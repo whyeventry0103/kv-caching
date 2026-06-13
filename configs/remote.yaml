@@ -1,8 +1,8 @@
 project_name: kv-caching
 local_project_root: /Users/apple/Desktop/kv-caching
-ssh_alias: TODO(human)
+ssh_alias: 10.224.32.112
 remote_user: sk10741
-remote_host: ADUAED16811WKLX
+remote_host: 10.224.32.112  # hostname: ADUAED16811WKLX
 remote_project_root: /home/sk10741/kv-caching
 remote_data_root: /home/sk10741/kvcache-storage/data
 remote_cache_root: /home/sk10741/kvcache-storage/cache

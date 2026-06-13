@@ -44,9 +44,9 @@ PROJECT_NAME=kv-caching
 
 LOCAL_PROJECT_ROOT=/Users/apple/Desktop/kv-caching
 
-SSH_ALIAS=TODO(human)
+SSH_ALIAS=10.224.32.112
 REMOTE_USER=sk10741
-REMOTE_HOST=ADUAED16811WKLX
+REMOTE_HOST=10.224.32.112             # hostname: ADUAED16811WKLX
 REMOTE_PROJECT_ROOT=/home/sk10741/kv-caching
 
 REMOTE_DATA_ROOT=/home/sk10741/kvcache-storage/data
