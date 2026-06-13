@@ -23,6 +23,9 @@ def build_result_row(
     sampling_cfg: dict[str, Any],
     generation: GenerationResult,
     runmeta: dict[str, Any],
+    press: str = "fullcache",
+    budget: int | str = "full",
+    compression_ratio: float = 1.0,
 ) -> dict[str, Any]:
     # Stamp the grader and canonicalizer versions so rows are re-gradeable: the
     # audit showed scoring depends on the grader (3/20 flips on 90 vs 90 degrees).
@@ -35,9 +38,9 @@ def build_result_row(
         bench=bench,
         pid=pid,
         model=model_name,
-        press="fullcache",
-        budget="full",
-        compression_ratio=1.0,
+        press=press,
+        budget=budget,
+        compression_ratio=compression_ratio,
         decoding={
             "temp": float(sampling_cfg["temperature"]),
             "top_p": float(sampling_cfg["top_p"]),

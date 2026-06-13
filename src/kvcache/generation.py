@@ -131,9 +131,57 @@ def generate_full_cache(
     )
 
 
+def generate_with_press(
+    model: Any,
+    tokenizer: Any,
+    problem: Problem,
+    model_cfg: dict[str, Any],
+    sampling_cfg: dict[str, Any],
+    *,
+    press: Any,
+    seed: int,
+    max_new_tokens: int,
+) -> tuple[GenerationResult, int]:
+    """Generate once under a verified press context and report prompt length."""
+    import torch
+
+    prompt = render_prompt(tokenizer, problem.question, model_cfg)
+    inputs = _move_inputs(tokenizer(prompt, return_tensors="pt"), model.device)
+    input_ids = inputs["input_ids"]
+    set_determinism(seed)
+    started = time.monotonic()
+    with torch.inference_mode(), press(model):
+        output_ids = model.generate(
+            **inputs,
+            do_sample=True,
+            temperature=float(sampling_cfg["temperature"]),
+            top_p=float(sampling_cfg["top_p"]),
+            max_new_tokens=max_new_tokens,
+            use_cache=True,
+        )
+    if torch.cuda.is_available():
+        torch.cuda.synchronize(model.device)
+    wallclock_s = time.monotonic() - started
+    generated = output_ids[0, input_ids.shape[-1] :]
+    n_tokens = int(generated.shape[-1])
+    trace = tokenizer.decode(generated, skip_special_tokens=True)
+    return (
+        finalize_generation(
+            prompt=prompt,
+            trace=trace,
+            n_tokens=n_tokens,
+            max_new_tokens=max_new_tokens,
+            gold_answer=problem.gold_answer,
+            wallclock_s=wallclock_s,
+        ),
+        int(input_ids.shape[-1]),
+    )
+
+
 def generate_compressed(
     prompt: str, generator: Callable[..., Any], press: Any, **kwargs: Any
 ) -> Any:
+    """Compatibility wrapper retained until the reviewed M3 CLI lands."""
     return generator(prompt, press=press, **kwargs)
 
 

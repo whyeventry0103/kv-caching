@@ -101,3 +101,33 @@ Phase 3 required Phase 2 acceptance. Therefore:
 The next action requires a scientific ruling on whether the 19/20 result is
 acceptable sampling variance or whether the migration must reproduce 20/20
 before any compressed run.
+
+## Reviewer ruling (Claude, 2026-06-13): Phase 2 ACCEPTED
+
+The literal "20/20" criterion was mis-specified and is corrected here. Bitwise
+accuracy reproduction across a transformers version change is numerical identity
+between two different generation kernels — impossible by construction: different
+numerics produce different sampled trajectories, which flip borderline problems.
+
+The scientifically load-bearing Phase-2 gates, all PASS:
+
+1. chat template byte-identical (catches real stack/template breakage) — PASS;
+2. zero grader/extraction disagreements (scoring consistent) — PASS;
+3. no truncation regression — PASS;
+4. no *systematic* accuracy change — PASS. 19/20 vs 20/20 at n=20 is one Bernoulli
+   flip; the bootstrap CI greatly exceeds the 1/20 difference. Accuracy is not
+   measured with power at 5 problems; that is the 250-problem bank's role.
+
+The single flip (precalculus/927 s11, 90 -> 66) was verified by reading the trace:
+a coherent, well-formed derivation that made a genuine sign error, using
+(2, -12, 3) instead of (2, -12, -3). The correct vector makes the dot product
+6 - 24 + 18 = 0 (perpendicular lines, 90 degrees); the sign error yields -36 and
+66 degrees. The new trajectory was also shorter (5345 vs 11374 tokens). This is
+healthy-model trajectory variance under a numerical perturbation — itself an
+in-vivo instance of the trajectory-distortion phenomenon under study — not stack
+corruption.
+
+Decision: the new stack (transformers 4.56.2 + kvpress 0.5.3) is sound. Proceed to
+Phase 3 (DecodingPress smoke); promote `.venv-next` to canonical on Phase 3 pass.
+The 4.56.2 bank becomes the canonical reference; 4.52.4 banks are retired to
+provenance. Qwen3-4B stays deferred (no `<think>` prefix on 4.56.2 either).

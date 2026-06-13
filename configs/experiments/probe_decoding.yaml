@@ -1,0 +1,14 @@
+name: probe_decoding
+stage: diagnostic
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+subset:
+  math500: 1
+presses: [streamingllm]
+budgets: [256]
+seeds: [11]
+max_new_tokens: 4096
+compression_interval: 64
+estimated_generation_count: 1
+remote_only: true
+pilot: true

@@ -17,6 +17,7 @@ dryrun:
 	$(PYTHON) scripts/build_bank.py --config configs/experiments/smoke_fullcache_4096.yaml --dry-run
 	$(PYTHON) scripts/build_bank.py --config configs/experiments/pilot_fullcache.yaml --dry-run
 	$(PYTHON) scripts/build_bank.py --config configs/experiments/pilot_fullcache_v2.yaml --dry-run
+	$(PYTHON) scripts/probe_decoding.py --config configs/experiments/probe_decoding.yaml --dry-run
 	$(PYTHON) scripts/build_bank.py --config configs/experiments/bank_fullcache.yaml --dry-run
 	$(PYTHON) scripts/run_grid.py --config configs/experiments/grid_compression.yaml --dry-run
 	$(PYTHON) scripts/run_replay.py --config configs/experiments/replay_decomposition.yaml --dry-run

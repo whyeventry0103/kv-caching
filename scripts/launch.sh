@@ -36,6 +36,7 @@ case "$COMMAND" in
   metrics) PY_SCRIPT="scripts/run_metrics.py" ;;
   mechanism) PY_SCRIPT="scripts/run_mechanism.py" ;;
   figures) PY_SCRIPT="scripts/make_figures.py" ;;
+  probe-decoding) PY_SCRIPT="scripts/probe_decoding.py" ;;
   *) echo "unknown command: $COMMAND" >&2; exit 2 ;;
 esac
 
