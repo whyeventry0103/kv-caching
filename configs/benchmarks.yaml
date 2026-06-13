@@ -1,0 +1,36 @@
+benchmarks:
+  math500:
+    handle: HuggingFaceH4/MATH-500
+    split: test
+    subset_size: 500
+    extraction: boxed_or_numeric
+  aime24:
+    handle: TODO(human)
+    split: test
+    subset_size: 30
+    extraction: boxed_or_numeric
+  aime25:
+    handle: TODO(human)
+    split: test
+    subset_size: 30
+    extraction: boxed_or_numeric
+  gsm8k:
+    handle: openai/gsm8k
+    config: main
+    split: test
+    extraction: hash_numeric
+  folio:
+    handle: yale-lily/folio
+    split: validation
+    extraction: option
+  strategyqa:
+    handle: TODO(human)
+    split: test
+    extraction: yes_no
+  rsp:
+    handle: synthetic
+    split: generated
+    design: interleaved-reference
+    max_new_tokens: 2048
+    extraction: boxed_or_numeric
+    truncation: failure

@@ -1,0 +1,16 @@
+name: mechanism_ladder
+stage: mechanism
+models: [r1_distill_qwen_7b]
+benchmarks: [math500, aime24, aime25, rsp]
+presses: [streamingllm, h2o, snapkv]
+budgets: [256, 2048]
+seeds: [11, 23, 47, 89]
+instruments:
+  - evicted_anchor_attribution
+  - restoration
+  - branch_recovery_fullcache_fork
+  - branch_recovery_random_fork
+  - reverse_replay
+  - tv_matched_noise
+estimated_generation_count: 576
+remote_only: true

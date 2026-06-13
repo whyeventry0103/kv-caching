@@ -1,0 +1,16 @@
+temperature: 0.6
+top_p: 0.95
+seeds: [11, 23, 47, 89, 131, 197, 263, 347]
+tiers:
+  math500:
+    add_n: 8
+  aime:
+    pass_at_1_fullcache_n: 16
+    pass_at_1_compressed_n: 8
+    deep_add_fullcache_n: 32
+    deep_add_compressed_n: 16
+    asymptote_n: 64
+    deep_methods: [streamingllm, h2o, snapkv]
+    deep_budgets: [256, 2048]
+  default:
+    add_n: 8

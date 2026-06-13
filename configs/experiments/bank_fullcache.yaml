@@ -1,0 +1,9 @@
+name: bank_fullcache
+stage: bank
+models: [r1_distill_qwen_7b, qwen3_4b]
+benchmarks: [math500, aime24, aime25, gsm8k, folio, strategyqa, rsp]
+presses: [fullcache]
+budgets: [full]
+seeds: [11, 23, 47, 89, 131, 197, 263, 347]
+estimated_generation_count: 448
+remote_only: true

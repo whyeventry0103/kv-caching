@@ -1,0 +1,20 @@
+project_name: kv-caching
+local_project_root: /Users/apple/Desktop/kv-caching
+ssh_alias: TODO(human)
+remote_user: sk10741
+remote_host: ADUAED16811WKLX
+remote_project_root: /home/sk10741/kv-caching
+remote_data_root: /home/sk10741/kvcache-storage/data
+remote_cache_root: /home/sk10741/kvcache-storage/cache
+remote_runs_root: /home/sk10741/kvcache-storage/runs
+remote_os: Ubuntu 22.04.5 LTS
+remote_python: "3.11"
+gpu_count: 2
+gpu_model: NVIDIA RTX 6000 Ada Generation 48GB
+cuda_version: "12.8"
+environment_type: venv  # conda absent; TODO(human) confirm python3.11 exists
+environment_name: .venv
+personal_storage_free_gb_estimate: 70  # user-confirmed
+min_personal_free_gb: 5
+primary_sync_method: git  # Policy A; TODO(human) toggle to Policy B
+primary_branch: main

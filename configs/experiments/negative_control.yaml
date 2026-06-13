@@ -1,0 +1,12 @@
+name: negative_control
+stage: figures
+models: [r1_distill_qwen_7b]
+benchmarks: [math500, rsp]
+presses: [fullcache_bank_a, fullcache_bank_b]
+budgets: [full]
+seeds: [11, 23, 47, 89, 131, 197, 263, 347]
+expectations:
+  excess_add: approximately_zero
+  tdp_percentile: approximately_one
+estimated_generation_count: 32
+remote_only: true

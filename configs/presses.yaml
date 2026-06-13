@@ -1,0 +1,27 @@
+budgets: [128, 256, 512, 1024, 2048]
+report_compression_ratio: true
+presses:
+  fullcache:
+    implementation: builtin
+  streamingllm:
+    implementation: kvpress
+  h2o:
+    implementation: adapter-required
+    note: TODO(human) verify semantic mapping in pinned kvpress else port
+  snapkv:
+    implementation: kvpress
+  rkv:
+    implementation: adapter-required
+    note: TODO(human) verify implementation against paper else port
+  kivi2:
+    implementation: adapter-required
+    note: TODO(human) verify 2-bit implementation against paper else port
+  random:
+    implementation: local
+    role: random-eviction floor
+  expected_attention:
+    implementation: verify-or-port
+    note: TODO(human) verify in pinned kvpress else port
+  triattention:
+    implementation: verify-or-port
+    note: TODO(human) verify in pinned kvpress else port

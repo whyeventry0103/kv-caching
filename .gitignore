@@ -1,0 +1,13 @@
+.venv/
+.git/
+data/
+runs/
+logs/
+results/
+*.npy
+__pycache__/
+.pytest_cache/
+*.safetensors
+*.pyc
+.ruff_cache/
+.coverage

@@ -1,0 +1,11 @@
+name: add_permutation
+stage: metrics
+models: [r1_distill_qwen_7b, qwen3_4b]
+benchmarks: [math500, aime24, aime25, gsm8k, folio, strategyqa, rsp]
+presses: [streamingllm, h2o, snapkv, rkv, kivi2, random]
+budgets: [128, 256, 512, 1024, 2048]
+seeds: [11, 23, 47, 89, 131, 197, 263, 347]
+permutation_test: per-problem
+multiple_testing: benjamini-hochberg
+estimated_generation_count: 0
+remote_only: true
