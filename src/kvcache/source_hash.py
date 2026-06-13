@@ -7,6 +7,7 @@ import hashlib
 from pathlib import Path
 
 IGNORED_PARTS = {
+    ".claude",
     ".git",
     ".venv",
     ".pytest_cache",

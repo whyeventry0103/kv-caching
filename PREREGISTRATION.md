@@ -79,3 +79,66 @@ configuration hashes are retained in machine-readable outputs.
 
 Truncated generations remain in every denominator and are scored incorrect.
 They are never discarded as malformed rows. Each cell reports truncation rate.
+
+## Amendment A (2026-06-13): grading authority, claims discipline, off-policy bounds
+
+This dated addendum is append-only; it does not retract anything above.
+
+### Grading authority
+
+Correctness is decided by a vetted pairwise grader, `kvcache.grading.is_equiv`
+(canonical Hendrycks MATH normalization; no `eval`/`sympify` on model text), applied
+to the **raw** gold and **raw** predicted answer. The `sympify`-based
+`canonicalize` is demoted to an ADD bucketing key and a reported canonicalization
+sensitivity; it is never the correctness oracle. The exact grader used by HOTT /
+the kvpress eval / MATH-500 must be verified and reconciled before the grid; any
+deviation is recorded. Each row records `grader_version`.
+
+### ADD is answer-level and a lower bound
+
+ADD is the total variation between answer distributions: a **lower bound** on
+behavioral change that only sees changes reaching the answer. It is never
+described as "behavioral change." ADD is decomposed (`add_decomposition`) into a
+termination-mass shift (probability moving into the `OTHER`/truncation bucket — a
+length effect) and the within-answered TV (the reasoning channel), so a truncation
+increase is never read as a reasoning change. The identity
+`add_tv >= 0.5 * |termination_shift|` is reported.
+
+### Direction discipline (the reference is not assumed better)
+
+Every divergence quantity (ADD, per-step TV, AUC-TV, TDP) is reported alongside its
+**signed** outcome consequence — gained-vs-lost correct mass (`flip_mass`,
+`aggregate_flip_mass`). Divergence is "behavioral fidelity loss," never "damage";
+correctness is the quality arbiter. This guards the >100% ("denoising") regime,
+where deviation from the full-cache reference is improvement.
+
+### Off-policy validity of readout/TDP
+
+Teacher-forced readout and TDP are off-policy: they are measured on the full-cache
+reference trajectory (good states), not the states the compressed model visits.
+The residual `total - on-reference readout` is therefore biased toward the
+trajectory share (Ross & Bagnell, DAgger covariate-shift lineage). This is stated
+up front, not in rebuttal. The bias is bounded by **reverse replay** (compressed
+free-run replayed under full cache; reported symmetrically to forward replay so the
+two bracket the on-policy residual — `Decomposition.residual_bracket`) and closed
+on-policy by the **TV-matched noise control**, which is mandatory, not optional. TV
+is retained over KL/JSD because `1 - acceptance ≈ TV` in speculative decoding
+(Leviathan et al.), giving TV a behavioral reading; JSD is an appendix sensitivity.
+
+### Multiple-comparisons pre-registration
+
+The pass@k crossover (the >100% claim) is a confirmatory test pre-registered on
+named cells only: R-KV-style methods at high budgets ({1024, 2048}) on math
+(MATH-500, AIME), using a **paired bootstrap of the pass@1−pass@k difference**
+(the curves are correlated; naive CI overlap is invalid). All other crossovers are
+exploratory and BH-corrected. Confirmatory family (decomposition dominance,
+moderator, this crossover) is Holm–Bonferroni corrected.
+
+### Negative control as a figure; exchangeability
+
+The two-independent-full-cache-banks negative control is a **figure**, not a
+sentence: it must show excess ADD ≈ 0, TDP percentile ≈ 1, and an exact permutation
+test rejecting at ≈ α. Exchangeability requires matched batching and kernel settings
+across conditions; batch-composition nondeterminism is a real systematic at this
+precision and is controlled. Any instrument lighting up on the negative control is a
+bug, caught before a reviewer catches it.

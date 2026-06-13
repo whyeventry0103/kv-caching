@@ -6,8 +6,10 @@ import json
 from pathlib import Path
 from typing import Any
 
+from kvcache.canonicalize import CANONICALIZER_VERSION
 from kvcache.determinism import log_versions
 from kvcache.generation import GenerationResult
+from kvcache.grading import GRADER_VERSION
 from kvcache.io_schema import ResultRow, result_path, validate_row
 
 
@@ -22,7 +24,13 @@ def build_result_row(
     generation: GenerationResult,
     runmeta: dict[str, Any],
 ) -> dict[str, Any]:
-    versions = log_versions()
+    # Stamp the grader and canonicalizer versions so rows are re-gradeable: the
+    # audit showed scoring depends on the grader (3/20 flips on 90 vs 90 degrees).
+    versions = {
+        **log_versions(),
+        "grader": GRADER_VERSION,
+        "canonicalizer": CANONICALIZER_VERSION,
+    }
     row = ResultRow(
         bench=bench,
         pid=pid,
@@ -43,6 +51,9 @@ def build_result_row(
         n_tokens=generation.n_tokens,
         truncated=generation.truncated,
         wallclock_s=generation.wallclock_s,
+        hit_token_cap=generation.hit_token_cap,
+        has_answer_marker=generation.has_answer_marker,
+        finish_reason=generation.finish_reason,
         runmeta={
             "commit": runmeta["commit"],
             "dirty": runmeta["dirty"],

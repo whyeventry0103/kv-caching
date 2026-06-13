@@ -1,4 +1,5 @@
 .venv/
+.claude/
 .git/
 data/
 runs/

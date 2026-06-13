@@ -2,7 +2,7 @@ from dataclasses import asdict
 
 import pytest
 
-from kvcache.io_schema import ResultRow, result_path, validate_row
+from kvcache.io_schema import V2_FIELDS, ResultRow, result_path, validate_row
 
 
 def valid_row():
@@ -52,8 +52,26 @@ def test_schema_rejects_missing_versions():
 def test_schema_retains_truncation_as_incorrect_failure():
     row = valid_row()
     row["truncated"] = True
+    row["hit_token_cap"] = True
+    row["has_answer_marker"] = False
+    row["finish_reason"] = "length"
     row["correct"] = False
     validate_row(row)
     row["correct"] = True
     with pytest.raises(ValueError, match="correct=false"):
         validate_row(row)
+
+
+def test_schema_rejects_inconsistent_truncation_markers():
+    row = valid_row()
+    row["truncated"] = True  # but hit_token_cap stays False -> inconsistent
+    row["correct"] = False
+    with pytest.raises(ValueError, match="hit_token_cap"):
+        validate_row(row)
+
+
+def test_schema_v1_rows_without_version_skip_v2_fields():
+    row = valid_row()
+    for key in V2_FIELDS:
+        row.pop(key)
+    validate_row(row)  # retired 4096 pilot bank stays auditable

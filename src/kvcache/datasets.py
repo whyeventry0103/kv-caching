@@ -82,12 +82,19 @@ def _math500_problems(
     dataset: Any, subset: int | dict[str, Any] | None
 ) -> list[Problem]:
     rows = _select_math500_rows(dataset, subset)
+    # Keep gold RAW: correctness is decided by grading.is_equiv on raw strings, so
+    # the gold must never pass through the brittle canonicalizer first. The canonical
+    # form is retained in meta only as an ADD bucketing/diagnostic aid.
     return [
         Problem(
             pid=str(row["unique_id"]),
             question=str(row["problem"]),
-            gold_answer=canonicalize(str(row["answer"])),
-            meta={"level": int(row["level"]), "subject": str(row["subject"])},
+            gold_answer=str(row["answer"]),
+            meta={
+                "level": int(row["level"]),
+                "subject": str(row["subject"]),
+                "gold_canon": canonicalize(str(row["answer"])),
+            },
         )
         for row in rows
     ]

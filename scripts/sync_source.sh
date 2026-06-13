@@ -53,6 +53,7 @@ rsync "${RSYNC_FLAGS[@]}" \
   -e "$RSYNC_SSH" \
   --itemize-changes \
   --exclude='.git/' \
+  --exclude='.claude/' \
   --exclude='.venv/' \
   --exclude='data/' \
   --exclude='kvcache-storage/' \

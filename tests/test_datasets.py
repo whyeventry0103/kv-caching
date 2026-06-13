@@ -28,7 +28,9 @@ def test_math500_mapping_and_subset():
     problems = _math500_problems(dataset, subset=1)
     assert len(problems) == 1
     assert problems[0].pid == "test/algebra/1.json"
-    assert problems[0].gold_answer == "1/2"
+    # Gold is kept RAW for is_equiv grading; the canonical form lives in meta.
+    assert problems[0].gold_answer == r"\frac{1}{2}"
+    assert problems[0].meta["gold_canon"] == "1/2"
 
 
 def test_math500_level_stratified_subset():
