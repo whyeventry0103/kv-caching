@@ -5,6 +5,10 @@ PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 CONFIRM="${1:-}"
 COMMAND="${2:-}"
 CONFIG="${3:-}"
+if [[ $# -ge 3 ]]; then
+  shift 3
+fi
+EXTRA_ARGS=("$@")
 
 echo "Action: launch remote experiment command '$COMMAND'"
 echo "Project: $PROJECT_ROOT"
@@ -47,18 +51,35 @@ if (( KVCACHE_PERSONAL_FREE_GB < MIN_PERSONAL_FREE_GB )); then
   echo "REFUSED: personal headroom is below ${MIN_PERSONAL_FREE_GB} GB" >&2
   exit 2
 fi
+FILESYSTEM_FREE_KB="$(df -Pk "$REMOTE_RUNS_ROOT" | awk 'NR == 2 {print $4}')"
+MIN_FILESYSTEM_FREE_GB="${KVCACHE_MIN_FILESYSTEM_FREE_GB:-30}"
+MIN_FILESYSTEM_FREE_KB=$((MIN_FILESYSTEM_FREE_GB * 1024 * 1024))
+if (( FILESYSTEM_FREE_KB < MIN_FILESYSTEM_FREE_KB )); then
+  echo "REFUSED: runs filesystem has less than ${MIN_FILESYSTEM_FREE_GB} GiB free" >&2
+  exit 2
+fi
 export PYTHONUNBUFFERED=1
 export HF_HOME="${REMOTE_CACHE_ROOT:?REMOTE_CACHE_ROOT is required}/huggingface"
 export TORCH_HOME="$REMOTE_CACHE_ROOT/torch"
 export XDG_CACHE_HOME="$REMOTE_CACHE_ROOT/xdg"
 export REMOTE_DATA_ROOT="${REMOTE_DATA_ROOT:?REMOTE_DATA_ROOT is required}"
-export REMOTE_RUNS_ROOT="${REMOTE_RUNS_ROOT:?REMOTE_RUNS_ROOT is required}"
+BASE_RUNS_ROOT="${REMOTE_RUNS_ROOT:?REMOTE_RUNS_ROOT is required}"
 
-RUN_NAME="$(basename "$CONFIG" .yaml)-$(date -u +%Y%m%dT%H%M%SZ)"
-mkdir -p "$REMOTE_RUNS_ROOT/$RUN_NAME" "$PROJECT_ROOT/logs"
+RUN_NAME="${KVCACHE_RUN_NAME:-$(basename "$CONFIG" .yaml)-$(date -u +%Y%m%dT%H%M%SZ)}"
+export REMOTE_RUNS_ROOT="$BASE_RUNS_ROOT/$RUN_NAME"
+mkdir -p "$REMOTE_RUNS_ROOT" "$PROJECT_ROOT/logs"
 echo "Run name: $RUN_NAME"
+echo "Output root: $REMOTE_RUNS_ROOT"
 echo "Personal free-space declaration: ${KVCACHE_PERSONAL_FREE_GB} GB"
-echo "Command: $VENV_PATH/bin/python $PY_SCRIPT --config $CONFIG --i-understand"
+printf 'Command: %q %q --config %q --i-understand' \
+  "$VENV_PATH/bin/python" "$PY_SCRIPT" "$CONFIG"
+if (( ${#EXTRA_ARGS[@]} )); then
+  printf ' %q' "${EXTRA_ARGS[@]}"
+fi
+printf '\n'
 
-"$VENV_PATH/bin/python" "$PY_SCRIPT" --config "$CONFIG" --i-understand \
-  2>&1 | tee "$PROJECT_ROOT/logs/$RUN_NAME.log"
+{
+  "$VENV_PATH/bin/python" "$PY_SCRIPT" --config "$CONFIG" --i-understand \
+    "${EXTRA_ARGS[@]}"
+  echo "Finished: $RUN_NAME"
+} 2>&1 | tee "$PROJECT_ROOT/logs/$RUN_NAME.log"

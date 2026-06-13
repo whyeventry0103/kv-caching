@@ -42,12 +42,18 @@ def test_schema_accepts_complete_row_and_path():
     )
 
 
-def test_schema_rejects_missing_versions_and_truncation():
+def test_schema_rejects_missing_versions():
     row = valid_row()
     row["versions"].pop("kvpress")
     with pytest.raises(ValueError, match="kvpress"):
         validate_row(row)
+
+
+def test_schema_retains_truncation_as_incorrect_failure():
     row = valid_row()
     row["truncated"] = True
-    with pytest.raises(ValueError, match="truncated"):
+    row["correct"] = False
+    validate_row(row)
+    row["correct"] = True
+    with pytest.raises(ValueError, match="correct=false"):
         validate_row(row)

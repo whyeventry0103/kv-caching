@@ -6,6 +6,9 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 CASES = [
+    ("build_bank.py", "smoke_fullcache.yaml"),
+    ("build_bank.py", "smoke_fullcache_4096.yaml"),
+    ("build_bank.py", "pilot_fullcache.yaml"),
     ("build_bank.py", "bank_fullcache.yaml"),
     ("run_grid.py", "grid_compression.yaml"),
     ("run_replay.py", "replay_decomposition.yaml"),

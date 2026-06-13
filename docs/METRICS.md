@@ -15,6 +15,10 @@ subtraction. Report Miller–Madow entropy shift, the unbiased Codex pass@k
 estimator, paired bootstrap uncertainty, and BH-adjusted p-values. ADD is for
 sampled inference; greedy decoding uses answer flip rate.
 
+Missing, truncated, invalid, or explicitly out-of-support answers map to one
+frozen `__OTHER__` category. Truncated generations remain rows, are scored
+incorrect, count in all denominators, and contribute to cell truncation rate.
+
 ## Divergence
 
 Replay computes per-step TV on the fly and stores only scalar profiles. Full
@@ -22,8 +26,10 @@ vocabulary dumps across steps are prohibited. A top-k=256 fallback records a TV
 interval induced by unknown tail overlap. AUC and fraction above each fixed tau
 in `{0.05, 0.10, 0.15, 0.20}` are primary; TDP is localization only.
 
-Views include onset-aligned, content-token (numerals, operators, answer span),
-and segment aggregation.
+Report both normalized mean TV (`auc_tv`) and unnormalized total TV with trace
+length. Compare total TV across trace-length regimes only with that confound
+made explicit. Views include onset-aligned, content-token (numerals, operators,
+answer span), and segment aggregation.
 
 ## Instruments and controls
 

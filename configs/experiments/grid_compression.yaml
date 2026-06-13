@@ -3,6 +3,7 @@ stage: grid
 models: [r1_distill_qwen_7b, qwen3_4b]
 benchmarks: [math500, aime24, aime25, gsm8k, folio, strategyqa, rsp]
 presses: [streamingllm, h2o, snapkv, rkv, kivi2, random]
+execution_note: h2o/rkv require ports; kivi2 is deferred and not an eviction press
 budgets: [128, 256, 512, 1024, 2048]
 seeds: [11, 23, 47, 89, 131, 197, 263, 347]
 estimated_generation_count: 3360

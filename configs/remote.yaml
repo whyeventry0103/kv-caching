@@ -1,6 +1,6 @@
 project_name: kv-caching
 local_project_root: /Users/apple/Desktop/kv-caching
-ssh_alias: 10.224.32.112
+ssh_alias: kvcache-gpu
 remote_user: sk10741
 remote_host: 10.224.32.112  # hostname: ADUAED16811WKLX
 remote_project_root: /home/sk10741/kv-caching
@@ -16,5 +16,6 @@ environment_type: uv  # /snap/bin/uv; provisions user-space Python 3.11
 environment_name: .venv
 personal_storage_free_gb_estimate: 70  # user-confirmed
 min_personal_free_gb: 5
+min_filesystem_free_gb: 30
 primary_sync_method: rsync  # Policy B, explicitly selected by human
 primary_branch: main

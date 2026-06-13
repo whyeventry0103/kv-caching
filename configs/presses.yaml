@@ -14,14 +14,14 @@ presses:
     implementation: adapter-required
     note: TODO(human) verify implementation against paper else port
   kivi2:
-    implementation: adapter-required
-    note: TODO(human) verify 2-bit implementation against paper else port
+    implementation: deferred-cache-wrapper
+    note: TODO(human) implement as quantized cache wrapper, not eviction press
   random:
     implementation: local
     role: random-eviction floor
   expected_attention:
-    implementation: verify-or-port
-    note: TODO(human) verify in pinned kvpress else port
+    implementation: kvpress
+    note: Verify behavior against pinned kvpress 0.2.10 before baseline use.
   triattention:
-    implementation: verify-or-port
-    note: TODO(human) verify in pinned kvpress else port
+    implementation: deferred
+    note: TODO(human) identify paper-faithful implementation before inclusion

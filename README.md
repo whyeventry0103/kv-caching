@@ -25,3 +25,5 @@ Scientific claims and analysis choices are frozen in
 [PREREGISTRATION.md](PREREGISTRATION.md). Heavy commands require explicit
 `--i-understand` confirmation. On the shared remote, launchers also require a
 verified `KVCACHE_PERSONAL_FREE_GB`; filesystem-wide `df` space is insufficient.
+Long-running downloads and GPU work use `scripts/launch_tmux.sh` so SSH
+disconnects do not terminate jobs and every session has a persistent log.

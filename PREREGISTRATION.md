@@ -76,3 +76,6 @@ random-eviction floor.
 
 All deviations, exclusions, failed cells, truncations, package versions, and
 configuration hashes are retained in machine-readable outputs.
+
+Truncated generations remain in every denominator and are scored incorrect.
+They are never discarded as malformed rows. Each cell reports truncation rate.

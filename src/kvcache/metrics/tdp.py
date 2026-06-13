@@ -9,8 +9,19 @@ THRESHOLDS = (0.05, 0.10, 0.15, 0.20)
 CONTENT_TOKEN = re.compile(r"(?:\d|[+\-*/=]|\\boxed)")
 
 
-def auc_tv(profile: Sequence[float]) -> float:
+def mean_tv(profile: Sequence[float]) -> float:
+    """Length-normalized divergence mass."""
     return sum(profile) / len(profile) if profile else 0.0
+
+
+def total_tv(profile: Sequence[float]) -> float:
+    """Unnormalized divergence mass; report trace length beside comparisons."""
+    return sum(profile)
+
+
+def auc_tv(profile: Sequence[float]) -> float:
+    """Backward-compatible name for normalized AUC (mean TV)."""
+    return mean_tv(profile)
 
 
 def fraction_above(profile: Sequence[float], tau: float) -> float:
@@ -25,6 +36,9 @@ def tdp(profile: Sequence[float], tau: float) -> int | None:
 def summarize_profile(profile: Sequence[float]) -> dict[str, object]:
     return {
         "auc_tv": auc_tv(profile),
+        "mean_tv": mean_tv(profile),
+        "total_tv": total_tv(profile),
+        "n_steps": len(profile),
         "frac_above": {
             f"p{int(tau * 100):02d}": fraction_above(profile, tau) for tau in THRESHOLDS
         },

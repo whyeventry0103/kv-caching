@@ -61,7 +61,7 @@ class ResultRow:
 
 
 def validate_row(row: dict[str, Any], *, replay: bool = False) -> None:
-    """Reject incomplete, unversioned, or truncated result rows."""
+    """Reject structurally invalid rows while retaining truncation failures."""
     required = BASE_FIELDS | (REPLAY_FIELDS if replay else set())
     missing = sorted(required - row.keys())
     if missing:
@@ -75,8 +75,8 @@ def validate_row(row: dict[str, Any], *, replay: bool = False) -> None:
     for key in ("torch", "transformers", "kvpress"):
         if not row["versions"].get(key):
             raise ValueError(f"missing required version: {key}")
-    if row["truncated"]:
-        raise ValueError("truncated rows are invalid for primary result analysis")
+    if row["truncated"] and row["correct"]:
+        raise ValueError("truncated rows must be scored correct=false")
     if replay:
         for key in ("p05", "p10", "p15", "p20"):
             if key not in row["frac_above"]:

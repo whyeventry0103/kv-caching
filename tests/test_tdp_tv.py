@@ -8,6 +8,7 @@ from kvcache.metrics.tdp import (
     segment_aggregate,
     summarize_profile,
     tdp,
+    total_tv,
 )
 from kvcache.replay import replay_tv_profile, topk_tv_bounds, total_variation
 
@@ -17,6 +18,7 @@ def test_total_variation_and_profile():
     profile = replay_tv_profile([[0.5, 0.5], [0.9, 0.1]], [[0.5, 0.5], [0.6, 0.4]])
     assert profile == pytest.approx([0.0, 0.3])
     assert auc_tv(profile) == pytest.approx(0.15)
+    assert total_tv(profile) == pytest.approx(0.3)
     assert fraction_above(profile, 0.1) == 0.5
     assert tdp(profile, 0.1) == 1
     assert set(summarize_profile(profile)["frac_above"]) == {
@@ -25,6 +27,7 @@ def test_total_variation_and_profile():
         "p15",
         "p20",
     }
+    assert summarize_profile(profile)["n_steps"] == 2
     assert onset_aligned(profile, 1) == {-1: 0.0, 0: pytest.approx(0.3)}
     assert content_token_profile(["word", "2"], profile) == pytest.approx([0.3])
     assert segment_aggregate(profile, [("all", 0, 2)])["all"] == pytest.approx(0.15)

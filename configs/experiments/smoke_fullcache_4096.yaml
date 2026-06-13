@@ -1,0 +1,13 @@
+name: smoke_fullcache_4096
+stage: bank
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+subset:
+  math500: 1
+presses: [fullcache]
+budgets: [full]
+seeds: [11]
+max_new_tokens: 4096
+estimated_generation_count: 1
+remote_only: true
+pilot: true

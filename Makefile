@@ -1,4 +1,4 @@
-.PHONY: lint test dryrun sync sync-apply setup check bank grid replay metrics figures
+.PHONY: lint test dryrun sync sync-apply setup check smoke bank grid replay metrics figures
 
 PYTHON := $(if $(wildcard .venv/bin/python),.venv/bin/python,python)
 RUFF := $(if $(wildcard .venv/bin/ruff),.venv/bin/ruff,ruff)
@@ -13,6 +13,9 @@ test:
 	$(PYTEST) -q
 
 dryrun:
+	$(PYTHON) scripts/build_bank.py --config configs/experiments/smoke_fullcache.yaml --dry-run
+	$(PYTHON) scripts/build_bank.py --config configs/experiments/smoke_fullcache_4096.yaml --dry-run
+	$(PYTHON) scripts/build_bank.py --config configs/experiments/pilot_fullcache.yaml --dry-run
 	$(PYTHON) scripts/build_bank.py --config configs/experiments/bank_fullcache.yaml --dry-run
 	$(PYTHON) scripts/run_grid.py --config configs/experiments/grid_compression.yaml --dry-run
 	$(PYTHON) scripts/run_replay.py --config configs/experiments/replay_decomposition.yaml --dry-run
@@ -32,8 +35,11 @@ setup:
 check:
 	bash scripts/check_remote.sh --config configs/experiments/grid_compression.yaml --run-name preflight
 
+smoke:
+	bash scripts/launch_tmux.sh --i-understand smoke-fullcache bank configs/experiments/smoke_fullcache.yaml --allow-model-download --allow-dataset-download
+
 bank:
-	bash scripts/launch.sh --i-understand bank configs/experiments/bank_fullcache.yaml
+	bash scripts/launch_tmux.sh --i-understand bank-fullcache bank configs/experiments/bank_fullcache.yaml
 
 grid:
 	bash scripts/launch.sh --i-understand grid configs/experiments/grid_compression.yaml

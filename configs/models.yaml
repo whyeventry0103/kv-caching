@@ -1,6 +1,7 @@
 models:
   r1_distill_qwen_7b:
     handle: deepseek-ai/DeepSeek-R1-Distill-Qwen-7B
+    revision: 916b56a44061fd5cd7d6a8fb632557ed4f724f60
     dtype: bfloat16
     max_new_tokens: 32768
     chat_template: tokenizer
@@ -8,11 +9,16 @@ models:
     role: primary
   qwen3_4b:
     handle: Qwen/Qwen3-4B
+    revision: 1cfa9a7208912126459214e8b04321603b3df60c
     dtype: bfloat16
     max_new_tokens: 32768
     chat_template: tokenizer
     system_prompt: null
     role: cross-training-paradigm within Qwen family
+    pilot_enabled: false
+    note: Deferred from pilot pending rendered thinking-template verification.
+    chat_template_kwargs:
+      enable_thinking: true
 backend:
   generation: transformers+kvpress
   bank_optional: vllm

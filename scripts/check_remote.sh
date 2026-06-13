@@ -51,6 +51,13 @@ if (( KVCACHE_PERSONAL_FREE_GB < MIN_PERSONAL_FREE_GB )); then
   echo "REFUSED: personal headroom is below ${MIN_PERSONAL_FREE_GB} GB" >&2
   exit 2
 fi
+FILESYSTEM_FREE_KB="$(df -Pk "$REMOTE_RUNS_ROOT" | awk 'NR == 2 {print $4}')"
+MIN_FILESYSTEM_FREE_GB="${KVCACHE_MIN_FILESYSTEM_FREE_GB:-30}"
+MIN_FILESYSTEM_FREE_KB=$((MIN_FILESYSTEM_FREE_GB * 1024 * 1024))
+if (( FILESYSTEM_FREE_KB < MIN_FILESYSTEM_FREE_KB )); then
+  echo "REFUSED: runs filesystem has less than ${MIN_FILESYSTEM_FREE_GB} GiB free" >&2
+  exit 2
+fi
 [[ -d "${REMOTE_DATA_ROOT:?REMOTE_DATA_ROOT is required}" ]] || {
   echo "missing REMOTE_DATA_ROOT" >&2
   exit 1
@@ -81,6 +88,18 @@ if [[ "$SYNC_METHOD" == "rsync" ]]; then
   }
   echo "=== RSYNC STATE ==="
   cat .sync-state
+  EXPECTED_TREE_HASH="$(awk -F= '/^source_tree_hash=/ {print $2}' .sync-state)"
+  [[ -n "$EXPECTED_TREE_HASH" ]] || {
+    echo "missing source_tree_hash in .sync-state; resync from local" >&2
+    exit 1
+  }
+  ACTUAL_TREE_HASH="$(PYTHONPATH=src python3 -m kvcache.source_hash .)"
+  [[ "$ACTUAL_TREE_HASH" == "$EXPECTED_TREE_HASH" ]] || {
+    echo "remote source changed after rsync; apply a fresh local sync" >&2
+    echo "expected source hash: $EXPECTED_TREE_HASH" >&2
+    echo "actual source hash:   $ACTUAL_TREE_HASH" >&2
+    exit 1
+  }
   echo "Remote Git status may be dirty under Policy B:"
   git status --short
 else
