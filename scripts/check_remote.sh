@@ -63,7 +63,12 @@ fi
   echo "run-name clash: $REMOTE_RUNS_ROOT/$RUN_NAME" >&2
   exit 1
 }
-if ps -ef | grep -F "$RUN_NAME" | grep -v grep >/dev/null; then
+if ps -eo pid=,args= | awk -v self="$$" -v run="$RUN_NAME" '
+  $1 != self &&
+  $0 ~ /(python|torchrun|accelerate|deepspeed|ray)/ &&
+  index($0, run) { found = 1 }
+  END { exit !found }
+'; then
   echo "an active process already contains run name: $RUN_NAME" >&2
   exit 1
 fi
