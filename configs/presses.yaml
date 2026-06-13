@@ -4,12 +4,16 @@ presses:
   fullcache:
     implementation: builtin
   streamingllm:
-    implementation: kvpress
+    implementation: kvpress-prefill-only
+    decoding_status: adapter-required
+    note: Pinned kvpress 0.2.10 has no decoding-time budget API.
   h2o:
     implementation: adapter-required
     note: TODO(human) verify semantic mapping in pinned kvpress else port
   snapkv:
-    implementation: kvpress
+    implementation: kvpress-prefill-only
+    decoding_status: adapter-required
+    note: Stock SnapKVPress compresses prefill only; a SnapKV-D-style adapter is required.
   rkv:
     implementation: adapter-required
     note: TODO(human) verify implementation against paper else port
@@ -17,11 +21,13 @@ presses:
     implementation: deferred-cache-wrapper
     note: TODO(human) implement as quantized cache wrapper, not eviction press
   random:
-    implementation: local
+    implementation: kvpress-prefill-only
+    decoding_status: adapter-required
     role: random-eviction floor
   expected_attention:
-    implementation: kvpress
-    note: Verify behavior against pinned kvpress 0.2.10 before baseline use.
+    implementation: kvpress-prefill-only
+    decoding_status: adapter-required
+    note: Verify behavior and add decoding-time budget control before baseline use.
   triattention:
     implementation: deferred
     note: TODO(human) identify paper-faithful implementation before inclusion
