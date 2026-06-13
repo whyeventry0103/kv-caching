@@ -16,5 +16,5 @@ environment_type: uv  # /snap/bin/uv; provisions user-space Python 3.11
 environment_name: .venv
 personal_storage_free_gb_estimate: 70  # user-confirmed
 min_personal_free_gb: 5
-primary_sync_method: git  # Policy A; TODO(human) toggle to Policy B
+primary_sync_method: rsync  # Policy B, explicitly selected by human
 primary_branch: main

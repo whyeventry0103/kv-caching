@@ -17,9 +17,9 @@ make dryrun
 
 ## Remote workflow
 
-The default is manual section 11 Policy A (Git-first): edit and test locally,
-commit and push, pull remotely with `--ff-only`, run remotely, then pull only
-small summaries. See [docs/WORKFLOW.md](docs/WORKFLOW.md).
+The selected workflow is manual section 11 Policy B (rsync-first): edit and
+test locally, preview and apply a source-only rsync, run remotely, then commit
+stable changes locally. See [docs/WORKFLOW.md](docs/WORKFLOW.md).
 
 Scientific claims and analysis choices are frozen in
 [PREREGISTRATION.md](PREREGISTRATION.md). Heavy commands require explicit

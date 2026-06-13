@@ -63,25 +63,38 @@ fi
   echo "run-name clash: $REMOTE_RUNS_ROOT/$RUN_NAME" >&2
   exit 1
 }
-if ps -eo pid=,args= | awk -v self="$$" -v run="$RUN_NAME" '
+if ps -eo pid=,comm=,args= | awk -v self="$$" -v run="$RUN_NAME" '
   $1 != self &&
-  $0 ~ /(python|torchrun|accelerate|deepspeed|ray)/ &&
+  $2 ~ /^(python([0-9.]*)?|torchrun|accelerate|deepspeed|ray)$/ &&
   index($0, run) { found = 1 }
   END { exit !found }
 '; then
   echo "an active process already contains run name: $RUN_NAME" >&2
   exit 1
 fi
-[[ -z "$(git status --porcelain)" ]] || {
-  echo "remote worktree is dirty" >&2
-  exit 1
-}
-UPSTREAM="$(git rev-parse --abbrev-ref '@{upstream}' 2>/dev/null)" || {
-  echo "no upstream configured; cannot verify Git-first synchronization" >&2
-  exit 1
-}
-[[ "$(git rev-parse HEAD)" == "$(git rev-parse "$UPSTREAM")" ]] || {
-  echo "HEAD differs from locally known upstream; git pull --ff-only first" >&2
-  exit 1
-}
+
+SYNC_METHOD="$(awk '/^primary_sync_method:/ {print $2}' configs/remote.yaml)"
+if [[ "$SYNC_METHOD" == "rsync" ]]; then
+  [[ -f .sync-state ]] || {
+    echo "missing .sync-state; apply scripts/sync_source.sh from the local machine" >&2
+    exit 1
+  }
+  echo "=== RSYNC STATE ==="
+  cat .sync-state
+  echo "Remote Git status may be dirty under Policy B:"
+  git status --short
+else
+  [[ -z "$(git status --porcelain)" ]] || {
+    echo "remote worktree is dirty" >&2
+    exit 1
+  }
+  UPSTREAM="$(git rev-parse --abbrev-ref '@{upstream}' 2>/dev/null)" || {
+    echo "no upstream configured; cannot verify Git-first synchronization" >&2
+    exit 1
+  }
+  [[ "$(git rev-parse HEAD)" == "$(git rev-parse "$UPSTREAM")" ]] || {
+    echo "HEAD differs from locally known upstream; git pull --ff-only first" >&2
+    exit 1
+  }
+fi
 echo "Health check passed. Confirm dataset/model manifests for this config before launch."

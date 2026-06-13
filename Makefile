@@ -1,4 +1,4 @@
-.PHONY: lint test dryrun setup check bank grid replay metrics figures
+.PHONY: lint test dryrun sync sync-apply setup check bank grid replay metrics figures
 
 PYTHON := $(if $(wildcard .venv/bin/python),.venv/bin/python,python)
 RUFF := $(if $(wildcard .venv/bin/ruff),.venv/bin/ruff,ruff)
@@ -19,6 +19,12 @@ dryrun:
 	$(PYTHON) scripts/run_metrics.py --config configs/experiments/add_permutation.yaml --dry-run
 	$(PYTHON) scripts/run_mechanism.py --config configs/experiments/mechanism_ladder.yaml --dry-run
 	$(PYTHON) scripts/make_figures.py --config configs/experiments/negative_control.yaml --dry-run
+
+sync:
+	bash scripts/sync_source.sh
+
+sync-apply:
+	bash scripts/sync_source.sh --apply
 
 setup:
 	bash scripts/setup_remote.sh --i-understand

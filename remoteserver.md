@@ -67,7 +67,7 @@ ENVIRONMENT_NAME=.venv
 PERSONAL_STORAGE_FREE_GB_ESTIMATE=70 # user-confirmed personal free space
 MIN_PERSONAL_FREE_GB=5               # launcher refuses below this value
 
-PRIMARY_SYNC_METHOD=git             # Policy A; TODO(human) toggle to Policy B only if explicitly chosen
+PRIMARY_SYNC_METHOD=rsync           # Policy B, explicitly selected by human
 PRIMARY_BRANCH=main
 ```
 
