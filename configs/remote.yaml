@@ -12,7 +12,7 @@ remote_python: "3.11"
 gpu_count: 2
 gpu_model: NVIDIA RTX 6000 Ada Generation 48GB
 cuda_version: "12.8"
-environment_type: venv  # conda absent; TODO(human) confirm python3.11 exists
+environment_type: uv  # /snap/bin/uv; provisions user-space Python 3.11
 environment_name: .venv
 personal_storage_free_gb_estimate: 70  # user-confirmed
 min_personal_free_gb: 5

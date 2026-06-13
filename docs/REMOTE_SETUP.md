@@ -27,16 +27,16 @@ bash scripts/check_remote.sh \
   --run-name grid-smoke
 ```
 
-Setup creates the pinned Python 3.11 `.venv` only. Conda is not installed. It
-does not modify system Python, CUDA, drivers, or system packages. Model and
+Setup uses `/snap/bin/uv` to provision Python 3.11 in `.venv`. Conda and system
+Python 3.11 are not installed. It does not modify system Python, CUDA, drivers,
+or system packages. Model and
 dataset access requires a separate explicit human decision and the relevant
 environment guard.
 
-Confirm Python and quota before setup:
+Confirm uv and quota before setup:
 
 ```bash
-python3.11 --version
-python3 --version
+uv --version
 quota -s 2>/dev/null || true
 du -sh "$HOME"
 du -sh "$HOME"/.[!.]* "$HOME"/* 2>/dev/null | sort -h | tail -30

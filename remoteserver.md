@@ -61,7 +61,7 @@ GPU_COUNT=2
 GPU_MODEL=NVIDIA RTX 6000 Ada Generation 48GB
 CUDA_VERSION=12.8
 
-ENVIRONMENT_TYPE=venv               # conda is not installed; TODO(human) confirm python3.11 exists
+ENVIRONMENT_TYPE=uv                 # /snap/bin/uv; provisions user-space Python 3.11
 ENVIRONMENT_NAME=.venv
 
 PERSONAL_STORAGE_FREE_GB_ESTIMATE=70 # user-confirmed personal free space
