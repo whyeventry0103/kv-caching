@@ -55,6 +55,7 @@ rsync "${RSYNC_FLAGS[@]}" \
   --exclude='.git/' \
   --exclude='.claude/' \
   --exclude='.venv/' \
+  --exclude='.venv-*/' \
   --exclude='data/' \
   --exclude='kvcache-storage/' \
   --exclude='runs/' \

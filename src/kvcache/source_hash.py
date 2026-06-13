@@ -33,6 +33,8 @@ def source_tree_hash(root: str | Path) -> str:
             continue
         if relative.name in IGNORED_FILES:
             continue
+        if any(part.startswith(".venv-") for part in relative.parts):
+            continue
         if any(part in IGNORED_PARTS for part in relative.parts):
             continue
         if path.suffix in IGNORED_SUFFIXES:
