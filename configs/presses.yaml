@@ -4,9 +4,10 @@ presses:
   fullcache:
     implementation: builtin
   streamingllm:
-    implementation: kvpress-prefill-only
-    decoding_status: adapter-required
-    note: Pinned kvpress 0.2.10 has no decoding-time budget API.
+    implementation: kvpress-decoding
+    decoding_status: executable
+    compression_interval: 64
+    note: DecodingPress target_size is the absolute post-prune KV budget.
   h2o:
     implementation: adapter-required
     note: TODO(human) verify semantic mapping in pinned kvpress else port
@@ -21,8 +22,9 @@ presses:
     implementation: deferred-cache-wrapper
     note: TODO(human) implement as quantized cache wrapper, not eviction press
   random:
-    implementation: kvpress-prefill-only
-    decoding_status: adapter-required
+    implementation: kvpress-decoding
+    decoding_status: executable
+    compression_interval: 64
     role: random-eviction floor
   expected_attention:
     implementation: kvpress-prefill-only

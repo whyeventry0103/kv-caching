@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import re
 import time
-from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
 
@@ -179,10 +178,28 @@ def generate_with_press(
 
 
 def generate_compressed(
-    prompt: str, generator: Callable[..., Any], press: Any, **kwargs: Any
-) -> Any:
-    """Compatibility wrapper retained until the reviewed M3 CLI lands."""
-    return generator(prompt, press=press, **kwargs)
+    model: Any,
+    tokenizer: Any,
+    problem: Problem,
+    model_cfg: dict[str, Any],
+    sampling_cfg: dict[str, Any],
+    *,
+    press: Any,
+    seed: int,
+    max_new_tokens: int,
+) -> GenerationResult:
+    """Generate one compressed trace using the verified DecodingPress path."""
+    result, _ = generate_with_press(
+        model,
+        tokenizer,
+        problem,
+        model_cfg,
+        sampling_cfg,
+        press=press,
+        seed=seed,
+        max_new_tokens=max_new_tokens,
+    )
+    return result
 
 
 def bank_backend(name: str) -> str:

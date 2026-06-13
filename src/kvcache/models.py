@@ -42,7 +42,7 @@ def load_model_and_tokenizer(
     tokenizer = AutoTokenizer.from_pretrained(handle, **common)
     model = AutoModelForCausalLM.from_pretrained(
         handle,
-        torch_dtype=torch_dtype,
+        dtype=torch_dtype,
         device_map={"": device},
         **common,
     )

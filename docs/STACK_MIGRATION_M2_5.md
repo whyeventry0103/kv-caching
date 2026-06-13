@@ -131,3 +131,18 @@ Decision: the new stack (transformers 4.56.2 + kvpress 0.5.3) is sound. Proceed 
 Phase 3 (DecodingPress smoke); promote `.venv-next` to canonical on Phase 3 pass.
 The 4.56.2 bank becomes the canonical reference; 4.52.4 banks are retired to
 provenance. Qwen3-4B stays deferred (no `<think>` prefix on 4.56.2 either).
+
+## Phase 3 result: PASS
+
+One `StreamingLLMPress` generation ran through `DecodingPress` with
+`target_size=256` and `compression_interval=64`.
+
+- schema v2 row valid;
+- answer correct and non-truncated;
+- exact post-prune maximum: 256;
+- measured pre-prune maximum: 320 (`256 + 64`);
+- no serialized KV cache or full-vocabulary tensor artifact;
+- package versions: Torch 2.7.1, Transformers 4.56.2, KVPress 0.5.3.
+
+The migration stack is promoted. The previous 4.52.4/0.2.10 environment and
+banks remain available under legacy/provenance names.

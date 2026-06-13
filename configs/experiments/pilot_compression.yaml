@@ -1,0 +1,17 @@
+name: pilot_compression
+stage: grid
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+subset:
+  math500:
+    count: 5
+    stratify_by: level
+presses: [random, streamingllm]
+budgets: [256, 2048]
+seeds: [11, 23, 47, 89]
+max_new_tokens:
+  math500: 16384
+compression_interval: 64
+estimated_generation_count: 80
+remote_only: true
+pilot: true

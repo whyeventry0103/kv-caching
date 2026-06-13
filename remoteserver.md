@@ -72,6 +72,23 @@ PRIMARY_SYNC_METHOD=rsync           # Policy B, explicitly selected by human
 PRIMARY_BRANCH=main
 ```
 
+### Stack migration addendum (2026-06-13)
+
+The original `transformers==4.52.4` / `kvpress==0.2.10` stack was verified to be
+prefill-only and could not execute the project's long-output decoding-compression
+regime. A controlled isolated migration validated and promoted:
+
+```text
+torch==2.7.1
+transformers==4.56.2
+tokenizers==0.22.2
+kvpress==0.5.3
+```
+
+The previous environment is retained remotely as `.venv-legacy-tf452`, and its
+direct dependency list is retained as `requirements-legacy-tf452.txt`. New
+full-cache and compressed rows must use the promoted stack for exchangeability.
+
 Recommended convention:
 
 ```text
