@@ -3,12 +3,16 @@ stage: bank
 models: [r1_distill_qwen_7b]
 benchmarks: [math500, rsp]
 subset:
-  math500: 5
+  math500:
+    count: 5
+    stratify_by: level
   rsp: 3
 presses: [fullcache]
 budgets: [full]
 seeds: [11, 23, 47, 89]
-max_new_tokens: 4096
+max_new_tokens:
+  math500: 4096
+  rsp: 2048
 estimated_generation_count: 32
 remote_only: true
 pilot: true

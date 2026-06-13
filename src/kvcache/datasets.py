@@ -56,10 +56,32 @@ def load_dataset_guarded(
     )
 
 
-def _math500_problems(dataset: Any, subset: int | None) -> list[Problem]:
-    rows = (
-        dataset if subset is None else dataset.select(range(min(subset, len(dataset))))
-    )
+def _select_math500_rows(dataset: Any, subset: int | dict[str, Any] | None) -> Any:
+    if subset is None:
+        return dataset
+    if isinstance(subset, int):
+        return dataset.select(range(min(subset, len(dataset))))
+    count = int(subset["count"])
+    if subset.get("stratify_by") != "level":
+        raise ValueError("MATH-500 pilot supports only stratify_by: level")
+    selected_indices = []
+    seen_levels = set()
+    for index, row in enumerate(dataset):
+        level = int(row["level"])
+        if level not in seen_levels:
+            selected_indices.append(index)
+            seen_levels.add(level)
+        if len(selected_indices) == count:
+            break
+    if len(selected_indices) != count:
+        raise ValueError(f"could not select {count} distinct MATH-500 levels")
+    return dataset.select(selected_indices)
+
+
+def _math500_problems(
+    dataset: Any, subset: int | dict[str, Any] | None
+) -> list[Problem]:
+    rows = _select_math500_rows(dataset, subset)
     return [
         Problem(
             pid=str(row["unique_id"]),
@@ -92,11 +114,13 @@ def load_benchmark(
     name: str,
     benchmark_cfg: dict[str, Any],
     *,
-    subset: int | None = None,
+    subset: int | dict[str, Any] | None = None,
     allow_download: bool = False,
 ) -> list[Problem]:
     """Load only the MATH-500 and synthetic RSP pilot benchmarks."""
     if name == "rsp":
+        if isinstance(subset, dict):
+            subset = int(subset["count"])
         return _rsp_problems(subset)
     if name != "math500":
         raise NotImplementedError(f"benchmark not implemented for pilot: {name}")

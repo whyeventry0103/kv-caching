@@ -75,16 +75,21 @@ def main() -> int:
         allow_download=args.allow_model_download,
     )
     runs_root = Path(os.environ["REMOTE_RUNS_ROOT"])
-    max_new_tokens = int(config["max_new_tokens"])
     counts = {"rows": 0, "truncated": 0}
 
     for benchmark in config["benchmarks"]:
-        subset = int(config.get("subset", {}).get(benchmark, 0)) or None
+        subset = config.get("subset", {}).get(benchmark)
         problems = load_benchmark(
             benchmark,
             benchmarks_cfg[benchmark],
             subset=subset,
             allow_download=args.allow_dataset_download,
+        )
+        configured_max_new = config["max_new_tokens"]
+        max_new_tokens = (
+            int(configured_max_new[benchmark])
+            if isinstance(configured_max_new, dict)
+            else int(configured_max_new)
         )
         for seed in config["seeds"]:
             runmeta = capture_runmeta(config["name"], args.config, int(seed))

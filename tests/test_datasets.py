@@ -31,6 +31,24 @@ def test_math500_mapping_and_subset():
     assert problems[0].gold_answer == "1/2"
 
 
+def test_math500_level_stratified_subset():
+    dataset = FakeDataset(
+        {
+            "unique_id": f"p{index}",
+            "problem": f"problem {index}",
+            "answer": str(index),
+            "level": level,
+            "subject": "Mixed",
+        }
+        for index, level in enumerate([1, 1, 2, 3, 4, 5])
+    )
+    problems = _math500_problems(
+        dataset,
+        subset={"count": 5, "stratify_by": "level"},
+    )
+    assert [problem.meta["level"] for problem in problems] == [1, 2, 3, 4, 5]
+
+
 def test_rsp_is_local_and_deterministic():
     problems = load_benchmark("rsp", {"handle": "synthetic"}, subset=2)
     assert len(problems) == 2
