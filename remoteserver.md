@@ -42,7 +42,7 @@ of the file so another agent can immediately understand the setup.
 ```text
 PROJECT_NAME=kv-caching
 
-LOCAL_PROJECT_ROOT=/Users/apple/Desktop/kv-caching
+LOCAL_PROJECT_ROOT=/Users/apple/dev/kv-caching   # moved off ~/Desktop 2026-06-14 (macOS TCC lockout); ~/Desktop/kv-caching may be a symlink to here
 
 SSH_ALIAS=kvcache-gpu
 REMOTE_USER=sk10741
