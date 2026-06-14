@@ -155,3 +155,12 @@ reported separately through `compression_interval`.
 
 No `.pt`, `.pth`, `.safetensors`, `.npy`, or `.npz` artifact was written. The run
 contained only one JSONL result row and `cache_stats.json`.
+
+### Seeded RandomPress device fix
+
+kvpress 0.5.3's seeded `RandomPress` constructs `torch.Generator()` without a
+device, then passes that CPU generator to CUDA `torch.rand`. The project wraps
+the class lazily and constructs the generator on `keys.device`, preserving the
+upstream seeded scoring behavior while avoiding the device mismatch. A
+one-generation RandomPress diagnostic is required before the compression pilot
+is relaunched.

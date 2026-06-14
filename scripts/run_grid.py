@@ -17,7 +17,11 @@ from kvcache.bank import append_result, build_result_row
 from kvcache.cli import load_config, plan
 from kvcache.datasets import load_benchmark
 from kvcache.generation import generate_compressed
-from kvcache.models import load_model_and_tokenizer, render_prompt
+from kvcache.models import (
+    load_model_and_tokenizer,
+    render_prompt,
+    tokenize_rendered_prompt,
+)
 from kvcache.presses import build_press
 from kvcache.runmeta import capture_runmeta
 
@@ -92,8 +96,9 @@ def main() -> int:
                             max_new_tokens=max_new_tokens,
                         )
                         prompt_tokens = len(
-                            tokenizer(
-                                render_prompt(tokenizer, problem.question, model_cfg)
+                            tokenize_rendered_prompt(
+                                tokenizer,
+                                render_prompt(tokenizer, problem.question, model_cfg),
                             )["input_ids"]
                         )
                         logical_tokens = prompt_tokens + generation.n_tokens

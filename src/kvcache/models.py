@@ -83,6 +83,24 @@ def render_prompt(
     )
 
 
+def tokenize_rendered_prompt(
+    tokenizer: Any,
+    prompt: str,
+    *,
+    return_tensors: str | None = None,
+) -> Any:
+    """Tokenize a rendered chat prompt without adding a second BOS token.
+
+    ``apply_chat_template(..., tokenize=False)`` already renders the model's BOS
+    token. Tokenizing that text with ``add_special_tokens=True`` duplicates BOS
+    for Qwen-family tokenizers and changes the generation protocol.
+    """
+    kwargs: dict[str, Any] = {"add_special_tokens": False}
+    if return_tensors is not None:
+        kwargs["return_tensors"] = return_tensors
+    return tokenizer(prompt, **kwargs)
+
+
 def load_model(
     handle: str,
     *,

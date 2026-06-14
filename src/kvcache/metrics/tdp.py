@@ -33,6 +33,14 @@ def tdp(profile: Sequence[float], tau: float) -> int | None:
     return next((index for index, value in enumerate(profile) if value > tau), None)
 
 
+def tdp_percentile(profile: Sequence[float], tau: float) -> float:
+    """Normalize TDP for figures; no crossing is the endpoint 1.0."""
+    crossing = tdp(profile, tau)
+    if crossing is None or not profile:
+        return 1.0
+    return crossing / len(profile)
+
+
 def summarize_profile(profile: Sequence[float]) -> dict[str, object]:
     return {
         "auc_tv": auc_tv(profile),

@@ -1,0 +1,14 @@
+name: pilot_replay_compression
+stage: replay
+mode: compression_replay
+reference_run_name: pilot-fullcache-tokenized-v2
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+presses: [random, streamingllm]
+budgets: [256, 2048]
+seeds: [11, 23, 47, 89]
+compression_interval: 64
+estimated_generation_count: 0
+estimated_replay_count: 80
+remote_only: true
+pilot: true

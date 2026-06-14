@@ -1,0 +1,17 @@
+name: pilot_fullcache_tokenized
+stage: bank
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+subset:
+  math500:
+    count: 5
+    stratify_by: level
+presses: [fullcache]
+budgets: [full]
+seeds: [11, 23, 47, 89]
+max_new_tokens:
+  math500: 16384
+estimated_generation_count: 20
+store_token_ids: true
+remote_only: true
+pilot: true

@@ -18,6 +18,7 @@ from kvcache.models import (
     render_prompt,
 )
 from kvcache.runmeta import capture_runmeta
+from kvcache.token_ids import append_token_ids, build_token_ids_record
 
 
 def _yaml(path: Path):
@@ -114,9 +115,23 @@ def main() -> int:
                     runmeta=runmeta,
                 )
                 output = append_result(runs_root, row)
+                token_output = None
+                if config.get("store_token_ids"):
+                    token_record = build_token_ids_record(
+                        result_row=row,
+                        prompt_token_ids=generation.prompt_token_ids,
+                        trace_token_ids=generation.trace_token_ids,
+                        prompt_text=generation.prompt,
+                        trace_text=generation.trace,
+                        tokenizer=tokenizer,
+                        tokenizer_revision=str(model_cfg["revision"]),
+                    )
+                    token_output = append_token_ids(runs_root, token_record)
                 counts["rows"] += 1
                 counts["truncated"] += int(row["truncated"])
                 print(f"wrote {output}: {benchmark}/{problem.pid}/s{seed}")
+                if token_output is not None:
+                    print(f"wrote {token_output}: exact token IDs")
     counts["truncation_rate"] = (
         counts["truncated"] / counts["rows"] if counts["rows"] else 0.0
     )

@@ -7,6 +7,12 @@ trace. The residual after subtracting this on-reference readout change from the
 total free-run accuracy change is **accuracy change unexplained by on-reference
 readout**. It is not itself a measured cause or proof of trajectory distortion.
 
+The accuracy-scale readout quantity is not mean TV. It is the accuracy obtained by
+teacher-forcing the exact full-cache reference reasoning through the `</think>` or
+answer-marker boundary into a compressed cache, then freely sampling and grading the
+answer continuation under the matched method, budget, decoding parameters, and seed.
+Per-step TV remains a separate localization/fidelity instrument.
+
 ## ADD
 
 ADD is total variation on coarsened canonical-answer support. Excess ADD is

@@ -142,3 +142,53 @@ test rejecting at ≈ α. Exchangeability requires matched batching and kernel s
 across conditions; batch-composition nondeterminism is a real systematic at this
 precision and is controlled. Any instrument lighting up on the negative control is a
 bug, caught before a reviewer catches it.
+
+## Amendment B (2026-06-14): accuracy-scale readout estimand
+
+Per-step TV, mean TV, summed TV, fraction-above-threshold, and TDP remain
+distribution-fidelity instruments. They are not accuracy changes and are never
+subtracted from an accuracy delta.
+
+The accuracy-scale on-reference readout estimand is measured by a
+teacher-force-then-generate intervention. For each full-cache reference trace, define
+the reasoning/answer boundary as the end of `</think>` when present, otherwise the
+start of the first recognized answer marker. Teacher-force the exact stored reference
+token IDs through that boundary into the compressed cache. From the boundary, freely
+sample the answer continuation under the same compression method, absolute budget,
+temperature 0.6, top-p 0.95, and matched seed. Score the generated answer with the
+frozen `is_equiv` grader.
+
+For method-budget cell `m`:
+
+```text
+readout_change(m) = readout_accuracy(m) - full_cache_accuracy
+total_change(m) = compressed_free_run_accuracy(m) - full_cache_accuracy
+unexplained_residual(m) = total_change(m) - readout_change(m)
+```
+
+The residual is still named only **accuracy change unexplained by on-reference
+readout**. Because the intervention conditions on the good full-cache reasoning
+trajectory, it plausibly underestimates readout failure on compressed-model states and
+therefore inflates the residual share. Reverse replay and the TV-matched noise control
+remain mandatory later controls for this off-policy bias.
+
+Exact prompt and generated token IDs are stored in an additive validated sidecar;
+the frozen result-row schema is unchanged. Replay's self-control is run before any
+compressed replay. The independent-two-full-cache-bank ADD permutation control remains
+with the ADD engine in M5.
+
+## Amendment C (2026-06-14): rendered-prompt tokenization correction
+
+The model chat template already renders its beginning-of-sequence token. Rendered
+prompts are therefore tokenized with `add_special_tokens=False`; adding tokenizer
+special tokens a second time duplicates BOS and changes the generation protocol.
+Exact token-ID sidecar validation exposed this error before M4 replay began.
+
+All M2/M3 pilot rows generated before this correction used duplicate BOS and are
+retained only for provenance and harness diagnostics. They are not final paper
+evidence. The corrected tokenized full-cache bank is the first canonical M4
+reference. Full-cache and compressed free-run rows used in any accuracy change,
+signed flip-mass, ADD, or readout/residual decomposition must be regenerated under
+the same corrected prompt-tokenization protocol and software stack. In particular,
+the earlier M3 compression pilot cannot provide `total_change` for a decomposition
+against the corrected M4 reference.

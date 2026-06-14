@@ -12,7 +12,7 @@ from kvcache.datasets import Problem
 from kvcache.determinism import set_determinism
 from kvcache.grading import is_equiv
 from kvcache.metrics.add import OTHER_ANSWER
-from kvcache.models import render_prompt
+from kvcache.models import render_prompt, tokenize_rendered_prompt
 
 _ANSWER_MARKER = re.compile(r"\\boxed\{|(?:final\s+)?answer\s*(?:is|:)", re.I)
 
@@ -35,6 +35,8 @@ class GenerationResult:
     hit_token_cap: bool
     has_answer_marker: bool
     finish_reason: str
+    prompt_token_ids: tuple[int, ...] = ()
+    trace_token_ids: tuple[int, ...] = ()
 
 
 def _move_inputs(inputs: Any, device: Any) -> Any:
@@ -54,6 +56,8 @@ def finalize_generation(
     max_new_tokens: int,
     gold_answer: str,
     wallclock_s: float,
+    prompt_token_ids: tuple[int, ...] = (),
+    trace_token_ids: tuple[int, ...] = (),
 ) -> GenerationResult:
     """Convert decoded text into a scored result without requiring Torch.
 
@@ -84,6 +88,8 @@ def finalize_generation(
         hit_token_cap=hit_token_cap,
         has_answer_marker=has_marker,
         finish_reason=finish_reason,
+        prompt_token_ids=prompt_token_ids,
+        trace_token_ids=trace_token_ids,
     )
 
 
@@ -101,7 +107,10 @@ def generate_full_cache(
     import torch
 
     prompt = render_prompt(tokenizer, problem.question, model_cfg)
-    inputs = _move_inputs(tokenizer(prompt, return_tensors="pt"), model.device)
+    inputs = _move_inputs(
+        tokenize_rendered_prompt(tokenizer, prompt, return_tensors="pt"),
+        model.device,
+    )
     input_ids = inputs["input_ids"]
     set_determinism(seed)
     started = time.monotonic()
@@ -127,6 +136,8 @@ def generate_full_cache(
         max_new_tokens=max_new_tokens,
         gold_answer=problem.gold_answer,
         wallclock_s=wallclock_s,
+        prompt_token_ids=tuple(int(token) for token in input_ids[0].tolist()),
+        trace_token_ids=tuple(int(token) for token in generated.tolist()),
     )
 
 
@@ -145,7 +156,10 @@ def generate_with_press(
     import torch
 
     prompt = render_prompt(tokenizer, problem.question, model_cfg)
-    inputs = _move_inputs(tokenizer(prompt, return_tensors="pt"), model.device)
+    inputs = _move_inputs(
+        tokenize_rendered_prompt(tokenizer, prompt, return_tensors="pt"),
+        model.device,
+    )
     input_ids = inputs["input_ids"]
     set_determinism(seed)
     started = time.monotonic()
@@ -172,6 +186,8 @@ def generate_with_press(
             max_new_tokens=max_new_tokens,
             gold_answer=problem.gold_answer,
             wallclock_s=wallclock_s,
+            prompt_token_ids=tuple(int(token) for token in input_ids[0].tolist()),
+            trace_token_ids=tuple(int(token) for token in generated.tolist()),
         ),
         int(input_ids.shape[-1]),
     )

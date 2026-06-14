@@ -18,6 +18,7 @@ from kvcache.cli import load_config, plan
 from kvcache.datasets import load_benchmark
 from kvcache.generation import generate_with_press
 from kvcache.models import load_model_and_tokenizer
+from kvcache.presses import build_press
 from kvcache.runmeta import capture_runmeta
 
 
@@ -50,7 +51,7 @@ def main() -> int:
     if config.get("estimated_generation_count") != 1:
         raise SystemExit("REFUSED: decoding probe must contain exactly one generation")
 
-    from kvpress import DecodingPress, StreamingLLMPress
+    from kvpress import DecodingPress
 
     class InstrumentedDecodingPress(DecodingPress):
         def __post_init__(self) -> None:
@@ -78,6 +79,7 @@ def main() -> int:
     benchmark = config["benchmarks"][0]
     seed = int(config["seeds"][0])
     budget = int(config["budgets"][0])
+    press_name = config["presses"][0]
     interval = int(config["compression_interval"])
     max_new_tokens = int(config["max_new_tokens"])
     problem = load_benchmark(
@@ -87,11 +89,12 @@ def main() -> int:
         allow_download=False,
     )[0]
     model, tokenizer = load_model_and_tokenizer(models_cfg[model_name])
-    press = InstrumentedDecodingPress(
-        base_press=StreamingLLMPress(),
-        target_size=budget,
+    press = build_press(
+        press_name,
+        budget=budget,
         compression_interval=interval,
-        hidden_states_buffer_size=0,
+        seed=seed,
+        decoding_press_cls=InstrumentedDecodingPress,
     )
     generation, prompt_tokens = generate_with_press(
         model,
@@ -115,7 +118,7 @@ def main() -> int:
         sampling_cfg=sampling_cfg,
         generation=generation,
         runmeta=runmeta,
-        press="streamingllm",
+        press=press_name,
         budget=budget,
         compression_ratio=compression_ratio,
     )

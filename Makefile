@@ -17,11 +17,17 @@ dryrun:
 	$(PYTHON) scripts/build_bank.py --config configs/experiments/smoke_fullcache_4096.yaml --dry-run
 	$(PYTHON) scripts/build_bank.py --config configs/experiments/pilot_fullcache.yaml --dry-run
 	$(PYTHON) scripts/build_bank.py --config configs/experiments/pilot_fullcache_v2.yaml --dry-run
+	$(PYTHON) scripts/build_bank.py --config configs/experiments/pilot_fullcache_tokenized.yaml --dry-run
 	$(PYTHON) scripts/probe_decoding.py --config configs/experiments/probe_decoding.yaml --dry-run
+	$(PYTHON) scripts/probe_decoding.py --config configs/experiments/probe_decoding_random.yaml --dry-run
 	$(PYTHON) scripts/run_grid.py --config configs/experiments/pilot_compression.yaml --dry-run
 	$(PYTHON) scripts/build_bank.py --config configs/experiments/bank_fullcache.yaml --dry-run
 	$(PYTHON) scripts/run_grid.py --config configs/experiments/grid_compression.yaml --dry-run
 	$(PYTHON) scripts/run_replay.py --config configs/experiments/replay_decomposition.yaml --dry-run
+	$(PYTHON) scripts/run_replay.py --config configs/experiments/pilot_replay_self_smoke.yaml --dry-run
+	$(PYTHON) scripts/run_replay.py --config configs/experiments/pilot_replay_self.yaml --dry-run
+	$(PYTHON) scripts/run_replay.py --config configs/experiments/pilot_replay_compression.yaml --dry-run
+	$(PYTHON) scripts/run_replay.py --config configs/experiments/pilot_readout.yaml --dry-run
 	$(PYTHON) scripts/run_metrics.py --config configs/experiments/add_permutation.yaml --dry-run
 	$(PYTHON) scripts/run_mechanism.py --config configs/experiments/mechanism_ladder.yaml --dry-run
 	$(PYTHON) scripts/make_figures.py --config configs/experiments/negative_control.yaml --dry-run

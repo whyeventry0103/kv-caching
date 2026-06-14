@@ -21,7 +21,11 @@ def main() -> int:
     parser.add_argument("--expected-rows", type=int)
     args = parser.parse_args()
 
-    paths = sorted(args.run_root.rglob("*.jsonl"))
+    paths = sorted(
+        path
+        for path in args.run_root.rglob("*.jsonl")
+        if "token_ids" not in path.relative_to(args.run_root).parts
+    )
     if not paths:
         raise SystemExit(f"no JSONL files found under {args.run_root}")
 
@@ -40,7 +44,14 @@ def main() -> int:
                 validate_row(row)
             except ValueError as exc:
                 raise SystemExit(f"{path}:{line_number}: {exc}") from exc
-            key = (row["bench"], row["pid"], row["decoding"]["seed"])
+            key = (
+                row["bench"],
+                row["pid"],
+                row["model"],
+                row["press"],
+                row["budget"],
+                row["decoding"]["seed"],
+            )
             keys[key] += 1
             rows.append(row)
             by_benchmark[row["bench"]].append(row)
