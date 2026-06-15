@@ -144,7 +144,15 @@ def build_report(
         replay = replay_by_cell[condition]
         readout = readout_by_cell[condition]
         compressed_accuracy = _accuracy(comp)
-        readout_accuracy = sum(row["readout_correct"] for row in readout) / len(readout)
+        # Exclude undefined-boundary readout rows from readout-accuracy; count them.
+        readout_defined = [r for r in readout if r.get("readout_correct") is not None]
+        n_readout_undefined = len(readout) - len(readout_defined)
+        readout_accuracy = (
+            sum(bool(r["readout_correct"]) for r in readout_defined)
+            / len(readout_defined)
+            if readout_defined
+            else 0.0
+        )
         total_change = compressed_accuracy - full_accuracy
         readout_change = readout_accuracy - full_accuracy
         residual = total_change - readout_change
@@ -167,10 +175,11 @@ def build_report(
                 ),
                 "readout_accuracy": readout_accuracy,
                 "readout_accuracy_ci95": _problem_bootstrap_ci(
-                    readout,
+                    readout_defined,
                     lambda r: bool(r["readout_correct"]),
                     pid_fn=lambda r: r["reference_key"][1],
                 ),
+                "n_readout_undefined": n_readout_undefined,
                 "n_problems": len({r["pid"] for r in comp}),
                 "total_change": total_change,
                 "readout_change": readout_change,

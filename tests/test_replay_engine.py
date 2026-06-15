@@ -117,11 +117,28 @@ def test_readout_boundary_prefers_think_end_then_answer_marker():
     tokenizer = CharTokenizer()
     trace = "<think>x</think>\\nFinal Answer: 2"
     ids = [ord(char) for char in trace]
-    boundary = reasoning_boundary_char(trace)
+    boundary, kind = reasoning_boundary_char(trace)
+    assert kind == "think_close"
     assert trace[:boundary].endswith("</think>")
-    assert reasoning_boundary_token(tokenizer, ids, trace) == boundary
+    assert reasoning_boundary_token(tokenizer, ids, trace) == (boundary, "think_close")
+    # No </think> but an answer marker -> defined via fallback.
     marker_trace = "reasoning... answer is 2"
-    assert reasoning_boundary_char(marker_trace) == marker_trace.index("answer")
+    char, mkind = reasoning_boundary_char(marker_trace)
+    assert (char, mkind) == (marker_trace.index("answer"), "answer_marker")
+
+
+def test_readout_boundary_last_think_and_undefined():
+    tokenizer = CharTokenizer()
+    # Multiple </think>: use the LAST close (answer follows the final one).
+    multi = "<think>a</think>more<think>b</think>FINAL"
+    char, kind = reasoning_boundary_char(multi)
+    assert kind == "think_close"
+    assert char == multi.rfind("</think>") + len("</think>")
+    # Neither </think> nor a marker -> undefined (excluded + counted, never dropped).
+    undefined = "just plain reasoning with no close and no boxed answer"
+    assert reasoning_boundary_char(undefined) == (None, "undefined")
+    ids = [ord(c) for c in undefined]
+    assert reasoning_boundary_token(tokenizer, ids, undefined) == (None, "undefined")
 
 
 def test_teacher_forced_readout_uses_reference_prefix_then_samples():

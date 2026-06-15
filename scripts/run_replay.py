@@ -195,41 +195,61 @@ def main() -> int:
                 if mode == "readout":
                     import torch
 
-                    boundary = reasoning_boundary_token(
+                    boundary, boundary_kind = reasoning_boundary_token(
                         tokenizer, trace_ids, row["trace"]
                     )
-                    with torch.inference_mode(), press(model):
-                        generated_ids = teacher_forced_readout_tokens(
-                            prompt_ids,
-                            trace_ids,
-                            boundary=boundary,
-                            cache_factory=backend.cache_factory,
-                            forward=backend.forward,
-                            press=press,
-                            seed=seed,
-                            temperature=float(sampling_cfg["temperature"]),
-                            top_p=float(sampling_cfg["top_p"]),
-                            eos_token_ids=_eos_token_ids(tokenizer),
-                            max_answer_tokens=int(config["max_answer_tokens"]),
+                    if boundary is None:
+                        # Undefined reasoning/answer boundary: exclude from
+                        # readout-accuracy, never silently drop or mis-segment.
+                        record = {
+                            "schema_version": "readout-v1",
+                            "reference_key": list(_reference_key(row)),
+                            "condition": {"press": press_name, "budget": budget},
+                            "boundary_token": None,
+                            "boundary_kind": boundary_kind,
+                            "readout_defined": False,
+                            "generated_token_ids": [],
+                            "generated_text": "",
+                            "answer_raw": "",
+                            "readout_correct": None,
+                            "runmeta": runmeta,
+                            "versions": row["versions"],
+                        }
+                    else:
+                        with torch.inference_mode(), press(model):
+                            generated_ids = teacher_forced_readout_tokens(
+                                prompt_ids,
+                                trace_ids,
+                                boundary=boundary,
+                                cache_factory=backend.cache_factory,
+                                forward=backend.forward,
+                                press=press,
+                                seed=seed,
+                                temperature=float(sampling_cfg["temperature"]),
+                                top_p=float(sampling_cfg["top_p"]),
+                                eos_token_ids=_eos_token_ids(tokenizer),
+                                max_answer_tokens=int(config["max_answer_tokens"]),
+                            )
+                        generated_text = tokenizer.decode(
+                            generated_ids, skip_special_tokens=True
                         )
-                    generated_text = tokenizer.decode(
-                        generated_ids, skip_special_tokens=True
-                    )
-                    answer_raw = extract_answer(generated_text)
-                    record = {
-                        "schema_version": "readout-v1",
-                        "reference_key": list(_reference_key(row)),
-                        "condition": {"press": press_name, "budget": budget},
-                        "boundary_token": boundary,
-                        "generated_token_ids": generated_ids,
-                        "generated_text": generated_text,
-                        "answer_raw": answer_raw,
-                        "readout_correct": score_readout_answer(
-                            gold_by_pid[row["pid"]], generated_text
-                        ),
-                        "runmeta": runmeta,
-                        "versions": row["versions"],
-                    }
+                        answer_raw = extract_answer(generated_text)
+                        record = {
+                            "schema_version": "readout-v1",
+                            "reference_key": list(_reference_key(row)),
+                            "condition": {"press": press_name, "budget": budget},
+                            "boundary_token": boundary,
+                            "boundary_kind": boundary_kind,
+                            "readout_defined": True,
+                            "generated_token_ids": generated_ids,
+                            "generated_text": generated_text,
+                            "answer_raw": answer_raw,
+                            "readout_correct": score_readout_answer(
+                                gold_by_pid[row["pid"]], generated_text
+                            ),
+                            "runmeta": runmeta,
+                            "versions": row["versions"],
+                        }
                     path = _readout_path(output_root, press_name, int(budget), seed)
                     path.parent.mkdir(parents=True, exist_ok=True)
                     if path.exists():

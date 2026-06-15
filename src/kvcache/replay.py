@@ -204,13 +204,26 @@ def paired_teacher_forced_replay(
     )
 
 
-def reasoning_boundary_char(trace: str) -> int:
-    """Return the character boundary after reasoning and before answer generation."""
-    think_end = trace.find("</think>")
-    if think_end >= 0:
-        return think_end + len("</think>")
+def reasoning_boundary_char(trace: str) -> tuple[int | None, str]:
+    """Char boundary after reasoning + a deterministic, logged ``kind``.
+
+    Rule (per-row logged, for the powered set):
+    - ``think_close``: the LAST ``</think>`` closes reasoning. Using the last close
+      is robust to multiple ``</think>`` and to ``\\boxed{}`` emitted mid-reasoning
+      (the answer always follows the final close).
+    - ``answer_marker``: no ``</think>`` at all, but a recognized answer marker — fall
+      back to its start (covers non-thinking traces).
+    - ``undefined``: neither — there is no clean reasoning/answer split, so the readout
+      estimand is ill-defined. The row is EXCLUDED from readout-accuracy and COUNTED
+      separately (never silently dropped or mis-segmented).
+    """
+    last_think = trace.rfind("</think>")
+    if last_think >= 0:
+        return last_think + len("</think>"), "think_close"
     marker = _ANSWER_BOUNDARY.search(trace)
-    return marker.start() if marker else len(trace)
+    if marker:
+        return marker.start(), "answer_marker"
+    return None, "undefined"
 
 
 def token_boundary_for_text(
@@ -239,12 +252,14 @@ def reasoning_boundary_token(
     tokenizer: Any,
     trace_token_ids: Sequence[int],
     trace: str,
-) -> int:
-    return token_boundary_for_text(
-        tokenizer,
-        trace_token_ids,
-        trace,
-        reasoning_boundary_char(trace),
+) -> tuple[int | None, str]:
+    """Return ``(token_boundary, kind)``; ``token_boundary`` is None when undefined."""
+    char_boundary, kind = reasoning_boundary_char(trace)
+    if char_boundary is None:
+        return None, kind
+    return (
+        token_boundary_for_text(tokenizer, trace_token_ids, trace, char_boundary),
+        kind,
     )
 
 
