@@ -1,0 +1,17 @@
+name: bank_math500_powered_g0
+stage: bank
+# Powered MATH-500 FC bank, half g0 (split across 2 GPUs; merge after).
+# 250 problems x 4 seeds; the two halves union to the canonical n=8 reference.
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+subset:
+  math500: 250
+seeds: [11,23,47,89]
+max_new_tokens:
+  math500: 16384
+presses: [fullcache]
+budgets: [full]
+estimated_generation_count: 1000
+store_token_ids: true
+scale_authorized: true
+remote_only: true
