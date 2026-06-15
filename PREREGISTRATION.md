@@ -184,6 +184,71 @@ prompts are therefore tokenized with `add_special_tokens=False`; adding tokenize
 special tokens a second time duplicates BOS and changes the generation protocol.
 Exact token-ID sidecar validation exposed this error before M4 replay began.
 
+## Amendment D (2026-06-15): pilot-result discipline and review responses
+
+This addendum records commitments made in response to an external review, before the
+powered run, to prevent underpowered pilot directionals from calcifying into facts.
+
+### The M4 pilot decomposition is explicitly UNCONFIRMED
+
+The pilot "double dissociation" (StreamingLLM-256 readout-dominated, Random-256
+residual-dominated) is from n=5 problems x 4 seeds. Problem-level bootstrap 95% CIs are
+wide (e.g. SLM-256 readout 0.45, CI [0.15, 0.80]; Random-256 readout 0.90, CI
+[0.80, 1.00]); the per-method readout-vs-residual split is barely resolved. It is a
+**hypothesis-generating observation, not a result**. The powered MATH-500 bank
+(250 problems x n=8) is the confirmatory test, and it CAN overturn the dissociation.
+**We pre-commit to reporting the powered result whatever it shows**, including a
+reversal. No language asserting the dissociation as established may enter any external
+artifact until MATH-500 confirms it. Reports must carry the bootstrap CIs, not point
+estimates alone.
+
+### Random > StreamingLLM: mundane causes ruled out / controlled
+
+(i) Budget parity is verified: at `target_size=256` both presses prune to
+`max_after_prune=256` and `max_before_prune=320` identically — same retained budget,
+so the gap is which 256 tokens, not how many. (ii) Stochastic presses now use a
+per-(problem, seed) RNG (`press_seed`) so the effect cannot be a single lucky seed.
+The mechanistic sentence ("random preserves mid-trace anchors by chance") remains
+provisional until the powered bank.
+
+### Readout estimand is math/span-shaped; per-step TV is the general fallback
+
+The accuracy-scale readout (Amendment B) assumes a clean reasoning/answer boundary
+(`</think>` or an answer marker) and localizes readout to the answer span. This holds
+for math. For logic benchmarks (FOLIO, StrategyQA) where the answer is not a span after
+a marker, the **per-step TV profile is the general-purpose readout instrument**, and the
+paper states explicitly which instrument carries the decomposition on which benchmark.
+
+### One canonical full-cache reference, enforced in code
+
+`pilot-fullcache-tokenized-v2` (single-BOS, 20/20, with token-ID sidecars) is the sole
+canonical pilot FC reference. The double-BOS `pilot-fullcache-v2-tf456` (19/20) is
+retired to provenance. `report_m4` asserts every compression and readout row references
+this exact bank's `(pid, seed)` set; `total_change` and `readout_change` share one
+reference by construction.
+
+### R-KV port is a HARD reproduction gate
+
+R-KV's >=100% regime is central to the paper. Because we port R-KV rather than run the
+authors' code, a subtly wrong port that fails to reproduce the regime would masquerade
+as a finding. Before ANY R-KV row enters analysis, the port must reproduce a specific
+published (model, benchmark, budget) number from the R-KV paper within sampling noise,
+committed as a test. If it cannot, we do not have R-KV and no R-KV result is reported.
+The same source-sanity gate applies to H2O (ObservedAttention).
+
+### RSP demoted; restoration on natural traces is the primary mechanism instrument
+
+RSP has failed validity twice. The restoration test (re-insert evicted KV at a spike,
+recompute d_t) on natural traces is the PRIMARY mechanism instrument; RSP is a bonus.
+RSP redesign must not consume restoration-engine effort.
+
+### Bookkeeping
+
+`compression_events` counts layer-level prune calls (x n_layers), not token-prune
+steps; it is never divided as a per-step rate. The powered two-full-cache-bank ADD
+negative control MUST be run at M8 (split the n=8 bank); the degenerate pilot smoke
+does not discharge it.
+
 All M2/M3 pilot rows generated before this correction used duplicate BOS and are
 retained only for provenance and harness diagnostics. They are not final paper
 evidence. The corrected tokenized full-cache bank is the first canonical M4
