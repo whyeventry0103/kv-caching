@@ -257,3 +257,72 @@ signed flip-mass, ADD, or readout/residual decomposition must be regenerated und
 the same corrected prompt-tokenization protocol and software stack. In particular,
 the earlier M3 compression pilot cannot provide `total_change` for a decomposition
 against the corrected M4 reference.
+
+## Amendment E (2026-06-15): second-review responses (baselines + scaling)
+
+### R-KV port integrity gate (tightened)
+
+R-KV is ported into our kvpress framework, not run from the authors' code, so the
+gate certifies **port fidelity** ("does our reimplementation compute what R-KV's code
+computes on the model we run"), which is what our paper's integrity depends on — not
+headline reproduction (the authors' claim to defend). Before ANY R-KV row enters
+analysis:
+
+1. **Mechanism match, not just score.** For a fixed (problem, seed, budget), the set of
+   retained token positions after each prune must match the authors' code
+   (Jaccard ≈ 1, with a small documented tolerance only if their scoring is
+   nondeterministic), on a handful of traces. We already store eviction decisions for
+   attribution, so this is cheap and is the test that catches a subtly-wrong port.
+2. **Two budgets, not one** — one moderate and one aggressive (the regime where the
+   denoising/>100% behavior would appear if it appears at 7B). Match the curve shape.
+3. **Committed artifacts:** the authors' `run_math.py` raw output, the exact R-KV repo
+   commit, the separate-environment package versions, and seeds — so the comparison is
+   reproducible, not asserted.
+4. **Honest scoping in the paper:** R-KV's published >=100% headline is on
+   R1-Distill-Llama-8B and Qwen-14B; we run Qwen-7B and do **not** reproduce their exact
+   headline configuration. Our R-KV is validated as a faithful port at our scale. If the
+   faithful port shows **no >100% regime on Qwen-7B, that is a finding about scale, not a
+   port failure** — a claim credible *only because* the retained-set mechanism match
+   certifies the port. (c) restoring Llama-8B to reproduce their headline is rejected: it
+   certifies the wrong thing for us and costs a second GPU.
+
+### H2O is heavy-hitter scoring, labeled precisely
+
+A source read of kvpress `ObservedAttentionPress.score` confirms it is the H2O
+heavy-hitter signal (accumulated attention each key receives from all queries,
+normalized by causal eligibility) — but it has **no explicit recent-window
+reservation** (a component of the H2O paper). It is therefore labeled
+"H2O-style attention heavy-hitter eviction (kvpress ObservedAttention, as used by
+HOTT)", not bit-identical to the H2O paper. Because it is library code (same library
+HOTT used), a behavioral sanity suffices; no published-number gate. It requires eager
+attention.
+
+### Eager-attention exchangeability (gates the powered run)
+
+Attention-score presses (H2O) require `attn_implementation="eager"`, whose numerics
+differ from the sdpa default. To avoid a stack-mismatch confound, before the powered
+run we verify a common numerical baseline: full-cache accuracy under eager vs sdpa on
+the pilot problems must agree within sampling noise (no systematic shift). If it does
+not, the entire powered suite (all methods + FC reference) runs under eager. This is
+the one item that gates the powered run; everything else may run in parallel.
+
+### Readout boundary rule (powered set)
+
+The reasoning/answer boundary is deterministic and logged per row: the LAST `</think>`
+(robust to multiple closes and `\boxed{}` emitted mid-reasoning); else an answer-marker
+fallback; else **undefined**. Undefined-boundary rows are excluded from readout-accuracy
+and counted (`n_readout_undefined`) — never silently dropped or mis-segmented.
+
+### Budget-parity language
+
+StreamingLLM and Random retain the same TOTAL budget (verified: both prune to 256/320
+at target_size=256) but a DIFFERENT positional allocation (StreamingLLM = sinks +
+recent window; Random = uniform sample). The paper says "same total budget, different
+positional allocation," never "same mid-trace coverage" — the differing coverage is
+arguably the mechanism, not an artifact to eliminate.
+
+### Powered-run discipline
+
+The powered MATH-500 (250 x n=8) decomposition is where the M4 dissociation survives or
+dies; we report it with CIs either way. A reversal or wash-out at n=250 is a publishable
+result about the decomposition's resolution limits, not a failure.
