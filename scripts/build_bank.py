@@ -50,8 +50,10 @@ def main() -> int:
         raise SystemExit("REFUSED: costly execution requires --i-understand")
     if os.environ.get("KVCACHE_REMOTE") != "1":
         raise SystemExit("REFUSED: non-dry execution requires KVCACHE_REMOTE=1")
-    if not config.get("pilot"):
-        raise SystemExit("REFUSED: only pilot_fullcache.yaml is executable")
+    if not (config.get("pilot") or config.get("scale_authorized")):
+        raise SystemExit(
+            "REFUSED: bank config must set pilot:true or scale_authorized:true"
+        )
 
     models_cfg = _yaml(PROJECT_ROOT / "configs/models.yaml")["models"]
     benchmarks_cfg = _yaml(PROJECT_ROOT / "configs/benchmarks.yaml")["benchmarks"]

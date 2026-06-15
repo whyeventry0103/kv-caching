@@ -1,0 +1,20 @@
+name: bank_math500_powered
+stage: bank
+# Powered full-cache reference bank: the foundation for the M8 powered decomposition.
+# MATH-500 first 250 problems x n=8 seeds, 16384 cap, sdpa (the canonical fast path;
+# H2O-on-eager is exchangeable with this per the eager-check verification, 19/20).
+# Token-ID sidecars stored for teacher-forced replay/readout. This is the single
+# canonical powered FC reference; everything compares against it.
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+subset:
+  math500: 250
+seeds: [11, 23, 47, 89, 131, 197, 263, 347]
+max_new_tokens:
+  math500: 16384
+presses: [fullcache]
+budgets: [full]
+estimated_generation_count: 2000
+store_token_ids: true
+scale_authorized: true
+remote_only: true
