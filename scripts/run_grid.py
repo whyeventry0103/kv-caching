@@ -22,7 +22,7 @@ from kvcache.models import (
     render_prompt,
     tokenize_rendered_prompt,
 )
-from kvcache.presses import build_press
+from kvcache.presses import build_press, press_seed
 from kvcache.runmeta import capture_runmeta
 
 
@@ -83,7 +83,9 @@ def main() -> int:
                             press_name,
                             budget=int(budget),
                             compression_interval=int(config["compression_interval"]),
-                            seed=int(seed),
+                            # Per-(problem, seed) RNG so random eviction is
+                            # decorrelated across problems (no lucky-seed artifact).
+                            seed=press_seed(problem.pid, int(seed)),
                         )
                         generation = generate_compressed(
                             model,

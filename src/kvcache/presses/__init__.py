@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 from contextlib import contextmanager
 from typing import Any
 
@@ -9,6 +10,17 @@ EXECUTABLE = {"streamingllm", "random"}
 PREFILL_ONLY = {"snapkv", "expected_attention"}
 PORT_REQUIRED = {"h2o", "rkv"}
 DEFERRED = {"kivi2", "triattention"}
+
+
+def press_seed(pid: str, seed: int) -> int:
+    """Stable per-(problem, seed) RNG seed for stochastic presses (RandomPress).
+
+    Using one cell seed across all problems would correlate random eviction and
+    risks a "lucky seed" artifact (a reviewer concern). This decorrelates eviction
+    per problem while staying fully deterministic/reproducible.
+    """
+    digest = hashlib.sha256(f"{pid}|{seed}".encode()).hexdigest()
+    return int(digest[:8], 16)
 
 
 class NoOpReplayPress:

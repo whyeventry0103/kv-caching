@@ -1,6 +1,15 @@
 import pytest
 
-from kvcache.presses import build_press, build_replay_press, get_press
+from kvcache.presses import build_press, build_replay_press, get_press, press_seed
+
+
+def test_press_seed_is_deterministic_and_decorrelated():
+    # Stable across calls (reproducible).
+    assert press_seed("p1", 11) == press_seed("p1", 11)
+    # Varies by problem and by seed (decorrelates random eviction).
+    assert press_seed("p1", 11) != press_seed("p2", 11)
+    assert press_seed("p1", 11) != press_seed("p1", 23)
+    assert isinstance(press_seed("p1", 11), int)
 
 
 @pytest.mark.parametrize(

@@ -20,7 +20,7 @@ from kvcache.cli import load_config, plan
 from kvcache.datasets import load_benchmark
 from kvcache.determinism import log_versions
 from kvcache.models import load_model_and_tokenizer
-from kvcache.presses import build_replay_press
+from kvcache.presses import build_replay_press, press_seed
 from kvcache.replay import (
     TransformersReplayBackend,
     build_replay_row,
@@ -187,7 +187,8 @@ def main() -> int:
                     press_name,
                     budget=2048 if budget == "full" else int(budget),
                     compression_interval=int(config["compression_interval"]),
-                    seed=seed,
+                    # Per-(problem, seed) RNG (decorrelate random eviction).
+                    seed=press_seed(row["pid"], seed),
                 )
                 backend = TransformersReplayBackend(model)
                 runmeta = capture_runmeta(config["name"], args.config, seed)

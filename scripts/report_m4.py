@@ -5,10 +5,41 @@ from __future__ import annotations
 
 import argparse
 import json
+import random
 import statistics
 from collections import defaultdict
 from pathlib import Path
 from typing import Any
+
+
+def _problem_bootstrap_ci(
+    rows: list[dict[str, Any]],
+    value_fn,
+    *,
+    pid_fn=lambda row: row["pid"],
+    n_resamples: int = 2000,
+    seed: int = 0,
+) -> tuple[float, float]:
+    """Problem-level 95% bootstrap CI (the powered unit is the problem, not the row).
+
+    At pilot scale (5 problems) this CI is intentionally wide — it makes the
+    under-power visible in the numbers, not just in a caveat.
+    """
+    by_pid: dict[str, list[float]] = defaultdict(list)
+    for row in rows:
+        by_pid[pid_fn(row)].append(float(value_fn(row)))
+    per_problem = [statistics.fmean(v) for v in by_pid.values()]
+    if not per_problem:
+        return (0.0, 0.0)
+    rng = random.Random(seed)
+    k = len(per_problem)
+    means = sorted(
+        statistics.fmean(rng.choice(per_problem) for _ in range(k))
+        for _ in range(n_resamples)
+    )
+    lo = means[int(0.025 * (n_resamples - 1))]
+    hi = means[int(0.975 * (n_resamples - 1))]
+    return (round(lo, 4), round(hi, 4))
 
 
 def _jsonl(path: Path) -> list[dict[str, Any]]:
@@ -80,6 +111,23 @@ def build_report(
     reference_correct = {_run_key(row): bool(row["correct"]) for row in full_rows}
     full_accuracy = _accuracy(full_rows)
 
+    # Pin ONE canonical full-cache reference: every total_change, readout_change,
+    # and flip_mass MUST be measured against this exact bank's (pid, seed) set.
+    # (Reviewer #4: two FC banks with different accuracies were floating around.)
+    ref_keys = set(reference_correct)
+    comp_keys = {_run_key(row) for row in compression_rows}
+    readout_keys = {_reference_key_from_readout(row) for row in readout_rows}
+    if not comp_keys <= ref_keys:
+        raise ValueError(
+            "compression rows reference (pid,seed) absent from the FC bank: "
+            f"{sorted(comp_keys - ref_keys)[:3]}"
+        )
+    if not readout_keys <= ref_keys:
+        raise ValueError(
+            "readout rows reference (pid,seed) absent from the FC bank: "
+            f"{sorted(readout_keys - ref_keys)[:3]}"
+        )
+
     compression_by_cell: dict[tuple[str, str], list[dict[str, Any]]] = defaultdict(list)
     replay_by_cell: dict[tuple[str, str], list[dict[str, Any]]] = defaultdict(list)
     readout_by_cell: dict[tuple[str, str], list[dict[str, Any]]] = defaultdict(list)
@@ -114,7 +162,16 @@ def build_report(
                 "rows": len(comp),
                 "full_accuracy": full_accuracy,
                 "compressed_accuracy": compressed_accuracy,
+                "compressed_accuracy_ci95": _problem_bootstrap_ci(
+                    comp, lambda r: bool(r["correct"])
+                ),
                 "readout_accuracy": readout_accuracy,
+                "readout_accuracy_ci95": _problem_bootstrap_ci(
+                    readout,
+                    lambda r: bool(r["readout_correct"]),
+                    pid_fn=lambda r: r["reference_key"][1],
+                ),
+                "n_problems": len({r["pid"] for r in comp}),
                 "total_change": total_change,
                 "readout_change": readout_change,
                 "unexplained_residual": residual,
