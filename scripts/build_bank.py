@@ -74,6 +74,7 @@ def main() -> int:
     model, tokenizer = load_model_and_tokenizer(
         model_cfg,
         allow_download=args.allow_model_download,
+        attn_implementation=config.get("attn_implementation"),
     )
     runs_root = Path(os.environ["REMOTE_RUNS_ROOT"])
     counts = {"rows": 0, "truncated": 0}

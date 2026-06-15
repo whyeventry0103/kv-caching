@@ -1,0 +1,22 @@
+name: pilot_fullcache_eager_check
+stage: bank
+# Exchangeability gate (reviewer): does eager attention produce a numerically
+# comparable full-cache baseline to the sdpa default? Same 5 MATH problems x 4 seeds
+# x 16384 cap as pilot-fullcache-tokenized-v2 (sdpa), but eager. Compare accuracy +
+# per-problem outcomes. If comparable (within sampling noise, no systematic shift),
+# H2O-on-eager may be mixed with sdpa methods; otherwise run the whole powered suite eager.
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+subset:
+  math500:
+    count: 5
+    stratify_by: level
+presses: [fullcache]
+budgets: [full]
+seeds: [11, 23, 47, 89]
+max_new_tokens:
+  math500: 16384
+attn_implementation: eager
+estimated_generation_count: 20
+remote_only: true
+pilot: true

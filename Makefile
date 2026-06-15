@@ -17,6 +17,7 @@ dryrun:
 	$(PYTHON) scripts/build_bank.py --config configs/experiments/smoke_fullcache_4096.yaml --dry-run
 	$(PYTHON) scripts/build_bank.py --config configs/experiments/pilot_fullcache.yaml --dry-run
 	$(PYTHON) scripts/build_bank.py --config configs/experiments/pilot_fullcache_v2.yaml --dry-run
+	$(PYTHON) scripts/build_bank.py --config configs/experiments/pilot_fullcache_eager_check.yaml --dry-run
 	$(PYTHON) scripts/build_bank.py --config configs/experiments/pilot_fullcache_tokenized.yaml --dry-run
 	$(PYTHON) scripts/probe_decoding.py --config configs/experiments/probe_decoding.yaml --dry-run
 	$(PYTHON) scripts/probe_decoding.py --config configs/experiments/probe_decoding_random.yaml --dry-run
