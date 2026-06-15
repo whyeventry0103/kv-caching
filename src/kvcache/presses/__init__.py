@@ -6,10 +6,16 @@ import hashlib
 from contextlib import contextmanager
 from typing import Any
 
-EXECUTABLE = {"streamingllm", "random"}
+EXECUTABLE = {"streamingllm", "random", "h2o"}
 PREFILL_ONLY = {"snapkv", "expected_attention"}
-PORT_REQUIRED = {"h2o", "rkv"}
+PORT_REQUIRED = {"rkv"}
 DEFERRED = {"kivi2", "triattention"}
+# Attention-score presses read attention weights, which require eager attention.
+EAGER_ATTENTION = {"h2o"}
+
+
+def press_needs_eager_attention(name: str) -> bool:
+    return name.lower() in EAGER_ATTENTION
 
 
 def press_seed(pid: str, seed: int) -> int:
@@ -81,6 +87,10 @@ def build_press(
 
     if normalized == "streamingllm":
         base_press = kvpress_module.StreamingLLMPress()
+    elif normalized == "h2o":
+        # kvpress's ObservedAttentionPress is the in-library H2O (its own docstring
+        # cites arXiv:2306.14048); requires the model loaded with eager attention.
+        base_press = kvpress_module.ObservedAttentionPress()
     elif normalized == "random":
 
         class DeviceSafeRandomPress(kvpress_module.RandomPress):

@@ -1,0 +1,17 @@
+name: probe_decoding_h2o
+stage: diagnostic
+# H2O sanity smoke: ObservedAttentionPress (kvpress's in-library H2O) under DecodingPress
+# at an absolute budget, with eager attention. Verifies it runs, the cache stays bounded
+# near target_size, and no tensor/cache artifacts are written.
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+subset:
+  math500: 1
+presses: [h2o]
+budgets: [256]
+seeds: [11]
+max_new_tokens: 4096
+compression_interval: 64
+estimated_generation_count: 1
+remote_only: true
+pilot: true

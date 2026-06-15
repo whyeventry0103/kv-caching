@@ -18,7 +18,7 @@ from kvcache.cli import load_config, plan
 from kvcache.datasets import load_benchmark
 from kvcache.generation import generate_with_press
 from kvcache.models import load_model_and_tokenizer
-from kvcache.presses import build_press
+from kvcache.presses import build_press, press_needs_eager_attention
 from kvcache.runmeta import capture_runmeta
 
 
@@ -88,7 +88,12 @@ def main() -> int:
         subset=config["subset"][benchmark],
         allow_download=False,
     )[0]
-    model, tokenizer = load_model_and_tokenizer(models_cfg[model_name])
+    model, tokenizer = load_model_and_tokenizer(
+        models_cfg[model_name],
+        attn_implementation=(
+            "eager" if press_needs_eager_attention(press_name) else None
+        ),
+    )
     press = build_press(
         press_name,
         budget=budget,

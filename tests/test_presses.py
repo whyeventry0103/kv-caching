@@ -1,6 +1,12 @@
 import pytest
 
-from kvcache.presses import build_press, build_replay_press, get_press, press_seed
+from kvcache.presses import (
+    build_press,
+    build_replay_press,
+    get_press,
+    press_needs_eager_attention,
+    press_seed,
+)
 
 
 def test_press_seed_is_deterministic_and_decorrelated():
@@ -12,12 +18,17 @@ def test_press_seed_is_deterministic_and_decorrelated():
     assert isinstance(press_seed("p1", 11), int)
 
 
+def test_h2o_needs_eager_attention_others_do_not():
+    assert press_needs_eager_attention("h2o") is True
+    assert press_needs_eager_attention("streamingllm") is False
+    assert press_needs_eager_attention("random") is False
+
+
 @pytest.mark.parametrize(
     "name",
     [
         "snapkv",
         "expected_attention",
-        "h2o",
         "rkv",
         "kivi2",
         "triattention",
@@ -47,13 +58,18 @@ class _FakeDecoding:
         self.kwargs = kwargs
 
 
+class _FakeObservedAttention:
+    pass
+
+
 class _FakeKVPress:
     StreamingLLMPress = _FakeStreaming
     RandomPress = _FakeRandom
+    ObservedAttentionPress = _FakeObservedAttention
     DecodingPress = _FakeDecoding
 
 
-@pytest.mark.parametrize("name", ["streamingllm", "random"])
+@pytest.mark.parametrize("name", ["streamingllm", "random", "h2o"])
 def test_build_press_constructs_decoding_press(name):
     press = build_press(
         name,

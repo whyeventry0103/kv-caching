@@ -20,6 +20,7 @@ dryrun:
 	$(PYTHON) scripts/build_bank.py --config configs/experiments/pilot_fullcache_tokenized.yaml --dry-run
 	$(PYTHON) scripts/probe_decoding.py --config configs/experiments/probe_decoding.yaml --dry-run
 	$(PYTHON) scripts/probe_decoding.py --config configs/experiments/probe_decoding_random.yaml --dry-run
+	$(PYTHON) scripts/probe_decoding.py --config configs/experiments/probe_decoding_h2o.yaml --dry-run
 	$(PYTHON) scripts/run_grid.py --config configs/experiments/pilot_compression.yaml --dry-run
 	$(PYTHON) scripts/build_bank.py --config configs/experiments/bank_fullcache.yaml --dry-run
 	$(PYTHON) scripts/run_grid.py --config configs/experiments/grid_compression.yaml --dry-run

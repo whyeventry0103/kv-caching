@@ -24,8 +24,13 @@ def load_model_and_tokenizer(
     *,
     device: str = "cuda:0",
     allow_download: bool = False,
+    attn_implementation: str | None = None,
 ) -> tuple[Any, Any]:
-    """Load one model on one GPU; network access is separately confirmed."""
+    """Load one model on one GPU; network access is separately confirmed.
+
+    ``attn_implementation`` must be ``"eager"`` for attention-score presses
+    (ObservedAttention/H2O), which read attention weights unavailable under sdpa.
+    """
     _require_remote()
     import torch
     from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -39,12 +44,16 @@ def load_model_and_tokenizer(
         "revision": revision,
         "local_files_only": not allow_download,
     }
+    extra = {}
+    if attn_implementation is not None:
+        extra["attn_implementation"] = attn_implementation
     tokenizer = AutoTokenizer.from_pretrained(handle, **common)
     model = AutoModelForCausalLM.from_pretrained(
         handle,
         dtype=torch_dtype,
         device_map={"": device},
         **common,
+        **extra,
     )
     model.eval()
     return model, tokenizer

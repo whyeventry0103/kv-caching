@@ -22,7 +22,7 @@ from kvcache.models import (
     render_prompt,
     tokenize_rendered_prompt,
 )
-from kvcache.presses import build_press, press_seed
+from kvcache.presses import build_press, press_needs_eager_attention, press_seed
 from kvcache.runmeta import capture_runmeta
 
 
@@ -62,7 +62,10 @@ def main() -> int:
     sampling_cfg = _yaml(PROJECT_ROOT / "configs/sampling.yaml")
     model_name = config["models"][0]
     model_cfg = models_cfg[model_name]
-    model, tokenizer = load_model_and_tokenizer(model_cfg)
+    eager = any(press_needs_eager_attention(p) for p in config["presses"])
+    model, tokenizer = load_model_and_tokenizer(
+        model_cfg, attn_implementation="eager" if eager else None
+    )
     runs_root = Path(os.environ["REMOTE_RUNS_ROOT"])
     counts = {"rows": 0, "truncated": 0}
 
