@@ -53,7 +53,9 @@ def get_press(name: str) -> str:
         )
     if normalized in PORT_REQUIRED:
         raise NotImplementedError(
-            f"{normalized}: paper-faithful adapter/port required - TODO(human)"
+            f"{normalized}: ported but PARITY-GATED. Run scripts/rkv_parity.py and "
+            "record a retained-set match vs the authors' code before any analysis row "
+            "(PREREGISTRATION Amendment E)."
         )
     if normalized in DEFERRED:
         raise NotImplementedError(
@@ -182,4 +184,29 @@ def build_replay_press(
         seed=seed,
         kvpress_module=kvpress_module,
         decoding_press_cls=EnabledDecodingPress,
+    )
+
+
+def build_rkv_press(
+    *,
+    budget: int,
+    compression_interval: int = 64,
+    kvpress_module: Any | None = None,
+    decoding_press_cls: type | None = None,
+) -> Any:
+    """Build the parity-gated R-KV decoding press (for the parity harness only).
+
+    R-KV is refused by get_press until the parity gate passes; this constructor exists
+    so scripts/rkv_parity.py can exercise the port against the authors' code.
+    """
+    from kvcache.presses.rkv import build_rkv_scorer
+
+    if kvpress_module is None:
+        import kvpress as kvpress_module
+    press_cls = decoding_press_cls or kvpress_module.DecodingPress
+    return press_cls(
+        base_press=build_rkv_scorer(kvpress_module),
+        target_size=budget,
+        compression_interval=compression_interval,
+        hidden_states_buffer_size=0,
     )

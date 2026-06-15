@@ -24,6 +24,12 @@ def test_h2o_needs_eager_attention_others_do_not():
     assert press_needs_eager_attention("random") is False
 
 
+def test_rkv_is_parity_gated():
+    # R-KV is ported but must not enter analysis until the parity gate passes.
+    with pytest.raises(NotImplementedError, match="PARITY-GATED"):
+        get_press("rkv")
+
+
 @pytest.mark.parametrize(
     "name",
     [
