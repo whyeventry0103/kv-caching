@@ -36,7 +36,49 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--allow-model-download", action="store_true")
     parser.add_argument("--allow-dataset-download", action="store_true")
     parser.add_argument("--i-understand", action="store_true")
+    parser.add_argument(
+        "--resume",
+        action="store_true",
+        help="skip (bench,pid,seed) already fully generated in the output dir",
+    )
     return parser
+
+
+def _resume_done_keys(runs_root: Path, store_token_ids: bool) -> set:
+    """Return fully-completed (bench, pid, seed) keys; heal any partial trailing line.
+
+    A key counts as done only if it has a result row AND (when store_token_ids) a
+    token-ID sidecar -- a result row without its sidecar is incomplete and is redone.
+    """
+
+    def scan(paths: list[Path]) -> set:
+        keys = set()
+        for path in paths:
+            lines = path.read_text(encoding="utf-8").splitlines()
+            valid = []
+            for line in lines:
+                if not line.strip():
+                    continue
+                try:
+                    row = json.loads(line)
+                except json.JSONDecodeError:
+                    continue  # drop a partial/corrupt trailing line
+                valid.append(line)
+                seed = row.get("decoding", {}).get("seed", row.get("seed"))
+                keys.add((row["bench"], row["pid"], int(seed)))
+            if len(valid) != len([x for x in lines if x.strip()]):
+                path.write_text(
+                    ("\n".join(valid) + "\n") if valid else "", encoding="utf-8"
+                )
+        return keys
+
+    all_jsonl = sorted(runs_root.rglob("*.jsonl"))
+    result_paths = [p for p in all_jsonl if "token_ids" not in p.parts]
+    result_keys = scan(result_paths)
+    if not store_token_ids:
+        return result_keys
+    token_paths = [p for p in all_jsonl if "token_ids" in p.parts]
+    return result_keys & scan(token_paths)
 
 
 def main() -> int:
@@ -79,7 +121,14 @@ def main() -> int:
         attn_implementation=config.get("attn_implementation"),
     )
     runs_root = Path(os.environ["REMOTE_RUNS_ROOT"])
-    counts = {"rows": 0, "truncated": 0}
+    done_keys = (
+        _resume_done_keys(runs_root, bool(config.get("store_token_ids")))
+        if args.resume
+        else set()
+    )
+    counts = {"rows": 0, "truncated": 0, "skipped_resume": len(done_keys)}
+    if args.resume:
+        print(f"RESUME: skipping {len(done_keys)} already-complete generations")
 
     for benchmark in config["benchmarks"]:
         subset = config.get("subset", {}).get(benchmark)
@@ -98,6 +147,8 @@ def main() -> int:
         for seed in config["seeds"]:
             runmeta = capture_runmeta(config["name"], args.config, int(seed))
             for problem in problems:
+                if (benchmark, problem.pid, int(seed)) in done_keys:
+                    continue
                 generation = generate_full_cache(
                     model,
                     tokenizer,

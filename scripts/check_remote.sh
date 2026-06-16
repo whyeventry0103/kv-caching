@@ -66,10 +66,14 @@ fi
   echo "missing REMOTE_CACHE_ROOT" >&2
   exit 1
 }
-[[ ! -e "$REMOTE_RUNS_ROOT/$RUN_NAME" ]] || {
-  echo "run-name clash: $REMOTE_RUNS_ROOT/$RUN_NAME" >&2
-  exit 1
-}
+if [[ "${KVCACHE_ALLOW_EXISTING_RUN:-}" == "1" ]]; then
+  echo "RESUME: reusing existing run dir $REMOTE_RUNS_ROOT/$RUN_NAME"
+else
+  [[ ! -e "$REMOTE_RUNS_ROOT/$RUN_NAME" ]] || {
+    echo "run-name clash: $REMOTE_RUNS_ROOT/$RUN_NAME" >&2
+    exit 1
+  }
+fi
 if ps -eo pid=,comm=,args= | awk -v self="$$" -v run="$RUN_NAME" '
   $1 != self &&
   $2 ~ /^(python([0-9.]*)?|torchrun|accelerate|deepspeed|ray)$/ &&
