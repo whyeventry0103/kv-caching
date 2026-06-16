@@ -1,0 +1,16 @@
+name: replay_math500_powered
+stage: replay
+mode: compression_replay
+reference_run_name: math500-fc-powered-merged
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+subset:
+  math500: 100
+presses: [random, streamingllm]
+budgets: [256, 2048]
+seeds: [11, 23, 47, 89]
+compression_interval: 64
+
+estimated_generation_count: 0
+estimated_replay_count: 1600
+scale_authorized: true

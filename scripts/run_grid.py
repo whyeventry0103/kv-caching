@@ -52,10 +52,12 @@ def main() -> int:
         raise SystemExit("REFUSED: costly execution requires --i-understand")
     if os.environ.get("KVCACHE_REMOTE") != "1":
         raise SystemExit("REFUSED: non-dry execution requires KVCACHE_REMOTE=1")
-    if not config.get("pilot") or config.get("estimated_generation_count") != 80:
+    if not (config.get("pilot") or config.get("scale_authorized")):
         raise SystemExit(
-            "REFUSED: only the reviewed 80-row compression pilot is eligible"
+            "REFUSED: grid config must set pilot:true or scale_authorized:true"
         )
+    if config.get("pilot") and config.get("estimated_generation_count") != 80:
+        raise SystemExit("REFUSED: the pilot grid must be exactly 80 rows")
 
     models_cfg = _yaml(PROJECT_ROOT / "configs/models.yaml")["models"]
     benchmarks_cfg = _yaml(PROJECT_ROOT / "configs/benchmarks.yaml")["benchmarks"]

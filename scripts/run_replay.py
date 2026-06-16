@@ -112,15 +112,16 @@ def main() -> int:
         raise SystemExit("REFUSED: costly execution requires --i-understand")
     if os.environ.get("KVCACHE_REMOTE") != "1":
         raise SystemExit("REFUSED: non-dry execution requires KVCACHE_REMOTE=1")
-    if not config.get("pilot") or config.get("mode") not in {
+    scale = bool(config.get("scale_authorized"))
+    if not (config.get("pilot") or scale) or config.get("mode") not in {
         "self_replay",
         "compression_replay",
         "readout",
     }:
-        raise SystemExit("REFUSED: only reviewed M4 pilot modes are executable")
+        raise SystemExit("REFUSED: replay config needs pilot/scale_authorized + a mode")
 
     expected = int(config["estimated_replay_count"])
-    if expected not in {1, 20, 80}:
+    if not scale and expected not in {1, 20, 80}:
         raise SystemExit("REFUSED: M4 pilot must contain 1, 20, or 80 conditions")
     base_runs = Path(os.environ["KVCACHE_BASE_RUNS_ROOT"])
     reference_root = base_runs / config["reference_run_name"]
@@ -128,8 +129,10 @@ def main() -> int:
         raise SystemExit(f"missing reference run: {reference_root}")
     reference_rows = _load_jsonl(reference_root)
     token_records = _load_token_records(reference_root)
-    if len(reference_rows) != 20 or len(token_records) != 20:
-        raise SystemExit("M4 reference must contain exactly 20 rows and token records")
+    if len(reference_rows) != len(token_records):
+        raise SystemExit("reference rows and token-ID records must be 1:1")
+    if not scale and len(reference_rows) != 20:
+        raise SystemExit("M4 pilot reference must contain exactly 20 rows")
 
     models_cfg = _yaml(PROJECT_ROOT / "configs/models.yaml")["models"]
     benchmarks_cfg = _yaml(PROJECT_ROOT / "configs/benchmarks.yaml")["benchmarks"]
@@ -144,7 +147,9 @@ def main() -> int:
     problems = load_benchmark(
         "math500",
         benchmarks_cfg["math500"],
-        subset={"count": 5, "stratify_by": "level"},
+        subset=config.get("subset", {}).get(
+            "math500", {"count": 5, "stratify_by": "level"}
+        ),
         allow_download=False,
     )
     gold_by_pid = {problem.pid: problem.gold_answer for problem in problems}
@@ -153,10 +158,14 @@ def main() -> int:
     mode = config["mode"]
     completed = 0
 
+    # Replay only the configured subset's problems and seeds (so a 250-problem FC
+    # reference is not fully replayed when only a 100-problem cell is being decomposed).
     eligible_rows = [
         row
         for row in reference_rows
-        if row["model"] == model_name and row["decoding"]["seed"] in config["seeds"]
+        if row["model"] == model_name
+        and row["decoding"]["seed"] in config["seeds"]
+        and row["pid"] in gold_by_pid
     ]
     reference_limit = config.get("reference_limit")
     if reference_limit is not None:

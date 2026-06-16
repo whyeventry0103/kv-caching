@@ -4,6 +4,10 @@ mode: compression_replay
 reference_run_name: pilot-fullcache-tokenized-v2
 models: [r1_distill_qwen_7b]
 benchmarks: [math500]
+subset:
+  math500:
+    count: 5
+    stratify_by: level
 presses: [random, streamingllm]
 budgets: [256, 2048]
 seeds: [11, 23, 47, 89]
