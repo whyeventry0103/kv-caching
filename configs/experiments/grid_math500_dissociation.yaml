@@ -1,0 +1,19 @@
+name: grid_math500_dissociation
+stage: grid
+# Powered dissociation test (focused): StreamingLLM + Random at budget 256 (the
+# collapse pole) on 100 MATH-500 problems x n=4 (a subset of the 250 x n=8 powered FC
+# reference). 800 gens; budget-256 free-runs ramble (~8k tokens). Resumable. 2048,
+# H2O, R-KV are follow-up passes.
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+subset:
+  math500: 100
+presses: [streamingllm, random]
+budgets: [256]
+seeds: [11, 23, 47, 89]
+max_new_tokens:
+  math500: 16384
+compression_interval: 64
+estimated_generation_count: 800
+scale_authorized: true
+remote_only: true

@@ -38,7 +38,43 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--config", required=True, type=Path)
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--i-understand", action="store_true")
+    parser.add_argument(
+        "--resume",
+        action="store_true",
+        help="skip (bench,pid,press,budget,seed) already generated in the output dir",
+    )
     return parser
+
+
+def _grid_done_keys(runs_root: Path) -> set:
+    """Completed (bench, pid, press, budget, seed) keys; heal partial trailing lines."""
+    done = set()
+    for path in sorted(runs_root.rglob("*.jsonl")):
+        if "token_ids" in path.parts:
+            continue
+        lines = path.read_text(encoding="utf-8").splitlines()
+        valid = []
+        for line in lines:
+            if not line.strip():
+                continue
+            try:
+                row = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            valid.append(line)
+            done.add(
+                (
+                    row["bench"],
+                    row["pid"],
+                    row["press"],
+                    str(row["budget"]),
+                    int(row["decoding"]["seed"]),
+                )
+            )
+        if len(valid) != len([x for x in lines if x.strip()]):
+            healed = ("\n".join(valid) + "\n") if valid else ""
+            path.write_text(healed, encoding="utf-8")
+    return done
 
 
 def main() -> int:
@@ -69,7 +105,10 @@ def main() -> int:
         model_cfg, attn_implementation="eager" if eager else None
     )
     runs_root = Path(os.environ["REMOTE_RUNS_ROOT"])
-    counts = {"rows": 0, "truncated": 0}
+    done_keys = _grid_done_keys(runs_root) if args.resume else set()
+    counts = {"rows": 0, "truncated": 0, "skipped_resume": len(done_keys)}
+    if args.resume:
+        print(f"RESUME: skipping {len(done_keys)} already-complete generations")
 
     for benchmark in config["benchmarks"]:
         problems = load_benchmark(
@@ -84,6 +123,14 @@ def main() -> int:
                 for seed in config["seeds"]:
                     runmeta = capture_runmeta(config["name"], args.config, int(seed))
                     for problem in problems:
+                        if (
+                            benchmark,
+                            problem.pid,
+                            press_name,
+                            str(budget),
+                            int(seed),
+                        ) in done_keys:
+                            continue
                         press = build_press(
                             press_name,
                             budget=int(budget),
