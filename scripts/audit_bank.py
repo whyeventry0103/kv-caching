@@ -19,6 +19,12 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--run-root", required=True, type=Path)
     parser.add_argument("--expected-rows", type=int)
+    parser.add_argument(
+        "--allow-mixed-provenance",
+        action="store_true",
+        help="warn (not fail) on multiple source/config hashes, e.g. a merged bank "
+        "from parallel halves; package versions must still be consistent",
+    )
     args = parser.parse_args()
 
     paths = sorted(
@@ -66,9 +72,15 @@ def main() -> int:
         raise SystemExit(f"expected {args.expected_rows} rows, found {len(rows)}")
     if len(versions) != 1:
         raise SystemExit(f"inconsistent package versions: {versions}")
-    if len(source_hashes) != 1 or not next(iter(source_hashes)):
-        raise SystemExit(f"inconsistent or missing source hashes: {source_hashes}")
-    if len(config_hashes) != 1:
+    if "" in source_hashes:
+        raise SystemExit("missing source_tree_hash on some rows")
+    if len(source_hashes) != 1 and not args.allow_mixed_provenance:
+        raise SystemExit(f"inconsistent source hashes: {source_hashes}")
+    if len(source_hashes) != 1:
+        print(f"WARNING: {len(source_hashes)} source hashes (mixed provenance allowed)")
+    if len(config_hashes) != 1 and args.allow_mixed_provenance:
+        print(f"WARNING: {len(config_hashes)} config hashes (mixed provenance allowed)")
+    elif len(config_hashes) != 1:
         raise SystemExit(f"inconsistent config hashes: {config_hashes}")
 
     summary = {
