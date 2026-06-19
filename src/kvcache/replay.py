@@ -364,6 +364,7 @@ def write_replay_profile(
     budget: int | str,
     pid_hash: str,
     profile: ReplayProfile,
+    overwrite: bool = False,
 ) -> Path:
     lengths = {
         len(profile.estimate),
@@ -395,7 +396,7 @@ def write_replay_profile(
         / f"{press_name}-{budget}-s{seed}"
         / f"{pid_hash}.json"
     )
-    if path.exists():
+    if path.exists() and not overwrite:
         raise FileExistsError(f"replay profile already exists: {path}")
     path.parent.mkdir(parents=True, exist_ok=True)
     payload = {

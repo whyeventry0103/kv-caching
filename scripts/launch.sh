@@ -80,8 +80,29 @@ if (( ${#EXTRA_ARGS[@]} )); then
 fi
 printf '\n'
 
+# Optional wall-clock cap: KVCACHE_MAX_HOURS=5 stops the run cleanly after 5h
+# (SIGTERM, then SIGKILL 120s later if a generation is still in flight). Completed
+# rows are already on disk; rerun the identical command (with --resume in EXTRA_ARGS
+# and the same KVCACHE_RUN_NAME) to continue from exactly where it stopped.
+RUN_CMD=("$VENV_PATH/bin/python" "$PY_SCRIPT" --config "$CONFIG" --i-understand
+  "${EXTRA_ARGS[@]}")
+if [[ -n "${KVCACHE_MAX_HOURS:-}" ]]; then
+  echo "Timer: will stop after ${KVCACHE_MAX_HOURS}h (resumable)"
+  RUN_CMD=(timeout --kill-after=120s --signal=TERM "${KVCACHE_MAX_HOURS}h"
+    "${RUN_CMD[@]}")
+fi
+
 {
-  "$VENV_PATH/bin/python" "$PY_SCRIPT" --config "$CONFIG" --i-understand \
-    "${EXTRA_ARGS[@]}"
-  echo "Finished: $RUN_NAME"
+  set +e
+  "${RUN_CMD[@]}"
+  RC=$?
+  set -e
+  if [[ $RC -eq 124 || $RC -eq 137 || $RC -eq 143 ]]; then
+    echo "STOPPED by timer (rc=$RC): $RUN_NAME"
+    echo "Progress saved. Rerun the SAME command (keep --resume + KVCACHE_RUN_NAME) to continue."
+  elif [[ $RC -ne 0 ]]; then
+    echo "FAILED (rc=$RC): $RUN_NAME"
+  else
+    echo "Finished: $RUN_NAME"
+  fi
 } 2>&1 | tee "$PROJECT_ROOT/logs/$RUN_NAME.log"

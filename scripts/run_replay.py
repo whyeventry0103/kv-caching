@@ -46,7 +46,63 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--config", required=True, type=Path)
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--i-understand", action="store_true")
+    parser.add_argument(
+        "--resume",
+        action="store_true",
+        help="skip (reference_key, press, budget) conditions already written under "
+        "the output dir; heal any partial trailing line left by a timed stop",
+    )
+    parser.add_argument(
+        "--seeds",
+        default="",
+        help="comma-separated subset of config seeds to process (per-GPU sharding: "
+        "each shard owns disjoint per-seed output files, so two GPUs never collide)",
+    )
     return parser
+
+
+def _heal_jsonl(path: Path) -> list[dict[str, Any]]:
+    """Return parsed records, rewriting the file to drop a partial trailing line."""
+    lines = path.read_text(encoding="utf-8").splitlines()
+    raw = [line for line in lines if line.strip()]
+    valid = []
+    parsed = []
+    for line in raw:
+        try:
+            parsed.append(json.loads(line))
+        except json.JSONDecodeError:
+            continue
+        valid.append(line)
+    if len(valid) != len(raw):
+        path.write_text(("\n".join(valid) + "\n") if valid else "", encoding="utf-8")
+    return parsed
+
+
+def _replay_done_keys(output_root: Path, mode: str) -> set:
+    """Completed (reference_key, press, budget) condition keys under the output dir."""
+    done = set()
+    if mode == "readout":
+        readout_dir = output_root / "readout"
+        if not readout_dir.exists():
+            return done
+        for path in sorted(readout_dir.rglob("*.jsonl")):
+            for rec in _heal_jsonl(path):
+                done.add(
+                    (
+                        tuple(rec["reference_key"]),
+                        rec["condition"]["press"],
+                        str(rec["condition"]["budget"]),
+                    )
+                )
+        return done
+    for path in sorted(output_root.rglob("*.jsonl")):
+        parts = path.relative_to(output_root).parts
+        if parts and parts[0] in {"readout", "profiles", "token_ids"}:
+            continue
+        for rec in _heal_jsonl(path):
+            if "replay_of" in rec:
+                done.add((rec["replay_of"], rec["press"], str(rec["budget"])))
+    return done
 
 
 def _load_jsonl(root: Path) -> list[dict[str, Any]]:
@@ -120,9 +176,19 @@ def main() -> int:
     }:
         raise SystemExit("REFUSED: replay config needs pilot/scale_authorized + a mode")
 
-    expected = int(config["estimated_replay_count"])
-    if not scale and expected not in {1, 20, 80}:
+    pilot_count = int(config["estimated_replay_count"])
+    if not scale and pilot_count not in {1, 20, 80}:
         raise SystemExit("REFUSED: M4 pilot must contain 1, 20, or 80 conditions")
+    config_seeds = [int(s) for s in config["seeds"]]
+    if args.seeds.strip():
+        shard = {int(s) for s in args.seeds.split(",")}
+        active_seeds = [s for s in config_seeds if s in shard]
+        if not active_seeds:
+            raise SystemExit(
+                f"--seeds {args.seeds} disjoint from config seeds {config_seeds}"
+            )
+    else:
+        active_seeds = config_seeds
     base_runs = Path(os.environ["KVCACHE_BASE_RUNS_ROOT"])
     reference_root = base_runs / config["reference_run_name"]
     if not reference_root.is_dir():
@@ -164,12 +230,20 @@ def main() -> int:
         row
         for row in reference_rows
         if row["model"] == model_name
-        and row["decoding"]["seed"] in config["seeds"]
+        and int(row["decoding"]["seed"]) in active_seeds
         and row["pid"] in gold_by_pid
     ]
     reference_limit = config.get("reference_limit")
     if reference_limit is not None:
         eligible_rows = eligible_rows[: int(reference_limit)]
+
+    # The shard's real workload; the config's estimated_replay_count is only the
+    # full-job sanity number used by the pilot guard above.
+    expected = len(eligible_rows) * len(config["presses"]) * len(config["budgets"])
+    done_keys = _replay_done_keys(output_root, mode) if args.resume else set()
+    skipped = 0
+    if args.resume:
+        print(f"RESUME: {len(done_keys)} conditions already complete in this run dir")
 
     for row in eligible_rows:
         token_record = token_records.get(_reference_key(row))
@@ -192,6 +266,19 @@ def main() -> int:
         seed = int(row["decoding"]["seed"])
         for press_name in config["presses"]:
             for budget in config["budgets"]:
+                if args.resume:
+                    cond = (
+                        (_reference_key(row), press_name, str(budget))
+                        if mode == "readout"
+                        else (
+                            f"{config['reference_run_name']}:{_reference_key(row)}",
+                            press_name,
+                            str(budget),
+                        )
+                    )
+                    if cond in done_keys:
+                        skipped += 1
+                        continue
                 press = build_replay_press(
                     press_name,
                     budget=2048 if budget == "full" else int(budget),
@@ -307,6 +394,9 @@ def main() -> int:
                         budget=budget,
                         pid_hash=pid_hash,
                         profile=profile,
+                        # On resume an orphan profile can survive a timed stop that
+                        # killed the process before the row was appended; overwrite it.
+                        overwrite=args.resume,
                     )
                     logical_tokens = len(prompt_ids) + len(trace_ids)
                     ratio = (
@@ -327,11 +417,17 @@ def main() -> int:
                     append_result(output_root, replay_row)
                 completed += 1
 
-    if completed != expected:
+    if completed + skipped != expected:
         raise SystemExit(
-            f"expected {expected} replay conditions, completed {completed}"
+            f"expected {expected} conditions, completed {completed} + "
+            f"resumed {skipped} = {completed + skipped}"
         )
-    print(json.dumps({"mode": mode, "completed": completed}, sort_keys=True))
+    print(
+        json.dumps(
+            {"mode": mode, "completed": completed, "resumed": skipped},
+            sort_keys=True,
+        )
+    )
     return 0
 
 

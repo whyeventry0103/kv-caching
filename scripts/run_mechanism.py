@@ -6,6 +6,5 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from kvcache.cli import run_cli
 
-
 if __name__ == "__main__":
     raise SystemExit(run_cli("mechanism", "Run causal-ladder instruments and controls"))
