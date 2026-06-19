@@ -241,11 +241,27 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
   **NEXT: powered compression cells (the dissociation test at scale) — a multi-day GPU
   run because budget-256 free-runs ramble (~8k tokens). run_grid lacks --resume yet.**
 
-  **★ POWERED DISSOCIATION GRID RUNNING (2026-06-17→18): `grid-math500-dissociation-v1`**
-  (SLM+Random × budget 256, 100 problems × n=4 = 800 gens, GPU 0, resumable via
-  `run_grid --resume`). ~536/800 at last check (SLM-256 done, Random-256 in progress),
-  ~12h left. Budget-256 rambles: ~21% hit the 16K cap (the HOTT length effect at scale),
-  mean ~166s/gen. GPU 1 appears free again (other user's job ended) → could parallelize.
+  **★ DISSOCIATION GRID DONE (2026-06-19): `grid-math500-dissociation-v1` 800/800.**
+  Powered free-run result (100 problems × n=4): FC 0.885 → StreamingLLM-256 **0.237**
+  [0.172,0.302], Random-256 **0.422** [0.343,0.500]. **Random − StreamingLLM = +0.185,
+  CI [0.130,0.242], 94/100 problems** → the surprising ordering (random eviction beats
+  "principled" StreamingLLM at low budget) SURVIVES powering decisively. VERDICT: GO.
+  Honest caveat: the grid confirms only the PHENOMENON; the paper's actual IDEA (the
+  readout/trajectory decomposition) is UNTESTED until the readout run lands. Readout is
+  therefore the single decisive next run.
+
+  **★ TIMED/RESUMABLE REPLAY HARNESS BUILT (2026-06-19, synced):** `run_replay.py` gains
+  `--resume` (heals partial trailing line + skips done (reference_key,press,budget)
+  conditions, both readout & compression_replay modes) and `--seeds A,B` (per-GPU shard
+  by seed → disjoint per-seed output files, two GPUs never collide). `launch.sh` gains
+  `KVCACHE_MAX_HOURS=N` → wraps python in `timeout --kill-after=120s --signal=TERM`,
+  prints "STOPPED by timer (resumable)"; rerun the identical command (same
+  KVCACHE_RUN_NAME + --resume) to continue exactly. `write_replay_profile(overwrite=)`
+  for orphan-profile safety on resume. Tested (heal+skip unit test, 96/96 suite). Configs:
+  `readout_math500_diss256.yaml` (256 readout, 800 conds, DECISIVE) + `replay_math500_
+  diss256.yaml` (256 TV profiles, 800 conds). User runs nightly 1am-8am on BOTH GPUs
+  (seeds 11,23→GPU0 / 47,89→GPU1), run names readout-diss256-g{0,1}/replay-diss256-g{0,1};
+  then I compute total−readout=residual (the decomposition that tests the idea).
 
   **★ ROADMAP TO PAPER (estimates, single GPU ~20GB; time is the only constraint):**
   Runs left (cells = 100 problems × n=4): (1) finish dissociation grid [~12h];
