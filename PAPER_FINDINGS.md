@@ -117,17 +117,18 @@ the old code used total − (acc_rev − acc_FC), which equals the on-policy REA
 residual estimate. Reverse readout (compressed trajectory read out under FULL cache): **Random
 0.636, SLM 0.417** (vs FC 0.882) — clean readout does NOT recover to FC, so a large part of the
 loss is genuinely the trajectory. Corrected **residual bracket: Random [−0.343, −0.246], SLM
-[−0.465, −0.347]** — even farther from 0 than the old (wrong) [−0.34,−0.21]/[−0.35,−0.18], so
+[−0.466, −0.347]** — even farther from 0 than the old (wrong) [−0.34,−0.21]/[−0.35,−0.18], so
 the residual **survives the off-policy correction with room to spare**. Nuance changed by the
 correction: the forward residuals are nearly equal (−0.343/−0.347) while the reverse estimates
-separate (−0.246 vs −0.465 — SLM more trajectory-damaged on the reverse side; the expected
+separate (−0.246 vs −0.466 — SLM more trajectory-damaged on the reverse side; the expected
 "forward inflates the residual" bias ordering holds for Random but REVERSES for SLM). The
 point-estimate brackets barely separate (gap 0.004) and no sampling uncertainty is propagated to
 the endpoints, so the *method-level* split is still reported as **bracketed and exploratory**,
 and "method-invariant trajectory damage" is a **forward-estimand** statement. Mild confound:
 differential defined-reverse counts (Random 308 vs SLM 372 — Random's rambling traces more often
-lack a clean answer boundary). (Re-run report_m4 with the fixed code to confirm exact decimals;
-endpoints above derive by identity from the cell accuracies.)
+lack a clean answer boundary). (Exact decimals CONFIRMED 2026-07-03 by re-running report_m4 with
+the fixed code on the remote: SLM reverse endpoint is −0.466 — the earlier −0.465 came from the
+rounded 0.417 accuracy. Fig 2 is generated from this report in DATA mode.)
 
 ### 4d. Figure 4 — the mechanism (TV profiles), 800/800
 Onset-aligned per-step TV (800 profiles, median first-eviction at step 65 = compression interval):

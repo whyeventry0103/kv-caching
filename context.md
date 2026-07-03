@@ -29,14 +29,14 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
   **⚠ CORRECTED 2026-07-03 (residual-bracket bug; PREREGISTRATION Amendment H):** the reverse
   bracket endpoint was computed as total − (acc_rev − acc_fc), which is the on-policy READOUT
   change, not a residual estimate. Correct endpoint = acc_rev − acc_fc itself. Corrected
-  brackets: Random **[−0.343, −0.246]**, SLM **[−0.465, −0.347]** (both FARTHER from 0 —
-  headline stronger). But: bias ordering reverses for SLM (reverse −0.465 > forward −0.347)
-  and reverse estimates SEPARATE the methods, so "method-invariant trajectory damage" is a
-  FORWARD-estimand claim; method split still exploratory. Fixed in decomposition.py,
-  report_m4.py, tests (all green); paper tex/pdf + PAPER_FINDINGS updated. Any bracket
+  brackets: Random **[−0.343, −0.246]**, SLM **[−0.466, −0.347]** (EXACT, confirmed by the
+  report re-run on remote data 2026-07-03; −0.465 was from the rounded 0.417; both FARTHER
+  from 0 — headline stronger). But: bias ordering reverses for SLM (reverse −0.466 > forward
+  −0.347) and reverse estimates SEPARATE the methods, so "method-invariant trajectory damage"
+  is a FORWARD-estimand claim; method split still exploratory. Fixed in decomposition.py,
+  report_m4.py, tests (all green); paper tex/pdf + PAPER_FINDINGS + Amendment H precision
+  note updated; paper now uses −0.466 everywhere (abstract rounds to −0.47). Any bracket
   numbers below this line ([−0.34,−0.21]/[−0.35,−0.18], "brackets overlap") are STALE.
-  TODO: re-run report_m4 --reverse-readout-root on the remote to regenerate summary.json
-  with exact corrected decimals.
 
   **★★★ FIGURE 4 / TV PROFILES DONE (2026-07-02): replay-diss256 800/800.** Onset-aligned
   mechanism (800 profiles, median first-eviction step 65): mean per-step TV = 0.0000 BEFORE

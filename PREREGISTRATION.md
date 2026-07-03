@@ -494,6 +494,9 @@ A's off-policy section intended. Code, tests, and reports are fixed as of this d
   bracket **[−0.343, −0.246]** (was, wrongly, [−0.343, −0.214]).
 - StreamingLLM-256: forward residual −0.347, reverse residual = 0.417 − 0.882 = −0.465 →
   bracket **[−0.465, −0.347]** (was, wrongly, [−0.347, −0.180]).
+  *(Precision note, added 2026-07-03 after re-running report_m4 with the fixed code on the
+  full run data: the exact SLM reverse endpoint is −0.466; −0.465 above derives from the
+  rounded 0.417 accuracy. Exact brackets: Random [−0.343, −0.246], SLM [−0.466, −0.347].)*
 
 ### What changes and what does not
 

@@ -66,7 +66,7 @@ We emphasize what the thesis is not. We observed no accuracy \emph{gains} under 
   \item \textbf{A resolution of the near-lossless-under-readout versus degraded-under-free-running contradiction} via an accuracy-scale decomposition of compressed free-running loss into on-reference readout and a trajectory residual, with the residual explicitly framed as a definition (``accuracy change unexplained by on-reference readout''), not a measured cause (\cref{sec:estimands}).
   \item \textbf{The powered phenomenon}: at budget 256 on MATH-500 (DeepSeek-R1-Distill-Qwen-7B), full-cache accuracy $0.882$ collapses to $0.237$ (StreamingLLM) and $0.422$ (Random); random eviction beats the principled recency policy by $+0.185$, 95\% CI $[0.130, 0.242]$, on 94/100 problems (\cref{sec:phenomenon}).
   \item \textbf{A large, readout-invisible trajectory residual} of $\approx -0.34$ for both methods (400 conditions per cell), with the entire $+0.185$ Random-vs-StreamingLLM gap living in the readout channel --- on the forward estimand, trajectory damage is method-invariant at this scope, reported as exploratory (\cref{sec:forward}).
-  \item \textbf{An off-policy defense}: forward and reverse readout give two $\text{total}-\text{readout}$ residual estimates whose min/max bracket excludes zero for both methods (Random $[-0.343,-0.246]$, StreamingLLM $[-0.465,-0.347]$) --- for StreamingLLM the reverse estimate \emph{exceeds} the forward one --- so the central claim survives the covariate-shift correction, while the \emph{method-level} readout-vs-trajectory attribution is reported as exploratory (\cref{sec:reverse}).
+  \item \textbf{An off-policy defense}: forward and reverse readout give two $\text{total}-\text{readout}$ residual estimates whose min/max bracket excludes zero for both methods (Random $[-0.343,-0.246]$, StreamingLLM $[-0.466,-0.347]$) --- for StreamingLLM the reverse estimate \emph{exceeds} the forward one --- so the central claim survives the covariate-shift correction, while the \emph{method-level} readout-vs-trajectory attribution is reported as exploratory (\cref{sec:reverse}).
   \item \textbf{The mechanism}: onset-aligned TV profiles over 800 replays show divergence of exactly $0.0000$ before the first eviction, $0.0018$ in the first 50 post-eviction steps, compounding to $0.0884$ later --- slow-compounding drift that single-step evaluation structurally misses (\cref{sec:mechanism}).
   \item \textbf{Instrument validity}: a two-full-cache negative control establishing an ADD noise floor of $\approx 0.07$ (mean permutation $p = 0.976$, 0\% of problems significant) against compression-cell ADD of $0.56$--$0.75$, plus a Jaccard-1.0 retained-set parity certification of our R-KV port (\cref{sec:control}).
 \end{itemize}
@@ -153,11 +153,10 @@ $\res{m}$ is labeled, throughout, \emph{accuracy change unexplained by on-refere
 
 \begin{definition}[Reverse readout and the residual bracket]
 Reverse readout inverts the roles: the \emph{compressed free-run} trace is teacher-forced to its boundary under the \emph{full} cache, and the answer span is generated full-cache, yielding $\accrev{m}$. Both bracket endpoints are $\text{total} - \text{readout}$ residual estimates, with the readout change measured on two different state distributions: the forward endpoint $\rho_{\mathrm{fwd}} = \dtot{m} - \dro{m}$ measures readout on \emph{reference} states, and the reverse endpoint measures it on the compressed model's \emph{own} states, since $\accfree{m} - \accrev{m}$ is the cost of compressed versus clean readout of the same compressed traces:
-\begin{equation}
-\rho_{\mathrm{rev}}(m) \;=\; \dtot{m} - \bigl(\accfree{m} - \accrev{m}\bigr) \;=\; \accrev{m} - \accfc ,
-\qquad
+\begin{gather}
+\rho_{\mathrm{rev}}(m) \;=\; \dtot{m} - \bigl(\accfree{m} - \accrev{m}\bigr) \;=\; \accrev{m} - \accfc ,\\
 \rho_{\mathrm{bracket}}(m) \;=\; \bigl[\, \min(\rho_{\mathrm{fwd}}, \rho_{\mathrm{rev}}),\; \max(\rho_{\mathrm{fwd}}, \rho_{\mathrm{rev}}) \,\bigr].
-\end{equation}
+\end{gather}
 The two estimates are off-policy in opposite directions, so their interval brackets the on-policy residual. A bracket bounded away from zero is what licenses the (bounded) causal reading of the residual; the point estimate alone does not.
 \end{definition}
 
@@ -188,8 +187,8 @@ From $\accfc = 0.882$, free-running accuracy at budget 256 falls to $\mathbf{0.2
 
 \begin{figure}[t]
 \centering
-\figplaceholder{\textbf{The phenomenon.} Per-cell free-running accuracy bars with problem-clustered bootstrap CIs: full cache $0.882$; Random-256 $0.422$; StreamingLLM-256 $0.237$. Inset: per-problem paired differences (Random $-$ StreamingLLM), highlighting the 94/100 problems where Random wins and the $+0.185$ $[0.130, 0.242]$ mean gap.}
-\caption{Free-running collapse at budget 256 and the Random-vs-StreamingLLM gap.}
+\includegraphics[width=0.9\linewidth]{figures/fig1_phenomenon.pdf}
+\caption{Free-running collapse at budget 256: full cache $0.882$ falls to $0.422$ (Random) and $0.237$ (StreamingLLM); random eviction beats the recency policy by $+0.185$, 95\% CI $[0.130, 0.242]$, on 94/100 problems.}
 \label{fig:phenomenon}
 \end{figure}
 
@@ -223,12 +222,12 @@ Two facts carry the paper. \textbf{(i) A large trajectory residual exists for bo
 \label{sec:reverse}
 The forward residual conditions on full-cache states and is biased toward the trajectory share (\cref{eq:residual}). Reverse replay measures the residual from the other side: the compressed free-run trace is read out under the \emph{full} cache. If the free-running loss were mostly readout failure that the forward estimand mis-assigns, clean full-cache readout of the compressed trajectory would recover accuracy toward $\accfc$. It does not: $\accrev{\text{Random}} = 0.636$ and $\accrev{\text{SLM}} = 0.417$ versus $\accfc = 0.882$ (800 reverse-readout conditions; defined answer boundaries: Random 308, StreamingLLM 372). A large part of the loss is genuinely in the trajectory: the compressed model has, by the time it reaches its answer, written itself into reasoning states from which even an uncompressed reader cannot recover the correct answer.
 
-The resulting residual brackets are \textbf{Random $[-0.343, -0.246]$} and \textbf{StreamingLLM $[-0.465, -0.347]$} --- in neither case near zero; for StreamingLLM the reverse estimate is \emph{larger} in magnitude than the forward one. The central claim (a large, readout-invisible trajectory residual) \emph{survives} the off-policy correction for both methods. Three honest qualifications. First, the anticipated bias ordering --- forward inflates the residual, reverse deflates it --- holds for Random but \emph{reverses} for StreamingLLM, so the intervals are reported as min/max brackets of the two estimates, not as directional bias bounds. Second, the two sides disagree on method structure: the forward residuals are nearly equal ($-0.343$ vs.\ $-0.347$), while the reverse estimates separate ($-0.246$ vs.\ $-0.465$), attributing substantially more trajectory damage to StreamingLLM --- consistent with its within-answered ADD profile (\cref{sec:add}: it writes confidently wrong reasoning that even a clean reader cannot rescue). Because sampling uncertainty is not propagated to the bracket endpoints and the point-estimate brackets separate only marginally ($-0.343$ vs.\ $-0.347$), we do \emph{not} claim the method-level readout-vs-trajectory attribution is identifiable; we report the central residual strongly and the method split as bracketed and exploratory. Third, there is a mild confound in defined-reverse counts (308 vs.\ 372): Random's rambling traces more often lack a clean answer boundary, which we report as a confound check rather than adjust away.
+The resulting residual brackets are \textbf{Random $[-0.343, -0.246]$} and \textbf{StreamingLLM $[-0.466, -0.347]$} --- in neither case near zero; for StreamingLLM the reverse estimate is \emph{larger} in magnitude than the forward one. The central claim (a large, readout-invisible trajectory residual) \emph{survives} the off-policy correction for both methods. Three honest qualifications. First, the anticipated bias ordering --- forward inflates the residual, reverse deflates it --- holds for Random but \emph{reverses} for StreamingLLM, so the intervals are reported as min/max brackets of the two estimates, not as directional bias bounds. Second, the two sides disagree on method structure: the forward residuals are nearly equal ($-0.343$ vs.\ $-0.347$), while the reverse estimates separate ($-0.246$ vs.\ $-0.466$), attributing substantially more trajectory damage to StreamingLLM --- consistent with its within-answered ADD profile (\cref{sec:add}: it writes confidently wrong reasoning that even a clean reader cannot rescue). Because sampling uncertainty is not propagated to the bracket endpoints and the point-estimate brackets separate only marginally ($-0.343$ vs.\ $-0.347$), we do \emph{not} claim the method-level readout-vs-trajectory attribution is identifiable; we report the central residual strongly and the method split as bracketed and exploratory. Third, there is a mild confound in defined-reverse counts (308 vs.\ 372): Random's rambling traces more often lack a clean answer boundary, which we report as a confound check rather than adjust away.
 
 \begin{figure}[t]
 \centering
-\figplaceholder{\textbf{Decomposition and bracket.} For each method: a vertical accuracy ladder from $\accfc = 0.882$ down through forward readout ($0.765$ / $0.584$), reverse readout ($0.636$ / $0.417$), and free-run ($0.422$ / $0.237$), with the forward--reverse residual bracket (Random $[-0.343,-0.246]$, SLM $[-0.465,-0.347]$) drawn as a shaded band that visibly excludes zero.}
-\caption{Forward and reverse readout bracket the on-policy trajectory residual away from zero.}
+\includegraphics[width=0.9\linewidth]{figures/fig2_bracket.pdf}
+\caption{Accuracy ladders from the full-cache reference ($0.882$) down through forward readout, reverse readout, and free-run, per method. The forward--reverse residual brackets (Random $[-0.343, -0.246]$, StreamingLLM $[-0.466, -0.347]$) exclude zero for both methods.}
 \label{fig:bracket}
 \end{figure}
 
@@ -253,8 +252,8 @@ Later steps ($>$50 after) & $\mathbf{0.0884}$ \\
 
 \begin{figure}[t]
 \centering
-\figplaceholder{\textbf{The mechanism.} Onset-aligned mean per-step TV curve (x-axis: steps relative to first eviction; median onset at absolute step 65): identically $0.0000$ pre-eviction, $0.0018$ over the first 50 post-eviction steps, compounding to $0.0884$ beyond; per-method AUC-TV overlaid (Random $0.086$, StreamingLLM $0.083$). Populated from the 800 replay profiles of \cref{tab:tv}.}
-\caption{Divergence is zero before eviction, near-zero immediately after, then compounds --- slow drift, not an instantaneous readout error.}
+\includegraphics[width=0.72\linewidth]{figures/fig4_tvprofile.pdf}
+\caption{Onset-aligned mean per-step TV over 800 replay profiles: exactly zero before the first eviction, near-zero immediately after, then a compounding staircase whose steps align with eviction events (every 64 decoding steps) --- slow drift, not an instantaneous readout error. The curve is shown to $+400$ steps of onset; the later-steps windowed mean of $0.0884$ (\cref{tab:tv}) covers the full horizon, where divergence continues to grow.}
 \label{fig:tvprofile}
 \end{figure}
 
@@ -268,6 +267,7 @@ Accuracy alone understates what compression does to the answer distribution. \cr
 \centering
 \caption{Answer-distribution distortion at budget 256. Within-answered TV is over renormalized answered-only distributions (a channel diagnostic, not an additive part of ADD). Signed flip-mass is net gained-minus-lost correct-answer mass; both methods are overwhelmingly on the losing side. ADD values far exceed the $\approx 0.07$ negative-control noise floor (\cref{sec:control}).}
 \label{tab:add}
+\footnotesize
 \begin{tabular}{lcccc}
 \toprule
 Method & Mean ADD & Within-answered TV & Termination shift & Signed flip-mass (net) \\
@@ -282,8 +282,8 @@ The decomposition separates two failure styles that headline accuracy conflates.
 
 \begin{figure}[t]
 \centering
-\figplaceholder{\textbf{ADD decomposition.} Per-method panels showing mean ADD ($0.751$ / $0.559$) beside its two channel diagnostics --- renormalized within-answered TV ($0.749$ / $0.504$) and termination-mass shift ($+0.081$ / $+0.224$), which are not additive parts of ADD --- each annotated with signed flip-mass ($-0.646$ / $-0.461$); the $\approx 0.07$ two-FC noise floor drawn as a horizontal reference line.}
-\caption{Two failure styles: StreamingLLM silently flips answers; Random fails to terminate.}
+\includegraphics[width=0.72\linewidth]{figures/fig3_add.pdf}
+\caption{Two failure styles that headline accuracy conflates: StreamingLLM's distortion is nearly all within-answered (renormalized TV $0.749$ vs.\ ADD $0.751$ --- silent answer flips), while Random carries a $2.8\times$ larger termination-mass shift ($+0.224$ --- it rambles and fails to terminate). Signed flip-mass annotated; dashed line marks the two-FC noise floor ($0.068$).}
 \label{fig:add}
 \end{figure}
 
@@ -293,8 +293,8 @@ Splitting the FC bank into two disjoint four-seed halves and running the full AD
 
 \begin{figure}[t]
 \centering
-\figplaceholder{\textbf{Two-full-cache negative control.} Histogram of per-problem ADD between two disjoint FC seed halves ($n = 250$; mean $0.068$, median $0.000$) with the permutation-$p$ distribution (mean $0.976$, $0\%$ of problems $p < 0.05$), against the compression-cell means ($0.559$, $0.751$) marked for scale.}
-\caption{The ADD instrument's noise floor under the null: no false positives.}
+\includegraphics[width=0.72\linewidth]{figures/fig5_twofc.pdf}
+\caption{Two-full-cache negative control ($n = 250$): ADD between disjoint FC seed halves has mean $0.068$ (median $0.000$, mean permutation $p = 0.976$, $0\%$ of problems significant), an order of magnitude below the compression cells ($0.559$, $0.751$) --- the instrument does not false-positive.}
 \label{fig:control}
 \end{figure}
 
