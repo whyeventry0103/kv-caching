@@ -20,6 +20,7 @@ Usage:
       [--runs-root <runs>] [--m4-summary <summary.json>] \
       [--profiles-dir <replay-diss256/profiles>] [--twofc-report <report.json>]
 """
+
 from __future__ import annotations
 
 import argparse
@@ -37,14 +38,32 @@ import matplotlib.pyplot as plt  # noqa: E402
 FC = 0.882
 C = {
     "Random": dict(
-        free=0.422, readout=0.765, readout_ci=(0.686, 0.817), reverse=0.636,
-        residual=-0.343, bracket=(-0.343, -0.246),
-        add=0.559, within=0.504, term=0.224, flip=-0.461, auc_tv=0.086, trunc=0.233,
+        free=0.422,
+        readout=0.765,
+        readout_ci=(0.686, 0.817),
+        reverse=0.636,
+        residual=-0.343,
+        bracket=(-0.343, -0.246),
+        add=0.559,
+        within=0.504,
+        term=0.224,
+        flip=-0.461,
+        auc_tv=0.086,
+        trunc=0.233,
     ),
     "StreamingLLM": dict(
-        free=0.237, readout=0.584, readout_ci=(0.495, 0.647), reverse=0.417,
-        residual=-0.347, bracket=(-0.466, -0.347),
-        add=0.751, within=0.749, term=0.081, flip=-0.646, auc_tv=0.083, trunc=0.070,
+        free=0.237,
+        readout=0.584,
+        readout_ci=(0.495, 0.647),
+        reverse=0.417,
+        residual=-0.347,
+        bracket=(-0.466, -0.347),
+        add=0.751,
+        within=0.749,
+        term=0.081,
+        flip=-0.646,
+        auc_tv=0.083,
+        trunc=0.070,
     ),
 }
 PHEN = dict(gap=0.185, gap_ci=(0.130, 0.242), n_win=94, n_tot=100)
@@ -54,10 +73,16 @@ TWOFC = dict(mean=0.068, median=0.000, p=0.976, frac_sig=0.0, n=250)
 BLUE, ORANGE, GREY = "#3366cc", "#dd8452", "#8a8a8a"
 MC = {"Random": BLUE, "StreamingLLM": ORANGE}
 
-plt.rcParams.update({
-    "font.family": "serif", "font.size": 9, "axes.spines.top": False,
-    "axes.spines.right": False, "figure.dpi": 150, "savefig.bbox": "tight",
-})
+plt.rcParams.update(
+    {
+        "font.family": "serif",
+        "font.size": 9,
+        "axes.spines.top": False,
+        "axes.spines.right": False,
+        "figure.dpi": 150,
+        "savefig.bbox": "tight",
+    }
+)
 
 
 def _save(fig, out_dir: Path, name: str):
@@ -71,8 +96,9 @@ def _save(fig, out_dir: Path, name: str):
 def fig1_phenomenon(out_dir: Path, runs_root: Path | None):
     per_problem = _load_paired_diffs(runs_root) if runs_root else None
     print(f"Figure 1 [{'DATA (paired-diff panel)' if per_problem else 'SUMMARY'}]")
-    fig, (axb, axh) = plt.subplots(1, 2, figsize=(6.8, 3.0),
-                                   gridspec_kw={"width_ratios": [1.25, 1]})
+    fig, (axb, axh) = plt.subplots(
+        1, 2, figsize=(6.8, 3.0), gridspec_kw={"width_ratios": [1.25, 1]}
+    )
     labels = ["Full\ncache", "Random\n(256)", "SLM\n(256)"]
     vals = [FC, C["Random"]["free"], C["StreamingLLM"]["free"]]
     axb.bar(labels, vals, color=[GREY, BLUE, ORANGE], width=0.62)
@@ -80,22 +106,37 @@ def fig1_phenomenon(out_dir: Path, runs_root: Path | None):
         axb.text(x, v + 0.015, f"{v:.3f}", ha="center", fontsize=8.5)
     axb.set_ylabel("Free-running accuracy (MATH-500)")
     axb.set_ylim(0, 1.0)
-    gaptxt = (f"Random $-$ SLM: $+{PHEN['gap']:.3f}$\n"
-              f"95% CI [{PHEN['gap_ci'][0]:.3f}, {PHEN['gap_ci'][1]:.3f}]\n"
-              f"{PHEN['n_win']}/{PHEN['n_tot']} problems favor Random")
+    gaptxt = (
+        f"Random $-$ SLM: $+{PHEN['gap']:.3f}$\n"
+        f"95% CI [{PHEN['gap_ci'][0]:.3f}, {PHEN['gap_ci'][1]:.3f}]\n"
+        f"{PHEN['n_win']}/{PHEN['n_tot']} problems favor Random"
+    )
     if per_problem:
         axh.hist(per_problem, bins=20, color=BLUE, alpha=0.85)
         axh.axvline(0, color="k", lw=1)
         axh.set_title("per-problem: Random $-$ StreamingLLM", fontsize=8)
         axh.set_xlabel("accuracy difference", fontsize=8)
         axh.set_ylabel("# problems", fontsize=8)
-        axh.annotate(gaptxt, xy=(0.03, 0.97), xycoords="axes fraction", va="top",
-                     ha="left", fontsize=6.3,
-                     bbox=dict(boxstyle="round", fc="white", ec=GREY, alpha=0.9))
+        axh.annotate(
+            gaptxt,
+            xy=(0.03, 0.97),
+            xycoords="axes fraction",
+            va="top",
+            ha="left",
+            fontsize=6.3,
+            bbox=dict(boxstyle="round", fc="white", ec=GREY, alpha=0.9),
+        )
     else:
         axh.axis("off")
-        axh.text(0.5, 0.5, gaptxt, ha="center", va="center", fontsize=9,
-                 bbox=dict(boxstyle="round", fc="white", ec=GREY))
+        axh.text(
+            0.5,
+            0.5,
+            gaptxt,
+            ha="center",
+            va="center",
+            fontsize=9,
+            bbox=dict(boxstyle="round", fc="white", ec=GREY),
+        )
     fig.tight_layout()
     _save(fig, out_dir, "fig1_phenomenon")
 
@@ -118,9 +159,15 @@ def fig2_bracket(out_dir: Path, m4_summary: dict | None):
         ax.set_yticklabels(rung_labels, fontsize=7.5)
         lo, hi = d["bracket"]
         ax.set_title(m, fontsize=9.5)
-        ax.annotate(f"residual bracket\n[{lo:.3f}, {hi:.3f}]", xy=(0.97, 0.52),
-                    xycoords="axes fraction", ha="right", va="center", fontsize=7.5,
-                    bbox=dict(boxstyle="round", fc="white", ec=MC[m]))
+        ax.annotate(
+            f"residual bracket\n[{lo:.3f}, {hi:.3f}]",
+            xy=(0.97, 0.52),
+            xycoords="axes fraction",
+            ha="right",
+            va="center",
+            fontsize=7.5,
+            bbox=dict(boxstyle="round", fc="white", ec=MC[m]),
+        )
         ax.set_xlim(0, 1.15)
         ax.set_ylim(-0.5, 3.5)
         ax.set_xlabel("Accuracy")
@@ -137,25 +184,46 @@ def fig3_add(out_dir: Path):
     w = 0.34
     within = [C[m]["within"] for m in methods]
     term = [C[m]["term"] for m in methods]
-    ax.bar([x - w / 2 for x in xs], within, w, color="#4c78a8",
-           label="within-answered TV (renorm. diagnostic)")
-    ax.bar([x + w / 2 for x in xs], term, w, color=GREY,
-           label="termination-mass shift")
+    ax.bar(
+        [x - w / 2 for x in xs],
+        within,
+        w,
+        color="#4c78a8",
+        label="within-answered TV (renorm. diagnostic)",
+    )
+    ax.bar([x + w / 2 for x in xs], term, w, color=GREY, label="termination-mass shift")
     for i, m in enumerate(methods):
-        ax.text(i - w / 2, within[i] + 0.015, f"{within[i]:.3f}", ha="center",
-                fontsize=7)
+        ax.text(
+            i - w / 2, within[i] + 0.015, f"{within[i]:.3f}", ha="center", fontsize=7
+        )
         ax.text(i + w / 2, term[i] + 0.015, f"+{term[i]:.3f}", ha="center", fontsize=7)
-        ax.text(i, 0.90, f"ADD {C[m]['add']:.3f}\nflip {C[m]['flip']:.3f}", ha="center",
-                va="top", fontsize=7.5,
-                bbox=dict(boxstyle="round", fc="white", ec=MC[m], alpha=0.9))
-    ax.axhline(TWOFC["mean"], color="green", ls="--", lw=1,
-               label=f"two-FC noise floor {TWOFC['mean']:.3f}")
+        ax.text(
+            i,
+            0.90,
+            f"ADD {C[m]['add']:.3f}\nflip {C[m]['flip']:.3f}",
+            ha="center",
+            va="top",
+            fontsize=7.5,
+            bbox=dict(boxstyle="round", fc="white", ec=MC[m], alpha=0.9),
+        )
+    ax.axhline(
+        TWOFC["mean"],
+        color="green",
+        ls="--",
+        lw=1,
+        label=f"two-FC noise floor {TWOFC['mean']:.3f}",
+    )
     ax.set_xticks(xs)
     ax.set_xticklabels(methods)
     ax.set_ylabel("Total variation")
     ax.set_ylim(0, 1.0)
-    ax.legend(loc="lower center", bbox_to_anchor=(0.5, 1.0), ncol=1, fontsize=6.5,
-              frameon=False)
+    ax.legend(
+        loc="lower center",
+        bbox_to_anchor=(0.5, 1.0),
+        ncol=1,
+        fontsize=6.5,
+        frameon=False,
+    )
     _save(fig, out_dir, "fig3_add")
 
 
@@ -177,8 +245,9 @@ def fig4_tvprofile(out_dir: Path, profiles_dir: Path | None):
             ax.text(i, v + 0.002, f"{v:.4f}", ha="center", fontsize=8)
         ax.set_xlabel(f"window rel. to first eviction (onset step {TVWIN['onset']})")
     ax.set_ylabel("Mean per-step total variation")
-    ax.set_title("Divergence is ~0 at eviction and compounds over the trajectory",
-                 fontsize=8)
+    ax.set_title(
+        "Divergence is ~0 at eviction and compounds over the trajectory", fontsize=8
+    )
     _save(fig, out_dir, "fig4_tvprofile")
 
 
@@ -189,11 +258,17 @@ def fig5_twofc(out_dir: Path, twofc_report: dict | None):
     fig, ax = plt.subplots(figsize=(4.8, 3.0))
     if vals:
         ax.hist(vals, bins=30, color=GREY, alpha=0.85)
-        ax.axvline(TWOFC["mean"], color="green", ls="--", lw=1,
-                   label=f"two-FC mean {TWOFC['mean']:.3f}")
+        ax.axvline(
+            TWOFC["mean"],
+            color="green",
+            ls="--",
+            lw=1,
+            label=f"two-FC mean {TWOFC['mean']:.3f}",
+        )
         for m in ["Random", "StreamingLLM"]:
-            ax.axvline(C[m]["add"], color=MC[m], lw=1.4,
-                       label=f"{m} ADD {C[m]['add']:.2f}")
+            ax.axvline(
+                C[m]["add"], color=MC[m], lw=1.4, label=f"{m} ADD {C[m]['add']:.2f}"
+            )
         ax.set_xlabel("Per-problem ADD")
         ax.set_ylabel("count")
         ax.legend(fontsize=6.5)
@@ -204,8 +279,11 @@ def fig5_twofc(out_dir: Path, twofc_report: dict | None):
         for i, v in enumerate(bvals):
             ax.text(i, v + 0.01, f"{v:.3f}", ha="center", fontsize=8)
         ax.set_ylabel("ADD")
-    ax.set_title(f"Negative control: ADD floor {TWOFC['mean']:.3f} "
-                 f"({int(TWOFC['frac_sig']*100)}% sig., n={TWOFC['n']})", fontsize=8)
+    ax.set_title(
+        f"Negative control: ADD floor {TWOFC['mean']:.3f} "
+        f"({int(TWOFC['frac_sig']*100)}% sig., n={TWOFC['n']})",
+        fontsize=8,
+    )
     _save(fig, out_dir, "fig5_twofc")
 
 
@@ -239,7 +317,8 @@ def _cells_from_summary(summ: dict):
             name = {"random": "Random", "streamingllm": "StreamingLLM"}.get(c["press"])
             if name:
                 out[name] = dict(
-                    free=c["compressed_accuracy"], readout=c["readout_accuracy"],
+                    free=c["compressed_accuracy"],
+                    readout=c["readout_accuracy"],
                     reverse=c["reverse_readout_accuracy"],
                     residual=c["unexplained_residual"],
                     bracket=tuple(c["residual_bracket"]),
