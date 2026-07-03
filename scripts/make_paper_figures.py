@@ -70,29 +70,33 @@ def _save(fig, out_dir: Path, name: str):
 # ---------------------------------------------------------------- Figure 1
 def fig1_phenomenon(out_dir: Path, runs_root: Path | None):
     per_problem = _load_paired_diffs(runs_root) if runs_root else None
-    mode = "DATA (with per-problem inset)" if per_problem else "SUMMARY"
-    print(f"Figure 1 [{mode}]")
-    fig, ax = plt.subplots(figsize=(4.0, 2.9))
-    labels = ["Full cache", "Random\n(256)", "StreamingLLM\n(256)"]
+    print(f"Figure 1 [{'DATA (paired-diff panel)' if per_problem else 'SUMMARY'}]")
+    fig, (axb, axh) = plt.subplots(1, 2, figsize=(6.8, 3.0),
+                                   gridspec_kw={"width_ratios": [1.25, 1]})
+    labels = ["Full\ncache", "Random\n(256)", "SLM\n(256)"]
     vals = [FC, C["Random"]["free"], C["StreamingLLM"]["free"]]
-    ax.bar(labels, vals, color=[GREY, BLUE, ORANGE], width=0.62)
+    axb.bar(labels, vals, color=[GREY, BLUE, ORANGE], width=0.62)
     for x, v in enumerate(vals):
-        ax.text(x, v + 0.015, f"{v:.3f}", ha="center", fontsize=8.5)
-    ax.set_ylabel("Free-running accuracy (MATH-500)")
-    ax.set_ylim(0, 1.0)
-    ax.annotate(
-        f"Random $-$ SLM: $+{PHEN['gap']:.3f}$\n"
-        f"95% CI [{PHEN['gap_ci'][0]:.3f}, {PHEN['gap_ci'][1]:.3f}], "
-        f"{PHEN['n_win']}/{PHEN['n_tot']} problems",
-        xy=(0.97, 0.95), xycoords="axes fraction", ha="right", va="top", fontsize=7.5,
-        bbox=dict(boxstyle="round", fc="white", ec=GREY, alpha=0.9),
-    )
+        axb.text(x, v + 0.015, f"{v:.3f}", ha="center", fontsize=8.5)
+    axb.set_ylabel("Free-running accuracy (MATH-500)")
+    axb.set_ylim(0, 1.0)
+    gaptxt = (f"Random $-$ SLM: $+{PHEN['gap']:.3f}$\n"
+              f"95% CI [{PHEN['gap_ci'][0]:.3f}, {PHEN['gap_ci'][1]:.3f}]\n"
+              f"{PHEN['n_win']}/{PHEN['n_tot']} problems favor Random")
     if per_problem:
-        ins = ax.inset_axes([0.60, 0.30, 0.36, 0.40])
-        ins.hist(per_problem, bins=20, color=BLUE, alpha=0.8)
-        ins.axvline(0, color="k", lw=0.8)
-        ins.set_title("per-problem\nRandom$-$SLM", fontsize=6)
-        ins.tick_params(labelsize=5)
+        axh.hist(per_problem, bins=20, color=BLUE, alpha=0.85)
+        axh.axvline(0, color="k", lw=1)
+        axh.set_title("per-problem: Random $-$ StreamingLLM", fontsize=8)
+        axh.set_xlabel("accuracy difference", fontsize=8)
+        axh.set_ylabel("# problems", fontsize=8)
+        axh.annotate(gaptxt, xy=(0.03, 0.97), xycoords="axes fraction", va="top",
+                     ha="left", fontsize=6.3,
+                     bbox=dict(boxstyle="round", fc="white", ec=GREY, alpha=0.9))
+    else:
+        axh.axis("off")
+        axh.text(0.5, 0.5, gaptxt, ha="center", va="center", fontsize=9,
+                 bbox=dict(boxstyle="round", fc="white", ec=GREY))
+    fig.tight_layout()
     _save(fig, out_dir, "fig1_phenomenon")
 
 
