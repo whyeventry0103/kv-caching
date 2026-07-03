@@ -4,10 +4,13 @@ Standing review artifact for the submission push. Updated as work progresses; tr
 **Roadmap** (bottom) as the canonical prioritized TODO. Everything here is grounded in
 repository evidence — file paths are cited throughout.
 
-**Status line (update on every pass):** 2026-07-03 — full code audit done; bracket bug
-found+fixed+amended (Amendment H); imputation-bounds robustness added to §4.3; free-run
-CIs added to Table 2; windowed-TV provenance script added; scoop sweep clean; figures
-embedded; build clean; 120/120 tests.
+**Status line (update on every pass):** 2026-07-03 (evening) — senior strategy pass done:
+see **BEST_POSSIBLE_PAPER.md** (blueprint; verdict: framing right, ~85% of best paper;
+lead-with-the-gap reorder + notation diet scheduled for venue conversion). Two new
+robustness sentences applied to the tex (truncation-imputation bound; easiness-is-the-
+thesis). Earlier today: full code audit; bracket bug fixed+amended (Amendment H);
+imputation bounds in §4.3; free-run CIs in Table 2; windowed-TV provenance script;
+scoop sweep clean; figures embedded; build clean; 120/120 tests.
 
 ---
 
