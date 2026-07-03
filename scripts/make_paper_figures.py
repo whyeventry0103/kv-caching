@@ -350,6 +350,38 @@ def _onset_aligned_curve(profiles_dir: Path, half=400):
         return None
 
 
+def print_windowed_tv(profiles_dir: Path):
+    """Committed provenance for the paper's windowed-TV table (Table: tab:tv).
+
+    Full-horizon (NO +/-400 cap, unlike the figure curve) mean per-step TV in the
+    three onset-aligned windows: before eviction (off < 0), first 50 steps after
+    (0 <= off < 50), later (off >= 50). Run on the remote replay profiles dir.
+    """
+    windows = {"before": [], "first50": [], "later": []}
+    n_profiles = 0
+    for f in glob.glob(str(profiles_dir / "**/*.json"), recursive=True):
+        d = json.load(open(f))
+        est, onset = d.get("estimate"), d.get("onset_step")
+        if not est or onset is None:
+            continue
+        n_profiles += 1
+        for i, v in enumerate(est):
+            off = i - onset
+            if off < 0:
+                windows["before"].append(v)
+            elif off < 50:
+                windows["first50"].append(v)
+            else:
+                windows["later"].append(v)
+    if not n_profiles:
+        print("windowed TV: no profiles found")
+        return
+    print(f"windowed TV over {n_profiles} profiles (full horizon):")
+    for name, vals in windows.items():
+        mean = statistics.fmean(vals) if vals else float("nan")
+        print(f"  {name}: mean {mean:.4f} over {len(vals)} steps")
+
+
 def _twofc_values(report: dict):
     try:
         for key in ("per_problem", "problems", "add_values"):
@@ -380,7 +412,18 @@ def main():
     ap.add_argument("--m4-summary", default=None, help="report_m4 summary.json (Fig 2)")
     ap.add_argument("--profiles-dir", default=None, help="replay profiles (Fig 4)")
     ap.add_argument("--twofc-report", default=None, help="two-FC report json (Fig 5)")
+    ap.add_argument(
+        "--print-windows",
+        action="store_true",
+        help="print full-horizon windowed TV means from --profiles-dir "
+        "(provenance for the paper's windowed-TV table)",
+    )
     args = ap.parse_args()
+
+    if args.print_windows:
+        if not args.profiles_dir:
+            ap.error("--print-windows requires --profiles-dir")
+        print_windowed_tv(Path(args.profiles_dir))
 
     out = Path(args.out_dir)
     out.mkdir(parents=True, exist_ok=True)
