@@ -192,6 +192,7 @@ def fig5_twofc(out_dir: Path, twofc_report: dict | None):
                        label=f"{m} ADD {C[m]['add']:.2f}")
         ax.set_xlabel("Per-problem ADD")
         ax.set_ylabel("count")
+        ax.legend(fontsize=6.5)
     else:
         bars = ["two-FC\nfloor", "Random\nADD", "SLM\nADD"]
         bvals = [TWOFC["mean"], C["Random"]["add"], C["StreamingLLM"]["add"]]
@@ -201,7 +202,6 @@ def fig5_twofc(out_dir: Path, twofc_report: dict | None):
         ax.set_ylabel("ADD")
     ax.set_title(f"Negative control: ADD floor {TWOFC['mean']:.3f} "
                  f"({int(TWOFC['frac_sig']*100)}% sig., n={TWOFC['n']})", fontsize=8)
-    ax.legend(fontsize=6.5)
     _save(fig, out_dir, "fig5_twofc")
 
 
