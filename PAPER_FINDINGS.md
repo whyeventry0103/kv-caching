@@ -21,8 +21,10 @@ single method IS the readout-vs-trajectory gap in the wild, and our decompositio
 mechanism. Reconcile the **channel structure**, NOT the digits: HOTT full-cache MATH-500 = 0.47
 vs our 0.882 (different decode-length/sampling), so no digit-for-digit merge. HOTT also
 independently notes eviction makes models *"more talkative, generating longer sequences"* —
-corroborates our Random termination-mass / truncation finding. (To verify: HOTT's random-eviction
-control row — does random >= StreamingLLM there too, corroborating our +0.185?)
+corroborates our Random termination-mass / truncation finding. **HOTT does NOT test random
+eviction** (its methods are Full/ShadowKV/H2O/KNorm/R-KV/SnapKV/StreamingLLM), so our
+Random-beats-recency (+0.185) result is our OWN contribution — do NOT imply HOTT corroborates it.
+HOTT does evaluate R-KV free-running (relevant to the audit table / related work).
 
 **Evaluation-protocol audit (verified):**
 
