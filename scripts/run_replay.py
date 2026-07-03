@@ -20,7 +20,11 @@ from kvcache.cli import load_config, plan
 from kvcache.datasets import load_benchmark
 from kvcache.determinism import log_versions
 from kvcache.models import load_model_and_tokenizer
-from kvcache.presses import build_replay_press, press_seed
+from kvcache.presses import (
+    build_replay_press,
+    press_needs_eager_attention,
+    press_seed,
+)
 from kvcache.replay import (
     TransformersReplayBackend,
     build_replay_row,
@@ -219,7 +223,12 @@ def main() -> int:
         allow_download=False,
     )
     gold_by_pid = {problem.pid: problem.gold_answer for problem in problems}
-    model, tokenizer = load_model_and_tokenizer(model_cfg, allow_download=False)
+    # Attention-score presses (H2O) need eager attention during replay/readout too, not
+    # just free-run generation -- mirror run_grid so H2O/R-KV decomposition is correct.
+    eager = any(press_needs_eager_attention(p) for p in config["presses"])
+    model, tokenizer = load_model_and_tokenizer(
+        model_cfg, allow_download=False, attn_implementation="eager" if eager else None
+    )
     output_root = Path(os.environ["REMOTE_RUNS_ROOT"])
     mode = config["mode"]
     completed = 0
@@ -373,9 +382,17 @@ def main() -> int:
                             profile.max_after_prune > int(budget)
                         ):
                             raise SystemExit("post-prune cache exceeded target budget")
-                        if profile.max_before_prune is None or (
-                            profile.max_before_prune
-                            > int(budget) + int(config["compression_interval"])
+                        # Between prunes the cache holds the prefill (prompt) + one
+                        # compression interval before the first prune, so the bound is
+                        # max(prompt_len, budget)+interval -- NOT budget+interval. Long-
+                        # prompt MATH problems (prompt > budget) tripped the old bound.
+                        # Post-prune <= budget (above) still checks the press prunes.
+                        prune_bound = max(len(prompt_ids), int(budget)) + int(
+                            config["compression_interval"]
+                        )
+                        if (
+                            profile.max_before_prune is None
+                            or profile.max_before_prune > prune_bound
                         ):
                             raise SystemExit(
                                 "between-prune cache exceeded expected bound"

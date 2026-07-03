@@ -40,14 +40,27 @@ class Decomposition:
     def residual_bracket(self) -> tuple[float, float] | None:
         """Interval bracketing the on-policy residual via forward+reverse readout.
 
-        ``None`` until a reverse-replay estimate is supplied. With both readout
-        estimates, the on-policy residual is bounded by the two ``total - readout``
-        endpoints; we never collapse the bracket to a single causal number.
+        ``None`` until a reverse-replay estimate is supplied. Each endpoint is a
+        ``total - readout`` residual estimate with readout measured on a different
+        state distribution:
+
+        * forward: readout measured on *reference* states ->
+          ``total_change - on_reference_readout_change``;
+        * reverse: readout measured on the compressed model's *own* states. The
+          reverse run reads the compressed trace out under the full cache, so its
+          accuracy change vs the full-cache reference (``reverse_readout_change``
+          = ``acc_rev - acc_fc``) is *itself* the reverse-side residual estimate:
+          ``total - (acc_free - acc_rev) = acc_rev - acc_fc``.
+
+        (A previous revision used ``total - reverse_readout_change`` as the
+        reverse endpoint; that quantity equals the on-policy readout change, not
+        a residual estimate.) We never collapse the bracket to a single causal
+        number.
         """
         if self.reverse_readout_change is None:
             return None
         forward = self.total_change - self.on_reference_readout_change
-        reverse = self.total_change - self.reverse_readout_change
+        reverse = self.reverse_readout_change
         return (min(forward, reverse), max(forward, reverse))
 
 

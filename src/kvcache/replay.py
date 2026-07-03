@@ -52,7 +52,9 @@ def total_variation(p: Sequence[float], q: Sequence[float]) -> float:
         raise ValueError("distributions must have equal support")
     if abs(sum(p) - 1.0) > 1e-6 or abs(sum(q) - 1.0) > 1e-6:
         raise ValueError("distributions must sum to one")
-    return 0.5 * sum(abs(a - b) for a, b in zip(p, q, strict=True))
+    # TV is mathematically in [0,1]; clamp the tiny float overshoot (e.g. 1.0000001)
+    # that otherwise trips the strict [0,1] profile validation and crashes the replay.
+    return min(1.0, 0.5 * sum(abs(a - b) for a, b in zip(p, q, strict=True)))
 
 
 def topk_tv_bounds(
@@ -73,9 +75,11 @@ def topk_tv_bounds(
     visible = 0.5 * sum(abs(p[i] - q[i]) for i in p)
     tail_lower = 0.5 * abs(p_tail - q_tail)
     tail_upper = 0.5 * (p_tail + q_tail)
-    lower = visible + tail_lower
+    # All bounded by 1 (TV in [0,1]); clamp float overshoot so the profile validation
+    # downstream never crashes the replay on a 1.0000001.
+    lower = min(1.0, visible + tail_lower)
     upper = min(1.0, visible + tail_upper)
-    return BoundedTV(estimate=(lower + upper) / 2, lower=lower, upper=upper)
+    return BoundedTV(estimate=min(1.0, (lower + upper) / 2), lower=lower, upper=upper)
 
 
 def replay_tv_profile(
@@ -95,7 +99,7 @@ def exact_tv_from_logits(full_logits: Any, test_logits: Any) -> float:
 
     full = torch.softmax(full_logits.float(), dim=-1)
     test = torch.softmax(test_logits.float(), dim=-1)
-    return float(0.5 * torch.abs(full - test).sum().item())
+    return min(1.0, float(0.5 * torch.abs(full - test).sum().item()))
 
 
 @contextmanager

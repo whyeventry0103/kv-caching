@@ -2,6 +2,8 @@ import importlib.util
 import json
 from pathlib import Path
 
+from pytest import approx
+
 ROOT = Path(__file__).resolve().parents[1]
 SPEC = importlib.util.spec_from_file_location(
     "report_m4", ROOT / "scripts" / "report_m4.py"
@@ -80,3 +82,93 @@ def test_m4_report_uses_accuracy_scale_residual(tmp_path):
     assert cells[0]["readout_change"] == -0.55
     assert cells[0]["unexplained_residual"] == -0.25
     assert cells[0]["signed_flip_mass"]["lost"] == 0.8
+
+
+def _minimal_inputs(tmp_path):
+    full = tmp_path / "full"
+    comp = tmp_path / "comp"
+    readout = tmp_path / "readout"
+    _write(
+        full / "math500" / "r.jsonl",
+        [
+            {
+                "pid": f"p{i}",
+                "decoding": {"seed": i},
+                "correct": True,
+                "truncated": False,
+            }
+            for i in range(20)
+        ],
+    )
+    _write(
+        comp / "math500" / "r.jsonl",
+        [
+            {
+                "pid": f"p{i}",
+                "decoding": {"seed": i},
+                "press": "streamingllm",
+                "budget": 256,
+                "correct": i < 4,
+                "truncated": False,
+                "n_tokens": 10,
+            }
+            for i in range(20)
+        ],
+    )
+    _write(
+        readout / "readout" / "r.jsonl",
+        [
+            {
+                "reference_key": ["math500", f"p{i}", "model", "fullcache", "full", i],
+                "condition": {"press": "streamingllm", "budget": 256},
+                "readout_correct": i < 9,
+                "generated_token_ids": [1, 2],
+            }
+            for i in range(20)
+        ],
+    )
+    return full, comp, readout
+
+
+def test_m4_report_without_replay_still_decomposes(tmp_path):
+    full, comp, readout = _minimal_inputs(tmp_path)
+    summary, cells = MODULE.build_report(
+        fullcache_root=full, compression_root=comp, readout_root=readout
+    )
+    assert cells[0]["unexplained_residual"] == -0.25
+    assert cells[0]["mean_auc_tv"] is None  # TV columns absent without a replay run
+    assert summary["runs"]["replay"] is None
+
+
+def test_m4_reverse_readout_residual_bracket(tmp_path):
+    full, comp, readout = _minimal_inputs(tmp_path)
+    reverse = tmp_path / "reverse"
+    # reverse readout: the COMPRESSED trace (press=streamingllm) read out under full
+    # cache; reference_key[3:5] = (streamingllm, 256) keys it to the cell.
+    _write(
+        reverse / "readout" / "r.jsonl",
+        [
+            {
+                "reference_key": ["math500", f"p{i}", "model", "streamingllm", 256, i],
+                "condition": {"press": "fullcache", "budget": "full"},
+                "readout_correct": i < 14,
+                "generated_token_ids": [1, 2],
+            }
+            for i in range(20)
+        ],
+    )
+    _, cells = MODULE.build_report(
+        fullcache_root=full,
+        compression_root=comp,
+        readout_root=readout,
+        reverse_readout_root=reverse,
+    )
+    cell = cells[0]
+    # reverse readout acc = 14/20 = 0.70; reverse_change = 0.70 - 1.0 = -0.30
+    assert cell["reverse_readout_accuracy"] == approx(0.70)
+    assert cell["reverse_readout_change"] == approx(-0.30)
+    # bracket endpoints: forward = total - fwd_readout = -0.25; reverse = the
+    # reverse change itself (acc_rev - acc_fc = -0.30), i.e. total minus the
+    # on-policy readout change (total - (free - rev)). NOT total - reverse_change,
+    # which would be the readout change (-0.50) mislabeled as a residual.
+    assert cell["residual_bracket"] == approx([-0.30, -0.25])

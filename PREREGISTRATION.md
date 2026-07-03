@@ -326,3 +326,190 @@ arguably the mechanism, not an artifact to eliminate.
 The powered MATH-500 (250 x n=8) decomposition is where the M4 dissociation survives or
 dies; we report it with CIs either way. A reversal or wash-out at n=250 is a publishable
 result about the decomposition's resolution limits, not a failure.
+
+## Amendment F (2026-06-19): pre-committed read of the powered readout decomposition
+
+Written *before* the powered readout numbers exist (the run launches tonight). The
+powered free-run phenomenon is already settled: at 100 problems x n=4, Random-256 beats
+StreamingLLM-256 by +0.185, CI [0.130, 0.242], on 94/100 problems. That is the
+PHENOMENON. This amendment pre-registers how we read the decomposition that is supposed
+to EXPLAIN it, so the read is not chosen after seeing the data.
+
+### Quantities (budget 256, per method m), all with problem-level bootstrap 95% CIs
+
+Estimator = `scripts/report_m4.py`: one pinned canonical full-cache reference;
+problem-clustered bootstrap; undefined reasoning/answer boundary rows excluded from
+readout-accuracy and counted (`n_readout_undefined`). Definitions:
+
+- `total_drop(m)   = FC_acc - free_acc(m)`            (free-run loss)
+- `readout_drop(m) = FC_acc - readout_acc(m)`         (loss with the FC trajectory held
+  fixed, compressed cache active during answer read-out)
+- `residual(m)     = readout_acc(m) - free_acc(m) = total_drop - readout_drop`
+- `readout_share(m) = readout_drop(m) / total_drop(m)`  (cell-level ratio of means, not
+  per-problem ratios, to avoid small-denominator blow-up)
+
+Anchors already known: FC_acc = 0.885; free_acc(SLM) = 0.237 (total_drop 0.648);
+free_acc(Random) = 0.422 (total_drop 0.463). Pilot (n=5, unconfirmed) suggested
+readout_acc(SLM) ~ 0.45 and readout_acc(Random) ~ 0.90.
+
+### The pre-committed read
+
+**CONFIRMS the thesis (the strong paper)** iff ALL hold:
+1. `readout_acc(Random)` 95% CI lower bound >= 0.75 (Random readout is ~lossless), AND
+   `residual(Random)` CI excludes 0 (its free-run collapse is trajectory-attributed);
+2. `readout_drop(SLM)` CI excludes 0 with `readout_share(SLM)` point estimate >= 0.5
+   (StreamingLLM's loss is at least half readout-mediated);
+3. `readout_share(SLM)` and `readout_share(Random)` 95% CIs do NOT overlap, in the
+   predicted direction SLM > Random.
+The headline this licenses: *the same method (Random), at the same budget, is near-
+lossless on teacher-forced read-out yet collapses on free generation* — which resolves
+the literature contradiction directly.
+
+**COMPLICATES (weaker but honest)** if the split runs in the predicted direction but
+either the two `readout_share` CIs overlap (methods not statistically separable) or both
+methods are residual/trajectory-dominated. Reported as: "compression damage to reasoning
+is predominantly trajectory-mediated, with a method ordering the decomposition cannot
+cleanly separate." No clean single-method headline.
+
+**REFUTES** if both methods are readout-dominated (large `readout_drop` for both, small
+similar residuals) or the two `readout_share` CIs are indistinguishable AND not in the
+predicted direction. Then the +0.185 free-run gap is NOT explained by the readout/
+trajectory split; the thesis is dead and we report the phenomenon plus the null
+decomposition. Pre-committed to this outcome per Amendment D.
+
+### Reverse-replay bracket result (2026-06-27)
+
+Reverse readout complete (800/800 on grid-diss256-tok traces). Reverse readout acc =
+compressed trajectory read out under FULL cache: Random 0.636, StreamingLLM 0.417 (FC
+0.882; free 0.422 / 0.237). Clean readout of the compressed trajectory does NOT recover to
+FC for either method -> a large component of the loss is genuinely trajectory, not readout
+(reverse trajectory damage: Random -0.246, SLM -0.465). Residual bracket (forward..reverse
+endpoints): Random [-0.343, -0.214], SLM [-0.347, -0.180]. **VERDICT: the central claim
+(large, readout-invisible trajectory residual) SURVIVES the off-policy correction for both
+methods -- the residual never approaches 0.** HOWEVER forward and reverse DISAGREE on the
+method-level split (forward: Random more trajectory; reverse: SLM more trajectory), and the
+brackets overlap, so the method-level readout-vs-trajectory attribution is NOT identifiable
+within the off-policy bracket. Report the central residual strongly; report the method
+dissociation as bracketed / not separable. Mild confound: differential defined-reverse n
+(Random 308 vs SLM 372 -- Random's rambling traces more often lack a clean boundary).
+
+### Causal-claim discipline (off-policy bias)
+
+`residual` is DEFINED as "accuracy change unexplained by on-reference read-out"; it is
+not yet "trajectory damage" as a cause. A CONFIRM read licenses only
+"consistent with trajectory-dominance." The reverse-replay rung (M7) that brackets the
+off-policy bias is REQUIRED before the paper's mechanism section asserts trajectory
+causation, and it runs on these same dissociation cells immediately after a CONFIRM,
+before any new method/benchmark cells. Differential `n_readout_undefined` between methods
+is itself reported as a confound check (a method that more often destroys the boundary
+would bias `readout_acc`).
+
+### Outcome (2026-06-23, FINAL forward read at 800/800)
+
+Read honestly against the criteria above. FC=0.882. Random-256: free=0.422,
+readout=0.765 [.686,.817], readoutΔ=-0.117, residual=-0.343, share=0.25. StreamingLLM-256:
+free=0.237, readout=0.584 [.495,.647], readoutΔ=-0.298, residual=-0.347, share=0.46.
+Undefined boundary: 8/cell, balanced (no confound). (The 765/800 preliminary read gave the
+same verdict; full power moved every quantity by <=0.012.)
+
+**Verdict: COMPLICATE / qualified confirm.** What CONFIRMED: a large trajectory residual
+(~-0.355) exists and is significant for BOTH methods (readout CIs sit far above free-run,
+non-overlapping) -> the residual the contradiction needs is real and readout-invisible;
+and the methods dissociate significantly on the READOUT channel (SLM 0.595 vs Random 0.777,
+non-overlapping CIs), in the predicted direction. Strikingly, the entire +0.185 free-run
+gap is in the readout channel (readoutΔ differs 0.182, residual differs 0.003) -- trajectory
+damage is essentially METHOD-INVARIANT. What did NOT confirm (the strong pilot headline
+dies): Random is NOT readout-lossless (CI lower 0.696 < the 0.75 bar; readoutΔ significantly
+<0), and SLM share 0.45 < 0.50. So the clean "SLM=readout-dominated, Random=trajectory-
+dominated" framing is FALSE; reality is "both heavily + equally trajectory-damaged, differing
+in readout fidelity." REFRAME the paper accordingly. The method-invariant-trajectory claim
+rests on the on-reference (off-policy-biased) residual, so reverse replay is now load-bearing,
+not optional -- it is the next experiment, on a token-ID-bearing 256 re-run.
+
+## Amendment G (2026-06-27): committed paper spine + external-review responses
+
+External review (2026-06-27) audited the project end-to-end. Committed responses:
+
+### The spine (commit in writing, now)
+THE paper is: "compression damage to reasoning is real, large, and largely INVISIBLE to
+teacher-forced / readout-style evaluation -- which is why KV-compression method papers
+(readout-style) report near-lossless while free-running benchmarks (HOTT) report collapse;
+the gap is the trajectory residual." This is fully supported by data in hand (forward
+decomposition + the reverse-replay bracket). Method-invariance and any >100% result are
+UPSIDE on top of this spine, reported at their true (exploratory / pending) confidence.
+
+### >100% reframe (resolve Gap 2 explicitly)
+We have observed NO >100%/denoising regime (no gains on small-budget MATH). So we DROP
+">100%" from the framing/title (reframe option b: near-lossless-under-readout vs
+collapse-under-free-generation, which the data fully supports). AIME+R-KV at R-KV's reported
+>100% budgets is the high-upside swing (Phase 2): reproduce+decompose it (headline) or show
+it does not appear at 7B (a clean scale finding, claimable only because the port is
+Jaccard-1.0 certified). We do NOT keep ">100%" in the framing without >100% in the results.
+
+### Two-FC negative control -- PASSED (2026-06-27, committed artifact)
+`scripts/report_two_fc_control.py` on math500-fc-powered-merged (split seeds {11,23,47,89}
+vs {131,197,263,347}): n=250, mean_ADD=0.068, median 0.000, mean perm p=0.976, 0% of
+problems p<0.05. The ADD noise floor (~0.07) is far below the compression cells (0.56-0.75),
+so ADD does not false-positive. Required figure for submission -- DONE, no GPU.
+
+### Provenance statement (the load-bearing FC bank)
+math500-fc-powered-merged is THE canonical full-cache reference (2000 rows = 250 problems x
+n=8, accuracy 0.882). Its 4 runmeta commits are orphaned (repo re-init during the move), so
+the byte-identical-generation claim is not git-verifiable. Provenance now rests on: identical
+pinned package versions (audit_bank hard-check), per-row source_tree_hash, and FC having NO
+press logic (the generation path for full-cache is models.py + generation.py only). Appendix
+will carry this paragraph. If time permits before freezing results, regenerate the FC bank
+from a clean committed state to make it bulletproof (it underlies every number).
+
+### Scope decisions
+- RSP is CUT (structurally invalid twice, decoupled from results; mechanism evidence comes
+  from natural-trace replay). Late-binding hypothesis -> future-work mention only.
+- Generality envelope (Gap 1, venue-deciding) queued for the nightly watcher: budget-2048
+  dose-response (R/SLM + H2O), H2O cells 256+2048, R-KV cells (after the gen-smoke gate).
+  Target: 4 methods x 2 budgets + onset-localized TV mechanism (re-scoped replay/Fig 4).
+- Threats-to-validity section is written as a STRENGTH (the rigor is the paper's edge), not
+  an apology.
+
+## Amendment H (2026-07-03): correction of the residual-bracket computation
+
+A computation error is corrected, dated, and disclosed. This amendment does not change any
+raw measurement; it changes the derived bracket endpoints and their interpretation.
+
+### The error
+
+`Decomposition.residual_bracket` and `scripts/report_m4.py` computed the reverse bracket
+endpoint as `total_change - reverse_readout_change`, with `reverse_readout_change =
+acc_rev - acc_fc`. That quantity equals `acc_free - acc_rev`, which is the **on-policy
+readout change** (compressed vs clean readout of the same compressed traces), not a
+residual estimate. The correct reverse-side residual estimate is `reverse_readout_change`
+itself: `acc_rev - acc_fc = total - (acc_free - acc_rev)`, i.e. total minus the readout
+change measured on the compressed model's own states. Both bracket endpoints are then
+`total - readout` estimates with readout measured on the two state distributions
+(reference states forward, compressed states reverse), which is the construction Amendment
+A's off-policy section intended. Code, tests, and reports are fixed as of this date.
+
+### Corrected numbers (from the 2026-06-27 reverse-readout run; identities on cell accuracies)
+
+- Random-256: forward residual −0.343, reverse residual = 0.636 − 0.882 = −0.246 →
+  bracket **[−0.343, −0.246]** (was, wrongly, [−0.343, −0.214]).
+- StreamingLLM-256: forward residual −0.347, reverse residual = 0.417 − 0.882 = −0.465 →
+  bracket **[−0.465, −0.347]** (was, wrongly, [−0.347, −0.180]).
+
+### What changes and what does not
+
+- UNCHANGED (stronger): the central claim. Both brackets exclude zero by a wider margin
+  than previously reported; the residual survives the off-policy correction.
+- CHANGED: the anticipated bias ordering (forward inflates the residual, reverse deflates
+  it) holds for Random but REVERSES for StreamingLLM (reverse −0.465 exceeds forward
+  −0.347). Brackets are therefore reported as min/max intervals of the two estimates, not
+  directional bias bounds.
+- CHANGED: the forward residuals are nearly equal across methods (−0.343 vs −0.347) while
+  the reverse estimates separate (−0.246 vs −0.465). "Trajectory damage is
+  method-invariant" is therefore a FORWARD-ESTIMAND statement, reported as exploratory;
+  the reverse side attributes more trajectory damage to StreamingLLM. Because sampling
+  uncertainty is not propagated to bracket endpoints and the point-estimate brackets
+  separate only marginally (0.004), the method-level attribution remains reported as
+  bracketed and exploratory — the same humility as before, now for the corrected reason.
+- The prior text of Amendment F's "Reverse-replay bracket result" is retained unedited
+  per append-only discipline; its bracket numbers and its "brackets overlap" reading are
+  superseded by this amendment.

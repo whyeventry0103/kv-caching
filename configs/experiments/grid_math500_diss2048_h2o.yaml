@@ -1,0 +1,22 @@
+name: grid_math500_diss2048_h2o
+stage: grid
+# H2O (ObservedAttentionPress, heavy-hitter / arXiv:2306.14048) free-run at budget 2048.
+# max_new_tokens CAPPED at 8192 (not 16384): eager attention materializes an O(seq^2)
+# score matrix (~15GB/layer at 16k) -> OOM risk; 8192 keeps peak ~20GB. H2O's higher
+# truncation from this cap is an eager-kernel artifact, reported separately.
+# A 3rd eviction method for the generality envelope; needs eager attention (run_grid
+# auto-loads it). 100 problems x n=4 x 1 press = 400 gens, token IDs stored.
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+subset:
+  math500: 100
+presses: [h2o]
+budgets: [2048]
+seeds: [11, 23, 47, 89]
+max_new_tokens:
+  math500: 8192
+compression_interval: 64
+estimated_generation_count: 400
+scale_authorized: true
+remote_only: true
+store_token_ids: true

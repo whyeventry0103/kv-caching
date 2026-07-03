@@ -117,7 +117,12 @@ def rkv_retained_indices(
     )
     keep = final.topk(budget - window, dim=-1).indices[0]
     k_len = key.shape[2]
-    window_idx = torch.arange(k_len - window, k_len).expand(keep.shape[0], -1)
+    # arange defaults to CPU; keep is on the model's device during real decoding, so the
+    # window indices must be built on keep.device or torch.cat raises a device mismatch
+    # (caught by the GPU smoke; invisible to the CPU-only parity harness).
+    window_idx = torch.arange(k_len - window, k_len, device=keep.device).expand(
+        keep.shape[0], -1
+    )
     return torch.cat([keep, window_idx], dim=-1)
 
 

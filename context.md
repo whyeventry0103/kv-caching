@@ -16,6 +16,130 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
 
 ## 0. TL;DR — where we are right now
 
+  **⚠ CORRECTED 2026-07-03 (residual-bracket bug; PREREGISTRATION Amendment H):** the reverse
+  bracket endpoint was computed as total − (acc_rev − acc_fc), which is the on-policy READOUT
+  change, not a residual estimate. Correct endpoint = acc_rev − acc_fc itself. Corrected
+  brackets: Random **[−0.343, −0.246]**, SLM **[−0.465, −0.347]** (both FARTHER from 0 —
+  headline stronger). But: bias ordering reverses for SLM (reverse −0.465 > forward −0.347)
+  and reverse estimates SEPARATE the methods, so "method-invariant trajectory damage" is a
+  FORWARD-estimand claim; method split still exploratory. Fixed in decomposition.py,
+  report_m4.py, tests (all green); paper tex/pdf + PAPER_FINDINGS updated. Any bracket
+  numbers below this line ([−0.34,−0.21]/[−0.35,−0.18], "brackets overlap") are STALE.
+  TODO: re-run report_m4 --reverse-readout-root on the remote to regenerate summary.json
+  with exact corrected decimals.
+
+  **★★★ FIGURE 4 / TV PROFILES DONE (2026-07-02): replay-diss256 800/800.** Onset-aligned
+  mechanism (800 profiles, median first-eviction step 65): mean per-step TV = 0.0000 BEFORE
+  eviction, 0.0018 in the first 50 steps after, 0.0884 later -> divergence is ~zero at
+  eviction and COMPOUNDS over the trajectory. Clean mechanism: trajectory damage is a slow-
+  compounding drift, not an instant readout error -> explains why readout/teacher-forced eval
+  misses it while free-run collapses. mean_auc_tv 0.086 (random) vs 0.083 (SLM) -> matched
+  across methods, corroborates method-invariant trajectory damage. WRITABLE CORE NOW COMPLETE
+  + mutually consistent: forward decomp (residual ~-0.34) + reverse bracket ([-0.35,-0.18])
+  + Fig4 (compounding TV) + ADD + two-FC control. report_m4 with --replay-root gives the full
+  table. Per-shard recovery + TV clamp confirmed working (no crashes, chained to grid-2048).
+  Remaining = generality only: grid-diss2048-tok 526/800 (running) -> readout-2048 -> H2O ->
+  R-KV -> AIME. Can START DRAFTING the core paper now.
+
+  **⚠ FIXED 2026-06-29 (1-GPU-near-end issue):** last night ONE replay shard crashed
+  (`ValueError: TV profile values must be in [0,1]` -- a TV came out 1.0000001 from float
+  noise) and the watcher's old "any session running -> no-op" guard NEVER relaunched the
+  dead shard (the other shard was live) -> that GPU sat idle all night (per-seed: 23=158,
+  89=0 on the dead gpu0; 11=53, 47=0 on the live gpu1). TWO fixes: (1) clamp TV to [0,1] at
+  the source in `replay.py` (total_variation/topk_tv_bounds/exact_tv_from_logits). (2)
+  `nightly_autorun.py` now does PER-SHARD recovery: each tick launches only seeds that are
+  incomplete AND not owned by a live session, onto GPUs eligible AND not running our job
+  (tracks per-gpu shard assignment + per-seed counts in `logs/nightly_state.json`) -> a
+  crashed/OOM-killed shard is relaunched on its freed GPU WHILE the other shard runs. Whole-
+  job crash-loop guard retained (MAX_FAILS no-progress -> stuck+skip). 120 tests. Residual
+  (rare): a single deterministically-crashing condition can loop its shard (other shard
+  masks it in the whole-job guard) -> visible in the morning email's per-seed progress.
+
+  **★ DAILY STATUS EMAIL (2026-06-28):** `scripts/nightly_report.py` emails 27100172@lums.edu.pk
+  at 09:10 (cron, after the session ends) -- whole queue + per-job progress, what launched
+  last night, total % to queue completion + paper-core status, crash/stuck alerts, GPU free.
+  Transport = AUTHENTICATED Gmail SMTP (smtp.gmail.com:587) via creds in
+  `~/.kvcache_smtp.json` on the remote (chmod 600, NOT in repo: {host,port,user,password,to};
+  user=m.ali.shah0103@gmail.com, to=same). Direct-to-MX was abandoned: O365 quarantines it
+  (LUMS never received) and Gmail hard-rejects (sender IP has no PTR). The app-password is
+  revocable in the Google account. `--dry-run` prints without sending; report logic reuses
+  nightly_autorun (load_queue/count_progress). Crontab: watcher `*/10 2-8` + report `10 9`.
+
+  **⚠ FIXED 2026-06-28 (caught from 06-28 run):** `replay-diss256` crashed
+  ("between-prune cache exceeded expected bound") on the 2% of MATH-500 problems whose
+  rendered prompt > budget 256 (max prompt 705 tok) -- the guard's bound was budget+interval
+  but the prefill legitimately holds prompt+interval. FIXED: bound = max(prompt_len,budget)+
+  interval (`run_replay.py`). The watcher then CRASH-LOOPED it 70x (no give-up), blocking the
+  queue all night. FIXED: per-job no-progress failure counter in `nightly_autorun.py`
+  (`logs/nightly_state.json`); after MAX_FAILS=3 launches with no progress a job is marked
+  stuck and skipped so the queue advances. Both synced -> replay resumes from 16 tonight with
+  the relaxed guard; any future crashing job self-skips after 3 ticks.
+
+  **CANONICAL FC REFERENCE = `math500-fc-powered-merged` (2000 rows = 250 problems x n=8,
+  accuracy 0.882). EVERY result references this one bank.** Older pins (pilot-fullcache-v2
+  19/20, tokenized-v2 20/20) are RETIRED -- ignore stale mentions below. Provenance caveat
+  (orphaned commits) + statement: PREREGISTRATION Amendment G.
+
+  **PAPER SPINE (committed, Amendment G):** "compression damage to reasoning is real, large,
+  and largely INVISIBLE to teacher-forced/readout-style eval -- which is why method papers
+  (readout-style) report near-lossless while free-running (HOTT) reports collapse; the gap is
+  the trajectory residual." >100% is DROPPED from framing (no gains observed); method-
+  invariance + any >100% are upside. Generality envelope (4 methods x 2 budgets) is the
+  venue-decider, queued. RSP is CUT. Two-FC control PASSED (ADD floor 0.068 << 0.56-0.75).
+
+  **★★★ REVERSE-REPLAY BRACKET DONE — central claim SURVIVES off-policy test (2026-06-27).**
+  reverse-readout-diss256 800/800. Reverse readout (compressed traj read out under FULL
+  cache): Random 0.636, SLM 0.417 (FC 0.882) -> clean readout does NOT recover to FC, so a
+  large chunk of loss is genuinely TRAJECTORY (reverse damage Random -0.246, SLM -0.465).
+  Residual bracket: Random [-0.343,-0.214], SLM [-0.347,-0.180] -> never near 0. **The #1
+  reviewer objection (off-policy bias gutting the residual) is answered: the headline holds.**
+  Nuance: forward vs reverse DISAGREE on the method-level split (forward Random-more-traj,
+  reverse SLM-more-traj) + brackets overlap -> method dissociation NOT identifiable; report
+  central residual strongly, method split as bracketed. (PREREGISTRATION "Reverse-replay
+  bracket result".) Core ~75% done: forward decomp ✅, grid ✅, bracket ✅; replay/Fig4 next.
+
+  **★★ NIGHTLY AUTOMATION = WATCHER (2026-06-26, upgraded from once-a-night v1).** Remote
+  cron (Asia/Dubai UTC+4) runs `scripts/nightly_autorun.py` **every 10 min, 02:00-08:50**
+  (`*/10 2-8 * * *`). Each tick: pick next incomplete job from `configs/nightly_queue.yaml`
+  whose `requires` dep is complete; **if any of OUR tmux sessions (`<run_name>-g<idx>`) are
+  running -> no-op**; else check nvidia-smi free mem, SKIP any GPU below `min_free_gb` (OOM),
+  shard seeds across free GPU(s) (freest first; 1→all, 2→split), `check_remote.sh` preflight,
+  launch `launch.sh` in tmux with `KVCACHE_MAX_HOURS`=hours-until-09:00. Because it fires
+  every 10 min and only launches when nothing of ours runs, it **FILLS THE WHOLE 02-09
+  window** -- a job finishing mid-window triggers the next within ≤10 min (fixed the v1 bug
+  that idled GPUs ~5h after a job completed early). Residual: ≤~20min within-job imbalance
+  when one shard finishes before the other (unavoidable w/o finer sharding). Marker logic
+  REMOVED (the sessions-check is the double-launch guard + auto-recovers a crashed shard).
+  KILL-SWITCH: `enabled: false` in queue (or `crontab -r`). Queue (5 jobs, sequential):
+  grid-diss256-tok ✅DONE → reverse-readout-diss256 (bracket) → replay-diss256 (Fig4) →
+  grid-diss2048-tok → readout-diss2048. 18 tests. NOTE: after ANY code change run
+  `sync_source.sh` (source-hash preflight else keeps last-synced code / aborts on drift).
+
+  **★★ DECOMPOSITION READ — FINAL forward at 800/800 (2026-06-23).** FC=0.882.
+  Random-256: free=0.422, readout=0.765 [.686,.817], readoutΔ=-0.117, residual=-0.343,
+  share=0.25. StreamingLLM-256: free=0.237, readout=0.584 [.495,.647], readoutΔ=-0.298,
+  residual=-0.347, share=0.46. (765/800 preliminary gave same verdict; <=0.012 drift.)
+  **Verdict: COMPLICATE / qualified confirm** (see
+  PREREGISTRATION Amendment F Outcome). CONFIRMED: large trajectory residual (~-0.355)
+  significant for BOTH methods, readout-invisible (resolves the contradiction); methods
+  dissociate on the READOUT channel (non-overlapping CIs); the ENTIRE +0.185 gap is
+  readout (trajectory damage is METHOD-INVARIANT). DID NOT confirm: Random not readout-
+  lossless (CI low 0.696<0.75), SLM share 0.45<0.50 -> the pilot "SLM=readout,
+  Random=trajectory" framing is FALSE; reframe to "both equally trajectory-damaged,
+  differ in readout fidelity." The core idea works; the headline reframes.
+
+  **★★ REVISED PLAN (2026-06-22), priority order:** (1) finish 35 readout stragglers
+  (seeds 11,23) -> forward readout 800/800 [~1h]. (2) **256 re-run WITH token IDs**
+  (`grid_math500_dissociation.yaml` already has store_token_ids:true; new run name
+  `grid-diss256-tok`) -> reproduces phenomenon + the token-ID compressed traces reverse
+  replay needs [~2-3 nights, resumable]. (3) **Reverse readout** (`reverse_readout_
+  diss256.yaml`, ref=grid-diss256-tok, press=fullcache) -> residual bracket; report via
+  `report_m4 --reverse-readout-root` (wiring already built). This DEFENDS the method-
+  invariant-trajectory claim against off-policy bias -- now load-bearing, not optional.
+  (4) budget-2048 grid (token IDs) -> silent-flip regime. (5) replay TV profiles (Fig 4).
+  (6) R-KV smoke re-run (device bug fixed) -> R-KV cells; AIME (>100%). report_m4 is now
+  replay-OPTIONAL + multi-readout-root, so the decomposition reads without TV profiles.
+
 - This is an **analysis/evaluation paper** about *why* KV-cache compression papers
   report near-lossless reasoning while the independent HOTT benchmark reports
   collapse. We are building the measurement harness, not a new compression method.
@@ -241,6 +365,37 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
   **NEXT: powered compression cells (the dissociation test at scale) — a multi-day GPU
   run because budget-256 free-runs ramble (~8k tokens). run_grid lacks --resume yet.**
 
+  **★ TIMER VERIFIED + ADD WORKS (2026-06-19):** Live server trial of the launch.sh
+  run-block (20s timer, sleep stub) → "STOPPED by timer (rc=124) after 20s"; GNU timeout
+  8.32 primitives confirmed (2.5h parses, SIGTERM→124, SIGKILL-fallback→137). Metric 2
+  (ADD) computed on the existing grid vs FC bank: StreamingLLM-256 mean_ADD=0.751
+  (within-answered TV 0.749, termination +0.081, flip net −0.646); Random-256 mean_ADD
+  =0.559 (within 0.504, termination +0.224, flip net −0.461). ADD instrument validated;
+  bonus — the methods damage the answer distribution DIFFERENTLY (SLM ~all within-answered
+  = readout-like; Random more termination = trajectory/rambling-like), previewing the M4
+  decomposition. Silent-flip-at-flat-accuracy showcase still needs the 2048 cells. NOTE:
+  report_add --out wrote a dir at /tmp/add_diss.json (minor, stdout json is correct).
+
+  **★ DOWNTIME CODEBASE REVIEW (2026-06-20):** deep pass, lint+99 tests green. Core
+  science modules verified correct (ADD, TDP, decomposition, readout/replay, Hendrycks
+  is_equiv, exact-permutation + BH). FIXED: (1) `report_m4._write_svg` had a non-f-string
+  gridline (`y2="{y:.1f}"` rendered literally → malformed M4-figure gridlines). BUILT (so
+  we don't lose a night later): (2) **`run_grid` now stores token-ID sidecars**
+  (`store_token_ids`, mirrors build_bank + resume-requires-sidecar + 3 tests); set on
+  `grid_math500_dissociation.yaml`. Without this, compressed traces weren't replay-ready
+  (reverse readout / TV profiles would need lossy re-tokenize). (3) **Reverse-readout
+  (M7 first rung) wired into `report_m4`** (`--reverse-readout-root` → per-cell
+  `residual_bracket`); the reverse RUN needs NO new engine — it's the existing readout
+  mode with reference=compression-grid (token-ID-bearing) + press=fullcache. OPEN (not
+  bugs): `run_mechanism`/`run_metrics` are scaffolds (`cli.run_cli`→not-implemented; real
+  metrics run via report_*.py); restoration + TV-matched-noise rungs still unbuilt
+  (post-confirm); `grading.py` flags a comparability caveat (confirm is_equiv matches
+  HOTT/kvpress grader before cross-paper number claims); AIME/other benchmarks raise
+  not-implemented (TODO dataset handles). REVERSE-READOUT RECIPE post-confirm: re-run the
+  dissociation cells with store_token_ids (or use future token-ID cells), then
+  `run_replay` readout mode with reference=that-grid + presses=[fullcache], then
+  `report_m4 --reverse-readout-root`.
+
   **★ DISSOCIATION GRID DONE (2026-06-19): `grid-math500-dissociation-v1` 800/800.**
   Powered free-run result (100 problems × n=4): FC 0.885 → StreamingLLM-256 **0.237**
   [0.172,0.302], Random-256 **0.422** [0.343,0.500]. **Random − StreamingLLM = +0.185,
@@ -263,20 +418,39 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
   (seeds 11,23→GPU0 / 47,89→GPU1), run names readout-diss256-g{0,1}/replay-diss256-g{0,1};
   then I compute total−readout=residual (the decomposition that tests the idea).
 
-  **★ ROADMAP TO PAPER (estimates, single GPU ~20GB; time is the only constraint):**
-  Runs left (cells = 100 problems × n=4): (1) finish dissociation grid [~12h];
-  (2) budget-2048 SLM+Random [~0.8d]; (3) R-KV press smoke [~0.5h]; (4) H2O cells
-  256+2048 eager [~1.5d]; (5) R-KV cells 256+2048 [~1.5d]; (6) readout (teacher-force→
-  answer span, all cells, cheap) [~0.7d]; (7) replay TV profiles, 256 cells [~1.5-2d];
-  (8) self-replay + 2-FC-bank negative controls [~0.5d+CPU]; (9) AIME (R-KV >100% home
-  turf — the contradiction) [needs dataset handle, ~1-2d]. **Compute subtotal ~8-10
-  GPU-days** (budget-256 ramble is the time sink; GPU 1 ~halves it). Code left: **causal
-  ladder M7** (restoration + TV-matched-noise + reverse replay — new engines, ~2-3d code
-  +1-2 GPU-d); optional ADD at n=8 (doubles compression, ~2-3d). **Start writing:**
-  Methods/Related-Work/Background/protocol are results-independent → draftable NOW; core
-  dissociation table + Fig 2 after runs 1-6 (~1 week); Fig 4 (mechanism) after replay +
-  one causal rung (~1.5 wks); Fig 1 (contradiction) after AIME. **~1 week to the core
-  writable result; ~2-2.5 weeks to a strong submission.**
+  **★ ROADMAP REORDERED per third review (2026-06-19) — READOUT IS THE ONLY THING ON
+  THE CRITICAL PATH.** The review's central correction: the old roadmap buried the
+  decisive cheap run (readout, was item 6) behind ~3 GPU-days of method cells (H2O, R-KV,
+  2048) that ASSUME the decomposition resolved. Reordered by information value:
+  (1) **READOUT @256** (`readout_math500_diss256.yaml`, 800 conds, ~2h on 2 GPUs) — the
+  experiment that confirms or kills the paper's thesis; NOTHING else runs until it is read
+  per Amendment F. (2) interpret + the read is pre-committed (Amendment F: confirm/
+  complicate/refute). (3) IF CONFIRM → **reverse replay** (M7 first rung) on the SAME
+  dissociation cells to bound off-policy bias BEFORE drafting the mechanism section, THEN
+  R-KV cells (port certified, R-KV is the >100% method), THEN AIME (needs dataset handle).
+  IF NOT → stop, re-scope (phenomenon + methodology may be a workshop/different framing).
+  Deferred behind the readout verdict: replay TV profiles, budget-2048, H2O cells, R-KV
+  cells, AIME, causal ladder. **Results-independent / do in parallel now:** draft Methods/
+  Background/Related-Work/framing-discipline. **R-KV smoke BUILT (2026-06-19):**
+  `scripts/rkv_smoke.py` drives real generation via `build_rkv_press` and checks (1) sane
+  terminating output, (2) every compression ≤ budget, (3) finite scores, (4) recent window
+  always retained + exactly budget kept, (5) live selection self-consistent with the
+  parity-verified `rkv_retained_indices` (mean Jaccard ≥0.99). ~5 min; designed to chain
+  into the readout tail (GPU0/small-set session, with a 6.5h wall-clock guard so it never
+  overruns the window). On PASS, record it + promote R-KV to EXECUTABLE per Amendment E.
+
+  **★ PROVENANCE FINDING (2026-06-19):** built `scripts/verify_generation_path_stable.py`
+  (committed re-runnable artifact replacing the one-time eyeballed diff). It found the
+  merged FC bank's 4 runmeta commits (193e12fc, 78659a6, b74f7f3, ff4240b) are NOT in the
+  current git history (remote HEAD 3e19f8b) — they were orphaned when the repo was
+  re-initialized during the ~/Desktop→~/dev move, so the byte-identical-generation claim
+  is no longer git-verifiable (it was checked at creation). FC-bank provenance now rests
+  on: identical package versions (audit_bank hard-check) + per-row source_tree_hash + FC
+  has no press logic. FORWARD FIX: commit a clean state before tonight's readout so its
+  runmeta.commit is reachable (currently main is dirty with uncommitted work). H2O
+  CONFOUND (review): H2O is the only method on the eager kernel (others sdpa); passed
+  exchangeability 19/20 vs 20/20, but keep the eager-vs-sdpa FC equivalence check handy —
+  if H2O ever shows a surprising result the kernel is a confound to rule out explicitly.
 
   **User decisions (2026-06-14):** (1) Claude launches/manages remote GPU jobs itself
   within the guards, reports after. (2) Scope = ports-first then MATH+AIME core

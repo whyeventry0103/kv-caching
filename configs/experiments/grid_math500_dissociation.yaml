@@ -17,3 +17,7 @@ compression_interval: 64
 estimated_generation_count: 800
 scale_authorized: true
 remote_only: true
+# Store exact token IDs so the compressed traces are replay-ready (reverse readout,
+# TV profiles) without lossy re-tokenization. The original powered grid predates this;
+# any re-run (e.g. for reverse replay or n=8 ADD) gets sidecars natively.
+store_token_ids: true

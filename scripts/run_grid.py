@@ -24,6 +24,7 @@ from kvcache.models import (
 )
 from kvcache.presses import build_press, press_needs_eager_attention, press_seed
 from kvcache.runmeta import capture_runmeta
+from kvcache.token_ids import append_token_ids, build_token_ids_record
 
 
 def _yaml(path: Path) -> dict[str, Any]:
@@ -43,38 +44,55 @@ def _parser() -> argparse.ArgumentParser:
         action="store_true",
         help="skip (bench,pid,press,budget,seed) already generated in the output dir",
     )
+    parser.add_argument(
+        "--seeds",
+        default="",
+        help="comma-separated subset of config seeds to generate (per-GPU sharding: "
+        "each shard owns disjoint per-seed output files, so two GPUs never collide)",
+    )
     return parser
 
 
-def _grid_done_keys(runs_root: Path) -> set:
-    """Completed (bench, pid, press, budget, seed) keys; heal partial trailing lines."""
-    done = set()
-    for path in sorted(runs_root.rglob("*.jsonl")):
-        if "token_ids" in path.parts:
-            continue
-        lines = path.read_text(encoding="utf-8").splitlines()
-        valid = []
-        for line in lines:
-            if not line.strip():
-                continue
-            try:
-                row = json.loads(line)
-            except json.JSONDecodeError:
-                continue
-            valid.append(line)
-            done.add(
-                (
-                    row["bench"],
-                    row["pid"],
-                    row["press"],
-                    str(row["budget"]),
-                    int(row["decoding"]["seed"]),
+def _grid_done_keys(runs_root: Path, store_token_ids: bool) -> set:
+    """Completed (bench, pid, press, budget, seed) keys; heal partial trailing lines.
+
+    With store_token_ids, a key is done only if it has BOTH a result row and a token-ID
+    sidecar -- a row whose sidecar is missing is incomplete and gets redone on resume.
+    """
+
+    def scan(paths: list[Path]) -> set:
+        keys = set()
+        for path in paths:
+            lines = path.read_text(encoding="utf-8").splitlines()
+            valid = []
+            for line in lines:
+                if not line.strip():
+                    continue
+                try:
+                    row = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                valid.append(line)
+                seed = row.get("decoding", {}).get("seed", row.get("seed"))
+                keys.add(
+                    (
+                        row["bench"],
+                        row["pid"],
+                        row["press"],
+                        str(row["budget"]),
+                        int(seed),
+                    )
                 )
-            )
-        if len(valid) != len([x for x in lines if x.strip()]):
-            healed = ("\n".join(valid) + "\n") if valid else ""
-            path.write_text(healed, encoding="utf-8")
-    return done
+            if len(valid) != len([x for x in lines if x.strip()]):
+                healed = ("\n".join(valid) + "\n") if valid else ""
+                path.write_text(healed, encoding="utf-8")
+        return keys
+
+    all_jsonl = sorted(runs_root.rglob("*.jsonl"))
+    result_keys = scan([p for p in all_jsonl if "token_ids" not in p.parts])
+    if not store_token_ids:
+        return result_keys
+    return result_keys & scan([p for p in all_jsonl if "token_ids" in p.parts])
 
 
 def main() -> int:
@@ -105,7 +123,18 @@ def main() -> int:
         model_cfg, attn_implementation="eager" if eager else None
     )
     runs_root = Path(os.environ["REMOTE_RUNS_ROOT"])
-    done_keys = _grid_done_keys(runs_root) if args.resume else set()
+    store_token_ids = bool(config.get("store_token_ids"))
+    config_seeds = [int(s) for s in config["seeds"]]
+    if args.seeds.strip():
+        shard = {int(s) for s in args.seeds.split(",")}
+        active_seeds = [s for s in config_seeds if s in shard]
+        if not active_seeds:
+            raise SystemExit(
+                f"--seeds {args.seeds} disjoint from config seeds {config_seeds}"
+            )
+    else:
+        active_seeds = config_seeds
+    done_keys = _grid_done_keys(runs_root, store_token_ids) if args.resume else set()
     counts = {"rows": 0, "truncated": 0, "skipped_resume": len(done_keys)}
     if args.resume:
         print(f"RESUME: skipping {len(done_keys)} already-complete generations")
@@ -120,7 +149,7 @@ def main() -> int:
         max_new_tokens = int(config["max_new_tokens"][benchmark])
         for press_name in config["presses"]:
             for budget in config["budgets"]:
-                for seed in config["seeds"]:
+                for seed in active_seeds:
                     runmeta = capture_runmeta(config["name"], args.config, int(seed))
                     for problem in problems:
                         if (
@@ -170,6 +199,21 @@ def main() -> int:
                             compression_ratio=min(1.0, int(budget) / logical_tokens),
                         )
                         output = append_result(runs_root, row)
+                        if store_token_ids:
+                            # Exact token IDs make every compressed trace replay-ready
+                            # (reverse readout, TV profiles) without lossy re-tokenize.
+                            append_token_ids(
+                                runs_root,
+                                build_token_ids_record(
+                                    result_row=row,
+                                    prompt_token_ids=generation.prompt_token_ids,
+                                    trace_token_ids=generation.trace_token_ids,
+                                    prompt_text=generation.prompt,
+                                    trace_text=generation.trace,
+                                    tokenizer=tokenizer,
+                                    tokenizer_revision=str(model_cfg["revision"]),
+                                ),
+                            )
                         counts["rows"] += 1
                         counts["truncated"] += int(row["truncated"])
                         print(f"wrote {output}: {benchmark}/{problem.pid}/s{seed}")

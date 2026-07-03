@@ -1,0 +1,18 @@
+name: readout_math500_diss2048_h2o
+stage: replay
+mode: readout
+# H2O forward readout decomposition at budget 2048 (needs eager attention; run_replay
+# auto-loads it). Tests whether H2O also shows a readout-invisible trajectory residual.
+reference_run_name: math500-fc-powered-merged
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+subset:
+  math500: 100
+presses: [h2o]
+budgets: [2048]
+seeds: [11, 23, 47, 89]
+compression_interval: 64
+max_answer_tokens: 2048
+estimated_generation_count: 0
+estimated_replay_count: 400
+scale_authorized: true

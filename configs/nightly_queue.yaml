@@ -1,0 +1,106 @@
+# Ordered job queue for scripts/nightly_autorun.py (the nightly auto-launch orchestrator).
+# Each night at 02:00 (Asia/Dubai) the orchestrator launches the FIRST job that is
+# (a) incomplete and (b) has its `requires` dependency complete, GPU-aware + OOM-safe.
+#
+# enabled: false is the kill-switch (orchestrator exits 0 immediately).
+# Appending a job needs no code change. min_free_gb is the per-job OOM threshold.
+version: 1
+enabled: true
+jobs:
+  # The token-ID 256 re-run (reproduces the phenomenon + makes traces reverse-replay-ready).
+  - name: grid-diss256-tok
+    command: grid
+    config: configs/experiments/grid_math500_dissociation.yaml
+    run_name: grid-diss256-tok
+    total: 800
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 24          # budget-256 free-run under compression ~18-19GB + headroom
+    progress_kind: grid      # counts runs/grid-diss256-tok/math500/**/*.jsonl (excl token_ids)
+    requires: null
+
+  # Reverse readout: the compressed traces read out under FULL cache -> residual bracket.
+  - name: reverse-readout-diss256
+    command: replay
+    config: configs/experiments/reverse_readout_diss256.yaml
+    run_name: reverse-readout-diss256
+    total: 800
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 28          # FULL-cache teacher-forcing on 8-16k traces -> more memory
+    progress_kind: readout   # counts runs/reverse-readout-diss256/readout/**/*.jsonl
+    requires: grid-diss256-tok
+
+  # Per-step TV-divergence profiles over the FC reference (Figure 4 / the mechanism panel).
+  - name: replay-diss256
+    command: replay
+    config: configs/experiments/replay_math500_diss256.yaml
+    run_name: replay-diss256
+    total: 800
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 24
+    progress_kind: grid      # compression_replay writes rows to math500/ (profiles sidecar)
+    requires: null           # references the FC bank, independent of grid-diss256-tok
+
+  # --- Budget-2048 "silent-flip" regime (the other half of the story) ---
+  - name: grid-diss2048-tok
+    command: grid
+    config: configs/experiments/grid_math500_diss2048.yaml
+    run_name: grid-diss2048-tok
+    total: 800
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 24
+    progress_kind: grid
+    requires: null
+
+  # --- H2O (3rd eviction method) for the generality envelope. Needs EAGER attention
+  # (run_grid/run_replay auto-load it); eager materializes attention -> higher memory, so
+  # min_free_gb is conservative (36). Monitor logs/grid-diss256-h2o.log for OOM on the
+  # rambling budget-256 traces; if it OOMs, lower max_new_tokens for the h2o grid. ---
+  - name: grid-diss256-h2o
+    command: grid
+    config: configs/experiments/grid_math500_diss256_h2o.yaml
+    run_name: grid-diss256-h2o
+    total: 400
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 36
+    progress_kind: grid
+    requires: null
+  - name: readout-diss256-h2o
+    command: replay
+    config: configs/experiments/readout_math500_diss256_h2o.yaml
+    run_name: readout-diss256-h2o
+    total: 400
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 36
+    progress_kind: readout
+    requires: null
+
+  # readout-2048 runs AFTER H2O-256: H2O is the method HOTT reports as surviving, so
+  # testing method-invariance of the trajectory residual against it is highest-value.
+  - name: readout-diss2048
+    command: replay
+    config: configs/experiments/readout_math500_diss2048.yaml
+    run_name: readout-diss2048
+    total: 800
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 24
+    progress_kind: readout
+    requires: null           # references the FC bank
+
+  - name: grid-diss2048-h2o
+    command: grid
+    config: configs/experiments/grid_math500_diss2048_h2o.yaml
+    run_name: grid-diss2048-h2o
+    total: 400
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 36
+    progress_kind: grid
+    requires: null
+  - name: readout-diss2048-h2o
+    command: replay
+    config: configs/experiments/readout_math500_diss2048_h2o.yaml
+    run_name: readout-diss2048-h2o
+    total: 400
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 36
+    progress_kind: readout
+    requires: null

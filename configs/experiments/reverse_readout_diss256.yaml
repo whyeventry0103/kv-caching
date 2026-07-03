@@ -1,0 +1,24 @@
+name: reverse_readout_diss256
+stage: replay
+mode: readout
+# REVERSE readout (M7 first rung). The COMPRESSED free-run trace (from the token-ID grid
+# re-run) is teacher-forced and read out under the FULL cache (press: fullcache = no
+# compression during read-out). Forward + reverse readout BRACKET the on-policy residual
+# (decomposition.py residual_bracket); this is what defends the trajectory-residual claim
+# against the off-policy / covariate-shift bias (PREREGISTRATION Amendment F).
+#
+# reference_run_name MUST be a compression grid carrying token-ID sidecars -- the original
+# grid-math500-dissociation-v1 has none, so this points at the store_token_ids re-run.
+reference_run_name: grid-diss256-tok
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+subset:
+  math500: 100
+presses: [fullcache]
+budgets: [256]
+seeds: [11, 23, 47, 89]
+compression_interval: 64
+max_answer_tokens: 2048
+estimated_generation_count: 0
+estimated_replay_count: 800
+scale_authorized: true

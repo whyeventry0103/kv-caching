@@ -1,0 +1,20 @@
+name: grid_math500_diss2048
+stage: grid
+# Budget-2048 dissociation (near-full cache) = the SILENT-FLIP regime: accuracy closer to
+# full-cache, but ADD / readout may still shift. StreamingLLM + Random at budget 2048,
+# 100 MATH-500 problems x n=4 = 800 gens. Token IDs stored so the traces are reverse-replay
+# ready. Faster per-gen than budget 256 (much less rambling near full cache).
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+subset:
+  math500: 100
+presses: [streamingllm, random]
+budgets: [2048]
+seeds: [11, 23, 47, 89]
+max_new_tokens:
+  math500: 16384
+compression_interval: 64
+estimated_generation_count: 800
+scale_authorized: true
+remote_only: true
+store_token_ids: true

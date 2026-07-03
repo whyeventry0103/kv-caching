@@ -1,0 +1,353 @@
+\documentclass[11pt]{article}
+
+% ---------- Preamble ----------
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{makecell}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{microtype}
+\usepackage[colorlinks=true,linkcolor=blue!60!black,citecolor=blue!60!black,urlcolor=blue!60!black]{hyperref}
+\usepackage[capitalize,noabbrev]{cleveref}
+
+\newtheorem{definition}{Definition}
+\emergencystretch=1.5em
+
+% Placeholder figure box
+\newcommand{\figplaceholder}[1]{%
+  \fbox{\parbox{0.94\linewidth}{\centering\vspace{2.2em}\textsc{Figure placeholder}\vspace{0.4em}\\ \small #1 \vspace{2.2em}}}}
+
+% Visible TODO placeholder (never guess a missing fact)
+\newcommand{\todo}[1]{\textcolor{red}{\textbf{[TODO: #1]}}}
+
+% Estimand macros
+\newcommand{\accfc}{\mathrm{Acc}_{\mathrm{FC}}}
+\newcommand{\accfree}[1]{\mathrm{Acc}_{\mathrm{free}}(#1)}
+\newcommand{\accro}[1]{\mathrm{Acc}_{\mathrm{ro}}(#1)}
+\newcommand{\accrev}[1]{\mathrm{Acc}_{\mathrm{rev}}(#1)}
+\newcommand{\dtot}[1]{\Delta_{\mathrm{tot}}(#1)}
+\newcommand{\dro}[1]{\Delta_{\mathrm{ro}}(#1)}
+\newcommand{\res}[1]{\rho(#1)}
+\newcommand{\TV}{\mathrm{TV}}
+\newcommand{\ADD}{\mathrm{ADD}}
+
+\title{\bf Near-Lossless Under Readout, Collapse Under Free Generation:\\
+Decomposing the Accuracy Cost of KV-Cache Compression for Reasoning}
+\author{Anonymous Authors\\ \small Draft under preparation --- all numbers final unless marked \emph{in progress}}
+\date{}
+
+\begin{document}
+\maketitle
+
+% =====================================================================
+\begin{abstract}
+Two literatures disagree on what KV-cache compression costs reasoning models: eviction methods are certified near-lossless on predominantly \emph{readout-shaped} evidence (perplexity on held text, few-shot accuracy, retrieval), while the HOTT benchmark, \emph{free-running} the same eviction families on reasoning tasks, reports severe, method-specific degradation. We explain the contradiction with a measurement study --- not a new compression method --- that decomposes the free-running accuracy change under compression into an \emph{on-reference readout} component (teacher-force the full-cache reasoning trace; generate only the answer span under compression) and a \emph{trajectory residual}, defined as the accuracy change unexplained by on-reference readout. On MATH-500 with DeepSeek-R1-Distill-Qwen-7B at cache budget 256, full-cache accuracy of $0.882$ falls free-running to $0.237$ (StreamingLLM) and $0.422$ (random eviction), yet on-reference readout accuracy remains $0.584$ and $0.765$: a trajectory residual of roughly $-0.34$ for \emph{both} methods, which accuracy evaluation on held-fixed traces does not register. Because the forward residual is off-policy, we bound it with a reverse-replay bracket --- reading the compressed free-run trace out under the full cache --- and the bracket excludes zero for both methods (Random $[-0.34,-0.25]$, StreamingLLM $[-0.47,-0.35]$). Onset-aligned per-step total-variation profiles supply the mechanism: divergence is exactly zero before the first eviction, ${\approx}0.002$ per step immediately after, and compounds roughly $50\times$ over the remaining trajectory --- even with the trace held fixed --- so short-horizon evaluation structurally measures the pre-compounding regime. An answer-distribution instrument with a two-full-cache negative control (noise floor $\approx 0.07$ versus $0.56$--$0.75$ in compression cells) shows compression silently rewrites the answer distribution, with signed flip-mass overwhelmingly toward lost correct answers. The implication is direct: KV-compression papers should report free-running reasoning accuracy, because readout-style metrics can certify near-losslessness while free-running accuracy has collapsed.
+\end{abstract}
+
+% =====================================================================
+\section{Introduction}
+\label{sec:intro}
+
+KV-cache compression is the standard lever for serving long-context transformer inference within memory budgets: eviction policies such as StreamingLLM~\cite{xiao2023streamingllm}, H2O~\cite{zhang2023h2o}, SnapKV~\cite{li2024snapkv}, and R-KV~\cite{rkv2025} discard cached key--value entries and report that downstream quality is largely preserved --- frequently described as near-lossless --- even at aggressive compression ratios. Against this stands the HOTT benchmark~\cite{hott2025}, which evaluates the same eviction families \emph{free-running} on reasoning tasks and reports strongly \emph{method-specific} degradation, not uniform collapse: on MATH-500 with DeepSeek-R1-Distill-Qwen-7B (budgets 128--512), full-cache accuracy is $0.47$, and at budget 128 StreamingLLM scores $0.03$, H2O $0.14$, and SnapKV $0.38$ --- HOTT's own conclusion is that heavy-hitter methods (H2O, SnapKV-D) win across budgets and datasets for reasoning models. The sharpest case is StreamingLLM: certified near-lossless on its own perplexity evaluation, yet at $0.03$ free-running on MATH-500 reasoning. That single method \emph{is} the readout-vs-trajectory gap in the wild, and explaining it is this paper's contribution. Both literatures are internally careful; the contradiction is between what their protocols measure. This paper is a measurement and analysis study whose contribution is to explain \emph{why} they disagree. We propose no new compression technique.
+
+Our diagnosis begins with an observation about evaluation protocol. Most method papers evaluate in ways that hold the generated trace fixed or nearly fixed: perplexity on reference text, teacher-forced likelihoods, short-answer completions, or retrieval-style probes (R-KV, which evaluates free-running and claims gains, is the exception; \cref{sec:related} audits this and our in-progress cells test it). All of these interrogate what we call the \emph{readout} channel: given a (good) context, can the compressed model still read the answer out of it? Free-running benchmarks such as HOTT instead let the compressed model generate its own multi-hundred-token reasoning trajectory, so any distortion the compression induces in the trajectory itself is allowed to accumulate and feed back. If compression damage were purely a readout phenomenon, the two protocols would agree. They do not, which raises the central question of this paper: \textbf{how much of the free-running accuracy loss under KV compression is attributable to readout, and how much lives in the generated trajectory itself --- and can the trajectory part be seen at all by held-fixed-trace evaluation?}
+
+We answer with an explicit decomposition. For each compression method $m$ we measure the \emph{total} accuracy change of compressed free-running generation against a pinned full-cache reference bank; the \emph{on-reference readout} change, obtained by teacher-forcing the exact full-cache reasoning token IDs to the reasoning/answer boundary and then generating only the answer span under compression; and the \emph{residual}, defined --- and only defined --- as the accuracy change unexplained by on-reference readout. Because the readout intervention conditions on the full-cache trajectory, it is off-policy with respect to the states the compressed model actually visits, and the residual is biased toward the trajectory share~\cite{ross2011dagger}. We therefore state this caveat up front, not in rebuttal, and bound the bias symmetrically with \emph{reverse replay}: the compressed free-run trace read out under the full cache. Forward and reverse readout together bracket the on-policy residual. Two further instruments complete the suite: \emph{ADD}, a total-variation measure of answer-distribution distortion with a permutation null, a termination-versus-within-answered decomposition, and a signed flip-mass that separates gained from lost correct answers; and an onset-aligned per-step total-variation profile over teacher-forced replay, which localizes \emph{when} divergence arises relative to the first eviction event.
+
+\paragraph{Thesis.} Compression damage to reasoning is real, large, and largely \emph{invisible to teacher-forced / readout-style evaluation} --- which is why method papers that evaluate on held-fixed traces report near-lossless while free-running evaluation reports severe, method-specific degradation (for StreamingLLM, collapse). The gap is the trajectory residual, and it arises from a divergence that is approximately zero at the moment of eviction and \emph{compounds} over the generated trajectory.
+
+We emphasize what the thesis is not. We observed no accuracy \emph{gains} under compression on small-budget MATH-500, so no ``denoising'' or $>$100\%-of-baseline regime is claimed; the paper is framed strictly as near-lossless-under-readout versus collapse-under-free-generation. And throughout, divergence quantities (ADD, per-step TV, the residual) are reported as \emph{behavioral-fidelity loss}, never as ``damage to reasoning ability'': correctness is the only quality arbiter, and every divergence quantity is accompanied by its signed flip-mass.
+
+\paragraph{Contributions.}
+\begin{itemize}[leftmargin=1.6em,itemsep=2pt]
+  \item \textbf{A resolution of the near-lossless-under-readout versus degraded-under-free-running contradiction} via an accuracy-scale decomposition of compressed free-running loss into on-reference readout and a trajectory residual, with the residual explicitly framed as a definition (``accuracy change unexplained by on-reference readout''), not a measured cause (\cref{sec:estimands}).
+  \item \textbf{The powered phenomenon}: at budget 256 on MATH-500 (DeepSeek-R1-Distill-Qwen-7B), full-cache accuracy $0.882$ collapses to $0.237$ (StreamingLLM) and $0.422$ (Random); random eviction beats the principled recency policy by $+0.185$, 95\% CI $[0.130, 0.242]$, on 94/100 problems (\cref{sec:phenomenon}).
+  \item \textbf{A large, readout-invisible trajectory residual} of $\approx -0.34$ for both methods (400 conditions per cell), with the entire $+0.185$ Random-vs-StreamingLLM gap living in the readout channel --- on the forward estimand, trajectory damage is method-invariant at this scope, reported as exploratory (\cref{sec:forward}).
+  \item \textbf{An off-policy defense}: forward and reverse readout give two $\text{total}-\text{readout}$ residual estimates whose min/max bracket excludes zero for both methods (Random $[-0.343,-0.246]$, StreamingLLM $[-0.465,-0.347]$) --- for StreamingLLM the reverse estimate \emph{exceeds} the forward one --- so the central claim survives the covariate-shift correction, while the \emph{method-level} readout-vs-trajectory attribution is reported as exploratory (\cref{sec:reverse}).
+  \item \textbf{The mechanism}: onset-aligned TV profiles over 800 replays show divergence of exactly $0.0000$ before the first eviction, $0.0018$ in the first 50 post-eviction steps, compounding to $0.0884$ later --- slow-compounding drift that single-step evaluation structurally misses (\cref{sec:mechanism}).
+  \item \textbf{Instrument validity}: a two-full-cache negative control establishing an ADD noise floor of $\approx 0.07$ (mean permutation $p = 0.976$, 0\% of problems significant) against compression-cell ADD of $0.56$--$0.75$, plus a Jaccard-1.0 retained-set parity certification of our R-KV port (\cref{sec:control}).
+\end{itemize}
+
+\paragraph{Summary of findings.} At budget 256 both eviction methods lose most of their free-running accuracy, but teacher-forced readout recovers much of it: readout accuracy is $0.765$ (Random) and $0.584$ (StreamingLLM) against free-running $0.422$ and $0.237$, leaving trajectory residuals of $-0.343$ and $-0.347$. Reverse replay confirms the residual is not an off-policy artifact: reading the compressed trajectory out under a \emph{full} cache recovers only to $0.636$ and $0.417$, far below the $0.882$ reference. The per-step TV profile places the origin of this loss after the first eviction with near-zero immediate effect and strong compounding, and ADD shows the two methods distort the answer distribution through different channels --- StreamingLLM almost entirely within-answered (it keeps answering, but wrongly; ADD $0.751$, signed flip-mass $-0.646$), Random with a larger termination-mass shift ($+0.224$; it rambles and fails to terminate). Our pre-registered read of the powered decomposition came out \textsc{complicate}: the central residual is robust, but the pilot's clean ``StreamingLLM$=$readout / Random$=$trajectory'' double dissociation did not survive powering.
+
+% =====================================================================
+\section{Related Work}
+\label{sec:related}
+
+\subsection{KV-cache eviction methods and how they evaluate}
+StreamingLLM~\cite{xiao2023streamingllm} retains attention sinks plus a recent window; H2O~\cite{zhang2023h2o} retains heavy-hitter tokens by accumulated attention mass; SnapKV~\cite{li2024snapkv} selects entries by observation-window attention prior to generation; R-KV~\cite{rkv2025} targets redundancy in reasoning traces specifically. Eviction is one of several compression families --- quantization (e.g., KIVI~\cite{liu2024kivi}) and merging store all entries at reduced fidelity rather than discarding them --- and we scope this study to decoding-time eviction, the family HOTT evaluates and the one whose near-lossless certifications conflict with free-running results. The crux for this paper is not the eviction policies but their \emph{evaluation protocols}, audited in \cref{tab:audit}. For three of the four, the primary near-lossless evidence is readout-shaped: StreamingLLM's is language-modeling perplexity on held reference text (PG19, streaming to 4M tokens); H2O's is few-shot task accuracy under lm-eval plus summarization (XSUM/CNN) and throughput; SnapKV's is LongBench and needle-in-a-haystack retrieval. Each of these either holds the trace fixed or keeps generations short enough that trajectory feedback cannot accumulate; in our terminology (\cref{sec:estimands}), they estimate the readout channel. \textbf{R-KV is the counterexample, not an instance}: it evaluates MATH-500 and AIME-24 \emph{free-running} and claims $105\%$ of full-KV accuracy at ${\sim}16\%$ cache (R1-Distill-Llama-8B, AIME-24) --- a claimed $>$100\% regime that our in-progress R-KV cells test directly rather than explain away (we observed no such regime on small-budget MATH-500 at 7B; \cref{sec:threats}). For the readout-evaluated majority, none of the primary evidence estimates the accuracy of a long, free-running, compression-active reasoning trajectory --- the quantity a deployed reasoning model actually delivers. This is the evaluation gap through which a $\approx -0.34$ trajectory residual can pass unobserved.
+
+\begin{table}[t]\centering
+\caption{Evaluation-protocol audit. Near-lossless claims for eviction methods rest on
+readout-shaped evidence; only R-KV reports free-running reasoning accuracy (and claims gains
+--- the regime our in-progress cells test, not one we explain away).}\label{tab:audit}\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{llp{5.6cm}cc}
+\toprule
+Method & Venue & Primary near-lossless evidence & Trace fixed? & \makecell{Free-run\\ reasoning acc?} \\
+\midrule
+StreamingLLM & ICLR'24 & LM perplexity (PG19, streaming to $4$M tok) & Yes & No \\
+H2O & NeurIPS'23 & few-shot task acc.\ (lm-eval), summ.\ (XSUM/CNN), throughput & Mostly & No \\
+SnapKV & NeurIPS'24 & LongBench, Needle-in-a-Haystack retrieval & Yes & No \\
+R-KV & NeurIPS'25 & \textbf{MATH-500, AIME-24 free-running}; $105\%$ full-KV @ ${\sim}16\%$ cache & No & \textbf{Yes} \\
+\bottomrule
+\end{tabular}\end{table}
+
+\subsection{Reasoning under compression}
+The HOTT benchmark (\emph{Hold Onto That Thought})~\cite{hott2025} evaluates the same eviction families free-running on reasoning tasks, with strongly method-dependent outcomes rather than uniform collapse: at budget 128 on R1-Distill-Qwen-7B MATH-500 (HOTT Table 2, budgets 128/256/384/512), StreamingLLM falls to $0.03$ against a full-cache baseline of $0.47$, while H2O ($0.14$) and SnapKV ($0.38$) degrade far less; HOTT's verbatim conclusion is that \emph{``heavy-hitter methods H2O and SnapKV-D win over all budgets and datasets for reasoning models''}. Set against the method papers' own near-lossless certifications (\cref{tab:audit}), this is the contradiction we decompose --- sharpest for StreamingLLM, near-lossless under its own perplexity protocol and at $0.03$ under HOTT's free-running one. We do not merge HOTT's numbers with ours digit-for-digit: the baselines differ (HOTT's full-cache MATH-500 accuracy is $0.47$ versus our $0.882$, reflecting different decode-length and sampling configurations). What we reconcile is the \emph{channel structure}: method-paper near-losslessness lives in the readout channel, HOTT's free-running degradation lives in the trajectory channel, and the residual is their difference --- both sets of numbers can be simultaneously correct because they measure different channels of the same underlying loss. We use the same library stack HOTT used (kvpress) for comparability, including its H2O-style \texttt{ObservedAttentionPress} labeling (\cref{sec:setup}). Two further critical strands corroborate the evaluation gap without explaining it: degradation under compression is highly non-uniform across instruction types, so averaged accuracy hides failure structure~\cite{pitfalls2025}, and worst-case lower bounds limit lossless cache compressibility~\cite{barriers2025}. Neither line separates readout from trajectory, which is the decomposition this paper contributes.
+
+\subsection{Teacher forcing versus free running}
+That teacher-forced evaluation can diverge sharply from free-running behavior is a classical observation: exposure bias in sequence models~\cite{ranzato2016exposure,bengio2015scheduled} and the covariate-shift analysis of imitation learning~\cite{ross2011dagger} both formalize how errors compound when a model consumes its own outputs, with regret growing superlinearly in horizon under distribution shift. Our forward readout estimand is deliberately off-policy in exactly the DAgger sense --- it conditions on reference states --- and we import that lineage's discipline: the residual is stated as biased toward the trajectory share, and the bias is bounded empirically (reverse replay) rather than argued away. We retain total variation over KL/JSD for per-step divergence because $1 - \text{acceptance} \approx \TV$ in speculative decoding~\cite{leviathan2023speculative}, giving TV a direct behavioral reading; JSD is an appendix sensitivity. To our knowledge, no prior work applies this teacher-forcing-versus-free-running lens \emph{quantitatively, on an accuracy scale}, to KV-cache compression of reasoning models, which is the specific measurement this paper contributes.
+
+% =====================================================================
+\section{Estimands and Experimental Design}
+\label{sec:estimands}
+
+\subsection{Setup}
+\label{sec:setup}
+\textbf{Model and benchmark.} DeepSeek-R1-Distill-Qwen-7B~\cite{deepseek2025r1} on MATH-500~\cite{hendrycks2021math,lightman2023verify}, sampled at temperature $0.6$, top-$p$ $0.95$, seeds frozen in configuration.
+
+\textbf{Full-cache reference.} A single pinned canonical full-cache (FC) bank: 250 problems $\times$ $n{=}8$ seeds $=$ 2000 generations, FC accuracy $\accfc = 0.882$. Every accuracy change in this paper is computed against this one bank by construction.
+
+\textbf{Compression cells.} 100 problems $\times$ $n{=}4$ seeds per (method, budget) cell at budget \textbf{256} --- the collapse pole; budget 2048 cells are \emph{in progress}. Eviction presses: \textbf{StreamingLLM} (sinks $+$ recent window) and \textbf{Random} (uniform eviction with a per-(problem, seed) RNG, so the effect cannot be a single lucky seed); \textbf{H2O} (kvpress \texttt{ObservedAttentionPress}, the accumulated-attention heavy-hitter signal, labeled ``H2O-style'' because it lacks the paper's explicit recent-window reservation; requires eager attention) and \textbf{R-KV} (parity-verified port, \cref{sec:control}) are \emph{in progress}. Budget parity is verified: at \texttt{target\_size}$=256$ both StreamingLLM and Random prune to identical retained budgets (256 after prune, 320 before) --- \emph{same total budget, different positional allocation}. The differing positional coverage is arguably the mechanism under study, not an artifact to eliminate.
+
+\textbf{Stack.} \texttt{transformers} 4.56.2, \texttt{kvpress} 0.5.3 (the library HOTT used); decoding-time \texttt{DecodingPress} with \texttt{compression\_interval}$=64$ and \texttt{target\_size}$=$ budget.
+
+\textbf{Grader.} Correctness is decided by a vetted pairwise grader implementing canonical Hendrycks-MATH normalization (\texttt{is\_equiv}), applied to raw gold and raw predicted answers, with no \texttt{eval}/\texttt{sympify} executed on model text. \texttt{sympify}-based canonicalization is used only as an ADD bucketing key, never as the correctness oracle.
+
+\textbf{Exact-token-ID replay protocol.} All teacher-forced instruments replay \emph{exact stored token IDs}, held in an additively validated sidecar, for bitwise-faithful replay. Rendered chat-template prompts are tokenized with \texttt{add\_special\_tokens=False}; single-BOS tokenization is verified by a decode$\leftrightarrow$encode round trip (a duplicated-BOS protocol error was caught by this validation before any replay ran, and all affected pilot rows were retired to provenance).
+
+\textbf{Truncation discipline.} Truncated generations remain in every denominator and are scored incorrect; they are never dropped as malformed. Truncation rate is reported per cell (\cref{tab:decomp}: Random $0.233$, StreamingLLM $0.070$); Random's $3.3\times$ higher truncation is consistent with its larger termination-mass shift in \cref{sec:add}.
+
+\textbf{Statistical methodology.} All accuracy confidence intervals are problem-clustered bootstrap 95\% intervals: 2000 resamples of problems with replacement, percentile intervals (2.5/97.5 indices). ADD significance uses a per-problem permutation null with 10{,}000 resamples of pooled relabelings, Benjamini--Hochberg corrected across problems.
+
+\textbf{Compute.} Generation totaled approximately 230 GPU-hours of summed wall-clock across ${\sim}7{,}300$ generations (excluding model-load and teacher-forcing overhead).
+
+\subsection{Estimands}
+Let $\accfc$ denote full-cache accuracy on the pinned reference bank and let $m$ index a (method, budget) cell.
+
+\begin{definition}[Total change]
+$\accfree{m}$ is the accuracy of free-running generation with compression active throughout. The total change is
+\begin{equation}
+\dtot{m} \;=\; \accfree{m} - \accfc .
+\end{equation}
+\end{definition}
+
+\begin{definition}[On-reference (forward) readout]
+For each FC reference trace, the reasoning/answer boundary is deterministic and logged per row: the \emph{last} \texttt{</think>} token when present (robust to multiple closes and \texttt{\textbackslash boxed\{\}} emitted mid-reasoning); else an answer-marker fallback; else \emph{undefined}. Undefined-boundary rows are excluded from readout accuracy and counted ($n_{\mathrm{readout\text{-}undefined}}$), never silently dropped. The exact stored reference token IDs are teacher-forced through the boundary into the \emph{compressed} cache; from the boundary, the answer span is freely sampled under the same compression method, budget, temperature, top-$p$, and matched seed, and scored with the frozen grader. This yields $\accro{m}$ and
+\begin{equation}
+\dro{m} \;=\; \accro{m} - \accfc .
+\end{equation}
+\end{definition}
+
+\begin{definition}[Residual --- a definition, not a measured cause]
+\begin{equation}
+\res{m} \;=\; \dtot{m} - \dro{m} \;=\; \accfree{m} - \accro{m}.
+\label{eq:residual}
+\end{equation}
+$\res{m}$ is labeled, throughout, \emph{accuracy change unexplained by on-reference readout}. It is not a directly measured causal effect of trajectory distortion. Because the readout intervention conditions on the good full-cache trajectory, it plausibly underestimates readout failure on the states the compressed model actually visits, biasing $\res{m}$ toward the trajectory share (the covariate-shift argument of~\cite{ross2011dagger}). This caveat is structural to the estimand and is stated here, up front.
+\end{definition}
+
+\begin{definition}[Reverse readout and the residual bracket]
+Reverse readout inverts the roles: the \emph{compressed free-run} trace is teacher-forced to its boundary under the \emph{full} cache, and the answer span is generated full-cache, yielding $\accrev{m}$. Both bracket endpoints are $\text{total} - \text{readout}$ residual estimates, with the readout change measured on two different state distributions: the forward endpoint $\rho_{\mathrm{fwd}} = \dtot{m} - \dro{m}$ measures readout on \emph{reference} states, and the reverse endpoint measures it on the compressed model's \emph{own} states, since $\accfree{m} - \accrev{m}$ is the cost of compressed versus clean readout of the same compressed traces:
+\begin{equation}
+\rho_{\mathrm{rev}}(m) \;=\; \dtot{m} - \bigl(\accfree{m} - \accrev{m}\bigr) \;=\; \accrev{m} - \accfc ,
+\qquad
+\rho_{\mathrm{bracket}}(m) \;=\; \bigl[\, \min(\rho_{\mathrm{fwd}}, \rho_{\mathrm{rev}}),\; \max(\rho_{\mathrm{fwd}}, \rho_{\mathrm{rev}}) \,\bigr].
+\end{equation}
+The two estimates are off-policy in opposite directions, so their interval brackets the on-policy residual. A bracket bounded away from zero is what licenses the (bounded) causal reading of the residual; the point estimate alone does not.
+\end{definition}
+
+\begin{definition}[ADD: answer-distribution distortion]
+For each problem, let $P_{\mathrm{FC}}$ and $P_m$ be the coarsened, canonicalized answer distributions over the FC bank ($n{=}8$) and the compressed cell ($n{=}4$; the TV estimate's variance is dominated by the smaller $n$, so the asymmetry only tightens the reference side). Then
+\begin{equation}
+\ADD(m) \;=\; \TV\bigl(P_{\mathrm{FC}}, P_m\bigr),
+\end{equation}
+a \emph{lower bound} on behavioral change --- it sees only changes that reach the answer --- and never described as ``behavioral change'' tout court. ADD is reported alongside its two channels: the \textbf{termination-mass shift} (signed change in \texttt{OTHER}/truncation-bucket probability; a length effect) and the \textbf{within-answered TV} (TV between the \emph{renormalized} answered-only distributions; the reasoning channel) --- these are separate diagnostics, not additive parts of ADD --- so a truncation increase is never read as a reasoning change; the identity $\ADD \ge \tfrac{1}{2}\lvert \text{termination shift} \rvert$ is reported. Significance uses a per-problem exact or Monte Carlo \textbf{permutation null} formed by relabeling pooled samples (split-half subtraction is prohibited), with Benjamini--Hochberg correction across problems. Every ADD value is accompanied by its \textbf{signed flip-mass} --- gained versus lost correct-answer mass --- because divergence from the reference is not intrinsically damage; correctness is the arbiter.
+\end{definition}
+
+\begin{definition}[TV profile, onset, and TDP]
+Per-step divergence between full-cache and compressed \emph{teacher-forced replay} of the same token IDs is measured as total variation between next-token distributions, $\TV_t = \TV\bigl(p^{\mathrm{FC}}_t, p^{m}_t\bigr)$ --- TV, not KL, for the speculative-decoding behavioral reading noted above. Profiles are onset-aligned at each row's first prune event; summaries are threshold-free AUC-TV and windowed means (pre-eviction, first 50 post-eviction steps, later steps). TDP localizes divergence onset. These are distribution-fidelity instruments on their own scale; they are never subtracted from an accuracy delta.
+\end{definition}
+
+\subsection{Pre-registration}
+The decomposition's read was pre-committed before the powered numbers existed, with named \textsc{confirm} / \textsc{complicate} / \textsc{refute} criteria (CI-based thresholds on readout accuracy, readout share, and share separability), and we report the outcome whatever it shows. The outcome was \textsc{complicate} (\cref{sec:forward}). The pilot double dissociation that motivated the confirmatory criteria was itself pre-registered as an unconfirmed, hypothesis-generating observation from $n{=}5$ problems. Deviations from the original protocol are recorded in the pre-registration's dated, append-only amendment log; the material one is cell size --- the original specification named 250 problems $\times$ $n{=}8$ for compression cells, and the powered cells ran at 100 $\times$ $n{=}4$ (fixed, with the pre-committed read, before the decisive readout run) --- with the full-cache reference kept at 250 $\times$ $n{=}8$.
+
+% =====================================================================
+\section{Results}
+\label{sec:results}
+
+All compression-cell results are at budget 256 on MATH-500 unless stated; confidence intervals are problem-clustered bootstrap 95\% CIs against the single pinned FC reference. \textsc{Done} items are final; budget-2048, H2O, R-KV cells, and AIME are \emph{in progress} and appear only in \cref{sec:threats,sec:conclusion} as planned extensions.
+
+\subsection{The powered phenomenon: collapse, and random beats recency}
+\label{sec:phenomenon}
+From $\accfc = 0.882$, free-running accuracy at budget 256 falls to $\mathbf{0.237}$ for StreamingLLM and $\mathbf{0.422}$ for Random (100 problems $\times$ 4 seeds per cell). Random eviction beats the principled sinks-plus-recency policy by $+0.185$, 95\% CI $[0.130, 0.242]$, on \textbf{94/100 problems}. Both presses retain the same total budget (\cref{sec:setup}), so the gap is \emph{which} 256 tokens are kept, not how many. This is the phenomenon the rest of the paper decomposes: free-running degradation of the kind HOTT reports --- sharpest, as in HOTT, for StreamingLLM --- at a compression level the method literature certifies as safe under readout-shaped evaluation.
+
+\begin{figure}[t]
+\centering
+\figplaceholder{\textbf{The phenomenon.} Per-cell free-running accuracy bars with problem-clustered bootstrap CIs: full cache $0.882$; Random-256 $0.422$; StreamingLLM-256 $0.237$. Inset: per-problem paired differences (Random $-$ StreamingLLM), highlighting the 94/100 problems where Random wins and the $+0.185$ $[0.130, 0.242]$ mean gap.}
+\caption{Free-running collapse at budget 256 and the Random-vs-StreamingLLM gap.}
+\label{fig:phenomenon}
+\end{figure}
+
+\subsection{Forward decomposition: the loss is mostly not readout}
+\label{sec:forward}
+\cref{tab:decomp} gives the forward decomposition: 400 conditions per cell (100 problems $\times$ 4 seeds), 800 in total across the two method cells.
+
+\begin{table}[t]
+\centering
+\caption{Forward decomposition at budget 256 (400 conditions per cell: 100 problems $\times$ 4 seeds). $\accfc = 0.882$. CIs are problem-clustered bootstrap 95\% (2000 resamples, percentile). Readout share $= \dro{m}/\dtot{m}$ (ratio of cell means). Trunc.\ = per-cell truncation rate; truncated rows remain in every denominator, scored incorrect. Undefined reasoning/answer boundary: 8 rows per cell, balanced across methods.}
+\label{tab:decomp}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lccccccc}
+\toprule
+Method @256 & $\accfree{m}$ & $\accro{m}$ (95\% CI) & $\dtot{m}$ & $\dro{m}$ & $\res{m}$ & Readout share & Trunc. \\
+\midrule
+Random       & 0.422 & 0.765 $[0.686, 0.817]$ & $-0.460$ & $-0.117$ & $\mathbf{-0.343}$ & 25\% & 0.233 \\
+StreamingLLM & 0.237 & 0.584 $[0.495, 0.647]$ & $-0.645$ & $-0.298$ & $\mathbf{-0.347}$ & 46\% & 0.070 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Two facts carry the paper. \textbf{(i) A large trajectory residual exists for both methods.} Readout accuracy sits far above free-running accuracy for both presses (non-overlapping with the free-run values), leaving residuals of $-0.343$ and $-0.347$: roughly 34 accuracy points, for both methods, that held-fixed-trace accuracy evaluation does not register. A protocol that teacher-forces the reasoning trace and scores answer readout would certify Random-256 at $0.765$ --- within sight of the $0.882$ reference --- while its deployed free-running accuracy is $0.422$. This is, in one row of a table, the resolution of the near-lossless/collapse contradiction. \textbf{(ii) The entire method gap is in the readout channel.} The $+0.185$ Random-vs-StreamingLLM free-run gap decomposes into a $0.181$ difference in readout change and a $0.004$ difference in residual: on the forward estimand, trajectory damage is essentially \emph{method-invariant} at this scope. We report method-invariance as \textbf{exploratory} (one model, one benchmark, one budget, two methods; and the reverse-side residual estimates do separate the methods, \cref{sec:reverse}). Truncation rates differ sharply --- Random $0.233$ versus StreamingLLM $0.070$, a $3.3\times$ gap --- and, with truncations in-denominator and scored incorrect, this anticipates Random's larger ADD termination-mass shift ($+0.224$ vs.\ $+0.081$; \cref{sec:add}).
+
+\textbf{Why does random beat recency? (hypothesis-level.)} We offer an interpretation, explicitly labeled as unverified: StreamingLLM's sinks-plus-recent-window allocation discards the early portion of the trace --- the problem statement and its givens --- which is precisely the material answer readout needs to consult, whereas uniform random eviction preserves a coarse, thinned sketch of the \emph{entire} trajectory, problem statement included. This interpretation is consistent with where the gap localizes --- entirely in the readout channel --- but no eviction-content attribution experiment in this paper tests it; we advance it as hypothesis, not finding.
+
+\textbf{Pre-registered outcome: \textsc{complicate}.} The pre-committed criteria for the strong headline required Random to be readout-lossless (readout CI lower bound $\ge 0.75$) and the two readout shares to separate with StreamingLLM $\ge 0.5$. Neither held: Random's readout change is significantly negative (CI lower bound $0.686 < 0.75$) and StreamingLLM's share is $0.46 < 0.5$. The pilot's clean ``StreamingLLM$=$readout-dominated, Random$=$trajectory-dominated'' double dissociation is therefore \emph{false} at power; reality is ``both heavily and equally trajectory-damaged, differing in readout fidelity.'' The central residual --- the part the contradiction needs --- confirmed robustly; the paper is framed around what survived.
+
+\subsection{Reverse-replay bracket: the residual survives the off-policy correction}
+\label{sec:reverse}
+The forward residual conditions on full-cache states and is biased toward the trajectory share (\cref{eq:residual}). Reverse replay measures the residual from the other side: the compressed free-run trace is read out under the \emph{full} cache. If the free-running loss were mostly readout failure that the forward estimand mis-assigns, clean full-cache readout of the compressed trajectory would recover accuracy toward $\accfc$. It does not: $\accrev{\text{Random}} = 0.636$ and $\accrev{\text{SLM}} = 0.417$ versus $\accfc = 0.882$ (800 reverse-readout conditions; defined answer boundaries: Random 308, StreamingLLM 372). A large part of the loss is genuinely in the trajectory: the compressed model has, by the time it reaches its answer, written itself into reasoning states from which even an uncompressed reader cannot recover the correct answer.
+
+The resulting residual brackets are \textbf{Random $[-0.343, -0.246]$} and \textbf{StreamingLLM $[-0.465, -0.347]$} --- in neither case near zero; for StreamingLLM the reverse estimate is \emph{larger} in magnitude than the forward one. The central claim (a large, readout-invisible trajectory residual) \emph{survives} the off-policy correction for both methods. Three honest qualifications. First, the anticipated bias ordering --- forward inflates the residual, reverse deflates it --- holds for Random but \emph{reverses} for StreamingLLM, so the intervals are reported as min/max brackets of the two estimates, not as directional bias bounds. Second, the two sides disagree on method structure: the forward residuals are nearly equal ($-0.343$ vs.\ $-0.347$), while the reverse estimates separate ($-0.246$ vs.\ $-0.465$), attributing substantially more trajectory damage to StreamingLLM --- consistent with its within-answered ADD profile (\cref{sec:add}: it writes confidently wrong reasoning that even a clean reader cannot rescue). Because sampling uncertainty is not propagated to the bracket endpoints and the point-estimate brackets separate only marginally ($-0.343$ vs.\ $-0.347$), we do \emph{not} claim the method-level readout-vs-trajectory attribution is identifiable; we report the central residual strongly and the method split as bracketed and exploratory. Third, there is a mild confound in defined-reverse counts (308 vs.\ 372): Random's rambling traces more often lack a clean answer boundary, which we report as a confound check rather than adjust away.
+
+\begin{figure}[t]
+\centering
+\figplaceholder{\textbf{Decomposition and bracket.} For each method: a vertical accuracy ladder from $\accfc = 0.882$ down through forward readout ($0.765$ / $0.584$), reverse readout ($0.636$ / $0.417$), and free-run ($0.422$ / $0.237$), with the forward--reverse residual bracket (Random $[-0.343,-0.246]$, SLM $[-0.465,-0.347]$) drawn as a shaded band that visibly excludes zero.}
+\caption{Forward and reverse readout bracket the on-policy trajectory residual away from zero.}
+\label{fig:bracket}
+\end{figure}
+
+\subsection{The mechanism: divergence is zero at eviction and compounds}
+\label{sec:mechanism}
+Why does readout-style evaluation miss a 34-point loss? \cref{fig:tvprofile} answers with onset-aligned per-step TV between full-cache and compressed teacher-forced replay of identical token IDs (800 profiles; median onset at step 65, one step after the first prune at the compression interval of 64).
+
+\begin{table}[t]
+\centering
+\caption{Onset-aligned per-step TV between full and compressed teacher-forced replay (800 profiles).}
+\label{tab:tv}
+\begin{tabular}{lc}
+\toprule
+Window relative to first eviction & Mean per-step TV \\
+\midrule
+Before eviction & $\mathbf{0.0000}$ \\
+First 50 steps after & $0.0018$ \\
+Later steps ($>$50 after) & $\mathbf{0.0884}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\figplaceholder{\textbf{The mechanism.} Onset-aligned mean per-step TV curve (x-axis: steps relative to first eviction; median onset at absolute step 65): identically $0.0000$ pre-eviction, $0.0018$ over the first 50 post-eviction steps, compounding to $0.0884$ beyond; per-method AUC-TV overlaid (Random $0.086$, StreamingLLM $0.083$). Populated from the 800 replay profiles of \cref{tab:tv}.}
+\caption{Divergence is zero before eviction, near-zero immediately after, then compounds --- slow drift, not an instantaneous readout error.}
+\label{fig:tvprofile}
+\end{figure}
+
+Three readings. First, the \textbf{mechanism}: the divergence induced by eviction is near-zero \emph{at the moment it happens} ($0.0018$ per step over the next 50 steps) and grows by roughly $50\times$ over the remaining trajectory --- a slow-compounding drift. Note the a-fortiori structure of this measurement: the profile is computed under teacher forcing, with the trace held fixed, so the compounding reflects accumulating cache-state divergence alone, with \emph{no} feedback through sampled tokens; in free-running generation, feedback through the model's own outputs can only add to it. Any single-step or short-horizon evaluation therefore measures the $\approx 0.002$ pre-compounding regime, and accuracy-scale readout evaluation registers only the distortion present at answer time --- not the counterfactual rewriting of the trajectory that free-running generation exposes; this is the quantitative form of the paper's thesis. Second, \textbf{forward method-invariance corroborated}: AUC-TV is matched across methods ($0.086$ Random vs.\ $0.083$ StreamingLLM), consistent with the method-invariant forward residual of \cref{sec:forward} (exploratory; the reverse-side estimates separate, \cref{sec:reverse}). Third, \textbf{instrument validity}: the exactly-zero pre-eviction TV doubles as a self-control --- the replay harness introduces no divergence of its own.
+
+\subsection{ADD: silent answer-distribution distortion, with signed flips}
+\label{sec:add}
+Accuracy alone understates what compression does to the answer distribution. \cref{tab:add} reports ADD with its channel diagnostics and, per our direction discipline, the signed flip-mass.
+
+\begin{table}[t]
+\centering
+\caption{Answer-distribution distortion at budget 256. Within-answered TV is over renormalized answered-only distributions (a channel diagnostic, not an additive part of ADD). Signed flip-mass is net gained-minus-lost correct-answer mass; both methods are overwhelmingly on the losing side. ADD values far exceed the $\approx 0.07$ negative-control noise floor (\cref{sec:control}).}
+\label{tab:add}
+\begin{tabular}{lcccc}
+\toprule
+Method & Mean ADD & Within-answered TV & Termination shift & Signed flip-mass (net) \\
+\midrule
+StreamingLLM & 0.751 & 0.749 & $+0.081$ & $-0.646$ \\
+Random       & 0.559 & 0.504 & $+0.224$ & $-0.461$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The decomposition separates two failure styles that headline accuracy conflates. StreamingLLM's distortion is almost entirely \emph{within-answered}: its renormalized within-answered TV ($0.749$) is essentially as large as its total ADD ($0.751$) while its termination shift is small ($+0.081$) --- it keeps producing confident answers, but different, wrong ones: silent flips. Random carries a much larger \emph{termination-mass} shift ($+0.224$): it rambles and fails to terminate, consistent with its higher truncation rate (truncations remain in all denominators, scored incorrect). So even where the two methods' accuracies were similar, they would damage the answer distribution through different channels --- a distinction invisible to pass@1. The signed flip-mass ($-0.646$ and $-0.461$ net toward lost correct answers) is what licenses reading this divergence as loss rather than mere change: on these cells, deviation from the reference is not denoising. HOTT independently observes that eviction makes reasoning models ``more talkative, generating longer sequences''~\cite{hott2025} --- external corroboration of the termination-mass/truncation channel we measure most strongly for Random.
+
+\begin{figure}[t]
+\centering
+\figplaceholder{\textbf{ADD decomposition.} Per-method panels showing mean ADD ($0.751$ / $0.559$) beside its two channel diagnostics --- renormalized within-answered TV ($0.749$ / $0.504$) and termination-mass shift ($+0.081$ / $+0.224$), which are not additive parts of ADD --- each annotated with signed flip-mass ($-0.646$ / $-0.461$); the $\approx 0.07$ two-FC noise floor drawn as a horizontal reference line.}
+\caption{Two failure styles: StreamingLLM silently flips answers; Random fails to terminate.}
+\label{fig:add}
+\end{figure}
+
+\subsection{Negative control: the instrument does not false-positive}
+\label{sec:control}
+Splitting the FC bank into two disjoint four-seed halves and running the full ADD pipeline between them yields \textbf{mean ADD $0.068$, median $0.000$, mean permutation $p = 0.976$, and $0\%$ of problems significant} ($n = 250$). The noise floor of the instrument ($\approx 0.07$) sits an order of magnitude below the compression cells ($0.56$--$0.75$): ADD does not light up on null data. Per our pre-registration this control is presented as a figure, not a sentence.
+
+\begin{figure}[t]
+\centering
+\figplaceholder{\textbf{Two-full-cache negative control.} Histogram of per-problem ADD between two disjoint FC seed halves ($n = 250$; mean $0.068$, median $0.000$) with the permutation-$p$ distribution (mean $0.976$, $0\%$ of problems $p < 0.05$), against the compression-cell means ($0.559$, $0.751$) marked for scale.}
+\caption{The ADD instrument's noise floor under the null: no false positives.}
+\label{fig:control}
+\end{figure}
+
+A second validity artifact gates the in-progress R-KV cells: our R-KV port reproduces the authors' retained-token sets \emph{exactly} (Jaccard $1.0$ at budgets $\{128, 256, 384, 512\}$ on synthetic tensors) --- a mechanism-level match, which is the test that catches a subtly wrong port. A real-generation smoke test is pending before any R-KV row enters analysis; until it passes, no R-KV result is reported.
+
+% =====================================================================
+\section{Threats to Validity}
+\label{sec:threats}
+
+We treat this section as part of the paper's evidence, not as an apology: each threat is paired with the specific control that bounds it.
+
+\textbf{Generality (the primary threat).} All final results are one model (DeepSeek-R1-Distill-Qwen-7B), one benchmark (MATH-500), one budget (256), two eviction methods. Method-invariance of the trajectory residual and any generality claim are therefore explicitly \emph{exploratory}. \emph{Control:} the claims are scoped accordingly throughout, and the widening grid --- budget-2048 dose-response, H2O cells, R-KV cells behind the parity gate, and AIME --- is in progress, with the pre-registered analysis fixed before those cells complete.
+
+\textbf{No $>$100\% regime observed.} We saw no accuracy gains under compression on small-budget MATH-500. \emph{Control:} the framing carries no denoising claim anywhere --- title, thesis, and headline are strictly near-lossless-under-readout versus collapse-under-free-generation. R-KV's published claim --- $105\%$ of full-KV accuracy at ${\sim}16\%$ cache on AIME-24 with R1-Distill-Llama-8B, a $>$100\% regime at another model scale, and notably established with \emph{free-running} evaluation (\cref{tab:audit}) --- is an in-progress swing: reproducing it would extend the paper; a certified-faithful port showing no such regime at 7B would be a scale finding --- claimable only because the port is Jaccard-$1.0$ certified --- and neither outcome is presumed here.
+
+\textbf{Off-policy bias of the residual.} The forward residual conditions on full-cache states and is biased toward the trajectory share; this is stated at the definition (\cref{eq:residual}), not held for rebuttal. \emph{Control:} the reverse-replay bracket \emph{bounds} the bias --- it does not eliminate it --- and the bracket excludes zero for both methods (\cref{sec:reverse}). The honest costs of the bracket are also stated: the anticipated bias ordering reverses for StreamingLLM, sampling uncertainty is not propagated to the bracket endpoints, the method-level split is reported only as bracketed and exploratory, and the differential defined-reverse counts (308 vs.\ 372) are reported as a confound check.
+
+\textbf{Kernel confound.} H2O's attention-score press requires eager attention while the other presses run under sdpa, whose numerics differ. \emph{Control:} full-cache accuracy under eager versus sdpa was checked for exchangeability before the powered run (19/20 vs.\ 20/20 on the pilot problems, no systematic shift); had it failed, the entire suite including the FC reference would have run under eager.
+
+\textbf{FC-bank provenance.} The canonical reference bank underlies every number in the paper, and its build commits were orphaned in a repository re-initialization, so byte-identical generation is not git-verifiable. \emph{Control:} provenance rests on hard-checked pinned package versions, per-row source-tree hashes, and the structural fact that the full-cache generation path contains no compression logic; the appendix carries this statement verbatim.
+
+\textbf{Instrument validity.} Divergence instruments that fire on null data would fabricate findings. \emph{Control:} the two-FC negative control (\cref{sec:control}) bounds ADD's noise floor at $\approx 0.07$ with $0\%$ false positives, and the exactly-zero pre-eviction TV in \cref{fig:tvprofile} certifies the replay harness. Truncated generations are never excluded (scored incorrect, in all denominators), removing a common silent selection effect.
+
+% =====================================================================
+\section{Conclusion}
+\label{sec:conclusion}
+
+Compression damage to reasoning is real, large, and largely invisible to teacher-forced, readout-style evaluation. At budget 256 on MATH-500, both a principled and a random eviction policy carry a trajectory residual of roughly $-0.34$ --- accuracy loss that held-fixed-trace evaluation does not register, because the underlying divergence is zero at the moment of eviction and compounds over the trajectory that follows. That is why KV-compression method papers, which evaluate on readout-shaped protocols, report near-lossless, while HOTT's free-running evaluation reports severe, method-specific degradation --- for StreamingLLM, collapse: both are measuring correctly, on different channels of the same loss. The forward decomposition identifies the residual; the reverse-replay bracket shows it survives the off-policy correction; the TV profile supplies the compounding mechanism; and ADD shows the answer distribution is silently rewritten, with flip-mass overwhelmingly toward lost correct answers.
+
+The practical implication for the compression literature is one sentence: \textbf{report free-running reasoning accuracy, not only readout-style metrics}, because the latter can certify near-losslessness while the former has collapsed. For evaluation methodology, the onset-aligned TV profile and the forward/reverse readout pair are cheap, general instruments for asking whether any inference-time intervention's cost is being hidden by teacher-forcing.
+
+Near-term extensions in progress widen the generality envelope along pre-registered lines: budget-2048 dose-response cells, H2O-style heavy-hitter eviction, R-KV behind its parity gate, and AIME --- where either reproducing or failing to reproduce R-KV's claimed $>$100\%-of-full-KV regime at 7B is an informative outcome. All are reported at their true confidence: nothing in this paper's headline depends on them.
+
+\paragraph{Reproducibility.} Code is available at \todo{anonymized-repo-url}. The release pins all package versions (\texttt{transformers} 4.56.2, \texttt{kvpress} 0.5.3), ships the exact-token-ID sidecars and frozen seed configuration required for bitwise-faithful replay, and links the time-stamped pre-registration --- including the pre-committed \textsc{confirm}/\textsc{complicate}/\textsc{refute} read of the powered decomposition --- at \todo{anonymized-prereg-link}.
+
+% =====================================================================
+\begin{thebibliography}{99}
+\small
+\bibitem{xiao2023streamingllm} G.~Xiao, Y.~Tian, B.~Chen, S.~Han, M.~Lewis. Efficient Streaming Language Models with Attention Sinks. \emph{ICLR}, 2024. arXiv:2309.17453.
+\bibitem{zhang2023h2o} Z.~Zhang et al. H$_2$O: Heavy-Hitter Oracle for Efficient Generative Inference of Large Language Models. \emph{NeurIPS}, 2023. arXiv:2306.14048.
+\bibitem{li2024snapkv} Y.~Li et al. SnapKV: LLM Knows What You are Looking for Before Generation. \emph{NeurIPS}, 2024. arXiv:2404.14469.
+\bibitem{rkv2025} \todo{author list}. R-KV: Redundancy-aware KV Cache Compression for Reasoning Models. \emph{NeurIPS}, 2025. arXiv:2505.24133.
+\bibitem{hott2025} \todo{author list}. Hold Onto That Thought: Assessing KV Cache Compression On Reasoning. arXiv:2512.12008, 2025.
+\bibitem{ross2011dagger} S.~Ross, G.~Gordon, D.~Bagnell. A Reduction of Imitation Learning and Structured Prediction to No-Regret Online Learning (DAgger). \emph{AISTATS}, 2011.
+\bibitem{ranzato2016exposure} M.~Ranzato, S.~Chopra, M.~Auli, W.~Zaremba. Sequence Level Training with Recurrent Neural Networks. \emph{ICLR}, 2016.
+\bibitem{bengio2015scheduled} S.~Bengio, O.~Vinyals, N.~Jaitly, N.~Shazeer. Scheduled Sampling for Sequence Prediction with Recurrent Neural Networks. \emph{NeurIPS}, 2015.
+\bibitem{leviathan2023speculative} Y.~Leviathan, M.~Kalman, Y.~Matias. Fast Inference from Transformers via Speculative Decoding. \emph{ICML}, 2023.
+\bibitem{hendrycks2021math} D.~Hendrycks et al. Measuring Mathematical Problem Solving with the MATH Dataset. \emph{NeurIPS Datasets and Benchmarks}, 2021. arXiv:2103.03874.
+\bibitem{lightman2023verify} H.~Lightman et al. Let's Verify Step by Step. \emph{ICLR}, 2024. arXiv:2305.20050. (Source of the MATH-500 subset.)
+\bibitem{deepseek2025r1} DeepSeek-AI. DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning. 2025. arXiv:2501.12948.
+\bibitem{liu2024kivi} Z.~Liu et al. KIVI: A Tuning-Free Asymmetric 2bit Quantization for KV Cache. \emph{ICML}, 2024. arXiv:2402.02750.
+\bibitem{pitfalls2025} \todo{author list}. The Pitfalls of KV Cache Compression. arXiv:2510.00231, 2025.
+\bibitem{barriers2025} \todo{author list}. Compression Barriers for Autoregressive Transformers. arXiv:2502.15955, 2025.
+\end{thebibliography}
+
+\end{document}

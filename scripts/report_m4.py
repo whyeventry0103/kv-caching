@@ -66,6 +66,13 @@ def _condition_from_readout(row: dict[str, Any]) -> tuple[str, str]:
     return str(condition["press"]), str(condition["budget"])
 
 
+def _reference_cell_from_readout(row: dict[str, Any]) -> tuple[str, str]:
+    """Cell of a REVERSE readout: the (press, budget) of the *reference* trace it read
+    out (the compressed free-run trace), not the readout condition (full cache)."""
+    reference = row["reference_key"]
+    return str(reference[3]), str(reference[4])
+
+
 def _accuracy(rows: list[dict[str, Any]], field: str = "correct") -> float:
     return sum(bool(row[field]) for row in rows) / len(rows)
 
@@ -94,19 +101,37 @@ def build_report(
     *,
     fullcache_root: Path,
     compression_root: Path,
-    replay_root: Path,
     readout_root: Path,
+    replay_root: Path | None = None,
+    reverse_readout_root: Path | None = None,
 ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     full_rows = _load_rows(fullcache_root, "math500")
     compression_rows = _load_rows(compression_root, "math500")
-    replay_rows = _load_rows(replay_root, "math500")
+    # Replay (per-step TV profiles) is OPTIONAL: the accuracy-scale decomposition
+    # (total/readout/residual + CIs, the Amendment-F call) needs only fullcache,
+    # compression, and readout. TV columns are added only when a replay run is given.
+    replay_rows = _load_rows(replay_root, "math500") if replay_root is not None else []
+    # Readout may be split across per-shard run dirs (e.g. seed-sharded -g0/-g1); read
+    # every supplied root so the cells aggregate all seeds.
+    readout_root_list = (
+        readout_root if isinstance(readout_root, list) else [readout_root]
+    )
     readout_rows = [
         row
-        for path in sorted((readout_root / "readout").rglob("*.jsonl"))
+        for root in readout_root_list
+        for path in sorted((root / "readout").rglob("*.jsonl"))
         for row in _jsonl(path)
     ]
-    if not (full_rows and compression_rows and replay_rows and readout_rows):
-        raise ValueError("all M4 inputs must contain rows")
+    if not (full_rows and compression_rows and readout_rows):
+        raise ValueError("fullcache, compression, and readout inputs must contain rows")
+
+    # Optional reverse readout (M7 first rung): the compressed free-run trace read out
+    # under the FULL cache. Forward + reverse readout bracket the on-policy residual.
+    reverse_by_cell: dict[tuple[str, str], list[dict[str, Any]]] = defaultdict(list)
+    if reverse_readout_root is not None:
+        for path in sorted((reverse_readout_root / "readout").rglob("*.jsonl")):
+            for row in _jsonl(path):
+                reverse_by_cell[_reference_cell_from_readout(row)].append(row)
 
     reference_correct = {_run_key(row): bool(row["correct"]) for row in full_rows}
     full_accuracy = _accuracy(full_rows)
@@ -156,6 +181,29 @@ def build_report(
         total_change = compressed_accuracy - full_accuracy
         readout_change = readout_accuracy - full_accuracy
         residual = total_change - readout_change
+        # Reverse readout (if supplied) brackets the on-policy residual; never collapse
+        # the bracket to one causal number (decomposition.py / Amendment F discipline).
+        reverse = [
+            r
+            for r in reverse_by_cell.get(condition, [])
+            if r.get("readout_correct") is not None
+        ]
+        reverse_readout_accuracy = (
+            sum(bool(r["readout_correct"]) for r in reverse) / len(reverse)
+            if reverse
+            else None
+        )
+        if reverse_readout_accuracy is not None:
+            reverse_change = reverse_readout_accuracy - full_accuracy
+            # Reverse endpoint is reverse_change ITSELF (acc_rev - acc_fc): clean
+            # readout of the compressed trace directly estimates the residual on
+            # the compressed model's own states (total - (free - rev) = rev - fc).
+            # total - reverse_change would be the on-policy READOUT change.
+            endpoints = (total_change - readout_change, reverse_change)
+            residual_bracket = [min(endpoints), max(endpoints)]
+        else:
+            reverse_change = None
+            residual_bracket = None
         flip = _signed_flip_mass(reference_correct, comp)
         summed_tv = []
         for row in replay:
@@ -163,6 +211,18 @@ def build_report(
                 (replay_root / row["tv_profile_path"]).read_text(encoding="utf-8")
             )
             summed_tv.append(sum(float(value) for value in profile["estimate"]))
+        # TV-profile columns are None when no replay run was supplied (deferred).
+        mean_auc_tv = statistics.fmean(r["auc_tv"] for r in replay) if replay else None
+        mean_summed_tv = statistics.fmean(summed_tv) if summed_tv else None
+        mean_frac_p05 = (
+            statistics.fmean(r["frac_above"]["p05"] for r in replay) if replay else None
+        )
+        mean_frac_p10 = (
+            statistics.fmean(r["frac_above"]["p10"] for r in replay) if replay else None
+        )
+        onset_nonnull = (
+            sum(r["onset_step"] is not None for r in replay) if replay else None
+        )
         cells.append(
             {
                 "press": condition[0],
@@ -184,6 +244,10 @@ def build_report(
                 "total_change": total_change,
                 "readout_change": readout_change,
                 "unexplained_residual": residual,
+                "reverse_readout_accuracy": reverse_readout_accuracy,
+                "reverse_readout_change": reverse_change,
+                "residual_bracket": residual_bracket,
+                "n_reverse_readout": len(reverse),
                 "signed_flip_mass": flip,
                 "compressed_correct": sum(bool(row["correct"]) for row in comp),
                 "readout_correct": sum(bool(row["readout_correct"]) for row in readout),
@@ -196,15 +260,11 @@ def build_report(
                 "mean_readout_tokens": statistics.fmean(
                     len(row["generated_token_ids"]) for row in readout
                 ),
-                "mean_auc_tv": statistics.fmean(row["auc_tv"] for row in replay),
-                "mean_summed_tv": statistics.fmean(summed_tv),
-                "mean_frac_above_p05": statistics.fmean(
-                    row["frac_above"]["p05"] for row in replay
-                ),
-                "mean_frac_above_p10": statistics.fmean(
-                    row["frac_above"]["p10"] for row in replay
-                ),
-                "onset_nonnull": sum(row["onset_step"] is not None for row in replay),
+                "mean_auc_tv": mean_auc_tv,
+                "mean_summed_tv": mean_summed_tv,
+                "mean_frac_above_p05": mean_frac_p05,
+                "mean_frac_above_p10": mean_frac_p10,
+                "onset_nonnull": onset_nonnull,
             }
         )
 
@@ -219,8 +279,11 @@ def build_report(
         "runs": {
             "fullcache": str(fullcache_root),
             "compression": str(compression_root),
-            "replay": str(replay_root),
-            "readout": str(readout_root),
+            "replay": str(replay_root) if replay_root else None,
+            "readout": [str(r) for r in readout_root_list],
+            "reverse_readout": (
+                str(reverse_readout_root) if reverse_readout_root else None
+            ),
         },
         "claim_discipline": (
             "Residual is accuracy change unexplained by on-reference readout, "
@@ -242,6 +305,12 @@ def _write_table(path: Path, cells: list[dict[str, Any]]) -> None:
         "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for cell in cells:
+        auc = "n/a" if cell["mean_auc_tv"] is None else f"{cell['mean_auc_tv']:.3f}"
+        frac = (
+            "n/a"
+            if cell["mean_frac_above_p05"] is None
+            else f"{cell['mean_frac_above_p05']:.2f}"
+        )
         lines.append(
             f"| {cell['press']} | {cell['budget']} | "
             f"{cell['compressed_accuracy']:.2f} | "
@@ -251,8 +320,8 @@ def _write_table(path: Path, cells: list[dict[str, Any]]) -> None:
             f"{cell['unexplained_residual']:+.2f} | "
             f"{cell['signed_flip_mass']['lost']:.2f} | "
             f"{cell['truncation_rate']:.2f} | "
-            f"{cell['mean_auc_tv']:.3f} | "
-            f"{cell['mean_frac_above_p05']:.2f} |"
+            f"{auc} | "
+            f"{frac} |"
         )
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
@@ -280,7 +349,7 @@ def _write_svg(path: Path, cells: list[dict[str, Any]]) -> None:
         y = zero_y - tick * scale
         svg.append(
             f'<line x1="{left - 30}" y1="{y:.1f}" x2="{width - 40}" '
-            'y2="{y:.1f}" stroke="#ddd"/>'
+            f'y2="{y:.1f}" stroke="#ddd"/>'
         )
         svg.append(
             f'<text x="{left - 38}" y="{y + 4:.1f}" text-anchor="end" '
@@ -338,8 +407,27 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--fullcache-root", required=True, type=Path)
     parser.add_argument("--compression-root", required=True, type=Path)
-    parser.add_argument("--replay-root", required=True, type=Path)
-    parser.add_argument("--readout-root", required=True, type=Path)
+    parser.add_argument(
+        "--replay-root",
+        type=Path,
+        default=None,
+        help="optional TV-profile replay run; omit for the decomposition-only read "
+        "(total/readout/residual + CIs) before the deferred replay has been run",
+    )
+    parser.add_argument(
+        "--readout-root",
+        required=True,
+        type=Path,
+        nargs="+",
+        help="one or more readout run dirs (seed-sharded shards are passed together)",
+    )
+    parser.add_argument(
+        "--reverse-readout-root",
+        type=Path,
+        default=None,
+        help="optional reverse-readout run (compressed trace read out under full "
+        "cache) to report the residual bracket (M7 first rung)",
+    )
     parser.add_argument("--out", required=True, type=Path)
     args = parser.parse_args()
     summary, cells = build_report(
@@ -347,6 +435,7 @@ def main() -> int:
         compression_root=args.compression_root,
         replay_root=args.replay_root,
         readout_root=args.readout_root,
+        reverse_readout_root=args.reverse_readout_root,
     )
     args.out.mkdir(parents=True, exist_ok=True)
     (args.out / "summary.json").write_text(
