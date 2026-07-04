@@ -66,7 +66,7 @@ C = {
         trunc=0.070,
     ),
 }
-PHEN = dict(gap=0.185, gap_ci=(0.130, 0.242), n_win=94, n_tot=100)
+PHEN = dict(gap=0.185, gap_ci=(0.130, 0.242), win=44, tie=50, loss=6, n_tot=100)
 TVWIN = dict(before=0.0000, first50=0.0018, later=0.0884, onset=65)
 TWOFC = dict(mean=0.068, median=0.000, p=0.976, frac_sig=0.0, n=250)
 
@@ -109,7 +109,7 @@ def fig1_phenomenon(out_dir: Path, runs_root: Path | None):
     gaptxt = (
         f"Random $-$ SLM: $+{PHEN['gap']:.3f}$\n"
         f"95% CI [{PHEN['gap_ci'][0]:.3f}, {PHEN['gap_ci'][1]:.3f}]\n"
-        f"{PHEN['n_win']}/{PHEN['n_tot']} problems favor Random"
+        f"per problem: {PHEN['win']} win / {PHEN['tie']} tie / {PHEN['loss']} loss"
     )
     if per_problem:
         axh.hist(per_problem, bins=20, color=BLUE, alpha=0.85)
@@ -355,9 +355,14 @@ def print_windowed_tv(profiles_dir: Path):
 
     Full-horizon (NO +/-400 cap, unlike the figure curve) mean per-step TV in the
     three onset-aligned windows: before eviction (off < 0), first 50 steps after
-    (0 <= off < 50), later (off >= 50). Run on the remote replay profiles dir.
+    (0 <= off < 50), later (off >= 50). Two estimators are printed:
+    per-profile = mean of per-profile window means (each trace counts once; the
+    trace is the sampling unit, matching the problem-clustered convention);
+    pooled = mean over all steps (long traces weigh more). The paper's table
+    reports the per-profile estimator.
     """
-    windows = {"before": [], "first50": [], "later": []}
+    pooled = {"before": [], "first50": [], "later": []}
+    per_profile = {"before": [], "first50": [], "later": []}
     n_profiles = 0
     for f in glob.glob(str(profiles_dir / "**/*.json"), recursive=True):
         d = json.load(open(f))
@@ -365,21 +370,28 @@ def print_windowed_tv(profiles_dir: Path):
         if not est or onset is None:
             continue
         n_profiles += 1
+        local = {"before": [], "first50": [], "later": []}
         for i, v in enumerate(est):
             off = i - onset
-            if off < 0:
-                windows["before"].append(v)
-            elif off < 50:
-                windows["first50"].append(v)
-            else:
-                windows["later"].append(v)
+            name = "before" if off < 0 else ("first50" if off < 50 else "later")
+            pooled[name].append(v)
+            local[name].append(v)
+        for name, vals in local.items():
+            if vals:
+                per_profile[name].append(statistics.fmean(vals))
     if not n_profiles:
         print("windowed TV: no profiles found")
         return
     print(f"windowed TV over {n_profiles} profiles (full horizon):")
-    for name, vals in windows.items():
-        mean = statistics.fmean(vals) if vals else float("nan")
-        print(f"  {name}: mean {mean:.4f} over {len(vals)} steps")
+    for name in ("before", "first50", "later"):
+        pooled_mean = statistics.fmean(pooled[name]) if pooled[name] else float("nan")
+        prof_mean = (
+            statistics.fmean(per_profile[name]) if per_profile[name] else float("nan")
+        )
+        print(
+            f"  {name}: per-profile {prof_mean:.4f} over {len(per_profile[name])} "
+            f"profiles; pooled {pooled_mean:.4f} over {len(pooled[name])} steps"
+        )
 
 
 def _twofc_values(report: dict):

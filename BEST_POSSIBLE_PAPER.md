@@ -191,20 +191,24 @@ The manuscript currently names ~17 quantities. Reviewer working memory is ~5. Cu
 - **Single rewrite for comprehension:** the Phase-8 notation diet + leading with the gap.
 - **Single figure:** the annotated staircase (add the eviction-event arrow) promoted
   alongside the ladder as the visual pair the paper is remembered by.
-- **What would make it exceptional rather than publishable:** if the decomposition
-  *predicts* HOTT's method ordering out of sample — i.e., H2O (which survives free-running
-  in HOTT) shows a small trajectory residual where SLM/Random show −0.34. Then the
-  instrument isn't descriptive, it's predictive, and the paper jumps a tier. This is
-  exactly what the queued H2O cells test. If instead H2O also shows ~−0.34, the
-  method-invariance story strengthens and the "why do heavy-hitters survive in HOTT"
-  question becomes an honest open problem — still a good paper, one rung lower.
+- **What would make it exceptional rather than publishable:** a third method's
+  decomposition landing clean. TEMPERED (2026-07-04, per co-session pushback — correct):
+  our press is ObservedAttentionPress WITHOUT H2O's recency reservation, so a clean
+  decomposition licenses "the instrument characterizes a third eviction policy," NOT
+  "we predicted H2O/HOTT's ordering" — that stronger claim would require the
+  recency-reserving H2O variant. The free-run point is in (0.2475: collapses like SLM,
+  below Random — see PAPER_FINDINGS §4h for the labeling landmine and the
+  concentrated-vs-uniform-allocation hypothesis it suggests). The readout half runs
+  tonight; method-invariance on a third policy is still the biggest single upgrade.
 
 ## Phase 11 — What still matters in ten years
 
 Not the MATH-500 numbers. Two things: (1) **the audit recipe** — forward/reverse
-bracketed channel decomposition as the standard way to price ANY inference-time
-intervention (quantization, speculative decoding, early exit, retrieval truncation,
-context compression) before deployment; (2) **the compounding measurement** — small
+bracketed channel decomposition as a way to price inference-time interventions before
+deployment. Demonstrated on exactly ONE intervention here, so the paper must phrase the
+extensions (quantization, speculative decoding, early exit, retrieval truncation, context
+compression) as *conjectures we propose testing*, never as validated applications
+(co-session pushback 2026-07-04, accepted); (2) **the compounding measurement** — small
 held-trace state divergence as a leading indicator of free-running failure. The current
 conclusion gestures at this in one clause ("cheap, general instruments"). It deserves a
 named paragraph: state the recipe in three steps, name the class of interventions it

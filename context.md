@@ -16,6 +16,24 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
 
 ## 0. TL;DR — where we are right now
 
+  **★★★ 2026-07-04 (Fable session; remote back up):** (1) **ROADMAP #1 DONE — bracket-
+  endpoint bootstrap CIs** (report_m4 fields `unexplained_residual_ci95` /
+  `reverse_residual_ci95`; problem-clustered, 2000 resamples): fwd **[−0.402,−0.258]**
+  (Random) / **[−0.403,−0.268]** (SLM); rev **[−0.383,−0.213]** / **[−0.553,−0.410]** —
+  ALL exclude zero; reverse endpoints separate with NON-overlapping CIs (SLM more
+  trajectory-damaged on reverse estimand; attribution = estimand-dependent). Paper
+  §4.3/threats/abstract/§3.1 updated; summary archived at
+  `results/diag/m4-powered-diss256-summary.json`. (2) **H2O-style grid VERIFIED 400/400:
+  free 0.2475, trunc 0.105** — see PAPER_FINDINGS §4h for the LABELING LANDMINE
+  (ObservedAttentionPress has NO recency reservation → never claim "H2O collapses" /
+  HOTT contradiction; "predictive upgrade" framing TEMPERED accordingly). readout-h2o
+  runs tonight. (3) **Fig 1 DATA-mode landed** and exposed imprecision: 94/100 =
+  **44 win / 50 tie / 6 loss** → paper now says "non-negative on 94/100" (never "beats
+  on 94/100"). (4) **Table 3 estimator defined + reproduced**: per-trace 0.0884
+  (pooled 0.1182); `make_paper_figures.py --print-windows`. (5) **Scoop-sweep cron
+  INSTALLED on remote** (Mon 09:20, `scripts/scoop_sweep.py`, emails via smtp json).
+  (6) make sync-apply run AFTER these changes (sync-state fresh for tonight's watcher).
+
   **★★ DECISIONS MADE 2026-07-03 (Claude, at user's request — both CONFIRMED):**
   (1) **R-KV + AIME drop-dead = 2026-08-01.** If R-KV cells (post-gen-smoke) and AIME are
   not producing rows by Aug 1, CUT both to future work; the paper ships as 3 methods x 2

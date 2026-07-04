@@ -172,3 +172,9 @@ def test_m4_reverse_readout_residual_bracket(tmp_path):
     # on-policy readout change (total - (free - rev)). NOT total - reverse_change,
     # which would be the readout change (-0.50) mislabeled as a residual.
     assert cell["residual_bracket"] == approx([-0.30, -0.25])
+    # problem-clustered bootstrap CIs on the endpoints: intervals must be ordered,
+    # bounded in [-1, 1], and contain their point estimates on this balanced input.
+    f_lo, f_hi = cell["unexplained_residual_ci95"]
+    r_lo, r_hi = cell["reverse_residual_ci95"]
+    assert -1.0 <= f_lo <= -0.25 <= f_hi <= 1.0
+    assert -1.0 <= r_lo <= -0.30 <= r_hi <= 1.0

@@ -42,6 +42,71 @@ def _problem_bootstrap_ci(
     return (round(lo, 4), round(hi, 4))
 
 
+def _endpoint_cis(
+    comp: list[dict[str, Any]],
+    readout_defined: list[dict[str, Any]],
+    reverse: list[dict[str, Any]],
+    full_rows: list[dict[str, Any]],
+    *,
+    n_resamples: int = 2000,
+    seed: int = 0,
+) -> tuple[tuple[float, float], tuple[float, float] | None]:
+    """Problem-clustered bootstrap 95% CIs for the two residual-bracket endpoints.
+
+    Endpoints per resample of problems (with replacement, k = n cell problems):
+    forward = comp_acc - readout_acc (the FC term cancels in total - readout);
+    reverse = reverse_acc - fc_acc (clean readout of the compressed trace vs FC).
+    Problems missing defined readout/reverse rows contribute to the other means
+    only (matching the point estimates' mixed-denominator convention, which is
+    disclosed and imputation-bounded in the paper).
+    """
+
+    def _per_pid_mean(rows, key, pid_fn):
+        by_pid: dict[str, list[float]] = defaultdict(list)
+        for row in rows:
+            by_pid[pid_fn(row)].append(float(bool(row[key])))
+        return {pid: statistics.fmean(vals) for pid, vals in by_pid.items()}
+
+    comp_mean = _per_pid_mean(comp, "correct", lambda r: r["pid"])
+    ro_mean = _per_pid_mean(
+        readout_defined, "readout_correct", lambda r: r["reference_key"][1]
+    )
+    rev_mean = _per_pid_mean(
+        reverse, "readout_correct", lambda r: r["reference_key"][1]
+    )
+    cell_pids = sorted(comp_mean)
+    fc_mean = _per_pid_mean(
+        [r for r in full_rows if r["pid"] in comp_mean], "correct", lambda r: r["pid"]
+    )
+    rng = random.Random(seed)
+    k = len(cell_pids)
+    forward_samples: list[float] = []
+    reverse_samples: list[float] = []
+    for _ in range(n_resamples):
+        draw = [cell_pids[rng.randrange(k)] for _ in range(k)]
+        comp_acc = statistics.fmean(comp_mean[p] for p in draw)
+        ro_vals = [ro_mean[p] for p in draw if p in ro_mean]
+        if ro_vals:
+            forward_samples.append(comp_acc - statistics.fmean(ro_vals))
+        if rev_mean:
+            rev_vals = [rev_mean[p] for p in draw if p in rev_mean]
+            if rev_vals:
+                fc_acc = statistics.fmean(fc_mean[p] for p in draw)
+                reverse_samples.append(statistics.fmean(rev_vals) - fc_acc)
+
+    def _ci(samples: list[float]) -> tuple[float, float]:
+        ordered = sorted(samples)
+        n = len(ordered)
+        return (
+            round(ordered[int(0.025 * (n - 1))], 4),
+            round(ordered[int(0.975 * (n - 1))], 4),
+        )
+
+    forward_ci = _ci(forward_samples)
+    reverse_ci = _ci(reverse_samples) if reverse_samples else None
+    return forward_ci, reverse_ci
+
+
 def _jsonl(path: Path) -> list[dict[str, Any]]:
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()]
 
@@ -204,6 +269,11 @@ def build_report(
         else:
             reverse_change = None
             residual_bracket = None
+        # Problem-clustered bootstrap CIs on the two bracket endpoints (closes the
+        # "no sampling uncertainty on the bracket" gap; paper Threats/§reverse).
+        forward_endpoint_ci, reverse_endpoint_ci = _endpoint_cis(
+            comp, readout_defined, reverse, full_rows
+        )
         flip = _signed_flip_mass(reference_correct, comp)
         summed_tv = []
         for row in replay:
@@ -247,6 +317,10 @@ def build_report(
                 "reverse_readout_accuracy": reverse_readout_accuracy,
                 "reverse_readout_change": reverse_change,
                 "residual_bracket": residual_bracket,
+                "unexplained_residual_ci95": list(forward_endpoint_ci),
+                "reverse_residual_ci95": (
+                    list(reverse_endpoint_ci) if reverse_endpoint_ci else None
+                ),
                 "n_reverse_readout": len(reverse),
                 "signed_flip_mass": flip,
                 "compressed_correct": sum(bool(row["correct"]) for row in comp),

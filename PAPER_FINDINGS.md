@@ -96,8 +96,10 @@ MATH, so that regime is explicitly out of scope for the headline (see §6).
 
 ### 4a. The powered phenomenon (budget 256)
 FC 0.882 → **StreamingLLM 0.237**, **Random 0.422**. Random beats the "principled" recency
-policy by **+0.185, 95% CI [0.130, 0.242]**, on **94/100 problems**. (n=100 problems × 4 seeds,
-problem-clustered bootstrap.)
+policy by **+0.185, 95% CI [0.130, 0.242]**; per-problem difference **≥ 0 on 94/100 problems
+(44 strict wins, 50 ties, 6 losses — verified from rows 2026-07-04; say "non-negative on
+94/100", NEVER "beats on 94/100", because half the 94 are ties and Fig 1's histogram makes
+that visible)**. (n=100 problems × 4 seeds, problem-clustered bootstrap.)
 
 ### 4b. Forward decomposition (readout vs trajectory), 800/800 conditions
 | method @256 | free | readout (95% CI) | total Δ | readout Δ | residual | readout share |
@@ -130,7 +132,22 @@ lack a clean answer boundary). (Exact decimals CONFIRMED 2026-07-03 by re-runnin
 the fixed code on the remote: SLM reverse endpoint is −0.466 — the earlier −0.465 came from the
 rounded 0.417 accuracy. Fig 2 is generated from this report in DATA mode.)
 
+**ENDPOINT CIs (2026-07-04, closes the "no sampling uncertainty on the bracket" gap):**
+problem-clustered bootstrap (2000 resamples) on each bracket endpoint — forward
+**[−0.402, −0.258]** (Random) / **[−0.403, −0.268]** (SLM); reverse **[−0.383, −0.213]** /
+**[−0.553, −0.410]**. ALL four exclude zero. Forward endpoints statistically
+indistinguishable (method-invariance stands); reverse endpoints separate with
+NON-OVERLAPPING CIs (SLM significantly more trajectory-damaged on the reverse estimand)
+→ attribution is estimand-dependent; still reported as bracketed/exploratory. Archived:
+`results/diag/m4-powered-diss256-summary.json`; fields `unexplained_residual_ci95`,
+`reverse_residual_ci95` in report_m4.
+
 ### 4d. Figure 4 — the mechanism (TV profiles), 800/800
+**Estimator (defined 2026-07-04, script-reproducible via `make_paper_figures.py
+--print-windows`):** table entries are means of PER-TRACE window means (each trace counts
+once; matches the problem-clustered convention). The step-pooled later mean is LARGER
+(0.1182) because longer traces diverge more — quote 0.0884 as the conservative per-trace
+estimator, never mix the two.
 Onset-aligned per-step TV (800 profiles, median first-eviction at step 65 = compression interval):
 | window relative to first eviction | mean per-step TV |
 |---|---|
@@ -191,8 +208,25 @@ cells run.
   provenance now rests on pinned package versions + per-row source-tree hashes + FC having no
   compression logic.
 
+### 4h. PRELIMINARY — ObservedAttentionPress ("H2O-style") free-run @256 (2026-07-04)
+grid-diss256-h2o 400/400: **free-run 0.2475, truncation 0.105, mean 4,359 tokens**
+(100 problems × 4 seeds; audited from rows). Third eviction policy collapses — worse than
+Random (0.422), at StreamingLLM's level (0.237). **LABELING LANDMINE (do not step on):**
+our press is kvpress ObservedAttentionPress — the accumulated-attention heavy-hitter
+signal WITHOUT the recent-window reservation of the actual H2O paper (and of HOTT's H2O,
+which SURVIVES free-running). So this does NOT contradict HOTT and must never be written
+as "H2O collapses" — always "H2O-style / ObservedAttentionPress (no recency reservation)".
+Positive reading (hypothesis-level): pure attention-score selection collapses like pure
+recency selection while uniform Random does best of the three → *concentrated* allocations
+(positional OR score-based) underperform uniform coverage at this budget; HOTT's surviving
+H2O combines both components. Decomposition (readout-diss256-h2o) runs tonight — only then
+does the method-invariance test on a third method read out. Tempered claim if it lands
+clean: we predicted ObservedAttentionPress behavior, not H2O's.
+
 ## 7. Status
-- **DONE (writable core):** phenomenon, forward decomposition, reverse-replay bracket, Figure 4
-  TV mechanism, ADD, two-FC negative control, R-KV parity.
-- **IN PROGRESS (generality/breadth):** budget-2048 cells; H2O cells; R-KV smoke + cells; AIME
-  (the reproduce-or-scale-finding swing).
+- **DONE (writable core):** phenomenon, forward decomposition, reverse-replay bracket
+  (+ endpoint CIs, + imputation bounds), Figure 4 TV mechanism (estimator defined), ADD,
+  two-FC negative control, R-KV parity.
+- **IN PROGRESS (generality/breadth):** budget-2048 grid DONE 800/800 (read pending);
+  readout-2048 queued; H2O-style: grid DONE (§4h), readout tonight; R-KV smoke + cells;
+  AIME (drop-dead 2026-08-01).

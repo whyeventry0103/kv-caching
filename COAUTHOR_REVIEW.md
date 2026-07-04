@@ -4,13 +4,20 @@ Standing review artifact for the submission push. Updated as work progresses; tr
 **Roadmap** (bottom) as the canonical prioritized TODO. Everything here is grounded in
 repository evidence — file paths are cited throughout.
 
-**Status line (update on every pass):** 2026-07-03 (evening) — senior strategy pass done:
-see **BEST_POSSIBLE_PAPER.md** (blueprint; verdict: framing right, ~85% of best paper;
-lead-with-the-gap reorder + notation diet scheduled for venue conversion). Two new
-robustness sentences applied to the tex (truncation-imputation bound; easiness-is-the-
-thesis). Earlier today: full code audit; bracket bug fixed+amended (Amendment H);
-imputation bounds in §4.3; free-run CIs in Table 2; windowed-TV provenance script;
-scoop sweep clean; figures embedded; build clean; 120/120 tests.
+**Status line (update on every pass):** 2026-07-04 — remote back. ROADMAP #1 DONE:
+bracket-endpoint bootstrap CIs implemented (report_m4 `unexplained_residual_ci95` /
+`reverse_residual_ci95`), run on the powered data: all four endpoints exclude zero
+(fwd [−0.402,−0.258]/[−0.403,−0.268]; rev [−0.383,−0.213]/[−0.553,−0.410] — reverse
+endpoints separate with NON-overlapping CIs); paper §4.3/threats/abstract updated.
+Roadmap #2 half-done: H2O-style grid 400/400 (free 0.2475 — see PAPER_FINDINGS §4h
+LANDMINE: ObservedAttentionPress ≠ H2O, never claim HOTT contradiction; readout half
+tonight). Fig 1 histogram panel landed (exposed a claim imprecision, fixed: 94/100 =
+44 win + 50 tie + 6 loss, now stated as "non-negative on 94/100" everywhere). Table 3
+estimator defined + reproduced exactly (per-trace 0.0884; pooled 0.1182). Scoop-sweep
+cron installed on remote (Mon 09:20, scripts/scoop_sweep.py). "Predictive upgrade"
+framing tempered per co-session pushback (see BEST_POSSIBLE_PAPER Phase 10/11).
+Prior pass (07-03): blueprint; bracket bug fix + Amendment H; imputation bounds;
+figures embedded; sweep clean.
 
 ---
 
