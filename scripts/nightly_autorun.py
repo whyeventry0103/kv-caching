@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 """GPU-aware nightly auto-launch WATCHER (remote cron, every 10 min from 02:00-08:00).
 
-Each tick (server = Asia/Dubai, UTC+4): pick the next incomplete job from
-configs/nightly_queue.yaml whose dependency is complete; if any of OUR tmux sessions are
-already running, no-op (a job is in flight). Otherwise check GPU free memory, skip a GPU
-that can't fit the job (avoid OOM), shard the seeds across the free GPU(s), run
-check_remote.sh as preflight, then launch via scripts/launch.sh in tmux with
-KVCACHE_MAX_HOURS = hours-until-09:00. Because it fires every 10 min and only launches
-when nothing of ours runs, it FILLS THE WHOLE window: the instant a job finishes the
-next one starts (no idle GPUs); "both GPUs full" is retried next tick. Every non-error
-exits 0 so cron mail flags only real breakage.
+Each tick (server = Asia/Dubai, UTC+4): walk the queue in order and launch the FIRST
+job that has relaunchable ("needy") seeds -- incomplete AND not owned by a live tmux
+session -- onto GPUs that are eligible (>= min_free_gb) AND not occupied by ANY of our
+sessions. A job whose remaining seeds are all in flight is skipped in favor of the next
+job, so one long tail shard never idles the other GPU. check_remote.sh runs as
+preflight; launch goes through scripts/launch.sh in tmux with KVCACHE_MAX_HOURS =
+hours-until-09:00. At most one job launches per tick (its seeds may shard across both
+GPUs); the 10-min cadence fills the window. Every non-error exits 0 so cron mail flags
+only real breakage.
 """
 
 from __future__ import annotations
@@ -206,6 +206,69 @@ def session_gpus(run_name: str) -> set[int]:
     return gpus
 
 
+def live_map(run_names: list[str], session_names: list[str]) -> dict[str, set[int]]:
+    """run_name -> live GPU indices, from one parse of tmux session names."""
+    live: dict[str, set[int]] = {rn: set() for rn in run_names}
+    for name in session_names:
+        for rn in run_names:
+            m = re.match(rf"^{re.escape(rn)}-g(\d+)$", name)
+            if m:
+                live[rn].add(int(m.group(1)))
+    return live
+
+
+def tmux_session_names() -> list[str]:
+    result = subprocess.run([TMUX, "ls"], capture_output=True, text=True)
+    if result.returncode != 0:
+        return []
+    return [line.split(":", 1)[0] for line in result.stdout.splitlines() if ":" in line]
+
+
+def launch_candidates(
+    runs_root: Path,
+    jobs: list[Job],
+    *,
+    skip: set[str],
+    live: dict[str, set[int]],
+    state: dict[str, dict] | None = None,
+) -> tuple[list[tuple[Job, list[int]]], list[str]]:
+    """Jobs with relaunchable (needy) seeds, in queue order, plus skip notes.
+
+    A job whose incomplete seeds are ALL in flight is skipped (not returned) so a
+    later job can fill the otherwise-idle GPU during the first job's tail shard —
+    previously the tick no-op'd there and one GPU could idle for hours.
+    """
+    notes: list[str] = []
+    by_name = {j.name: j for j in jobs}
+    state = load_state() if state is None else state
+    candidates: list[tuple[Job, list[int]]] = []
+    for job in jobs:
+        if job.name in skip:
+            continue
+        if count_progress(runs_root, job) >= job.total:
+            continue
+        if job.requires is not None:
+            req = by_name.get(job.requires)
+            if req is None or count_progress(runs_root, req) < req.total:
+                notes.append(f"{job.name}: dependency incomplete -> skip")
+                continue
+        per_seed = count_per_seed(runs_root, job)
+        seed_total = max(1, job.total // len(job.seeds))
+        incomplete = [s for s in job.seeds if per_seed.get(s, 0) < seed_total]
+        shards = state.get(job.name, {}).get("shards", {})
+        job_live = live.get(job.run_name, set())
+        running = {s for g in job_live for s in shards.get(str(g), [])}
+        needy = [s for s in incomplete if s not in running]
+        if not needy:
+            notes.append(
+                f"{job.name}: incomplete seeds all in flight on "
+                f"{sorted(job_live)} -> try next job"
+            )
+            continue
+        candidates.append((job, needy))
+    return candidates, notes
+
+
 def select_job(
     runs_root: Path, jobs: list[Job], skip: set[str] | None = None
 ) -> tuple[Job | None, str]:
@@ -384,91 +447,112 @@ def main() -> int:
     stuck = {n for n, s in state.items() if s.get("fails", 0) >= MAX_FAILS}
     if stuck:
         log(f"stuck jobs (skipped, {MAX_FAILS}+ no-progress launches): {sorted(stuck)}")
-    job, reason = select_job(runs_root, jobs, skip=stuck)
-    if job is None:
-        log(f"no job to run: {reason} -> exit")
+
+    # One tmux parse -> live GPUs per run + globally occupied GPUs. A job whose
+    # remaining seeds are all in flight no longer blocks the queue: later jobs may
+    # fill the otherwise-idle GPU during its tail shard (launch_candidates).
+    session_names = [] if (args.force or args.dry_run) else tmux_session_names()
+    live = live_map([j.run_name for j in jobs], session_names)
+    occupied = {g for gpu_set in live.values() for g in gpu_set}
+    candidates, notes = launch_candidates(
+        runs_root, jobs, skip=stuck, live=live, state=state
+    )
+    for note in notes:
+        log(note)
+    if not candidates:
+        log("no launchable job (complete, stuck, dep-gated, or in flight) -> exit")
         return 0
-    done = count_progress(runs_root, job)
-    log(f"selected: {job.name} {done}/{job.total} (min_free_gb={job.min_free_gb})")
 
     max_hours = args.max_hours_override or compute_max_hours(now, args.stop_hour)
     if not max_hours:
         log(f"<1h to {args.stop_hour}:00 -> outside window, no launch")
         return 0
 
-    # PER-SHARD recovery: launch only seeds that are incomplete AND not owned by a live
-    # session, onto GPUs eligible AND not running our job. This relaunches a dead
-    # shard on its freed GPU while the OTHER shard keeps running -> a crashed/OOM-killed
-    # shard no longer leaves a GPU idle all night.
-    per_seed = count_per_seed(runs_root, job)
-    seed_total = max(1, job.total // len(job.seeds))
-    incomplete = [s for s in job.seeds if per_seed.get(s, 0) < seed_total]
-    shards = state.get(job.name, {}).get("shards", {})
-    live = set() if (args.force or args.dry_run) else session_gpus(job.run_name)
-    running_seeds = {s for g in live for s in shards.get(str(g), [])}
-    needy = [s for s in incomplete if s not in running_seeds]
-    if not needy:
-        log(f"{job.name}: incomplete seeds all in flight on {sorted(live)} -> no-op")
-        return 0
-    log(f"window->{args.stop_hour}:00; needy seeds {needy}; live gpus {sorted(live)}")
-
     gpus = parse_fake_gpus(args.fake_gpus) if args.fake_gpus else query_gpus()
     for g in gpus:
         log(f"  gpu{g.index}: {g.free_gb:.1f}GB free util={g.util_pct}%")
-    free = [g for g in eligible_gpus(gpus, job.min_free_gb) if g.index not in live]
-    if not free:
-        log(f"no free GPU >= {job.min_free_gb}GB (live={sorted(live)}) -> wait")
-        return 0
 
-    assignment = shard_seeds(needy, free)  # split needy seeds across the free GPUs
-    log(f"launch assignment: {assignment}")
-    specs = build_launch_specs(job, assignment, max_hours)
-
-    if not (args.dry_run and args.skip_preflight):
-        ok, output = run_preflight(job)
-        log(f"preflight check_remote.sh: {'PASS' if ok else 'FAIL'}")
-        if not ok:
-            log("preflight output:\n" + output)
-            if not args.dry_run:
-                log("ABORT: preflight failed -> no launch")
-                return 0
-
-    if args.dry_run:
-        log("DRY-RUN would launch:")
-        for spec in specs:
+    for job, needy in candidates:
+        free = [
+            g for g in eligible_gpus(gpus, job.min_free_gb) if g.index not in occupied
+        ]
+        if not free:
             log(
-                f"  tmux -s {spec.session}: {' '.join(spec.launch_argv)} "
-                f"[CUDA={spec.gpu_index}, MAX_HOURS={max_hours}]"
+                f"{job.name}: no free GPU >= {job.min_free_gb}GB "
+                f"(occupied={sorted(occupied)}) -> try next job"
             )
-        log("DRY-RUN: nothing launched")
-        return 0
-
-    # Crash-loop guard (whole-job, committed launch only): if TOTAL progress did not
-    # advance since the last launch, nothing is progressing -> count a failure; at
-    # MAX_FAILS mark stuck + skip so a fully-broken job can't block the queue. (A live
-    # shard making progress resets it, so recovery isn't mistaken for a crash.)
-    done = sum(per_seed.values())
-    prev = state.get(job.name, {})
-    fails = prev.get("fails", 0) + 1 if done <= prev.get("last_progress", -1) else 0
-    if fails >= MAX_FAILS:
-        state[job.name] = {**prev, "last_progress": done, "fails": fails}
-        save_state(state)
+            continue
+        done = count_progress(runs_root, job)
         log(
-            f"STUCK: {job.name} no progress across {fails} launches (at {done}/"
-            f"{job.total}) -> skipping; investigate logs/{job.run_name}.log"
+            f"selected: {job.name} {done}/{job.total} "
+            f"(min_free_gb={job.min_free_gb}); needy seeds {needy}; "
+            f"window->{args.stop_hour}:00"
         )
+        assignment = shard_seeds(needy, free)  # split needy seeds across free GPUs
+        log(f"launch assignment: {assignment}")
+        specs = build_launch_specs(job, assignment, max_hours)
+
+        if not (args.dry_run and args.skip_preflight):
+            ok, output = run_preflight(job)
+            log(f"preflight check_remote.sh: {'PASS' if ok else 'FAIL'}")
+            if not ok:
+                log("preflight output:\n" + output)
+                if not args.dry_run:
+                    log("ABORT: preflight failed -> no launch")
+                    return 0
+
+        if args.dry_run:
+            log("DRY-RUN would launch:")
+            for spec in specs:
+                log(
+                    f"  tmux -s {spec.session}: {' '.join(spec.launch_argv)} "
+                    f"[CUDA={spec.gpu_index}, MAX_HOURS={max_hours}]"
+                )
+            log("DRY-RUN: nothing launched")
+            return 0
+
+        # Crash-loop guard (whole-job, committed launch only): if TOTAL progress did
+        # not advance since the last launch, nothing is progressing -> count a
+        # failure; at MAX_FAILS mark stuck, then let the NEXT candidate use the GPUs
+        # this same tick. (A live shard making progress resets the counter, so
+        # recovery isn't mistaken for a crash.)
+        per_seed = count_per_seed(runs_root, job)
+        progressed = sum(per_seed.values())
+        prev = state.get(job.name, {})
+        fails = (
+            prev.get("fails", 0) + 1
+            if progressed <= prev.get("last_progress", -1)
+            else 0
+        )
+        if fails >= MAX_FAILS:
+            state[job.name] = {**prev, "last_progress": progressed, "fails": fails}
+            save_state(state)
+            log(
+                f"STUCK: {job.name} no progress across {fails} launches (at "
+                f"{progressed}/{job.total}) -> skipping; investigate "
+                f"logs/{job.run_name}.log"
+            )
+            continue
+
+        for spec in specs:
+            write_runner(spec)
+            launch_session(spec)
+            log(f"launched {spec.session} (gpu {spec.gpu_index}, seeds {spec.seeds})")
+        shards = state.get(job.name, {}).get("shards", {})
+        job_live = live.get(job.run_name, set())
+        new_shards = {str(g): shards[str(g)] for g in job_live if str(g) in shards}
+        for gpu, seeds in assignment.items():
+            new_shards[str(gpu)] = seeds
+        state[job.name] = {
+            "last_progress": progressed,
+            "fails": fails,
+            "shards": new_shards,
+        }
+        save_state(state)
+        log("=== done ===")
         return 0
 
-    for spec in specs:
-        write_runner(spec)
-        launch_session(spec)
-        log(f"launched {spec.session} (gpu {spec.gpu_index}, seeds {spec.seeds})")
-    new_shards = {str(g): shards[str(g)] for g in live if str(g) in shards}
-    for gpu, seeds in assignment.items():
-        new_shards[str(gpu)] = seeds
-    state[job.name] = {"last_progress": done, "fails": fails, "shards": new_shards}
-    save_state(state)
-    log("=== done ===")
+    log("no candidate fits the free GPUs -> wait")
     return 0
 
 

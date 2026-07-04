@@ -208,3 +208,55 @@ def test_launch_spec_env_and_argv(tmp_path):
     assert s0.launch_argv[:3] == ["bash", "scripts/launch.sh", "--i-understand"]
     assert s0.launch_argv[3:5] == ["grid", "c.yaml"]
     assert s0.launch_argv[-3:] == ["--resume", "--seeds", "11,23"]
+
+
+# ---- multi-job GPU fill (launch_candidates + live_map) ----
+
+
+def test_live_map_one_parse_matches_exact_run_names():
+    live = M.live_map(
+        ["grid-a", "grid-a-x"],
+        ["grid-a-g0", "grid-a-x-g1", "other-g0", "grid-a-g1extra"],
+    )
+    # exact `<run>-g<idx>` only: no prefix bleed between grid-a and grid-a-x,
+    # and a trailing-suffix session name does not count.
+    assert live == {"grid-a": {0}, "grid-a-x": {1}}
+
+
+def test_candidates_skip_all_in_flight_and_yield_next_job(tmp_path):
+    # job a: seeds 11,23 remain, BOTH owned by the live gpu0 shard -> skipped with a
+    # note; job b (independent) becomes the candidate so gpu1 doesn't idle for hours.
+    jobs = [_job("a", "a", 800, "grid", seeds=(11, 23)), _job("b", "b", 800, "grid")]
+    _write(tmp_path / "a" / "math500" / "m" / "x-256-s11.jsonl", 100)  # incomplete
+    state = {"a": {"shards": {"0": [11, 23]}}}
+    live = {"a": {0}, "b": set()}
+    candidates, notes = M.launch_candidates(
+        tmp_path, jobs, skip=set(), live=live, state=state
+    )
+    assert [(j.name, seeds) for j, seeds in candidates] == [("b", [11, 23, 47, 89])]
+    assert any("a: incomplete seeds all in flight" in n for n in notes)
+
+
+def test_candidates_partial_shard_death_relaunches_only_dead_seeds(tmp_path):
+    # gpu0 shard (seeds 11,23) died (not live); gpu1 shard (47,89) still running ->
+    # only the dead shard's incomplete seeds are needy, and job stays first in line.
+    jobs = [_job("a", "a", 800, "grid")]
+    _write(tmp_path / "a" / "math500" / "m" / "x-256-s11.jsonl", 200)  # 11 complete
+    state = {"a": {"shards": {"0": [11, 23], "1": [47, 89]}}}
+    live = {"a": {1}}
+    candidates, _ = M.launch_candidates(
+        tmp_path, jobs, skip=set(), live=live, state=state
+    )
+    assert [(j.name, seeds) for j, seeds in candidates] == [("a", [23])]
+
+
+def test_candidates_respect_dependency_and_completion(tmp_path):
+    jobs = [
+        _job("grid", "grid", 800, "grid"),
+        _job("rev", "rev", 800, "readout", requires="grid"),
+        _job("later", "later", 400, "grid"),
+    ]
+    _write(tmp_path / "grid" / "math500" / "m" / "a-256-s11.jsonl", 800)  # complete
+    candidates, _ = M.launch_candidates(tmp_path, jobs, skip=set(), live={}, state={})
+    # grid complete -> not a candidate; rev unblocked and first; later follows.
+    assert [j.name for j, _ in candidates] == ["rev", "later"]

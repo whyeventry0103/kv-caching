@@ -34,6 +34,23 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
   INSTALLED on remote** (Mon 09:20, `scripts/scoop_sweep.py`, emails via smtp json).
   (6) make sync-apply run AFTER these changes (sync-state fresh for tonight's watcher).
 
+  **★ AUTOMATION HARDENED + EMAIL REDESIGNED (2026-07-04 afternoon, Fable):**
+  (1) **Watcher tail-fill fix:** previously, when the selected job's remaining seeds were
+  all in flight the tick no-op'd — one long tail shard could idle the OTHER GPU for hours
+  and block every later job. Now `launch_candidates()` walks the queue and launches the
+  first job with needy seeds onto GPUs not occupied by ANY of our sessions (cross-job
+  occupancy via one tmux parse, `live_map`); STUCK marking now falls through to the next
+  candidate the same tick. 4 new tests (24 total for autorun); dry-run VERIFIED on remote
+  against real state (tonight: readout-diss256-h2o shards g0=[11,47], g1=[23,89],
+  MAX_HOURS 6.91 — correct). (2) **nightly_report.py redesigned:** subject
+  `[kvcache] date | +N last night | %% | FLAG`; sections LAST NIGHT (per-job deltas +
+  ** COMPLETED ** callouts), QUEUE (progress bars), TOTAL+ETA (nights at last night's
+  rate), TONIGHT (watcher's actual plan + per-seed counts = looping-shard flag),
+  DEADLINES (R-KV/AIME drop-dead D-countdown — the wiring promised on 07-03), HEALTH
+  (stuck/GPU/disk). Per-job snapshot now stored for deltas (old format tolerated);
+  dry-run no longer overwrites the delta baseline. Remote dry-run rendered clean.
+  Synced; 124 tests, lint green.
+
   **★★ DECISIONS MADE 2026-07-03 (Claude, at user's request — both CONFIRMED):**
   (1) **R-KV + AIME drop-dead = 2026-08-01.** If R-KV cells (post-gen-smoke) and AIME are
   not producing rows by Aug 1, CUT both to future work; the paper ships as 3 methods x 2
