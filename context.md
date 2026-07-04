@@ -34,6 +34,21 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
   INSTALLED on remote** (Mon 09:20, `scripts/scoop_sweep.py`, emails via smtp json).
   (6) make sync-apply run AFTER these changes (sync-state fresh for tonight's watcher).
 
+  **★★ SERVER SWEEP + PRO FIGURES + QUEUE EXTENSION (2026-07-04 evening, Fable):**
+  (1) **UNREAD RESULT FOUND: grid-diss2048-tok read** — Random 0.850 / SLM 0.808 vs FC
+  0.882 (near-lossless pole at power; ordering persists +0.042; doubles as harness
+  control). Now in paper §4.1 + Fig 1 dose bars + PAPER_FINDINGS §4i. (2) **EXACT
+  REPLICATION verified**: v1 grid vs tok re-run = 800/800 rows identical (correct,
+  truncated, n_tokens) → determinism claim added to paper Threats + PAPER_FINDINGS §1b.
+  (3) **Figures fully restyled** (Okabe-Ito validated palette, dataviz-skill pass;
+  Fig 1 gains 2048 dose bars; Fig 2 shows residual arrow + all endpoint CIs; Fig 4
+  annotated staircase; all rendered + eyeballed). (4) **QUEUE EXTENDED + verified
+  parse (11 jobs):** NEW reverse-readout-diss256-h2o (bracket for 3rd method; h2o grid
+  HAS token sidecars) after readout-diss256-h2o; NEW replay-diss256-h2o (mechanism,
+  3rd method) appended last. New configs: reverse_readout_diss256_h2o.yaml,
+  replay_math500_diss256_h2o.yaml. (5) H2O-style free-run 0.248 now in paper Threats
+  with the ObservedAttention-≠-H2O label (no HOTT contradiction claim).
+
   **★ AUTOMATION HARDENED + EMAIL REDESIGNED (2026-07-04 afternoon, Fable):**
   (1) **Watcher tail-fill fix:** previously, when the selected job's remaining seeds were
   all in flight the tick no-op'd — one long tail shard could idle the OTHER GPU for hours

@@ -1,0 +1,19 @@
+name: replay_math500_diss256_h2o
+stage: replay
+mode: compression_replay
+# Per-step TV (divergence) profiles for the H2O-style press at budget 256: teacher-force
+# the full-cache reference under ObservedAttentionPress and record the paired TV profile.
+# Extends the Figure-4 mechanism (onset-aligned compounding + AUC-TV) to a third eviction
+# policy. Eager attention is auto-loaded by run_replay for h2o. 100 x n=4 x 1 press = 400.
+reference_run_name: math500-fc-powered-merged
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+subset:
+  math500: 100
+presses: [h2o]
+budgets: [256]
+seeds: [11, 23, 47, 89]
+compression_interval: 64
+estimated_generation_count: 0
+estimated_replay_count: 400
+scale_authorized: true

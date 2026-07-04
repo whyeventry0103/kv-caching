@@ -74,6 +74,19 @@ jobs:
     progress_kind: readout
     requires: null
 
+  # Reverse readout for the H2O-style cells -> completes the residual BRACKET on a
+  # third eviction policy (grid-diss256-h2o stores token-ID sidecars; full-cache
+  # readout, so sdpa + modest memory like the original reverse job).
+  - name: reverse-readout-diss256-h2o
+    command: replay
+    config: configs/experiments/reverse_readout_diss256_h2o.yaml
+    run_name: reverse-readout-diss256-h2o
+    total: 400
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 28
+    progress_kind: readout
+    requires: grid-diss256-h2o
+
   # readout-2048 runs AFTER H2O-256: H2O is the method HOTT reports as surviving, so
   # testing method-invariance of the trajectory residual against it is highest-value.
   - name: readout-diss2048
@@ -103,4 +116,16 @@ jobs:
     seeds: [11, 23, 47, 89]
     min_free_gb: 36
     progress_kind: readout
+    requires: null
+
+  # TV profiles for the H2O-style press (mechanism / Figure-4 extension to a third
+  # policy; eager attention -> conservative min_free_gb like the other h2o jobs).
+  - name: replay-diss256-h2o
+    command: replay
+    config: configs/experiments/replay_math500_diss256_h2o.yaml
+    run_name: replay-diss256-h2o
+    total: 400
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 36
+    progress_kind: grid
     requires: null

@@ -55,6 +55,11 @@ and a **trajectory** part.
 - **Compute:** ~224 GPU-hours of generation (summed wall-clock over 7,307 generations; excludes
   model-load/teacher-forcing overhead — quote as "~230 GPU-hours").
 - **Repo:** github.com/whyeventry0103/kv-caching (ANONYMIZE for submission).
+- **EXACT REPLICATION (verified 2026-07-04):** the original budget-256 grid
+  (grid-math500-dissociation-v1) and the token-ID re-run (grid-diss256-tok) agree on ALL
+  800 rows — identical per-row correctness, truncation, AND n_tokens → generation is
+  deterministic under our seeding; quote as "an independent re-run reproduced all 800
+  rows exactly." (In the paper: Threats/instrument-validity.)
 
 ## 2. Thesis (the spine — commit to this framing)
 > **Compression damage to reasoning is real, large, and largely *invisible to teacher-forced /
@@ -222,6 +227,13 @@ recency selection while uniform Random does best of the three → *concentrated*
 H2O combines both components. Decomposition (readout-diss256-h2o) runs tonight — only then
 does the method-invariance test on a third method read out. Tempered claim if it lands
 clean: we predicted ObservedAttentionPress behavior, not H2O's.
+
+### 4i. Budget-2048 free-run (the near-lossless pole) — READ 2026-07-04
+grid-diss2048-tok 800/800: **Random 0.850 (trunc 0.030, mean 3,454 tok), StreamingLLM
+0.808 (trunc 0.028, mean 3,650 tok)** vs FC 0.882. Free-running at 8× budget is within
+0.03–0.07 of the reference → (a) the collapse is a BUDGET effect, (b) doubles as a harness
+control (free-running per se isn't broken), (c) the Random>SLM ordering PERSISTS at 2048
+(+0.042). In the paper: §4.1 + Fig 1 dose bars. readout-2048 (decomposition) queued.
 
 ## 7. Status
 - **DONE (writable core):** phenomenon, forward decomposition, reverse-replay bracket

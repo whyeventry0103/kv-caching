@@ -1,0 +1,22 @@
+name: reverse_readout_diss256_h2o
+stage: replay
+mode: readout
+# REVERSE readout for the THIRD eviction policy: the H2O-style (ObservedAttentionPress)
+# compressed free-run traces (grid-diss256-h2o, token-ID sidecars verified present) are
+# teacher-forced and read out under the FULL cache (press: fullcache = no compression
+# during read-out). Together with readout-diss256-h2o this completes the residual
+# BRACKET for a third method -- the same off-policy defense the paper carries for
+# Random/StreamingLLM (PREREGISTRATION Amendment F/H discipline).
+reference_run_name: grid-diss256-h2o
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+subset:
+  math500: 100
+presses: [fullcache]
+budgets: [256]
+seeds: [11, 23, 47, 89]
+compression_interval: 64
+max_answer_tokens: 2048
+estimated_generation_count: 0
+estimated_replay_count: 400
+scale_authorized: true
