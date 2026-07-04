@@ -58,6 +58,9 @@ class Job:
     min_free_gb: int
     progress_kind: str
     requires: str | None
+    bench: str = "math500"  # subtree counted for kind 'grid' (e.g. aime24 banks)
+    marker: str | None = None  # kind 'marker': done when <runs_root>/<marker> exists
+    extra_args: tuple[str, ...] = ()  # appended to launch.sh argv (e.g. download flags)
 
 
 @dataclass(frozen=True)
@@ -101,6 +104,9 @@ def load_queue(path: Path) -> tuple[bool, list[Job]]:
             min_free_gb=int(j["min_free_gb"]),
             progress_kind=j["progress_kind"],
             requires=j.get("requires"),
+            bench=j.get("bench", "math500"),
+            marker=j.get("marker"),
+            extra_args=tuple(j.get("extra_args") or ()),
         )
         for j in data["jobs"]
     ]
@@ -154,8 +160,12 @@ def compute_max_hours(now: datetime, stop_hour: int = STOP_HOUR) -> float | None
 
 def count_progress(runs_root: Path, job: Job) -> int:
     run_dir = runs_root / job.run_name
+    if job.progress_kind == "marker":
+        # Gate jobs (e.g. the rkv generation smoke): done exactly when the PASS
+        # marker exists under the base runs root; there are no row files to count.
+        return 1 if job.marker and (runs_root / job.marker).exists() else 0
     if job.progress_kind == "grid":
-        base = run_dir / "math500"
+        base = run_dir / job.bench
         paths = (
             [p for p in base.rglob("*.jsonl") if "token_ids" not in p.parts]
             if base.exists()
@@ -176,7 +186,10 @@ def count_progress(runs_root: Path, job: Job) -> int:
 
 def count_per_seed(runs_root: Path, job: Job) -> dict[int, int]:
     """Completed records per seed (from `...-s<seed>.jsonl`), summed over presses."""
-    sub = "math500" if job.progress_kind == "grid" else "readout"
+    if job.progress_kind == "marker":
+        done = count_progress(runs_root, job)
+        return {job.seeds[0]: done} if done else {}
+    sub = job.bench if job.progress_kind == "grid" else "readout"
     base = runs_root / job.run_name / sub
     counts: dict[int, int] = {}
     if not base.exists():
@@ -311,6 +324,7 @@ def build_launch_specs(
             "--resume",
             "--seeds",
             ",".join(str(s) for s in seeds),
+            *job.extra_args,
         ]
         specs.append(
             LaunchSpec(

@@ -133,10 +133,17 @@ def build_rkv_scorer(kvpress_module: Any) -> Any:
     queries via kvpress's verified path; a real-generation smoke confirms the retained
     sets match before R-KV is promoted to EXECUTABLE.
     """
-    import torch.nn.functional as F
+    from dataclasses import dataclass
 
     SnapKVPress = kvpress_module.SnapKVPress
 
+    # MUST be a dataclass: SnapKVPress is a dataclass, so a plain subclass's annotated
+    # class attributes do NOT become field defaults -- the generated __init__ would
+    # silently set the instance back to SnapKV's window_size=64 / kernel_size=5. That
+    # exact shadowing bug shipped once and was caught by the real-generation smoke
+    # (selection Jaccard 0.805 vs the parity functions; press-only indices clustered
+    # in the last-64 region). Regression-locked in tests/test_presses.py.
+    @dataclass
     class RKVScorerPress(SnapKVPress):
         compression_ratio: float = 0.0
         window_size: int = RKV_WINDOW_SIZE
@@ -146,6 +153,8 @@ def build_rkv_scorer(kvpress_module: Any) -> Any:
         def score(self, module, hidden_states, keys, values, attentions, kwargs):
             # Recompute the last-window queries (RoPE-applied), then the parity-verified
             # R-KV final score; pad the window with the max so it is always kept.
+            import torch.nn.functional as F
+
             query = self._recompute_window_query(module, hidden_states, kwargs)
             final = rkv_final_score(
                 query,
@@ -158,14 +167,48 @@ def build_rkv_scorer(kvpress_module: Any) -> Any:
 
         @staticmethod
         def _recompute_window_query(module, hidden_states, kwargs):
+            # R-KV importance uses the last `window` (8) queries. At decode time
+            # kvpress supplies position_embeddings for the CURRENT position only, so
+            # the window's cos/sin are recomputed analytically (standard RoPE) for
+            # positions p-n+1..p and self-checked against the framework's rotation
+            # at p -- a silent mis-rotation can never ship a wrong retained set.
+            import torch
             from kvpress.presses.snapkv_press import (
                 get_prerope_query_states,
                 rotate_half,
             )
 
-            q = get_prerope_query_states(module, hidden_states[:, -RKV_WINDOW_SIZE:])
-            cos, sin = kwargs["position_embeddings"]
-            cos, sin = cos[:, -RKV_WINDOW_SIZE:], sin[:, -RKV_WINDOW_SIZE:]
+            n = min(RKV_WINDOW_SIZE, hidden_states.shape[1])
+            q = get_prerope_query_states(module, hidden_states[:, -n:])
+            config = module.config
+            if getattr(config, "rope_scaling", None):
+                raise NotImplementedError(
+                    "rkv window-query recompute supports standard RoPE only; got "
+                    f"rope_scaling={config.rope_scaling!r}"
+                )
+            head_dim = q.shape[-1]
+            pos_end = int(kwargs["cache_position"][-1].item())
+            positions = torch.arange(
+                pos_end - n + 1, pos_end + 1, device=q.device, dtype=torch.float32
+            )
+            inv_freq = 1.0 / (
+                float(config.rope_theta)
+                ** (
+                    torch.arange(0, head_dim, 2, device=q.device, dtype=torch.float32)
+                    / head_dim
+                )
+            )
+            freqs = positions[:, None] * inv_freq[None, :]
+            emb = torch.cat((freqs, freqs), dim=-1)
+            cos = emb.cos()[None].to(q.dtype)
+            sin = emb.sin()[None].to(q.dtype)
+            cos_cur, _ = kwargs["position_embeddings"]
+            if not torch.allclose(
+                cos[:, -1].float(), cos_cur[:, -1].float(), atol=1e-2
+            ):
+                raise RuntimeError(
+                    "rkv analytic RoPE disagrees with model position_embeddings"
+                )
             return (q * cos.unsqueeze(1)) + (rotate_half(q) * sin.unsqueeze(1))
 
     return RKVScorerPress()

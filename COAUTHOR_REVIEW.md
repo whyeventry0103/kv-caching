@@ -4,7 +4,14 @@ Standing review artifact for the submission push. Updated as work progresses; tr
 **Roadmap** (bottom) as the canonical prioritized TODO. Everything here is grounded in
 repository evidence — file paths are cited throughout.
 
-**Status line (update on every pass):** 2026-07-04 — remote back. ROADMAP #1 DONE:
+**Status line (update on every pass):** 2026-07-05 — RUN-ONLY STATE: 22-job queue now
+carries every strengthening run (H2O full bracket, R-KV unlocked after the smoke gate
+caught+we fixed a real press bug — Amendment I, Jaccard 0.805→1.0000; Llama-8B
+cross-architecture trio; AIME-24 bank+cells with the >100% test). AIME loader +
+Llama pin + marker-gated jobs + bench-aware progress all implemented and tested
+(131 tests). Breadth criticism status: methods 2→4 queued, budgets 2, benchmarks 2
+queued, architectures 2 queued — resolved BY THE QUEUE, not yet by data.
+Prior: 2026-07-04 — remote back. ROADMAP #1 DONE:
 bracket-endpoint bootstrap CIs implemented (report_m4 `unexplained_residual_ci95` /
 `reverse_residual_ci95`), run on the powered data: all four endpoints exclude zero
 (fwd [−0.402,−0.258]/[−0.403,−0.268]; rev [−0.383,−0.213]/[−0.553,−0.410] — reverse

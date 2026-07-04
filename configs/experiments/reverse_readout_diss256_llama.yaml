@@ -1,0 +1,17 @@
+name: reverse_readout_diss256_llama
+stage: replay
+mode: readout
+# Cross-architecture reverse readout (bracket) over the llama compressed traces.
+reference_run_name: grid-diss256-llama
+models: [r1_distill_llama_8b]
+benchmarks: [math500]
+subset:
+  math500: 50
+presses: [fullcache]
+budgets: [256]
+seeds: [11, 23, 47, 89]
+compression_interval: 64
+max_answer_tokens: 2048
+estimated_generation_count: 0
+estimated_replay_count: 400
+scale_authorized: true

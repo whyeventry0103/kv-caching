@@ -33,6 +33,7 @@ case "$COMMAND" in
   bank) PY_SCRIPT="scripts/build_bank.py" ;;
   grid) PY_SCRIPT="scripts/run_grid.py" ;;
   replay) PY_SCRIPT="scripts/run_replay.py" ;;
+  rkvsmoke) PY_SCRIPT="scripts/rkv_smoke.py" ;;
   metrics) PY_SCRIPT="scripts/run_metrics.py" ;;
   mechanism) PY_SCRIPT="scripts/run_mechanism.py" ;;
   figures) PY_SCRIPT="scripts/make_figures.py" ;;

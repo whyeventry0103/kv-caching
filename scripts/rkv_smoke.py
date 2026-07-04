@@ -24,6 +24,7 @@ import argparse
 import os
 import sys
 from pathlib import Path
+from datetime import UTC
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
@@ -43,6 +44,18 @@ def main() -> int:
     parser.add_argument("--max-new-tokens", type=int, default=640)
     parser.add_argument("--compression-interval", type=int, default=64)
     parser.add_argument("--i-understand", action="store_true")
+    parser.add_argument(
+        "--write-pass-marker",
+        default="",
+        help="on PASS, write this JSON marker (mechanically promotes rkv to "
+        "executable per PREREGISTRATION Amendment E); empty + "
+        "KVCACHE_BASE_RUNS_ROOT set -> <base>/rkv-gen-smoke-PASS.json",
+    )
+    # Accepted-and-ignored so the nightly launcher can invoke this like any other
+    # stage (launch.sh always appends --config / --resume / --seeds).
+    parser.add_argument("--config", default="", help="ignored (launcher compat)")
+    parser.add_argument("--resume", action="store_true", help="ignored")
+    parser.add_argument("--seeds", default="", help="ignored (launcher compat)")
     args = parser.parse_args()
     if not args.i_understand:
         raise SystemExit("REFUSED: loads the model on GPU; pass --i-understand")
@@ -168,6 +181,27 @@ def main() -> int:
             print("  -", failure)
         return 1
     print("PASS — R-KV path sane, within budget, parity-consistent during decoding")
+    marker = args.write_pass_marker
+    if not marker and os.environ.get("KVCACHE_BASE_RUNS_ROOT"):
+        marker = str(
+            Path(os.environ["KVCACHE_BASE_RUNS_ROOT"]) / "rkv-gen-smoke-PASS.json"
+        )
+    if marker:
+        import json as _json
+        from datetime import datetime
+
+        payload = {
+            "passed": True,
+            "budget": args.budget,
+            "n_problems": len(outputs),
+            "compressions": len(compressions),
+            "verified_events": len(events),
+            "mean_jaccard": mean_j,
+            "timestamp": datetime.now(UTC).isoformat(),
+        }
+        Path(marker).parent.mkdir(parents=True, exist_ok=True)
+        Path(marker).write_text(_json.dumps(payload, indent=2), encoding="utf-8")
+        print(f"PASS marker written: {marker} (rkv is now executable)")
     return 0
 
 

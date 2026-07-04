@@ -1,0 +1,8 @@
+name: rkv_smoke
+stage: rkvsmoke
+# Real-generation smoke for the parity-verified R-KV port (Amendment E's last gate).
+# launch.sh runs scripts/rkv_smoke.py; on PASS it writes
+# $KVCACHE_BASE_RUNS_ROOT/rkv-gen-smoke-PASS.json, which mechanically promotes the
+# rkv press to executable so the queued rkv cells can run. The script ignores this
+# config's contents (launcher compatibility only).
+scale_authorized: true

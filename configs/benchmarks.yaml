@@ -6,8 +6,9 @@ benchmarks:
     subset_size: 500
     extraction: boxed_or_numeric
   aime24:
-    handle: TODO(human)
-    split: test
+    handle: HuggingFaceH4/aime_2024
+    revision: 2fe88a2f1091d5048c0f36abc874fb997b3dd99a
+    split: train  # the repo's only split; 30 rows = AIME 2024 I + II
     subset_size: 30
     extraction: boxed_or_numeric
   aime25:

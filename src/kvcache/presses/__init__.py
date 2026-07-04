@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import hashlib
+import os
 from contextlib import contextmanager
+from pathlib import Path
 from typing import Any
 
 EXECUTABLE = {"streamingllm", "random", "h2o"}
@@ -12,6 +14,27 @@ PORT_REQUIRED = {"rkv"}
 DEFERRED = {"kivi2", "triattention"}
 # Attention-score presses read attention weights, which require eager attention.
 EAGER_ATTENTION = {"h2o"}
+
+# R-KV promotion gate (PREREGISTRATION Amendment E): the port is parity-verified
+# (retained-set Jaccard 1.0 vs the authors' code, docs/RKV_PORT.md); the remaining
+# gate is the REAL-GENERATION smoke. scripts/rkv_smoke.py writes this marker ONLY
+# when every smoke check passes, which mechanically promotes rkv to executable --
+# so the nightly queue can chain smoke -> rkv cells without a human in the loop.
+RKV_SMOKE_MARKER_ENV = "KVCACHE_RKV_SMOKE_MARKER"
+RKV_SMOKE_MARKER_NAME = "rkv-gen-smoke-PASS.json"
+
+
+def rkv_smoke_marker_path() -> Path | None:
+    explicit = os.environ.get(RKV_SMOKE_MARKER_ENV)
+    if explicit:
+        return Path(explicit)
+    base = os.environ.get("KVCACHE_BASE_RUNS_ROOT")
+    return Path(base) / RKV_SMOKE_MARKER_NAME if base else None
+
+
+def rkv_certified() -> bool:
+    marker = rkv_smoke_marker_path()
+    return bool(marker and marker.exists())
 
 
 def press_needs_eager_attention(name: str) -> bool:
@@ -52,10 +75,13 @@ def get_press(name: str) -> str:
             f"{normalized}: decoding-time adapter required before execution"
         )
     if normalized in PORT_REQUIRED:
+        if normalized == "rkv" and rkv_certified():
+            return normalized  # parity Jaccard 1.0 + generation smoke marker present
         raise NotImplementedError(
-            f"{normalized}: ported but PARITY-GATED. Run scripts/rkv_parity.py and "
-            "record a retained-set match vs the authors' code before any analysis row "
-            "(PREREGISTRATION Amendment E)."
+            f"{normalized}: parity-verified (Jaccard 1.0) but the real-generation "
+            "smoke has not passed. Run the queue job rkv-smoke (or scripts/"
+            "rkv_smoke.py --write-pass-marker) so the PASS marker exists before any "
+            "analysis row (PREREGISTRATION Amendment E)."
         )
     if normalized in DEFERRED:
         raise NotImplementedError(
@@ -121,14 +147,26 @@ def build_press(
                 )
 
         base_press = DeviceSafeRandomPress(seed=seed)
+    elif normalized == "rkv":
+        from kvcache.presses.rkv import build_rkv_scorer
+
+        base_press = build_rkv_scorer(kvpress_module)
     else:
         raise AssertionError("unreachable")
     press_cls = decoding_press_cls or kvpress_module.DecodingPress
+    # R-KV scores importance over the last-8-query observation window, so DecodingPress
+    # must buffer those hidden states; the other presses score from keys alone.
+    if normalized == "rkv":
+        from kvcache.presses.rkv import RKV_WINDOW_SIZE
+
+        buffer_size = RKV_WINDOW_SIZE
+    else:
+        buffer_size = 0
     return press_cls(
         base_press=base_press,
         target_size=budget,
         compression_interval=compression_interval,
-        hidden_states_buffer_size=0,
+        hidden_states_buffer_size=buffer_size,
     )
 
 
@@ -199,7 +237,7 @@ def build_rkv_press(
     R-KV is refused by get_press until the parity gate passes; this constructor exists
     so scripts/rkv_parity.py can exercise the port against the authors' code.
     """
-    from kvcache.presses.rkv import build_rkv_scorer
+    from kvcache.presses.rkv import RKV_WINDOW_SIZE, build_rkv_scorer
 
     if kvpress_module is None:
         import kvpress as kvpress_module
@@ -208,5 +246,5 @@ def build_rkv_press(
         base_press=build_rkv_scorer(kvpress_module),
         target_size=budget,
         compression_interval=compression_interval,
-        hidden_states_buffer_size=0,
+        hidden_states_buffer_size=RKV_WINDOW_SIZE,
     )

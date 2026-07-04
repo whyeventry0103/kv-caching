@@ -1,0 +1,18 @@
+name: bank_aime24_fc
+stage: bank
+# AIME-24 full-cache reference bank: 30 problems x n=8 = 240 generations at the
+# 16384 cap (AIME traces are long; truncation stays in-denominator per protocol).
+# Second benchmark for the generality envelope + the R-KV >100%-regime testbed.
+models: [r1_distill_qwen_7b]
+benchmarks: [aime24]
+subset:
+  aime24: 30
+seeds: [11, 23, 47, 89, 131, 197, 263, 347]
+max_new_tokens:
+  aime24: 16384
+presses: [fullcache]
+budgets: [full]
+estimated_generation_count: 240
+store_token_ids: true
+scale_authorized: true
+remote_only: true

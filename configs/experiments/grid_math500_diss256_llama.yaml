@@ -1,0 +1,19 @@
+name: grid_math500_diss256_llama
+stage: grid
+# Cross-architecture free-run cells: Random + StreamingLLM at budget 256 on
+# R1-Distill-Llama-8B (50 problems x n=4 x 2 presses = 400). Tests whether the
+# collapse + Random>SLM ordering transfer across the base-architecture change.
+models: [r1_distill_llama_8b]
+benchmarks: [math500]
+subset:
+  math500: 50
+presses: [random, streamingllm]
+budgets: [256]
+seeds: [11, 23, 47, 89]
+max_new_tokens:
+  math500: 16384
+compression_interval: 64
+estimated_generation_count: 400
+scale_authorized: true
+remote_only: true
+store_token_ids: true

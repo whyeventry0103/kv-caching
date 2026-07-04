@@ -260,3 +260,61 @@ def test_candidates_respect_dependency_and_completion(tmp_path):
     candidates, _ = M.launch_candidates(tmp_path, jobs, skip=set(), live={}, state={})
     # grid complete -> not a candidate; rev unblocked and first; later follows.
     assert [j.name for j, _ in candidates] == ["rev", "later"]
+
+
+# ---- marker jobs, bench subtrees, extra args ----
+
+
+def _job2(**kw):
+    base = dict(
+        name="j",
+        command="grid",
+        config="c.yaml",
+        run_name="j",
+        total=400,
+        seeds=[11, 23, 47, 89],
+        min_free_gb=24,
+        progress_kind="grid",
+        requires=None,
+    )
+    base.update(kw)
+    return M.Job(**base)
+
+
+def test_marker_job_progress_and_per_seed(tmp_path):
+    job = _job2(
+        name="rkv-smoke",
+        command="rkvsmoke",
+        run_name="rkv-smoke",
+        total=1,
+        seeds=[11],
+        progress_kind="marker",
+        marker="rkv-gen-smoke-PASS.json",
+    )
+    assert M.count_progress(tmp_path, job) == 0
+    assert M.count_per_seed(tmp_path, job) == {}
+    (tmp_path / "rkv-gen-smoke-PASS.json").write_text("{}")
+    assert M.count_progress(tmp_path, job) == 1
+    assert M.count_per_seed(tmp_path, job) == {11: 1}
+
+
+def test_count_progress_bench_subtree(tmp_path):
+    job = _job2(name="fc-aime24", run_name="fc-aime24", total=240, bench="aime24")
+    _write(tmp_path / "fc-aime24" / "aime24" / "m" / "fullcache-full-s11.jsonl", 30)
+    _write(tmp_path / "fc-aime24" / "math500" / "m" / "x-s11.jsonl", 99)  # ignored
+    assert M.count_progress(tmp_path, job) == 30
+    assert M.count_per_seed(tmp_path, job) == {11: 30}
+
+
+def test_extra_args_appended_to_launch_argv(tmp_path):
+    job = _job2(
+        name="fc-llama50",
+        command="bank",
+        run_name="fc-llama50",
+        total=200,
+        seeds=[11, 23],
+        min_free_gb=30,
+        extra_args=("--allow-model-download",),
+    )
+    specs = M.build_launch_specs(job, {0: [11, 23]}, 5.0)
+    assert specs[0].launch_argv[-1] == "--allow-model-download"

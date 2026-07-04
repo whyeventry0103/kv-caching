@@ -1,0 +1,20 @@
+name: grid_math500_diss256_rkv
+stage: grid
+# R-KV (parity-verified port, Jaccard 1.0; promoted by the generation-smoke marker)
+# free-run at budget 256 -- the FOURTH eviction policy, and the reasoning-specific
+# one. sdpa (the scorer recomputes observation-window Q@K; no eager needed).
+# 100 problems x n=4 x 1 press = 400 gens, token IDs stored for reverse readout.
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+subset:
+  math500: 100
+presses: [rkv]
+budgets: [256]
+seeds: [11, 23, 47, 89]
+max_new_tokens:
+  math500: 16384
+compression_interval: 64
+estimated_generation_count: 400
+scale_authorized: true
+remote_only: true
+store_token_ids: true

@@ -16,6 +16,27 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
 
 ## 0. TL;DR — where we are right now
 
+  **★★★ RUN-ONLY STATE REACHED (2026-07-05, Fable): queue = 22 jobs, everything the
+  paper needs is queued + code-complete.** (1) **R-KV UNLOCKED (Amendment I):** smoke
+  first FAILED (Jaccard 0.805) → root cause = dataclass field shadowing (press ran
+  SnapKV window/kernel 64/5, not R-KV 8/7; parity harness couldn't see it, the GATE
+  caught it) → fixed (dataclass subclass + regression test + TRUE 8-query window w/
+  buffered hidden states + analytic RoPE w/ per-event self-check vs framework rotation;
+  scaled-RoPE models refused) → re-run **PASS Jaccard 1.0000**, marker
+  `rkv-gen-smoke-PASS.json` written; press registry promotes rkv iff marker exists
+  (env KVCACHE_RKV_SMOKE_MARKER or $KVCACHE_BASE_RUNS_ROOT). (2) **NEW capabilities:**
+  AIME-24 dataset handle implemented + pinned (HuggingFaceH4/aime_2024 @2fe88a2, split
+  train, 30 rows; loader test); R1-Distill-Llama-8B model entry pinned (@6a6f4aa —
+  NOTE: llama3-scaled RoPE → rkv press refuses on it by design; llama cells use
+  random/slm only); run_replay benchmark-generalized; autorun gains bench= (aime
+  subtree counting), marker= (gate jobs), extra_args= (bank download flags);
+  launch.sh gains rkvsmoke stage. (3) **QUEUE (22 jobs, ~4.3k rows remaining):**
+  ... h2o chain → rkv-smoke(DONE) → rkv 256 grid/readout/reverse → llama FC bank
+  (--allow-model-download) → llama grid/readout/reverse → fc-aime24
+  (--allow-dataset-download) → aime grid+readout @2048 (random/slm/rkv). All configs
+  dry-run validated; watcher dry-run verified (tonight = readout-diss256-h2o).
+  131 tests; lint green; synced (docs re-sync pending final commit).
+
   **★★★ 2026-07-04 (Fable session; remote back up):** (1) **ROADMAP #1 DONE — bracket-
   endpoint bootstrap CIs** (report_m4 fields `unexplained_residual_ci95` /
   `reverse_residual_ci95`; problem-clustered, 2000 resamples): fwd **[−0.402,−0.258]**

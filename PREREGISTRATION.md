@@ -516,3 +516,31 @@ A's off-policy section intended. Code, tests, and reports are fixed as of this d
 - The prior text of Amendment F's "Reverse-replay bracket result" is retained unedited
   per append-only discipline; its bracket numbers and its "brackets overlap" reading are
   superseded by this amendment.
+
+## Amendment I (2026-07-05): R-KV promoted to executable — gate history recorded
+
+Amendment E required a real-generation smoke before any R-KV analysis row. Record:
+
+1. **First smoke run FAILED** (selection Jaccard 0.805 vs the parity-verified
+   functions). Root cause: kvpress `SnapKVPress` is a dataclass, so the port's plain
+   subclass class-attributes (`window_size=8`, `kernel_size=7`) were silently
+   shadowed by the dataclass-generated `__init__` defaults (64 / 5) — the live press
+   was scoring with SnapKV's window, not R-KV's. The parity harness could not see
+   this (it tests the scoring functions, not the press wrapper); the smoke gate
+   caught it exactly as designed.
+2. **Fixes:** (a) the scorer subclass is now itself a dataclass (regression test
+   locks the override); (b) decode-time window queries are now the true last-8
+   observation window — DecodingPress buffers 8 hidden states for rkv and the
+   cos/sin rotations for positions p-7..p are computed analytically (standard RoPE
+   only; scaled-RoPE models are refused) with a per-event self-check against the
+   framework-provided rotation at position p, so a convention drift hard-fails
+   rather than silently mis-rotating.
+3. **Second smoke run PASSED:** 3 problems, 756 compressions within budget,
+   selection Jaccard 1.0000 vs the parity functions, coherent trace. The PASS
+   marker (`rkv-gen-smoke-PASS.json`, containing the metrics) was written; the
+   press registry treats the marker's existence as the promotion condition, so the
+   gate remains enforced by code, not convention.
+
+R-KV cells (grid/readout/reverse at 256; AIME-24 at 2048) are queued behind this
+marker. Paper labeling: "R-KV (parity-verified port; smoke-verified during
+decoding)" — the two-stage gate history above is disclosable as methodology.

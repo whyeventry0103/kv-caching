@@ -100,6 +100,35 @@ def _math500_problems(
     ]
 
 
+def _aime_problems(
+    dataset: Any, subset: int | dict[str, Any] | None, *, name: str
+) -> list[Problem]:
+    """AIME rows (HuggingFaceH4/aime_2024 schema: id/problem/solution/answer/url/year).
+
+    Gold stays RAW (AIME answers are integers 0-999 as strings); is_equiv grades raw
+    vs raw exactly as for MATH-500. Rows are ordered by their integer id so subsetting
+    is deterministic across runs.
+    """
+    rows = sorted(dataset, key=lambda row: int(row["id"]))
+    if isinstance(subset, dict):
+        subset = int(subset["count"])
+    if isinstance(subset, int):
+        rows = rows[: min(subset, len(rows))]
+    return [
+        Problem(
+            pid=f"{name}-{int(row['id'])}",
+            question=str(row["problem"]),
+            gold_answer=str(row["answer"]),
+            meta={
+                "year": str(row.get("year", "")),
+                "url": str(row.get("url", "")),
+                "gold_canon": canonicalize(str(row["answer"])),
+            },
+        )
+        for row in rows
+    ]
+
+
 def _rsp_problems(subset: int | None) -> list[Problem]:
     count = subset or 3
     problems = []
@@ -124,12 +153,12 @@ def load_benchmark(
     subset: int | dict[str, Any] | None = None,
     allow_download: bool = False,
 ) -> list[Problem]:
-    """Load only the MATH-500 and synthetic RSP pilot benchmarks."""
+    """Load the implemented benchmarks: MATH-500, AIME-24, and synthetic RSP."""
     if name == "rsp":
         if isinstance(subset, dict):
             subset = int(subset["count"])
         return _rsp_problems(subset)
-    if name != "math500":
+    if name not in {"math500", "aime24"}:
         raise NotImplementedError(f"benchmark not implemented for pilot: {name}")
     dataset = load_dataset_guarded(
         str(benchmark_cfg["handle"]),
@@ -138,4 +167,6 @@ def load_benchmark(
         config=benchmark_cfg.get("config"),
         allow_download=allow_download,
     )
+    if name == "aime24":
+        return _aime_problems(dataset, subset, name=name)
     return _math500_problems(dataset, subset)

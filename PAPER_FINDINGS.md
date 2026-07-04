@@ -180,10 +180,15 @@ Splitting the FC bank into two disjoint seed halves and running ADD between them
 0.068, median 0.000, mean permutation p 0.976, 0% of problems significant.** The ADD noise floor
 (~0.07) is far below the compression cells (0.56–0.75) → ADD does not false-positive.
 
-### 4g. R-KV port integrity
+### 4g. R-KV port integrity — GATE COMPLETE (2026-07-05)
 The R-KV port reproduces the authors' retained-token sets exactly (Jaccard 1.0 at budgets
-{128,256,384,512}, synthetic tensors). Real-generation smoke pending *(in progress)* before R-KV
-cells run.
+{128,256,384,512}, synthetic tensors). The real-generation smoke (Amendment E's last gate)
+initially **FAILED at Jaccard 0.805** — the press wrapper was silently running SnapKV's
+window/kernel (64/5) instead of R-KV's (8/7) due to dataclass field shadowing; the parity
+harness could not see it, the smoke caught it (the gate worked). Fixed (dataclass subclass +
+regression test + true 8-query window with analytic RoPE + per-event self-check), re-run:
+**PASS, Jaccard 1.0000**, marker written -> rkv executable; cells queued (256 grid/readout/
+reverse + AIME-2048). Sell the two-stage catch as methodology, never hide it (Amendment I).
 
 ## 5. Framing discipline (non-negotiable — apply throughout)
 - **Divergence ≠ damage.** ADD / TV / residual are "behavioral-fidelity loss," never "damage."

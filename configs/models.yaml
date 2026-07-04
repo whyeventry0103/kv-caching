@@ -7,6 +7,14 @@ models:
     chat_template: tokenizer
     system_prompt: null  # R1-Distill requires its chat template and no system prompt.
     role: primary
+  r1_distill_llama_8b:
+    handle: deepseek-ai/DeepSeek-R1-Distill-Llama-8B
+    revision: 6a6f4aa4197940add57724a7707d069478df56b1
+    dtype: bfloat16
+    max_new_tokens: 32768
+    chat_template: tokenizer
+    system_prompt: null  # same DeepSeek R1-Distill template family; no system prompt.
+    role: cross-architecture check (Llama base; the model behind R-KV's headline)
   qwen3_4b:
     handle: Qwen/Qwen3-4B
     revision: 1cfa9a7208912126459214e8b04321603b3df60c

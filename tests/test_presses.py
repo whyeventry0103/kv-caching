@@ -24,10 +24,30 @@ def test_h2o_needs_eager_attention_others_do_not():
     assert press_needs_eager_attention("random") is False
 
 
-def test_rkv_is_parity_gated():
-    # R-KV is ported but must not enter analysis until the parity gate passes.
-    with pytest.raises(NotImplementedError, match="PARITY-GATED"):
+def test_rkv_refuses_without_smoke_marker(monkeypatch, tmp_path):
+    # R-KV is parity-verified but must not enter analysis until the real-generation
+    # smoke marker exists (Amendment E). No marker -> refuse.
+    monkeypatch.delenv("KVCACHE_RKV_SMOKE_MARKER", raising=False)
+    monkeypatch.delenv("KVCACHE_BASE_RUNS_ROOT", raising=False)
+    with pytest.raises(NotImplementedError, match="smoke"):
         get_press("rkv")
+
+
+def test_rkv_promoted_by_smoke_marker(monkeypatch, tmp_path):
+    marker = tmp_path / "rkv-gen-smoke-PASS.json"
+    marker.write_text('{"passed": true}')
+    monkeypatch.setenv("KVCACHE_RKV_SMOKE_MARKER", str(marker))
+    assert get_press("rkv") == "rkv"
+
+
+def test_rkv_promoted_by_base_runs_root_marker(monkeypatch, tmp_path):
+    # launch.sh exports KVCACHE_BASE_RUNS_ROOT; the smoke writes the marker there.
+    monkeypatch.delenv("KVCACHE_RKV_SMOKE_MARKER", raising=False)
+    monkeypatch.setenv("KVCACHE_BASE_RUNS_ROOT", str(tmp_path))
+    with pytest.raises(NotImplementedError):
+        get_press("rkv")
+    (tmp_path / "rkv-gen-smoke-PASS.json").write_text('{"passed": true}')
+    assert get_press("rkv") == "rkv"
 
 
 @pytest.mark.parametrize(
@@ -40,7 +60,9 @@ def test_rkv_is_parity_gated():
         "triattention",
     ],
 )
-def test_unimplemented_or_deferred_presses_refuse(name):
+def test_unimplemented_or_deferred_presses_refuse(name, monkeypatch):
+    monkeypatch.delenv("KVCACHE_RKV_SMOKE_MARKER", raising=False)
+    monkeypatch.delenv("KVCACHE_BASE_RUNS_ROOT", raising=False)
     with pytest.raises(NotImplementedError):
         get_press(name)
 
@@ -166,3 +188,31 @@ def test_replay_press_onset_is_step_after_prune():
     press.profile_step = 64
     press.compress(_Module(), None, _Keys(), _Keys(), None, {})
     assert press.onset_step == 65
+
+
+def test_rkv_scorer_overrides_snapkv_dataclass_defaults():
+    # SnapKVPress is a dataclass; a plain subclass's annotated class attributes are
+    # shadowed by the generated __init__ (instance gets window_size=64/kernel_size=5).
+    # The live smoke caught this (Jaccard 0.805). Lock the override behavior.
+    from dataclasses import dataclass, field
+    from types import SimpleNamespace
+
+    from kvcache.presses.rkv import (
+        RKV_KERNEL_SIZE,
+        RKV_MIX_LAMBDA,
+        RKV_WINDOW_SIZE,
+        build_rkv_scorer,
+    )
+
+    @dataclass
+    class FakeSnapKVPress:  # mirrors kvpress's dataclass defaults
+        compression_ratio: float = 0.0
+        window_size: int = 64
+        kernel_size: int = 5
+        extra: dict = field(default_factory=dict)
+
+    fake_kvpress = SimpleNamespace(SnapKVPress=FakeSnapKVPress)
+    scorer = build_rkv_scorer(fake_kvpress)
+    assert scorer.window_size == RKV_WINDOW_SIZE == 8
+    assert scorer.kernel_size == RKV_KERNEL_SIZE == 7
+    assert scorer.mix_lambda == RKV_MIX_LAMBDA

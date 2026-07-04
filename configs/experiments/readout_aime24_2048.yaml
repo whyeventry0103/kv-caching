@@ -1,0 +1,17 @@
+name: readout_aime24_2048
+stage: replay
+mode: readout
+# AIME-24 forward readout decomposition at budget 2048 (reference = fc-aime24).
+reference_run_name: fc-aime24
+models: [r1_distill_qwen_7b]
+benchmarks: [aime24]
+subset:
+  aime24: 30
+presses: [random, streamingllm, rkv]
+budgets: [2048]
+seeds: [11, 23, 47, 89]
+compression_interval: 64
+max_answer_tokens: 2048
+estimated_generation_count: 0
+estimated_replay_count: 360
+scale_authorized: true

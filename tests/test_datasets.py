@@ -56,3 +56,22 @@ def test_rsp_is_local_and_deterministic():
     assert len(problems) == 2
     assert problems[0].gold_answer == "14"
     assert "follow refers_to links" in problems[0].question
+
+
+def test_aime24_problems_raw_gold_and_deterministic_order():
+    from kvcache.datasets import _aime_problems
+
+    rows = [
+        {"id": 62, "problem": "P62", "answer": "025", "url": "u62", "year": "2024"},
+        {"id": 60, "problem": "P60", "answer": "204", "url": "u60", "year": "2024"},
+        {"id": 61, "problem": "P61", "answer": "113", "url": "u61", "year": "2024"},
+    ]
+    problems = _aime_problems(rows, 2, name="aime24")
+    # ordered by integer id, subset applied AFTER ordering, gold kept raw
+    assert [p.pid for p in problems] == ["aime24-60", "aime24-61"]
+    assert problems[0].gold_answer == "204"
+    assert problems[0].question == "P60"
+    assert problems[0].meta["year"] == "2024"
+    # leading-zero answers survive raw (is_equiv handles equivalence at grade time)
+    full = _aime_problems(rows, None, name="aime24")
+    assert full[2].gold_answer == "025"

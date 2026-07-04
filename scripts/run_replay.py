@@ -214,12 +214,14 @@ def main() -> int:
         for package in ("torch", "transformers", "kvpress"):
             if row["versions"][package] != installed[package]:
                 raise SystemExit(f"reference {package} version does not match runtime")
+    bench = str(config.get("benchmarks", ["math500"])[0])
+    default_subset = (
+        {"count": 5, "stratify_by": "level"} if bench == "math500" else None
+    )
     problems = load_benchmark(
-        "math500",
-        benchmarks_cfg["math500"],
-        subset=config.get("subset", {}).get(
-            "math500", {"count": 5, "stratify_by": "level"}
-        ),
+        bench,
+        benchmarks_cfg[bench],
+        subset=config.get("subset", {}).get(bench, default_subset),
         allow_download=False,
     )
     gold_by_pid = {problem.pid: problem.gold_answer for problem in problems}

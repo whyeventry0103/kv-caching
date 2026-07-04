@@ -1,0 +1,19 @@
+name: grid_aime24_2048
+stage: grid
+# AIME-24 free-run cells at budget 2048 (~12-16% of a 16K trace: R-KV's claimed
+# >100% regime). Random + StreamingLLM + R-KV (rkv requires the smoke marker).
+# 30 problems x n=4 x 3 presses = 360 generations, token IDs stored.
+models: [r1_distill_qwen_7b]
+benchmarks: [aime24]
+subset:
+  aime24: 30
+presses: [random, streamingllm, rkv]
+budgets: [2048]
+seeds: [11, 23, 47, 89]
+max_new_tokens:
+  aime24: 16384
+compression_interval: 64
+estimated_generation_count: 360
+scale_authorized: true
+remote_only: true
+store_token_ids: true

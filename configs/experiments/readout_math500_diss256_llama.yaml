@@ -1,0 +1,18 @@
+name: readout_math500_diss256_llama
+stage: replay
+mode: readout
+# Cross-architecture forward readout: does the readout-invisible trajectory residual
+# reproduce on a Llama-base model? Reference = the llama FC bank (fc-llama50).
+reference_run_name: fc-llama50
+models: [r1_distill_llama_8b]
+benchmarks: [math500]
+subset:
+  math500: 50
+presses: [random, streamingllm]
+budgets: [256]
+seeds: [11, 23, 47, 89]
+compression_interval: 64
+max_answer_tokens: 2048
+estimated_generation_count: 0
+estimated_replay_count: 400
+scale_authorized: true

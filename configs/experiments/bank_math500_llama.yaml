@@ -1,0 +1,20 @@
+name: bank_math500_llama
+stage: bank
+# Cross-ARCHITECTURE replication reference: DeepSeek-R1-Distill-Llama-8B (Llama base
+# vs the primary's Qwen base -- the check the paper's Threats section names). Subset
+# replication scale: first 50 MATH-500 problems x n=4 seeds = 200 generations, 16384
+# cap, sdpa, token-ID sidecars. This bank is the pinned FC reference for the llama
+# cells ONLY (report_m4 pins per-reference by construction).
+models: [r1_distill_llama_8b]
+benchmarks: [math500]
+subset:
+  math500: 50
+seeds: [11, 23, 47, 89]
+max_new_tokens:
+  math500: 16384
+presses: [fullcache]
+budgets: [full]
+estimated_generation_count: 200
+store_token_ids: true
+scale_authorized: true
+remote_only: true
