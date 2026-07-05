@@ -16,6 +16,18 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
 
 ## 0. TL;DR — where we are right now
 
+  **★★★ H2O-STYLE FORWARD DECOMPOSITION LANDED (2026-07-06 read of last night):**
+  readout-diss256-h2o 400/400 -> free 0.2475 [0.180,0.318], readout 0.597 [0.503,0.668],
+  **residual −0.349 [−0.403,−0.270]**, share 45%, undef 8 (same rows). => forward
+  residuals across THREE unrelated policies: −0.343/−0.347/−0.349 (spread 0.006, all
+  CIs exclude zero) while readout spans 0.169 — method-invariance now a 3-policy result;
+  IN THE PAPER (Table 2 row + abstract + §4.1/4.2 + threats; summary archived at
+  results/diag/m4-h2o256-forward-summary.json). Multi-job tail-fill WORKED in prod
+  (06:00 reverse-h2o on gpu0 while 06:10 readout-2048 started on gpu1). In flight:
+  reverse-h2o 152/400, readout-2048 164/800 (both resume tonight). TODO when reverse-h2o
+  completes: h2o bracket + imputation bounds into §4.3, regen Fig1 (H2O bar) + Fig2
+  (third panel) in ONE batch, rebuild PDF.
+
   **★★★ RUN-ONLY STATE REACHED (2026-07-05, Fable): queue = 22 jobs, everything the
   paper needs is queued + code-complete.** (1) **R-KV UNLOCKED (Amendment I):** smoke
   first FAILED (Jaccard 0.805) → root cause = dataclass field shadowing (press ran

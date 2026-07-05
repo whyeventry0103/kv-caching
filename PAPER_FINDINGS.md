@@ -218,7 +218,19 @@ reverse + AIME-2048). Sell the two-stage catch as methodology, never hide it (Am
   provenance now rests on pinned package versions + per-row source-tree hashes + FC having no
   compression logic.
 
-### 4h. PRELIMINARY — ObservedAttentionPress ("H2O-style") free-run @256 (2026-07-04)
+### 4h. H2O-style FORWARD DECOMPOSITION IN — method-invariance extends to 3 policies (2026-07-05)
+readout-diss256-h2o 400/400 (report archived: results/diag/m4-h2o256-forward-summary.json):
+**free 0.2475 [0.180, 0.318], readout 0.597 [0.503, 0.668], totalΔ −0.635, readoutΔ −0.286,
+residual −0.349 [−0.403, −0.270], share 45%, trunc 0.105, flip net −0.6375 (gained 0.000),
+n_readout_undefined 8 (same 8 FC rows as the other cells).** THE result: forward residuals
+across three mechanistically unrelated policies = −0.343 / −0.347 / −0.349 (spread 0.006,
+CIs mutually overlapping, all excluding zero) while readout changes span 0.169 → trajectory
+damage method-invariant on the forward estimand; readout channel carries ALL method
+differences. In the paper: Table 2 third row (dagger footnote: ObservedAttention ≠ H2O,
+8192 cap), abstract, §4.1/§4.2, threats. Reverse bracket 152/400 (finishes tonight) →
+then Fig 1 H2O bar + Fig 2 third panel in one figure-regen batch.
+
+### (superseded preliminary note, kept for history) — free-run @256 (2026-07-04)
 grid-diss256-h2o 400/400: **free-run 0.2475, truncation 0.105, mean 4,359 tokens**
 (100 problems × 4 seeds; audited from rows). Third eviction policy collapses — worse than
 Random (0.422), at StreamingLLM's level (0.237). **LABELING LANDMINE (do not step on):**
