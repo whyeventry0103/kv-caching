@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""GPU-aware nightly auto-launch WATCHER (remote cron, every 10 min from 02:00-08:00).
+"""GPU-aware nightly auto-launch WATCHER (remote cron; window 01:45-10:45 Dubai).
 
 Each tick (server = Asia/Dubai, UTC+4): walk the queue in order and launch the FIRST
 job that has relaunchable ("needy") seeds -- incomplete AND not owned by a live tmux
@@ -7,7 +7,7 @@ session -- onto GPUs that are eligible (>= min_free_gb) AND not occupied by ANY 
 sessions. A job whose remaining seeds are all in flight is skipped in favor of the next
 job, so one long tail shard never idles the other GPU. check_remote.sh runs as
 preflight; launch goes through scripts/launch.sh in tmux with KVCACHE_MAX_HOURS =
-hours-until-09:00. At most one job launches per tick (its seeds may shard across both
+hours-until-10:45. At most one job launches per tick (its seeds may shard across both
 GPUs); the 10-min cadence fills the window. Every non-error exits 0 so cron mail flags
 only real breakage.
 """
@@ -31,7 +31,8 @@ sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
 NVIDIA_SMI = "/usr/bin/nvidia-smi"
 TMUX = "/usr/bin/tmux"
-STOP_HOUR = 9
+STOP_HOUR = 10  # window stop 10:45 Dubai (start 01:45 is enforced by the cron schedule)
+STOP_MINUTE = 45
 QUEUE_DEFAULT = PROJECT_ROOT / "configs" / "nightly_queue.yaml"
 STATE_PATH = PROJECT_ROOT / "logs" / "nightly_state.json"
 MAX_FAILS = 3  # consecutive no-progress launches before a job is marked stuck + skipped
@@ -148,13 +149,15 @@ def shard_seeds(seeds: list[int], gpus: list[GpuState]) -> dict[int, list[int]]:
     return assignment
 
 
-def compute_max_hours(now: datetime, stop_hour: int = STOP_HOUR) -> float | None:
-    stop = now.replace(hour=stop_hour, minute=0, second=0, microsecond=0)
+def compute_max_hours(
+    now: datetime, stop_hour: int = STOP_HOUR, stop_minute: int = STOP_MINUTE
+) -> float | None:
+    stop = now.replace(hour=stop_hour, minute=stop_minute, second=0, microsecond=0)
     hours = (stop - now).total_seconds() / 3600
     if hours < 1:
         return None  # past stop or <1h left -> skip (don't run a tiny window)
-    # 2-decimal floor: uses the (near-)full window without ever overshooting stop_hour
-    # (an int floor lost up to ~1h when cron fired a second after 02:00).
+    # 2-decimal floor: uses the (near-)full window without ever overshooting the stop
+    # (an int floor lost up to ~1h when cron fired a second after the start).
     return math.floor(hours * 100) / 100
 
 
@@ -430,6 +433,7 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--force", action="store_true", help="ignore the night marker")
     parser.add_argument("--stop-hour", type=int, default=STOP_HOUR)
+    parser.add_argument("--stop-minute", type=int, default=STOP_MINUTE)
     parser.add_argument("--now", default="", help="ISO datetime override (testing)")
     parser.add_argument("--fake-gpus", default="", help="'0:47000,1:12000' (test)")
     parser.add_argument("--skip-preflight", action="store_true", help="dry-run only")
@@ -477,9 +481,11 @@ def main() -> int:
         log("no launchable job (complete, stuck, dep-gated, or in flight) -> exit")
         return 0
 
-    max_hours = args.max_hours_override or compute_max_hours(now, args.stop_hour)
+    max_hours = args.max_hours_override or compute_max_hours(
+        now, args.stop_hour, args.stop_minute
+    )
     if not max_hours:
-        log(f"<1h to {args.stop_hour}:00 -> outside window, no launch")
+        log(f"<1h to {args.stop_hour}:{args.stop_minute:02d} stop -> no launch")
         return 0
 
     gpus = parse_fake_gpus(args.fake_gpus) if args.fake_gpus else query_gpus()
@@ -500,7 +506,7 @@ def main() -> int:
         log(
             f"selected: {job.name} {done}/{job.total} "
             f"(min_free_gb={job.min_free_gb}); needy seeds {needy}; "
-            f"window->{args.stop_hour}:00"
+            f"window->{args.stop_hour}:{args.stop_minute:02d}"
         )
         assignment = shard_seeds(needy, free)  # split needy seeds across free GPUs
         log(f"launch assignment: {assignment}")

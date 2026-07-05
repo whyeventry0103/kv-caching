@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Daily status email after the nightly session (runs on the remote via cron ~09:05).
+"""Daily status email after the nightly session (runs on the remote via cron ~10:55).
 
 Reports: the whole queue with per-job progress, what ran last night, total progress % to
 queue completion (and whether the paper-core jobs are done), and any crash/stuck alert.
@@ -140,14 +140,14 @@ def generate_report(write_snapshot: bool = True) -> tuple[str, str]:
         + ("COMPLETE" if core_done else "in progress"),
     ]
 
-    # Tonight's plan: what the watcher will pick at 02:00 (no sessions run at 09:10,
-    # so live is read fresh; per-seed detail doubles as a looping-shard flag).
+    # Tonight's plan: what the watcher will pick at 01:45 (no sessions run at report
+    # time, so live is read fresh; per-seed detail doubles as a looping-shard flag).
     try:
         live = na.live_map([j.run_name for j in jobs], na.tmux_session_names())
         candidates, _ = na.launch_candidates(
             runs_root, jobs, skip=set(stuck), live=live, state=state
         )
-        lines += ["", "TONIGHT (02:00-09:00 Dubai)"]
+        lines += ["", "TONIGHT (01:45-10:45 Dubai)"]
         if candidates:
             for job, needy in candidates[:2]:
                 lines.append(

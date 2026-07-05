@@ -70,16 +70,19 @@ def test_shard_one_gpu_all_seeds():
 
 
 def test_max_hours_uses_full_window():
-    # 2-decimal floor: near-full window, never overshoots 09:00 (int floor lost ~1h).
-    assert M.compute_max_hours(datetime(2026, 6, 24, 2, 0)) == 7.0
-    assert M.compute_max_hours(datetime(2026, 6, 24, 2, 0, 1)) == 6.99  # 1s late != 6
-    assert M.compute_max_hours(datetime(2026, 6, 24, 2, 40)) == 6.33
-    assert M.compute_max_hours(datetime(2026, 6, 24, 3, 20)) == 5.66
+    # 2-decimal floor: near-full window, never overshoots the 10:45 stop.
+    assert M.compute_max_hours(datetime(2026, 6, 24, 1, 45)) == 9.0  # start -> full 9h
+    assert M.compute_max_hours(datetime(2026, 6, 24, 2, 0)) == 8.75
+    assert M.compute_max_hours(datetime(2026, 6, 24, 2, 0, 1)) == 8.74  # 1s late != 8.75
+    assert M.compute_max_hours(datetime(2026, 6, 24, 2, 40)) == 8.08
+    assert M.compute_max_hours(datetime(2026, 6, 24, 3, 20)) == 7.41
 
 
 def test_max_hours_sub_one_hour_is_none():
-    assert M.compute_max_hours(datetime(2026, 6, 24, 8, 30)) is None  # 0.5h -> skip
-    assert M.compute_max_hours(datetime(2026, 6, 24, 9, 30)) is None  # past stop
+    assert M.compute_max_hours(datetime(2026, 6, 24, 9, 45)) == 1.0  # exactly 1h -> runs
+    assert M.compute_max_hours(datetime(2026, 6, 24, 9, 50)) is None  # 0.92h -> skip
+    assert M.compute_max_hours(datetime(2026, 6, 24, 10, 0)) is None  # 0.75h -> skip
+    assert M.compute_max_hours(datetime(2026, 6, 24, 11, 0)) is None  # past stop
 
 
 # ---- progress counting ----
