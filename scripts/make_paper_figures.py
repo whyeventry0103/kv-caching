@@ -75,6 +75,10 @@ C = {
     ),
 }
 C["H2O-style"] = dict(
+    add=0.715,
+    within=0.713,
+    term=0.101,
+    flip=-0.636,
     free=0.248,
     readout=0.597,
     readout_ci=(0.503, 0.668),
@@ -271,8 +275,8 @@ def fig2_bracket(out_dir: Path, m4_summary: dict | None):
 def fig3_add(out_dir: Path):
     print("Figure 3 [SUMMARY]")
     fig, ax = plt.subplots(figsize=(4.9, 3.2))
-    methods = ["StreamingLLM", "Random"]
-    xs = [0, 1]
+    methods = ["StreamingLLM", "H2O-style", "Random"]
+    xs = [0, 1, 2]
     w = 0.33
     within = [C[m]["within"] for m in methods]
     term = [C[m]["term"] for m in methods]
@@ -314,7 +318,7 @@ def fig3_add(out_dir: Path):
         ax.text(
             i,
             0.945,
-            f"ADD {C[m]['add']:.3f}   flip ${C[m]['flip']:.3f}$",
+            f"ADD {C[m]['add']:.3f}\nflip ${C[m]['flip']:.3f}$",
             ha="center",
             va="top",
             fontsize=7.5,
@@ -323,7 +327,7 @@ def fig3_add(out_dir: Path):
         )
     ax.axhline(TWOFC["mean"], color=GREEN, ls=(0, (4, 3)), lw=1.1)
     ax.text(
-        1.44,
+        2.44,
         TWOFC["mean"] + 0.012,
         f"two-FC noise floor {TWOFC['mean']:.3f}",
         ha="right",
@@ -334,7 +338,7 @@ def fig3_add(out_dir: Path):
     ax.set_xticklabels(methods)
     ax.set_ylabel("Total variation")
     ax.set_ylim(0, 1.0)
-    ax.set_xlim(-0.55, 1.55)
+    ax.set_xlim(-0.55, 2.55)
     _ygrid(ax)
     ax.legend(loc="upper left", bbox_to_anchor=(0.0, 1.14), ncol=2, frameon=False)
     _save(fig, out_dir, "fig3_add")

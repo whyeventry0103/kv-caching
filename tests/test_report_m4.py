@@ -178,3 +178,57 @@ def test_m4_reverse_readout_residual_bracket(tmp_path):
     r_lo, r_hi = cell["reverse_residual_ci95"]
     assert -1.0 <= f_lo <= -0.25 <= f_hi <= 1.0
     assert -1.0 <= r_lo <= -0.30 <= r_hi <= 1.0
+
+
+def test_m4_report_bench_parameter_reads_aime_subtree(tmp_path):
+    full = tmp_path / "full"
+    comp = tmp_path / "comp"
+    readout = tmp_path / "readout"
+    _write(
+        full / "aime24" / "r.jsonl",
+        [
+            {
+                "pid": f"aime24-{i}",
+                "decoding": {"seed": i},
+                "correct": True,
+                "truncated": False,
+            }
+            for i in range(10)
+        ],
+    )
+    _write(
+        comp / "aime24" / "r.jsonl",
+        [
+            {
+                "pid": f"aime24-{i}",
+                "decoding": {"seed": i},
+                "press": "rkv",
+                "budget": 2048,
+                "correct": i < 5,
+                "truncated": False,
+                "n_tokens": 10,
+            }
+            for i in range(10)
+        ],
+    )
+    _write(
+        readout / "readout" / "r.jsonl",
+        [
+            {
+                "reference_key": ["aime24", f"aime24-{i}", "m", "fullcache", "full", i],
+                "condition": {"press": "rkv", "budget": 2048},
+                "readout_correct": i < 8,
+                "generated_token_ids": [1],
+            }
+            for i in range(10)
+        ],
+    )
+    summary, cells = MODULE.build_report(
+        fullcache_root=full,
+        compression_root=comp,
+        readout_root=readout,
+        bench="aime24",
+    )
+    assert summary["full_cache"]["rows"] == 10
+    assert cells[0]["compressed_accuracy"] == 0.5
+    assert cells[0]["readout_accuracy"] == 0.8

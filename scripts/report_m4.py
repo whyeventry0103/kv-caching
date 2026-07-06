@@ -169,13 +169,14 @@ def build_report(
     readout_root: Path,
     replay_root: Path | None = None,
     reverse_readout_root: Path | None = None,
+    bench: str = "math500",
 ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
-    full_rows = _load_rows(fullcache_root, "math500")
-    compression_rows = _load_rows(compression_root, "math500")
+    full_rows = _load_rows(fullcache_root, bench)
+    compression_rows = _load_rows(compression_root, bench)
     # Replay (per-step TV profiles) is OPTIONAL: the accuracy-scale decomposition
     # (total/readout/residual + CIs, the Amendment-F call) needs only fullcache,
     # compression, and readout. TV columns are added only when a replay run is given.
-    replay_rows = _load_rows(replay_root, "math500") if replay_root is not None else []
+    replay_rows = _load_rows(replay_root, bench) if replay_root is not None else []
     # Readout may be split across per-shard run dirs (e.g. seed-sharded -g0/-g1); read
     # every supplied root so the cells aggregate all seeds.
     readout_root_list = (
@@ -503,6 +504,11 @@ def main() -> int:
         "cache) to report the residual bracket (M7 first rung)",
     )
     parser.add_argument("--out", required=True, type=Path)
+    parser.add_argument(
+        "--bench",
+        default="math500",
+        help="benchmark subtree to read rows from (e.g. aime24 for the AIME cells)",
+    )
     args = parser.parse_args()
     summary, cells = build_report(
         fullcache_root=args.fullcache_root,
@@ -510,6 +516,7 @@ def main() -> int:
         replay_root=args.replay_root,
         readout_root=args.readout_root,
         reverse_readout_root=args.reverse_readout_root,
+        bench=args.bench,
     )
     args.out.mkdir(parents=True, exist_ok=True)
     (args.out / "summary.json").write_text(

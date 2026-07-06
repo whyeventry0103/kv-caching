@@ -174,6 +174,13 @@ Both far above the noise floor. SLM's divergence is almost entirely *within-answ
 answering, but a different, wrong answer); Random's has more *termination* mass (it rambles /
 fails to terminate — consistent with its higher truncation). So the two methods damage the answer
 distribution differently even where accuracy is similar.
+**H2O-style row (read 2026-07-06): ADD 0.715, within-answered 0.713, termination +0.101,
+flip net −0.636 (gained 0.000)** — patterns with StreamingLLM (concentrated pair). In paper
+Table 3 + §4.5 + Fig 3.
+**Dose response (add-2048, read 2026-07-06): Random ADD 0.085 (≈ the 0.068 floor),
+SLM 0.146 (net flip −0.076)** → distortion tracks the dose; the pre-registered
+silent-flip-at-flat-accuracy regime did NOT materialize at 2048 — reported honestly in §4.5.
+Archived: runs harvest/add-2048 + harvest/add-256-h2o (remote) and stdout JSONs.
 
 ### 4f. Two-full-cache negative control (instrument validity)
 Splitting the FC bank into two disjoint seed halves and running ADD between them: **mean ADD

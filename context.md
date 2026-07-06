@@ -16,6 +16,23 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
 
 ## 0. TL;DR — where we are right now
 
+  **★★★ FABLE HANDOFF COMPLETE (2026-07-06). Successor: work the morning loop in
+  CLAUDE.md §Handoff-operations.** Built today: (1) `scripts/harvest_results.py` —
+  ONE command turns finished runs into report artifacts + digest (unit table inside;
+  tested live: correctly gated 7 pending units, harvested the 2 ready ADD units);
+  (2) **RESULTS_PLAYBOOK.md** — pre-written BRANCHED paper text + tex anchors +
+  figure/docs updates for EVERY pending unit (2048 decomp, h2o-2048, replay-h2o,
+  rkv-256 incl. outlier branch, llama replication incl. non-replication branch,
+  aime incl. >100% branch). (3) CLAUDE.md extended with the operating rules.
+  (4) report_m4 --bench flag (AIME cells would have silently read 0 rows). (5) NEW
+  RESULTS IN PAPER TODAY: ADD-h2o row (0.715/0.713/+0.101/−0.636, Fig 3 now 3 groups)
+  + ADD dose response @2048 (0.085/0.146 vs floor 0.068; silent-flip regime did NOT
+  materialize — reported per prereg). (6) Also today: realized compression ratios in
+  Setup (256 = 3.8% of mean trace; 2048 = 56.6%), all 6 bib author lists filled
+  (arXiv-verified), the trajectory-audit recipe paragraph added to the conclusion.
+  Remaining human endgame after queue drains: playbook units as they land → venue
+  conversion (SUBMISSION_STRATEGY §6 + BEST_POSSIBLE Phase 8) → anonymize → arXiv.
+
   **★★★ H2O-STYLE BRACKET IN — 3-policy story COMPLETE at 256 (2026-07-06):**
   reverse-readout-diss256-h2o 400/400 -> rev 0.4194 (151/360; 40 undefined), bracket
   **[−0.463, −0.349]**, rev CI **[−0.566, −0.420]**; imputation bounds −0.505…−0.405
