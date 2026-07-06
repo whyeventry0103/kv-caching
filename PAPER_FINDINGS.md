@@ -227,8 +227,14 @@ across three mechanistically unrelated policies = −0.343 / −0.347 / −0.349
 CIs mutually overlapping, all excluding zero) while readout changes span 0.169 → trajectory
 damage method-invariant on the forward estimand; readout channel carries ALL method
 differences. In the paper: Table 2 third row (dagger footnote: ObservedAttention ≠ H2O,
-8192 cap), abstract, §4.1/§4.2, threats. Reverse bracket 152/400 (finishes tonight) →
-then Fig 1 H2O bar + Fig 2 third panel in one figure-regen batch.
+8192 cap), abstract, §4.1/§4.2, threats. **REVERSE BRACKET IN (2026-07-06): rev acc 0.4194 (151/360 defined; 40/400 undefined),
+rev change −0.463, bracket [−0.463, −0.349], rev CI [−0.566, −0.420]** (archived:
+results/diag/m4-h2o256-full-summary.json). Structure: H2O-style twins StreamingLLM on the
+reverse side (−0.463 vs −0.466, CIs overlap) and both separate from Random (−0.246) with
+non-overlapping CIs → reverse side splits UNIFORM vs CONCENTRATED, not method vs method.
+Bias ordering reverses for both concentrated policies. Imputation bounds: endpoints
+−0.505 (all-incorrect) … −0.405 (all-correct) — zero excluded under any imputation.
+Figures: Fig 1 H2O bar + Fig 2 third panel DONE (3-hue palette validated, #CC79A7).
 
 ### (superseded preliminary note, kept for history) — free-run @256 (2026-07-04)
 grid-diss256-h2o 400/400: **free-run 0.2475, truncation 0.105, mean 4,359 tokens**

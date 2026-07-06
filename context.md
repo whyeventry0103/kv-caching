@@ -16,6 +16,16 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
 
 ## 0. TL;DR — where we are right now
 
+  **★★★ H2O-STYLE BRACKET IN — 3-policy story COMPLETE at 256 (2026-07-06):**
+  reverse-readout-diss256-h2o 400/400 -> rev 0.4194 (151/360; 40 undefined), bracket
+  **[−0.463, −0.349]**, rev CI **[−0.566, −0.420]**; imputation bounds −0.505…−0.405
+  (zero excluded always). STRUCTURE: reverse side splits uniform-vs-concentrated —
+  H2O-style twins SLM (−0.463/−0.466, CIs overlap), both separate from Random
+  (non-overlapping CIs). Paper fully updated (abstract/bullet4/§4.3 3-policy rewrite/
+  threats/conclusion/captions); Fig 1 has the H2O† bar, Fig 2 is now THREE panels
+  (palette #0072B2/#D55E00/#CC79A7 validated). Archived m4-h2o256-full-summary.json.
+  Also in flight: readout-diss2048 539/800, grid-diss2048-h2o 289/400 (tonight).
+
   **★★★ H2O-STYLE FORWARD DECOMPOSITION LANDED (2026-07-06 read of last night):**
   readout-diss256-h2o 400/400 -> free 0.2475 [0.180,0.318], readout 0.597 [0.503,0.668],
   **residual −0.349 [−0.403,−0.270]**, share 45%, undef 8 (same rows). => forward

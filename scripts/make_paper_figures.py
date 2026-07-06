@@ -74,6 +74,17 @@ C = {
         trunc=0.070,
     ),
 }
+C["H2O-style"] = dict(
+    free=0.248,
+    readout=0.597,
+    readout_ci=(0.503, 0.668),
+    reverse=0.419,
+    residual=-0.349,
+    bracket=(-0.463, -0.349),
+    fwd_ci=(-0.403, -0.270),
+    rev_ci=(-0.566, -0.420),
+    trunc=0.105,
+)
 # Budget-2048 free-run (grid-diss2048-tok, 800/800, read 2026-07-04).
 C2048 = {"Random": 0.850, "StreamingLLM": 0.808}
 PHEN = dict(gap=0.185, gap_ci=(0.130, 0.242), win=44, tie=50, loss=6, n_tot=100)
@@ -81,11 +92,11 @@ TVWIN = dict(before=0.0000, first50=0.0018, later=0.0884, onset=65)
 TWOFC = dict(mean=0.068, median=0.000, p=0.976, frac_sig=0.0, n=250)
 
 # Palette (validated, see module docstring). GREEN reserved for the control line.
-BLUE, ORANGE, GREY = "#0072B2", "#D55E00", "#8a8a8a"
+BLUE, ORANGE, PURPLE, GREY = "#0072B2", "#D55E00", "#CC79A7", "#8a8a8a"
 BLUE_LT, ORANGE_LT = "#9CC7E4", "#F2B27F"  # 2048-budget tints (dose)
 GREEN = "#009E73"
 INK, INK2, GRIDC, SPINE = "#1a1a1a", "#555555", "#dddddd", "#9a9a9a"
-MC = {"Random": BLUE, "StreamingLLM": ORANGE}
+MC = {"Random": BLUE, "StreamingLLM": ORANGE, "H2O-style": PURPLE}
 
 plt.rcParams.update(
     {
@@ -133,15 +144,23 @@ def fig1_phenomenon(out_dir: Path, runs_root: Path | None):
     fig, (axb, axh) = plt.subplots(
         1, 2, figsize=(6.9, 2.9), gridspec_kw={"width_ratios": [1.3, 1]}
     )
-    labels = ["Full\ncache", "Random\n256", "SLM\n256", "Random\n2048", "SLM\n2048"]
+    labels = [
+        "Full\ncache",
+        "Random\n256",
+        "SLM\n256",
+        "H2O$^{\\dagger}$\n256",
+        "Random\n2048",
+        "SLM\n2048",
+    ]
     vals = [
         FC,
         C["Random"]["free"],
         C["StreamingLLM"]["free"],
+        C["H2O-style"]["free"],
         C2048["Random"],
         C2048["StreamingLLM"],
     ]
-    colors = [GREY, BLUE, ORANGE, BLUE_LT, ORANGE_LT]
+    colors = [GREY, BLUE, ORANGE, PURPLE, BLUE_LT, ORANGE_LT]
     axb.bar(labels, vals, color=colors, width=0.62, edgecolor="white", linewidth=0.8)
     for x, v in enumerate(vals):
         axb.text(x, v + 0.018, f"{v:.3f}", ha="center", fontsize=8, color=INK)
@@ -189,9 +208,9 @@ def fig1_phenomenon(out_dir: Path, runs_root: Path | None):
 def fig2_bracket(out_dir: Path, m4_summary: dict | None):
     cells = _cells_from_summary(m4_summary) if m4_summary else C
     print(f"Figure 2 [{'DATA' if m4_summary else 'SUMMARY'}]")
-    fig, axes = plt.subplots(1, 2, figsize=(6.9, 3.1), sharey=True)
+    fig, axes = plt.subplots(1, 3, figsize=(9.9, 3.1), sharey=True)
     rung_labels = ["Full cache", "Forward\nreadout", "Reverse\nreadout", "Free-run"]
-    for ax, m in zip(axes, ["Random", "StreamingLLM"], strict=False):
+    for ax, m in zip(axes, ["Random", "StreamingLLM", "H2O-style"], strict=False):
         d = cells[m]
         vals = [FC, d["readout"], d["reverse"], d["free"]]
         ys = [3, 2, 1, 0]
@@ -446,8 +465,17 @@ def _load_paired_diffs(runs_root: Path):
 def _cells_from_summary(summ: dict):
     try:
         out = {}
-        for c in summ["cells"]:
-            name = {"random": "Random", "streamingllm": "StreamingLLM"}.get(c["press"])
+        cells = (
+            summ["cells"]
+            if isinstance(summ, dict)
+            else [c for one in summ for c in one["cells"]]
+        )
+        for c in cells:
+            name = {
+                "random": "Random",
+                "streamingllm": "StreamingLLM",
+                "h2o": "H2O-style",
+            }.get(c["press"])
             if name:
                 out[name] = dict(
                     free=c["compressed_accuracy"],
@@ -462,7 +490,7 @@ def _cells_from_summary(summ: dict):
                     rev_ci=tuple(c.get("reverse_residual_ci95") or ())
                     or C[name]["rev_ci"],
                 )
-        return out or C
+        return {**C, **out} if out else C
     except Exception as e:  # noqa: BLE001
         print(f"  (summary parse failed: {e}; using constants)")
         return C
@@ -560,7 +588,12 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out-dir", default="figures")
     ap.add_argument("--runs-root", default=None, help="grid run dir (Fig 1 inset)")
-    ap.add_argument("--m4-summary", default=None, help="report_m4 summary.json (Fig 2)")
+    ap.add_argument(
+        "--m4-summary",
+        default=None,
+        nargs="*",
+        help="one or more report_m4 summary.json files (Fig 2; cells are merged)",
+    )
     ap.add_argument("--profiles-dir", default=None, help="replay profiles (Fig 4)")
     ap.add_argument("--twofc-report", default=None, help="two-FC report json (Fig 5)")
     ap.add_argument(
@@ -579,7 +612,8 @@ def main():
     out = Path(args.out_dir)
     out.mkdir(parents=True, exist_ok=True)
     fig1_phenomenon(out, Path(args.runs_root) if args.runs_root else None)
-    fig2_bracket(out, _load_json(args.m4_summary))
+    summaries = [x for x in (_load_json(p) for p in (args.m4_summary or [])) if x]
+    fig2_bracket(out, summaries or None)
     fig3_add(out)
     fig4_tvprofile(out, Path(args.profiles_dir) if args.profiles_dir else None)
     fig5_twofc(out, _load_json(args.twofc_report))
