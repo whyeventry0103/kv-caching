@@ -79,7 +79,7 @@ def test_max_hours_uses_full_window():
 
 
 def test_max_hours_sub_one_hour_is_none():
-    assert M.compute_max_hours(datetime(2026, 6, 24, 9, 45)) == 1.0  # exactly 1h -> runs
+    assert M.compute_max_hours(datetime(2026, 6, 24, 9, 45)) == 1.0  # 1h -> runs
     assert M.compute_max_hours(datetime(2026, 6, 24, 9, 50)) is None  # 0.92h -> skip
     assert M.compute_max_hours(datetime(2026, 6, 24, 10, 0)) is None  # 0.75h -> skip
     assert M.compute_max_hours(datetime(2026, 6, 24, 11, 0)) is None  # past stop
