@@ -73,7 +73,7 @@ def test_max_hours_uses_full_window():
     # 2-decimal floor: near-full window, never overshoots the 10:45 stop.
     assert M.compute_max_hours(datetime(2026, 6, 24, 1, 45)) == 9.0  # start -> full 9h
     assert M.compute_max_hours(datetime(2026, 6, 24, 2, 0)) == 8.75
-    assert M.compute_max_hours(datetime(2026, 6, 24, 2, 0, 1)) == 8.74  # 1s late != 8.75
+    assert M.compute_max_hours(datetime(2026, 6, 24, 2, 0, 1)) == 8.74  # 1s late
     assert M.compute_max_hours(datetime(2026, 6, 24, 2, 40)) == 8.08
     assert M.compute_max_hours(datetime(2026, 6, 24, 3, 20)) == 7.41
 
