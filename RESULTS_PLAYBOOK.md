@@ -23,7 +23,8 @@ General rules for every unit:
 
 ## UNIT m4-2048 (readout-diss2048 completes; grid already done)
 
-**Expected shape:** free 0.850/0.808 (known). Readout at 2048 should be ≥ free-run
+**Expected shape:** free 0.850/0.807 (known; 0.8075 exact — display is `.3f` of the
+artifact float per PAPER_FINDINGS §5, never hand-rounded up). Readout at 2048 should be ≥ free-run
 (mild readout loss), residuals small. This is the dose-response endpoint: does the
 trajectory residual shrink toward zero at the near-lossless budget?
 
@@ -33,7 +34,7 @@ paragraph:
 
 > \textbf{Dose response: the residual shrinks with budget.} At budget 2048 the same
 > decomposition yields readout accuracies of {RO_RAND} (95\% CI {RO_RAND_CI}) and
-> {RO_SLM} ({RO_SLM_CI}) against free-running $0.850$ and $0.808$: trajectory
+> {RO_SLM} ({RO_SLM_CI}) against free-running $0.850$ and $0.807$: trajectory
 > residuals of {RES_RAND} (CI {RES_RAND_CI}) and {RES_SLM} ({RES_SLM_CI}), an order
 > of magnitude below the $-0.34$ residuals at 256. The trajectory channel is a
 > low-budget phenomenon: at 3.8\% of the trace it dominates the loss; at 56.6\% it

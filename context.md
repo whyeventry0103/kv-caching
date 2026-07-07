@@ -27,6 +27,14 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
   fetch to results/diag/ pending link (background probe armed). NOT read: m4-2048-h2o
   (readout 130/400), replay-256-h2o (21/400) — likely ready after tonight. Next
   pending units: m4-2048-h2o, replay-256-h2o, then rkv/llama/aime chains.
+  ALSO (same day, full-sweep audit): display convention PINNED — every 3-decimal
+  number is `.3f` of the artifact float (PAPER_FINDINGS §5). Two hand-rounded ties
+  corrected everywhere: H2O free 0.248→0.247 (99/400), SLM@2048 0.808→0.807
+  (323/400). Fig 1+2 regenerated to match; figure constants now store artifact
+  precision. Nightly automation verified healthy (cron live, tonight resumes
+  readout-diss2048-h2o s[23,47,89] + replay-diss256-h2o; disk 200G free; rkv
+  smoke marker in place). All 5 figures eyeballed against captions — no other
+  defect found.
 
   **★★★ FABLE HANDOFF COMPLETE (2026-07-06). Successor: work the morning loop in
   CLAUDE.md §Handoff-operations.** Built today: (1) `scripts/harvest_results.py` —

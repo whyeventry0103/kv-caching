@@ -39,10 +39,16 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
 # ---- verified headline constants (final; corrected brackets + endpoint CIs) ----
-FC = 0.882
+# Display convention (pinned 2026-07-07): every 3-decimal label is f"{v:.3f}" of the
+# report-artifact value — the same string numpy/R produce when recomputing from raw
+# rows. Do NOT hand-round exact ties (99/400=0.2475, 323/400=0.8075) up to 0.248 /
+# 0.808: that made Fig 1 (constants) disagree with Fig 2 (DATA mode) for the same
+# quantity. Tie-valued constants below are stored at artifact precision so .3f
+# renders them identically in both modes.
+FC = 0.8825
 C = {
     "Random": dict(
-        free=0.422,
+        free=0.4225,
         readout=0.765,
         readout_ci=(0.686, 0.817),
         reverse=0.636,
@@ -58,7 +64,7 @@ C = {
         trunc=0.233,
     ),
     "StreamingLLM": dict(
-        free=0.237,
+        free=0.2375,
         readout=0.584,
         readout_ci=(0.495, 0.647),
         reverse=0.417,
@@ -79,7 +85,7 @@ C["H2O-style"] = dict(
     within=0.713,
     term=0.101,
     flip=-0.636,
-    free=0.248,
+    free=0.2475,
     readout=0.597,
     readout_ci=(0.503, 0.668),
     reverse=0.419,
@@ -90,7 +96,7 @@ C["H2O-style"] = dict(
     trunc=0.105,
 )
 # Budget-2048 free-run (grid-diss2048-tok, 800/800, read 2026-07-04).
-C2048 = {"Random": 0.850, "StreamingLLM": 0.808}
+C2048 = {"Random": 0.850, "StreamingLLM": 0.8075}
 PHEN = dict(gap=0.185, gap_ci=(0.130, 0.242), win=44, tie=50, loss=6, n_tot=100)
 TVWIN = dict(before=0.0000, first50=0.0018, later=0.0884, onset=65)
 TWOFC = dict(mean=0.068, median=0.000, p=0.976, frac_sig=0.0, n=250)

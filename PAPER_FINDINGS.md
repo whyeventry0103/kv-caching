@@ -211,6 +211,13 @@ reverse + AIME-2048). Sell the two-stage catch as methodology, never hide it (Am
 - Report the pre-registered outcome honestly: the decomposition read was pre-committed
   (confirm/complicate/refute) and came out **COMPLICATE** — the central residual is robust; the
   strong pilot "SLM=readout / Random=trajectory" dissociation did **not** hold cleanly.
+- **Display convention (pinned 2026-07-07): every 3-decimal number is `f"{v:.3f}"` of the
+  report-artifact float** — the string numpy/R reproduce from raw rows. Do NOT hand-round
+  exact ties up. Corrections applied under this rule: H2O-style free 0.248 → **0.247**
+  (99/400 = 0.2475; abstract, summary, §4.1, Fig 1 + caption, Table 2) and SLM@2048 free
+  0.808 → **0.807** (323/400 = 0.8075; §4.1, Fig 1 + caption, dose paragraph). Caught by
+  eyeballing Fig 1 (hand-rounded constant, 0.248) against Fig 2 (DATA mode, 0.247) —
+  every other number in the paper already followed .3f.
 
 ## 6. Limitations / threats to validity (write this as a STRENGTH section)
 - **Generality (primary):** results are one model / one benchmark / budget 256 with two eviction
@@ -260,7 +267,8 @@ clean: we predicted ObservedAttentionPress behavior, not H2O's.
 
 ### 4i. Budget-2048 free-run (the near-lossless pole) — READ 2026-07-04
 grid-diss2048-tok 800/800: **Random 0.850 (trunc 0.030, mean 3,454 tok), StreamingLLM
-0.808 (trunc 0.028, mean 3,650 tok)** vs FC 0.882. Free-running at 8× budget is within
+0.8075 → displays 0.807 per the §5 display convention (trunc 0.028, mean 3,650 tok)**
+vs FC 0.882. Free-running at 8× budget is within
 0.03–0.07 of the reference → (a) the collapse is a BUDGET effect, (b) doubles as a harness
 control (free-running per se isn't broken), (c) the Random>SLM ordering PERSISTS at 2048
 (+0.042). In the paper: §4.1 + Fig 1 dose bars. readout-2048 (decomposition) queued.
