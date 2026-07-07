@@ -1,0 +1,26 @@
+name: readout_math500_fc_control
+stage: replay
+mode: readout
+# READOUT-RESAMPLING CONTROL (submission-audit addition, 2026-07-07). The FULL-CACHE
+# reference traces are teacher-forced and read out under the FULL cache (press:
+# fullcache = no compression anywhere). This calibrates the readout protocol itself:
+# Acc_ro(FC) - Acc_FC is the pure answer-resampling effect, with zero compression.
+# The budget-2048 readout cells bound this at ~+0.02 (readout 0.901/0.903 vs FC
+# 0.8825); this control measures it directly and removes the "readout conflates
+# compression fidelity with resampling variance" reviewer objection.
+# Same machinery as reverse readout (full-cache readout of stored token IDs), pointed
+# at the FC bank instead of a compression grid. 100 problems x 4 seeds = 400 rows,
+# matching the compression-cell grid.
+reference_run_name: math500-fc-powered-merged
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+subset:
+  math500: 100
+presses: [fullcache]
+budgets: [full]
+seeds: [11, 23, 47, 89]
+compression_interval: 64
+max_answer_tokens: 2048
+estimated_generation_count: 0
+estimated_replay_count: 400
+scale_authorized: true

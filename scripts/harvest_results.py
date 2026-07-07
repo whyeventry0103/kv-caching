@@ -108,6 +108,12 @@ UNITS = [
             "reverse": "reverse-readout-diss256-llama",
         },
     ),
+    Unit(
+        "fc-readout-control",
+        {"readout-fc-control": ("readout", 400)},
+        "readout_acc",
+        args={"readout": "readout-fc-control"},
+    ),
     Unit("fc-aime24-acc", {"fc-aime24": ("grid", 240)}, "bank_acc", bench="aime24"),
     Unit(
         "m4-aime-2048",
@@ -243,6 +249,25 @@ def harvest(unit: Unit, python: str) -> list[str]:
             if ":" in ln and "wrote" not in ln
         ]
         return [f"  {json.dumps(payload)}"] + window_lines[:4]
+    if unit.kind == "readout_acc":
+        # Plain readout accuracy over a readout run (no decomposition): used by the
+        # FC-readout resampling control, where the quantity is Acc_ro(FC) itself.
+        rows = []
+        for path in (RUNS / unit.args["readout"] / "readout").rglob("*.jsonl"):
+            if "token_ids" in path.parts:
+                continue
+            for ln in path.read_text(encoding="utf-8").splitlines():
+                if ln.strip():
+                    rows.append(json.loads(ln))
+        defined = [r for r in rows if r.get("readout_correct") is not None]
+        acc = sum(bool(r["readout_correct"]) for r in defined) / len(defined)
+        payload = {
+            "rows": len(rows),
+            "n_undefined": len(rows) - len(defined),
+            "readout_accuracy": acc,
+        }
+        (out_dir / "readout_acc.json").write_text(json.dumps(payload, indent=2))
+        return [f"  {json.dumps(payload)}"]
     if unit.kind == "bank_acc":
         rows = []
         for path in (RUNS / next(iter(unit.requires)) / unit.bench).rglob("*.jsonl"):

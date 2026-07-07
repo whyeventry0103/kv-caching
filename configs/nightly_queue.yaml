@@ -247,3 +247,18 @@ jobs:
     min_free_gb: 28
     progress_kind: readout
     requires: fc-aime24
+
+  # ====== Readout-resampling control (submission-audit addition, 2026-07-07) =====
+  # Full-cache readout of the FC bank itself: Acc_ro(FC) - Acc_FC = the pure
+  # answer-resampling effect of the readout protocol, zero compression involved.
+  # Deliberately LAST: defensive calibration, nothing in the paper's headline
+  # depends on it, so it must never delay a paper-critical cell.
+  - name: readout-fc-control
+    command: replay
+    config: configs/experiments/readout_math500_fc_control.yaml
+    run_name: readout-fc-control
+    total: 400
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 28
+    progress_kind: readout
+    requires: null           # references only the FC bank, which exists

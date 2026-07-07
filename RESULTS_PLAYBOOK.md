@@ -173,6 +173,29 @@ never per-problem claims; problem-clustered CI only).
 **Either branch:** AIME numbers stay out of the abstract (scope stays MATH-500-led)
 unless Branch B survives CIs, in which case add ONE clause at most.
 
+## UNIT fc-readout-control (readout-fc-control completes; queued LAST, 2026-07-07)
+
+Full-cache readout of the FC bank itself = the pure answer-resampling effect of the
+readout protocol (zero compression). Digest gives {rows, n_undefined,
+readout_accuracy}. **Expected shape: readout_accuracy ≈ 0.88–0.92** (FC is 0.8825;
+the 2048 readout cells bound resampling+near-lossless-compression at ~+0.02).
+
+**Branch A (expected: |acc − 0.8825| ≤ 0.04):** replace the §4.2 dose-paragraph
+sentence "The above-reference readout values also calibrate the readout protocol
+itself: regenerating the answer span on reference traces is worth roughly $+0.02$
+even with compression near-inactive" with the direct measurement: "A direct control
+--- full-cache readout of the full-cache traces --- puts the answer-resampling
+effect of the readout protocol at {ACC_MINUS_FC:+.3f}"; keep the rest of the
+sentence (order-of-magnitude-below + direction clause). Add one line to
+PAPER_FINDINGS §4f (instrument validity) with the numbers.
+
+**Branch B (surprising: acc < 0.84 or > 0.93):** the readout protocol itself moves
+accuracy by more than resampling noise should — STOP, do not edit the paper;
+investigate (boundary detection on FC traces? seed collision with bank seeds?
+n_undefined spike?) and treat as possible instrument bug per the standing rule.
+Note: bank seeds 11/23/47/89 overlap the readout seeds by construction (matched-seed
+convention, same as every readout run); that is protocol, not a bug.
+
 ## ALREADY HARVESTED (2026-07-06, in the paper — do not redo)
 
 - add-2048: Random ADD 0.085 / SLM 0.146 (floor 0.068); §4.5 dose sentence.
