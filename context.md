@@ -16,6 +16,23 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
 
 ## 0. TL;DR — where we are right now
 
+  **★ PI SUBMISSION AUDIT (2026-07-08 ~00:30, Fable, final session):** adversarial
+  review + PI decision pass, commits e5b39c2 + bef350c. (1) Three defensive
+  sentences added: FC 0.882 anchored to the R1 report's 0.928 MATH-500 pass@1
+  (verified vs arXiv 2501.12948) in §2.2; resampling bound (+0.02 from 2048
+  readout, direction shrinks residual) in §4.2 dose paragraph; truncation bound
+  labeled extreme-by-construction linking to ADD §4.5. (2) NEW QUEUE JOB (23rd,
+  LAST priority): readout-fc-control — full-cache readout of FC bank, 400 rows,
+  directly measures the answer-resampling effect; config dry-run validated,
+  Makefile dryrun line added (24 configs), harvest unit fc-readout-control (new
+  readout_acc kind), playbook unit with STOP branch (expect 0.88–0.92). Decisions
+  AFFIRMED (not queued): SnapKV cell, budgets 512/1024, TV-matched noise, logic
+  benches, Qwen3; second grader = optional CPU-side appendix, not blocking.
+  VERDICT: submit after queue drains + venue conversion (ICLR-target ~50%,
+  as-today would be ~10-15% on format alone). ⚠ SYNC: bef350c sync timed out
+  (link flaky); background retry loop armed — if resuming, VERIFY .sync-state is
+  fresh before tonight's window or the watcher preflight may refuse.
+
   **★ FINAL SUBMISSION-POLISH PASS (2026-07-07 late, Fable):** independent
   reviewer-mode pass over the full manuscript; 15 external observations evaluated,
   ~7 acted on. Changes: (1) NEW Figure: protocol schematic `figures/fig0_protocol`
