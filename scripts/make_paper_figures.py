@@ -147,6 +147,130 @@ def _save(fig, out_dir: Path, name: str):
     print(f"  wrote {name}.pdf / .png")
 
 
+# ---------------------------------------------------------------- Figure 0
+def fig0_protocol(out_dir: Path):
+    """Protocol schematic for the four estimands (SUMMARY-only; no data needed).
+
+    Fill encodes the CACHE condition while a span is processed (grey = full cache,
+    hatched = compression active); the in-span text says where the tokens come from
+    (self-generated vs teacher-forced replay of stored token IDs). Texture, not a
+    method hue, marks "compressed" so the schematic stays method-generic and does
+    not collide with the fixed per-method palette."""
+    print("Figure 0 [SUMMARY (protocol schematic)]")
+    fig, ax = plt.subplots(figsize=(6.9, 2.7))
+    trace_x, trace_w, ans_x, ans_w, bar_h = 0.0, 6.0, 6.15, 1.85, 0.52
+    full = dict(facecolor="#c9c9c9", edgecolor=SPINE, linewidth=0.8)
+    comp = dict(facecolor="white", edgecolor=INK, linewidth=0.8, hatch="////")
+    rows = [
+        # (label, trace style, trace text, answer style, right annotation)
+        (
+            "Full-cache\nreference",
+            full,
+            "self-generated trace",
+            full,
+            r"$\mathrm{Acc}_{\mathrm{FC}}$",
+        ),
+        (
+            "Compressed\nfree-run",
+            comp,
+            "self-generated trace",
+            comp,
+            r"$\mathrm{Acc}_{\mathrm{free}}\;\rightarrow\;\Delta_{\mathrm{tot}}$",
+        ),
+        (
+            "Forward\nreadout",
+            comp,
+            "reference token IDs, teacher-forced",
+            comp,
+            r"$\mathrm{Acc}_{\mathrm{ro}}\;\rightarrow\;\Delta_{\mathrm{ro}}$",
+        ),
+        (
+            "Reverse\nreadout",
+            full,
+            "compressed free-run token IDs, teacher-forced",
+            full,
+            r"$\mathrm{Acc}_{\mathrm{rev}}$",
+        ),
+    ]
+    for i, (label, tsty, ttxt, asty, right) in enumerate(rows):
+        y = 3 - i
+        ax.barh(y, trace_w, left=trace_x, height=bar_h, **tsty)
+        ax.barh(y, ans_w, left=ans_x, height=bar_h, **asty)
+        pad = dict(boxstyle="round,pad=0.22", facecolor="white", edgecolor="none")
+        ax.text(
+            trace_x + trace_w / 2,
+            y,
+            ttxt,
+            ha="center",
+            va="center",
+            fontsize=7.2,
+            color=INK,
+            bbox=pad,
+        )
+        ax.text(
+            ans_x + ans_w / 2,
+            y,
+            "answer",
+            ha="center",
+            va="center",
+            fontsize=7.2,
+            color=INK,
+            bbox=pad,
+        )
+        ax.text(
+            ans_x + ans_w + 0.18,
+            y,
+            right,
+            ha="left",
+            va="center",
+            fontsize=8.2,
+            color=INK,
+        )
+        ax.text(
+            trace_x - 0.18, y, label, ha="right", va="center", fontsize=7.8, color=INK
+        )
+    ax.plot(
+        [ans_x - 0.075] * 2, [-0.35, 3.42], color=INK2, lw=0.9, ls=(0, (2, 2)), zorder=0
+    )
+    ax.text(
+        ans_x - 0.075,
+        3.55,
+        "reasoning/answer boundary\n(last </think>)",
+        ha="center",
+        va="bottom",
+        fontsize=6.8,
+        color=INK2,
+    )
+    ax.text(
+        (trace_x + ans_x + ans_w) / 2,
+        -0.92,
+        r"$\rho(m) = \Delta_{\mathrm{tot}} - \Delta_{\mathrm{ro}}$ (residual);"
+        " forward and reverse readout bracket the on-policy residual",
+        ha="center",
+        va="center",
+        fontsize=7.8,
+        color=INK,
+    )
+    handles = [
+        plt.Rectangle((0, 0), 1, 1, **full),
+        plt.Rectangle((0, 0), 1, 1, **comp),
+    ]
+    ax.legend(
+        handles,
+        ["full cache", "compression active"],
+        loc="upper right",
+        bbox_to_anchor=(1.0, 1.24),
+        ncol=2,
+        frameon=False,
+        fontsize=7.2,
+        handlelength=1.4,
+    )
+    ax.set_xlim(-1.35, 10.4)
+    ax.set_ylim(-1.35, 4.15)
+    ax.axis("off")
+    _save(fig, out_dir, "fig0_protocol")
+
+
 # ---------------------------------------------------------------- Figure 1
 def fig1_phenomenon(out_dir: Path, runs_root: Path | None):
     per_problem = _load_paired_diffs(runs_root) if runs_root else None
@@ -621,6 +745,7 @@ def main():
 
     out = Path(args.out_dir)
     out.mkdir(parents=True, exist_ok=True)
+    fig0_protocol(out)
     fig1_phenomenon(out, Path(args.runs_root) if args.runs_root else None)
     summaries = [x for x in (_load_json(p) for p in (args.m4_summary or [])) if x]
     fig2_bracket(out, summaries or None)

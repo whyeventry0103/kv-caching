@@ -16,6 +16,26 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
 
 ## 0. TL;DR — where we are right now
 
+  **★ FINAL SUBMISSION-POLISH PASS (2026-07-07 late, Fable):** independent
+  reviewer-mode pass over the full manuscript; 15 external observations evaluated,
+  ~7 acted on. Changes: (1) NEW Figure: protocol schematic `figures/fig0_protocol`
+  (four-row diagram of FC/free-run/forward-readout/reverse-readout; fill = cache
+  condition, texture = compressed, in-span text = token source) placed in §3.2 —
+  compiled figure numbers shift by one, `\cref` handles it; generator
+  `fig0_protocol()` in make_paper_figures.py (SUMMARY-only). (2) Abstract: dropped
+  the three explicit bracket intervals (kept "excludes zero for every policy" +
+  endpoint-CI clause; residual triple stays). (3) Intro ¶1: HOTT per-method numbers
+  deduped (kept 0.47/0.03 hook, full audit stays §2); merged duplicate
+  "contribution" sentences. (4) Thesis + conclusion opening scoped "At aggressive
+  cache budgets" (licensed by the 2048 dose result). (5) §4.4 "can only add to it"
+  → "adds a second divergence source" (monotonicity overclaim removed). (6) Def 6:
+  dropped never-used TDP acronym. (7) §4.3 three-qualifications paragraph split
+  into three paragraphs. (8) Conclusion summary gains one dose-response clause.
+  NOT changed (deliberate): "certify/collapse" vocabulary (backed by the
+  both-literatures-correct framing), contributions bullets (playbook anchors),
+  Table 2, all §4 numbers. ALL 7 playbook anchors verified intact post-edit.
+  Build 0 errors / benign 1.4pt overfull; gates green (132 tests).
+
   **★ m4-2048 read (2026-07-07):** dose-response decomposition IN. FC 0.8825;
   Random@2048 free 0.850, readout 0.9005 [0.82, 0.9425], residual −0.0505
   [−0.065, −0.01]; SLM@2048 free 0.8075, readout 0.9031 [0.8225, 0.9425], residual
