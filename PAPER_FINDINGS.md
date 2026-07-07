@@ -265,10 +265,30 @@ grid-diss2048-tok 800/800: **Random 0.850 (trunc 0.030, mean 3,454 tok), Streami
 control (free-running per se isn't broken), (c) the Random>SLM ordering PERSISTS at 2048
 (+0.042). In the paper: §4.1 + Fig 1 dose bars. readout-2048 (decomposition) queued.
 
+### 4j. m4-2048 — dose-response DECOMPOSITION IN (read 2026-07-07)
+readout-diss2048 800/800 joined grid-diss2048-tok 800/800; FC 0.8825. **Random@2048:
+free 0.8500 [0.7825, 0.9125], readout 0.9005 [0.82, 0.9425], residual −0.0505
+CI [−0.065, −0.01]**, trunc 0.030, 8 undefined readout boundaries, flip net −0.035.
+**SLM@2048: free 0.8075 [0.735, 0.87], readout 0.9031 [0.8225, 0.9425], residual
+−0.0956 CI [−0.1275, −0.0425]**, trunc 0.028, 8 undefined, flip net −0.0775.
+Readout at 2048 is statistically indistinguishable from (nominally above) the
+reference — the remaining free-run loss is effectively ENTIRELY trajectory-channel.
+Residuals shrink by ×3.6 (SLM) to ×6.8 (Random) vs the −0.343/−0.347 values at 256,
+with CIs still excluding zero. Exact residuals derivable from counts: Random
+−0.0325 − (353/392 − 0.8825) = −0.05051; SLM −0.075 − (354/392 − 0.8825) = −0.09556.
+Branch taken: A (both residuals in [−0.10, 0]) with one template correction — the
+playbook's "order of magnitude below" was replaced by "factor 3.6–6.8" (SLM's
+−0.096 vs −0.343 is 3.6×, not 10×). In the paper: new §4.2 dose-response paragraph;
+Setup 2048 status; §4 preamble; §4.1 clause; threats-generality; conclusion
+extensions list. Abstract unchanged (256-led, per standing decision).
+Archived: results/diag/m4-2048-summary.json (fetch in flight — link down at read
+time; digest values above are report-exact from harvest_results.py output).
+
 ## 7. Status
 - **DONE (writable core):** phenomenon, forward decomposition, reverse-replay bracket
   (+ endpoint CIs, + imputation bounds), Figure 4 TV mechanism (estimator defined), ADD,
   two-FC negative control, R-KV parity.
-- **IN PROGRESS (generality/breadth):** budget-2048 grid DONE 800/800 (read pending);
-  readout-2048 queued; H2O-style: grid DONE (§4h), readout tonight; R-KV smoke + cells;
-  AIME (drop-dead 2026-08-01).
+- **DONE (added 2026-07-07):** budget-2048 decomposition (§4j) — dose response closed.
+- **IN PROGRESS (generality/breadth):** h2o-2048 (grid 400/400 DONE, readout 130/400);
+  replay-256-h2o (21/400); R-KV cells (queued behind smoke PASS); Llama quartet; AIME
+  trio (drop-dead 2026-08-01).

@@ -16,6 +16,18 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
 
 ## 0. TL;DR — where we are right now
 
+  **★ m4-2048 read (2026-07-07):** dose-response decomposition IN. FC 0.8825;
+  Random@2048 free 0.850, readout 0.9005 [0.82, 0.9425], residual −0.0505
+  [−0.065, −0.01]; SLM@2048 free 0.8075, readout 0.9031 [0.8225, 0.9425], residual
+  −0.0956 [−0.1275, −0.0425]. Readout ≥ reference at 2048 → remaining loss entirely
+  trajectory-channel; residuals shrink ×3.6–6.8 vs 256, CIs still exclude zero.
+  Branch A per RESULTS_PLAYBOOK (template's "order of magnitude" corrected to
+  factor 3.6–6.8). Paper: new §4.2 dose paragraph + Setup/§4-preamble/§4.1/threats/
+  conclusion status updates; abstract unchanged. PAPER_FINDINGS §4j. summary.json
+  fetch to results/diag/ pending link (background probe armed). NOT read: m4-2048-h2o
+  (readout 130/400), replay-256-h2o (21/400) — likely ready after tonight. Next
+  pending units: m4-2048-h2o, replay-256-h2o, then rkv/llama/aime chains.
+
   **★★★ FABLE HANDOFF COMPLETE (2026-07-06). Successor: work the morning loop in
   CLAUDE.md §Handoff-operations.** Built today: (1) `scripts/harvest_results.py` —
   ONE command turns finished runs into report artifacts + digest (unit table inside;
