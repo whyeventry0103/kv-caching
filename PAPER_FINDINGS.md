@@ -292,11 +292,35 @@ extensions list. Abstract unchanged (256-led, per standing decision).
 Archived: results/diag/m4-2048-summary.json (fetch in flight — link down at read
 time; digest values above are report-exact from harvest_results.py output).
 
+### 4k. m4-2048-h2o — H2O-style dose point IN (read 2026-07-10)
+grid-diss2048-h2o 400/400 + readout-diss2048-h2o 400/400; FC 0.8825. **H2O@2048:
+free 0.8225 [0.7525, 0.8875] (displays 0.823), readout 0.8980 [0.82, 0.9375]
+(displays 0.898; 352/392, 8 undefined), residual −0.0755 CI [−0.1025, −0.02]
+(displays −0.075, [−0.102, −0.020])**, trunc 0.085, flip net −0.0625. Free ≥ 0.75 →
+playbook Branch "behaves alike": near-lossless free-run, readout ≥ reference,
+residual sits BETWEEN Random (−0.051) and SLM (−0.096), factor 4.6 below its −0.349
+at 256 (inside the paper's 3.6–6.8 range — no text change needed). Dose response now
+holds for ALL THREE policies. In the paper: one clause in the §4.2 dose paragraph;
+§4 preamble, threats-generality, conclusion extensions updated (H2O fully done).
+Archived: results/diag/m4-2048-h2o-summary.json
+
+### 4l. replay-256-h2o — TV profiles for the 3rd policy IN (read 2026-07-10)
+replay-diss256-h2o 400/400. **mean AUC-TV 0.0730 (displays 0.073), median onset 65**
+— |0.073 − 0.085| = 0.012 ≤ 0.02 → playbook Branch A: §4.4 sentence extended to
+"matched across all three policies (0.086 / 0.083 / 0.073)". STOP-rule check PASSED:
+before-window 0.0000 per-profile AND pooled (26,000 pre-eviction steps) — instrument
+valid on the third policy. Windows (H2O only, NOT merged into Table 3 which stays
+R+SLM 800): first50 0.0008, later per-profile 0.0765 / pooled 0.1023 (estimators
+kept separate per §5 discipline). Fig 4 unchanged (R+SLM data).
+Archived: results/diag/replay-256-h2o-auc.json, replay-256-h2o-windows.txt
+
 ## 7. Status
 - **DONE (writable core):** phenomenon, forward decomposition, reverse-replay bracket
   (+ endpoint CIs, + imputation bounds), Figure 4 TV mechanism (estimator defined), ADD,
   two-FC negative control, R-KV parity.
 - **DONE (added 2026-07-07):** budget-2048 decomposition (§4j) — dose response closed.
-- **IN PROGRESS (generality/breadth):** h2o-2048 (grid 400/400 DONE, readout 130/400);
-  replay-256-h2o (21/400); R-KV cells (queued behind smoke PASS); Llama quartet; AIME
-  trio (drop-dead 2026-08-01).
+- **DONE (added 2026-07-10):** h2o-2048 dose point (§4k) + H2O TV profiles (§4l) —
+  H2O-style is now COMPLETE on every instrument (forward, reverse, ADD, dose, TV).
+- **IN PROGRESS (generality/breadth):** R-KV cells (grid 400/400 DONE, readout
+  208/400, reverse 71/400 as of 07-10 — unit likely ready ~07-11); Llama quartet
+  (not started); AIME trio; fc-readout-control (queued last). Drop-dead 2026-08-01.

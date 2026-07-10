@@ -16,6 +16,20 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
 
 ## 0. TL;DR — where we are right now
 
+  **★ m4-2048-h2o + replay-256-h2o read (2026-07-10):** both Branch A, both good.
+  H2O@2048: free 0.8225→0.823, readout 0.8980→0.898 (≥ ref), residual −0.0755
+  CI [−0.1025,−0.02] — between Random/SLM; dose response now holds for ALL 3
+  policies (one clause added to §4.2 dose paragraph). replay-h2o: AUC-TV 0.073 vs
+  0.086/0.083 → §4.4 "matched across all three policies"; STOP-check passed
+  (before-window 0.0000 per-profile AND pooled). H2O-style now complete on every
+  instrument. Paper: §4-preamble/threats/conclusion updated (H2O no longer "in
+  progress"). PAPER_FINDINGS §4k+§4l; archives in results/diag/. Sync mystery
+  resolved: .sync-state Jul 8 01:55 + remote queue has readout-fc-control → the
+  audit commit shipped in time, no night lost; SSH auth back. R-KV: grid 400/400
+  DONE, readout 208/400, reverse 71/400 → m4-rkv-256 likely ready ~07-11 (use
+  playbook branches; Branch B = free ≥ 0.55 = discriminative-outlier is GOOD).
+  Next pending: m4-rkv-256, then llama quartet, aime trio, fc-readout-control.
+
   **★ PI SUBMISSION AUDIT (2026-07-08 ~00:30, Fable, final session):** adversarial
   review + PI decision pass, commits e5b39c2 + bef350c. (1) Three defensive
   sentences added: FC 0.882 anchored to the R1 report's 0.928 MATH-500 pass@1
