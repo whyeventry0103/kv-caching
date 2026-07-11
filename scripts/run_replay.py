@@ -148,7 +148,9 @@ def _reference_key(row: dict[str, Any]) -> tuple[Any, ...]:
     )
 
 
-def _readout_path(root: Path, press: str, budget: int, seed: int) -> Path:
+def _readout_path(root: Path, press: str, budget: int | str, seed: int) -> Path:
+    # budget is int for compression cells, the literal "full" for full-cache
+    # references (e.g. the FC-readout resampling control), matching bank naming.
     return root / "readout" / f"{press}-{budget}-s{seed}.jsonl"
 
 
@@ -357,7 +359,12 @@ def main() -> int:
                             "runmeta": runmeta,
                             "versions": row["versions"],
                         }
-                    path = _readout_path(output_root, press_name, int(budget), seed)
+                    path = _readout_path(
+                        output_root,
+                        press_name,
+                        budget if budget == "full" else int(budget),
+                        seed,
+                    )
                     path.parent.mkdir(parents=True, exist_ok=True)
                     if path.exists():
                         for line in path.read_text(encoding="utf-8").splitlines():

@@ -15,6 +15,19 @@ def _row(pid, seed):
     return json.dumps({"bench": "math500", "pid": pid, "decoding": {"seed": seed}})
 
 
+def test_parser_accepts_seeds_shard():
+    # Regression: nightly_autorun launches every runner with --seeds for per-GPU
+    # sharding; build_bank lacked the flag, so the first bank jobs the queue ever
+    # reached (fc-llama50, fc-aime24) failed rc=2 "unrecognized arguments" across
+    # three launches and were marked STUCK (2026-07-11).
+    args = MODULE._parser().parse_args(
+        ["--config", "x.yaml", "--dry-run", "--seeds", "11,23,47,89"]
+    )
+    assert args.seeds == "11,23,47,89"
+    # Default stays "" (= all config seeds), matching run_grid/run_replay.
+    assert MODULE._parser().parse_args(["--config", "x.yaml"]).seeds == ""
+
+
 def test_resume_done_keys_requires_result_and_sidecar(tmp_path):
     res = tmp_path / "math500" / "m"
     tok = tmp_path / "token_ids" / "math500" / "m"

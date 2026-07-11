@@ -41,6 +41,12 @@ def _parser() -> argparse.ArgumentParser:
         action="store_true",
         help="skip (bench,pid,seed) already fully generated in the output dir",
     )
+    parser.add_argument(
+        "--seeds",
+        default="",
+        help="comma-separated subset of config seeds to generate (per-GPU sharding: "
+        "each shard owns disjoint per-seed output files, so two GPUs never collide)",
+    )
     return parser
 
 
@@ -126,6 +132,16 @@ def main() -> int:
         if args.resume
         else set()
     )
+    config_seeds = [int(s) for s in config["seeds"]]
+    if args.seeds.strip():
+        shard = {int(s) for s in args.seeds.split(",")}
+        active_seeds = [s for s in config_seeds if s in shard]
+        if not active_seeds:
+            raise SystemExit(
+                f"--seeds {args.seeds} disjoint from config seeds {config_seeds}"
+            )
+    else:
+        active_seeds = config_seeds
     counts = {"rows": 0, "truncated": 0, "skipped_resume": len(done_keys)}
     if args.resume:
         print(f"RESUME: skipping {len(done_keys)} already-complete generations")
@@ -144,7 +160,7 @@ def main() -> int:
             if isinstance(configured_max_new, dict)
             else int(configured_max_new)
         )
-        for seed in config["seeds"]:
+        for seed in active_seeds:
             runmeta = capture_runmeta(config["name"], args.config, int(seed))
             for problem in problems:
                 if (benchmark, problem.pid, int(seed)) in done_keys:
