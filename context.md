@@ -16,6 +16,20 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
 
 ## 0. TL;DR — where we are right now
 
+  **★ NIGHT OF 07-10→11: rkv-readout DONE + 3 stuck jobs root-caused & fixed
+  (2026-07-11, commit 74e97a5):** readout-diss256-rkv 400/400 COMPLETE; reverse
+  317/400 → m4-rkv-256 needs only s89 (83 rows), READY tomorrow. THREE jobs went
+  STUCK at 0 across 3 launches; both root causes fixed with regression tests
+  (135 tests): (1) build_bank.py lacked --seeds (autorun passes it to every
+  runner; fc-llama50/fc-aime24 were the first bank jobs the queue reached →
+  rc=2) — added, mirroring run_grid verbatim; (2) run_replay readout branch cast
+  int(budget) → ValueError on readout-fc-control's budgets [full] — now passes
+  "full" through (filenames fullcache-full-sN.jsonl, bank convention). Remote
+  fails counters reset to 0 (backup logs/nightly_state.json.bak-20260711); all
+  three launcher invocations re-verified on the REMOTE post-sync; tonight's
+  plan confirmed: reverse-rkv s89 + fc-llama50. No data lost; failures were
+  launch-time (rc=2 / pre-first-row crash), zero rows written by broken code.
+
   **★ m4-2048-h2o + replay-256-h2o read (2026-07-10):** both Branch A, both good.
   H2O@2048: free 0.8225→0.823, readout 0.8980→0.898 (≥ ref), residual −0.0755
   CI [−0.1025,−0.02] — between Random/SLM; dose response now holds for ALL 3
