@@ -314,6 +314,32 @@ R+SLM 800): first50 0.0008, later per-profile 0.0765 / pooled 0.1023 (estimators
 kept separate per §5 discipline). Fig 4 unchanged (R+SLM data).
 Archived: results/diag/replay-256-h2o-auc.json, replay-256-h2o-windows.txt
 
+### 4m. m4-rkv-256 — R-KV full decomposition IN, Branch C (read 2026-07-12)
+grid/readout/reverse-diss256-rkv all 400/400; FC 0.8825. **R-KV@256: free 0.5200
+[0.435, 0.61] (displays 0.520 [0.435, 0.610]) — BEST free-runner of the four;
+readout 0.7985 = 313/392 (displays 0.798 [0.710, 0.850]); residual −0.2785 CI
+[−0.335, −0.195] (displays −0.278); reverse 0.6618 = 229/346 (displays 0.662);
+bracket [−0.278, −0.221]; revCI [−0.3554, −0.2025] (displays [−0.355, −0.203]);
+trunc 0.135; 8 fwd-undefined; 54 rev-undefined; flip gained 0.0025 / net −0.365.**
+Imputation (derived from counts): all-incorrect → 229/400 − FC = −0.310;
+all-correct → 283/400 − FC = −0.175 — bracket excludes zero under ANY imputation.
+Branch taken: **C** (free 0.520 in the 0.30–0.55 intermediate band — 0.03 short of
+Branch B's 0.55) — row + bracket reported plainly, NO framing overhaul, figures
+unchanged per playbook. Structure found: (a) forward residual nominally smaller
+than the −0.34 trio, CIs OVERLAP → we claim neither equality nor separation;
+method-invariance stays scoped to the original trio; (b) reverse side: R-KV lands
+with Random on the RECOVERABLE side (revCIs overlap each other, both separated
+from the concentrated pair with non-overlapping CIs) → §4.3 split renamed
+"recoverable vs concentrated"; (c) no gains (gained 0.0025) → >100% threat
+paragraph gets the datum; AIME remains the direct test of the published claim.
+In the paper: Table 2 fourth row + ‡ footnote (certified-port-at-7B labeling);
+§4.2 new R-KV paragraph; §4.3 all lists extended (eight endpoints); abstract one
+clause + "every endpoint"; contributions bullet 4; summary-of-findings clause;
+Setup fourth press; §5 gate tense (both gates passed); threats generality
+(four policies, gate cleared) + >100% datum; related work tense; conclusion
+opening clause + extensions list. Fig 1/Fig 2 UNCHANGED (Branch C rule).
+Archived: results/diag/m4-rkv-256-summary.json
+
 ## 7. Status
 - **DONE (writable core):** phenomenon, forward decomposition, reverse-replay bracket
   (+ endpoint CIs, + imputation bounds), Figure 4 TV mechanism (estimator defined), ADD,
@@ -321,6 +347,8 @@ Archived: results/diag/replay-256-h2o-auc.json, replay-256-h2o-windows.txt
 - **DONE (added 2026-07-07):** budget-2048 decomposition (§4j) — dose response closed.
 - **DONE (added 2026-07-10):** h2o-2048 dose point (§4k) + H2O TV profiles (§4l) —
   H2O-style is now COMPLETE on every instrument (forward, reverse, ADD, dose, TV).
-- **IN PROGRESS (generality/breadth):** R-KV cells (grid 400/400 DONE, readout
-  208/400, reverse 71/400 as of 07-10 — unit likely ready ~07-11); Llama quartet
-  (not started); AIME trio; fc-readout-control (queued last). Drop-dead 2026-08-01.
+- **DONE (added 2026-07-12):** R-KV full decomposition (§4m, Branch C) — the paper
+  now has FOUR policies with brackets excluding zero on all eight endpoints.
+- **IN PROGRESS (generality/breadth):** Llama quartet (fc-llama50 bank 200/200
+  DONE, grid 16/400 as of 07-12); AIME trio (fc-aime24 117/240);
+  fc-readout-control (queued last). Drop-dead 2026-08-01.

@@ -16,6 +16,21 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
 
 ## 0. TL;DR — where we are right now
 
+  **★ m4-rkv-256 read — BRANCH C (2026-07-12):** R-KV@256 free 0.520 [0.435,0.610]
+  (BEST of 4 policies), readout 0.798, residual −0.278 [−0.335,−0.195], reverse
+  0.662 (229/346; 54 undef), bracket [−0.278,−0.221], revCI [−0.355,−0.203],
+  imputation −0.310/−0.175 (zero excluded always), trunc 0.135, gained flip
+  0.0025. Free 0.520 = intermediate band → Branch C: row+bracket plainly, no
+  framing overhaul, Fig 1/2 UNCHANGED. Key structure: forward residual nominally
+  below the −0.34 trio with OVERLAPPING CIs (invariance stays scoped to trio);
+  reverse side R-KV joins Random on the recoverable side (split renamed
+  "recoverable vs concentrated", both separations CI-clean). Paper: Table 2 4th
+  row + ‡, §4.2 R-KV paragraph, §4.3 eight endpoints, abstract clause,
+  Setup/§5/threats/related-work/conclusion status flips. PAPER_FINDINGS §4m.
+  Also last night: fc-llama50 bank 200/200 DONE (launcher fix worked), llama
+  grid 16/400, fc-aime24 117/240. Next units: m4-llama-256 (~2 nights),
+  fc-aime24-acc, then aime trio + fc-readout-control.
+
   **★ NIGHT OF 07-10→11: rkv-readout DONE + 3 stuck jobs root-caused & fixed
   (2026-07-11, commit 74e97a5):** readout-diss256-rkv 400/400 COMPLETE; reverse
   317/400 → m4-rkv-256 needs only s89 (83 rows), READY tomorrow. THREE jobs went
