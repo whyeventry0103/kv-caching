@@ -18,6 +18,9 @@ General rules for every unit:
 - Figure regen (when a unit says so): edit constants in
   `scripts/make_paper_figures.py`, sync, regenerate on remote with the DATA args used
   in context.md 2026-07-06 bullets, scp back, **view the PNGs**, rebuild PDF.
+  **The complete figure method (palette validation, display convention, exact regen
+  commands, per-figure anatomy, failure catalog) is `docs/FIGURES_PLAYBOOK.md` —
+  read it before touching any figure.**
 
 ---
 

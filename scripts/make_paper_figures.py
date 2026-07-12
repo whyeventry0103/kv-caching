@@ -330,6 +330,26 @@ def fig1_phenomenon(out_dir: Path, runs_root: Path | None):
     for x, v in zip(xs, vals, strict=True):
         axb.text(x, v + 0.018, f"{v:.3f}", ha="center", fontsize=7.6, color=INK)
     axb.axhline(FC, color=GREY, lw=0.8, ls=(0, (2, 3)), zorder=0)
+    # Budget-group headers carry the realized compression ratios (pre-registered
+    # Setup numbers), so the dose structure is legible from the figure alone.
+    axb.text(
+        2.5,
+        1.045,
+        "budget 256  (3.8% of mean trace)",
+        ha="center",
+        fontsize=7.2,
+        color=INK2,
+        clip_on=False,
+    )
+    axb.text(
+        6.55,
+        1.045,
+        "budget 2048  (56.6%)",
+        ha="center",
+        fontsize=7.2,
+        color=INK2,
+        clip_on=False,
+    )
     axb.set_xticks(xs)
     axb.set_xticklabels(labels, fontsize=7.6)
     axb.set_ylabel("Free-running accuracy (MATH-500)")
@@ -386,6 +406,8 @@ def fig2_bracket(out_dir: Path, m4_summary: dict | None):
         ys = [3, 2, 1, 0]
         ax.grid(axis="x", color=GRIDC, lw=0.6)
         ax.set_axisbelow(True)
+        # Faint reference vertical at Acc_FC so every rung reads against it.
+        ax.axvline(FC, color=GREY, lw=0.7, ls=(0, (1, 2)), alpha=0.75, zorder=0)
         for y, v in zip(ys, vals, strict=True):
             color = GREY if y == 3 else MC[m]
             ax.plot([0, v], [y, y], color=color, lw=2.0, solid_capstyle="round")
@@ -538,6 +560,18 @@ def fig4_tvprofile(out_dir: Path, profiles_dir: Path | None):
             xytext=(60, top * 0.72),
             fontsize=7,
             color=INK2,
+            arrowprops=dict(arrowstyle="->", color=INK2, lw=0.8),
+        )
+        # The instrument-validity reading, in the figure itself: the pre-onset
+        # segment is EXACTLY zero (the replay harness adds no divergence).
+        pre_x = min(xs)
+        ax.annotate(
+            "TV $= 0.0000$ before\nfirst eviction (self-control)",
+            xy=(pre_x * 0.5, 0.0),
+            xytext=(pre_x * 0.96, top * 0.30),
+            fontsize=7,
+            color=INK2,
+            ha="left",
             arrowprops=dict(arrowstyle="->", color=INK2, lw=0.8),
         )
         ax.set_xlabel("Decoding step relative to first eviction")

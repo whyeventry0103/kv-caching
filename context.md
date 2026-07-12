@@ -16,6 +16,21 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
 
 ## 0. TL;DR — where we are right now
 
+  **★ FIGURE UPGRADE PASS + FIGURES_PLAYBOOK handoff (2026-07-13, Fable final):**
+  (1) Fig 1: budget-group headers now carry the realized ratios "(3.8% of mean
+  trace)"/"(56.6%)" — dose structure legible from the figure alone; (2) Fig 2:
+  faint dotted FC vertical (0.8825) in every panel so all rungs read against the
+  reference; (3) Fig 4: new annotation "TV = 0.0000 before first eviction
+  (self-control)" pointing at the flat pre-onset segment (instrument validity now
+  in the figure, not just the caption). Fig 1+4 regenerated DATA-mode on remote,
+  Fig 2 local DATA-mode; all viewed. (4) Paper formatting: caption package
+  (small font, bold labels, 6pt skip) — builds clean. (5) NEW
+  **docs/FIGURES_PLAYBOOK.md**: the complete figure method for the Opus session
+  (source of truth, .3f display convention, palette+validator, regen commands,
+  per-figure anatomy, 9-item failure catalog, settled judgment calls);
+  pointer added to RESULTS_PLAYBOOK general rules. Known matplotlib gotcha
+  recorded: "---" renders literally (not an em dash).
+
   **★ FIGURES REFRESHED FOR 4-POLICY GRID + add-256-rkv (2026-07-12 evening):**
   user-requested figure update (supersedes Branch C figures-unchanged default).
   NEW: R-KV ADD run (report_add over existing grid rows, precedent = h2o read):
