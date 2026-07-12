@@ -95,18 +95,42 @@ C["H2O-style"] = dict(
     rev_ci=(-0.566, -0.420),
     trunc=0.105,
 )
-# Budget-2048 free-run (grid-diss2048-tok, 800/800, read 2026-07-04).
-C2048 = {"Random": 0.850, "StreamingLLM": 0.8075}
+C["R-KV"] = dict(
+    # Certified port (parity Jaccard 1.0 + generation smoke; Amendment I). Branch C
+    # read 2026-07-12: best free-runner, same readout-invisible residual structure.
+    free=0.52,
+    readout=0.798,
+    readout_ci=(0.710, 0.850),
+    reverse=0.662,
+    residual=-0.278,
+    bracket=(-0.278, -0.221),
+    fwd_ci=(-0.335, -0.195),
+    rev_ci=(-0.355, -0.203),
+    trunc=0.135,
+    # ADD instrument values (report_add over grid-diss256-rkv, read 2026-07-12;
+    # results/diag/add-256-rkv-summary.json). Lowest ADD of the four policies,
+    # coherent with its highest free-run accuracy.
+    add=0.459,
+    within=0.450,
+    term=0.149,
+    flip=-0.364,
+)
+# Budget-2048 free-run (grid-diss2048-tok 800/800 read 2026-07-04; h2o 400/400
+# read 2026-07-10; 0.8075/0.8225 stored at artifact precision -> .3f displays).
+C2048 = {"Random": 0.850, "StreamingLLM": 0.8075, "H2O-style": 0.8225}
 PHEN = dict(gap=0.185, gap_ci=(0.130, 0.242), win=44, tie=50, loss=6, n_tot=100)
 TVWIN = dict(before=0.0000, first50=0.0018, later=0.0884, onset=65)
 TWOFC = dict(mean=0.068, median=0.000, p=0.976, frac_sig=0.0, n=250)
 
 # Palette (validated, see module docstring). GREEN reserved for the control line.
 BLUE, ORANGE, PURPLE, GREY = "#0072B2", "#D55E00", "#CC79A7", "#8a8a8a"
-BLUE_LT, ORANGE_LT = "#9CC7E4", "#F2B27F"  # 2048-budget tints (dose)
+SKY = "#56B4E9"  # R-KV (4th hue; validated 2026-07-12: worst adjacent-pair CVD
+# dE 20.7 vs PURPLE, 15.7 vs BLUE_LT -- both above the 12 floor; contrast WARN
+# relieved by direct value labels on every mark, per the dataviz palette rules)
+BLUE_LT, ORANGE_LT, PURPLE_LT = "#9CC7E4", "#F2B27F", "#E5BCD3"  # 2048 dose tints
 GREEN = "#009E73"
 INK, INK2, GRIDC, SPINE = "#1a1a1a", "#555555", "#dddddd", "#9a9a9a"
-MC = {"Random": BLUE, "StreamingLLM": ORANGE, "H2O-style": PURPLE}
+MC = {"Random": BLUE, "StreamingLLM": ORANGE, "H2O-style": PURPLE, "R-KV": SKY}
 
 plt.rcParams.update(
     {
@@ -276,31 +300,41 @@ def fig1_phenomenon(out_dir: Path, runs_root: Path | None):
     per_problem = _load_paired_diffs(runs_root) if runs_root else None
     print(f"Figure 1 [{'DATA (paired-diff panel)' if per_problem else 'SUMMARY'}]")
     fig, (axb, axh) = plt.subplots(
-        1, 2, figsize=(6.9, 2.9), gridspec_kw={"width_ratios": [1.3, 1]}
+        1, 2, figsize=(7.6, 2.9), gridspec_kw={"width_ratios": [1.65, 1]}
     )
     labels = [
         "Full\ncache",
         "Random\n256",
         "SLM\n256",
         "H2O$^{\\dagger}$\n256",
+        "R-KV$^{\\ddagger}$\n256",
         "Random\n2048",
         "SLM\n2048",
+        "H2O$^{\\dagger}$\n2048",
     ]
     vals = [
         FC,
         C["Random"]["free"],
         C["StreamingLLM"]["free"],
         C["H2O-style"]["free"],
+        C["R-KV"]["free"],
         C2048["Random"],
         C2048["StreamingLLM"],
+        C2048["H2O-style"],
     ]
-    colors = [GREY, BLUE, ORANGE, PURPLE, BLUE_LT, ORANGE_LT]
-    axb.bar(labels, vals, color=colors, width=0.62, edgecolor="white", linewidth=0.8)
-    for x, v in enumerate(vals):
-        axb.text(x, v + 0.018, f"{v:.3f}", ha="center", fontsize=8, color=INK)
+    colors = [GREY, BLUE, ORANGE, PURPLE, SKY, BLUE_LT, ORANGE_LT, PURPLE_LT]
+    # Gap between the budget groups: secondary encoding on top of the tint scheme
+    # (and it visually separates SKY from BLUE_LT, the closest validated pair).
+    xs = [0, 1, 2, 3, 4, 5.55, 6.55, 7.55]
+    axb.bar(xs, vals, color=colors, width=0.62, edgecolor="white", linewidth=0.8)
+    for x, v in zip(xs, vals, strict=True):
+        axb.text(x, v + 0.018, f"{v:.3f}", ha="center", fontsize=7.6, color=INK)
     axb.axhline(FC, color=GREY, lw=0.8, ls=(0, (2, 3)), zorder=0)
+    axb.set_xticks(xs)
+    axb.set_xticklabels(labels, fontsize=7.6)
     axb.set_ylabel("Free-running accuracy (MATH-500)")
     axb.set_ylim(0, 1.0)
+    axb.set_xlim(-0.6, 8.15)
     _ygrid(axb)
     gaptxt = (
         f"Random $-$ SLM @256: $+{PHEN['gap']:.3f}$\n"
@@ -342,9 +376,11 @@ def fig1_phenomenon(out_dir: Path, runs_root: Path | None):
 def fig2_bracket(out_dir: Path, m4_summary: dict | None):
     cells = _cells_from_summary(m4_summary) if m4_summary else C
     print(f"Figure 2 [{'DATA' if m4_summary else 'SUMMARY'}]")
-    fig, axes = plt.subplots(1, 3, figsize=(9.9, 3.1), sharey=True)
+    fig, axes = plt.subplots(2, 2, figsize=(9.9, 6.4), sharey=True)
+    axes = axes.ravel()
     rung_labels = ["Full cache", "Forward\nreadout", "Reverse\nreadout", "Free-run"]
-    for ax, m in zip(axes, ["Random", "StreamingLLM", "H2O-style"], strict=False):
+    methods = ["Random", "R-KV", "StreamingLLM", "H2O-style"]
+    for ax, m in zip(axes, methods, strict=False):
         d = cells[m]
         vals = [FC, d["readout"], d["reverse"], d["free"]]
         ys = [3, 2, 1, 0]
@@ -397,16 +433,16 @@ def fig2_bracket(out_dir: Path, m4_summary: dict | None):
         ax.set_xlabel("Accuracy")
         ax.spines["left"].set_visible(False)
         ax.tick_params(axis="y", length=0)
-    fig.tight_layout(w_pad=2.0)
+    fig.tight_layout(w_pad=2.0, h_pad=2.4)
     _save(fig, out_dir, "fig2_bracket")
 
 
 # ---------------------------------------------------------------- Figure 3
 def fig3_add(out_dir: Path):
     print("Figure 3 [SUMMARY]")
-    fig, ax = plt.subplots(figsize=(4.9, 3.2))
-    methods = ["StreamingLLM", "H2O-style", "Random"]
-    xs = [0, 1, 2]
+    fig, ax = plt.subplots(figsize=(6.1, 3.2))
+    methods = ["StreamingLLM", "H2O-style", "Random", "R-KV"]
+    xs = [0, 1, 2, 3]
     w = 0.33
     within = [C[m]["within"] for m in methods]
     term = [C[m]["term"] for m in methods]
@@ -457,7 +493,7 @@ def fig3_add(out_dir: Path):
         )
     ax.axhline(TWOFC["mean"], color=GREEN, ls=(0, (4, 3)), lw=1.1)
     ax.text(
-        2.44,
+        3.44,
         TWOFC["mean"] + 0.012,
         f"two-FC noise floor {TWOFC['mean']:.3f}",
         ha="right",
@@ -468,7 +504,7 @@ def fig3_add(out_dir: Path):
     ax.set_xticklabels(methods)
     ax.set_ylabel("Total variation")
     ax.set_ylim(0, 1.0)
-    ax.set_xlim(-0.55, 2.55)
+    ax.set_xlim(-0.55, 3.55)
     _ygrid(ax)
     ax.legend(loc="upper left", bbox_to_anchor=(0.0, 1.14), ncol=2, frameon=False)
     _save(fig, out_dir, "fig3_add")
@@ -609,6 +645,7 @@ def _cells_from_summary(summ: dict):
                 "random": "Random",
                 "streamingllm": "StreamingLLM",
                 "h2o": "H2O-style",
+                "rkv": "R-KV",
             }.get(c["press"])
             if name:
                 out[name] = dict(

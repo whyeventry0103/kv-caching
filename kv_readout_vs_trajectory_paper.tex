@@ -195,7 +195,7 @@ From $\accfc = 0.882$, free-running accuracy at budget 256 falls to $\mathbf{0.2
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.9\linewidth]{figures/fig1_phenomenon.pdf}
-\caption{Left: free-running accuracy by method and budget --- the collapse is a budget effect (full cache $0.882$; at 256, Random $0.422$ / StreamingLLM $0.237$ / H2O-style$^{\dagger}$ $0.247$; at 2048, $0.850$ / $0.807$, the near-lossless pole; light tints = budget 2048; $\dagger$ per \cref{tab:decomp}). Right: per-problem paired differences at budget 256 --- Random $-$ StreamingLLM is $+0.185$ on average (95\% CI $[0.130, 0.242]$) and non-negative on 94/100 problems (44 strict wins, 50 ties, 6 losses).}
+\caption{Left: free-running accuracy by method and budget --- the collapse is a budget effect (full cache $0.882$; at 256, Random $0.422$ / StreamingLLM $0.237$ / H2O-style$^{\dagger}$ $0.247$ / R-KV$^{\ddagger}$ $0.520$; at 2048, $0.850$ / $0.807$ / $0.823$, the near-lossless pole; light tints $=$ budget 2048; $\dagger$, $\ddagger$ per \cref{tab:decomp}). Even the best policy at 256, the reasoning-specific R-KV, loses $0.36$ of the reference accuracy. Right: per-problem paired differences at budget 256 --- Random $-$ StreamingLLM is $+0.185$ on average (95\% CI $[0.130, 0.242]$) and non-negative on 94/100 problems (44 strict wins, 50 ties, 6 losses).}
 \label{fig:phenomenon}
 \end{figure}
 
@@ -251,7 +251,7 @@ Third, undefined-boundary reverse rows could be \emph{informative} missingness: 
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.9\linewidth]{figures/fig2_bracket.pdf}
-\caption{Accuracy ladders from the full-cache reference ($0.882$) down through forward readout, reverse readout, and free-run, per policy. The arrow marks the forward trajectory residual (the free-run--to--readout gap); whiskers on the forward-readout rung are its problem-clustered 95\% accuracy CI. The residual brackets (Random $[-0.343, -0.246]$, StreamingLLM $[-0.466, -0.347]$, H2O-style $[-0.463, -0.349]$) and the 95\% CIs on all six endpoints (beneath each panel) exclude zero; note the visual twinning of the two concentrated policies against Random.}
+\caption{Accuracy ladders from the full-cache reference ($0.882$) down through forward readout, reverse readout, and free-run, per policy --- top row the \emph{recoverable} pair (Random, R-KV), bottom row the \emph{concentrated} pair (StreamingLLM, H2O-style), the reverse-side split of \cref{sec:reverse}. The arrow marks the forward trajectory residual (the free-run--to--readout gap); whiskers on the forward-readout rung are its problem-clustered 95\% accuracy CI. The residual brackets (Random $[-0.343, -0.246]$, R-KV $[-0.278, -0.221]$, StreamingLLM $[-0.466, -0.347]$, H2O-style $[-0.463, -0.349]$) and the 95\% CIs on all eight endpoints (beneath each panel) exclude zero: even the best free-runner leaves a large, readout-invisible residual, and the concentrated policies' traces resist even clean full-cache readout.}
 \label{fig:bracket}
 \end{figure}
 
@@ -289,7 +289,7 @@ Accuracy alone understates what compression does to the answer distribution. \cr
 
 \begin{table}[t]
 \centering
-\caption{Answer-distribution distortion at budget 256. Within-answered TV is over renormalized answered-only distributions (a channel diagnostic, not an additive part of ADD). Signed flip-mass is net gained-minus-lost correct-answer mass; both methods are overwhelmingly on the losing side. ADD values far exceed the $\approx 0.07$ negative-control noise floor (\cref{sec:control}).}
+\caption{Answer-distribution distortion at budget 256. Within-answered TV is over renormalized answered-only distributions (a channel diagnostic, not an additive part of ADD). Signed flip-mass is net gained-minus-lost correct-answer mass; all four policies are overwhelmingly on the losing side. ADD values far exceed the $\approx 0.07$ negative-control noise floor (\cref{sec:control}).}
 \label{tab:add}
 \footnotesize
 \begin{tabular}{lcccc}
@@ -299,16 +299,17 @@ Method & Mean ADD & Within-answered TV & Termination shift & Signed flip-mass (n
 StreamingLLM & 0.751 & 0.749 & $+0.081$ & $-0.646$ \\
 H2O-style    & 0.715 & 0.713 & $+0.101$ & $-0.636$ \\
 Random       & 0.559 & 0.504 & $+0.224$ & $-0.461$ \\
+R-KV         & 0.459 & 0.450 & $+0.149$ & $-0.364$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The decomposition separates two failure styles that headline accuracy conflates, and the split again follows the uniform-vs-concentrated line. Both concentrated policies are almost entirely \emph{within-answered} (StreamingLLM $0.749$ of ADD $0.751$; H2O-style $0.713$ of $0.715$, with zero gained flip-mass): they keep producing confident answers, but different, wrong ones --- silent flips. Random carries a much larger \emph{termination-mass} shift ($+0.224$): it rambles and fails to terminate, consistent with its higher truncation rate (truncations remain in all denominators, scored incorrect). So even where the two methods' accuracies were similar, they would damage the answer distribution through different channels --- a distinction invisible to pass@1. The signed flip-mass ($-0.646$ and $-0.461$ net toward lost correct answers) is what licenses reading this divergence as loss rather than mere change: on these cells, deviation from the reference is not denoising. HOTT independently observes that eviction makes reasoning models ``more talkative, generating longer sequences''~\cite{hott2025} --- external corroboration of the termination-mass/truncation channel we measure most strongly for Random. The instrument also scales coherently with budget: at 2048, mean ADD falls to $0.085$ (Random; approaching the $0.068$ two-FC floor) and $0.146$ (StreamingLLM; ${\approx}2\times$ the floor, net flip $-0.076$), so distribution distortion tracks the dose --- we observe only modest answer churn beyond the accuracy change at the near-lossless pole, and we report this against our pre-registered silent-flip hypothesis honestly: the large-ADD-at-flat-accuracy regime did not materialize at 2048.
+The decomposition separates two failure styles that headline accuracy conflates, and the split again follows the recoverable-vs-concentrated line of \cref{sec:reverse}. Both concentrated policies are almost entirely \emph{within-answered} (StreamingLLM $0.749$ of ADD $0.751$; H2O-style $0.713$ of $0.715$, with zero gained flip-mass): they keep producing confident answers, but different, wrong ones --- silent flips. Random carries a much larger \emph{termination-mass} shift ($+0.224$): it rambles and fails to terminate, consistent with its higher truncation rate (truncations remain in all denominators, scored incorrect). The certified R-KV port completes the picture coherently: the lowest ADD of the four ($0.459$, still ${\sim}7\times$ the noise floor), with the second-largest termination shift ($+0.149$; truncation $0.135$) and flip-mass again overwhelmingly toward lost correct answers ($-0.364$; gained $0.004$) --- less distribution damage, in step with its higher accuracy, and no denoising. So even where the two methods' accuracies were similar, they would damage the answer distribution through different channels --- a distinction invisible to pass@1. The signed flip-mass ($-0.646$ and $-0.461$ net toward lost correct answers) is what licenses reading this divergence as loss rather than mere change: on these cells, deviation from the reference is not denoising. HOTT independently observes that eviction makes reasoning models ``more talkative, generating longer sequences''~\cite{hott2025} --- external corroboration of the termination-mass/truncation channel we measure most strongly for Random. The instrument also scales coherently with budget: at 2048, mean ADD falls to $0.085$ (Random; approaching the $0.068$ two-FC floor) and $0.146$ (StreamingLLM; ${\approx}2\times$ the floor, net flip $-0.076$), so distribution distortion tracks the dose --- we observe only modest answer churn beyond the accuracy change at the near-lossless pole, and we report this against our pre-registered silent-flip hypothesis honestly: the large-ADD-at-flat-accuracy regime did not materialize at 2048.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.72\linewidth]{figures/fig3_add.pdf}
-\caption{Two failure styles that headline accuracy conflates, split along the uniform-vs-concentrated line: both concentrated policies are nearly all within-answered (StreamingLLM $0.749$ of ADD $0.751$; H2O-style $0.713$ of $0.715$) --- silent answer flips --- while Random carries a $2$--$3\times$ larger termination-mass shift ($+0.224$: it rambles and fails to terminate). Signed flip-mass annotated; dashed line marks the two-FC noise floor ($0.068$).}
+\caption{Two failure styles that headline accuracy conflates, split along the recoverable-vs-concentrated line: both concentrated policies are nearly all within-answered (StreamingLLM $0.749$ of ADD $0.751$; H2O-style $0.713$ of $0.715$) --- silent answer flips --- while Random and R-KV carry larger termination-mass shifts ($+0.224$ and $+0.149$). R-KV's ADD is the lowest of the four ($0.459$), coherent with its highest free-running accuracy; flip-mass is overwhelmingly toward lost correct answers for all four. Dashed line marks the two-FC noise floor ($0.068$).}
 \label{fig:add}
 \end{figure}
 

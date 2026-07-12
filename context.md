@@ -16,6 +16,18 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
 
 ## 0. TL;DR — where we are right now
 
+  **★ FIGURES REFRESHED FOR 4-POLICY GRID + add-256-rkv (2026-07-12 evening):**
+  user-requested figure update (supersedes Branch C figures-unchanged default).
+  NEW: R-KV ADD run (report_add over existing grid rows, precedent = h2o read):
+  ADD 0.459 (lowest of 4) / within 0.450 / term +0.149 / flip −0.364 → Table 3
+  4th row + §4.5 sentence; split renamed recoverable-vs-concentrated in §4.5 +
+  Fig 3 caption. Fig 1: 8 bars incl. R-KV 0.520 (sky #56B4E9, validated ΔE
+  15.7–20.7) + H2O-2048 0.823 (tint #E5BCD3), budget-group gap, remote DATA
+  histogram. Fig 2: 2×2 — top row recoverable (Random, R-KV), bottom concentrated
+  (SLM, H2O), all 8 endpoints. Fig 3: 4 groups. All eyeballed; PDF clean; gates
+  green (135). Archived: results/diag/add-256-rkv-summary.json. Remote harvest
+  dir renamed add-256-rkv (was add-256-rkv.json — report_add --out is a DIR).
+
   **★ m4-rkv-256 read — BRANCH C (2026-07-12):** R-KV@256 free 0.520 [0.435,0.610]
   (BEST of 4 policies), readout 0.798, residual −0.278 [−0.335,−0.195], reverse
   0.662 (229/346; 54 undef), bracket [−0.278,−0.221], revCI [−0.355,−0.203],

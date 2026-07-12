@@ -340,6 +340,25 @@ Setup fourth press; §5 gate tense (both gates passed); threats generality
 opening clause + extensions list. Fig 1/Fig 2 UNCHANGED (Branch C rule).
 Archived: results/diag/m4-rkv-256-summary.json
 
+### 4n. add-256-rkv + figure refresh for the 4-policy grid (read 2026-07-12)
+report_add over grid-diss256-rkv (400 rows) vs the FC bank: **R-KV ADD 0.45875
+(displays 0.459) — lowest of the four; within-answered 0.4499 (0.450);
+termination shift +0.14875 (+0.149); flip gained 0.00375 (0.004) / net −0.36375
+(−0.364).** Ordering SLM 0.751 > H2O 0.715 > Random 0.559 > R-KV 0.459 — less
+distribution damage in step with higher accuracy; no denoising anywhere.
+In the paper: Table 3 fourth row; §4.5 R-KV sentence; §4.5 + Fig-3 caption split
+renamed "recoverable-vs-concentrated" (consistency with §4.3).
+FIGURES refreshed for the 4-policy grid (user-requested; supersedes the Branch C
+figures-unchanged default): Fig 1 = 8 bars (R-KV sky #56B4E9 + H2O-2048 tint
+#E5BCD3; budget-group gap; palette validated: worst adjacent CVD ΔE 15.7–20.7,
+≥12 floor; contrast WARN relieved by direct labels), DATA-mode histogram regen
+on remote; Fig 2 = 2×2 ladders, top row recoverable (Random, R-KV), bottom row
+concentrated (SLM, H2O) — layout encodes the reverse split; DATA-mode from the
+three archived 256 summaries; Fig 3 = 4 groups. All three eyeballed. NOTE for
+successors: MC/_cells_from_summary now know "rkv"→"R-KV"; C["R-KV"] carries the
+full constant set.
+Archived: results/diag/add-256-rkv-summary.json
+
 ## 7. Status
 - **DONE (writable core):** phenomenon, forward decomposition, reverse-replay bracket
   (+ endpoint CIs, + imputation bounds), Figure 4 TV mechanism (estimator defined), ADD,
