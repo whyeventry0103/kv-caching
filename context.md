@@ -16,6 +16,19 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
 
 ## 0. TL;DR — where we are right now
 
+  **★ MORNING CHECK 2026-07-14 — no unit ready; Llama bank GATE PASSED:** runs
+  finished overnight: grid-diss256-llama 400/400 + reverse-readout-diss256-llama
+  400/400; readout at 273/400 (s47=73, s89=0) → m4-llama-256 READY tomorrow.
+  fc-aime24 172/240. NOTHING read into the paper (harvest gating respected; no
+  partial cells). Instrument gate run instead: fc-llama50 bank sanity — 200/200
+  rows, accuracy 0.805 (161/200), trunc 0.025, mean 4,095 tok. Expected shape ✓
+  (published Llama-8B MATH-500 = 0.891; our harness sits ~0.08 under published
+  for Qwen too — same cap/sampling gap, not an instrument bug). Tonight per
+  report: readout-llama s[47,89] + fc-aime24 s[197,263,347]. No new failures
+  (FAILCHECK shows only the fixed 07-11 entries). Tomorrow: read m4-llama-256
+  via playbook (Branch A replicate / Branch B non-replicate, threats-generality
+  anchor "one model (DeepSeek-R1-Distill-Qwen-7B)" verified intact).
+
   **★ FIGURE UPGRADE PASS + FIGURES_PLAYBOOK handoff (2026-07-13, Fable final):**
   (1) Fig 1: budget-group headers now carry the realized ratios "(3.8% of mean
   trace)"/"(56.6%)" — dose structure legible from the figure alone; (2) Fig 2:
