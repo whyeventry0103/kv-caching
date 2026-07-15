@@ -359,6 +359,43 @@ successors: MC/_cells_from_summary now know "rkv"→"R-KV"; C["R-KV"] carries th
 full constant set.
 Archived: results/diag/add-256-rkv-summary.json
 
+### 4o. m4-llama-256 — MIXED, fits no branch, reported plainly (read 2026-07-15)
+All four Llama runs complete; own bank FC 0.805 (161/200, gate-passed 07-14).
+**SLM@256-Llama REPLICATES the central result: free 0.2350 [0.15, 0.32] (Qwen:
+0.2375!), readout 0.5077 (displays 0.508), residual −0.2727 (−0.273) CI [−0.345,
+−0.175], bracket [−0.426, −0.273], revCI [−0.523, −0.327] — zero excluded
+throughout; n_rev 198; trunc 0.010.** **Random@256-Llama DEGENERATES: free 0.0000
+(0/400), trunc 0.805, readout 0.0205 (0.021), residual −0.021 with bracket
+[−0.021, +0.028] SPANNING ZERO; only 6/400 defined reverse rows; flip lost
+0.805.** INSTRUMENT CHECK before interpretation (out-of-shape rule): eyeballed
+Random-Llama traces = fluency collapse into '.\\n\\n' filler loops (tens of
+thousands of chars), NOT rambling reasoning and NOT garbage-token breakage; SLM
+cell on the identical harness/bank is sane → real behavioral finding. Mechanism
+hypothesis (labeled as such in the paper, cite xiao2023streamingllm): uniform
+eviction removes attention-sink tokens the Llama family depends on; the
+sinks-preserving policy is protected. CONSEQUENCES, reported plainly (fits
+neither playbook branch — per the no-forcing rule): (a) central claim (large
+readout-invisible residual) replicates cross-architecture on the sharpest case;
+(b) random-beats-recency is ARCHITECTURE-DEPENDENT — reverses on Llama (0.000 vs
+0.235); (c) a near-zero residual at floor accuracy is uninformative (both
+channels floored — no accuracy left to attribute); never cite Llama-Random as
+"small residual". In the paper: new threats Cross-architecture-check paragraph;
+scope sentence → "one primary model (subset-scale Llama-base check below)";
+§4-preamble/conclusion status flips. Abstract/§4 untouched (subset scale stays
+in threats).
+Archived: results/diag/m4-llama-256-summary.json
+
+### 4p. fc-aime24-acc — AIME-24 reference bank (read 2026-07-15)
+240/240 rows (30 problems × 8 seeds): **accuracy 0.3708 (displays 0.371), trunc
+0.2208 (0.221), mean 10,415 tokens; ratio 2048/mean = 0.197.** Slightly below
+the playbook's soft 0.4–0.7 sanity band; mechanism visible in the truncation
+number: non-truncated subset ≈ 0.371/0.779 ≈ 0.476, and published 0.555 is at
+32K decode vs our 16K cap over much longer AIME traces. Same-direction harness
+gap as MATH-500 banks (Qwen 0.8825 vs 0.928; Llama 0.805 vs 0.891) → accepted
+as reference, NOT a STOP. FC_AIME slot for the m4-aime-2048 read = 0.371; note
+the 0.221 in-denominator truncation when interpreting AIME free-run cells.
+Archived: results/diag/fc-aime24-bank.json
+
 ## 7. Status
 - **DONE (writable core):** phenomenon, forward decomposition, reverse-replay bracket
   (+ endpoint CIs, + imputation bounds), Figure 4 TV mechanism (estimator defined), ADD,
@@ -368,6 +405,7 @@ Archived: results/diag/add-256-rkv-summary.json
   H2O-style is now COMPLETE on every instrument (forward, reverse, ADD, dose, TV).
 - **DONE (added 2026-07-12):** R-KV full decomposition (§4m, Branch C) — the paper
   now has FOUR policies with brackets excluding zero on all eight endpoints.
-- **IN PROGRESS (generality/breadth):** Llama quartet (fc-llama50 bank 200/200
-  DONE, grid 16/400 as of 07-12); AIME trio (fc-aime24 117/240);
-  fc-readout-control (queued last). Drop-dead 2026-08-01.
+- **DONE (added 2026-07-15):** Llama cross-architecture check (§4o — SLM
+  replicates, Random degenerates, both reported plainly); AIME-24 FC bank (§4p).
+- **IN PROGRESS (generality/breadth):** AIME trio (grid-aime24-2048 106/360,
+  readout 0/360); fc-readout-control (queued last). Drop-dead 2026-08-01.

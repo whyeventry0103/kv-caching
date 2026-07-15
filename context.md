@@ -16,6 +16,22 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
 
 ## 0. TL;DR — where we are right now
 
+  **★ m4-llama-256 + fc-aime24-acc read (2026-07-15) — MIXED Llama result,
+  reported plainly (fits no branch):** SLM-Llama REPLICATES: free 0.235 (Qwen
+  0.2375!), readout 0.508, residual −0.273 [−0.345,−0.175], bracket
+  [−0.426,−0.273], revCI [−0.523,−0.327], zero excluded. Random-Llama
+  DEGENERATES: free 0.000, trunc 0.805, readout 0.021, bracket [−0.021,+0.028]
+  spans zero, 6/400 defined reverse. Instrument check DONE before interpreting:
+  traces are '.\\n\\n' filler loops (fluency collapse, sink-eviction hypothesis,
+  cite xiao2023streamingllm), SLM cell sane on identical harness → real finding.
+  Random-beats-recency is ARCHITECTURE-DEPENDENT (reverses on Llama). Paper:
+  threats Cross-architecture-check paragraph + scope "one primary model";
+  abstract/§4 untouched. NEVER cite Llama-Random as small-residual evidence
+  (both channels floored = uninformative). AIME bank: 0.371 acc / 0.221 trunc /
+  10,415 mean tok (ratio 2048 = 19.7%); below soft band but cap-explained
+  (§4p); FC_AIME slot = 0.371. Remaining: m4-aime-2048 (grid 106/360, ~2-3
+  nights), fc-readout-control. PAPER_FINDINGS §4o+§4p; archives in diag/.
+
   **★ MORNING CHECK 2026-07-14 — no unit ready; Llama bank GATE PASSED:** runs
   finished overnight: grid-diss256-llama 400/400 + reverse-readout-diss256-llama
   400/400; readout at 273/400 (s47=73, s89=0) → m4-llama-256 READY tomorrow.
