@@ -16,16 +16,12 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
 
 ## 0. TL;DR — where we are right now
 
-  **⚠ SERVER SSH REFUSING CONNECTIONS (2026-07-15 evening):** "Connection
-  refused" (not the usual timeout) — sshd down / box possibly rebooted or in
-  maintenance. Last CLEAN sync = after commit dc1ed8d (Llama read, morning
-  07-15), so the remote has everything tonight's automation needs; only
-  complete_setup.md (c5727d7, doc-only) is unsynced. RISK: if the first failed
-  attempt left a partial file, watcher preflight may object; a background loop
-  is armed (probe sshd → make sync-apply → verify autorun --dry-run, up to
-  ~5h). IF RESUMING AND THE LOOP FAILED: verify sshd is back, run make
-  sync-apply, and check tonight's plan before 01:45 Dubai. If the box was
-  rebooted, also verify cron survived (crontab -l) and tmux/env intact.
+  **✓ RESOLVED — server outage 2026-07-15 evening (~30 min, likely reboot):**
+  went "connection refused" → timeout → back at 21:59 server time. Self-heal
+  loop completed: make sync-apply clean (fresh .sync-state incl.
+  complete_setup.md), crontab verified intact (3 nightly entries), autorun
+  dry-run normal (correctly waiting for the 01:45 window). No action needed;
+  tonight runs as planned (grid-aime24-2048 continues from 106/360).
 
   **★ m4-llama-256 + fc-aime24-acc read (2026-07-15) — MIXED Llama result,
   reported plainly (fits no branch):** SLM-Llama REPLICATES: free 0.235 (Qwen
