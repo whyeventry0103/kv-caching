@@ -176,6 +176,31 @@ never per-problem claims; problem-clustered CI only).
 **Either branch:** AIME numbers stay out of the abstract (scope stays MATH-500-led)
 unless Branch B survives CIs, in which case add ONE clause at most.
 
+## UNITS m4-q15b-256 and m4-q14b-256 (scale axis; Amendment J, added 2026-07-17)
+
+Two units, same shape as the llama unit but SLM + R-KV presses, own banks
+(fc-q15b / fc-q14b; digest prints fc_accuracy). **Bank gates first** (soft bands,
+Amendment J): 1.5B FC in [0.60, 0.85] (published 0.839), 14B FC in [0.82, 0.96]
+(published 0.939). Outside band → STOP, investigate before reading cells.
+
+Per cell, pre-committed branches (Amendment J wording is binding):
+**REPLICATES** (fwd residual negative, CI and bracket exclude zero): add the
+cell's numbers to the threats scale paragraph (create it on first read):
+"On {MODEL} ({FC} reference), {PRESS} free-runs at {FREE} against readout {RO}:
+residual {RES} (CI {CI}), bracket {BR} excluding zero." After BOTH models read,
+if ≥3 of 4 cells replicate: upgrade threats scope sentence to "one model family
+across three scales (1.5B/7B/14B) plus a Llama-base check". SLM-14B/1.5B also
+extend the sharpest-case line. R-KV cells: keep certified-port labeling; compare
+its free-run rank vs SLM (does best-free-runner persist across scale?).
+**DEGENERATE** (free floors, trunc > 0.5): report plainly like Llama-Random;
+decomposition uninformative; check traces (filler-loop vs garbage) before
+writing anything.
+**NON-REPLICATION** (anything else): verbatim in threats, no compensation.
+R-KV self-check abort on new dims = STOP (instrument), not a result.
+Figures: NO figure changes for these units (subset scale, threats-only) unless
+≥3/4 replicate AND the scale story earns a small multiples panel — decide then,
+per docs/FIGURES_PLAYBOOK.md; never improvise into Fig 1/2.
+
 ## UNIT fc-readout-control (readout-fc-control completes; queued LAST, 2026-07-07)
 
 Full-cache readout of the FC bank itself = the pure answer-resampling effect of the

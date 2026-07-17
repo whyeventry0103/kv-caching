@@ -109,6 +109,38 @@ UNITS = [
         },
     ),
     Unit(
+        "m4-q15b-256",
+        {
+            "fc-q15b": ("grid", 200),
+            "grid-diss256-q15b": ("grid", 400),
+            "readout-diss256-q15b": ("readout", 400),
+            "reverse-readout-diss256-q15b": ("readout", 400),
+        },
+        "m4_reverse",
+        args={
+            "fullcache": "fc-q15b",
+            "compression": "grid-diss256-q15b",
+            "readout": "readout-diss256-q15b",
+            "reverse": "reverse-readout-diss256-q15b",
+        },
+    ),
+    Unit(
+        "m4-q14b-256",
+        {
+            "fc-q14b": ("grid", 200),
+            "grid-diss256-q14b": ("grid", 400),
+            "readout-diss256-q14b": ("readout", 400),
+            "reverse-readout-diss256-q14b": ("readout", 400),
+        },
+        "m4_reverse",
+        args={
+            "fullcache": "fc-q14b",
+            "compression": "grid-diss256-q14b",
+            "readout": "readout-diss256-q14b",
+            "reverse": "reverse-readout-diss256-q14b",
+        },
+    ),
+    Unit(
         "fc-readout-control",
         {"readout-fc-control": ("readout", 400)},
         "readout_acc",

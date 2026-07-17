@@ -1,0 +1,20 @@
+name: grid_math500_diss256_q14b
+stage: grid
+# Scale-axis free-run cells: StreamingLLM (the sharpest case) + R-KV (the strongest
+# method) at budget 256 on r1_distill_qwen_14b (50 x 4 x 2 presses = 400). Per the AC plan:
+# does the readout-invisible residual persist across model scale? R-KV's per-event
+# analytic-RoPE self-check validates the port live on the new dims.
+models: [r1_distill_qwen_14b]
+benchmarks: [math500]
+subset:
+  math500: 50
+presses: [streamingllm, rkv]
+budgets: [256]
+seeds: [11, 23, 47, 89]
+max_new_tokens:
+  math500: 16384
+compression_interval: 64
+estimated_generation_count: 400
+scale_authorized: true
+remote_only: true
+store_token_ids: true

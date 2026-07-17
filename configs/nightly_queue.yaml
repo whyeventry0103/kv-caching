@@ -262,3 +262,83 @@ jobs:
     min_free_gb: 28
     progress_kind: readout
     requires: null           # references only the FC bank, which exists
+
+  # ========== Scale axis (AC plan 2026-07-17; Amendment J): 1.5B then 14B =========
+  # StreamingLLM (sharpest case) + R-KV (strongest method) at 50x4, own FC banks.
+  # 1.5B first: cheap, fast, entire chain ~1 night. 14B after: ~40GB weights+cache,
+  # conservative min_free_gb; expect ~3-4 nights for its chain.
+  - name: fc-q15b
+    command: bank
+    config: configs/experiments/bank_math500_q15b.yaml
+    run_name: fc-q15b
+    total: 200
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 16
+    progress_kind: grid
+    requires: null
+    extra_args: ["--allow-model-download"]  # ~3.5GB, first fetch
+  - name: grid-diss256-q15b
+    command: grid
+    config: configs/experiments/grid_math500_diss256_q15b.yaml
+    run_name: grid-diss256-q15b
+    total: 400
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 16
+    progress_kind: grid
+    requires: fc-q15b        # model cached by the bank job; rkv gated by its marker
+  - name: readout-diss256-q15b
+    command: replay
+    config: configs/experiments/readout_math500_diss256_q15b.yaml
+    run_name: readout-diss256-q15b
+    total: 400
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 16
+    progress_kind: readout
+    requires: fc-q15b
+  - name: reverse-readout-diss256-q15b
+    command: replay
+    config: configs/experiments/reverse_readout_diss256_q15b.yaml
+    run_name: reverse-readout-diss256-q15b
+    total: 400
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 16
+    progress_kind: readout
+    requires: grid-diss256-q15b
+
+  - name: fc-q14b
+    command: bank
+    config: configs/experiments/bank_math500_q14b.yaml
+    run_name: fc-q14b
+    total: 200
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 40
+    progress_kind: grid
+    requires: null
+    extra_args: ["--allow-model-download"]  # ~28GB, first fetch; disk checked by guard
+  - name: grid-diss256-q14b
+    command: grid
+    config: configs/experiments/grid_math500_diss256_q14b.yaml
+    run_name: grid-diss256-q14b
+    total: 400
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 40
+    progress_kind: grid
+    requires: fc-q14b
+  - name: readout-diss256-q14b
+    command: replay
+    config: configs/experiments/readout_math500_diss256_q14b.yaml
+    run_name: readout-diss256-q14b
+    total: 400
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 40
+    progress_kind: readout
+    requires: fc-q14b
+  - name: reverse-readout-diss256-q14b
+    command: replay
+    config: configs/experiments/reverse_readout_diss256_q14b.yaml
+    run_name: reverse-readout-diss256-q14b
+    total: 400
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 40
+    progress_kind: readout
+    requires: grid-diss256-q14b

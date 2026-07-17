@@ -544,3 +544,31 @@ Amendment E required a real-generation smoke before any R-KV analysis row. Recor
 R-KV cells (grid/readout/reverse at 256; AIME-24 at 2048) are queued behind this
 marker. Paper labeling: "R-KV (parity-verified port; smoke-verified during
 decoding)" — the two-stage gate history above is disclosable as methodology.
+
+## Amendment J (2026-07-17): scale-axis extension (R1-Distill-Qwen-1.5B and -14B)
+
+Post-hoc extension, added after all budget-256 Qwen-7B results and the Llama-8B
+check were final, in response to an area-chair-style breadth assessment. Two new
+subset-scale cell families, run with the frozen protocol (same seeds 11/23/47/89,
+same decoding parameters, same 16384 cap, same graders/instruments, 50 problems
+x 4 seeds per cell, own pinned FC reference banks):
+
+- Models (pinned from the HF API main revision on 2026-07-17, recorded in
+  configs/models.yaml): DeepSeek-R1-Distill-Qwen-1.5B @ad9f0ae0 and
+  DeepSeek-R1-Distill-Qwen-14B @1df85071.
+- Presses: StreamingLLM (the sharpest observed case) and R-KV (the strongest
+  free-runner; the certified port's per-event analytic-RoPE self-check validates
+  the port live on the new model dims — a self-check failure aborts the run and
+  is a STOP, not a result).
+- Pre-committed read (mirrors the Llama-unit branches, decided before any row
+  exists): REPLICATES if a cell's forward residual is negative with 95% CI
+  excluding zero and its bracket excludes zero; DEGENERATE if free-run accuracy
+  floors with truncation > 0.5 (report plainly, decomposition labeled
+  uninformative, as for Llama-Random); NON-REPLICATION otherwise (report
+  verbatim in threats; no compensating claim elsewhere). All scale-axis results
+  are labeled exploratory and subset-scale in the paper regardless of branch.
+- Expected-shape gates for the new FC banks (soft bands; outside-band means
+  investigate before any dependent cell is read): 1.5B accuracy 0.60-0.85
+  (published 0.839 at 32K decode), 14B accuracy 0.82-0.96 (published 0.939),
+  both with the ~0.03-0.09 harness gap seen for 7B (0.8825 vs 0.928) and
+  Llama-8B (0.805 vs 0.891).

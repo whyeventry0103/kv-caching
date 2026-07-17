@@ -1,0 +1,19 @@
+name: bank_math500_q14b
+stage: bank
+# Scale-axis reference bank (r1_distill_qwen_14b; AC plan 2026-07-17, Amendment J). Same
+# subset-replication shape as the llama check: first 50 MATH-500 problems x n=4
+# seeds = 200 generations, 16384 cap, token-ID sidecars. Pinned FC reference for
+# the q14b cells ONLY.
+models: [r1_distill_qwen_14b]
+benchmarks: [math500]
+subset:
+  math500: 50
+seeds: [11, 23, 47, 89]
+max_new_tokens:
+  math500: 16384
+presses: [fullcache]
+budgets: [full]
+estimated_generation_count: 200
+store_token_ids: true
+scale_authorized: true
+remote_only: true

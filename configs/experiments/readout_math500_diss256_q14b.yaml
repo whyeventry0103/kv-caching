@@ -1,0 +1,17 @@
+name: readout_math500_diss256_q14b
+stage: replay
+mode: readout
+# Scale-axis forward readout against the q14b FC bank.
+reference_run_name: fc-q14b
+models: [r1_distill_qwen_14b]
+benchmarks: [math500]
+subset:
+  math500: 50
+presses: [streamingllm, rkv]
+budgets: [256]
+seeds: [11, 23, 47, 89]
+compression_interval: 64
+max_answer_tokens: 2048
+estimated_generation_count: 0
+estimated_replay_count: 400
+scale_authorized: true
