@@ -396,6 +396,21 @@ as reference, NOT a STOP. FC_AIME slot for the m4-aime-2048 read = 0.371; note
 the 0.221 in-denominator truncation when interpreting AIME free-run cells.
 Archived: results/diag/fc-aime24-bank.json
 
+### 4q. fc-readout-control — resampling control IN, Branch A (read 2026-07-17)
+readout-fc-control 400/400 (full-cache readout of the FC bank; the control queued
+by the 07-08 submission audit): **readout_accuracy 0.9056 = 355/392 (displays
+0.906), 8 undefined boundaries (same 8 rows as every readout run on this bank
+subset — consistent).** Acc_ro(FC) − Acc_FC = **+0.0231 (displays +0.023)** —
+the pure answer-resampling effect of the readout protocol, measured directly with
+zero compression. Inside the playbook band [0.88, 0.92] → Branch A. Ratios:
+14.8× below the trio residuals (0.343), 12.0× below R-KV's (0.278) — "an order
+of magnitude below" is exactly true. Also confirms the mechanism of the
+above-reference 2048 readout values (0.898–0.903). In the paper: the §4.2
+calibration sentence upgraded from the 2048-derived bound to the direct
+measurement. The "readout conflates compression fidelity with resampling
+variance" reviewer attack now has a measured answer.
+Archived: results/diag/fc-readout-control.json
+
 ## 7. Status
 - **DONE (writable core):** phenomenon, forward decomposition, reverse-replay bracket
   (+ endpoint CIs, + imputation bounds), Figure 4 TV mechanism (estimator defined), ADD,
@@ -407,5 +422,8 @@ Archived: results/diag/fc-aime24-bank.json
   now has FOUR policies with brackets excluding zero on all eight endpoints.
 - **DONE (added 2026-07-15):** Llama cross-architecture check (§4o — SLM
   replicates, Random degenerates, both reported plainly); AIME-24 FC bank (§4p).
-- **IN PROGRESS (generality/breadth):** AIME trio (grid-aime24-2048 106/360,
-  readout 0/360); fc-readout-control (queued last). Drop-dead 2026-08-01.
+- **DONE (added 2026-07-17):** fc-readout-control (§4q — resampling effect
+  +0.023, measured; Branch A).
+- **IN PROGRESS (generality/breadth):** m4-aime-2048 — THE LAST UNIT
+  (grid 360/360 DONE, readout 180/360; likely ready 07-18). Drop-dead
+  2026-08-01 comfortably met.

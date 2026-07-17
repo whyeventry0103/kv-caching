@@ -16,6 +16,20 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
 
 ## 0. TL;DR — where we are right now
 
+  **★ fc-readout-control read (2026-07-17) — Branch A, +0.023 measured:**
+  full-cache readout of FC bank = 0.9056 (355/392; displays 0.906) vs FC
+  0.8825 → pure answer-resampling effect +0.023, inside the [0.88,0.92] band;
+  14.8×/12.0× below trio/R-KV residuals ("order of magnitude" exactly true).
+  §4.2 calibration sentence upgraded from 2048-derived bound to direct
+  measurement; PAPER_FINDINGS §4q; archive diag/fc-readout-control.json.
+  ONE UNIT LEFT: m4-aime-2048 (grid 360/360 DONE, readout 180/360 → ready
+  ~07-18). After it reads: queue EMPTY → endgame per CLAUDE.md (venue
+  conversion SUBMISSION_STRATEGY §6 + BEST_POSSIBLE Phase 8 notation diet,
+  anonymization scrub incl. email in nightly_report.py + internal docs
+  excluded incl. complete_setup.md, arXiv ~mid-Aug). AIME read uses playbook
+  UNIT m4-aime-2048: FC_AIME=0.371, ratio 19.7%, branches A (no gains) /
+  B (>100% regime, one measured paragraph max, Amendment G stands).
+
   **✓ RESOLVED — server outage 2026-07-15 evening (~30 min, likely reboot):**
   went "connection refused" → timeout → back at 21:59 server time. Self-heal
   loop completed: make sync-apply clean (fresh .sync-state incl.
