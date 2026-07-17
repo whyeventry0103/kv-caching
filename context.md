@@ -16,6 +16,26 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
 
 ## 0. TL;DR — where we are right now
 
+  **★★ AC IMPROVEMENT PLAN EXECUTING (started 2026-07-17 night; log =
+  logs/gpu_improvement_plan.log):** (1) SCALE AXIS QUEUED (Amendment J):
+  R1-Distill-Qwen-1.5B @ad9f0ae0 + -14B @1df85071 pinned from HF API; 8 configs
+  (SLM+R-KV, 50×4, own banks) dry-run validated; 8 queue jobs appended (1.5B
+  chain first, 14B min_free_gb=40); harvest units m4-q15b-256/m4-q14b-256;
+  playbook units w/ pre-committed REPLICATES/DEGENERATE/NON-REPLICATION branches
+  + bank gates (1.5B FC∈[0.60,0.85] pub 0.839; 14B∈[0.82,0.96] pub 0.939).
+  Timeline: 1.5B chain ~1-2 nights, 14B ~3-5 nights — all within budget/margin.
+  (2) PAPER REFRAMED as "A Trajectory Audit of KV-Cache Compression for
+  Reasoning": abstract deliverable sentence, §1 protocol positioning, NEW
+  contribution bullet 1 (the audit + validity kit), §3 naming sentence, §6 audit
+  paragraph FOREGROUNDED w/ validity-kit sentence before the implication.
+  (3) "method-invariant" RETIRED (0 instances; existential wording everywhere;
+  FINDINGS §5 rule added). (4) Bullet 2 random-beats-recency now carries the
+  architecture-dependence parenthetical. (5) Tonight: readout-aime24-2048
+  s[47,89] completes → READ m4-aime-2048 TOMORROW (playbook branches ready,
+  FC_AIME=0.371, ratio 19.7%); fc-q15b bank starts. (6) DEFERRED: FC/HOTT
+  matched-decode probe — only if GPUs idle after 14B chain; needs HOTT's decode
+  config verified first. AIME >100% anchor verified intact post-reframe.
+
   **★ fc-readout-control read (2026-07-17) — Branch A, +0.023 measured:**
   full-cache readout of FC bank = 0.9056 (355/392; displays 0.906) vs FC
   0.8825 → pure answer-resampling effect +0.023, inside the [0.88,0.92] band;

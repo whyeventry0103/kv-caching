@@ -211,6 +211,12 @@ reverse + AIME-2048). Sell the two-stage catch as methodology, never hide it (Am
 - Report the pre-registered outcome honestly: the decomposition read was pre-committed
   (confirm/complicate/refute) and came out **COMPLICATE** — the central residual is robust; the
   strong pilot "SLM=readout / Random=trajectory" dissociation did **not** hold cleanly.
+- **Terminology update (2026-07-17, AC-plan reframe): "method-invariant" is retired.**
+  Say "a residual of similar magnitude exists for every policy tested" (existential,
+  exploratory-labeled) — the invariance wording invited an estimand-dependence attack
+  the reverse split makes partially valid. The suite of estimands is now NAMED: "the
+  trajectory audit" (title, abstract, contribution bullet 1, §6 ¶2) — it is the
+  paper's stated deliverable, released as the pinned harness.
 - **Display convention (pinned 2026-07-07): every 3-decimal number is `f"{v:.3f}"` of the
   report-artifact float** — the string numpy/R reproduce from raw rows. Do NOT hand-round
   exact ties up. Corrections applied under this rule: H2O-style free 0.248 → **0.247**
