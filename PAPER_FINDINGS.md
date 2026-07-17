@@ -197,47 +197,6 @@ regression test + true 8-query window with analytic RoPE + per-event self-check)
 **PASS, Jaccard 1.0000**, marker written -> rkv executable; cells queued (256 grid/readout/
 reverse + AIME-2048). Sell the two-stage catch as methodology, never hide it (Amendment I).
 
-## 5. Framing discipline (non-negotiable — apply throughout)
-- **Divergence ≠ damage.** ADD / TV / residual are "behavioral-fidelity loss," never "damage."
-  Correctness is the only quality arbiter. Carry the **signed flip-mass** (gained vs lost correct
-  answers) with every divergence quantity.
-- **Residual is a definition, not a cause.** "Accuracy change unexplained by on-reference
-  readout." The reverse-replay *bracket* is what licenses the (bounded) causal reading; state the
-  off-policy/covariate-shift caveat up front, not in rebuttal.
-- **Truncated generations stay in every denominator, scored incorrect** (never dropped). Report
-  truncation rate per cell.
-- **Method-invariance and any generality claims are exploratory** at current scope (one model,
-  one benchmark, budget 256).
-- Report the pre-registered outcome honestly: the decomposition read was pre-committed
-  (confirm/complicate/refute) and came out **COMPLICATE** — the central residual is robust; the
-  strong pilot "SLM=readout / Random=trajectory" dissociation did **not** hold cleanly.
-- **Terminology update (2026-07-17, AC-plan reframe): "method-invariant" is retired.**
-  Say "a residual of similar magnitude exists for every policy tested" (existential,
-  exploratory-labeled) — the invariance wording invited an estimand-dependence attack
-  the reverse split makes partially valid. The suite of estimands is now NAMED: "the
-  trajectory audit" (title, abstract, contribution bullet 1, §6 ¶2) — it is the
-  paper's stated deliverable, released as the pinned harness.
-- **Display convention (pinned 2026-07-07): every 3-decimal number is `f"{v:.3f}"` of the
-  report-artifact float** — the string numpy/R reproduce from raw rows. Do NOT hand-round
-  exact ties up. Corrections applied under this rule: H2O-style free 0.248 → **0.247**
-  (99/400 = 0.2475; abstract, summary, §4.1, Fig 1 + caption, Table 2) and SLM@2048 free
-  0.808 → **0.807** (323/400 = 0.8075; §4.1, Fig 1 + caption, dose paragraph). Caught by
-  eyeballing Fig 1 (hand-rounded constant, 0.248) against Fig 2 (DATA mode, 0.247) —
-  every other number in the paper already followed .3f.
-
-## 6. Limitations / threats to validity (write this as a STRENGTH section)
-- **Generality (primary):** results are one model / one benchmark / budget 256 with two eviction
-  methods. Budget-2048 (dose-response), H2O, R-KV, and AIME are *in progress* to widen this.
-- **No >100% regime observed** → the paper is framed as "near-lossless-under-readout vs
-  collapse-under-free-generation," not around denoising/gains.
-- **Off-policy bias** on the residual is *bounded* by reverse replay, not eliminated; the
-  method-level split is not identifiable within the bracket.
-- **Kernel confound:** H2O runs on eager attention (others on sdpa); full-cache eager-vs-sdpa
-  exchangeability was checked (19/20 vs 20/20, no systematic shift).
-- **FC-bank provenance:** the reference bank's build commits were orphaned in a repo move;
-  provenance now rests on pinned package versions + per-row source-tree hashes + FC having no
-  compression logic.
-
 ### 4h. H2O-style FORWARD DECOMPOSITION IN — method-invariance extends to 3 policies (2026-07-05)
 readout-diss256-h2o 400/400 (report archived: results/diag/m4-h2o256-forward-summary.json):
 **free 0.2475 [0.180, 0.318], readout 0.597 [0.503, 0.668], totalΔ −0.635, readoutΔ −0.286,
@@ -416,6 +375,48 @@ calibration sentence upgraded from the 2048-derived bound to the direct
 measurement. The "readout conflates compression fidelity with resampling
 variance" reviewer attack now has a measured answer.
 Archived: results/diag/fc-readout-control.json
+
+
+## 5. Framing discipline (non-negotiable — apply throughout)
+- **Divergence ≠ damage.** ADD / TV / residual are "behavioral-fidelity loss," never "damage."
+  Correctness is the only quality arbiter. Carry the **signed flip-mass** (gained vs lost correct
+  answers) with every divergence quantity.
+- **Residual is a definition, not a cause.** "Accuracy change unexplained by on-reference
+  readout." The reverse-replay *bracket* is what licenses the (bounded) causal reading; state the
+  off-policy/covariate-shift caveat up front, not in rebuttal.
+- **Truncated generations stay in every denominator, scored incorrect** (never dropped). Report
+  truncation rate per cell.
+- **Method-invariance and any generality claims are exploratory** at current scope (one model,
+  one benchmark, budget 256).
+- Report the pre-registered outcome honestly: the decomposition read was pre-committed
+  (confirm/complicate/refute) and came out **COMPLICATE** — the central residual is robust; the
+  strong pilot "SLM=readout / Random=trajectory" dissociation did **not** hold cleanly.
+- **Terminology update (2026-07-17, AC-plan reframe): "method-invariant" is retired.**
+  Say "a residual of similar magnitude exists for every policy tested" (existential,
+  exploratory-labeled) — the invariance wording invited an estimand-dependence attack
+  the reverse split makes partially valid. The suite of estimands is now NAMED: "the
+  trajectory audit" (title, abstract, contribution bullet 1, §6 ¶2) — it is the
+  paper's stated deliverable, released as the pinned harness.
+- **Display convention (pinned 2026-07-07): every 3-decimal number is `f"{v:.3f}"` of the
+  report-artifact float** — the string numpy/R reproduce from raw rows. Do NOT hand-round
+  exact ties up. Corrections applied under this rule: H2O-style free 0.248 → **0.247**
+  (99/400 = 0.2475; abstract, summary, §4.1, Fig 1 + caption, Table 2) and SLM@2048 free
+  0.808 → **0.807** (323/400 = 0.8075; §4.1, Fig 1 + caption, dose paragraph). Caught by
+  eyeballing Fig 1 (hand-rounded constant, 0.248) against Fig 2 (DATA mode, 0.247) —
+  every other number in the paper already followed .3f.
+
+## 6. Limitations / threats to validity (write this as a STRENGTH section)
+- **Generality (primary):** results are one model / one benchmark / budget 256 with two eviction
+  methods. Budget-2048 (dose-response), H2O, R-KV, and AIME are *in progress* to widen this.
+- **No >100% regime observed** → the paper is framed as "near-lossless-under-readout vs
+  collapse-under-free-generation," not around denoising/gains.
+- **Off-policy bias** on the residual is *bounded* by reverse replay, not eliminated; the
+  method-level split is not identifiable within the bracket.
+- **Kernel confound:** H2O runs on eager attention (others on sdpa); full-cache eager-vs-sdpa
+  exchangeability was checked (19/20 vs 20/20, no systematic shift).
+- **FC-bank provenance:** the reference bank's build commits were orphaned in a repo move;
+  provenance now rests on pinned package versions + per-row source-tree hashes + FC having no
+  compression logic.
 
 ## 7. Status
 - **DONE (writable core):** phenomenon, forward decomposition, reverse-replay bracket
