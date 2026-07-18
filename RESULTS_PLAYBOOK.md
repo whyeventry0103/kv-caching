@@ -29,6 +29,8 @@ General rules for every unit:
 
 ## UNIT fc-aime24-acc then m4-aime-2048
 
+> **CONSUMED** 2026-07-18 — Branch A (no >100% regime) + residual replication + press-independent readout, reported plainly; record in PAPER_FINDINGS §4r (fc bank: §4p, 2026-07-15). Kept under PENDING header order only to preserve file history; do not redo.
+
 fc digest: {rows, accuracy, truncation, mean_tokens}. Sanity: accuracy should be
 ~0.4–0.7 (R1-Qwen-7B on AIME-24 with 16K cap); truncation may be sizable — it stays
 in-denominator. Record in PAPER_FINDINGS ("AIME-24 FC bank: acc {A}, trunc {T},

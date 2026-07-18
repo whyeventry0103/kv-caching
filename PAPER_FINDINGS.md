@@ -377,6 +377,35 @@ variance" reviewer attack now has a measured answer.
 Archived: results/diag/fc-readout-control.json
 
 
+### 4r. m4-aime-2048 — Branch A + two bonus findings (read 2026-07-18)
+grid-aime24-2048 360/360 + readout-aime24-2048 360/360 vs fc-aime24 (FC 0.3708,
+trunc 0.221, mean 10,415 tok; ratio 19.7%). 30 problems × 4 seeds = 120/cell.
+**(1) NO >100% REGIME (the headline question): best free Random 0.2833 (displays
+0.283) [0.15, 0.425]; R-KV 0.2167 (0.217) [0.10, 0.358]; SLM 0.1417 (0.142)
+[0.042, 0.258] — all ≪ FC 0.371; gained flip ≤ 0.050.** Per Amendment E: a
+scale/protocol finding, not a port failure. Trunc: R 0.308 / RKV 0.450 / SLM
+0.233 (in-denominator as always).
+**(2) RESIDUAL REPLICATES ON A 2ND BENCHMARK: −0.1790 (−0.179) CI [−0.349,
+−0.076] / −0.2457 (−0.246) [−0.419, −0.139] / −0.3207 (−0.321) [−0.509, −0.202]
+(R/RKV/SLM) — all CIs exclude zero.**
+**(3) READOUT IS LITERALLY PRESS-INDEPENDENT AT THIS DOSE: all three presses
+readout 0.4624 (0.462) [0.327, 0.661], IDENTICAL correctness vectors on all 120
+keys.** Investigated BEFORE reading (invariant-violation rule): NOT a bug —
+generations differ (only 30/120 share first-40 tokens), but 85/93 defined rows
+converge to the same extracted answer (e.g. three different texts all reaching
+\\boxed{204}), and on the 8 answer-divergent rows every press is wrong. The 27
+undefined keys are shared by construction (boundary is a reference-trace
+property). Readout 0.462 > FC 0.371 — same above-reference resampling pattern
+as MATH-2048, consistent with §4q's +0.023 calibration.
+Branch taken: A (playbook) + the two extra findings reported plainly per the
+no-forcing rule. In the paper: threats >100% paragraph rewritten with the
+result; related-work tense + audit-table caption; §4 preamble + conclusion
+extensions now name only the scale axis. Abstract unchanged (MATH-500-led per
+playbook either-branch rule; n=30 — no per-problem claims, clustered CIs only).
+Archived: results/diag/m4-aime-2048-summary.json
+ALSO: fc-q15b bank GATE PASSED same morning — 200/200, acc 0.800 (band
+[0.60, 0.85], published 0.839), trunc 0.04.
+
 ## 5. Framing discipline (non-negotiable — apply throughout)
 - **Divergence ≠ damage.** ADD / TV / residual are "behavioral-fidelity loss," never "damage."
   Correctness is the only quality arbiter. Carry the **signed flip-mass** (gained vs lost correct
@@ -431,6 +460,9 @@ Archived: results/diag/fc-readout-control.json
   replicates, Random degenerates, both reported plainly); AIME-24 FC bank (§4p).
 - **DONE (added 2026-07-17):** fc-readout-control (§4q — resampling effect
   +0.023, measured; Branch A).
-- **IN PROGRESS (generality/breadth):** m4-aime-2048 — THE LAST UNIT
-  (grid 360/360 DONE, readout 180/360; likely ready 07-18). Drop-dead
-  2026-08-01 comfortably met.
+- **DONE (added 2026-07-18):** m4-aime-2048 (§4r) — ORIGINAL CAMPAIGN 100%
+  READ. No >100% regime; residual replicates on 2nd benchmark; readout
+  press-INDEPENDENT at 19.7% dose. Drop-dead 2026-08-01 met with 14 days
+  to spare.
+- **IN PROGRESS (Amendment J scale axis):** q15b (bank GATE PASSED 0.800;
+  grid 39/400) and q14b (bank 124/200) — the last cells before endgame.

@@ -16,6 +16,20 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
 
 ## 0. TL;DR — where we are right now
 
+  **★★★ ORIGINAL CAMPAIGN 100% READ — m4-aime-2048 in (2026-07-18):** Branch A
+  + two bonus findings. (1) NO >100% regime: best free Random 0.283 vs FC 0.371
+  (R-KV 0.217, SLM 0.142; gained flip ≤ 0.050) — scale/protocol finding per
+  Amendment E. (2) Residual REPLICATES on 2nd benchmark: −0.179/−0.246/−0.321
+  (R/RKV/SLM), all CIs exclude zero. (3) Readout PRESS-INDEPENDENT at 19.7%
+  dose: identical 0.462 across all 3 presses — investigated BEFORE reading
+  (85/93 defined rows converge to same extracted answer via different texts; 8
+  divergent rows all-wrong everywhere; NOT a bug) — the sharpest form of the
+  thesis. Paper: threats >100% rewritten w/ result; related-work/audit-caption
+  tense; preamble+conclusion now name only scale axis. FINDINGS §4r; archive
+  diag/m4-aime-2048-summary.json. ALSO fc-q15b bank GATE PASSED (0.800, band
+  [0.60,0.85]); q15b grid 39/400, q14b bank 124/200. REMAINING: 2 scale units
+  (~5 nights) → endgame (venue conversion, scrub, arXiv mid-Aug).
+
   **★★ AC IMPROVEMENT PLAN EXECUTING (started 2026-07-17 night; log =
   logs/gpu_improvement_plan.log):** (1) SCALE AXIS QUEUED (Amendment J):
   R1-Distill-Qwen-1.5B @ad9f0ae0 + -14B @1df85071 pinned from HF API; 8 configs
