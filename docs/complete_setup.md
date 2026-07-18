@@ -374,3 +374,8 @@ Two disciplines make this system actually work:
 13. `git mv` refuses untracked files — batch moves die halfway. Check
     `git ls-files` before reorganizing; move tracked files with `git mv`
     (history preserved) and untracked ones with plain `mv`.
+14. Moving/renaming files under a no-`--delete` rsync leaves STALE copies at
+    the old remote paths, and a post-transfer tree-hash guard (rightly)
+    refuses the mismatch. The fix is never `--delete`: verify the new copies
+    landed remotely, list the exact stale files, remove precisely those, and
+    re-sync for a clean stamp. Inspect-then-delete, file by file.
