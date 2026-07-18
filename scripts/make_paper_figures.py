@@ -532,6 +532,98 @@ def fig3_add(out_dir: Path):
     _save(fig, out_dir, "fig3_add")
 
 
+# ---------------------------------------------------------------- Figure 6
+CAIME = dict(
+    # m4-aime-2048 (read 2026-07-18; results/diag/m4-aime-2048-summary.json).
+    # 30 problems x 4 seeds per cell vs the pinned AIME FC bank (0.3708).
+    fc=0.3708,
+    free={"Random": 0.2833, "R-KV": 0.2167, "StreamingLLM": 0.1417},
+    readout=0.4624,  # IDENTICAL across all three presses (verified: same
+    # 120-key correctness vectors; 85/93 defined rows converge to the same
+    # extracted answer through different generations).
+    readout_ci=(0.3274, 0.6607),
+)
+
+
+def fig6_aime(out_dir: Path):
+    """AIME-24 @2048: free-running separates the presses; readout cannot.
+
+    The identical readout bars ARE the message, so the readout bar is drawn in
+    each method's hue with a shared texture (hatch = the readout protocol,
+    consistent with fig0's compression-agnostic texture role), and free-run is
+    the solid hue. Grey dashline = the AIME FC reference (0.371)."""
+    print("Figure 6 [SUMMARY (AIME press-independence)]")
+    fig, ax = plt.subplots(figsize=(5.4, 3.0))
+    methods = ["Random", "R-KV", "StreamingLLM"]
+    xs = [0, 1, 2]
+    w = 0.34
+    for i, m in enumerate(methods):
+        ax.bar(
+            i - w / 2 - 0.01,
+            CAIME["free"][m],
+            w,
+            color=MC[m],
+            edgecolor="white",
+            linewidth=0.8,
+        )
+        ax.bar(
+            i + w / 2 + 0.01,
+            CAIME["readout"],
+            w,
+            facecolor="white",
+            edgecolor=MC[m],
+            linewidth=1.1,
+            hatch="///",
+        )
+        ax.text(
+            i - w / 2 - 0.01,
+            CAIME["free"][m] + 0.012,
+            f"{CAIME['free'][m]:.3f}",
+            ha="center",
+            fontsize=7.6,
+            color=INK,
+        )
+        ax.text(
+            i + w / 2 + 0.01,
+            CAIME["readout"] + 0.012,
+            f"{CAIME['readout']:.3f}",
+            ha="center",
+            fontsize=7.6,
+            color=INK,
+        )
+    ax.axhline(CAIME["fc"], color=GREY, lw=0.9, ls=(0, (2, 3)), zorder=0)
+    ax.text(
+        2.52,
+        CAIME["fc"] + 0.024,
+        f"AIME FC reference {CAIME['fc']:.3f}",
+        ha="right",
+        fontsize=7,
+        color=INK2,
+    )
+    handles = [
+        plt.Rectangle((0, 0), 1, 1, facecolor="#9a9a9a", edgecolor="white"),
+        plt.Rectangle(
+            (0, 0), 1, 1, facecolor="white", edgecolor=INK2, hatch="///", linewidth=1.0
+        ),
+    ]
+    ax.legend(
+        handles,
+        ["free-run", "readout (identical across presses)"],
+        loc="upper left",
+        bbox_to_anchor=(0.0, 1.14),
+        ncol=2,
+        frameon=False,
+        fontsize=7.2,
+    )
+    ax.set_xticks(xs)
+    ax.set_xticklabels(methods)
+    ax.set_ylabel("Accuracy (AIME-24, budget 2048)")
+    ax.set_ylim(0, 0.56)
+    ax.set_xlim(-0.6, 2.6)
+    _ygrid(ax)
+    _save(fig, out_dir, "fig6_aime")
+
+
 # ---------------------------------------------------------------- Figure 4
 def fig4_tvprofile(out_dir: Path, profiles_dir: Path | None):
     curve = _onset_aligned_curve(profiles_dir) if profiles_dir else None
@@ -817,6 +909,7 @@ def main():
     out = Path(args.out_dir)
     out.mkdir(parents=True, exist_ok=True)
     fig0_protocol(out)
+    fig6_aime(out)
     fig1_phenomenon(out, Path(args.runs_root) if args.runs_root else None)
     summaries = [x for x in (_load_json(p) for p in (args.m4_summary or [])) if x]
     fig2_bracket(out, summaries or None)

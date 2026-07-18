@@ -135,10 +135,19 @@ synced → `make lint` + `make test` bare → commit (name the unit/decision) �
 | `fig3_add` | 4 groups, within-answered + termination bars, ADD/flip boxes, noise-floor line | SUMMARY (constants) | any ADD cell changes |
 | `fig4_tvprofile` | onset-aligned staircase; annotations: 64-step events + zero-before self-control | DATA (remote, `--profiles-dir`) | new replay profiles worth adding |
 | `fig5_twofc` | negative control vs two exemplar cells | SUMMARY | control numbers change (they won't) |
+| `fig6_aime` | AIME @2048 press-independence: separated free-run bars vs identical hatched readout bars, FC dashline | SUMMARY (constants `CAIME`) | AIME cells change (they won't) |
 
 Pending-unit hooks (see RESULTS_PLAYBOOK.md): the Llama and AIME units are
 TEXT-ONLY (no figure changes). If AIME Branch B (>100% regime) ever fires, that
 gets a figure decision of its own — do not improvise it into Fig 1.
+UPDATE 2026-07-18: the AIME read (Branch A) DID earn a threats-local figure —
+`fig6_aime` — decided because the press-independence finding (identical 0.462
+readout across all three presses vs 2× free-run separation) is inherently
+visual and one bar chart states it faster than the sentence. Precedent: a
+consumed unit may earn a NEW, section-local figure when its finding is visual;
+main figures (1/2) still change only by their own rules. Hatch here = "the
+readout protocol" (consistent with fig0's texture-not-hue role); subset scale
+(n=30) stated in the caption.
 
 ## 7. Failure catalog — every defect a batch shipped, all caught by viewing
 

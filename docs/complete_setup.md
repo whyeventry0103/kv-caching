@@ -56,7 +56,8 @@ $PROJECT/
 │   ├── experiments/*.yaml  # one config per run, named {stage}_{bench}_{variant}
 │   └── nightly_queue.yaml  # the ordered job queue (§9) — the queue IS the plan
 ├── tests/                  # mirrors module names; CPU-only, no network, no weights
-├── docs/                   # WORKFLOW.md, probe docs, FIGURES_PLAYBOOK.md
+├── docs/                   # WORKFLOW.md, probe docs, FIGURES_PLAYBOOK.md, this guide
+│   └── strategy/           # frozen one-off review/strategy deliverables (out of the release)
 ├── results/diag/           # gitignored archive of harvested summary JSONs
 ├── figures/                # committed rendered figures (pdf+png pairs)
 ├── PREREGISTRATION.md, PAPER_FINDINGS.md, RESULTS_PLAYBOOK.md, context.md  (§12)
@@ -91,7 +92,11 @@ Rules that keep this healthy:
    big disk, OUTSIDE the code dir).
 5. Pin everything: model + dataset revisions in `configs/*.yaml` with a
    `TODO(human)` sentinel pattern — loader code REFUSES unpinned revisions, and
-   only a human ever fills a pin (never let an assistant guess one to unblock).
+   a pin is never guessed to unblock a run. The legitimate pin procedure:
+   fetch the current main-branch SHA from the hub API
+   (`curl https://huggingface.co/api/models/<org>/<model>` → `.sha`), record it
+   with a dated comment, and re-derive it once before first use (two fetches,
+   identical answer). A pin is a verified fact, not a convenience.
 6. Write `remoteserver.md`: who shares the box, disk etiquette, GPU count, the
    personal-quota env var (§7), allowed hours, contact for conflicts.
 
@@ -356,3 +361,16 @@ Two disciplines make this system actually work:
    pin the display convention on day one.
 10. STUCK counters persist across nights → fixing a job's bug isn't done until
     its state-file counter is reset and the next launch verified.
+11. Identical results across supposedly-different conditions = suspected
+    instrument bug FIRST (three eviction policies once produced byte-identical
+    correctness vectors). The diagnosis that separates bug from finding: diff
+    the raw generations, not the aggregates — here the texts differed and the
+    extracted answers converged, so it was a real (and quotable) result. Write
+    the investigation down before the result.
+12. Your laptop's midnight is not the server's midnight. Twice a "lost night"
+    scare was just a timezone offset — always read the SERVER clock before
+    concluding anything about the night window, and pin the window's timezone
+    in the queue file's comments.
+13. `git mv` refuses untracked files — batch moves die halfway. Check
+    `git ls-files` before reorganizing; move tracked files with `git mv`
+    (history preserved) and untracked ones with plain `mv`.

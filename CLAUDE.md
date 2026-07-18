@@ -87,7 +87,9 @@ watcher's preflight hash check fails that night.
 2026-08-01; TV-matched-noise control, logic benchmarks, and Qwen3 deliberately
 not queued (reasons in context.md, 2026-07-05 bullet); Table 2 stays at
 budget 256; abstract stays 256-led. Endgame after the queue drains: venue
-conversion per `SUBMISSION_STRATEGY.md` §6 + `BEST_POSSIBLE_PAPER.md` Phase 8,
+conversion per `docs/strategy/SUBMISSION_STRATEGY.md` §6 +
+`docs/strategy/BEST_POSSIBLE_PAPER.md` Phase 8 (strategy/review docs moved to
+`docs/strategy/` 2026-07-18; `complete_setup.md` moved to `docs/`),
 anonymization scrub (a personal email is embedded in
 `scripts/nightly_report.py`; internal strategy docs stay out of the artifact),
 arXiv ~mid-August.
