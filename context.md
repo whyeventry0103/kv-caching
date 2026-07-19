@@ -16,6 +16,19 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
 
 ## 0. TL;DR — where we are right now
 
+  **★ GPU-UTILIZATION FIX (2026-07-19): fair-share seed sharding.** Night of
+  07-18→19: both GPUs ran the q15b grid 01:45–~08:40/{~09:4x}; at 08:40 the
+  launcher gave readout-diss256-q15b ALL 4 seeds to gpu0 (gpu1 still on grid
+  tail) → gpu1 idled ~09:4x–10:45 (fc-q14b blocked by occupancy then the <1h
+  guard — guard behavior correct). ROOT CAUSE: shard_seeds strided over FREE
+  gpus only. FIX: stride over TOTAL gpu count (shard_seeds(..., total_gpus=
+  len(gpus))) — a lone free GPU takes its fair share; leftover seeds stay
+  needy for the GPU about to free (regression test added, 136 tests). If the
+  other GPU never frees, leftovers launch later on the first GPU (same total
+  time; one extra model load). Tonight: readout-q15b leftover seeds +
+  reverse-q15b + fc-q14b resume across both GPUs. STATUS: q15b grid DONE
+  400/400; readout partial (gpu0 session ran 08:40–10:45); q14b bank 124/200.
+
   **★★★ ORIGINAL CAMPAIGN 100% READ — m4-aime-2048 in (2026-07-18):** Branch A
   + two bonus findings. (1) NO >100% regime: best free Random 0.283 vs FC 0.371
   (R-KV 0.217, SLM 0.142; gained flip ≤ 0.050) — scale/protocol finding per

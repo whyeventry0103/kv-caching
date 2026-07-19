@@ -138,12 +138,24 @@ def eligible_gpus(gpus: list[GpuState], min_free_gb: int) -> list[GpuState]:
     return sorted(elig, key=lambda g: g.mem_free_mb, reverse=True)
 
 
-def shard_seeds(seeds: list[int], gpus: list[GpuState]) -> dict[int, list[int]]:
-    """Round-robin split, freest GPU first (1 GPU -> all seeds; 2 -> 0::2 / 1::2)."""
-    n = len(gpus)
+def shard_seeds(
+    seeds: list[int], gpus: list[GpuState], total_gpus: int | None = None
+) -> dict[int, list[int]]:
+    """Round-robin split over the TOTAL gpu count, launched on the free ones.
+
+    Striding by total_gpus (not just currently-free GPUs) means a lone free GPU
+    takes only its fair share and the remaining seeds stay needy for the next
+    tick -- so a GPU that frees minutes later picks them up instead of idling.
+    Regression: on 2026-07-19 the readout job grabbed all 4 seeds on gpu0 while
+    gpu1 was finishing the grid tail; gpu1 then idled for the rest of the
+    window. If the other GPU never frees, the leftover seeds simply launch on
+    the first GPU at a later tick (seeds run sequentially within a session, so
+    total work time is unchanged; only one extra model load).
+    """
+    n_total = max(total_gpus or len(gpus), len(gpus), 1)
     assignment = {}
     for i, gpu in enumerate(gpus):
-        shard = seeds[i::n]
+        shard = seeds[i::n_total]
         if shard:
             assignment[gpu.index] = shard
     return assignment
@@ -508,7 +520,9 @@ def main() -> int:
             f"(min_free_gb={job.min_free_gb}); needy seeds {needy}; "
             f"window->{args.stop_hour}:{args.stop_minute:02d}"
         )
-        assignment = shard_seeds(needy, free)  # split needy seeds across free GPUs
+        # Fair-share split over ALL GPUs so seeds are held back for busy GPUs
+        # that will free up mid-window (see shard_seeds docstring).
+        assignment = shard_seeds(needy, free, total_gpus=len(gpus))
         log(f"launch assignment: {assignment}")
         specs = build_launch_specs(job, assignment, max_hours)
 

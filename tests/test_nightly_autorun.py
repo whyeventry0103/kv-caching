@@ -66,6 +66,21 @@ def test_shard_one_gpu_all_seeds():
     assert M.shard_seeds([11, 23, 47, 89], [_gpu(0, 47000)]) == {0: [11, 23, 47, 89]}
 
 
+def test_shard_fair_share_holds_seeds_for_busy_gpus():
+    # Regression (2026-07-19): one free GPU of two grabbed ALL four readout
+    # seeds while the other GPU was finishing a grid tail; the second GPU then
+    # idled for the rest of the window. With total_gpus=2 the lone free GPU
+    # takes only its stride share; the rest stay needy for the next tick.
+    assignment = M.shard_seeds([11, 23, 47, 89], [_gpu(0, 47000)], total_gpus=2)
+    assert assignment == {0: [11, 47]}
+    # Both free out of two: unchanged even split.
+    gpus = [_gpu(1, 46000), _gpu(0, 40000)]
+    assert M.shard_seeds([11, 23, 47, 89], gpus, total_gpus=2) == {
+        1: [11, 47],
+        0: [23, 89],
+    }
+
+
 # ---- max-hours ----
 
 
