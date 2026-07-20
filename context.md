@@ -16,18 +16,35 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
 
 ## 0. TL;DR — where we are right now
 
-  **★ GPU-UTILIZATION FIX (2026-07-19): fair-share seed sharding.** Night of
-  07-18→19: both GPUs ran the q15b grid 01:45–~08:40/{~09:4x}; at 08:40 the
-  launcher gave readout-diss256-q15b ALL 4 seeds to gpu0 (gpu1 still on grid
-  tail) → gpu1 idled ~09:4x–10:45 (fc-q14b blocked by occupancy then the <1h
-  guard — guard behavior correct). ROOT CAUSE: shard_seeds strided over FREE
-  gpus only. FIX: stride over TOTAL gpu count (shard_seeds(..., total_gpus=
-  len(gpus))) — a lone free GPU takes its fair share; leftover seeds stay
-  needy for the GPU about to free (regression test added, 136 tests). If the
-  other GPU never frees, leftovers launch later on the first GPU (same total
-  time; one extra model load). Tonight: readout-q15b leftover seeds +
-  reverse-q15b + fc-q14b resume across both GPUs. STATUS: q15b grid DONE
-  400/400; readout partial (gpu0 session ran 08:40–10:45); q14b bank 124/200.
+  **★ SCALE-AXIS 1.5B CELL IN, BOTH PRESSES REPLICATE (2026-07-20):**
+  m4-q15b-256 complete (grid/readout/reverse all 400/400) against fc-q15b
+  (acc 0.800, gate passed). StreamingLLM: free 0.220 [0.130,0.315], readout
+  0.495 [0.378,0.617], residual −0.275 CI [−0.362,−0.193], bracket
+  [−0.418,−0.275]. R-KV: free 0.355 [0.240,0.465] (again the stronger
+  free-runner), readout 0.688 [0.566,0.806], residual −0.333 CI
+  [−0.439,−0.230], bracket [−0.333,−0.262]. Both CIs/brackets exclude zero,
+  trunc 0.150/0.210 (≪0.5 degenerate floor) → REPLICATES per Amendment J.
+  Recorded PAPER_FINDINGS §4s; new "Scale-axis check" threats paragraph
+  added to the paper (after Cross-architecture paragraph); fixed a stale
+  "AIME-24 is queued" sentence in the Generality paragraph (AIME was
+  already read 2026-07-18, §4r) while in there. m4-q14b-256 (14B) still
+  0/400 — the ≥3/4-replicate scope-upgrade sentence ("one model family
+  across three scales…") is withheld until it lands; RESULTS_PLAYBOOK.md
+  marks q15b half-consumed, q14b still PENDING. No figure change (subset
+  scale, threats-only per FIGURES_PLAYBOOK.md rule — revisit if q14b also
+  replicates and the pair earns a small-multiples panel). Archive
+  results/diag/m4-q15b-256-summary.json next sync.
+
+  **★ GPU-UTILIZATION FIX CONFIRMED UNDER REAL LOAD (night of 07-19→20):**
+  the fair-share `shard_seeds(..., total_gpus=len(gpus))` fix (written
+  07-19, root cause: striding over free GPUs only starved a GPU that freed
+  mid-window) held up on its first real night — `logs/nightly_autorun.log`
+  shows both gpu0 and gpu1 at 34–48% util in lockstep from 01:45 through
+  past 09:00, no idle gap. fc-q14b resumed 150→150 (seed 89 in flight,
+  stopped cleanly by the <1h guard, rc=124 resume-safe, not a failure).
+  nightly_state.json shows fails=0 on every active job. Next: q14b grid
+  still needs to start (blocked on fc-q14b bank finishing all 4 seeds
+  first — 3/4 done).
 
   **★★★ ORIGINAL CAMPAIGN 100% READ — m4-aime-2048 in (2026-07-18):** Branch A
   + two bonus findings. (1) NO >100% regime: best free Random 0.283 vs FC 0.371

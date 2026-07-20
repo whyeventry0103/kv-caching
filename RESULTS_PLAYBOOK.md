@@ -62,6 +62,13 @@ unless Branch B survives CIs, in which case add ONE clause at most.
 
 ## UNITS m4-q15b-256 and m4-q14b-256 (scale axis; Amendment J, added 2026-07-17)
 
+> **m4-q15b-256 (1.5B) HALF-CONSUMED 2026-07-20** — both cells REPLICATE
+> (StreamingLLM and R-KV, CIs and brackets excluding zero); recorded in
+> PAPER_FINDINGS §4s, threats paragraph added to the paper. m4-q14b-256
+> (14B) still pending (0/400 as of 2026-07-20) — unit stays under PENDING
+> until it lands; the ≥3/4-replicate scope-upgrade sentence below fires
+> only once both cells are in. Do not re-read q15b.
+
 Two units, same shape as the llama unit but SLM + R-KV presses, own banks
 (fc-q15b / fc-q14b; digest prints fc_accuracy). **Bank gates first** (soft bands,
 Amendment J): 1.5B FC in [0.60, 0.85] (published 0.839), 14B FC in [0.82, 0.96]

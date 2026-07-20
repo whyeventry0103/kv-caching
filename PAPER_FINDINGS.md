@@ -406,6 +406,40 @@ Archived: results/diag/m4-aime-2048-summary.json
 ALSO: fc-q15b bank GATE PASSED same morning — 200/200, acc 0.800 (band
 [0.60, 0.85], published 0.839), trunc 0.04.
 
+### 4s. m4-q15b-256 — scale axis, 1.5B cell IN, both presses REPLICATE (read 2026-07-20)
+grid/readout/reverse-readout-diss256-q15b complete (400/400 each) on
+DeepSeek-R1-Distill-Qwen-1.5B against its own pinned bank (fc-q15b, acc
+0.800, gate passed 2026-07-18). Amendment J pre-committed branch check, both
+presses:
+- **StreamingLLM-256: free 0.220 [0.130, 0.315], readout 0.495 [0.378,
+  0.617], residual −0.275 CI [−0.362, −0.193], bracket [−0.418, −0.275],
+  reverse CI [−0.550, −0.358], trunc 0.150 → REPLICATES.**
+- **R-KV-256: free 0.355 [0.240, 0.465] (again the stronger free-runner, as
+  at 7B), readout 0.688 [0.566, 0.806], residual −0.333 CI [−0.439, −0.230],
+  bracket [−0.333, −0.262], reverse CI [−0.443, −0.235], trunc 0.210 →
+  REPLICATES.**
+Both CIs and both brackets exclude zero; truncation for both cells is far
+below the 0.5 degenerate threshold. This is 1 of 2 scale-axis cells
+(Amendment J); m4-q14b-256 (14B) is still running (0/400 all three stages as
+of this read) — do NOT apply the ≥3/4-replicate scope-upgrade sentence
+("one model family across three scales…") until the 14B cell lands; that
+edit is pre-drafted in RESULTS_PLAYBOOK.md and fires only then.
+In the paper: new threats paragraph "Scale-axis check (subset scale,
+Amendment J, in progress)" added after the Cross-architecture paragraph
+(`kv_readout_vs_trajectory_paper.tex` §threats); Generality paragraph's
+stale "AIME-24 is queued" corrected to "AIME-24 is in" (it was already read
+2026-07-18, §4r — the sentence had gone stale) and a scale-axis landing
+clause added. No figure change (per FIGURES_PLAYBOOK.md — subset-scale
+units are threats-only unless ≥3/4 replicate and the story earns a
+small-multiples panel; decide once the 14B cell is in).
+Archived: results/diag/m4-q15b-256-summary.json (harvest digest; copy after
+this session's `harvest_results.py` run).
+ALSO (infra note): overnight of 2026-07-19→20 was the first full window
+under the `shard_seeds(total_gpus=...)` fair-share fix — both GPUs ran in
+lockstep at 34–48% util from 01:45 through past 09:00 (verified in
+`logs/nightly_autorun.log`), unlike the single-GPU-idle night the fix was
+written for. Fix confirmed working under real load, not just the unit test.
+
 ## 5. Framing discipline (non-negotiable — apply throughout)
 - **Divergence ≠ damage.** ADD / TV / residual are "behavioral-fidelity loss," never "damage."
   Correctness is the only quality arbiter. Carry the **signed flip-mass** (gained vs lost correct
@@ -462,7 +496,10 @@ ALSO: fc-q15b bank GATE PASSED same morning — 200/200, acc 0.800 (band
   +0.023, measured; Branch A).
 - **DONE (added 2026-07-18):** m4-aime-2048 (§4r) — ORIGINAL CAMPAIGN 100%
   READ. No >100% regime; residual replicates on 2nd benchmark; readout
-  press-INDEPENDENT at 19.7% dose. Drop-dead 2026-08-01 met with 14 days
+  is press-INDEPENDENT at 19.7% dose. Drop-dead 2026-08-01 met with 14 days
   to spare.
-- **IN PROGRESS (Amendment J scale axis):** q15b (bank GATE PASSED 0.800;
-  grid 39/400) and q14b (bank 124/200) — the last cells before endgame.
+- **IN PROGRESS (Amendment J scale axis), updated 2026-07-20:** m4-q15b-256
+  (§4s) — 1.5B cell COMPLETE and read, both presses REPLICATE. m4-q14b-256
+  (14B) still running (grid/readout/reverse all 0/400 as of this morning);
+  scope-upgrade sentence withheld until it lands — the last cell before
+  endgame.
