@@ -440,6 +440,67 @@ lockstep at 34–48% util from 01:45 through past 09:00 (verified in
 `logs/nightly_autorun.log`), unlike the single-GPU-idle night the fix was
 written for. Fix confirmed working under real load, not just the unit test.
 
+### 4t. m4-q14b-256 — scale axis, 14B cell IN, Amendment J COMPLETE; 3/4 REPLICATE (read 2026-07-24)
+grid/readout/reverse-readout-diss256-q14b complete (400/400 each; last job in
+the 31-job nightly queue — the queue is now fully drained) on
+DeepSeek-R1-Distill-Qwen-14B against its own pinned bank (fc-q14b, acc 0.880,
+band [0.82, 0.96] published 0.939 → gate PASSED). `fails: 0` on every stage;
+R-KV self-check (RuntimeError on RoPE-convention drift, `src/kvcache/presses/
+rkv.py:209`) did NOT fire — verified by grepping the grid log for
+error/traceback/abort (zero hits) and confirming full 200/200 rows landed —
+so this is a genuine result, not an instrument abort.
+- **StreamingLLM-256: free 0.240 [0.150, 0.335], readout 0.503 [0.395,
+  0.600], residual −0.263 CI [−0.335, −0.170], bracket [−0.485, −0.263],
+  reverse CI [−0.590, −0.385], trunc 0.000 → REPLICATES cleanly.**
+- **R-KV-256: free 0.670 [0.535, 0.795] (again the stronger free-runner —
+  persists across all three scales tested), readout 0.848 [0.750, 0.922],
+  residual −0.178 CI [−0.273, −0.085] (excludes zero) — but bracket
+  [−0.178, 0.029] SPANS ZERO, the first non-degenerate cell in the paper
+  where it does. reverse CI [−0.131, 0.029]. trunc 0.230.**
+  Root cause of the span: reverse-readout accuracy is 0.909, *above* the
+  0.880 reference (reverse-readout change +0.029). This is the same
+  magnitude as the +0.023 pure answer-resampling effect measured directly
+  in §4j/§4a-dose (full-cache readout of full-cache traces, zero
+  compression) — i.e. the bracket's positive edge is consistent with known
+  resampling noise on a readout channel that is already near-lossless at
+  this scale (0.848 vs 0.880 reference, only −0.032 readout loss) rather
+  than evidence the trajectory effect reverses sign. Not floored (free
+  0.670, trunc 0.230 ≪ 0.5), so it does not fit DEGENERATE either.
+  **Per Amendment J's binding wording ("CI AND bracket exclude zero" for
+  REPLICATES), this cell does not qualify — it falls under "anything else":
+  reported verbatim, no compensation, no forcing into either branch.**
+Scorecard across all four scale-axis cells (§4s + this unit): **3 of 4
+REPLICATE outright** (SLM-1.5B, R-KV-1.5B, SLM-14B); **1 of 4 inconclusive
+under the bracket** (R-KV-14B) — not contradictory, not degenerate, just
+statistically unresolved at n=50×4 with a near-lossless readout channel.
+Per Amendment J: ≥3/4 replicate → **scope-upgrade sentence now applies**:
+"the readout-invisible trajectory residual holds across one model family
+spanning three scales (1.5B/7B/14B), plus an independent Llama-base check."
+Applied in the paper.
+In the paper: Scale-axis threats paragraph rewritten in full (both models,
+all four cells, R-KV-14B exception spelled out with the resampling
+comparison) — `in progress` → `complete` in its own label. Generality
+paragraph: scope-upgrade sentence added; stale "subset-scale ... checks
+below" parenthetical removed (redundant with the explicit enumeration that
+follows); "scale-axis check is landing, one of two cells in" → "complete on
+both". §4 preamble (line ~196): "in progress" → "All experimental cells
+reported in this paper ... are final." Conclusion "Near-term extensions in
+progress" paragraph rewritten past tense: full grid is in, 3/4 scale cells
+replicate, 4th reported as inconclusive-not-contradictory. Abstract/title
+unchanged (headline was already scoped to 7B/budget-256; scale axis lives
+only in threats+conclusion per the playbook's original design — this was
+never meant to enter the headline).
+No figure change: this is the second of the two subset-scale checks and
+still doesn't clear FIGURES_PLAYBOOK.md's bar (visual finding worth its own
+panel) — the 3/4-replicate story is a sentence, not a chart; the one
+partial exception (R-KV-14B) is better served by the resampling-comparison
+prose than by a bar that would need its own caveat anyway.
+Archived: results/diag/m4-q14b-256-summary.json.
+**ORIGINAL CAMPAIGN + AMENDMENT J: 100% READ. Nightly queue fully drained —
+no more scheduled runs.** Remaining work is the pre-planned endgame only
+(anonymization scrub, restore double-blind author block, arXiv upload,
+ICLR conversion) per `docs/strategy/SUBMISSION_STRATEGY.md` Phase 11.
+
 ## 5. Framing discipline (non-negotiable — apply throughout)
 - **Divergence ≠ damage.** ADD / TV / residual are "behavioral-fidelity loss," never "damage."
   Correctness is the only quality arbiter. Carry the **signed flip-mass** (gained vs lost correct
@@ -498,8 +559,14 @@ written for. Fix confirmed working under real load, not just the unit test.
   READ. No >100% regime; residual replicates on 2nd benchmark; readout
   is press-INDEPENDENT at 19.7% dose. Drop-dead 2026-08-01 met with 14 days
   to spare.
-- **IN PROGRESS (Amendment J scale axis), updated 2026-07-20:** m4-q15b-256
-  (§4s) — 1.5B cell COMPLETE and read, both presses REPLICATE. m4-q14b-256
-  (14B) still running (grid/readout/reverse all 0/400 as of this morning);
-  scope-upgrade sentence withheld until it lands — the last cell before
-  endgame.
+- **DONE (added 2026-07-20 + 2026-07-24):** m4-q15b-256 (§4s) + m4-q14b-256
+  (§4t) — Amendment J COMPLETE, all four scale-axis cells read. 3/4
+  REPLICATE (both 1.5B cells, SLM-14B); R-KV-14B inconclusive under the
+  bracket (span-zero, tied to the +0.023 resampling floor), reported
+  plainly. Scope-upgrade sentence applied: "one model family spanning
+  three scales (1.5B/7B/14B), plus a Llama-base check."
+- **ALL EXPERIMENTAL WORK COMPLETE 2026-07-24 — nightly queue fully
+  drained, no runs remain.** Endgame only from here: anonymization scrub,
+  restore double-blind author block, arXiv, ICLR conversion
+  (`docs/strategy/SUBMISSION_STRATEGY.md` Phase 11). Drop-dead 2026-08-01
+  met with 8 days to spare.

@@ -16,6 +16,49 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★ ALL EXPERIMENTAL WORK COMPLETE (2026-07-24) — nightly queue fully
+  drained, zero runs remain, ORIGINAL CAMPAIGN + AMENDMENT J both 100%
+  READ.** m4-q14b-256 (14B, the last job in the 31-job queue) landed:
+  grid/readout/reverse all 400/400 against fc-q14b (acc 0.880, band
+  [0.82,0.96] published 0.939 → gate PASSED). StreamingLLM: free 0.240
+  [0.150,0.335], readout 0.503 [0.395,0.600], residual −0.263 CI
+  [−0.335,−0.170], bracket [−0.485,−0.263] — **REPLICATES cleanly.**
+  R-KV: free 0.670 (again the stronger free-runner — persists across all
+  three scales), readout 0.848 [0.750,0.922], residual −0.178 CI
+  [−0.273,−0.085] (excludes zero) but **bracket [−0.178, 0.029] SPANS
+  ZERO** — the first non-degenerate cell in the paper where it does.
+  Root cause: reverse-readout accuracy 0.909 exceeds the 0.880 reference
+  (+0.029 change), matching the order of magnitude of the independently
+  measured +0.023 pure resampling effect (§4j) — so the span reads as
+  resampling noise on an already near-lossless readout channel (0.848 vs
+  0.880), not a sign-reversed trajectory effect. Not floored (trunc
+  0.230), so it's not DEGENERATE either — falls under Amendment J's
+  "anything else" branch: reported verbatim, not forced.
+  **Scorecard: 3/4 scale-axis cells REPLICATE** (both 1.5B cells,
+  SLM-14B); R-KV-14B inconclusive. Per Amendment J, ≥3/4 triggers the
+  scope-upgrade sentence, now applied: "the readout-invisible trajectory
+  residual holds across one model family spanning three scales
+  (1.5B/7B/14B), plus an independent Llama-base check."
+  Verified genuine (not an instrument abort): R-KV's self-check raises
+  RuntimeError on RoPE-convention drift (`presses/rkv.py:209`) — grid log
+  has zero error/traceback/abort hits, `fails:0` throughout, full 200/200
+  rows landed.
+  Paper edits: Scale-axis threats paragraph rewritten in full (both
+  models, all 4 cells, R-KV-14B exception spelled out); Generality
+  paragraph gets the scope-upgrade sentence, stale hedges removed; §4
+  preamble "in progress" → "final"; conclusion's "near-term extensions"
+  paragraph rewritten past-tense. Abstract/title untouched (scale axis
+  was always threats+conclusion-only by design). No figure change (still
+  doesn't clear the FIGURES_PLAYBOOK.md bar for a dedicated panel).
+  Recorded PAPER_FINDINGS §4t; §7 status updated; RESULTS_PLAYBOOK unit
+  marked fully CONSUMED. Archived results/diag/m4-q14b-256-summary.json.
+  **REMAINING WORK: none experimental. Endgame only** — anonymization
+  scrub (personal email in scripts/nightly_report.py; exclude context.md/
+  docs/strategy/*/complete_setup.md from the public artifact), restore
+  "Anonymous Authors" for ICLR's double-blind submission, arXiv upload,
+  per `docs/strategy/SUBMISSION_STRATEGY.md` Phase 11. Drop-dead
+  2026-08-01 met with 8 days to spare.
+
   **★ SCALE-AXIS 1.5B CELL IN, BOTH PRESSES REPLICATE (2026-07-20):**
   m4-q15b-256 complete (grid/readout/reverse all 400/400) against fc-q15b
   (acc 0.800, gate passed). StreamingLLM: free 0.220 [0.130,0.315], readout

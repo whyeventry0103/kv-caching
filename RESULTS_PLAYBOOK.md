@@ -62,12 +62,15 @@ unless Branch B survives CIs, in which case add ONE clause at most.
 
 ## UNITS m4-q15b-256 and m4-q14b-256 (scale axis; Amendment J, added 2026-07-17)
 
-> **m4-q15b-256 (1.5B) HALF-CONSUMED 2026-07-20** — both cells REPLICATE
-> (StreamingLLM and R-KV, CIs and brackets excluding zero); recorded in
-> PAPER_FINDINGS §4s, threats paragraph added to the paper. m4-q14b-256
-> (14B) still pending (0/400 as of 2026-07-20) — unit stays under PENDING
-> until it lands; the ≥3/4-replicate scope-upgrade sentence below fires
-> only once both cells are in. Do not re-read q15b.
+> **CONSUMED 2026-07-24 — Amendment J COMPLETE, both units read.**
+> m4-q15b-256 (1.5B, read 2026-07-20): both cells REPLICATE. m4-q14b-256
+> (14B, read 2026-07-24, last job in the queue): SLM-14B REPLICATES;
+> R-KV-14B's bracket spans zero (span tied to the +0.023 resampling floor)
+> — "anything else" branch, reported verbatim, not forced. Scorecard 3/4
+> replicate → scope-upgrade sentence fires: "one model family spanning
+> three scales (1.5B/7B/14B), plus a Llama-base check." Recorded in
+> PAPER_FINDINGS §4s + §4t. Kept under PENDING header order only to
+> preserve file history; do not redo either half.
 
 Two units, same shape as the llama unit but SLM + R-KV presses, own banks
 (fc-q15b / fc-q14b; digest prints fc_accuracy). **Bank gates first** (soft bands,
