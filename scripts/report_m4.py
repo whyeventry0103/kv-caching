@@ -11,6 +11,11 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
+# A condition: the (problem id, seed) pair that indexes one generation everywhere
+# in this pipeline. Amendment K makes it the unit the reference population is
+# defined over, so it is named rather than spelled out at every call site.
+Key = tuple[str, int]
+
 
 def _problem_bootstrap_ci(
     rows: list[dict[str, Any]],
@@ -42,11 +47,36 @@ def _problem_bootstrap_ci(
     return (round(lo, 4), round(hi, 4))
 
 
+def _mean_over(keys: list[Key], table: dict[Key, bool]) -> float | None:
+    """Accuracy over exactly ``keys``, skipping keys absent from ``table``."""
+    vals = [float(table[k]) for k in keys if k in table]
+    return statistics.fmean(vals) if vals else None
+
+
+def _imputation_bounds(
+    cell_keys: list[Key], table: dict[Key, bool]
+) -> tuple[float, float]:
+    """Accuracy over the FULL cell population under both scorings of the undefined.
+
+    Amendment K layer 1: the population is fixed at every condition in the cell.
+    Conditions with no defined answer boundary are scored incorrect for the lower
+    endpoint and correct for the upper one, so the reported quantity is an
+    interval over a fixed population rather than a point on a selected subset.
+    """
+    n = len(cell_keys)
+    if not n:
+        return (0.0, 0.0)
+    hits = sum(1 for k in cell_keys if table.get(k) is True)
+    undefined = sum(1 for k in cell_keys if k not in table)
+    return (hits / n, (hits + undefined) / n)
+
+
 def _endpoint_cis(
-    comp: list[dict[str, Any]],
-    readout_defined: list[dict[str, Any]],
-    reverse: list[dict[str, Any]],
-    full_rows: list[dict[str, Any]],
+    cell_keys: list[Key],
+    comp_by: dict[Key, bool],
+    ro_by: dict[Key, bool],
+    rev_by: dict[Key, bool],
+    fc_by: dict[Key, bool],
     *,
     n_resamples: int = 2000,
     seed: int = 0,
@@ -54,45 +84,48 @@ def _endpoint_cis(
     """Problem-clustered bootstrap 95% CIs for the two residual-bracket endpoints.
 
     Endpoints per resample of problems (with replacement, k = n cell problems):
-    forward = comp_acc - readout_acc (the FC term cancels in total - readout);
-    reverse = reverse_acc - fc_acc (clean readout of the compressed trace vs FC).
-    Problems missing defined readout/reverse rows contribute to the other means
-    only (matching the point estimates' mixed-denominator convention, which is
-    disclosed and imputation-bounded in the paper).
-    """
+    forward = comp_acc - readout_acc; reverse = reverse_acc - fc_acc.
 
-    def _per_pid_mean(rows, key, pid_fn):
+    Amendment K: each endpoint's two terms are computed over the *same*
+    (problem, seed) population — the conditions where that endpoint's readout is
+    defined. Previously the point estimates used a global FC mean while these CIs
+    already restricted the reference to the cell's problems, so a point estimate
+    and its own interval were computed on different populations.
+    """
+    ro_keys = [k for k in cell_keys if k in ro_by]
+    rev_keys = [k for k in cell_keys if k in rev_by]
+
+    def _per_pid(keys: list[Key], table: dict[Key, bool]) -> dict[str, float]:
         by_pid: dict[str, list[float]] = defaultdict(list)
-        for row in rows:
-            by_pid[pid_fn(row)].append(float(bool(row[key])))
+        for key in keys:
+            if key in table:
+                by_pid[key[0]].append(float(table[key]))
         return {pid: statistics.fmean(vals) for pid, vals in by_pid.items()}
 
-    comp_mean = _per_pid_mean(comp, "correct", lambda r: r["pid"])
-    ro_mean = _per_pid_mean(
-        readout_defined, "readout_correct", lambda r: r["reference_key"][1]
-    )
-    rev_mean = _per_pid_mean(
-        reverse, "readout_correct", lambda r: r["reference_key"][1]
-    )
-    cell_pids = sorted(comp_mean)
-    fc_mean = _per_pid_mean(
-        [r for r in full_rows if r["pid"] in comp_mean], "correct", lambda r: r["pid"]
-    )
+    comp_on_ro = _per_pid(ro_keys, comp_by)
+    ro_mean = _per_pid(ro_keys, ro_by)
+    rev_mean = _per_pid(rev_keys, rev_by)
+    fc_on_rev = _per_pid(rev_keys, fc_by)
+
+    cell_pids = sorted({k[0] for k in cell_keys})
     rng = random.Random(seed)
     k = len(cell_pids)
     forward_samples: list[float] = []
     reverse_samples: list[float] = []
     for _ in range(n_resamples):
         draw = [cell_pids[rng.randrange(k)] for _ in range(k)]
-        comp_acc = statistics.fmean(comp_mean[p] for p in draw)
-        ro_vals = [ro_mean[p] for p in draw if p in ro_mean]
-        if ro_vals:
-            forward_samples.append(comp_acc - statistics.fmean(ro_vals))
-        if rev_mean:
-            rev_vals = [rev_mean[p] for p in draw if p in rev_mean]
-            if rev_vals:
-                fc_acc = statistics.fmean(fc_mean[p] for p in draw)
-                reverse_samples.append(statistics.fmean(rev_vals) - fc_acc)
+        fwd = [p for p in draw if p in ro_mean]
+        if fwd:
+            forward_samples.append(
+                statistics.fmean(comp_on_ro[p] for p in fwd)
+                - statistics.fmean(ro_mean[p] for p in fwd)
+            )
+        rev = [p for p in draw if p in rev_mean]
+        if rev:
+            reverse_samples.append(
+                statistics.fmean(rev_mean[p] for p in rev)
+                - statistics.fmean(fc_on_rev[p] for p in rev)
+            )
 
     def _ci(samples: list[float]) -> tuple[float, float]:
         ordered = sorted(samples)
@@ -102,7 +135,7 @@ def _endpoint_cis(
             round(ordered[int(0.975 * (n - 1))], 4),
         )
 
-    forward_ci = _ci(forward_samples)
+    forward_ci = _ci(forward_samples) if forward_samples else (0.0, 0.0)
     reverse_ci = _ci(reverse_samples) if reverse_samples else None
     return forward_ci, reverse_ci
 
@@ -235,45 +268,86 @@ def build_report(
         replay = replay_by_cell[condition]
         readout = readout_by_cell[condition]
         compressed_accuracy = _accuracy(comp)
-        # Exclude undefined-boundary readout rows from readout-accuracy; count them.
         readout_defined = [r for r in readout if r.get("readout_correct") is not None]
         n_readout_undefined = len(readout) - len(readout_defined)
-        readout_accuracy = (
-            sum(bool(r["readout_correct"]) for r in readout_defined)
-            / len(readout_defined)
-            if readout_defined
-            else 0.0
-        )
-        total_change = compressed_accuracy - full_accuracy
-        readout_change = readout_accuracy - full_accuracy
-        residual = total_change - readout_change
-        # Reverse readout (if supplied) brackets the on-policy residual; never collapse
-        # the bracket to one causal number (decomposition.py / Amendment F discipline).
-        reverse = [
-            r
-            for r in reverse_by_cell.get(condition, [])
-            if r.get("readout_correct") is not None
+        reverse_rows = reverse_by_cell.get(condition, [])
+        reverse = [r for r in reverse_rows if r.get("readout_correct") is not None]
+
+        # --- Amendment K: fix the reference population to the cell's conditions ---
+        # The cell population is every (pid, seed) it generated. Readout is defined
+        # only where the reference trace has an answer boundary, and reverse readout
+        # only where the *compressed* trace has one -- both are selected, non-random
+        # subsets (a trace has a boundary iff it terminated). Subtracting a global
+        # bank mean from an accuracy measured on such a subset is a population
+        # mismatch, not an estimand. Every change below is now computed against a
+        # reference on the same population as the quantity it is subtracted from.
+        cell_keys = sorted({_run_key(row) for row in comp})
+        comp_by = {_run_key(row): bool(row["correct"]) for row in comp}
+        ro_by = {
+            _reference_key_from_readout(row): bool(row["readout_correct"])
+            for row in readout_defined
+        }
+        rev_by = {
+            _reference_key_from_readout(row): bool(row["readout_correct"])
+            for row in reverse
+        }
+        fc_cell_accuracy = _mean_over(cell_keys, reference_correct)
+
+        # Layer 1 (primary): fixed population, imputation bounds on the undefined.
+        ro_bounds = _imputation_bounds(cell_keys, ro_by)
+        ro_change_bounds = [v - fc_cell_accuracy for v in ro_bounds]
+        # residual = total - readout = comp_acc - readout_acc (the FC term cancels),
+        # so the wider readout bound gives the more negative residual endpoint.
+        residual_bounds = [
+            compressed_accuracy - ro_bounds[1],
+            compressed_accuracy - ro_bounds[0],
         ]
-        reverse_readout_accuracy = (
-            sum(bool(r["readout_correct"]) for r in reverse) / len(reverse)
-            if reverse
-            else None
+        if reverse_rows:
+            rev_bounds = _imputation_bounds(cell_keys, rev_by)
+            rev_change_bounds = [v - fc_cell_accuracy for v in rev_bounds]
+            bracket_bounds = [
+                min(residual_bounds[0], rev_change_bounds[0]),
+                max(residual_bounds[1], rev_change_bounds[1]),
+            ]
+        else:
+            rev_bounds = rev_change_bounds = bracket_bounds = None
+
+        # Layer 2 (secondary, complete-case): the same quantities restricted to the
+        # defined subset, with the reference restricted to that identical subset.
+        # Post-treatment conditioning -- reported as sensitivity, never as primary.
+        ro_keys = [k for k in cell_keys if k in ro_by]
+        rev_keys = [k for k in cell_keys if k in rev_by]
+        readout_accuracy = _mean_over(ro_keys, ro_by) or 0.0
+        fc_on_readout = _mean_over(ro_keys, reference_correct)
+        comp_on_readout = _mean_over(ro_keys, comp_by)
+        readout_change = (
+            readout_accuracy - fc_on_readout if fc_on_readout is not None else None
         )
-        if reverse_readout_accuracy is not None:
-            reverse_change = reverse_readout_accuracy - full_accuracy
-            # Reverse endpoint is reverse_change ITSELF (acc_rev - acc_fc): clean
-            # readout of the compressed trace directly estimates the residual on
-            # the compressed model's own states (total - (free - rev) = rev - fc).
-            # total - reverse_change would be the on-policy READOUT change.
-            endpoints = (total_change - readout_change, reverse_change)
+        residual = (
+            comp_on_readout - readout_accuracy if comp_on_readout is not None else None
+        )
+        reverse_readout_accuracy = _mean_over(rev_keys, rev_by)
+        fc_on_reverse = _mean_over(rev_keys, reference_correct)
+        if (
+            reverse_readout_accuracy is not None
+            and fc_on_reverse is not None
+            and residual is not None
+        ):
+            # Reverse endpoint is acc_rev - acc_fc on the reverse-defined conditions:
+            # clean readout of the compressed trace estimates the residual on the
+            # compressed model's own states (Amendment H).
+            reverse_change = reverse_readout_accuracy - fc_on_reverse
+            endpoints = (residual, reverse_change)
             residual_bracket = [min(endpoints), max(endpoints)]
         else:
             reverse_change = None
             residual_bracket = None
-        # Problem-clustered bootstrap CIs on the two bracket endpoints (closes the
-        # "no sampling uncertainty on the bracket" gap; paper Threats/§reverse).
+        total_change = compressed_accuracy - fc_cell_accuracy
+
+        # Problem-clustered bootstrap CIs on the two bracket endpoints, now on the
+        # same populations as the complete-case point estimates they accompany.
         forward_endpoint_ci, reverse_endpoint_ci = _endpoint_cis(
-            comp, readout_defined, reverse, full_rows
+            cell_keys, comp_by, ro_by, rev_by, reference_correct
         )
         flip = _signed_flip_mass(reference_correct, comp)
         summed_tv = []
@@ -299,7 +373,34 @@ def build_report(
                 "press": condition[0],
                 "budget": condition[1],
                 "rows": len(comp),
-                "full_accuracy": full_accuracy,
+                # Amendment K: the cell's own reference population. `full_accuracy`
+                # is Acc_FC on this cell's (pid, seed) conditions -- NOT the global
+                # bank mean, which is kept only for provenance.
+                "full_accuracy": fc_cell_accuracy,
+                "full_accuracy_all_rows": full_accuracy,
+                "reference_population": {
+                    "n_conditions": len(cell_keys),
+                    "fc_accuracy_cell": fc_cell_accuracy,
+                    "fc_accuracy_readout_defined": fc_on_readout,
+                    "fc_accuracy_reverse_defined": fc_on_reverse,
+                    "n_readout_defined": len(ro_keys),
+                    "n_reverse_defined": len(rev_keys),
+                },
+                # Layer 1 (primary): fixed population, both imputations.
+                "primary_bounds": {
+                    "readout_accuracy": list(ro_bounds),
+                    "readout_change": list(ro_change_bounds),
+                    "residual": list(residual_bounds),
+                    "reverse_readout_accuracy": (
+                        list(rev_bounds) if rev_bounds else None
+                    ),
+                    "reverse_change": (
+                        list(rev_change_bounds) if rev_change_bounds else None
+                    ),
+                    "residual_bracket": (
+                        list(bracket_bounds) if bracket_bounds else None
+                    ),
+                },
                 "compressed_accuracy": compressed_accuracy,
                 "compressed_accuracy_ci95": _problem_bootstrap_ci(
                     comp, lambda r: bool(r["correct"])
@@ -344,6 +445,10 @@ def build_report(
         )
 
     summary = {
+        # Stamped so a pre-Amendment-K artifact can never be silently read as a
+        # current one: every number below is on the cell's own reference
+        # population, and the two conventions are not comparable.
+        "reference_convention": "amendment-k-cell-population",
         "full_cache": {
             "rows": len(full_rows),
             "correct": sum(bool(row["correct"]) for row in full_rows),
@@ -362,7 +467,12 @@ def build_report(
         },
         "claim_discipline": (
             "Residual is accuracy change unexplained by on-reference readout, "
-            "not a measured cause."
+            "not a measured cause. Top-level cell values are COMPLETE-CASE "
+            "(Amendment K layer 2): each change is measured against the "
+            "reference restricted to the same conditions. Boundary detection is "
+            "post-treatment, so the primary estimand is `primary_bounds` "
+            "(layer 1: the full cell population, undefined rows imputed both "
+            "ways). Never subtract a global bank mean from a subset accuracy."
         ),
     }
     return summary, cells

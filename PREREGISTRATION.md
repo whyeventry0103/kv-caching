@@ -572,3 +572,108 @@ x 4 seeds per cell, own pinned FC reference banks):
   (published 0.839 at 32K decode), 14B accuracy 0.82-0.96 (published 0.939),
   both with the ~0.03-0.09 harness gap seen for 7B (0.8825 vs 0.928) and
   Llama-8B (0.805 vs 0.891).
+
+## Amendment K (2026-07-27): correction of the reference-population mismatch in every accuracy-change estimand
+
+A computation error is corrected, dated, and disclosed. Like Amendment H, this
+amendment changes no raw measurement: every generated row, grade, and token-ID
+sidecar is unchanged. It changes how derived changes are computed against the
+full-cache reference, and it changes some reported numbers in both directions.
+
+### Trigger and date of discovery
+
+Found 2026-07-27 during a Phase-0 verification pass that was auditing an
+unrelated external-review claim about the 100-vs-250 problem reference bank.
+That claim turned out to be immaterial (matched Acc_FC 0.8838 vs 0.8825, a
++0.00125 difference that cancels in the forward residual). The verification
+incidentally exposed the real defect below. The sequence is recorded here
+because the correction happens to move one pre-registered verdict in our
+favour, and the discovery order is therefore part of the evidence.
+
+### The error
+
+`scripts/report_m4.py` computed one global `full_accuracy` over the entire
+full-cache bank and subtracted it from quantities measured on strict, non-random
+subsets of that bank:
+
+- **Readout accuracy** is defined only on conditions whose reference trace has a
+  detected reasoning/answer boundary. A trace has a boundary iff it terminated,
+  so the defined subset is systematically easier than the cell population.
+- **Reverse-readout accuracy** is defined only on conditions whose *compressed*
+  trace has a boundary — a post-treatment selection, differing by policy
+  (308 / 372 / 360 / 346 of 400 at MATH-500 budget 256).
+
+`readout_change` and `reverse_readout_change` therefore compared an accuracy on
+a selected subset against a reference mean over the unselected population. That
+is a population mismatch, not an estimand; no reading of it is defensible.
+Measured magnitudes of the mismatch:
+
+- Acc_FC over all 2000 MATH-500 rows = 0.8825; over the 392 readout-defined
+  rows = 0.9031; over R-KV-14B's 154 reverse-defined rows = 0.9351 (against
+  0.880 for that bank as a whole).
+
+A second, related defect: the point estimates used the unmatched global mean
+while their own problem-clustered bootstrap CIs (`_endpoint_cis`) already
+restricted the reference to the cell's problems. Point estimate and interval
+were computed on different populations.
+
+### The convention adopted (three layers, applied uniformly)
+
+1. **Primary estimand — fixed population.** The population is *all* conditions
+   in the cell (400 at MATH-500 budget 256; 200 for the scale-axis cells; 120 on
+   AIME-24). The reference is Acc_FC on that same (problem, seed) population.
+   Undefined-boundary rows are handled by **imputation bounds in both
+   directions** (scored incorrect for one endpoint, correct for the other), so
+   every reported change and residual is an interval over a fixed population.
+   This is the treatment the MATH-500 reverse rows already received; the
+   scale-axis and AIME cells simply never received it.
+2. **Secondary — complete-case.** The same quantities restricted to the defined
+   subset, with the reference restricted to that identical subset. Reported as a
+   sensitivity analysis and labeled complete-case. Because boundary detection is
+   post-treatment, complete-case conditions on an outcome the treatment affects
+   and compares policies on different populations; that caveat is stated once
+   and is why this layer is secondary rather than primary.
+3. **Retired — unmatched subset-vs-full-bank.** Removed everywhere. Numbers that
+   derived from it are corrected, not re-interpreted.
+
+### Effect on our own claims — in both directions
+
+The correction is not self-serving, and the evidence is that it moves our
+numbers both ways:
+
+- **Against us:** the AIME-24 forward residuals shrink, −0.179 / −0.246 / −0.321
+  (Random / R-KV / StreamingLLM) becoming −0.118 / −0.194 / −0.280 on matched
+  denominators. The AIME "readout exceeds the reference by +0.092" observation
+  is deleted outright: on the 93 defined rows, compressed readout agrees with
+  full-cache readout on 93/93 conditions (0 gained, 0 lost) for all three
+  policies, so the apparent bonus was entirely the denominator.
+- **Against us:** the measured pure answer-resampling effect falls from +0.023
+  to **+0.003** (full-cache readout of full-cache traces agrees with the bank on
+  391/392 rows; 1 gained, 0 lost). This *strengthens* the readout-easiness
+  rebuttal but retires a constant used elsewhere as an explanatory scale.
+- **For us:** all four MATH-500 reverse endpoints move further from zero
+  (Random −0.246 → −0.282, R-KV −0.221 → −0.251, StreamingLLM −0.466 → −0.470,
+  H2O-style −0.463 → −0.478).
+- **For us:** R-KV-14B's bracket, the only one in the paper that spanned zero,
+  no longer does — [−0.178, +0.029] becomes [−0.168, −0.026] complete-case,
+  because its reverse endpoint was computed on the 154 conditions where the
+  compressed model terminated, a subset on which the reference itself scores
+  0.9351 rather than 0.880.
+
+### Decision on the Amendment J scorecard — deliberately NOT restated
+
+Amendment J's pre-registered read gave **3 of 4 scale-axis cells REPLICATE, with
+R-KV-14B inconclusive under the bracket**. That outcome stands as the
+pre-registered convention's result and is reported as such. The
+corrected-denominator outcome for that cell is reported alongside it, with the
+discovery timing disclosed, so a reader sees both. We do not bank the upgrade to
+4/4 and we do not restate the §5 scope sentence on the strength of a correction
+found after the verdict was recorded; a footnote carries the correction. The
+value of visibly declining the upgrade exceeds the value of the upgrade.
+
+### Discipline followed in applying it
+
+The fix was written, the code changed, and **every** cell regenerated in one
+pass — MATH-500 at 256 and 2048, AIME-24, Llama-8B, 1.5B and 14B — before any
+per-cell verdict was inspected. The 14B cell was not fixed first. Uniform
+prior application is the control against fitting the convention to the result.

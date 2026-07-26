@@ -190,10 +190,21 @@ def _run(argv: list[str]) -> str:
     return result.stdout
 
 
+def _fmt_bounds(bounds: list[float] | None) -> str:
+    return "n/a" if not bounds else f"[{bounds[0]:+.4f}, {bounds[1]:+.4f}]"
+
+
 def _digest_m4(summary_path: Path) -> list[str]:
     summary = json.loads(summary_path.read_text())
-    lines = [f"  fc_accuracy={summary['full_cache']['accuracy']:.4f}"]
+    convention = summary.get("reference_convention", "PRE-AMENDMENT-K (STALE)")
+    lines = [
+        f"  fc_accuracy(bank)={summary['full_cache']['accuracy']:.4f} "
+        f"convention={convention}"
+    ]
     for c in summary["cells"]:
+        pop = c.get("reference_population", {})
+        bounds = c.get("primary_bounds", {})
+        # Complete-case line (Amendment K layer 2) -- the point estimates.
         lines.append(
             f"  {c['press']}@{c['budget']}: free={c['compressed_accuracy']:.4f} "
             f"{c['compressed_accuracy_ci95']} readout={c['readout_accuracy']:.4f} "
@@ -202,6 +213,19 @@ def _digest_m4(summary_path: Path) -> list[str]:
             f"revCI={c['reverse_residual_ci95']} trunc={c['truncation_rate']:.3f} "
             f"undef={c['n_readout_undefined']} n_rev={c['n_reverse_readout']} "
             f"flip={c['signed_flip_mass']}"
+        )
+        # Reference population + primary bounds (layer 1) -- the primary estimand.
+        lines.append(
+            f"      ref: cell={c['full_accuracy']:.4f} "
+            f"(n={pop.get('n_conditions')}) "
+            f"ro_defined={pop.get('fc_accuracy_readout_defined')} "
+            f"rev_defined={pop.get('fc_accuracy_reverse_defined')} "
+            f"| bank={c.get('full_accuracy_all_rows')}"
+        )
+        lines.append(
+            f"      primary bounds: residual={_fmt_bounds(bounds.get('residual'))} "
+            f"bracket={_fmt_bounds(bounds.get('residual_bracket'))} "
+            f"readout={_fmt_bounds(bounds.get('readout_accuracy'))}"
         )
     return lines
 

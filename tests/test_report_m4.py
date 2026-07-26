@@ -232,3 +232,210 @@ def test_m4_report_bench_parameter_reads_aime_subtree(tmp_path):
     assert summary["full_cache"]["rows"] == 10
     assert cells[0]["compressed_accuracy"] == 0.5
     assert cells[0]["readout_accuracy"] == 0.8
+
+
+def _amendment_k_inputs(tmp_path):
+    """A cell that is a strict, EASY subset of the FC bank, with undefined rows.
+
+    This is the shape that produced the real defect (Amendment K): the reference
+    bank spans problems the cell never ran, and readout / reverse readout are
+    defined only on a terminated -- therefore easier -- subset of the cell.
+
+    FC bank: p0..p4 correct, p5..p9 wrong  -> Acc_FC(all rows)  = 0.5
+    Cell:    p0..p4 only                   -> Acc_FC(cell)      = 1.0
+    """
+    full, comp = tmp_path / "full", tmp_path / "comp"
+    readout, reverse = tmp_path / "readout", tmp_path / "reverse"
+    _write(
+        full / "math500" / "r.jsonl",
+        [
+            {
+                "pid": f"p{i}",
+                "decoding": {"seed": i},
+                "correct": i < 5,
+                "truncated": False,
+            }
+            for i in range(10)
+        ],
+    )
+    _write(
+        comp / "math500" / "r.jsonl",
+        [
+            {
+                "pid": f"p{i}",
+                "decoding": {"seed": i},
+                "press": "streamingllm",
+                "budget": 256,
+                "correct": i < 1,  # 1 of 5 -> 0.2
+                "truncated": False,
+                "n_tokens": 10,
+            }
+            for i in range(5)
+        ],
+    )
+    # Readout defined on p0..p3 (p4 undefined), correct on p0,p1 -> 2/4 = 0.5.
+    _write(
+        readout / "readout" / "r.jsonl",
+        [
+            {
+                "reference_key": ["math500", f"p{i}", "m", "fullcache", "full", i],
+                "condition": {"press": "streamingllm", "budget": 256},
+                "readout_correct": (i < 2) if i < 4 else None,
+                "generated_token_ids": [1],
+            }
+            for i in range(5)
+        ],
+    )
+    # Reverse defined on p0..p2 only, all correct -> 1.0 on a subset the reference
+    # also scores 1.0 on. Against the global 0.5 bank mean this fabricates a +0.5
+    # endpoint; against its own population the endpoint is 0.0.
+    _write(
+        reverse / "readout" / "r.jsonl",
+        [
+            {
+                "reference_key": ["math500", f"p{i}", "m", "streamingllm", "256", i],
+                "condition": {"press": "fullcache", "budget": "full"},
+                "readout_correct": True if i < 3 else None,
+                "generated_token_ids": [1],
+            }
+            for i in range(5)
+        ],
+    )
+    return full, comp, readout, reverse
+
+
+def test_amendment_k_reference_is_the_cell_population_not_the_whole_bank(tmp_path):
+    full, comp, readout, reverse = _amendment_k_inputs(tmp_path)
+    summary, cells = MODULE.build_report(
+        fullcache_root=full,
+        compression_root=comp,
+        readout_root=readout,
+        reverse_readout_root=reverse,
+    )
+    cell = cells[0]
+    # Provenance keeps the global mean; the cell's reference is its own population.
+    assert summary["full_cache"]["accuracy"] == approx(0.5)
+    assert cell["full_accuracy_all_rows"] == approx(0.5)
+    assert cell["full_accuracy"] == approx(1.0)
+    assert cell["reference_population"]["n_conditions"] == 5
+    # Pre-Amendment-K this was 0.2 - 0.5 = -0.3, measured against problems the
+    # cell never ran.
+    assert cell["total_change"] == approx(-0.8)
+    assert summary["reference_convention"] == "amendment-k-cell-population"
+
+
+def test_amendment_k_complete_case_uses_the_defined_subset_as_its_own_reference(
+    tmp_path,
+):
+    full, comp, readout, reverse = _amendment_k_inputs(tmp_path)
+    _, cells = MODULE.build_report(
+        fullcache_root=full,
+        compression_root=comp,
+        readout_root=readout,
+        reverse_readout_root=reverse,
+    )
+    cell = cells[0]
+    assert cell["reference_population"]["n_readout_defined"] == 4
+    assert cell["reference_population"]["fc_accuracy_readout_defined"] == approx(1.0)
+    assert cell["readout_accuracy"] == approx(0.5)
+    # Pre-Amendment-K: 0.5 - 0.5 = 0.0, a readout that looked lossless because the
+    # bank mean happened to match an accuracy on an unrelated population.
+    assert cell["readout_change"] == approx(-0.5)
+    # residual = comp - readout on the SAME 4 conditions: 0.25 - 0.5.
+    assert cell["unexplained_residual"] == approx(-0.25)
+
+
+def test_amendment_k_reverse_endpoint_no_longer_fabricates_a_positive_edge(tmp_path):
+    """The 14B failure mode: reverse defined only where the compressed run
+    terminated, compared against a bank mean over every condition."""
+    full, comp, readout, reverse = _amendment_k_inputs(tmp_path)
+    _, cells = MODULE.build_report(
+        fullcache_root=full,
+        compression_root=comp,
+        readout_root=readout,
+        reverse_readout_root=reverse,
+    )
+    cell = cells[0]
+    assert cell["reference_population"]["n_reverse_defined"] == 3
+    assert cell["reverse_readout_accuracy"] == approx(1.0)
+    assert cell["reference_population"]["fc_accuracy_reverse_defined"] == approx(1.0)
+    # Pre-Amendment-K: 1.0 - 0.5 = +0.5, and the bracket spanned zero for no
+    # reason but the mismatch. On its own population the endpoint is exactly 0.
+    assert cell["reverse_readout_change"] == approx(0.0)
+    assert cell["residual_bracket"] == approx([-0.25, 0.0])
+
+
+def test_amendment_k_primary_bounds_fix_the_population_and_impute_both_ways(tmp_path):
+    full, comp, readout, reverse = _amendment_k_inputs(tmp_path)
+    _, cells = MODULE.build_report(
+        fullcache_root=full,
+        compression_root=comp,
+        readout_root=readout,
+        reverse_readout_root=reverse,
+    )
+    bounds = cells[0]["primary_bounds"]
+    # 2 defined-correct of 5 conditions; 1 undefined -> [2/5, 3/5].
+    assert bounds["readout_accuracy"] == approx([0.4, 0.6])
+    assert bounds["readout_change"] == approx([-0.6, -0.4])
+    # residual = comp_acc - readout_acc, so the upper readout bound is the more
+    # negative residual endpoint.
+    assert bounds["residual"] == approx([-0.4, -0.2])
+    # 3 defined-correct of 5; 2 undefined -> [3/5, 5/5].
+    assert bounds["reverse_readout_accuracy"] == approx([0.6, 1.0])
+    assert bounds["reverse_change"] == approx([-0.4, 0.0])
+    assert bounds["residual_bracket"] == approx([-0.4, 0.0])
+
+
+def test_amendment_k_bounds_collapse_to_the_point_when_nothing_is_undefined(tmp_path):
+    """Sanity: with every boundary defined and the cell equal to the bank, the
+    two layers agree and the imputation interval has zero width."""
+    full, comp = tmp_path / "full", tmp_path / "comp"
+    readout = tmp_path / "readout"
+    _write(
+        full / "math500" / "r.jsonl",
+        [
+            {
+                "pid": f"p{i}",
+                "decoding": {"seed": i},
+                "correct": i < 8,
+                "truncated": False,
+            }
+            for i in range(10)
+        ],
+    )
+    _write(
+        comp / "math500" / "r.jsonl",
+        [
+            {
+                "pid": f"p{i}",
+                "decoding": {"seed": i},
+                "press": "random",
+                "budget": 256,
+                "correct": i < 3,
+                "truncated": False,
+                "n_tokens": 5,
+            }
+            for i in range(10)
+        ],
+    )
+    _write(
+        readout / "readout" / "r.jsonl",
+        [
+            {
+                "reference_key": ["math500", f"p{i}", "m", "fullcache", "full", i],
+                "condition": {"press": "random", "budget": 256},
+                "readout_correct": i < 6,
+                "generated_token_ids": [1],
+            }
+            for i in range(10)
+        ],
+    )
+    _, cells = MODULE.build_report(
+        fullcache_root=full, compression_root=comp, readout_root=readout
+    )
+    cell = cells[0]
+    assert cell["full_accuracy"] == approx(cell["full_accuracy_all_rows"])
+    lo, hi = cell["primary_bounds"]["readout_accuracy"]
+    assert lo == approx(hi) == approx(cell["readout_accuracy"])
+    lo, hi = cell["primary_bounds"]["residual"]
+    assert lo == approx(hi) == approx(cell["unexplained_residual"])
