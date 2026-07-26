@@ -1589,3 +1589,51 @@ Verified by:
 
 Update this addendum whenever paths, environment setup, server hardware, sync
 policy, or launch scripts change.
+
+---
+
+## 34. Deviation log — non-standard source transfers
+
+Entries here record transfers that did **not** go through `make sync-apply`. The
+point is that staleness must never be silent: a deviation that is written down,
+hash-verified, and reflected in `.sync-state` is auditable; an unrecorded one is
+the failure mode Lesson 14 exists to prevent. Do not read these entries as drift.
+
+### 2026-07-27 — `scp-verified-tree-hash` at commit `f0f809e`
+
+**What.** The Amendment K source change (`scripts/report_m4.py`,
+`scripts/harvest_results.py`, `tests/test_report_m4.py`, `PREREGISTRATION.md`,
+`CLAUDE.md`, `context.md`, `.gitignore`) was transferred by `scp` rather than
+`make sync-apply`.
+
+**Why.** `make sync-apply` failed six consecutive times with
+`rsync: unexpected end of file` (exit 255), the SSH channel dropping mid-transfer.
+Isolated by bisection: single-file `rsync` succeeds with and without `-z`, `scp`
+succeeds, and plain `ssh` is responsive — but a full-tree traversal times out. The
+box was carrying load ~9 from other tenants (`dockerd`, `itops`), so this is remote
+contention during file-list traversal, not the SSH multiplexing and not our link.
+
+**Why not `git pull` on the remote.** Checked first and rejected: the remote *is* a
+clone, but pinned at `3e19f8b` with 163 files modified by weeks of `--delete`-free
+rsync writing over the working tree, and it has no credentials for the origin
+remote. Pulling would have conflicted with the rsync'd tree.
+
+**How the guard was preserved.** The load-bearing part of `sync_source.sh --apply`
+is not the transport — it is the refusal unless the remote `source_tree_hash`
+matches the local one. That check was reproduced by hand and **initially failed**,
+correctly: it caught a stale `kv_compression_tutorial.pdf` on the remote that no
+longer existed locally (a Lesson 14 no-delete residue). That file turned out to be
+a *third, byte-distinct build* present nowhere else, so it was copied down and
+verified before removal, never deleted blind. After targeted cleanup both hashes
+read `f06d2975…` and `.sync-state` was written with `sync_method=scp-verified-tree-hash`.
+
+**Consequence for provenance.** `sync_method` is stamped into every result row's
+runmeta (`src/kvcache/runmeta.py`), so any future run transferred this way is
+labelled accordingly. Nothing validates the field against `rsync`, and
+`check_remote.sh` gates only on `source_tree_hash`, so the preflight is unaffected.
+
+**Standing rule.** An alternate transport is acceptable only when all three hold:
+the tree hashes are compared and match, `.sync-state` records the true commit and
+hash, and the deviation is logged here. Never write `.sync-state` from a transfer
+whose hash was not verified — that is precisely the silent staleness the invariant
+exists to prevent.

@@ -677,3 +677,61 @@ The fix was written, the code changed, and **every** cell regenerated in one
 pass — MATH-500 at 256 and 2048, AIME-24, Llama-8B, 1.5B and 14B — before any
 per-cell verdict was inspected. The 14B cell was not fixed first. Uniform
 prior application is the control against fitting the convention to the result.
+
+### Post-application record (same day, 2026-07-27): re-run outcome and instrument-class audit
+
+**Verification.** The regenerated cells were cross-checked against derivations
+written from the raw rows *before* the code changed (24 of 24 quantities agree to
+4 decimal places: every complete-case residual, every reverse endpoint, and the
+readout-/reverse-defined reference accuracies).
+
+**The primary estimand reproduces Amendment J independently.** Under layer 1 the
+scale-axis scorecard is unchanged at 3 of 4: 1.5B StreamingLLM [-0.4750, -0.2550],
+1.5B R-KV [-0.3750, -0.1650] and 14B StreamingLLM [-0.4850, -0.2550] exclude zero;
+14B R-KV [-0.1800, +0.0500] spans it. Only the complete-case sensitivity (layer 2)
+resolves the fourth cell, at [-0.1675, -0.0260]. The convention change therefore
+did not buy the upgrade: the primary estimand returns the pre-registered verdict on
+its own, and that is the reason the Amendment J scorecard is not restated -- not
+authorial restraint.
+
+**Layer-1 bound width is analytic, not empirical.** Imputing the undefined rows
+both ways makes the interval exactly `n_undefined / N` wide. Observed widths match
+this identity in every cell (8/400 = 0.020; 27/120 = 0.225; 3/200 = 0.015; 46/200 =
+0.230). Consequently a wide layer-1 bound on a high-truncation cell carries no
+evidential content beyond the truncation rate, and "spans zero" under layer 1 must
+never be read as "no effect." The 14B R-KV cell is the worked example, and its
+three statements are consistent rather than contradictory:
+forward residual -0.1675 with CI [-0.2733, -0.0850] excluding zero; forward layer-1
+bounds [-0.1800, -0.1650] excluding zero (only 3 of 200 readout rows undefined);
+bracket spanning zero only because 46 of 200 *compressed* traces never terminated
+(truncation 0.230), which is a reverse-side definedness fact. Every reported
+layer-1 bound is therefore accompanied by its undefined-row count.
+
+**AIME-24 confidence intervals after the correction.** The AIME residuals move
+toward zero (the largest single movement in the re-run), so the CIs were recomputed
+before any prose was touched: Random -0.1183, CI [-0.3276, -0.0506]; R-KV -0.1935,
+CI [-0.4023, -0.1250]; StreamingLLM -0.2796, CI [-0.4914, -0.1815]. All three still
+exclude zero, and all three exclude zero under layer 1 as well ([-0.3000, -0.0750] /
+[-0.3667, -0.1417] / [-0.4417, -0.2167]). The second-benchmark replication stands at
+3 of 3, with Random's margin reduced (upper bound -0.076 -> -0.051).
+
+**Instrument-class audit -- the defect is confined to accuracy reporting.** Because
+this bug survived a pre-registration, a negative control and an exact-replication
+check, the sibling instruments were audited directly rather than by inference:
+
+- *ADD.* Computed over every problem in the compressed cell (the loop skips only
+  pids absent from the reference bank; zero are). Problem sets on the two sides are
+  identical; the seed asymmetry is the disclosed 8-vs-4 and is not a problem-set
+  asymmetry. Truncated rows do reach the frozen `__OTHER__` bucket -- verified on
+  the rows themselves, 38 of 38 reference and 121 of 121 compressed truncated rows
+  carry `answer_canon == "__OTHER__"` -- so the termination-mass channel measures
+  what it is claimed to measure. (Mechanism note: they arrive via the canonicalizer,
+  not via `coarsen_answer`'s `truncated=` parameter, which this call path never
+  sets; the parameter is redundant here, not wrong.)
+- *TV profiles.* All three replay cells span exactly the same (problem, seed)
+  population as their grid cell, with `auc_tv`, `frac_above` and `onset_step`
+  non-null on 400 of 400 rows each, so window means and AUC share one denominator
+  and no definedness filter is applied. The H2O mean AUC-TV recomputes to 0.072991,
+  matching the archived value exactly.
+
+No population-selection defect was found outside the accuracy-change estimands.
