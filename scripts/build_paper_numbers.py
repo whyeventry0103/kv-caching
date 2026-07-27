@@ -578,6 +578,18 @@ def build_catalogue() -> list[Entry]:
             (rk,),
             "trajectory residual expressed in accuracy points",
         )
+    # AUC-TV spread across policies, as a percent of the smallest. Quoted to
+    # make the point that "similar magnitude" on the TV scale is a loose
+    # statement, not a matched one.
+    _auc = ("diss256.random.auc_tv", "diss256.streamingllm.auc_tv", "h2o.auc_tv")
+    _av = [by_key[k] for k in _auc]
+    derive(
+        "auc_tv_spread_pct",
+        100.0 * (max(_av) - min(_av)) / min(_av),
+        "100 * (max - min) / min over the three AUC-TV values",
+        _auc,
+        "cross-policy AUC-TV spread as a percent of the smallest",
+    )
     derive(
         "truncation_ratio.random_over_slm",
         by_key["diss256.random.trunc"] / by_key["diss256.streamingllm.trunc"],
