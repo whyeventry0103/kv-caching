@@ -40,6 +40,13 @@ _HYPHEN_IN_WORD = re.compile(r"[0-9A-Za-z}\-]$")
 # Version strings: a number followed by a further ".<digits>" component.
 _VERSION_TAIL = re.compile(r"^\.\d")
 
+# Environment arguments that are typesetting parameters, not claims. The
+# bibliography's "{99}" is a label-width hint; it was matching a derived ratio
+# rounded to zero places (98.74 -> "99") and being counted as *sourced*, which
+# is worse than being counted as unsourced -- it inflates the audit's own
+# success metric with a number that is not a claim at all.
+_STRUCTURAL_ENVIRONMENTS = re.compile(r"\\begin\{thebibliography\}\{[^{}]*\}")
+
 # Contexts whose numbers are structural rather than claims: lengths, font
 # sizes, graphics options, cross-references, and package/version pins.
 _STRUCTURAL_UNITS = re.compile(
@@ -132,6 +139,8 @@ def strip_latex_noise(text: str) -> str:
         text = "".join("\n" if ch == "\n" else " " for ch in head) + text[start:]
     # Strip comments (an unescaped % to end of line).
     text = re.sub(r"(?<!\\)%[^\n]*", blank, text)
+    # Strip structural environment arguments (bibliography label width).
+    text = _STRUCTURAL_ENVIRONMENTS.sub(blank, text)
     # Strip structural commands together with their bracketed/braced arguments.
     for name in _STRIP_COMMANDS:
         pattern = re.compile(

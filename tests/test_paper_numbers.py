@@ -63,6 +63,20 @@ def test_structural_lengths_are_not_claims():
     assert {lit.value for lit in lits} == set()
 
 
+def test_bibliography_label_width_is_not_a_claim():
+    """``\\begin{thebibliography}{99}`` is a typesetting hint.
+
+    It was matching a derived ratio rounded to zero places (98.74 -> "99") and
+    being counted as *sourced*, which inflates the audit's success metric with
+    a number that is not a claim.
+    """
+    text = "\\begin{document}\n\\begin{thebibliography}{99}\nreal 0.185\n"
+    lits = extract_literals(text, "t")
+    assert 99.0 not in {lit.value for lit in lits}
+    assert 0.185 in {lit.value for lit in lits}
+    assert len(strip_latex_noise(text).splitlines()) == len(text.splitlines())
+
+
 def test_classification_buckets():
     cat = [_entry("a.residual", -0.3367)]
     lits = extract_literals(
