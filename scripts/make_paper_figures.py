@@ -38,89 +38,119 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
-# ---- verified headline constants (final; corrected brackets + endpoint CIs) ----
-# Display convention (pinned 2026-07-07): every 3-decimal label is f"{v:.3f}" of the
-# report-artifact value — the same string numpy/R produce when recomputing from raw
-# rows. Do NOT hand-round exact ties (99/400=0.2475, 323/400=0.8075) up to 0.248 /
-# 0.808: that made Fig 1 (constants) disagree with Fig 2 (DATA mode) for the same
-# quantity. Tie-valued constants below are stored at artifact precision so .3f
-# renders them identically in both modes.
-FC = 0.8825
-C = {
-    "Random": dict(
-        free=0.4225,
-        readout=0.765,
-        readout_ci=(0.686, 0.817),
-        reverse=0.636,
-        residual=-0.343,
-        bracket=(-0.343, -0.246),
-        fwd_ci=(-0.402, -0.258),
-        rev_ci=(-0.383, -0.213),
-        add=0.559,
-        within=0.504,
-        term=0.224,
-        flip=-0.461,
-        auc_tv=0.086,
-        trunc=0.233,
-    ),
-    "StreamingLLM": dict(
-        free=0.2375,
-        readout=0.584,
-        readout_ci=(0.495, 0.647),
-        reverse=0.417,
-        residual=-0.347,
-        bracket=(-0.466, -0.347),
-        fwd_ci=(-0.403, -0.268),
-        rev_ci=(-0.553, -0.410),
-        add=0.751,
-        within=0.749,
-        term=0.081,
-        flip=-0.646,
-        auc_tv=0.083,
-        trunc=0.070,
-    ),
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+
+# ---- headline constants, loaded from the number catalogue -------------------
+# These were hardcoded until 2026-07-27, and that was the last surface in the
+# repo where a paper number lived as a literal. It is exactly the surface that
+# Amendment K's estimand correction could not reach: the summaries were
+# regenerated, the .tex was regenerated, and the figures went on drawing the
+# old values with no gate able to notice. So the figures now read the same
+# catalogue the number audit gates the .tex against -- one source, two
+# consumers, and a regenerated artifact moves both or neither.
+#
+# There is deliberately NO literal fallback. If the catalogue is missing or
+# lacks a key, this raises: a figure drawn from stale constants is worse than
+# no figure, because it looks finished.
+#
+# Display convention (pinned 2026-07-07): every 3-decimal label is f"{v:.3f}" of
+# the artifact value. Loading the floats directly is what makes that automatic --
+# hand-rounding exact ties (99/400 = 0.2475) once made Fig 1 disagree with Fig 2
+# for the same quantity.
+CATALOGUE = PROJECT_ROOT / "paper_numbers.json"
+
+
+def _catalogue() -> dict[str, float]:
+    if not CATALOGUE.exists():
+        raise SystemExit(
+            f"missing {CATALOGUE}; run scripts/build_paper_numbers.py first. "
+            "The figures have no literal fallback by design."
+        )
+    payload = json.loads(CATALOGUE.read_text(encoding="utf-8"))
+    return {e["key"]: float(e["value"]) for e in payload["entries"]}
+
+
+K = _catalogue()
+
+
+def _k(key: str) -> float:
+    if key not in K:
+        raise SystemExit(f"paper_numbers.json has no entry {key!r}")
+    return K[key]
+
+
+# Unit prefixes: the decomposition cell each press is reported from, and the ADD
+# artifact its distribution numbers come from.
+_CELL = {
+    "Random": "diss256.random",
+    "StreamingLLM": "diss256.streamingllm",
+    "H2O-style": "h2o256.h2o",
+    "R-KV": "rkv256.rkv",
 }
-C["H2O-style"] = dict(
-    add=0.715,
-    within=0.713,
-    term=0.101,
-    flip=-0.636,
-    free=0.2475,
-    readout=0.597,
-    readout_ci=(0.503, 0.668),
-    reverse=0.419,
-    residual=-0.349,
-    bracket=(-0.463, -0.349),
-    fwd_ci=(-0.403, -0.270),
-    rev_ci=(-0.566, -0.420),
-    trunc=0.105,
+_ADD = {
+    "Random": "add256.random",
+    "StreamingLLM": "add256.streamingllm",
+    "H2O-style": "add256.h2o",
+    "R-KV": "add256.rkv",
+}
+_B2048 = {
+    "Random": "b2048.random",
+    "StreamingLLM": "b2048.streamingllm",
+    "H2O-style": "b2048h2o.h2o",
+}
+_AIME_PRESS = {"Random": "random", "R-KV": "rkv", "StreamingLLM": "streamingllm"}
+
+# The bank accuracy (2000 rows) is the headline reference quoted in section 3.1;
+# the cell reference (400 matched conditions) is the comparator every change is
+# measured against. Amendment K's whole point is that these are different
+# numbers with different jobs, so both are named rather than one standing in.
+FC_BANK = _k("diss256.fc_bank")
+FC = _k("diss256.random.fc_cell")
+
+
+def _cell(name: str) -> dict:
+    s, a = _CELL[name], _ADD[name]
+    return dict(
+        free=_k(f"{s}.free"),
+        readout=_k(f"{s}.readout"),
+        readout_ci=(_k(f"{s}.readout_ci0"), _k(f"{s}.readout_ci1")),
+        reverse=_k(f"{s}.reverse"),
+        residual=_k(f"{s}.residual"),
+        bracket=(_k(f"{s}.bracket0"), _k(f"{s}.bracket1")),
+        fwd_ci=(_k(f"{s}.residual_ci0"), _k(f"{s}.residual_ci1")),
+        rev_ci=(_k(f"{s}.reverse_ci0"), _k(f"{s}.reverse_ci1")),
+        trunc=_k(f"{s}.trunc"),
+        add=_k(f"{a}.add"),
+        within=_k(f"{a}.within"),
+        term=_k(f"{a}.term"),
+        flip=_k(f"{a}.flip_net"),
+        **({"auc_tv": _k(f"{s}.auc_tv")} if f"{s}.auc_tv" in K else {}),
+    )
+
+
+C = {name: _cell(name) for name in _CELL}
+C2048 = {name: _k(f"{s}.free") for name, s in _B2048.items()}
+PHEN = dict(
+    gap=_k("contrast256.mean"),
+    gap_ci=(_k("contrast256.ci0"), _k("contrast256.ci1")),
+    win=int(_k("contrast256.wins")),
+    tie=int(_k("contrast256.ties")),
+    loss=int(_k("contrast256.losses")),
+    n_tot=int(_k("contrast256.n_problems")),
 )
-C["R-KV"] = dict(
-    # Certified port (parity Jaccard 1.0 + generation smoke; Amendment I). Branch C
-    # read 2026-07-12: best free-runner, same readout-invisible residual structure.
-    free=0.52,
-    readout=0.798,
-    readout_ci=(0.710, 0.850),
-    reverse=0.662,
-    residual=-0.278,
-    bracket=(-0.278, -0.221),
-    fwd_ci=(-0.335, -0.195),
-    rev_ci=(-0.355, -0.203),
-    trunc=0.135,
-    # ADD instrument values (report_add over grid-diss256-rkv, read 2026-07-12;
-    # results/diag/add-256-rkv-summary.json). Lowest ADD of the four policies,
-    # coherent with its highest free-run accuracy.
-    add=0.459,
-    within=0.450,
-    term=0.149,
-    flip=-0.364,
+TVWIN = dict(
+    before=_k("tv_diss256.before"),
+    first50=_k("tv_diss256.first50"),
+    later=_k("tv_diss256.later"),
+    onset=_k("tv_diss256.median_onset"),
 )
-# Budget-2048 free-run (grid-diss2048-tok 800/800 read 2026-07-04; h2o 400/400
-# read 2026-07-10; 0.8075/0.8225 stored at artifact precision -> .3f displays).
-C2048 = {"Random": 0.850, "StreamingLLM": 0.8075, "H2O-style": 0.8225}
-PHEN = dict(gap=0.185, gap_ci=(0.130, 0.242), win=44, tie=50, loss=6, n_tot=100)
-TVWIN = dict(before=0.0000, first50=0.0018, later=0.0884, onset=65)
-TWOFC = dict(mean=0.068, median=0.000, p=0.976, frac_sig=0.0, n=250)
+TWOFC = dict(
+    mean=_k("twofc.mean_add"),
+    median=_k("twofc.median_add"),
+    p=_k("twofc.mean_perm_p"),
+    frac_sig=_k("twofc.frac_sig"),
+    n=250,
+)
 
 # Palette (validated, see module docstring). GREEN reserved for the control line.
 BLUE, ORANGE, PURPLE, GREY = "#0072B2", "#D55E00", "#CC79A7", "#8a8a8a"
@@ -534,14 +564,13 @@ def fig3_add(out_dir: Path):
 
 # ---------------------------------------------------------------- Figure 6
 CAIME = dict(
-    # m4-aime-2048 (read 2026-07-18; results/diag/m4-aime-2048-summary.json).
-    # 30 problems x 4 seeds per cell vs the pinned AIME FC bank (0.3708).
-    fc=0.3708,
-    free={"Random": 0.2833, "R-KV": 0.2167, "StreamingLLM": 0.1417},
-    readout=0.4624,  # IDENTICAL across all three presses (verified: same
-    # 120-key correctness vectors; 85/93 defined rows converge to the same
-    # extracted answer through different generations).
-    readout_ci=(0.3274, 0.6607),
+    # 30 problems x 4 seeds per cell vs the pinned AIME FC bank. Readout is
+    # IDENTICAL across all three presses -- same correctness on all 93 defined
+    # rows, and a readout change of exactly 0.000 against the matched reference.
+    fc=_k("aime.fc_bank"),
+    free={m: _k(f"aime.{p}.free") for m, p in _AIME_PRESS.items()},
+    readout=_k("aime.random.readout"),
+    readout_ci=(_k("aime.random.readout_ci0"), _k("aime.random.readout_ci1")),
 )
 
 

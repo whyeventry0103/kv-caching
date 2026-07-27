@@ -47,30 +47,30 @@
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Setup}{5}{subsection.3.1}\protected@file@percent }
 \newlabel{sec:setup}{{3.1}{5}{Setup}{subsection.3.1}{}}
 \newlabel{sec:setup@cref}{{[subsection][1][3]3.1}{[1][5][]5}{}{}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Estimands}{6}{subsection.3.2}\protected@file@percent }
 \citation{ross2011dagger}
 \@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces The four generation protocols behind the estimands. Fill encodes the cache condition while a span is processed (grey $=$ full cache; hatched $=$ compression active); the text in each span says where its tokens come from (self-generated versus teacher-forced replay of exact stored token IDs). Forward readout scores answer generation \emph  {under compression} given the full-cache reference trace; reverse readout scores \emph  {full-cache} answer generation given the compressed model's own trace. The residual $\rho (m) = \Delta _{\mathrm  {tot}}(m) - \Delta _{\mathrm  {ro}}(m)$ is the free-running loss unexplained by on-reference readout; the forward and reverse estimates bracket the on-policy residual (\cref  {sec:reverse}).}}{7}{figure.caption.5}\protected@file@percent }
 \newlabel{fig:protocol}{{1}{7}{The four generation protocols behind the estimands. Fill encodes the cache condition while a span is processed (grey $=$ full cache; hatched $=$ compression active); the text in each span says where its tokens come from (self-generated versus teacher-forced replay of exact stored token IDs). Forward readout scores answer generation \emph {under compression} given the full-cache reference trace; reverse readout scores \emph {full-cache} answer generation given the compressed model's own trace. The residual $\res {m} = \dtot {m} - \dro {m}$ is the free-running loss unexplained by on-reference readout; the forward and reverse estimates bracket the on-policy residual (\cref {sec:reverse})}{figure.caption.5}{}}
 \newlabel{fig:protocol@cref}{{[figure][1][]1}{[1][6][]7}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Estimands}{7}{subsection.3.2}\protected@file@percent }
 \newlabel{eq:residual}{{3}{7}{Residual --- a definition, not a measured cause}{equation.3}{}}
 \newlabel{eq:residual@cref}{{[equation][3][]3}{[1][7][]7}{}{}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Pre-registration}{8}{subsection.3.3}\protected@file@percent }
 \citation{vase2026}
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Left: free-running accuracy by method and budget --- the collapse is a budget effect (full cache $0.882$; at 256, Random $0.422$ / StreamingLLM $0.237$ / H2O-style$^{\dagger }$ $0.247$ / R-KV$^{\ddagger }$ $0.520$; at 2048, $0.850$ / $0.807$ / $0.823$, the near-lossless pole; light tints $=$ budget 2048; $\dagger $, $\ddagger $ per \cref  {tab:decomp}). Even the best policy at 256, the reasoning-specific R-KV, loses $0.36$ of the reference accuracy. Right: per-problem paired differences at budget 256 --- Random $-$ StreamingLLM is $+0.185$ on average (95\% CI $[0.130, 0.240]$) and non-negative on 94/100 problems (44 strict wins, 50 ties, 6 losses).}}{9}{figure.caption.6}\protected@file@percent }
-\newlabel{fig:phenomenon}{{2}{9}{Left: free-running accuracy by method and budget --- the collapse is a budget effect (full cache $0.882$; at 256, Random $0.422$ / StreamingLLM $0.237$ / H2O-style$^{\dagger }$ $0.247$ / R-KV$^{\ddagger }$ $0.520$; at 2048, $0.850$ / $0.807$ / $0.823$, the near-lossless pole; light tints $=$ budget 2048; $\dagger $, $\ddagger $ per \cref {tab:decomp}). Even the best policy at 256, the reasoning-specific R-KV, loses $0.36$ of the reference accuracy. Right: per-problem paired differences at budget 256 --- Random $-$ StreamingLLM is $+0.185$ on average (95\% CI $[0.130, 0.240]$) and non-negative on 94/100 problems (44 strict wins, 50 ties, 6 losses)}{figure.caption.6}{}}
-\newlabel{fig:phenomenon@cref}{{[figure][2][]2}{[1][9][]9}{}{}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {4}Results}{9}{section.4}\protected@file@percent }
 \newlabel{sec:results}{{4}{9}{Results}{section.4}{}}
-\newlabel{sec:results@cref}{{[section][4][]4}{[1][8][]9}{}{}{}}
+\newlabel{sec:results@cref}{{[section][4][]4}{[1][9][]9}{}{}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.1}The powered phenomenon: collapse, and random beats recency}{9}{subsection.4.1}\protected@file@percent }
 \newlabel{sec:phenomenon}{{4.1}{9}{The powered phenomenon: collapse, and random beats recency}{subsection.4.1}{}}
 \newlabel{sec:phenomenon@cref}{{[subsection][1][4]4.1}{[1][9][]9}{}{}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Forward decomposition at budget 256 (400 conditions per cell: 100 problems $\times $ 4 seeds). $\mathrm  {Acc}_{\mathrm  {FC}}= 0.882$. CIs are problem-clustered bootstrap 95\% (2000 resamples, percentile). Readout share $= \Delta _{\mathrm  {ro}}(m)/\Delta _{\mathrm  {tot}}(m)$ (ratio of cell means). Trunc.\ = per-cell truncation rate; truncated rows remain in every denominator, scored incorrect. Undefined reasoning/answer boundary: 8 rows per cell, balanced across methods.}}{10}{table.caption.7}\protected@file@percent }
-\newlabel{tab:decomp}{{2}{10}{Forward decomposition at budget 256 (400 conditions per cell: 100 problems $\times $ 4 seeds). $\accfc = 0.882$. CIs are problem-clustered bootstrap 95\% (2000 resamples, percentile). Readout share $= \dro {m}/\dtot {m}$ (ratio of cell means). Trunc.\ = per-cell truncation rate; truncated rows remain in every denominator, scored incorrect. Undefined reasoning/answer boundary: 8 rows per cell, balanced across methods}{table.caption.7}{}}
-\newlabel{tab:decomp@cref}{{[table][2][]2}{[1][9][]10}{}{}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Forward decomposition: the loss is mostly not readout}{10}{subsection.4.2}\protected@file@percent }
-\newlabel{sec:forward}{{4.2}{10}{Forward decomposition: the loss is mostly not readout}{subsection.4.2}{}}
-\newlabel{sec:forward@cref}{{[subsection][2][4]4.2}{[1][9][]10}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Forward decomposition: the loss is mostly not readout}{9}{subsection.4.2}\protected@file@percent }
+\newlabel{sec:forward}{{4.2}{9}{Forward decomposition: the loss is mostly not readout}{subsection.4.2}{}}
+\newlabel{sec:forward@cref}{{[subsection][2][4]4.2}{[1][9][]9}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Left: free-running accuracy by method and budget --- the collapse is a budget effect (matched full cache $0.885$; at 256, Random $0.422$ / StreamingLLM $0.237$ / H2O-style$^{\dagger }$ $0.247$ / R-KV$^{\ddagger }$ $0.520$; at 2048, $0.850$ / $0.807$ / $0.823$, the near-lossless pole; light tints $=$ budget 2048; $\dagger $, $\ddagger $ per \cref  {tab:decomp}). Even the best policy at 256, the reasoning-specific R-KV, loses $0.36$ of the reference accuracy. Right: per-problem paired differences at budget 256 --- Random $-$ StreamingLLM is $+0.185$ on average (95\% CI $[0.130, 0.240]$) and non-negative on 94/100 problems (44 strict wins, 50 ties, 6 losses).}}{10}{figure.caption.6}\protected@file@percent }
+\newlabel{fig:phenomenon}{{2}{10}{Left: free-running accuracy by method and budget --- the collapse is a budget effect (matched full cache $0.885$; at 256, Random $0.422$ / StreamingLLM $0.237$ / H2O-style$^{\dagger }$ $0.247$ / R-KV$^{\ddagger }$ $0.520$; at 2048, $0.850$ / $0.807$ / $0.823$, the near-lossless pole; light tints $=$ budget 2048; $\dagger $, $\ddagger $ per \cref {tab:decomp}). Even the best policy at 256, the reasoning-specific R-KV, loses $0.36$ of the reference accuracy. Right: per-problem paired differences at budget 256 --- Random $-$ StreamingLLM is $+0.185$ on average (95\% CI $[0.130, 0.240]$) and non-negative on 94/100 problems (44 strict wins, 50 ties, 6 losses)}{figure.caption.6}{}}
+\newlabel{fig:phenomenon@cref}{{[figure][2][]2}{[1][9][]10}{}{}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Forward decomposition at budget 256 (400 conditions per cell: 100 problems $\times $ 4 seeds). $\mathrm  {Acc}_{\mathrm  {FC}}= 0.885$ on those matched conditions. CIs are problem-clustered bootstrap 95\% (2000 resamples, percentile). Readout share $= \Delta _{\mathrm  {ro}}(m)/\Delta _{\mathrm  {tot}}(m)$ (ratio of cell means). Trunc.\ = per-cell truncation rate; truncated rows remain in every denominator, scored incorrect. Undefined reasoning/answer boundary: 8 rows per cell, balanced across methods.}}{11}{table.caption.7}\protected@file@percent }
+\newlabel{tab:decomp}{{2}{11}{Forward decomposition at budget 256 (400 conditions per cell: 100 problems $\times $ 4 seeds). $\accfc = 0.885$ on those matched conditions. CIs are problem-clustered bootstrap 95\% (2000 resamples, percentile). Readout share $= \dro {m}/\dtot {m}$ (ratio of cell means). Trunc.\ = per-cell truncation rate; truncated rows remain in every denominator, scored incorrect. Undefined reasoning/answer boundary: 8 rows per cell, balanced across methods}{table.caption.7}{}}
+\newlabel{tab:decomp@cref}{{[table][2][]2}{[1][9][]11}{}{}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Reverse-replay bracket: the residual survives the off-policy correction}{11}{subsection.4.3}\protected@file@percent }
 \newlabel{sec:reverse}{{4.3}{11}{Reverse-replay bracket: the residual survives the off-policy correction}{subsection.4.3}{}}
 \newlabel{sec:reverse@cref}{{[subsection][3][4]4.3}{[1][11][]11}{}{}{}}
@@ -95,10 +95,10 @@
 \newlabel{tab:add@cref}{{[table][4][]4}{[1][13][]15}{}{}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Two failure styles that headline accuracy conflates, split along the recoverable-vs-concentrated line: both concentrated policies are nearly all within-answered (StreamingLLM $0.749$ of ADD $0.751$; H2O-style $0.713$ of $0.715$) --- silent answer flips --- while Random and R-KV carry larger termination-mass shifts ($+0.224$ and $+0.149$). R-KV's ADD is the lowest of the four ($0.459$), coherent with its highest free-running accuracy; flip-mass is overwhelmingly toward lost correct answers for all four. Dashed line marks the two-FC noise floor ($0.068$).}}{15}{figure.caption.12}\protected@file@percent }
 \newlabel{fig:add}{{5}{15}{Two failure styles that headline accuracy conflates, split along the recoverable-vs-concentrated line: both concentrated policies are nearly all within-answered (StreamingLLM $0.749$ of ADD $0.751$; H2O-style $0.713$ of $0.715$) --- silent answer flips --- while Random and R-KV carry larger termination-mass shifts ($+0.224$ and $+0.149$). R-KV's ADD is the lowest of the four ($0.459$), coherent with its highest free-running accuracy; flip-mass is overwhelmingly toward lost correct answers for all four. Dashed line marks the two-FC noise floor ($0.068$)}{figure.caption.12}{}}
-\newlabel{fig:add@cref}{{[figure][5][]5}{[1][14][]15}{}{}{}}
+\newlabel{fig:add@cref}{{[figure][5][]5}{[1][15][]15}{}{}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.6}Negative control: the instrument does not false-positive}{15}{subsection.4.6}\protected@file@percent }
 \newlabel{sec:control}{{4.6}{15}{Negative control: the instrument does not false-positive}{subsection.4.6}{}}
-\newlabel{sec:control@cref}{{[subsection][6][4]4.6}{[1][14][]15}{}{}{}}
+\newlabel{sec:control@cref}{{[subsection][6][4]4.6}{[1][15][]15}{}{}{}}
 \citation{xiao2023streamingllm}
 \@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Two-full-cache negative control ($n = 250$): ADD between disjoint FC seed halves has mean $0.068$ (median $0.000$, mean permutation $p = 0.976$, $0\%$ of problems significant), far below the compression cells (Random $0.559$ and StreamingLLM $0.751$ shown; all four policies lie in $0.46$--$0.75$, \cref  {tab:add}) --- the instrument does not false-positive.}}{16}{figure.caption.13}\protected@file@percent }
 \newlabel{fig:control}{{6}{16}{Two-full-cache negative control ($n = 250$): ADD between disjoint FC seed halves has mean $0.068$ (median $0.000$, mean permutation $p = 0.976$, $0\%$ of problems significant), far below the compression cells (Random $0.559$ and StreamingLLM $0.751$ shown; all four policies lie in $0.46$--$0.75$, \cref {tab:add}) --- the instrument does not false-positive}{figure.caption.13}{}}
@@ -118,6 +118,7 @@
 \bibcite{li2024snapkv}{3}
 \bibcite{rkv2025}{4}
 \bibcite{hott2025}{5}
+\@writefile{toc}{\contentsline {paragraph}{Reproducibility.}{20}{section*.16}\protected@file@percent }
 \bibcite{ross2011dagger}{6}
 \bibcite{ranzato2016exposure}{7}
 \bibcite{bengio2015scheduled}{8}
@@ -125,7 +126,6 @@
 \bibcite{hendrycks2021math}{10}
 \bibcite{lightman2023verify}{11}
 \bibcite{deepseek2025r1}{12}
-\@writefile{toc}{\contentsline {paragraph}{Reproducibility.}{20}{section*.16}\protected@file@percent }
 \bibcite{liu2024kivi}{13}
 \bibcite{pitfalls2025}{14}
 \bibcite{barriers2025}{15}

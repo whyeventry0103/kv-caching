@@ -18,6 +18,40 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ UNIT 4 (2026-07-27) — output path closed. BOTH documents at zero
+  unsourced; `make audit` is the gate.**
+  **(1) The last literal surface is gone.** `make_paper_figures.py` held `FC`,
+  a 4-press `C` dict, `C2048`, `PHEN`, `TVWIN`, `TWOFC`, `CAIME` as hardcoded
+  constants — every one stale post-K, and *unreachable* by the correction: the
+  summaries were regenerated, the `.tex` was regenerated, and the figures went
+  on drawing 2026-07-12 values with nothing able to notice. They now load from
+  `paper_numbers.json`, **with no literal fallback** (missing key ⇒ SystemExit).
+  One source, two consumers: a figure and a sentence can no longer disagree
+  about the same quantity. Figures re-rendered and eyeballed.
+  **(2) The two FC references are now stated in the paper.** §3.1 defines bank
+  0.882 (2000 rows, quoted there only) vs matched **0.885** (400 cell
+  conditions, the comparator for every Δ/readout change/reverse endpoint), and
+  the five comparator sites that said 0.882 now say 0.885 (abstract,
+  contribution bullet, §4.1 opener, Fig 1 caption, Table 2 caption).
+  **(3) PAPER_FINDINGS.md: a CONFLICT with the work order, resolved the repo's
+  way.** §8.3 says drive its literals to zero. But §4a–4t is a *dated read-in
+  log* and several entries exist precisely to show a wrong value beside its
+  correction (§4c is Amendment H's old-vs-new). Flattening it would delete the
+  honesty trail CLAUDE.md §4.12 requires. Resolution: added **§4-CURRENT**, a
+  generated post-K headline table that is what a new session should read, and
+  marked the log `<!-- AUDIT:ARCHIVAL-BEGIN/END -->` — a declaration in the
+  document, not a silent exemption in code. Stale current-truth in §1b (compute,
+  the 0.004 residual gap, the 0.46 share) was fixed normally.
+  **(4) Four more extractor false-positive classes** (bare arXiv IDs in table
+  columns, `§4.1` section refs, ISO dates, and the archival spans): both-doc
+  literals 1780 → 952, and *sourced held at 543* — again, no real claim lost.
+  **(5) Reproducibility paragraph rewritten** to the B.4 claim: every number
+  traces to a committed artifact or a cited source, gate-enforced, figures from
+  the same catalogue, intervals carrying seed + resample count + difference
+  histogram, and the MC error (~0.008 across seeds) stated once.
+  Gates: lint, **188 tests**, dryrun, `audit --strict` exit 0, PDF ×2 clean
+  (0 `^!`, one 1.4pt Overfull, 21pp).
+
   **★★★★★ UNIT 3 (2026-07-27) — the `.tex` is at ZERO unsourced literals.**
   `audit_paper_numbers.py --documents <tex> --strict` exits 0: 738 literals,
   440 sourced, 281 protocol, 17 year. Both-docs unsourced 377 → 174 (the

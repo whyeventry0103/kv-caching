@@ -193,3 +193,42 @@ def test_a_space_breaks_the_scale_suffix():
     """A table cell after a number is not a parameter count."""
     lits = extract_literals("residual 0.343 B", "t", strip=False)
     assert {lit.value for lit in lits} == {0.343}
+
+
+def test_archival_span_is_skipped():
+    """PAPER_FINDINGS.md's dated log shows superseded values beside their
+    corrections on purpose. The gate stops stale numbers reaching the paper; it
+    must not launder the record that documents them."""
+    md = (
+        "current residual 0.337\n"
+        "<!-- AUDIT:ARCHIVAL-BEGIN -->\n"
+        "was 0.343 before Amendment K\n"
+        "<!-- AUDIT:ARCHIVAL-END -->\n"
+        "and 0.268 for R-KV\n"
+    )
+    values = {lit.value for lit in extract_literals(md, "t", strip=False)}
+    assert 0.337 in values and 0.268 in values
+    assert 0.343 not in values
+
+
+def test_archival_span_preserves_line_numbers():
+    """A blanked span that ate its newlines would shift every reported line."""
+    md = (
+        "a 0.1\n<!-- AUDIT:ARCHIVAL-BEGIN -->\n"
+        "x 0.2\n<!-- AUDIT:ARCHIVAL-END -->\nb 0.3\n"
+    )
+    lits = extract_literals(md, "t", strip=False)
+    assert [(lit.value, lit.line) for lit in lits] == [(0.1, 1), (0.3, 5)]
+
+
+def test_section_references_and_dates_are_not_claims():
+    lits = extract_literals("see §4.1 and §3 on 2026-07-17 for 0.885", "t", strip=False)
+    assert {lit.value for lit in lits} == {0.885}
+
+
+def test_bare_arxiv_id_in_a_table_column():
+    lits = extract_literals(
+        "| R-KV | NeurIPS'25 | 2505.24133 | 0.520 |", "t", strip=False
+    )
+    assert 0.520 in {lit.value for lit in lits}
+    assert 2505.0 not in {lit.value for lit in lits}

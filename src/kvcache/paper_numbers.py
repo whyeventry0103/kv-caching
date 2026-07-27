@@ -59,6 +59,28 @@ _BIBLIOGRAPHY_BODY = re.compile(
 # arXiv identifiers outside a bibliography (PAPER_FINDINGS.md cites them inline).
 _ARXIV_ID = re.compile(r"arXiv:\d{4}\.\d{4,5}(?:v\d+)?", re.IGNORECASE)
 
+# Bare arXiv identifiers in a table column, with no "arXiv:" prefix.
+_BARE_ARXIV_ID = re.compile(r"\b\d{4}\.\d{5}\b")
+
+# Section references and ISO dates. A cross-reference and a date are addresses,
+# not measurements; "§4.1" and "2026-07-17" were reporting 4.1 and 17 as
+# unsourced claims. Same class as the arXiv identifiers.
+_SECTION_REF = re.compile(r"§\s?\d+(?:\.\d+)*[a-z]?")
+_ISO_DATE = re.compile(r"\b\d{4}-\d{2}-\d{2}\b")
+
+# An explicitly marked archival span. PAPER_FINDINGS.md's dated read-in log is a
+# HISTORICAL RECORD: each entry is correct as of its date, and several exist
+# precisely to show a superseded value beside its correction (Amendment H's
+# bracket, the -0.465/-0.466 decimal). Rewriting those to current values would
+# delete the honesty trail this project treats as its moat -- the gate's job is
+# to stop stale numbers reaching the PAPER, not to launder the log that records
+# them. So an archival span is skipped, and the marker makes that a deliberate,
+# reviewable declaration in the document rather than a silent exemption here.
+_ARCHIVAL_SPAN = re.compile(
+    r"<!--\s*AUDIT:ARCHIVAL-BEGIN\s*-->.*?<!--\s*AUDIT:ARCHIVAL-END\s*-->",
+    re.DOTALL,
+)
+
 # Contexts whose numbers are structural rather than claims: lengths, font
 # sizes, graphics options, cross-references, and package/version pins.
 #
@@ -193,10 +215,18 @@ def extract_literals(
 ) -> list[Literal]:
     """Find every numeric literal that could be a claim."""
     cleaned = strip_latex_noise(text) if strip else text
+
     # An arXiv identifier is a name. Stripped for both document kinds: the .tex
     # keeps them in the bibliography (already blanked) but PAPER_FINDINGS.md
     # cites them inline, where no LaTeX stripping runs.
-    cleaned = _ARXIV_ID.sub(lambda m: " " * len(m.group(0)), cleaned)
+    def _blank(match: re.Match[str]) -> str:
+        return "".join("\n" if ch == "\n" else " " for ch in match.group(0))
+
+    cleaned = _ARXIV_ID.sub(_blank, cleaned)
+    cleaned = _BARE_ARXIV_ID.sub(_blank, cleaned)
+    cleaned = _SECTION_REF.sub(_blank, cleaned)
+    cleaned = _ISO_DATE.sub(_blank, cleaned)
+    cleaned = _ARCHIVAL_SPAN.sub(_blank, cleaned)
     lines = cleaned.splitlines()
     out: list[Literal] = []
     for lineno, line in enumerate(lines, start=1):

@@ -50,10 +50,15 @@ and a **trajectory** part.
   problems.
 - **Truncation rate @256:** Random **0.233** (93/400), StreamingLLM **0.070** (28/400) — Random
   truncates 3.3x more, corroborating its larger ADD termination-mass shift.
-- **Exact decomposition split:** readout-gap 0.1811, residual-gap 0.0039 (use 0.181 / 0.004;
-  the prereg's 0.182/0.003 is a mis-rounding). SLM readout share = 0.4625 -> 0.46.
-- **Compute:** ~224 GPU-hours of generation (summed wall-clock over 7,307 generations; excludes
-  model-load/teacher-forcing overhead — quote as "~230 GPU-hours").
+- **Exact decomposition split (post-Amendment-K):** readout-gap **0.181**, residual-gap
+  **0.008**. SLM readout share = **0.492 -> 49.2%**. The residual gap is the number that
+  moved most in relative terms (it was 0.004 against the mismatched reference), so the
+  "the whole +0.185 lives in readout" sentence is now "0.181 of the 0.185".
+- **Compute:** **280 GPU-hours** of generation (summed wall-clock over **7,200** generations)
+  under the inclusion rule recorded in `results/diag/amendment-k/classb/compute.json`:
+  free-running and reference-bank generation only, excluding teacher-forced work (readout,
+  reverse readout, replay), superseded pilots, and the two shards subsumed by the merged
+  bank. Every directory is listed there with its hours and an inclusion flag.
 - **Repo:** github.com/whyeventry0103/kv-caching (ANONYMIZE for submission).
 - **EXACT REPLICATION (verified 2026-07-04):** the original budget-256 grid
   (grid-math500-dissociation-v1) and the token-ID re-run (grid-diss256-tok) agree on ALL
@@ -98,6 +103,62 @@ MATH, so that regime is explicitly out of scope for the headline (see §6).
   bitwise-faithful replay; single-BOS tokenization verified by decode↔encode round-trip.
 
 ## 4. Results (final unless marked)
+
+### 4-CURRENT. Post-Amendment-K headline table — READ THIS ONE
+
+Everything below §4-CURRENT is a **dated read-in log**, not current truth. Each entry
+is correct as of its date and several exist specifically to show a superseded value
+beside its correction. Those are the honesty trail; they are never rewritten. When you
+want *the current number*, use this table or `paper_numbers.json`, which is generated
+from the artifacts and gates the `.tex`.
+
+Reference discipline (Amendment K): the bank is 0.882 over 2000 rows and is quoted in
+the setup section only. **Every Δ, readout change, and reverse endpoint below is
+measured against 0.885** — the same bank restricted to the cell's 400 matched
+conditions. The third value (100×8, 800 rows) is provenance only, never a comparator.
+
+| method @256 | free | readout (95% CI) | total Δ | readout Δ | residual (95% CI) | primary bound | reverse ep | readout share | trunc |
+|---|---|---|---|---|---|---|---|---|---|
+| Random | 0.422 | 0.765 [0.686, 0.817] | −0.463 | −0.138 | **−0.337** [−0.404, −0.262] | [−0.348, −0.328] | −0.282 | 29.8% | 0.233 |
+| StreamingLLM | 0.237 | 0.584 [0.495, 0.647] | −0.647 | −0.319 | **−0.344** [−0.405, −0.270] | [−0.355, −0.335] | −0.470 | 49.2% | 0.070 |
+| H2O-style | 0.247 | 0.597 [0.502, 0.667] | −0.637 | −0.306 | **−0.344** [−0.403, −0.270] | [−0.357, −0.337] | −0.478 | 48.0% | 0.105 |
+| R-KV | 0.520 | 0.798 [0.710, 0.850] | −0.365 | −0.105 | **−0.268** [−0.335, −0.195] | [−0.282, −0.262] | −0.251 | 28.7% | 0.135 |
+
+`primary bound` is the Amendment K layer-1 interval: the population is fixed at all 400
+conditions and rows with no answer boundary are scored both ways. **Its width is
+exactly the cell's undefined fraction**, so always read it next to `trunc` — a wide
+bound means many undefined rows, not a weak effect.
+
+Other current values that moved and are easy to re-introduce stale:
+- Pure answer-resampling effect (FC readout of FC traces, matched): **+0.003**, not
+  +0.023. Residuals are 132× (Random) / 105× (R-KV) that — *two* orders of magnitude.
+- Dose-response factor 256 vs 2048: **4.4–10.2×**.
+- Budget-2048 residuals: **−0.033 / −0.079 / −0.059**, CIs [−0.065, −0.010] /
+  [−0.125, −0.042] / [−0.102, −0.020], all excluding zero.
+- AIME residuals: **−0.118 / −0.194 / −0.280** (Random / R-KV / SLM). AIME readout Δ is
+  **exactly 0.000** for all three presses.
+- Policy contrast CI: **[0.130, 0.240]** at the pinned seed. The published upper bound
+  came from a seed that was never recorded; the artifact now pins seed, resample count,
+  and a difference histogram sufficient to recompute the interval.
+- Compute: **280 GPU-hours over 7,200 generations** under the artifact's inclusion rule.
+
+<!-- AUDIT:ARCHIVAL-BEGIN -->
+**Superseded values, listed so they are recognised if they resurface — do not reuse.**
+Dose factor 3.6–6.8×. Resampling effect +0.023. Residuals −0.343 / −0.347 / −0.349 and
+R-KV −0.278. Reverse endpoints −0.246 / −0.466 / −0.463 / −0.221. Readout shares
+25/46/45/23%. Residual spread 0.006, readout-change spread 0.169. Policy-contrast upper
+bound 0.242 (200-seed range [0.2375, 0.2450]). Compute ~224–230 GPU-h / ~7,307
+generations. Budget-2048 residuals −0.051 / −0.096 / −0.075. AIME residuals −0.179 /
+−0.246 / −0.321. Truncation-adjusted −0.110 / −0.277.
+<!-- AUDIT:ARCHIVAL-END -->
+
+<!-- AUDIT:ARCHIVAL-BEGIN -->
+<!-- Everything from here to AUDIT:ARCHIVAL-END is the dated read-in log: a
+     historical record whose numbers are correct as of their dates. The number
+     audit skips this span deliberately. Do NOT "update" these entries -- several
+     exist to show a wrong value beside its correction, which is the point. New
+     results append a new dated subsection; corrections go in §4-CURRENT and in a
+     PREREGISTRATION amendment. -->
 
 ### 4a. The powered phenomenon (budget 256)
 FC 0.882 → **StreamingLLM 0.237**, **Random 0.422**. Random beats the "principled" recency
@@ -501,6 +562,8 @@ no more scheduled runs.** Remaining work is the pre-planned endgame only
 (anonymization scrub, restore double-blind author block, arXiv upload,
 ICLR conversion) per `docs/strategy/SUBMISSION_STRATEGY.md` Phase 11.
 
+<!-- AUDIT:ARCHIVAL-END -->
+
 ## 5. Framing discipline (non-negotiable — apply throughout)
 - **Divergence ≠ damage.** ADD / TV / residual are "behavioral-fidelity loss," never "damage."
   Correctness is the only quality arbiter. Carry the **signed flip-mass** (gained vs lost correct
@@ -523,11 +586,17 @@ ICLR conversion) per `docs/strategy/SUBMISSION_STRATEGY.md` Phase 11.
   paper's stated deliverable, released as the pinned harness.
 - **Display convention (pinned 2026-07-07): every 3-decimal number is `f"{v:.3f}"` of the
   report-artifact float** — the string numpy/R reproduce from raw rows. Do NOT hand-round
-  exact ties up. Corrections applied under this rule: H2O-style free 0.248 → **0.247**
-  (99/400 = 0.2475; abstract, summary, §4.1, Fig 1 + caption, Table 2) and SLM@2048 free
-  0.808 → **0.807** (323/400 = 0.8075; §4.1, Fig 1 + caption, dose paragraph). Caught by
-  eyeballing Fig 1 (hand-rounded constant, 0.248) against Fig 2 (DATA mode, 0.247) —
-  every other number in the paper already followed .3f.
+  exact ties up. This rule is now enforced structurally rather than by discipline:
+  `make_paper_figures.py` loads every constant from `paper_numbers.json` and formats it
+  at render time, so a hand-rounded tie has nowhere left to enter.
+<!-- AUDIT:ARCHIVAL-BEGIN -->
+  Historical instances caught under this rule, kept because they are how the rule was
+  learned: H2O-style free 0.248 → 0.247 (99/400 = 0.2475) and SLM@2048 free 0.808 →
+  0.807 (323/400 = 0.8075), both found by eyeballing Fig 1's hand-rounded constant
+  against Fig 2's DATA-mode value for the same quantity. Four more were found in Unit 3
+  (2026-07-27): −0.498/−0.428/−0.313/−0.178 hand-rounded where `.3f` gives
+  −0.497/−0.427/−0.312/−0.177.
+<!-- AUDIT:ARCHIVAL-END -->
 
 ## 6. Limitations / threats to validity (write this as a STRENGTH section)
 - **Generality (primary):** results are one model / one benchmark / budget 256 with two eviction
@@ -557,8 +626,8 @@ ICLR conversion) per `docs/strategy/SUBMISSION_STRATEGY.md` Phase 11.
   +0.023, measured; Branch A).
 - **DONE (added 2026-07-18):** m4-aime-2048 (§4r) — ORIGINAL CAMPAIGN 100%
   READ. No >100% regime; residual replicates on 2nd benchmark; readout
-  is press-INDEPENDENT at 19.7% dose. Drop-dead 2026-08-01 met with 14 days
-  to spare.
+  is press-INDEPENDENT at that dose (restated prompt-inclusive as 19.5% in
+  Unit 3). Drop-dead 2026-08-01 met with two weeks to spare.
 - **DONE (added 2026-07-20 + 2026-07-24):** m4-q15b-256 (§4s) + m4-q14b-256
   (§4t) — Amendment J COMPLETE, all four scale-axis cells read. 3/4
   REPLICATE (both 1.5B cells, SLM-14B); R-KV-14B inconclusive under the
