@@ -18,6 +18,40 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ UNIT 2 (2026-07-27) — Class A/C sourced, and the GATE ITSELF was
+  over-reporting by 65%.** Budget-2048 priority check first: **all three
+  residuals still exclude zero on both layers** — Random −0.0332 CI
+  [−0.065, −0.010] / layer-1 [−0.0525, −0.0325]; SLM −0.0791 CI
+  [−0.125, −0.0417] / [−0.0975, −0.0775]; H2O −0.0587 CI [−0.1017, −0.0200] /
+  [−0.0775, −0.0575]. B.3's first branch: restate carrying the CIs, note the
+  reduced margin. No claim fails.
+  **The new output-path defect (same class, found by auditing the class).**
+  `Entry.displays()` emitted the zero-place form of every value, so `0.882`
+  produced `"1"` and every bare 0/1 in the prose matched some accuracy or
+  residual. **418 occurrences — 65% of the reported `sourced` count — were
+  protocol constants credited to unrelated entries.** Two fixes, both tested:
+  `displays()` no longer emits a zero-place form for `|v| < 1` (a rounding that
+  destroys the value is not a display of it), and `classify()` now checks
+  protocol *before* sourced as a backstop. Both land on identical counts, which
+  is the cross-check. Honest basis is now **sourced 645, protocol 906,
+  unsourced 377** (was "sourced 1063, protocol 488"). *Unsourced did not move* —
+  the gate's verdict was always right; only its self-report was inflated.
+  **Class C: the paper's compression ratios were never wrong, only unsourced.**
+  With the prompt term (66.28 tokens, from the token-ID sidecars) restored, the
+  published figures reproduce **exactly**: pooled trace 6725.00 → 3.807% ("3.8%
+  of 6,725") and 3618.20 → 56.603% ("56.6% of 3,618"); H2O 5.785% → "5.8%".
+  `build_paper_numbers.py`'s standing note that these "cannot be fully
+  reproduced here" was wrong about the paper and is replaced. **Compute is a
+  real claim change:** artifact gives **279.87 GPU-hours over 7,200
+  generations** under an explicit inclusion rule; `.tex:134` says "~230 GPU-hours
+  across ~7,300" → on the Unit 3 list.
+  **Class A: 8 external entries** (HOTT 0.47/0.03/0.14/0.38 → Table 2; R-KV
+  105%/16%; DeepSeek 0.928/0.939) carry citation key + locator. Four locators
+  are **UNVERIFIED** (paper known, place in it not recorded) and the builder
+  prints them rather than absorbing them into "sourced".
+  Audit: `.tex` **161 → 154**, both-docs **386 → 377**. `make audit` now exists
+  and is the output-path gate. 167 → **179 tests**.
+
   **★★★★★ AMENDMENT K + THE OUTPUT-PATH GATE (2026-07-27) — a real systemic
   bug found and fixed; the paper is NOT submission-ready and the
   "endgame only" bullet below is SUPERSEDED.** Read this bullet first;

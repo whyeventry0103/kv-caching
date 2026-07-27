@@ -107,3 +107,47 @@ def test_stale_value_is_unsourced_against_the_current_catalogue():
     lits = extract_literals("residual of $-0.343$", "t", strip=False)
     classify(lits, current)
     assert lits[0].classification == "unsourced"
+
+
+def test_protocol_wins_over_a_percentage_that_rounds_onto_it():
+    """A catalogued 3.157% must not lend provenance to a bare "3" in the prose.
+
+    displays() legitimately emits the zero-place form of every value, so a
+    percentage entry collides with small protocol integers. Matching sourced
+    first counted 53 config constants as sourced against unrelated ratios --
+    the bibliography-label failure mode one layer up: the gate inflating its own
+    success metric.
+    """
+    cat = [_entry("realized.random-256.ratio_pct", 3.1566)]
+    lits = extract_literals("all 3 policies at 3.157", "t", strip=False)
+    classify(lits, cat, allowed_integers={3})
+    got = {lit.raw: lit.classification for lit in lits}
+    assert got["3"] == "protocol"
+    assert got["3.157"] == "sourced"
+
+
+def test_a_non_protocol_integer_still_sources_normally():
+    """The ordering must not make every integer unsourceable."""
+    cat = [_entry("compute.generations", 7200.0)]
+    lits = extract_literals("7200 generations", "t", strip=False)
+    classify(lits, cat, allowed_integers={3, 4, 8})
+    assert lits[0].classification == "sourced"
+
+
+def test_displays_omits_the_zero_place_form_of_a_sub_unit_value():
+    """0.882 is never written "1". Emitting it matched every bare 0 and 1 in
+    the prose against some accuracy or residual -- 418 occurrences, 65% of the
+    reported "sourced" count, were protocol constants credited to nothing."""
+    forms = _entry("fc", 0.882).displays()
+    assert "1" not in forms and "0" not in forms
+    assert "0.9" in forms and "0.88" in forms and "0.882" in forms
+
+
+def test_displays_keeps_the_zero_place_form_of_a_magnitude_above_one():
+    """ "230 GPU-hours" and "105%" are legitimate zero-place displays."""
+    assert "280" in _entry("gpu_hours", 279.87).displays()
+    assert "105" in _entry("rkv_pct", 105.0).displays()
+
+
+def test_displays_still_covers_an_exact_zero():
+    assert "0" in _entry("aime_bonus", 0.0).displays()

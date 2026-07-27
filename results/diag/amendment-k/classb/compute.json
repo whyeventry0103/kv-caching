@@ -1,0 +1,190 @@
+{
+  "by_directory": {
+    "decodingpress-random-smoke-v1": {
+      "generations": 1,
+      "hours": 0.007213433755015204,
+      "included": false
+    },
+    "decodingpress-smoke-v1": {
+      "generations": 1,
+      "hours": 0.006124522752232022,
+      "included": false
+    },
+    "diagnostics": {
+      "generations": 2,
+      "hours": 0.0029204957713793393,
+      "included": false
+    },
+    "fc-aime24": {
+      "generations": 240,
+      "hours": 13.914861853028642,
+      "included": true
+    },
+    "fc-llama50": {
+      "generations": 200,
+      "hours": 6.569348932086302,
+      "included": true
+    },
+    "fc-q14b": {
+      "generations": 200,
+      "hours": 7.871816020098502,
+      "included": true
+    },
+    "fc-q15b": {
+      "generations": 200,
+      "hours": 3.7332192520894267,
+      "included": true
+    },
+    "fullcache-eager-check": {
+      "generations": 20,
+      "hours": 0.4168441861243951,
+      "included": false
+    },
+    "grid-aime24-2048": {
+      "generations": 360,
+      "hours": 27.90110888314288,
+      "included": true
+    },
+    "grid-diss2048-h2o": {
+      "generations": 400,
+      "hours": 9.986182659666653,
+      "included": true
+    },
+    "grid-diss2048-tok": {
+      "generations": 800,
+      "hours": 18.90306703908453,
+      "included": true
+    },
+    "grid-diss256-h2o": {
+      "generations": 400,
+      "hours": 15.575342906790707,
+      "included": true
+    },
+    "grid-diss256-llama": {
+      "generations": 400,
+      "hours": 22.742918965104035,
+      "included": true
+    },
+    "grid-diss256-q14b": {
+      "generations": 400,
+      "hours": 23.25956747642175,
+      "included": true
+    },
+    "grid-diss256-q15b": {
+      "generations": 400,
+      "hours": 16.27670451966955,
+      "included": true
+    },
+    "grid-diss256-rkv": {
+      "generations": 400,
+      "hours": 21.980167539759098,
+      "included": true
+    },
+    "grid-diss256-tok": {
+      "generations": 800,
+      "hours": 38.54148860377117,
+      "included": true
+    },
+    "grid-math500-dissociation-v1": {
+      "generations": 800,
+      "hours": 39.702992417994956,
+      "included": false
+    },
+    "h2o-probe-v1": {
+      "generations": 1,
+      "hours": 0.008925661788897641,
+      "included": false
+    },
+    "math500-fc-powered-g0": {
+      "generations": 1000,
+      "hours": 25.918209259765913,
+      "included": false
+    },
+    "math500-fc-powered-g1": {
+      "generations": 1000,
+      "hours": 26.691854284309603,
+      "included": false
+    },
+    "math500-fc-powered-merged": {
+      "generations": 2000,
+      "hours": 52.610063544075516,
+      "included": true
+    },
+    "pilot-compression-v1-r2": {
+      "generations": 80,
+      "hours": 2.4535619484627227,
+      "included": false
+    },
+    "pilot-compression-v2": {
+      "generations": 80,
+      "hours": 2.7294143238379913,
+      "included": false
+    },
+    "pilot-fullcache-tokenized-v1": {
+      "generations": 1,
+      "hours": 0.005435141726112407,
+      "included": false
+    },
+    "pilot-fullcache-tokenized-v2": {
+      "generations": 20,
+      "hours": 0.25539731319445613,
+      "included": false
+    },
+    "pilot-fullcache-v1": {
+      "generations": 32,
+      "hours": 0.29086009965745485,
+      "included": false
+    },
+    "pilot-fullcache-v2": {
+      "generations": 20,
+      "hours": 0.4794773368691676,
+      "included": false
+    },
+    "pilot-fullcache-v2-tf456": {
+      "generations": 20,
+      "hours": 0.3025982868097425,
+      "included": false
+    },
+    "pilot-replay-compression-v1": {
+      "generations": 80,
+      "hours": 1.0215892527778245,
+      "included": false
+    },
+    "pilot-replay-self-smoke-v1": {
+      "generations": 1,
+      "hours": 0.005346850551674531,
+      "included": false
+    },
+    "pilot-replay-self-v1": {
+      "generations": 20,
+      "hours": 0.25539731319445613,
+      "included": false
+    },
+    "replay-diss256": {
+      "generations": 800,
+      "hours": 19.623657808705982,
+      "included": false
+    },
+    "replay-diss256-h2o": {
+      "generations": 400,
+      "hours": 9.811828904352991,
+      "included": false
+    },
+    "smoke-fullcache-4096": {
+      "generations": 1,
+      "hours": 0.005539488797496435,
+      "included": false
+    },
+    "smoke-fullcache-4096-v2": {
+      "generations": 1,
+      "hours": 0.005533207523064145,
+      "included": false
+    }
+  },
+  "excluded_hours": 130.0007215387235,
+  "generations": 7200,
+  "gpu_hours": 279.86585819478876,
+  "n_directories_excluded": 22,
+  "n_directories_included": 14,
+  "note": "Summed wall-clock over free-running/bank generation rows. Excludes teacher-forced work (readout, reverse readout, replay), the two shards superseded by the merged bank, and superseded pilots. Every directory is listed with its hours and an 'included' flag, so any exclusion can be re-added and its effect seen."
+}

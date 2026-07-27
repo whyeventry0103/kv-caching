@@ -1,4 +1,4 @@
-.PHONY: lint test dryrun sync sync-apply setup check smoke bank grid replay metrics figures
+.PHONY: lint test dryrun audit sync sync-apply setup check smoke bank grid replay metrics figures
 
 PYTHON := $(if $(wildcard .venv/bin/python),.venv/bin/python,python)
 RUFF := $(if $(wildcard .venv/bin/ruff),.venv/bin/ruff,ruff)
@@ -11,6 +11,15 @@ lint:
 
 test:
 	$(PYTEST) -q
+
+# Output-path gate. This repo's input-side gates are strong (pinned revisions,
+# token-ID sidecars, Jaccard parity, an 800-row exact replication) and nothing
+# ever checked that a number in the paper matched the artifact it came from --
+# which is how a systemic estimand bug (Amendment K) reached the prose. Rebuild
+# the catalogue from the artifacts, then fail if any literal has no source.
+audit:
+	$(PYTHON) scripts/build_paper_numbers.py --out paper_numbers.json
+	$(PYTHON) scripts/audit_paper_numbers.py --strict
 
 dryrun:
 	$(PYTHON) scripts/build_bank.py --config configs/experiments/smoke_fullcache.yaml --dry-run

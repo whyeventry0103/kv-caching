@@ -99,9 +99,20 @@ class Entry:
         entry by 100 made ``0.015`` match the "1.5" in "Qwen-1.5B" and produced
         a whole class of false matches; quantities that are genuinely quoted as
         percentages get their own catalogue entries instead.
+
+        **A rounding that destroys the value is not a display of it.** For
+        ``|value| < 1`` the zero-place form is always "0" or "1", so emitting it
+        made every bare 0 and 1 in the prose match some residual or accuracy:
+        418 occurrences -- 65% of the reported "sourced" count -- were config
+        constants credited to unrelated entries. Nobody writes an accuracy of
+        0.882 as "1". The catalogue only claims a display it could plausibly be
+        written as, so sub-unit values start at one decimal place; integers and
+        larger magnitudes keep the zero-place form ("230 GPU-hours", "105%").
         """
         out: set[str] = set()
         for p in places:
+            if p == 0 and abs(self.value) < 1.0 and self.value != 0.0:
+                continue
             out.add(f"{self.value:.{p}f}")
             out.add(f"{abs(self.value):.{p}f}")
         return {s.lstrip("+") for s in out}
@@ -198,6 +209,14 @@ def classify(
     legitimately not in the catalogue, but they are enumerated explicitly so
     that "it's just a config number" is a decision on a list rather than a
     judgement made per literal.
+
+    **Protocol is checked before sourced, and the order is load-bearing.** A
+    catalogued percentage rounds to a bare integer at zero places (3.157% ->
+    "3", 29.8% -> "30"), so matching sourced first let a plain count in the
+    prose claim provenance from an unrelated ratio. That inflates the gate's own
+    success metric with numbers that were never in question -- the same failure
+    mode as the bibliography label width, one layer up. An enumerated config
+    constant is a config constant regardless of what else happens to round to it.
     """
     allowed = allowed_integers or set()
     by_display: dict[str, list[str]] = {}
@@ -206,14 +225,14 @@ def classify(
             by_display.setdefault(form, []).append(entry.key)
 
     for lit in literals:
+        if lit.value.is_integer() and int(lit.value) in allowed:
+            lit.classification = "protocol"
+            continue
         stripped = lit.raw.replace("{,}", "").lstrip("-")
         keys = by_display.get(stripped) or by_display.get(lit.raw.replace("{,}", ""))
         if keys:
             lit.classification = "sourced"
             lit.matched_keys = tuple(sorted(set(keys)))
-            continue
-        if lit.value.is_integer() and int(lit.value) in allowed:
-            lit.classification = "protocol"
             continue
         if lit.value.is_integer() and 1900 <= lit.value <= 2100:
             lit.classification = "year"

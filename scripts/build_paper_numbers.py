@@ -458,29 +458,175 @@ def build_catalogue() -> list[Entry]:
                 "ADD as a multiple of the two-FC noise floor",
             )
 
-    # Realized compression ratios. NOTE: the paper's stated definition is
-    # budget / mean(prompt + generation) POOLED across the Random/SLM pair, and
-    # the prompt-length component (~66 tokens) has no source artifact -- so the
-    # pooled figures quoted in the text (3.8% of 6,725; 56.6% of 3,618) cannot
-    # be fully reproduced here. The generation-only pooled mean is catalogued so
-    # the reproducible part is sourced and the gap is explicit.
-    for unit, budget in (("diss256", 256), ("b2048", 2048)):
-        ks = (f"{unit}.random.mean_tokens", f"{unit}.streamingllm.mean_tokens")
+    # Realized compression ratios. The paper's stated definition is
+    # budget / mean(prompt + generation), POOLED across the Random/SLM pair.
+    # The prompt term (~66 tokens) had no source artifact until Class C, so an
+    # earlier revision of this file recorded that the published figures "cannot
+    # be fully reproduced here" and catalogued only a generation-only variant.
+    # That note was wrong about the *paper*: with the prompt term restored from
+    # the token-ID sidecars the published values reproduce exactly (6725.00 and
+    # 3618.20 pooled trace tokens -> 3.807% and 56.603%). The gap was
+    # provenance, not correctness. Both forms are kept: the prompt-inclusive
+    # one is the paper's, the generation-only one shows what the prompt term is
+    # worth, which is what makes the definition checkable.
+    lengths = _load(CLASSB / "prompt_lengths.json")
+    rel_len = (CLASSB / "prompt_lengths.json").relative_to(PROJECT_ROOT)
+    add(
+        "prompt.mean_tokens",
+        lengths["pooled"]["mean_prompt_tokens"],
+        f"{rel_len}#/pooled/mean_prompt_tokens",
+        "mean rendered-prompt length over every compressed cell (token-ID sidecars)",
+    )
+    add(
+        "prompt.median_tokens",
+        lengths["pooled"]["median_prompt_tokens"],
+        f"{rel_len}#/pooled/median_prompt_tokens",
+        "median rendered-prompt length",
+    )
+    for cell, payload in sorted(lengths["realized"].items()):
+        for field_name, key, desc in (
+            ("mean_trace_tokens", "trace_tokens", "mean prompt+generation length"),
+            ("ratio_pct", "ratio_pct", "realized compression ratio (percent)"),
+        ):
+            add(
+                f"realized.{cell}.{key}",
+                payload[field_name],
+                f"{rel_len}#/realized/{cell}/{field_name}",
+                desc,
+            )
+    for unit, budget, cells in (
+        ("diss256", 256, ("random-256", "streamingllm-256")),
+        ("b2048", 2048, ("random-2048", "streamingllm-2048")),
+    ):
+        ks = tuple(f"realized.{c}.trace_tokens" for c in cells)
+        by_key.update({e.key: e.value for e in entries})
         pooled = sum(by_key[k] for k in ks) / len(ks)
         derive(
-            f"mean_tokens_pooled.{unit}",
+            f"mean_trace_pooled.{unit}",
             pooled,
-            "mean over the Random/SLM pair of mean_free_run_tokens",
+            "mean over the Random/SLM pair of mean_trace_tokens (prompt+generation)",
             ks,
-            "pooled mean GENERATED length (excludes prompt; see note)",
+            "pooled mean TRACE length -- the paper's compression-ratio denominator",
+        )
+        derive(
+            f"compression_ratio.{unit}",
+            budget / pooled,
+            f"{budget} / mean_trace_pooled.{unit}",
+            (f"mean_trace_pooled.{unit}",),
+            "realized ratio as the paper defines it (prompt + generation)",
+        )
+        gk = (f"{unit}.random.mean_tokens", f"{unit}.streamingllm.mean_tokens")
+        pooled_gen = sum(by_key[k] for k in gk) / len(gk)
+        derive(
+            f"mean_tokens_pooled.{unit}",
+            pooled_gen,
+            "mean over the Random/SLM pair of mean_free_run_tokens",
+            gk,
+            "pooled mean GENERATED length (excludes prompt; contrast only)",
         )
         derive(
             f"compression_ratio_gen_only.{unit}",
-            budget / pooled,
+            budget / pooled_gen,
             f"{budget} / mean_tokens_pooled.{unit}",
             (f"mean_tokens_pooled.{unit}",),
-            "realized ratio against generation only, NOT the paper's prompt+gen figure",
+            "realized ratio against generation only -- what the prompt term is worth",
         )
+
+    # ---- primary: Class C (compute) ---------------------------------------
+    compute = _load(CLASSB / "compute.json")
+    rel_c = (CLASSB / "compute.json").relative_to(PROJECT_ROOT)
+    add(
+        "compute.gpu_hours",
+        compute["gpu_hours"],
+        f"{rel_c}#/gpu_hours",
+        "summed generation wall-clock under the artifact's stated inclusion rule",
+    )
+    add(
+        "compute.generations",
+        compute["generations"],
+        f"{rel_c}#/generations",
+        "generations counted in the compute total",
+    )
+
+    # ---- external: Class A (numbers quoted from other papers) -------------
+    # These are not ours to regenerate, so "sourced" means something different:
+    # a citation key plus a locator precise enough that a reviewer can check the
+    # transcription without reading the whole paper. Where the repo's verified
+    # audit (PAPER_FINDINGS.md, "verified against the papers 2026-07") records a
+    # table, the table travels with the entry. Where it does not, the locator is
+    # UNVERIFIED and main() prints it -- an unverified locator is a number we
+    # believe but cannot point at, which is exactly the state worth surfacing
+    # rather than rounding up to "sourced".
+    def external(key, value, cite, locator, description):
+        entries.append(
+            Entry(
+                key=key,
+                value=float(value),
+                kind="external",
+                source=f"\\cite{{{cite}}} @ {locator}",
+                description=description,
+            )
+        )
+
+    for key, value, cite, locator, desc in (
+        (
+            "hott.fullcache_math500",
+            0.47,
+            "hott2025",
+            "Table 2 (MATH-500, R1-Distill-Qwen-7B, full cache)",
+            "HOTT's full-cache MATH-500 reference -- not comparable digit-for-digit",
+        ),
+        (
+            "hott.streamingllm_128",
+            0.03,
+            "hott2025",
+            "Table 2 (MATH-500, R1-Distill-Qwen-7B, budget 128)",
+            "HOTT StreamingLLM at budget 128 -- the sharpest external contradiction",
+        ),
+        (
+            "hott.h2o_128",
+            0.14,
+            "hott2025",
+            "Table 2 (MATH-500, R1-Distill-Qwen-7B, budget 128)",
+            "HOTT H2O at budget 128 (WITH recency reservation -- it survives)",
+        ),
+        (
+            "hott.snapkv_128",
+            0.38,
+            "hott2025",
+            "Table 2 (MATH-500, R1-Distill-Qwen-7B, budget 128)",
+            "HOTT SnapKV-D at budget 128",
+        ),
+        (
+            "rkv.published_pct_of_full",
+            105.0,
+            "rkv2025",
+            "UNVERIFIED (headline; R1-Distill-Llama-8B, AIME-24)",
+            "R-KV's published >100% headline -- our port runs a different scale",
+        ),
+        (
+            "rkv.published_cache_pct",
+            16.0,
+            "rkv2025",
+            "UNVERIFIED (headline; R1-Distill-Llama-8B, AIME-24)",
+            "cache fraction at R-KV's published headline",
+        ),
+        (
+            "deepseek.qwen7b_math500",
+            0.928,
+            "deepseek2025r1",
+            "UNVERIFIED (distilled-model MATH-500 pass@1, R1-Distill-Qwen-7B)",
+            "published 7B MATH-500 pass@1; our 0.882 bank is anchored against it",
+        ),
+        (
+            "deepseek.qwen14b_math500",
+            0.939,
+            "deepseek2025r1",
+            "UNVERIFIED (distilled-model MATH-500 pass@1, R1-Distill-Qwen-14B)",
+            "published 14B MATH-500 pass@1; the 14B bank gate band was set from it",
+        ),
+    ):
+        external(key, value, cite, locator, desc)
 
     # Percentage forms, catalogued explicitly rather than generated, so that a
     # value quoted as "29.8\\%" is sourced without every entry also matching
@@ -528,12 +674,25 @@ def main() -> int:
         ],
     }
     args.out.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
-    primary = sum(1 for e in entries if e.kind == "primary")
-    derived = len(entries) - primary
-    print(
-        f"wrote {args.out} -- {len(entries)} entries "
-        f"({primary} primary, {derived} derived)"
+    kinds: dict[str, int] = {}
+    for e in entries:
+        kinds[e.kind] = kinds.get(e.kind, 0) + 1
+    breakdown = ", ".join(f"{n} {k}" for k, n in sorted(kinds.items()))
+    print(f"wrote {args.out} -- {len(entries)} entries ({breakdown})")
+
+    # An external number whose locator is UNVERIFIED is traceable to a paper but
+    # not to a place in it. That is weaker than every other entry in the
+    # catalogue and must not be silently absorbed into the "sourced" count.
+    unverified = sorted(
+        e.key for e in entries if e.kind == "external" and "UNVERIFIED" in e.source
     )
+    if unverified:
+        print(
+            f"NOTE: {len(unverified)} external entries carry an UNVERIFIED "
+            "locator (cited paper known, place in it not recorded):"
+        )
+        for key in unverified:
+            print(f"  {key}")
     return 0
 
 

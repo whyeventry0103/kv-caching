@@ -1,0 +1,145 @@
+{
+  "by_cell": {
+    "h2o-2048": {
+      "budget": "2048",
+      "max_prompt_tokens": 353,
+      "mean_prompt_tokens": 66.28,
+      "median_prompt_tokens": 51.5,
+      "min_prompt_tokens": 15,
+      "n": 400,
+      "press": "h2o"
+    },
+    "h2o-256": {
+      "budget": "256",
+      "max_prompt_tokens": 353,
+      "mean_prompt_tokens": 66.28,
+      "median_prompt_tokens": 51.5,
+      "min_prompt_tokens": 15,
+      "n": 400,
+      "press": "h2o"
+    },
+    "random-2048": {
+      "budget": "2048",
+      "max_prompt_tokens": 353,
+      "mean_prompt_tokens": 66.28,
+      "median_prompt_tokens": 51.5,
+      "min_prompt_tokens": 15,
+      "n": 400,
+      "press": "random"
+    },
+    "random-256": {
+      "budget": "256",
+      "max_prompt_tokens": 353,
+      "mean_prompt_tokens": 66.28,
+      "median_prompt_tokens": 51.5,
+      "min_prompt_tokens": 15,
+      "n": 400,
+      "press": "random"
+    },
+    "rkv-256": {
+      "budget": "256",
+      "max_prompt_tokens": 353,
+      "mean_prompt_tokens": 66.28,
+      "median_prompt_tokens": 51.5,
+      "min_prompt_tokens": 15,
+      "n": 400,
+      "press": "rkv"
+    },
+    "streamingllm-2048": {
+      "budget": "2048",
+      "max_prompt_tokens": 353,
+      "mean_prompt_tokens": 66.28,
+      "median_prompt_tokens": 51.5,
+      "min_prompt_tokens": 15,
+      "n": 400,
+      "press": "streamingllm"
+    },
+    "streamingllm-256": {
+      "budget": "256",
+      "max_prompt_tokens": 353,
+      "mean_prompt_tokens": 66.28,
+      "median_prompt_tokens": 51.5,
+      "min_prompt_tokens": 15,
+      "n": 400,
+      "press": "streamingllm"
+    }
+  },
+  "note": "Prompt lengths from token-ID sidecars (exact generation-time tokens, decode-encode validated), not re-tokenized. Realized ratios use budget / (prompt + generation); the generation-only figure is reported alongside to show the difference the prompt term makes.",
+  "pooled": {
+    "mean_prompt_tokens": 66.28,
+    "median_prompt_tokens": 51.5,
+    "n": 2800
+  },
+  "realized": {
+    "h2o-2048": {
+      "budget": 2048,
+      "mean_generated_tokens": 3131.6425,
+      "mean_prompt_tokens": 66.28,
+      "mean_trace_tokens": 3197.9225,
+      "ratio": 0.6404157699256314,
+      "ratio_generation_only_pct": 65.39699215347856,
+      "ratio_pct": 64.04157699256314
+    },
+    "h2o-256": {
+      "budget": 256,
+      "mean_generated_tokens": 4358.7825,
+      "mean_prompt_tokens": 66.28,
+      "mean_trace_tokens": 4425.0625,
+      "ratio": 0.05785229022188952,
+      "ratio_generation_only_pct": 5.873199683627251,
+      "ratio_pct": 5.785229022188952
+    },
+    "random-2048": {
+      "budget": 2048,
+      "mean_generated_tokens": 3454.13,
+      "mean_prompt_tokens": 66.28,
+      "mean_trace_tokens": 3520.4100000000003,
+      "ratio": 0.5817504211157223,
+      "ratio_generation_only_pct": 59.291341090231114,
+      "ratio_pct": 58.175042111572225
+    },
+    "random-256": {
+      "budget": 256,
+      "mean_generated_tokens": 8043.7075,
+      "mean_prompt_tokens": 66.28,
+      "mean_trace_tokens": 8109.9875,
+      "ratio": 0.03156601659373704,
+      "ratio_generation_only_pct": 3.182611998260752,
+      "ratio_pct": 3.1566016593737043
+    },
+    "rkv-256": {
+      "budget": 256,
+      "mean_generated_tokens": 8032.5425,
+      "mean_prompt_tokens": 66.28,
+      "mean_trace_tokens": 8098.822499999999,
+      "ratio": 0.03160953336117689,
+      "ratio_generation_only_pct": 3.187035736194362,
+      "ratio_pct": 3.160953336117689
+    },
+    "streamingllm-2048": {
+      "budget": 2048,
+      "mean_generated_tokens": 3649.7025,
+      "mean_prompt_tokens": 66.28,
+      "mean_trace_tokens": 3715.9825,
+      "ratio": 0.5511328430637119,
+      "ratio_generation_only_pct": 56.114162729701945,
+      "ratio_pct": 55.11328430637119
+    },
+    "streamingllm-256": {
+      "budget": 256,
+      "mean_generated_tokens": 5273.74,
+      "mean_prompt_tokens": 66.28,
+      "mean_trace_tokens": 5340.0199999999995,
+      "ratio": 0.04793989535619717,
+      "ratio_generation_only_pct": 4.854240064925461,
+      "ratio_pct": 4.793989535619717
+    }
+  },
+  "runs": [
+    "grid-diss256-tok",
+    "grid-diss2048-tok",
+    "grid-diss256-h2o",
+    "grid-diss2048-h2o",
+    "grid-diss256-rkv"
+  ]
+}
