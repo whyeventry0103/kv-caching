@@ -142,9 +142,15 @@ UNITS = [
     ),
     Unit(
         "fc-readout-control",
-        {"readout-fc-control": ("readout", 400)},
+        {
+            "readout-fc-control": ("readout", 400),
+            "math500-fc-powered-merged": ("grid", 2000),
+        },
         "readout_acc",
-        args={"readout": "readout-fc-control"},
+        args={
+            "readout": "readout-fc-control",
+            "fullcache": "math500-fc-powered-merged",
+        },
     ),
     Unit("fc-aime24-acc", {"fc-aime24": ("grid", 240)}, "bank_acc", bench="aime24"),
     Unit(
@@ -322,6 +328,51 @@ def harvest(unit: Unit, python: str) -> list[str]:
             "n_undefined": len(rows) - len(defined),
             "readout_accuracy": acc,
         }
+        # Amendment K applies here too, and it was missed. This control's whole
+        # job is to measure the readout protocol's answer-resampling effect with
+        # zero compression -- Acc_ro(FC) minus Acc_FC. It was differenced against
+        # the full 2000-row bank while Acc_ro(FC) is defined on 392 rows: the
+        # exact mismatched-population comparison Amendment K retired, in the one
+        # artifact that exists to calibrate the readout channel. The matched
+        # reference restricts the bank to the conditions where readout is
+        # defined, so both sides describe the same problems.
+        fullcache = unit.args.get("fullcache")
+        if fullcache:
+            reference: dict[tuple[str, int], bool] = {}
+            for path in (RUNS / fullcache / "math500").rglob("*.jsonl"):
+                if "token_ids" in path.parts:
+                    continue
+                for ln in path.read_text(encoding="utf-8").splitlines():
+                    if ln.strip():
+                        row = json.loads(ln)
+                        key = (row["pid"], int(row["decoding"]["seed"]))
+                        reference[key] = bool(row["correct"])
+            # A readout row carries no "pid" of its own: it is keyed by the
+            # reference trace it read out, so the pid is reference_key[1] and
+            # the seed reference_key[5]. Same convention as report_m4's
+            # _reference_key_from_readout -- matching on anything else would
+            # silently pair a readout with the wrong reference.
+            defined_keys = [
+                key
+                for key in (
+                    (str(r["reference_key"][1]), int(r["reference_key"][5]))
+                    for r in defined
+                )
+                if key in reference
+            ]
+            matched = sum(reference[k] for k in defined_keys) / len(defined_keys)
+            unmatched = sum(reference.values()) / len(reference)
+            payload.update(
+                {
+                    "reference_convention": "amendment-k-cell-population",
+                    "n_reference_rows": len(reference),
+                    "n_matched_rows": len(defined_keys),
+                    "fc_accuracy_matched": matched,
+                    "fc_accuracy_unmatched": unmatched,
+                    "resampling_effect_matched": acc - matched,
+                    "resampling_effect_unmatched_RETIRED": acc - unmatched,
+                }
+            )
         (out_dir / "readout_acc.json").write_text(json.dumps(payload, indent=2))
         return [f"  {json.dumps(payload)}"]
     if unit.kind == "bank_acc":

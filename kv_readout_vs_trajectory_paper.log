@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.5.7)  24 JUL 2026 10:46
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.5.7)  27 JUL 2026 22:26
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -524,13 +524,14 @@ File: figures/fig0_protocol.pdf Graphic file (type pdf)
 <use figures/fig0_protocol.pdf>
 Package pdftex.def Info: figures/fig0_protocol.pdf  used on input line 141.
 (pdftex.def)             Requested size: 432.17375pt x 207.02226pt.
+ [6]
 LaTeX Font Info:    Trying to load font information for OMS+cmtt on input line 154.
  (/Library/Frameworks/R.framework/Resources/share/texmf/tex/latex/omscmtt.fd
 File: omscmtt.fd 
 )
 LaTeX Font Info:    Font shape `OMS/cmtt/m/it' in size <10.95> not available
 (Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 154.
- [6] [7 <./figures/fig0_protocol.pdf>] [8]
+ [7 <./figures/fig0_protocol.pdf>] [8]
 <figures/fig1_phenomenon.pdf, id=293, 544.16728pt x 203.73691pt>
 File: figures/fig1_phenomenon.pdf Graphic file (type pdf)
 <use figures/fig1_phenomenon.pdf>
@@ -541,41 +542,40 @@ Package pdftex.def Info: figures/fig1_phenomenon.pdf  used on input line 204.
 LaTeX Font Warning: Font shape `OT1/cmr/bx/sc' undefined
 (Font)              using `OT1/cmr/bx/n' instead on input line 244.
 
-
+[11]
 Overfull \hbox (1.40422pt too wide) in paragraph at lines 250--251
-[]\OT1/cmr/m/n/10.95 (-20) The re-sult-ing resid-ual brack-ets are \OT1/cmr/bx/n/10.95 (-20) Ran-dom $\OT1/cmr/m/n/10.95 (-20) [\OMS/cmsy/m/n/10.95 ^^@\OT1/cmr/m/n/10.95 (-20) 0\OML/cmm/m/it/10.95 :\OT1/cmr/m/n/10.95 (-20) 343\OML/cmm/m/it/10.95 ; \OMS/cmsy/m/n/10.95 ^^@\OT1/cmr/m/n/10.95 (-20) 0\OML/cmm/m/it/10.95 :\OT1/cmr/m/n/10.95 (-20) 246]$, \OT1/cmr/bx/n/10.95 (-20) StreamingLLM $\OT1/cmr/m/n/10.95 (-20) [\OMS/cmsy/m/n/10.95 ^^@\OT1/cmr/m/n/10.95 (-20) 0\OML/cmm/m/it/10.95 :\OT1/cmr/m/n/10.95 (-20) 466\OML/cmm/m/it/10.95 ; \OMS/cmsy/m/n/10.95 ^^@\OT1/cmr/m/n/10.95 (-20) 0\OML/cmm/m/it/10.95 :\OT1/cmr/m/n/10.95 (-20) 347]$,
+[]\OT1/cmr/m/n/10.95 (-20) The re-sult-ing resid-ual brack-ets are \OT1/cmr/bx/n/10.95 (-20) Ran-dom $\OT1/cmr/m/n/10.95 (-20) [\OMS/cmsy/m/n/10.95 ^^@\OT1/cmr/m/n/10.95 (-20) 0\OML/cmm/m/it/10.95 :\OT1/cmr/m/n/10.95 (-20) 337\OML/cmm/m/it/10.95 ; \OMS/cmsy/m/n/10.95 ^^@\OT1/cmr/m/n/10.95 (-20) 0\OML/cmm/m/it/10.95 :\OT1/cmr/m/n/10.95 (-20) 282]$, \OT1/cmr/bx/n/10.95 (-20) StreamingLLM $\OT1/cmr/m/n/10.95 (-20) [\OMS/cmsy/m/n/10.95 ^^@\OT1/cmr/m/n/10.95 (-20) 0\OML/cmm/m/it/10.95 :\OT1/cmr/m/n/10.95 (-20) 470\OML/cmm/m/it/10.95 ; \OMS/cmsy/m/n/10.95 ^^@\OT1/cmr/m/n/10.95 (-20) 0\OML/cmm/m/it/10.95 :\OT1/cmr/m/n/10.95 (-20) 344]$,
  []
 
-[11]
-<figures/fig2_bracket.pdf, id=398, 709.69138pt x 457.4701pt>
+<figures/fig2_bracket.pdf, id=399, 709.69138pt x 457.4701pt>
 File: figures/fig2_bracket.pdf Graphic file (type pdf)
 <use figures/fig2_bracket.pdf>
 Package pdftex.def Info: figures/fig2_bracket.pdf  used on input line 260.
 (pdftex.def)             Requested size: 422.77664pt x 272.52266pt.
-<figures/fig4_tvprofile.pdf, id=402, 316.7712pt x 210.01045pt>
+<figures/fig4_tvprofile.pdf, id=403, 316.7712pt x 210.01045pt>
 File: figures/fig4_tvprofile.pdf Graphic file (type pdf)
 <use figures/fig4_tvprofile.pdf>
 Package pdftex.def Info: figures/fig4_tvprofile.pdf  used on input line 286.
 (pdftex.def)             Requested size: 338.22418pt x 224.24751pt.
- [12] [13 <./figures/fig2_bracket.pdf>]
+[12] [13 <./figures/fig2_bracket.pdf>]
 <figures/fig3_add.pdf, id=491, 389.75761pt x 229.2516pt>
 File: figures/fig3_add.pdf Graphic file (type pdf)
 <use figures/fig3_add.pdf>
 Package pdftex.def Info: figures/fig3_add.pdf  used on input line 318.
 (pdftex.def)             Requested size: 338.22418pt x 198.94005pt.
  [14 <./figures/fig4_tvprofile.pdf>]
-<figures/fig5_twofc.pdf, id=544, 322.54652pt x 204.59235pt>
+<figures/fig5_twofc.pdf, id=545, 322.54652pt x 204.59235pt>
 File: figures/fig5_twofc.pdf Graphic file (type pdf)
 <use figures/fig5_twofc.pdf>
 Package pdftex.def Info: figures/fig5_twofc.pdf  used on input line 329.
 (pdftex.def)             Requested size: 338.22418pt x 214.54419pt.
- [15 <./figures/fig3_add.pdf>] [16 <./figures/fig5_twofc.pdf>]
-<figures/fig6_aime.pdf, id=687, 350.55115pt x 216.71445pt>
+ [15 <./figures/fig3_add.pdf>] [16 <./figures/fig5_twofc.pdf>] [17]
+<figures/fig6_aime.pdf, id=691, 350.55115pt x 216.71445pt>
 File: figures/fig6_aime.pdf Graphic file (type pdf)
 <use figures/fig6_aime.pdf>
 Package pdftex.def Info: figures/fig6_aime.pdf  used on input line 352.
 (pdftex.def)             Requested size: 281.85587pt x 174.25468pt.
- [17] [18 <./figures/fig6_aime.pdf>] [19] [20] (./kv_readout_vs_trajectory_paper.aux)
+ [18 <./figures/fig6_aime.pdf>] [19] [20] [21] (./kv_readout_vs_trajectory_paper.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2026-03-20>
@@ -588,18 +588,18 @@ Package rerunfilecheck Info: File `kv_readout_vs_trajectory_paper.out' has not c
 (rerunfilecheck)             Checksum: 68793427A8951DB54DCAAB9C83917277;4078.
  ) 
 Here is how much of TeX's memory you used:
- 17359 strings out of 469339
- 289712 string characters out of 5465691
+ 17358 strings out of 469339
+ 289701 string characters out of 5465691
  774078 words of memory out of 5000000
  45550 multiletter control sequences out of 15000+600000
- 656003 words of font info for 277 fonts, out of 8000000 for 9000
+ 655895 words of font info for 276 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 75i,15n,79p,2586b,625s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 75i,15n,79p,2593b,627s stack positions out of 10000i,1000n,20000p,200000b,200000s
  </Users/apple/Library/TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/tcrm1095.600pk></Users/apple/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></Users/apple/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></Users/apple/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx9.pfb></Users/apple/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmbxti10.pfb></Users/apple/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmcsc10.pfb></Users/apple/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></Users/apple/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmitt10.pfb></Users/apple/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></Users/apple/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></Users/apple/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi9.pfb></Users/apple/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></Users/apple/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></Users/apple/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></Users/apple/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></Users/apple/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></Users/apple/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></Users/apple/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></Users/apple/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></Users/apple/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></Users/apple/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy9.pfb></Users/apple/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></Users/apple/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmti8.pfb></Users/apple/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmti9.pfb></Users/apple/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></Users/apple/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb></Users/apple/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt9.pfb>
-Output written on kv_readout_vs_trajectory_paper.pdf (20 pages, 537486 bytes).
+Output written on kv_readout_vs_trajectory_paper.pdf (21 pages, 540006 bytes).
 PDF statistics:
- 905 PDF objects out of 1000 (max. 8388607)
- 459 compressed objects within 5 object streams
- 86 named destinations out of 1000 (max. 500000)
+ 909 PDF objects out of 1000 (max. 8388607)
+ 462 compressed objects within 5 object streams
+ 87 named destinations out of 1000 (max. 500000)
  59572 words of extra memory for PDF output out of 61914 (max. 10000000)
 

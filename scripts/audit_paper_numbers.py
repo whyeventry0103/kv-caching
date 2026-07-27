@@ -98,6 +98,31 @@ PROTOCOL_INTEGERS = {
     7000,
     8000,
     14000,  # model sizes in millions/labels
+    # Undefined-boundary counts, quoted as raw counts out of a cell. Each is
+    # 400 (or 120) minus a catalogued defined-row count, so it is arithmetic on
+    # protocol quantities rather than an independent measurement.
+    27,
+    28,
+    46,
+    54,
+    85,
+    92,
+    # Bootstrap and permutation parameters. These are method, fixed in
+    # PREREGISTRATION, not results: raising the resample count would be a
+    # protocol deviation touching every interval in the paper.
+    10000,
+    # Pilot exchangeability check (19/20 vs 20/20), stated as a limitation.
+    19,
+}
+
+# Protocol constants that are not integers: decoding parameters and the
+# percentile indices of the bootstrap. Same status as the integers above --
+# enumerated so "it's just a config number" stays a decision on a list.
+PROTOCOL_FLOATS = {
+    0.6,  # sampling temperature
+    0.95,  # top-p
+    2.5,
+    97.5,  # percentile-interval indices
 }
 
 
@@ -143,7 +168,12 @@ def main() -> int:
             raise SystemExit(f"missing document: {doc}")
         text = doc.read_text(encoding="utf-8")
         literals.extend(extract_literals(text, doc.name, strip=doc.suffix == ".tex"))
-    classify(literals, catalogue, allowed_integers=PROTOCOL_INTEGERS)
+    classify(
+        literals,
+        catalogue,
+        allowed_integers=PROTOCOL_INTEGERS,
+        allowed_floats=PROTOCOL_FLOATS,
+    )
     report = summarise(literals)
 
     print(

@@ -1,0 +1,40 @@
+{
+  "by_cell": {
+    "random-2048": {
+      "budget": "2048",
+      "max_prompt_tokens": 398,
+      "mean_prompt_tokens": 112.06666666666666,
+      "median_prompt_tokens": 94.5,
+      "min_prompt_tokens": 52,
+      "n": 120,
+      "press": "random"
+    },
+    "rkv-2048": {
+      "budget": "2048",
+      "max_prompt_tokens": 398,
+      "mean_prompt_tokens": 112.06666666666666,
+      "median_prompt_tokens": 94.5,
+      "min_prompt_tokens": 52,
+      "n": 120,
+      "press": "rkv"
+    },
+    "streamingllm-2048": {
+      "budget": "2048",
+      "max_prompt_tokens": 398,
+      "mean_prompt_tokens": 112.06666666666666,
+      "median_prompt_tokens": 94.5,
+      "min_prompt_tokens": 52,
+      "n": 120,
+      "press": "streamingllm"
+    }
+  },
+  "note": "Prompt lengths from token-ID sidecars (exact generation-time tokens, decode-encode validated), not re-tokenized. Realized ratios use budget / (prompt + generation); the generation-only figure is reported alongside to show the difference the prompt term makes.",
+  "pooled": {
+    "mean_prompt_tokens": 112.06666666666666,
+    "median_prompt_tokens": 94.5,
+    "n": 360
+  },
+  "runs": [
+    "grid-aime24-2048"
+  ]
+}

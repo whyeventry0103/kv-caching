@@ -179,6 +179,17 @@ def build_catalogue() -> list[Entry]:
                     f"{rel}#/cells/{press}/primary_bounds/residual_bracket/{i}",
                     "Amendment K layer-1 bracket bound",
                 )
+            # The reverse endpoint under both imputations, quoted directly in
+            # the selection-effect argument: index 0 scores every undefined row
+            # incorrect, index 1 scores every one correct.
+            for i, bound in enumerate(pb.get("reverse_change") or []):
+                add(
+                    f"{stem}.primary_reverse{i}",
+                    bound,
+                    f"{rel}#/cells/{press}/primary_bounds/reverse_change/{i}",
+                    "reverse endpoint with undefined rows scored "
+                    + ("incorrect" if i == 0 else "correct"),
+                )
             flip = cell.get("signed_flip_mass") or {}
             for name in ("gained", "lost", "net"):
                 if name in flip:
@@ -226,6 +237,20 @@ def build_catalogue() -> list[Entry]:
                 f"{rel}#/cells/{press}/n_significant_bh_0p05",
                 "problems significant after Benjamini-Hochberg",
             )
+            # Signed flip mass is what licenses reading divergence as loss
+            # rather than mere change, so it is quoted throughout the ADD
+            # section -- and it was catalogued only from the decomposition
+            # summaries, never from the ADD artifacts the section actually
+            # cites. Same quantity, different producer; both must be sourced.
+            flip_mass = cell.get("signed_flip_mass") or {}
+            for name in ("gained", "lost", "net"):
+                if name in flip_mass:
+                    add(
+                        f"{stem}.flip_{name}",
+                        flip_mass[name],
+                        f"{rel}#/cells/{press}/signed_flip_mass/{name}",
+                        f"signed flip mass ({name}) as measured by the ADD run",
+                    )
 
     # ---- primary: controls -------------------------------------------------
     twofc = _load(ADD / "twofc.json")
@@ -262,6 +287,22 @@ def build_catalogue() -> list[Entry]:
         ctrl["readout_accuracy"],
         f"{rel}#/readout_accuracy",
         "full-cache readout of full-cache traces",
+    )
+    # Amendment K reached this control late: its published +0.023 differenced a
+    # 392-row readout accuracy against the 2000-row bank. On the matched
+    # population the answer-resampling effect is +0.003 -- an order of magnitude
+    # smaller, and the calibration sentence it supports gets stronger, not weaker.
+    add(
+        "fc_readout_control.fc_matched",
+        ctrl["fc_accuracy_matched"],
+        f"{rel}#/fc_accuracy_matched",
+        "Acc_FC restricted to the conditions where FC readout is defined",
+    )
+    add(
+        "fc_readout_control.resampling_effect",
+        ctrl["resampling_effect_matched"],
+        f"{rel}#/resampling_effect_matched",
+        "pure answer-resampling effect of the readout protocol, matched population",
     )
 
     bank = _load(DIAG / "fc-aime24-bank.json")
@@ -419,6 +460,78 @@ def build_catalogue() -> list[Entry]:
             "growth factor from the first 50 post-eviction steps to later steps",
         )
 
+    # Truncation-adjusted residual: rescore every truncated free-run as CORRECT.
+    # An extreme bound by construction -- it scores as successes the very
+    # termination failures ADD measures as a compression-induced channel -- so
+    # it is the conservative end of a range, not an estimate.
+    for unit, press in (
+        ("diss256", "random"),
+        ("diss256", "streamingllm"),
+        ("h2o256", "h2o"),
+        ("rkv256", "rkv"),
+    ):
+        s = f"{unit}.{press}"
+        free_adj = by_key[f"{s}.free"] + by_key[f"{s}.trunc"]
+        derive(
+            f"residual_trunc_adjusted.{unit}.{press}",
+            (free_adj - by_key[f"{s}.fc_cell"]) - by_key[f"{s}.readout_change"],
+            f"({s}.free + {s}.trunc - {s}.fc_cell) - {s}.readout_change",
+            (f"{s}.free", f"{s}.trunc", f"{s}.fc_cell", f"{s}.readout_change"),
+            "residual with every truncated free-run rescored correct (extreme bound)",
+        )
+    # The residual restated in accuracy points ("roughly 34 accuracy points").
+    # A percentage form, so it is catalogued explicitly rather than generated.
+    for unit, press in (
+        ("diss256", "random"),
+        ("diss256", "streamingllm"),
+        ("h2o256", "h2o"),
+    ):
+        rk = f"{unit}.{press}.residual"
+        derive(
+            f"residual_points.{unit}.{press}",
+            abs(by_key[rk]) * 100.0,
+            f"100 * |{rk}|",
+            (rk,),
+            "trajectory residual expressed in accuracy points",
+        )
+    derive(
+        "truncation_ratio.random_over_slm",
+        by_key["diss256.random.trunc"] / by_key["diss256.streamingllm.trunc"],
+        "diss256.random.trunc / diss256.streamingllm.trunc",
+        ("diss256.random.trunc", "diss256.streamingllm.trunc"),
+        "how much more often Random fails to terminate than StreamingLLM",
+    )
+    # The (ii) claim: method differences appear in readout, not in the residual.
+    # Both spans are catalogued so the contrast cannot go stale one-sidedly.
+    ro_keys = (
+        "diss256.random.readout_change",
+        "diss256.streamingllm.readout_change",
+        "h2o256.h2o.readout_change",
+    )
+    ro_vals = [by_key[k] for k in ro_keys]
+    derive(
+        "readout_change_spread.256_three_policies",
+        max(ro_vals) - min(ro_vals),
+        "max - min over the three budget-256 readout changes",
+        ro_keys,
+        "cross-policy readout-change spread (contrast with the residual spread)",
+    )
+    derive(
+        "readout_change_gap.random_slm",
+        by_key["diss256.random.readout_change"]
+        - by_key["diss256.streamingllm.readout_change"],
+        "diss256.random.readout_change - diss256.streamingllm.readout_change",
+        ("diss256.random.readout_change", "diss256.streamingllm.readout_change"),
+        "how much of the +0.185 free-run gap the readout channel accounts for",
+    )
+    derive(
+        "residual_gap.random_slm",
+        by_key["diss256.random.residual"] - by_key["diss256.streamingllm.residual"],
+        "diss256.random.residual - diss256.streamingllm.residual",
+        ("diss256.random.residual", "diss256.streamingllm.residual"),
+        "how much of the +0.185 free-run gap the residual accounts for",
+    )
+
     # Cross-policy residual spread at budget 256 (superseded by a paired test,
     # but must not sit stale while that lands).
     spread_keys = (
@@ -435,9 +548,11 @@ def build_catalogue() -> list[Entry]:
         "cross-policy residual spread (exploratory; see paired test)",
     )
 
-    # Resampling effect: the control against its own matched reference.
+    # Resampling effect: the control against its own matched reference. The
+    # primary value is now a PRIMARY entry read straight off the artifact
+    # (fc_readout_control.resampling_effect, +0.003); the unmatched form stays
+    # only so the stale +0.023 is recognised rather than silently unmatched.
     a = "fc_readout_control.accuracy"
-    b = "diss256.random.fc_cell"
     derive(
         "resampling_effect.unmatched",
         by_key[a] - by_key["diss256.fc_bank"],
@@ -445,6 +560,19 @@ def build_catalogue() -> list[Entry]:
         (a, "diss256.fc_bank"),
         "RETIRED unmatched form (+0.023); kept so the stale value is recognised",
     )
+    # How far the residuals sit above the readout protocol's own noise. The
+    # published text says "an order of magnitude"; on the matched control it is
+    # two, which is the direction that helps us -- so it is stated with the
+    # correction's timing disclosed rather than quietly upgraded.
+    for unit, press in (("diss256", "random"), ("rkv256", "rkv")):
+        rk = f"{unit}.{press}.residual"
+        derive(
+            f"residual_over_resampling.{unit}.{press}",
+            abs(by_key[rk]) / by_key["fc_readout_control.resampling_effect"],
+            f"|{rk}| / fc_readout_control.resampling_effect",
+            (rk, "fc_readout_control.resampling_effect"),
+            "residual as a multiple of the pure answer-resampling effect",
+        )
 
     # ADD headroom over the noise floor.
     for stem in ("add256.random", "add256.streamingllm", "add256.h2o", "add256.rkv"):
@@ -531,6 +659,36 @@ def build_catalogue() -> list[Entry]:
             (f"mean_tokens_pooled.{unit}",),
             "realized ratio against generation only -- what the prompt term is worth",
         )
+
+    # AIME's realized ratio was stated against a generation-only denominator
+    # while the MATH-500 ratios use prompt + generation -- the same quantity
+    # computed two ways in one paper. Restated on the paper's own definition.
+    # The AIME denominator remains the REFERENCE bank's trace (that is what the
+    # sentence describes) where MATH's is the compressed cells'; that difference
+    # is deliberate and is now stated in the text rather than left implicit.
+    aime_len = _load(CLASSB / "prompt_lengths_aime.json")
+    rel_al = (CLASSB / "prompt_lengths_aime.json").relative_to(PROJECT_ROOT)
+    add(
+        "aime_prompt.mean_tokens",
+        aime_len["pooled"]["mean_prompt_tokens"],
+        f"{rel_al}#/pooled/mean_prompt_tokens",
+        "mean rendered-prompt length on AIME-24 (token-ID sidecars)",
+    )
+    by_key.update({e.key: e.value for e in entries})
+    derive(
+        "aime_mean_trace_tokens",
+        by_key["aime_bank.mean_tokens"] + by_key["aime_prompt.mean_tokens"],
+        "aime_bank.mean_tokens + aime_prompt.mean_tokens",
+        ("aime_bank.mean_tokens", "aime_prompt.mean_tokens"),
+        "mean AIME reference trace, prompt + generation",
+    )
+    derive(
+        "compression_ratio.aime2048",
+        2048 / (by_key["aime_bank.mean_tokens"] + by_key["aime_prompt.mean_tokens"]),
+        "2048 / aime_mean_trace_tokens",
+        ("aime_mean_trace_tokens",),
+        "realized AIME ratio on the paper's prompt+generation definition",
+    )
 
     # ---- primary: Class C (compute) ---------------------------------------
     compute = _load(CLASSB / "compute.json")

@@ -24,10 +24,14 @@ def test_displays_does_not_generate_percentage_forms():
 
 
 def test_hyphen_in_a_name_is_not_a_minus_sign():
-    lits = extract_literals("accuracy on MATH-500 and Qwen-1.5B", "t", strip=False)
+    """The example was "MATH-500 and Qwen-1.5B", asserting 1.5 extracts positive.
+    Qwen-1.5B is now dropped entirely as a model-scale suffix -- a stronger
+    reason, tested separately -- so the sign rule is exercised on a range
+    instead, which is the other case it exists for."""
+    lits = extract_literals("MATH-500 at budgets 128--512", "t", strip=False)
     values = {lit.value for lit in lits}
     assert 500.0 in values and -500.0 not in values
-    assert 1.5 in values and -1.5 not in values
+    assert 512.0 in values and -512.0 not in values
 
 
 def test_real_negative_number_keeps_its_sign():
@@ -151,3 +155,41 @@ def test_displays_keeps_the_zero_place_form_of_a_magnitude_above_one():
 
 def test_displays_still_covers_an_exact_zero():
     assert "0" in _entry("aime_bonus", 0.0).displays()
+
+
+def test_bibliography_body_is_not_scanned_for_claims():
+    """13 arXiv IDs were being reported as unsourced claims. Nothing in a
+    reference list is a claim about our results."""
+    tex = (
+        "\\begin{document}\nresidual $-0.343$\n"
+        "\\begin{thebibliography}{99}\n"
+        "\\bibitem{x} Attention Sinks. \\emph{ICLR}, 2024. arXiv:2309.17453.\n"
+        "\\end{thebibliography}\n\\end{document}\n"
+    )
+    values = {lit.value for lit in extract_literals(tex, "t")}
+    assert -0.343 in values
+    assert 2309.0 not in values and 17453.0 not in values
+
+
+def test_arxiv_ids_are_stripped_outside_latex_too():
+    """PAPER_FINDINGS.md cites them inline, where no LaTeX stripping runs."""
+    lits = extract_literals("HOTT (arXiv:2512.12008) reports 0.47", "t", strip=False)
+    assert {lit.value for lit in lits} == {0.47}
+
+
+def test_model_scale_suffixes_are_names_not_measurements():
+    """ "1.5B/7B/14B" and "4M tokens" contributed a dozen phantom literals."""
+    lits = extract_literals("Qwen-1.5B/7B/14B on 4M tokens", "t", strip=False)
+    assert lits == []
+
+
+def test_a_number_glued_to_a_word_is_an_identifier():
+    """PG19 is a corpus name; R1 is a model name."""
+    lits = extract_literals("PG19 with R1-Distill at 0.882", "t", strip=False)
+    assert {lit.value for lit in lits} == {0.882}
+
+
+def test_a_space_breaks_the_scale_suffix():
+    """A table cell after a number is not a parameter count."""
+    lits = extract_literals("residual 0.343 B", "t", strip=False)
+    assert {lit.value for lit in lits} == {0.343}

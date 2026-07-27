@@ -47,11 +47,37 @@ _VERSION_TAIL = re.compile(r"^\.\d")
 # success metric with a number that is not a claim at all.
 _STRUCTURAL_ENVIRONMENTS = re.compile(r"\\begin\{thebibliography\}\{[^{}]*\}")
 
+# The whole bibliography body, not just its label width. Every number between
+# \begin{thebibliography} and \end{thebibliography} is an arXiv identifier, a
+# volume, or a year -- 13 arXiv IDs were being reported as unsourced claims,
+# which is the bibliography-label bug again with a wider blast radius. Nothing
+# in a reference list is a claim about our results.
+_BIBLIOGRAPHY_BODY = re.compile(
+    r"\\begin\{thebibliography\}.*?\\end\{thebibliography\}", re.DOTALL
+)
+
+# arXiv identifiers outside a bibliography (PAPER_FINDINGS.md cites them inline).
+_ARXIV_ID = re.compile(r"arXiv:\d{4}\.\d{4,5}(?:v\d+)?", re.IGNORECASE)
+
 # Contexts whose numbers are structural rather than claims: lengths, font
 # sizes, graphics options, cross-references, and package/version pins.
+#
+# ``B`` and ``M`` are here because a model scale is a name, not a measurement:
+# "1.5B/7B/14B" and "PG19, streaming to 4M tokens" contributed a dozen phantom
+# unsourced literals. A parameter count is not a quantity this paper reports.
 _STRUCTURAL_UNITS = re.compile(
     r"(?:pt|em|ex|cm|mm|in|bp|sp|\\textwidth|\\linewidth|\\columnwidth|\\baselineskip)\b"
 )
+
+# A model scale or token-count suffix fused to the number: "1.5B", "14B", "4M".
+# Checked against the UNSTRIPPED tail so a space breaks it -- "0.343 B" in a
+# table column is a number followed by a cell, not a parameter count.
+_SCALE_SUFFIX = re.compile(r"[BMk]\b")
+
+# A number glued to the end of a word is part of an identifier, never a claim:
+# PG19, R1-Distill, H2O. Claim numbers are always preceded by whitespace or an
+# opening delimiter.
+_IDENTIFIER_PREFIX = re.compile(r"[A-Za-z]$")
 _STRIP_COMMANDS = (
     "cite",
     "citep",
@@ -150,8 +176,9 @@ def strip_latex_noise(text: str) -> str:
         text = "".join("\n" if ch == "\n" else " " for ch in head) + text[start:]
     # Strip comments (an unescaped % to end of line).
     text = re.sub(r"(?<!\\)%[^\n]*", blank, text)
-    # Strip structural environment arguments (bibliography label width).
+    # Strip the bibliography: its label width, then its entire body.
     text = _STRUCTURAL_ENVIRONMENTS.sub(blank, text)
+    text = _BIBLIOGRAPHY_BODY.sub(blank, text)
     # Strip structural commands together with their bracketed/braced arguments.
     for name in _STRIP_COMMANDS:
         pattern = re.compile(
@@ -166,6 +193,10 @@ def extract_literals(
 ) -> list[Literal]:
     """Find every numeric literal that could be a claim."""
     cleaned = strip_latex_noise(text) if strip else text
+    # An arXiv identifier is a name. Stripped for both document kinds: the .tex
+    # keeps them in the bibliography (already blanked) but PAPER_FINDINGS.md
+    # cites them inline, where no LaTeX stripping runs.
+    cleaned = _ARXIV_ID.sub(lambda m: " " * len(m.group(0)), cleaned)
     lines = cleaned.splitlines()
     out: list[Literal] = []
     for lineno, line in enumerate(lines, start=1):
@@ -178,6 +209,10 @@ def extract_literals(
                 start += 1
             tail = line[match.end() : match.end() + 14]
             if _STRUCTURAL_UNITS.match(tail.lstrip()) or _VERSION_TAIL.match(tail):
+                continue
+            if _SCALE_SUFFIX.match(tail):
+                continue
+            if _IDENTIFIER_PREFIX.search(line[:start] or " "):
                 continue
             try:
                 value = float(raw.replace("{,}", ""))
@@ -201,6 +236,7 @@ def classify(
     catalogue: list[Entry],
     *,
     allowed_integers: set[int] | None = None,
+    allowed_floats: set[float] | None = None,
 ) -> list[Literal]:
     """Mark each literal sourced, structural, protocol, or unsourced.
 
@@ -219,6 +255,7 @@ def classify(
     constant is a config constant regardless of what else happens to round to it.
     """
     allowed = allowed_integers or set()
+    allowed_f = allowed_floats or set()
     by_display: dict[str, list[str]] = {}
     for entry in catalogue:
         for form in entry.displays():
@@ -226,6 +263,9 @@ def classify(
 
     for lit in literals:
         if lit.value.is_integer() and int(lit.value) in allowed:
+            lit.classification = "protocol"
+            continue
+        if lit.value in allowed_f:
             lit.classification = "protocol"
             continue
         stripped = lit.raw.replace("{,}", "").lstrip("-")

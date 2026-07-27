@@ -18,6 +18,39 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ UNIT 3 (2026-07-27) — the `.tex` is at ZERO unsourced literals.**
+  `audit_paper_numbers.py --documents <tex> --strict` exits 0: 738 literals,
+  440 sourced, 281 protocol, 17 year. Both-docs unsourced 377 → 174 (the
+  remainder is all `PAPER_FINDINGS.md`, Unit 4's job). PDF rebuilds ×2 clean —
+  0 `^!`, one 1.4pt Overfull at L250, 21 pages.
+  **Two more gate false-positive classes found and fixed** (same "audit the
+  class" rule): the bibliography body was being scanned, reporting 13 arXiv IDs
+  as unsourced claims; and model-scale/identifier fragments (`1.5B`, `14B`,
+  `4M`, `PG19`, `R1`) were parsed as measurements. 260 phantom literals removed,
+  `sourced` unchanged at 645 — no real claim was lost. Protocol floats
+  (temperature, top-p, percentile indices) are now an enumerated list like the
+  integers.
+  **A REAL missed correction, found by cataloguing: `fc-readout-control` was
+  still on the retired convention.** Amendment K fixed the 9 decomposition
+  cells and never touched this artifact, whose entire job is calibrating the
+  readout channel. It differenced Acc_ro(FC)=0.9056 (392 defined rows) against
+  the 2000-row bank (0.8825) → +0.023. Matched: Acc_FC on the same 392 rows is
+  **0.9031**, so the pure answer-resampling effect is **+0.003** — and the
+  residuals are **132× (Random) / 105× (R-KV)** that, i.e. *two* orders of
+  magnitude, not one. Regenerated on the remote via an extended
+  `readout_acc` harvest branch; artifact now carries
+  `reference_convention: amendment-k-cell-population` and keeps the retired
+  value under an explicit `_RETIRED` key.
+  **Disagreement with the work order, repo wins:** StreamingLLM's readout share
+  is **49.2%**, not the 49.3% the order states (artifact 49.2475). The
+  threshold argument is unaffected (still below 0.5) but the margin is 0.008,
+  not 0.04.
+  **Also fixed:** AIME's realized ratio used a generation-only denominator
+  while MATH's used prompt+generation — the same quantity computed two ways in
+  one paper. Restated prompt-inclusive: **19.5% of 10,527** (AIME prompt mean
+  112.07 tokens, new artifact `classb/prompt_lengths_aime.json`).
+  Full claim-change list is in the Unit 3 commit message.
+
   **★★★★★ UNIT 2 (2026-07-27) — Class A/C sourced, and the GATE ITSELF was
   over-reporting by 65%.** Budget-2048 priority check first: **all three
   residuals still exclude zero on both layers** — Random −0.0332 CI
