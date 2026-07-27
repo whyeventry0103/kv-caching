@@ -136,3 +136,42 @@ def is_equiv(gold_raw: str | None, pred_raw: str | None) -> bool:
         return _strip_string(gold_raw) == _strip_string(pred_raw)
     except (IndexError, ValueError):
         return gold_raw == pred_raw
+
+
+CROSSCHECK_VERSION = "sympify-canonical-crosscheck-v1"
+
+
+def crosscheck_equiv(gold_raw: str | None, pred_raw: str | None) -> bool | None:
+    """Second-opinion equivalence via the sympify canonicalizer.
+
+    **Not an authority, and deliberately not one.** ``is_equiv`` remains the
+    correctness authority; this exists solely so the grader audit has an oracle
+    that does not share ``is_equiv``'s normalization path. Re-running
+    ``is_equiv`` over stored answers and finding no disagreement is guaranteed
+    by construction -- it tests that scoring replays deterministically, which is
+    a replay property, not a grader-validity property. Only a *different*
+    normalization can speak to whether ``is_equiv`` under-credits equivalent
+    forms, which is the threat the audit exists to close.
+
+    The canonicalizer is applied to the **extracted answer**, never to raw model
+    text: the standing prohibition is on an ``eval``/``sympify`` execution path
+    over model-generated prose, and ``canonicalize`` already runs in exactly
+    this position for ADD bucketing. Returns ``None`` when either side has no
+    extractable answer, so "cannot be compared" never masquerades as "agrees".
+
+    Its known weakness is documented and is the reason it is a second opinion
+    rather than a replacement: a sympify-to-string canonical form is brittle on
+    sets, tuples and decimal-versus-fraction, and produced a silent false
+    negative on a structured answer during the smoke run. Disagreements between
+    the two graders are therefore *candidates for human review*, not
+    corrections -- neither side wins automatically.
+    """
+    if gold_raw is None or pred_raw is None:
+        return None
+    from kvcache.canonicalize import canonicalize
+
+    gold_canon = canonicalize(gold_raw)
+    pred_canon = canonicalize(pred_raw)
+    if not gold_canon or not pred_canon:
+        return None
+    return gold_canon == pred_canon

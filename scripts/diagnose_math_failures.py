@@ -25,7 +25,12 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
 from kvcache.generation import has_answer_marker  # noqa: E402
-from kvcache.grading import GRADER_VERSION, is_equiv  # noqa: E402
+from kvcache.grading import (  # noqa: E402
+    CROSSCHECK_VERSION,
+    GRADER_VERSION,
+    crosscheck_equiv,
+    is_equiv,
+)
 
 TRACE_TAIL_CHARS = 800
 
@@ -80,6 +85,20 @@ def classify_row(row: dict[str, Any], gold_raw: str | None) -> dict[str, Any]:
     grader_disagreement = (
         None if ref_correct is None else (stored_correct != ref_correct)
     )
+    # Re-running is_equiv over stored answers agrees with itself by
+    # construction: same normalization, same inputs. That measures replay
+    # determinism, NOT grader validity, and cannot detect the threat this audit
+    # exists for -- that is_equiv under-credits equivalent forms more often on
+    # the malformed generations compression produces. The cross-check is a
+    # different normalization (sympify canonical form) so a disagreement is
+    # informative. Neither grader wins automatically; disagreements are
+    # candidates for human review.
+    cross_correct = crosscheck_equiv(gold_raw, answer_raw)
+    cross_disagreement = (
+        None
+        if (cross_correct is None or ref_correct is None)
+        else (bool(cross_correct) != bool(ref_correct))
+    )
     return {
         "pid": row.get("pid"),
         "seed": row["decoding"]["seed"],
@@ -97,6 +116,8 @@ def classify_row(row: dict[str, Any], gold_raw: str | None) -> dict[str, Any]:
         "stored_correct": stored_correct,
         "ref_correct": ref_correct,
         "grader_disagreement": grader_disagreement,
+        "cross_correct": cross_correct,
+        "cross_disagreement": cross_disagreement,
         "classification": classification,
         "trace_tail": trace[-TRACE_TAIL_CHARS:],
     }
@@ -104,6 +125,12 @@ def classify_row(row: dict[str, Any], gold_raw: str | None) -> dict[str, Any]:
 
 def summarize(records: list[dict[str, Any]]) -> dict[str, Any]:
     classifications = Counter(record["classification"] for record in records)
+    cross_comparable = sum(1 for r in records if r["cross_disagreement"] is not None)
+    cross_disagree = sum(1 for r in records if r["cross_disagreement"])
+    # Rows the cross-check calls correct and is_equiv calls wrong: the
+    # under-crediting direction, which is the one that would bias every
+    # accuracy change toward larger apparent compression damage.
+    cross_only = sum(1 for r in records if r["cross_correct"] and not r["ref_correct"])
     false_neg = sum(
         1
         for record in records
@@ -121,6 +148,17 @@ def summarize(records: list[dict[str, Any]]) -> dict[str, Any]:
         "grader_false_positives": false_pos,
         "grader_disagreements": false_neg + false_pos,
         "grader_version": GRADER_VERSION,
+        "crosscheck_version": CROSSCHECK_VERSION,
+        "crosscheck_comparable": cross_comparable,
+        "crosscheck_disagreements": cross_disagree,
+        "crosscheck_only_correct": cross_only,
+        "crosscheck_note": (
+            "grader_disagreements re-runs is_equiv over stored answers and "
+            "therefore agrees by construction: it is a REPLAY DETERMINISM "
+            "check, not grader validity. crosscheck_* uses a different "
+            "normalization (sympify canonical form) and is the only column "
+            "here that speaks to whether is_equiv under-credits."
+        ),
         "stored_accuracy": (
             sum(record["stored_correct"] for record in records) / len(records)
             if records

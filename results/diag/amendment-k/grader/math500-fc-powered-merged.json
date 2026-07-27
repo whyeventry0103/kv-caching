@@ -1,0 +1,19 @@
+{
+  "classifications": {
+    "correct": 1765,
+    "genuine_wrong_or_ambiguous": 197,
+    "token_cap_truncation": 38
+  },
+  "crosscheck_comparable": 1962,
+  "crosscheck_disagreements": 131,
+  "crosscheck_note": "grader_disagreements re-runs is_equiv over stored answers and therefore agrees by construction: it is a REPLAY DETERMINISM check, not grader validity. crosscheck_* uses a different normalization (sympify canonical form) and is the only column here that speaks to whether is_equiv under-credits.",
+  "crosscheck_only_correct": 22,
+  "crosscheck_version": "sympify-canonical-crosscheck-v1",
+  "grader_disagreements": 0,
+  "grader_false_negatives": 0,
+  "grader_false_positives": 0,
+  "grader_version": "hendrycks-is-equiv-v1",
+  "regraded_accuracy": 0.8825,
+  "rows": 2000,
+  "stored_accuracy": 0.8825
+}

@@ -232,3 +232,63 @@ def test_bare_arxiv_id_in_a_table_column():
     )
     assert 0.520 in {lit.value for lit in lits}
     assert 2505.0 not in {lit.value for lit in lits}
+
+
+_GUARDED_DOC = """# Findings
+
+### 4-CURRENT. Post-Amendment-K headline table
+
+residual -0.337 and reference 0.885.
+
+### 4-LOG. Dated read-in log (archival)
+
+<!-- AUDIT:ARCHIVAL-BEGIN -->
+superseded residual -0.343
+<!-- AUDIT:ARCHIVAL-END -->
+"""
+
+
+def _cat():
+    return [_entry("r", -0.3367), _entry("fc", 0.885)]
+
+
+def test_guarded_section_stops_at_the_next_heading():
+    from kvcache.paper_numbers import guarded_section
+
+    section = guarded_section(_GUARDED_DOC)
+    assert "-0.337" in section
+    assert "-0.343" not in section  # the log is a different section
+
+
+def test_guarded_section_gate_passes_on_a_clean_document():
+    from kvcache.paper_numbers import check_guarded_section
+
+    assert check_guarded_section(_GUARDED_DOC, _cat()) == []
+
+
+def test_guarded_section_gate_refuses_an_archival_exemption_inside_itself():
+    """The archival mechanism is necessary for the log and is also a hole. The
+    current-truth section must not be able to use it."""
+    from kvcache.paper_numbers import check_guarded_section
+
+    doc = _GUARDED_DOC.replace(
+        "residual -0.337 and reference 0.885.",
+        "<!-- AUDIT:ARCHIVAL-BEGIN -->\n-0.343\n<!-- AUDIT:ARCHIVAL-END -->",
+    )
+    problems = check_guarded_section(doc, _cat())
+    assert any("may not exempt itself" in p for p in problems)
+
+
+def test_guarded_section_gate_catches_a_stale_literal():
+    from kvcache.paper_numbers import check_guarded_section
+
+    doc = _GUARDED_DOC.replace("residual -0.337", "residual -0.343")
+    problems = check_guarded_section(doc, _cat())
+    assert any("unsourced literal" in p and "0.343" in p for p in problems)
+
+
+def test_guarded_section_gate_reports_a_missing_section():
+    from kvcache.paper_numbers import check_guarded_section
+
+    problems = check_guarded_section("# Findings\n\nno current section\n", _cat())
+    assert any("no 4-CURRENT section" in p for p in problems)

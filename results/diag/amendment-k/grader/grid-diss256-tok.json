@@ -5,6 +5,11 @@
     "genuine_wrong_or_ambiguous": 408,
     "token_cap_truncation": 121
   },
+  "crosscheck_comparable": 665,
+  "crosscheck_disagreements": 13,
+  "crosscheck_note": "grader_disagreements re-runs is_equiv over stored answers and therefore agrees by construction: it is a REPLAY DETERMINISM check, not grader validity. crosscheck_* uses a different normalization (sympify canonical form) and is the only column here that speaks to whether is_equiv under-credits.",
+  "crosscheck_only_correct": 8,
+  "crosscheck_version": "sympify-canonical-crosscheck-v1",
   "grader_disagreements": 0,
   "grader_false_negatives": 0,
   "grader_false_positives": 0,

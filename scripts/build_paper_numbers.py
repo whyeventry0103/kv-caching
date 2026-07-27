@@ -799,6 +799,9 @@ def build_catalogue() -> list[Entry]:
             ("stored_accuracy", "stored_accuracy"),
             ("regraded_accuracy", "regraded_accuracy"),
             ("grader_disagreements", "disagreements"),
+            ("crosscheck_comparable", "xc_comparable"),
+            ("crosscheck_disagreements", "xc_disagreements"),
+            ("crosscheck_only_correct", "xc_only_correct"),
         ):
             add(
                 f"{stem}.{key}",
@@ -806,6 +809,26 @@ def build_catalogue() -> list[Entry]:
                 f"{rel}#/{field_name}",
                 "grader audit",
             )
+        # The rate that matters: how often the INDEPENDENT normalization calls a
+        # row correct where is_equiv does not, over rows where both produce a
+        # comparable answer. This is the under-crediting direction -- the one
+        # that would inflate apparent compression damage.
+        add(
+            f"{stem}.xc_only_pct",
+            100.0
+            * payload["crosscheck_only_correct"]
+            / payload["crosscheck_comparable"],
+            f"100 * {rel}#/crosscheck_only_correct / #/crosscheck_comparable",
+            "under-crediting rate over comparable rows (percent)",
+            kind="derived",
+        )
+        add(
+            f"{stem}.xc_worst_shift",
+            payload["crosscheck_only_correct"] / payload["rows"],
+            f"{rel}#/crosscheck_only_correct / #/rows",
+            "worst-case accuracy shift if every disagreement were a grader miss",
+            kind="derived",
+        )
         grader_total_rows += int(payload["rows"])
         grader_total_disagreements += int(payload["grader_disagreements"])
     if grader_total_rows:

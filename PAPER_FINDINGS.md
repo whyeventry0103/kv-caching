@@ -129,6 +129,13 @@ conditions and rows with no answer boundary are scored both ways. **Its width is
 exactly the cell's undefined fraction**, so always read it next to `trunc` — a wide
 bound means many undefined rows, not a weak effect.
 
+**A primary bound is NOT a confidence interval and must never be compared for width
+against one.** It is deterministic and contains no sampling uncertainty; the CI beside
+it is a variance statement. At low truncation the bound is necessarily narrower, which
+is arithmetic, not evidence. A bound excluding zero means the point estimate is negative
+under every imputation — it is not significance. Every inferential claim in the paper
+rests on the complete-case CI.
+
 Other current values that moved and are easy to re-introduce stale:
 - Pure answer-resampling effect (FC readout of FC traces, matched): **+0.003**, not
   +0.023. Residuals are 132× (Random) / 105× (R-KV) that — *two* orders of magnitude.
@@ -142,15 +149,9 @@ Other current values that moved and are easy to re-introduce stale:
   and a difference histogram sufficient to recompute the interval.
 - Compute: **280 GPU-hours over 7,200 generations** under the artifact's inclusion rule.
 
-<!-- AUDIT:ARCHIVAL-BEGIN -->
-**Superseded values, listed so they are recognised if they resurface — do not reuse.**
-Dose factor 3.6–6.8×. Resampling effect +0.023. Residuals −0.343 / −0.347 / −0.349 and
-R-KV −0.278. Reverse endpoints −0.246 / −0.466 / −0.463 / −0.221. Readout shares
-25/46/45/23%. Residual spread 0.006, readout-change spread 0.169. Policy-contrast upper
-bound 0.242 (200-seed range [0.2375, 0.2450]). Compute ~224–230 GPU-h / ~7,307
-generations. Budget-2048 residuals −0.051 / −0.096 / −0.075. AIME residuals −0.179 /
-−0.246 / −0.321. Truncation-adjusted −0.110 / −0.277.
-<!-- AUDIT:ARCHIVAL-END -->
+Superseded values are listed at the top of the archival log below.
+
+### 4-LOG. Dated read-in log (archival — not current truth)
 
 <!-- AUDIT:ARCHIVAL-BEGIN -->
 <!-- Everything from here to AUDIT:ARCHIVAL-END is the dated read-in log: a
@@ -158,7 +159,17 @@ generations. Budget-2048 residuals −0.051 / −0.096 / −0.075. AIME residual
      audit skips this span deliberately. Do NOT "update" these entries -- several
      exist to show a wrong value beside its correction, which is the point. New
      results append a new dated subsection; corrections go in §4-CURRENT and in a
-     PREREGISTRATION amendment. -->
+     PREREGISTRATION amendment. The heading above must stay ABOVE this marker:
+     the 4-CURRENT gate ends the guarded span at the next heading, so a marker
+     placed first would fall inside the section it is meant to sit outside. -->
+
+**Superseded values, listed so they are recognised if they resurface — do not reuse.**
+Dose factor 3.6–6.8×. Resampling effect +0.023. Residuals −0.343 / −0.347 / −0.349 and
+R-KV −0.278. Reverse endpoints −0.246 / −0.466 / −0.463 / −0.221. Readout shares
+25/46/45/23%. Residual spread 0.006, readout-change spread 0.169. Policy-contrast upper
+bound 0.242 (200-seed range [0.2375, 0.2450]). Compute ~224–230 GPU-h / ~7,307
+generations. Budget-2048 residuals −0.051 / −0.096 / −0.075. AIME residuals −0.179 /
+−0.246 / −0.321. Truncation-adjusted −0.110 / −0.277.
 
 ### 4a. The powered phenomenon (budget 256)
 FC 0.882 → **StreamingLLM 0.237**, **Random 0.422**. Random beats the "principled" recency

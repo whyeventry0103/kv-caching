@@ -133,3 +133,43 @@ def test_load_rows_skips_token_id_sidecars(tmp_path):
     rows = load_rows(run)
     assert len(rows) == 1
     assert "decoding" in rows[0]
+
+
+def test_crosscheck_is_a_different_normalization_from_is_equiv():
+    """The whole point of C.1: re-running is_equiv agrees by construction, so
+    only a different normalization can speak to under-crediting."""
+    from kvcache.grading import crosscheck_equiv, is_equiv
+
+    # A structured form where the two normalizations need not coincide.
+    assert crosscheck_equiv("1/2", "0.5") is not None
+    # Cannot-compare must be None, never a silent "agrees".
+    assert crosscheck_equiv(None, "2") is None
+    assert crosscheck_equiv("2", None) is None
+    # And is_equiv remains the authority, untouched.
+    assert is_equiv("2", "2") is True
+
+
+def test_summary_separates_replay_determinism_from_grader_validity():
+    records = [
+        {
+            "classification": "correct",
+            "grader_disagreement": False,
+            "stored_correct": True,
+            "ref_correct": True,
+            "cross_correct": True,
+            "cross_disagreement": False,
+        },
+        {
+            "classification": "genuine_wrong_or_ambiguous",
+            "grader_disagreement": False,
+            "stored_correct": False,
+            "ref_correct": False,
+            "cross_correct": True,
+            "cross_disagreement": True,
+        },
+    ]
+    got = diagnose.summarize(records)
+    assert got["grader_disagreements"] == 0  # replay determinism
+    assert got["crosscheck_disagreements"] == 1  # grader validity signal
+    assert got["crosscheck_only_correct"] == 1  # the under-crediting direction
+    assert "REPLAY DETERMINISM" in got["crosscheck_note"]

@@ -329,3 +329,55 @@ def summarise(literals: list[Literal]) -> dict[str, Any]:
             if lit.classification == "unsourced"
         ],
     }
+
+
+# A section whose literals must all be sourced AND inside which no archival
+# exemption is permitted. The archival mechanism is necessary for the dated log
+# but it is also a hole: anything wrapped in it stops being checked. A
+# current-truth section that could quietly wrap its own numbers would be worse
+# than no section at all, because it reads as gated while not being gated.
+_GUARDED_SECTION_START = re.compile(r"^#{1,6}\s*4-CURRENT\b.*$", re.MULTILINE)
+_GUARDED_SECTION_END = re.compile(r"^#{1,6}\s+(?!4-CURRENT)\S.*$", re.MULTILINE)
+
+
+def guarded_section(text: str) -> str | None:
+    """The current-truth span of PAPER_FINDINGS.md, or None if absent.
+
+    Runs from the ``4-CURRENT`` heading to the next heading of any level. The
+    span is returned RAW -- archival spans inside it are deliberately not
+    stripped, so :func:`check_guarded_section` can refuse them.
+    """
+    start = _GUARDED_SECTION_START.search(text)
+    if start is None:
+        return None
+    rest = text[start.end() :]
+    end = _GUARDED_SECTION_END.search(rest)
+    return rest[: end.start()] if end else rest
+
+
+def check_guarded_section(text: str, catalogue: list[Entry]) -> list[str]:
+    """Problems with the current-truth section. Empty list means it is clean.
+
+    Two rules, both hard:
+
+    1. no ``AUDIT:ARCHIVAL`` marker may appear inside it -- superseded values
+       belong in the log, not in the section a new session reads as truth;
+    2. every numeric literal in it must be sourced or protocol.
+    """
+    section = guarded_section(text)
+    if section is None:
+        return ["PAPER_FINDINGS.md has no 4-CURRENT section (the gate needs one)"]
+    problems: list[str] = []
+    if "AUDIT:ARCHIVAL" in section:
+        problems.append(
+            "4-CURRENT contains an AUDIT:ARCHIVAL marker: the current-truth "
+            "section may not exempt itself from the gate"
+        )
+    literals = extract_literals(section, "PAPER_FINDINGS.md#4-CURRENT", strip=False)
+    classify(literals, catalogue, allowed_integers=set(range(0, 3000)))
+    for lit in literals:
+        if lit.classification == "unsourced":
+            problems.append(
+                f"4-CURRENT has an unsourced literal {lit.raw!r}: {lit.context[:70]}"
+            )
+    return problems

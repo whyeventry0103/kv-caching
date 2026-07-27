@@ -25,7 +25,13 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
-from kvcache.paper_numbers import Entry, classify, extract_literals, summarise
+from kvcache.paper_numbers import (
+    Entry,
+    check_guarded_section,
+    classify,
+    extract_literals,
+    summarise,
+)
 
 # Protocol constants that legitimately live in configs rather than in a results
 # artifact. Enumerated so that "it's just a config number" is a decision made
@@ -214,7 +220,28 @@ def main() -> int:
             if len(rows) > args.show:
                 print(f"    ... {len(rows) - args.show} more")
 
-    if args.strict and unsourced:
+    # The 4-CURRENT gate. PAPER_FINDINGS.md's dated log is deliberately exempt
+    # from the literal check, which leaves a hole: anything wrapped in an
+    # archival marker stops being checked. The current-truth section a new
+    # session reads as authoritative must not be able to use that hole, so it is
+    # checked separately with exemptions refused.
+    guarded_problems: list[str] = []
+    for doc in args.documents:
+        if doc.name != "PAPER_FINDINGS.md":
+            continue
+        guarded_problems = check_guarded_section(
+            doc.read_text(encoding="utf-8"), catalogue
+        )
+        if guarded_problems:
+            print(f"\n4-CURRENT GATE FAILED ({len(guarded_problems)}):")
+            for problem in guarded_problems:
+                print(f"  {problem}")
+        else:
+            print(
+                "\n4-CURRENT gate: clean (no archival exemption, all literals sourced)"
+            )
+
+    if args.strict and (unsourced or guarded_problems):
         return 1
     return 0
 
