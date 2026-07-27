@@ -44,6 +44,10 @@ dryrun:
 	$(PYTHON) scripts/run_replay.py --config configs/experiments/readout_math500_diss256_q14b.yaml --dry-run
 	$(PYTHON) scripts/run_replay.py --config configs/experiments/reverse_readout_diss256_q15b.yaml --dry-run
 	$(PYTHON) scripts/run_replay.py --config configs/experiments/reverse_readout_diss256_q14b.yaml --dry-run
+	$(PYTHON) scripts/run_grid.py --config configs/experiments/grid_math500_diss512.yaml --dry-run
+	$(PYTHON) scripts/run_grid.py --config configs/experiments/grid_math500_diss1024.yaml --dry-run
+	$(PYTHON) scripts/run_replay.py --config configs/experiments/readout_math500_diss512.yaml --dry-run
+	$(PYTHON) scripts/run_replay.py --config configs/experiments/readout_math500_diss1024.yaml --dry-run
 	$(PYTHON) scripts/build_bank.py --config configs/experiments/bank_fullcache.yaml --dry-run
 	$(PYTHON) scripts/run_grid.py --config configs/experiments/grid_compression.yaml --dry-run
 	$(PYTHON) scripts/run_replay.py --config configs/experiments/replay_decomposition.yaml --dry-run

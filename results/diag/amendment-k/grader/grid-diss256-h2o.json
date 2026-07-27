@@ -1,0 +1,14 @@
+{
+  "classifications": {
+    "correct": 99,
+    "genuine_wrong_or_ambiguous": 259,
+    "token_cap_truncation": 42
+  },
+  "grader_disagreements": 0,
+  "grader_false_negatives": 0,
+  "grader_false_positives": 0,
+  "grader_version": "hendrycks-is-equiv-v1",
+  "regraded_accuracy": 0.2475,
+  "rows": 400,
+  "stored_accuracy": 0.2475
+}

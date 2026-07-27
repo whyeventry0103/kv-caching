@@ -1,0 +1,22 @@
+name: readout_math500_diss512
+stage: readout
+# Forward readout for the budget-512 confirmatory cell (Amendment M.5). The
+# resolution statistic needs BOTH arms -- free-run spread and readout spread on
+# the same problems -- so this is not optional alongside grid_math500_diss512.
+#
+# NOT LAUNCHED. Written and dry-run validated only.
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+subset:
+  math500: 100
+presses: [streamingllm, random]
+budgets: [512]
+seeds: [11, 23, 47, 89]
+reference_run: math500-fc-powered-merged
+max_new_tokens:
+  math500: 16384
+compression_interval: 64
+estimated_generation_count: 800
+scale_authorized: true
+remote_only: true
+store_token_ids: true

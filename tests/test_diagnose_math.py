@@ -94,3 +94,42 @@ def test_classification_and_grader_disagreement_counts():
     assert summary["grader_false_positives"] == 0
     assert summary["stored_accuracy"] == 0.2
     assert summary["regraded_accuracy"] == 0.4
+
+
+def test_load_rows_skips_token_id_sidecars(tmp_path):
+    """Sidecars are also *.jsonl and also carry "bench", so the bench filter
+    alone lets them through -- and they have no "decoding" block, which crashed
+    the audit the first time it was pointed at a compression cell."""
+    import json
+
+    load_rows = diagnose.load_rows
+
+    run = tmp_path / "grid-cell"
+    (run / "math500").mkdir(parents=True)
+    (run / "math500" / "rows.jsonl").write_text(
+        json.dumps(
+            {
+                "bench": "math500",
+                "pid": "p1",
+                "decoding": {"max_new": 16384},
+                "answer_raw": "2",
+                "answer_canon": "2",
+                "correct": True,
+                "truncated": False,
+                "finish_reason": "stop",
+                "n_tokens": 10,
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    sidecar = run / "math500" / "token_ids"
+    sidecar.mkdir()
+    (sidecar / "rows.jsonl").write_text(
+        json.dumps({"bench": "math500", "pid": "p1", "prompt_token_ids": [1, 2]})
+        + "\n",
+        encoding="utf-8",
+    )
+    rows = load_rows(run)
+    assert len(rows) == 1
+    assert "decoding" in rows[0]

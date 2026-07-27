@@ -18,6 +18,38 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★ UNIT 9.4 + UNIT 10 + PART D (2026-07-28).**
+  **Grader audit: CLEAN, and it found a script bug on the way.** All three
+  budget-256 compressed cells re-graded: **0 disagreements over 1600 rows**, 0
+  false positives, 0 false negatives, regraded accuracy identical to stored in
+  every cell. The "is_equiv under-credits compressed generations" attack now has
+  a measured answer. `diagnose_math_failures.py` crashed first — it predates
+  token-ID sidecars and was globbing them in (`KeyError: 'decoding'`); it worked
+  on the FC bank and silently acquired the crash when cells gained sidecars.
+  Fixed + regression test. Artifacts `results/diag/amendment-k/grader/`.
+  **Unit 10.1 NOT LAUNCHED, deliberately.** Remote is healthy (verified on a
+  real `sync-apply`, not a dry run) but the injection engine is a substantial
+  GPU deliverable. Built instead: `noise_control.match_gate()` — requires window
+  means within 10% **and** growth shape within 25%, because either alone passes
+  an obviously wrong profile (a flat curve with the right mean; a uniformly
+  doubled curve). Gate carries a `contract` field saying accuracy MUST NOT be
+  read if it fails. 9 tests. Read pre-registered in **Amendment M.1** with all
+  three branches including GENERIC, which would weaken the paper.
+  **Amendment M** also pre-registers M.2 (the missing factorial cell), M.3
+  (ratio-matched TV), M.4 (content-token TV), M.5 (512/1024 confirmatory), M.6
+  (HOTT config + R-KV published config) — all specified, none run.
+  **Part D configs written and dry-run validated, NOT launched:**
+  `grid_math500_diss{512,1024}.yaml`, `readout_math500_diss{512,1024}.yaml`,
+  all four registered in the Makefile `dryrun` target.
+  **§6 now states what we have NOT measured** — the missing noise control, the
+  missing factorial cell, the unreproduced HOTT baseline, and the post-hoc
+  status of the resolution result. Previously all four were absences a reader
+  had to notice.
+  **Unit 11 staged, not applied:** `docs/strategy/PROPOSED_REFRAME.md` carries
+  the proposed title + ≤180-word abstract side-by-side with the current ones,
+  and argues **against** the headline title while the resolution result stays
+  post-hoc. Structural reframe parts already landed in the `.tex`.
+
   **★★★★★ UNIT 6 (2026-07-28) — THE RESOLUTION COLLAPSE IS REAL AND MEASURED;
   B.9's reframe gate PASSES.** New §4.1 `sec:resolution` + `tab:resolution`,
   PREREGISTRATION **Amendment L** (declares it post-hoc *before* the write-up

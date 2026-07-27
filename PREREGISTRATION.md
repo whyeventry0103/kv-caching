@@ -805,3 +805,113 @@ the ordering is non-monotone in budget, the gradual-collapse reading is refuted
 and we will report it as such rather than reinterpreting. This converts the
 present post-hoc observation into a prediction testable on data that does not yet
 exist, which is worth more than the cells themselves.
+
+---
+
+## Amendment M (2026-07-28): pre-registered reads for the built-but-unlaunched experiments
+
+Four experiments are specified and instrumented but **not run**. Their reads are
+committed here first, so that if they are run later the analysis is fixed before
+the data exists. Any of them may never run; that is recorded as a limitation
+rather than resolved by quietly dropping the entry.
+
+### M.1 TV-matched full-cache noise control (`noise_control`)
+
+**Status: instrument gate built and tested; injection engine NOT built; run NOT
+launched.** `context.md` §1.3 designates this control mandatory, and the paper
+does not currently contain it. That is stated as a limitation in §6 rather than
+left implicit.
+
+**Design.** During full-cache free-running generation, inject calibrated
+per-step perturbations `(1 - eps) * p + eps * q` whose induced per-step TV
+matches the profile measured for method *M* under replay. Cells:
+StreamingLLM-256 and Random-256, 100 problems × 4 seeds each, matched seeds.
+
+**Instrument gate, which runs first and can veto the experiment.**
+`kvcache.metrics.noise_control.match_gate` requires *both* (i) first-50 and
+later window means within 10% relative of the target profile, and (ii) the
+later/first-50 growth ratio within 25% relative. Both are required because
+either alone is satisfiable by an obviously wrong profile — a flat curve with
+the right average passes (i) and fails (ii); a uniformly doubled curve passes
+(ii) and fails (i). **If the gate does not pass, accuracy from this control is
+not read at all.** A failed calibration means the experiment did not run; a null
+result under a failed match is uninterpretable, and a positive one worse.
+
+**Pre-committed read, conditional on the gate passing.** Let ΔM be method *M*'s
+free-running accuracy change and ΔN the change under TV-matched generic noise,
+both against the matched reference, with problem-clustered CIs.
+
+- **GENERIC** — if ΔN's CI contains ΔM for both cells: the accuracy loss is
+  explained by divergence *magnitude*, and the trajectory residual is generic
+  drift rather than structured damage. **This outcome is reported as the primary
+  result of the control and it substantially weakens the paper's mechanism
+  reading.** It is not a reason to reframe around something else; the correct
+  response is to say so, in the abstract.
+- **STRUCTURED** — if ΔN is significantly smaller in magnitude than ΔM (CIs
+  non-overlapping) for both cells: matched-magnitude noise does not reproduce
+  the damage, so what compression does is structured. This is the outcome the
+  mechanism reading predicts, and it is the strongest rung of the causal ladder.
+- **MIXED** — if the two cells disagree: reported as mixed, per policy, with no
+  pooled claim.
+
+Signed flip-mass accompanies both arms, so a *reproduced improvement* is never
+mislabelled as reproduced damage.
+
+### M.2 The missing factorial cell (full-cache trace, compression at the boundary)
+
+**Status: specified, not built, not launched.** Force the full-cache reference
+trace through a **full** cache and activate compression only at the
+reasoning/answer boundary. 100 × 4, one budget (256), StreamingLLM and Random.
+
+This separates readout damage localized to the answer span from damage caused by
+a cache state degraded across the trace — the decomposition currently cannot
+tell those apart, which is the reviewers' central structural objection. Read:
+accuracy near 0.885–0.906 ⇒ answer-time compression alone explains little and
+essentially all readout damage is trace-accumulated; near 0.765 (Random's forward
+readout) ⇒ answer-time compression alone explains it. Intermediate values are
+reported as a proportion with a CI and not rounded to either pole.
+
+The inverse cell (compressed trace, compressed answer) is deliberately **not**
+specified: it is a replay of the free-running condition and carries no extra
+information.
+
+### M.3 Ratio-matched TV series
+
+**Status: specified, not built, not launched.** Budget is fixed at 256 while
+context grows, so the observed TV staircase may be a compression-*ratio* curve
+rather than a horizon curve. Re-measure per-step TV holding the realized ratio
+fixed as the trace grows. Read: if the staircase survives at fixed ratio, the
+horizon reading stands and the word "mechanism" is licensed for it; if it
+flattens, the profile is a ratio effect and §4.4 is restated in those terms.
+
+### M.4 Content-token TV variant
+
+**Status: specified, not built, not launched.** Restrict the TV profile to
+numerals, operators, and the answer span. Read: if the content-restricted
+profile tracks the full profile, the "your TV is paraphrase noise" objection is
+answered; if it is materially flatter, the profile is substantially lexical and
+we say so.
+
+### M.5 Budgets 512 and 1024 — the confirmatory resolution test
+
+**Status: configs written, not launched.** The read is already pre-committed in
+**Amendment L**: the readout-to-free-run spread ratio must fall strictly between
+the 256 value (0.78) and the 2048 value (0.12), monotone in budget. A ratio
+outside [0.12, 0.78] at either budget, or a non-monotone ordering, refutes the
+gradual-collapse reading, and we report that rather than reinterpreting.
+
+### M.6 One HOTT-configuration cell, and R-KV in its published configuration
+
+**Status: specified, not launched.** We claim to resolve HOTT's contradiction
+while failing to reproduce its baseline within a factor of two (0.882 vs 0.47),
+and we characterize R-KV's published claim from an adjacent configuration rather
+than its own (R1-Distill-Llama-8B / AIME-24). Both are honest gaps in the current
+paper and are stated as such in §6. Reads: for the HOTT cell, whether our
+full-cache baseline moves toward 0.47 under their decode-length and sampling
+configuration — if it does, the digit gap is configuration and the channel
+argument is unaffected; if it does not, we cannot explain the gap and say so.
+For the R-KV cell, whether the >100% regime appears in its own configuration; if
+it does, our "no >100% regime at 7B" finding is confirmed as scale-specific
+exactly as Amendment E anticipated, and if it does not, the published claim does
+not replicate under a parity-certified port and that is a finding about the
+claim.

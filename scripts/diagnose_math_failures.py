@@ -31,13 +31,23 @@ TRACE_TAIL_CHARS = 800
 
 
 def load_rows(rundir: Path, *, bench: str = "math500") -> list[dict[str, Any]]:
+    """Result rows under ``rundir``, excluding token-ID sidecars.
+
+    Sidecars live in a ``token_ids/`` subtree, are also ``*.jsonl``, and also
+    carry ``bench`` -- so the bench filter alone lets them through, and they
+    have no ``decoding`` block. This script predates sidecars: it was written
+    against the full-cache bank and worked, then silently acquired a crash the
+    first time it was pointed at a compression cell.
+    """
     rows: list[dict[str, Any]] = []
     for path in sorted(rundir.rglob("*.jsonl")):
+        if "token_ids" in path.parts:
+            continue
         for line in path.read_text(encoding="utf-8").splitlines():
             if not line.strip():
                 continue
             row = json.loads(line)
-            if row.get("bench") == bench:
+            if row.get("bench") == bench and "decoding" in row:
                 rows.append(row)
     return rows
 

@@ -786,6 +786,43 @@ def build_catalogue() -> list[Entry]:
         "realized AIME ratio on the paper's prompt+generation definition",
     )
 
+    # ---- primary: grader audit (instrument validity) -----------------------
+    grader_dir = K / "grader"
+    grader_total_rows = 0
+    grader_total_disagreements = 0
+    for path in sorted(grader_dir.glob("*.json")):
+        rel = path.relative_to(PROJECT_ROOT)
+        payload = _load(path)
+        stem = f"grader.{path.stem.replace('grid-diss256-', '')}"
+        for field_name, key in (
+            ("rows", "rows"),
+            ("stored_accuracy", "stored_accuracy"),
+            ("regraded_accuracy", "regraded_accuracy"),
+            ("grader_disagreements", "disagreements"),
+        ):
+            add(
+                f"{stem}.{key}",
+                payload[field_name],
+                f"{rel}#/{field_name}",
+                "grader audit",
+            )
+        grader_total_rows += int(payload["rows"])
+        grader_total_disagreements += int(payload["grader_disagreements"])
+    if grader_total_rows:
+        gsrc = f"sum over {grader_dir.relative_to(PROJECT_ROOT)}/*.json"
+        add(
+            "grader.total_rows",
+            grader_total_rows,
+            f"{gsrc} #/rows",
+            "rows re-graded across every budget-256 compressed cell",
+        )
+        add(
+            "grader.total_disagreements",
+            grader_total_disagreements,
+            f"{gsrc} #/grader_disagreements",
+            "grader disagreements across every budget-256 compressed cell",
+        )
+
     # ---- primary: Class C (compute) ---------------------------------------
     compute = _load(CLASSB / "compute.json")
     rel_c = (CLASSB / "compute.json").relative_to(PROJECT_ROOT)

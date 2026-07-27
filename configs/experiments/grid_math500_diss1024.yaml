@@ -1,0 +1,28 @@
+name: grid_math500_diss1024
+stage: grid
+# Budget-1024 cell for the CONFIRMATORY resolution test (PREREGISTRATION
+# Amendments L and M.5). Amendment L pre-commits the prediction this tests: the
+# readout-to-free-run spread ratio must fall strictly between the budget-256
+# value (0.78) and the budget-2048 value (0.12), monotone in budget. A ratio
+# outside [0.12, 0.78] at either budget, or a non-monotone ordering, refutes the
+# gradual-collapse reading -- which is the point of running it on data that did
+# not exist when the prediction was made.
+#
+# Matched to the 256 and 2048 cells in every other respect (same problems, same
+# frozen seeds, same cap, same interval) so the budget is the only axis moving.
+#
+# NOT LAUNCHED. Written and dry-run validated only.
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+subset:
+  math500: 100
+presses: [streamingllm, random]
+budgets: [1024]
+seeds: [11, 23, 47, 89]
+max_new_tokens:
+  math500: 16384
+compression_interval: 64
+estimated_generation_count: 800
+scale_authorized: true
+remote_only: true
+store_token_ids: true
