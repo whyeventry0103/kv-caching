@@ -25,3 +25,68 @@ def test_reverse_replay_brackets_the_residual_and_sign_is_carried():
     assert low == pytest.approx(-0.25)
     assert high == pytest.approx(-0.20)
     assert result.flip_mass_net == pytest.approx(-0.20)
+
+
+def test_paired_policy_contrast_reports_wins_ties_losses_separately():
+    """'non-negative on N' is not 'beats on N' -- the breakdown must survive."""
+    from kvcache.stats import paired_policy_contrast
+
+    a = {"p1": [True, True], "p2": [True, False], "p3": [False, False]}
+    b = {"p1": [False, False], "p2": [True, False], "p3": [True, True]}
+    out = paired_policy_contrast(a, b, n_resamples=200)
+    assert out["n_problems"] == 3
+    assert (out["wins"], out["ties"], out["losses"]) == (1, 1, 1)
+    assert out["non_negative"] == 2
+    assert out["mean_difference"] == pytest.approx(0.0)
+
+
+def test_paired_policy_contrast_pairs_on_the_problem():
+    from kvcache.stats import paired_policy_contrast
+
+    a = {"p1": [True, True, True, True]}
+    b = {"p1": [True, False, False, False]}
+    out = paired_policy_contrast(a, b, n_resamples=100)
+    assert out["mean_difference"] == pytest.approx(0.75)
+    assert out["wins"] == 1
+
+
+def test_paired_policy_contrast_requires_common_problems():
+    import pytest as _pytest
+
+    from kvcache.stats import paired_policy_contrast
+
+    with _pytest.raises(ValueError):
+        paired_policy_contrast({"a": [True]}, {"b": [True]})
+
+
+def test_paired_policy_contrast_records_bootstrap_provenance():
+    """A percentile CI with no recorded seed is not reproducible.
+
+    The published CI upper endpoint could not be reproduced exactly because the
+    original run's seed was never recorded; pinning it here is the fix.
+    """
+    from kvcache.stats import paired_policy_contrast
+
+    a = {"p1": [True, True], "p2": [True, False], "p3": [False, False]}
+    b = {"p1": [False, False], "p2": [True, False], "p3": [True, True]}
+    out = paired_policy_contrast(a, b, n_resamples=256, seed=7)
+    assert out["seed"] == 7
+    assert out["n_resamples"] == 256
+    # same seed reproduces the interval exactly; a different seed need not
+    again = paired_policy_contrast(a, b, n_resamples=256, seed=7)
+    assert again["ci95"] == out["ci95"]
+
+
+def test_paired_policy_contrast_histogram_is_a_sufficient_statistic():
+    """The histogram must account for every problem, so a reader can
+    recompute the bootstrap from the artifact alone."""
+    from kvcache.stats import paired_policy_contrast
+
+    a = {"p1": [True, True], "p2": [True, False], "p3": [False, False]}
+    b = {"p1": [False, False], "p2": [True, False], "p3": [True, True]}
+    out = paired_policy_contrast(a, b, n_resamples=200)
+    histogram = out["difference_histogram"]
+    assert sum(count for _, count in histogram) == out["n_problems"]
+    assert histogram == sorted(histogram)
+    assert dict(histogram)[-1.0] == 1  # p3: 0.0 - 1.0
+    assert dict(histogram)[0.0] == 1  # p2: tie

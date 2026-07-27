@@ -1637,3 +1637,65 @@ the tree hashes are compared and match, `.sync-state` records the true commit an
 hash, and the deviation is logged here. Never write `.sync-state` from a transfer
 whose hash was not verified — that is precisely the silent staleness the invariant
 exists to prevent.
+
+---
+
+## 35. `make sync` restored to rsync — the hash guard was blocked by output in the source tree
+
+### 2026-07-27 — deviation CLOSED; root cause was not (only) contention
+
+**Outcome.** `make sync-apply` works again by the standard path.
+`.sync-state` now reads `sync_method=rsync`, `source_commit=81c2642`,
+`source_tree_hash=6dc9ac95…`, verified by the script's own local-vs-remote
+comparison. The §34 `scp-verified-tree-hash` deviation is closed; do not
+carry it forward as the normal path.
+
+**Two distinct causes, and only one was the one §34 named.**
+
+1. *Contention (real, transient).* The first apply of the day still died with
+   §34's exact signature — `rsync: unexpected end of file`, exit 255, mid
+   transfer, box at load ~10 from other tenants. A retry minutes later
+   transferred all 220 files without complaint. So the transport fault is
+   intermittent, not persistent: **retry before concluding the link is
+   broken**, and never diagnose from the dry-run — `make sync` traverses but
+   transfers nothing, so it succeeds while the apply fails. That asymmetry is
+   what made an earlier read of "the link is healthy" wrong.
+
+2. *The actual blocker: `amendk/` lived inside the hashed source tree.* With
+   the transfer succeeding, the script still refused:
+   `REFUSED: remote source hash does not match transferred local source`.
+   Diagnosis was file-by-file, not inferred: all **206** local files were
+   present on the remote with **byte-identical content** (zero content
+   differences, zero local-only files), and the remote carried **39 extra
+   files, all under `amendk/`** — the Amendment K working outputs
+   (9 `summary.json`, 9 `table.md`, 9 `decomposition.svg`, the ADD set, and
+   the three Class B artifacts). `kvcache/source_hash.py` ignores `results/`,
+   `runs/`, `logs/`, `data/`, `kvcache-storage/` — but not `amendk/`, so
+   remote-generated output entered the hash and could never match a local tree
+   that had none of it.
+
+**Fix.** `mv amendk results/amendk` on the remote, into the already-ignored
+`results/`. Nothing was deleted; the whole directory was first pulled down and
+compared — all 9 unit summaries and all 4 ADD summaries are byte-identical to
+the copies already archived under `results/diag/amendment-k/`, so the only
+remote-unique content was the three Class B artifacts (now archived locally at
+`results/diag/amendment-k/classb/`) plus regenerable tables and SVGs. No code,
+config, or cron entry referenced the `amendk` path.
+
+**The generalisable rule.** *Never write generated output into the source tree
+on either side.* The hash guard treats the source tree as the unit of identity,
+so any artifact written inside it makes local and remote permanently
+unequal and the guard fails closed — correctly, but for a reason that looks
+like drift and invites someone to "fix" it by weakening the check. Analysis
+output belongs in `results/` (ignored by both the hash and rsync) or under
+`kvcache-storage/`. This is the same failure family as Lesson 14: rsync has no
+`--delete`, so anything that lands in the tree stays there until someone
+removes it deliberately.
+
+**Note for the watcher.** The cron entries are still armed
+(`nightly_autorun.py` every 10 min in the 01:45–10:45 window). Between the
+refused apply and the fix, the remote briefly held the new source files with a
+`.sync-state` still naming the old commit — the precise silent-staleness state
+the invariant exists to prevent. It is now consistent. If an apply ever refuses
+again, treat the remote as *unknown* until the hash is reconciled; do not
+assume the transfer did not land.

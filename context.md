@@ -2,11 +2,12 @@
 
 **Purpose of this file:** a complete, self-contained handoff. An LLM with zero prior
 context should be able to read this and resume exactly where we are. Last updated
-2026-06-14. Repo: `/Users/apple/dev/kv-caching` (moved off `~/Desktop` 2026-06-14 to
+2026-07-27. Repo: `/Users/apple/dev/kv-caching` (moved off `~/Desktop` 2026-06-14 to
 escape a recurring macOS TCC lockout; `~/Desktop/kv-caching` is a **symlink** to this
 path, not a second copy — verified 2026-07-27), branch `main`, GitHub
-`whyeventry0103/kv-caching`. Current HEAD: `61760a5`
-(M4 complete + M5 ADD pipeline).
+`whyeventry0103/kv-caching`. Current HEAD: `81c2642`
+(number-provenance gate; 7 commits ahead of origin, nothing pushed — correct,
+nothing is externalized before the reframe lands).
 
 This document is authoritative for *narrative and decisions*. For *code*, the repo is
 ground truth — always re-read files before acting (state moves fast; this file can
@@ -17,7 +18,104 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
 
 ## 0. TL;DR — where we are right now
 
-  **★★★★ ALL EXPERIMENTAL WORK COMPLETE (2026-07-24) — nightly queue fully
+  **★★★★★ AMENDMENT K + THE OUTPUT-PATH GATE (2026-07-27) — a real systemic
+  bug found and fixed; the paper is NOT submission-ready and the
+  "endgame only" bullet below is SUPERSEDED.** Read this bullet first;
+  everything under it predates the correction.
+  **(1) The bug (Amendment K, `f0f809e`).** Every accuracy comparison was
+  computed over *mismatched populations*: readout accuracy is defined only
+  where a reasoning/answer boundary exists (i.e. the trace terminated), and
+  reverse-readout only where the *compressed* trace terminated — but both
+  were differenced against `Acc_FC` over the **entire** bank. Models fail to
+  terminate on harder problems, so the defined subset is systematically
+  easier. Magnitudes: Acc_FC = 0.8825 over all 2000 rows, 0.9031 over the 392
+  readout-defined rows, 0.9351 over R-KV-14B's 154 reverse-defined rows (vs
+  0.880). That last one fabricated a **+0.029** reverse endpoint — the reason
+  the 14B cell read "inconclusive." A second defect rode along: point
+  estimates used the unmatched global mean while their own bootstrap CIs
+  already restricted to the cell's problems, so estimate and interval were on
+  *different populations*.
+  **(2) The fix.** Three layers, applied uniformly and to every cell in one
+  pass *before* any per-cell verdict was inspected: layer 1 = primary
+  estimand on the full cell population with imputation bounds both ways
+  (`primary_bounds`); layer 2 = complete-case sensitivity against the
+  identically-restricted reference (top-level keys); the unmatched
+  subset-vs-bank comparison is **retired**. Artifacts carry
+  `reference_convention: amendment-k-cell-population`. Re-run + verified in
+  `d01cbc9`: 24/24 cross-checks against derivations written from raw rows
+  *before* the code changed; 5 regressions that fail on the pre-fix code.
+  **Verdicts held — the scorecard is 3/4 on BOTH the pre-registered
+  convention and the new primary estimand**, so the correction did not buy an
+  upgrade (see PREREGISTRATION Amendment K for why we decline to restate it).
+  Both directions moved: all four MATH-500 reverse endpoints moved *away*
+  from zero (helps us), all three AIME residuals *toward* zero (hurts us) —
+  that pair is the evidence the convention wasn't chosen for its result.
+  **(3) The diagnosis that generalizes.** This repo's gate culture is strong
+  on *inputs* (pinned revisions, token-ID sidecars, Jaccard parity, 800-row
+  exact replication) and was **absent on outputs**. Nothing ever checked that
+  a number in the paper matched the artifact it came from. Every defect found
+  in this exercise is output-path: the population bug, 81 stale literals, 99
+  never-sourced ones, and `make_paper_figures.py:48` hardcoding `FC = 0.8825`
+  plus every derived constant. Four symptoms, one missing gate.
+  **(4) The gate (`81c2642`).** `src/kvcache/paper_numbers.py` +
+  `scripts/build_paper_numbers.py` + `scripts/audit_paper_numbers.py`.
+  `.tex` alone = 817 literals: 452 sourced, 266 protocol/years, **180
+  unsourced** — 81 matching a pre-K artifact and no current one (**provably
+  false now**), 99 that never had a source at all (incl. `+0.185` and its CI,
+  `94/100`, `44/50/6`, the TV window means, the compute figures, and the
+  compression ratios). With PAPER_FINDINGS: 2006 literals, 421 unsourced.
+  Gate: `.venv/bin/python scripts/audit_paper_numbers.py --strict`.
+  **(5) UNIT 1 COMPLETE — Class B artifacts generated, verified, wired.**
+  `windowed_tv()` (metrics/tdp.py) and `paired_policy_contrast()` (stats.py)
+  + two thin runners (`scripts/report_tv_windows.py`,
+  `report_policy_contrast.py`); artifacts archived at
+  `results/diag/amendment-k/classb/` (remote copy at
+  `~/kv-caching/results/amendk/classb/`). **All four TV ground truths
+  reproduce** (pre-eviction exactly 0.0 — the hard self-control target;
+  first50 0.0018169; later per-trace 0.0883564; step-pooled 0.1182457; over
+  800 profiles, median onset 65) and the contrast reproduces exactly (mean
+  0.185 = 0.4225 − 0.2375; 44 wins / 50 ties / 6 losses = 100; non-negative
+  94). `windowed_tv` is a faithful refactor of `make_paper_figures.py`'s
+  `print_windowed_tv`, so reproducing the four targets validates both paths.
+  **One discrepancy, and it is now the ONLY unsourced Class B literal: the
+  published CI upper bound `0.242` (×3 in the .tex, L74/L200/L205) is not
+  reproducible** — a Monte-Carlo quantity whose seed was never recorded. Over
+  200 seeds the upper endpoint spans [0.2375, 0.2450] (median 0.2425); our
+  pinned seed=0 gives **[0.13, 0.24]**. Lower bound 0.130 matches exactly.
+  Claim survives (CI excludes zero either way); on the Unit 3 list as a
+  mechanical substitution. Fixed at the class level per §2.4 rather than
+  patched: the artifact now records `seed`, `n_resamples`, and a
+  `difference_histogram` (7 counts, a sufficient statistic for the whole
+  bootstrap — anyone can recompute the interval from the artifact alone), and
+  `windowed_tv` records `median_onset` (the paper quotes 65 twice; also
+  unsourced before). **Audit effect: .tex unsourced 180 → 161, both-docs
+  421 → 386; .tex sourced 371 → 433, protocol 232 → 189** (numbers formerly
+  waved through the config allowlist now match a real artifact).
+  **(5b) `make sync` RESTORED to rsync (remoteserver.md §35).** The §34 scp
+  deviation is CLOSED. Two causes, only one previously named: contention is
+  real but *intermittent* (first apply died at load ~10, a retry moved all 220
+  files) — and the actual blocker was that `amendk/` sat inside the hashed
+  source tree, so 39 remote-only output files made the guard's local-vs-remote
+  hash comparison unsatisfiable forever. Verified file-by-file: all 206 local
+  files byte-identical on the remote, zero local-only, zero content diffs.
+  Fixed by `mv amendk results/amendk` (results/ is ignored by both the hash
+  and rsync); nothing deleted, everything compared first. `.sync-state` now
+  truthful: `sync_method=rsync`, commit 81c2642. **Standing rule added: never
+  write generated output into the source tree on either side**, and never
+  diagnose link health from `make sync` — the dry-run traverses without
+  transferring, so it passes while the apply fails.
+  **(6) NEXT.** A 14-unit work order is in play (Units 1–4 output-path
+  hardening; 5–6 statistics + the resolution-collapse reframe; 7–9 claim
+  calibration, structure, figures; 10 the TV-matched noise control that
+  `context.md` §1.3 calls MANDATORY and the paper does not contain; 11–12
+  budgets 512/1024 + second-tier; 13 the reframe/retitle; 14 endgame).
+  Target **ICLR 2027, ~late September** — not the August arXiv path below.
+  **Do not arXiv or anonymize before the reframe lands.**
+
+  **★★★★ ALL EXPERIMENTAL WORK COMPLETE (2026-07-24) — SUPERSEDED by the
+  bullet above: the accuracy numbers in this bullet are pre-Amendment-K and
+  several are now false. Retained for the run/gate history only.** Nightly
+  queue fully
   drained, zero runs remain, ORIGINAL CAMPAIGN + AMENDMENT J both 100%
   READ.** m4-q14b-256 (14B, the last job in the 31-job queue) landed:
   grid/readout/reverse all 400/400 against fc-q14b (acc 0.880, band

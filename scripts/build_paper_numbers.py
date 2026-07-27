@@ -37,6 +37,7 @@ UNITS = {
     "q14b": K / "m4-q14b-256-summary.json",
 }
 ADD = K / "add"
+CLASSB = K / "classb"
 
 
 def _load(path: Path) -> Any:
@@ -289,6 +290,67 @@ def build_catalogue() -> list[Entry]:
         "H2O-style median onset step",
     )
 
+    # ---- primary: Class B (mechanism + phenomenon headline numbers) --------
+    # These are quoted in the abstract and in contribution bullets and had no
+    # machine-readable source at all until now -- they were computed once, by
+    # hand or by a --print flag, and transcribed.
+    for label, fname in (
+        ("tv_diss256", "tv_windows_diss256.json"),
+        ("tv_h2o", "tv_windows_h2o.json"),
+    ):
+        path = CLASSB / fname
+        rel = path.relative_to(PROJECT_ROOT)
+        payload = _load(path)
+        add(
+            f"{label}.median_onset",
+            payload["median_onset"],
+            f"{rel}#/median_onset",
+            "median onset step (one step after the first prune)",
+        )
+        add(
+            f"{label}.n_profiles",
+            payload["n_profiles"],
+            f"{rel}#/n_profiles",
+            "replay profiles contributing to this cell",
+        )
+        for window in ("before", "first50", "later"):
+            add(
+                f"{label}.{window}",
+                payload["windows"][window]["per_profile"],
+                f"{rel}#/windows/{window}/per_profile",
+                "windowed mean per-step TV (per-trace estimator; the paper's)",
+            )
+            add(
+                f"{label}.{window}_pooled",
+                payload["windows"][window]["pooled"],
+                f"{rel}#/windows/{window}/pooled",
+                "windowed mean per-step TV (step-pooled estimator)",
+            )
+
+    contrast = _load(CLASSB / "policy_contrast_256.json")
+    rel = (CLASSB / "policy_contrast_256.json").relative_to(PROJECT_ROOT)
+    add(
+        "contrast256.mean",
+        contrast["mean_difference"],
+        f"{rel}#/mean_difference",
+        "Random minus StreamingLLM free-run accuracy, paired on the problem",
+    )
+    for i, bound in enumerate(contrast["ci95"]):
+        add(
+            f"contrast256.ci{i}",
+            bound,
+            f"{rel}#/ci95/{i}",
+            "problem-clustered 95% CI (seed and n_resamples pinned in artifact)",
+        )
+    for name, desc in (
+        ("wins", "problems where Random strictly beats StreamingLLM"),
+        ("ties", "problems where the two policies score identically"),
+        ("losses", "problems where StreamingLLM strictly beats Random"),
+        ("non_negative", "wins + ties -- the honest '94/100' phrasing"),
+        ("n_problems", "problems in the paired contrast"),
+    ):
+        add(f"contrast256.{name}", contrast[name], f"{rel}#/{name}", desc)
+
     # ---- derived ----------------------------------------------------------
     # These are the quantities a manual pass loses: they read as prose, and a
     # regenerated primary silently invalidates them.
@@ -343,6 +405,18 @@ def build_catalogue() -> list[Entry]:
             f"{rc} / {tc}",
             (rc, tc),
             "fraction of the total accuracy change attributable to readout",
+        )
+
+    # The abstract's "compounds roughly 50x": the later-window mean over the
+    # first-50-steps mean. Derived, so regenerating either window recomputes it
+    # instead of leaving the "50x" claim stranded.
+    for label in ("tv_diss256", "tv_h2o"):
+        derive(
+            f"tv_compounding.{label}",
+            by_key[f"{label}.later"] / by_key[f"{label}.first50"],
+            f"{label}.later / {label}.first50",
+            (f"{label}.later", f"{label}.first50"),
+            "growth factor from the first 50 post-eviction steps to later steps",
         )
 
     # Cross-policy residual spread at budget 256 (superseded by a paired test,

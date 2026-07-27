@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import re
-from collections.abc import Sequence
+import statistics
+from collections.abc import Iterable, Sequence
+from typing import Any
 
 THRESHOLDS = (0.05, 0.10, 0.15, 0.20)
 CONTENT_TOKEN = re.compile(r"(?:\d|[+\-*/=]|\\boxed)")
@@ -85,3 +87,75 @@ def segment_aggregate(
             raise ValueError(f"invalid segment bounds for {name}")
         result[name] = auc_tv(profile[start:stop])
     return result
+
+
+WINDOW_NAMES = ("before", "first50", "later")
+
+
+def onset_window(offset: int) -> str:
+    """Which onset-aligned window a step falls in.
+
+    ``before`` is pre-eviction and doubles as the replay harness's self-control:
+    it MUST come out at exactly 0.0000, because before the first prune the two
+    caches are identical. A non-zero value there is an instrument bug, not a
+    finding.
+    """
+    if offset < 0:
+        return "before"
+    return "first50" if offset < 50 else "later"
+
+
+def windowed_tv(
+    profiles: Iterable[tuple[Sequence[float], int | None]],
+) -> dict[str, Any]:
+    """Onset-aligned windowed TV means over a set of (profile, onset) pairs.
+
+    Full horizon -- no +/-400 cap, unlike the rendered figure curve. Two
+    estimators, because they answer different questions and the paper reports
+    the first:
+
+    * ``per_profile`` -- mean of per-profile window means, so each trace counts
+      once. The trace is the sampling unit, matching the problem-clustered
+      convention used everywhere else.
+    * ``pooled`` -- mean over every step, so long traces weigh more.
+
+    Extracted from ``scripts/make_paper_figures.py`` so that the figure path and
+    the artifact path cannot drift: these numbers are quoted in the mechanism
+    section and had no machine-readable source before.
+
+    ``median_onset`` is reported because the paper quotes it twice ("median
+    onset at step 65, one step after the first prune at the compression
+    interval of 64"), and it was itself an unsourced literal.
+    """
+    pooled: dict[str, list[float]] = {name: [] for name in WINDOW_NAMES}
+    per_profile: dict[str, list[float]] = {name: [] for name in WINDOW_NAMES}
+    onsets: list[int] = []
+    n_profiles = 0
+    for estimate, onset in profiles:
+        if not estimate or onset is None:
+            continue
+        n_profiles += 1
+        onsets.append(int(onset))
+        local: dict[str, list[float]] = {name: [] for name in WINDOW_NAMES}
+        for index, value in enumerate(estimate):
+            name = onset_window(index - onset)
+            pooled[name].append(float(value))
+            local[name].append(float(value))
+        for name, values in local.items():
+            if values:
+                per_profile[name].append(statistics.fmean(values))
+    out: dict[str, Any] = {
+        "n_profiles": n_profiles,
+        "median_onset": statistics.median(onsets) if onsets else None,
+        "windows": {},
+    }
+    for name in WINDOW_NAMES:
+        out["windows"][name] = {
+            "per_profile": (
+                statistics.fmean(per_profile[name]) if per_profile[name] else None
+            ),
+            "pooled": statistics.fmean(pooled[name]) if pooled[name] else None,
+            "n_profiles": len(per_profile[name]),
+            "n_steps": len(pooled[name]),
+        }
+    return out
