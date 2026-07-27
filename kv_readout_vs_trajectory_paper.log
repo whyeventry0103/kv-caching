@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.5.7)  28 JUL 2026 02:15
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.5.7)  28 JUL 2026 02:26
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -519,7 +519,7 @@ Underfull \hbox (badness 1275) in paragraph at lines 101--101
  []
 
 [4] [5]
-<figures/fig0_protocol.pdf, id=185, 411.58829pt x 197.14966pt>
+<figures/fig0_protocol.pdf, id=189, 411.58829pt x 197.14966pt>
 File: figures/fig0_protocol.pdf Graphic file (type pdf)
 <use figures/fig0_protocol.pdf>
 Package pdftex.def Info: figures/fig0_protocol.pdf  used on input line 141.
@@ -531,50 +531,51 @@ File: omscmtt.fd
 )
 LaTeX Font Info:    Font shape `OMS/cmtt/m/it' in size <10.95> not available
 (Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 154.
- [7 <./figures/fig0_protocol.pdf>] [8]
-<figures/fig1_phenomenon.pdf, id=294, 538.03255pt x 204.83972pt>
+ [7 <./figures/fig0_protocol.pdf>] [8] [9]
+<figures/fig1_phenomenon.pdf, id=307, 538.03255pt x 204.83972pt>
 File: figures/fig1_phenomenon.pdf Graphic file (type pdf)
 <use figures/fig1_phenomenon.pdf>
-Package pdftex.def Info: figures/fig1_phenomenon.pdf  used on input line 204.
+Package pdftex.def Info: figures/fig1_phenomenon.pdf  used on input line 228.
 (pdftex.def)             Requested size: 422.77664pt x 160.9683pt.
- [9] [10 <./figures/fig1_phenomenon.pdf>]
+ [10 <./figures/fig1_phenomenon.pdf>] [11]
 
 LaTeX Font Warning: Font shape `OT1/cmr/bx/sc' undefined
-(Font)              using `OT1/cmr/bx/n' instead on input line 244.
+(Font)              using `OT1/cmr/bx/n' instead on input line 268.
 
-[11]
-Overfull \hbox (1.40422pt too wide) in paragraph at lines 250--251
+[12]
+Overfull \hbox (1.40422pt too wide) in paragraph at lines 274--275
 []\OT1/cmr/m/n/10.95 (-20) The re-sult-ing resid-ual brack-ets are \OT1/cmr/bx/n/10.95 (-20) Ran-dom $\OT1/cmr/m/n/10.95 (-20) [\OMS/cmsy/m/n/10.95 ^^@\OT1/cmr/m/n/10.95 (-20) 0\OML/cmm/m/it/10.95 :\OT1/cmr/m/n/10.95 (-20) 337\OML/cmm/m/it/10.95 ; \OMS/cmsy/m/n/10.95 ^^@\OT1/cmr/m/n/10.95 (-20) 0\OML/cmm/m/it/10.95 :\OT1/cmr/m/n/10.95 (-20) 282]$, \OT1/cmr/bx/n/10.95 (-20) StreamingLLM $\OT1/cmr/m/n/10.95 (-20) [\OMS/cmsy/m/n/10.95 ^^@\OT1/cmr/m/n/10.95 (-20) 0\OML/cmm/m/it/10.95 :\OT1/cmr/m/n/10.95 (-20) 470\OML/cmm/m/it/10.95 ; \OMS/cmsy/m/n/10.95 ^^@\OT1/cmr/m/n/10.95 (-20) 0\OML/cmm/m/it/10.95 :\OT1/cmr/m/n/10.95 (-20) 344]$,
  []
 
-<figures/fig2_bracket.pdf, id=398, 709.69138pt x 457.4701pt>
+<figures/fig2_bracket.pdf, id=411, 709.69138pt x 457.4701pt>
 File: figures/fig2_bracket.pdf Graphic file (type pdf)
 <use figures/fig2_bracket.pdf>
-Package pdftex.def Info: figures/fig2_bracket.pdf  used on input line 260.
+Package pdftex.def Info: figures/fig2_bracket.pdf  used on input line 284.
 (pdftex.def)             Requested size: 422.77664pt x 272.52266pt.
-<figures/fig4_tvprofile.pdf, id=402, 316.7712pt x 223.70856pt>
+<figures/fig4_tvprofile.pdf, id=415, 316.7712pt x 223.70856pt>
 File: figures/fig4_tvprofile.pdf Graphic file (type pdf)
 <use figures/fig4_tvprofile.pdf>
-Package pdftex.def Info: figures/fig4_tvprofile.pdf  used on input line 286.
+Package pdftex.def Info: figures/fig4_tvprofile.pdf  used on input line 310.
 (pdftex.def)             Requested size: 338.22418pt x 238.87424pt.
-[12] [13 <./figures/fig2_bracket.pdf>] [14 <./figures/fig4_tvprofile.pdf>]
-<figures/fig3_add.pdf, id=538, 389.75761pt x 229.2516pt>
+[13] [14 <./figures/fig2_bracket.pdf>]
+<figures/fig3_add.pdf, id=502, 389.75761pt x 229.2516pt>
 File: figures/fig3_add.pdf Graphic file (type pdf)
 <use figures/fig3_add.pdf>
-Package pdftex.def Info: figures/fig3_add.pdf  used on input line 318.
+Package pdftex.def Info: figures/fig3_add.pdf  used on input line 342.
 (pdftex.def)             Requested size: 338.22418pt x 198.94005pt.
-<figures/fig5_twofc.pdf, id=540, 322.54652pt x 204.59154pt>
+ [15 <./figures/fig4_tvprofile.pdf>]
+<figures/fig5_twofc.pdf, id=552, 322.54652pt x 204.59154pt>
 File: figures/fig5_twofc.pdf Graphic file (type pdf)
 <use figures/fig5_twofc.pdf>
-Package pdftex.def Info: figures/fig5_twofc.pdf  used on input line 329.
+Package pdftex.def Info: figures/fig5_twofc.pdf  used on input line 353.
 (pdftex.def)             Requested size: 338.22418pt x 214.54337pt.
- [15 <./figures/fig3_add.pdf>] [16 <./figures/fig5_twofc.pdf>] [17]
-<figures/fig6_aime.pdf, id=686, 350.55115pt x 216.71445pt>
+ [16 <./figures/fig3_add.pdf>] [17 <./figures/fig5_twofc.pdf>] [18]
+<figures/fig6_aime.pdf, id=698, 350.55115pt x 216.71445pt>
 File: figures/fig6_aime.pdf Graphic file (type pdf)
 <use figures/fig6_aime.pdf>
-Package pdftex.def Info: figures/fig6_aime.pdf  used on input line 352.
+Package pdftex.def Info: figures/fig6_aime.pdf  used on input line 376.
 (pdftex.def)             Requested size: 281.85587pt x 174.25468pt.
- [18 <./figures/fig6_aime.pdf>] [19] [20] [21] (./kv_readout_vs_trajectory_paper.aux)
+ [19 <./figures/fig6_aime.pdf>] [20] [21] [22] (./kv_readout_vs_trajectory_paper.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2026-03-20>
@@ -584,21 +585,21 @@ L3 programming layer <2026-03-20>
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
 Package rerunfilecheck Info: File `kv_readout_vs_trajectory_paper.out' has not changed.
-(rerunfilecheck)             Checksum: 68793427A8951DB54DCAAB9C83917277;4078.
+(rerunfilecheck)             Checksum: 8B2541F837F609E76FAB6D6FD66EAC50;4482.
  ) 
 Here is how much of TeX's memory you used:
- 17364 strings out of 469339
- 289757 string characters out of 5465691
+ 17378 strings out of 469339
+ 289936 string characters out of 5465691
  775078 words of memory out of 5000000
- 45550 multiletter control sequences out of 15000+600000
- 656153 words of font info for 279 fonts, out of 8000000 for 9000
+ 45555 multiletter control sequences out of 15000+600000
+ 656372 words of font info for 282 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 75i,15n,79p,2594b,627s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 75i,15n,79p,3047b,627s stack positions out of 10000i,1000n,20000p,200000b,200000s
  </Users/apple/Library/TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/tcrm1095.600pk></Users/apple/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></Users/apple/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></Users/apple/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx9.pfb></Users/apple/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmbxti10.pfb></Users/apple/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmcsc10.pfb></Users/apple/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></Users/apple/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmitt10.pfb></Users/apple/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></Users/apple/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></Users/apple/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi9.pfb></Users/apple/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></Users/apple/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></Users/apple/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></Users/apple/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></Users/apple/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></Users/apple/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></Users/apple/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></Users/apple/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></Users/apple/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></Users/apple/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy9.pfb></Users/apple/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></Users/apple/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmti8.pfb></Users/apple/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmti9.pfb></Users/apple/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></Users/apple/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb></Users/apple/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt9.pfb>
-Output written on kv_readout_vs_trajectory_paper.pdf (21 pages, 535334 bytes).
+Output written on kv_readout_vs_trajectory_paper.pdf (22 pages, 541353 bytes).
 PDF statistics:
- 905 PDF objects out of 1000 (max. 8388607)
- 464 compressed objects within 5 object streams
- 87 named destinations out of 1000 (max. 500000)
- 59572 words of extra memory for PDF output out of 61914 (max. 10000000)
+ 917 PDF objects out of 1000 (max. 8388607)
+ 475 compressed objects within 5 object streams
+ 90 named destinations out of 1000 (max. 500000)
+ 59580 words of extra memory for PDF output out of 61914 (max. 10000000)
 

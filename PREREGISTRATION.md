@@ -735,3 +735,73 @@ check, the sibling instruments were audited directly rather than by inference:
   matching the archived value exactly.
 
 No population-selection defect was found outside the accuracy-change estimands.
+
+---
+
+## Amendment L (2026-07-28): resolution of held-trace evaluation — a POST-HOC analysis, declared as such
+
+**This analysis was not pre-registered, and it was formed after every cell in the
+paper had been read.** It is recorded here before it is written up, with its
+design fixed in code (`kvcache.stats.resolution_spread`) rather than described,
+so that the choices below cannot be tuned after seeing more of the result than
+has already been seen. Every appearance of it in the paper is labelled
+exploratory. It does not revise any pre-registered verdict, and no
+pre-registered outcome depends on it.
+
+**Provenance of the question.** While correcting Amendment K it became visible
+that the three AIME presses share an *identical* readout accuracy (0.462, a
+readout change of exactly 0.000 against the matched reference) while free-running
+separates them by roughly 2×. The obvious question — whether held-trace
+evaluation loses discriminating power precisely in the regime where it certifies
+near-losslessness — is answerable from cells that already exist, which is exactly
+the situation in which post-hoc analysis is most tempting and least trustworthy.
+Hence this amendment.
+
+**Estimand.** For a regime (benchmark × budget), the *spread* of a set of
+policies under a protocol is the **mean absolute pairwise difference** of their
+per-problem accuracies, paired on the problem. Max-minus-min is reported nowhere:
+with three or four presses it is a function of the two extreme cells alone and
+moves discontinuously when they swap.
+
+**Primary reported quantity: the DIFFERENCE** (free-run spread − readout spread),
+with a problem-clustered percentile CI over 2000 resamples, both spreads driven
+by the same bootstrap draw so the difference is paired. **The ratio is reported
+as descriptive only, with no interval**: in the saturated regime the readout
+spread approaches zero, and a ratio interval on a near-zero denominator is not an
+honest interval.
+
+**Secondary:** rank agreement — the fraction of press pairs ordered identically by
+the two protocols, with a readout tie against a free-run ordering counted as
+disagreement, since that is the failure under study.
+
+**What this analysis may and may not claim.** It compares readout to readout and
+free-run to free-run on the same problems, so the off-policy caveat attaching to
+the trajectory residual does not apply to it. It may not be stated as "readout
+cannot rank policies": that is **false in general**, and our own MATH-500 budget-256
+cell is the counterexample. The claim is specific to the saturated regime.
+
+**Result, recorded here as read (artifacts under
+`results/diag/amendment-k/classb/resolution_*.json`, seed 0, 2000 resamples):**
+
+| regime | free-run spread | readout spread | difference (95% CI) | ratio | rank agreement |
+|---|---|---|---|---|---|
+| MATH-500 @256 | 0.1704 | 0.1328 | +0.0376 [−0.0117, +0.0837] | 0.779 | 6/6 |
+| MATH-500 @2048 | 0.0283 | 0.0033 | +0.0250 [+0.0067, +0.0467] | 0.118 | 1/3 |
+| AIME-24 @2048 | 0.1012 | 0.0000 | +0.1012 [+0.0357, +0.1786] | 0.000 | 0/3 |
+
+At budget 256 the difference **spans zero and rank agreement is perfect**: readout
+retains essentially full resolution in the regime where it reports large damage.
+At the two near-lossless cells the difference **excludes zero** and rank agreement
+falls to 1/3 and then 0/3. The monotone ordering of the ratio (0.78 → 0.12 → 0.00)
+is descriptive; the two collapse cells are what carry statistical weight.
+
+**Confirmatory follow-up, pre-registered now.** The budget 512 and 1024 cells
+described in the queue have not been run. Before they are, we pre-commit the
+prediction this analysis generates: **the readout-to-free-run spread ratio at 512
+and 1024 will fall strictly between the 256 value (0.78) and the 2048 value
+(0.12), and the spread difference will move from spanning zero toward excluding
+it as budget rises.** If the ratio at 512 or 1024 falls outside [0.12, 0.78], or
+the ordering is non-monotone in budget, the gradual-collapse reading is refuted
+and we will report it as such rather than reinterpreting. This converts the
+present post-hoc observation into a prediction testable on data that does not yet
+exist, which is worth more than the cells themselves.

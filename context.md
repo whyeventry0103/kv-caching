@@ -18,6 +18,40 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ UNIT 6 (2026-07-28) — THE RESOLUTION COLLAPSE IS REAL AND MEASURED;
+  B.9's reframe gate PASSES.** New §4.1 `sec:resolution` + `tab:resolution`,
+  PREREGISTRATION **Amendment L** (declares it post-hoc *before* the write-up
+  and pre-commits the confirmatory 512/1024 prediction).
+
+  | regime | free spread | readout spread | difference (95% CI) | ratio | rank agr |
+  |---|---|---|---|---|---|
+  | MATH@256 | 0.1704 | 0.1328 | +0.0376 [−0.0117, +0.0837] spans 0 | 0.78 | **6/6** |
+  | MATH@2048 | 0.0283 | 0.0033 | +0.0250 [+0.0067, +0.0467] **excl 0** | 0.12 | 1/3 |
+  | AIME@2048 | 0.1012 | 0.0000 | +0.1012 [+0.0357, +0.1786] **excl 0** | 0.00 | 0/3 |
+
+  Readout keeps **full** resolution where it reports damage (ranks all 6 pairs
+  right at 256) and goes blind where it certifies near-losslessness. Monotone
+  ratio, both collapse cells exclude zero → gate passes. The narrow statement is
+  the strong one: "readout cannot rank policies" is **false in general** and our
+  own 256 cell refutes it; the claim is specific to the saturated regime.
+  Statistic: mean **absolute pairwise** difference (max−min is unstable at 3–4
+  presses); **the difference carries the CI, the ratio is descriptive only** (a
+  ratio CI on a near-zero denominator is not honest).
+
+  **★★★ UNIT 5.1 — the method-invariance support was inadmissible, and the
+  replacement holds.** The paper set a cross-policy residual *spread* (paired)
+  against marginal CI half-widths ≈0.07 (unpaired) — not comparable in either
+  direction. Paired per-problem test (`paired_residual_contrast`, artifact
+  `classb/residual_contrast_256.json`, 100/100 problems on all four cells):
+  mean |pairwise diff| **0.038** [0.020, 0.094], and **0 of 6 pairwise contrasts
+  exclude zero**. Trio diffs 0.003–0.008; the biggest gap in the paper (R-KV vs H2O,
+  −0.075) still spans zero at [−0.158, 0.000]. So the claim **survives**, but as
+  a non-detection at n=100, not a demonstration of equality — and the paper now
+  says exactly that. Note the per-problem residual is `free − readout`, so
+  **Acc_FC cancels exactly** — this contrast is immune to the Amendment K
+  reference choice.
+  Gates: lint, **197 tests**, audit --strict 0, PDF ×2 (0 `^!`, 1 Overfull, 22pp).
+
   **★★★★★ UNIT 4 (2026-07-27) — output path closed. BOTH documents at zero
   unsourced; `make audit` is the gate.**
   **(1) The last literal surface is gone.** `make_paper_figures.py` held `FC`,

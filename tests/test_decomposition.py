@@ -116,3 +116,122 @@ def test_paired_policy_contrast_histogram_is_a_sufficient_statistic():
     assert histogram == sorted(histogram)
     assert dict(histogram)[-1.0] == 1  # p3: 0.0 - 1.0
     assert dict(histogram)[0.0] == 1  # p2: tie
+
+
+def test_paired_residual_contrast_identical_presses_give_zero():
+    from kvcache.stats import paired_residual_contrast
+
+    r = {"a": {"p1": -0.3, "p2": -0.4}, "b": {"p1": -0.3, "p2": -0.4}}
+    got = paired_residual_contrast(r, n_resamples=200, seed=0)
+    assert got["mean_abs_pairwise_difference"] == pytest.approx(0.0)
+    assert got["pairs"]["a_vs_b"]["mean_difference"] == pytest.approx(0.0)
+    assert got["pairs"]["a_vs_b"]["excludes_zero"] is False
+
+
+def test_paired_residual_contrast_constant_offset_is_detected():
+    """Every problem shifted by the same amount: zero paired variance, so the
+    CI collapses onto the offset and the difference is unambiguous -- exactly
+    the case an unpaired comparison of wide marginal CIs would call a tie."""
+    from kvcache.stats import paired_residual_contrast
+
+    r = {
+        "a": {f"p{i}": -0.30 for i in range(20)},
+        "b": {f"p{i}": -0.35 for i in range(20)},
+    }
+    got = paired_residual_contrast(r, n_resamples=200, seed=0)
+    pair = got["pairs"]["a_vs_b"]
+    assert pair["mean_difference"] == pytest.approx(0.05)
+    assert pair["ci95"][0] == pytest.approx(0.05)
+    assert pair["ci95"][1] == pytest.approx(0.05)
+    assert pair["excludes_zero"] is True
+
+
+def test_paired_residual_contrast_pairs_on_common_problems_only():
+    from kvcache.stats import paired_residual_contrast
+
+    r = {"a": {"p1": -0.3, "p2": -0.4, "p3": -0.5}, "b": {"p1": -0.3, "p2": -0.4}}
+    got = paired_residual_contrast(r, n_resamples=50, seed=0)
+    assert got["n_problems"] == 2
+
+
+def test_paired_residual_contrast_needs_two_presses():
+    from kvcache.stats import paired_residual_contrast
+
+    with pytest.raises(ValueError, match="at least two"):
+        paired_residual_contrast({"a": {"p1": -0.3}}, n_resamples=10)
+
+
+def test_paired_residual_contrast_mapd_is_not_max_minus_min():
+    """With three presses at -0.30/-0.34/-0.38 the pairwise gaps are
+    0.04/0.04/0.08, mean 0.0533 -- max-min alone would report 0.08 and be
+    driven entirely by the two extreme cells."""
+    from kvcache.stats import paired_residual_contrast
+
+    r = {
+        "a": {f"p{i}": -0.30 for i in range(10)},
+        "b": {f"p{i}": -0.34 for i in range(10)},
+        "c": {f"p{i}": -0.38 for i in range(10)},
+    }
+    got = paired_residual_contrast(r, n_resamples=50, seed=0)
+    assert got["mean_abs_pairwise_difference"] == pytest.approx(0.053333, abs=1e-5)
+    assert got["n_pairs_excluding_zero"] == 3
+
+
+def test_resolution_spread_collapses_when_readout_cannot_separate():
+    """The AIME case in miniature: free-running separates the presses, readout
+    gives every press the same score. The difference must be the free-run
+    spread exactly, and rank agreement must NOT be credited for the ties."""
+    from kvcache.stats import resolution_spread
+
+    pids = [f"p{i}" for i in range(20)]
+    free = {
+        "a": {p: 1.0 for p in pids},
+        "b": {p: 0.5 for p in pids},
+        "c": {p: 0.0 for p in pids},
+    }
+    readout = {name: {p: 0.5 for p in pids} for name in "abc"}
+    got = resolution_spread(free, readout, n_resamples=100, seed=0)
+    assert got["readout_spread"] == pytest.approx(0.0)
+    assert got["free_run_spread"] == pytest.approx(0.6666667, abs=1e-6)
+    assert got["spread_difference"] == pytest.approx(0.6666667, abs=1e-6)
+    assert got["spread_ratio_descriptive"] == pytest.approx(0.0)
+    assert got["rank_agreement"] == pytest.approx(0.0)
+
+
+def test_resolution_spread_is_zero_when_both_protocols_agree():
+    from kvcache.stats import resolution_spread
+
+    pids = [f"p{i}" for i in range(20)]
+    table = {
+        "a": {p: 1.0 for p in pids},
+        "b": {p: 0.5 for p in pids},
+    }
+    got = resolution_spread(table, table, n_resamples=100, seed=0)
+    assert got["spread_difference"] == pytest.approx(0.0)
+    assert got["spread_difference_excludes_zero"] is False
+    assert got["rank_agreement"] == pytest.approx(1.0)
+    assert got["spread_ratio_descriptive"] == pytest.approx(1.0)
+
+
+def test_resolution_spread_uses_mean_abs_pairwise_not_max_min():
+    from kvcache.stats import resolution_spread
+
+    pids = [f"p{i}" for i in range(10)]
+    free = {
+        "a": {p: 1.0 for p in pids},
+        "b": {p: 0.9 for p in pids},
+        "c": {p: 0.0 for p in pids},
+    }
+    got = resolution_spread(free, free, n_resamples=50, seed=0)
+    # gaps 0.1, 1.0, 0.9 -> mean 0.6667; max-min would say 1.0
+    assert got["free_run_spread"] == pytest.approx(0.6666667, abs=1e-6)
+
+
+def test_resolution_spread_flags_itself_post_hoc():
+    """The label is part of the result, not something a caller may forget."""
+    from kvcache.stats import resolution_spread
+
+    pids = [f"p{i}" for i in range(5)]
+    t = {"a": {p: 1.0 for p in pids}, "b": {p: 0.0 for p in pids}}
+    got = resolution_spread(t, t, n_resamples=20, seed=0)
+    assert "post-hoc" in got["analysis_status"]

@@ -215,3 +215,211 @@ def paired_policy_contrast(
             [value, histogram[value]] for value in sorted(histogram)
         ],
     }
+
+
+def paired_residual_contrast(
+    residuals_by_press: Mapping[str, Mapping[str, float]],
+    *,
+    n_resamples: int = 2000,
+    seed: int = 0,
+) -> dict[str, Any]:
+    """Paired per-problem contrast of the trajectory residual across presses.
+
+    The paper reports that the forward residual is of similar magnitude for
+    every policy tested, and supports it with a cross-policy *spread* (0.008)
+    set against CI half-widths of roughly 0.07. That comparison is not
+    admissible: the spread is a difference between policies measured on the
+    same 100 problems, while the half-widths are unpaired accuracy intervals.
+    A difference of paired quantities has far lower variance than the
+    difference of their marginal intervals suggests, so the spread could be
+    either much better or much worse supported than it looks. Pairing on the
+    problem is what makes the question answerable at all.
+
+    The per-problem residual is ``free - readout`` on that problem. The
+    full-cache reference cancels out of it exactly -- residual is
+    ``(free - Acc_FC) - (readout - Acc_FC)`` -- which is why this contrast is
+    insensitive to the reference-population choice that Amendment K corrected,
+    and therefore a clean way to ask whether the policies really differ.
+
+    Returns the pairwise differences, each with a problem-clustered percentile
+    CI, plus the mean absolute pairwise difference as a single summary. Seed,
+    resample count and the per-pair difference histogram travel with the result
+    for the same reason as in :func:`paired_policy_contrast`.
+    """
+    presses = sorted(residuals_by_press)
+    if len(presses) < 2:
+        raise ValueError("need at least two presses to contrast")
+    common = set.intersection(*(set(residuals_by_press[p]) for p in presses))
+    if not common:
+        raise ValueError("no problems in common across the presses")
+    problems = sorted(common)
+    rng = random.Random(seed)
+    k = len(problems)
+    # One resampling of problems drives every pair, so the pairs are compared
+    # on the same bootstrap draws rather than on independent ones.
+    draws = [[rng.randrange(k) for _ in range(k)] for _ in range(n_resamples)]
+
+    pairs: dict[str, Any] = {}
+    for i, a in enumerate(presses):
+        for b in presses[i + 1 :]:
+            diffs = [
+                residuals_by_press[a][pid] - residuals_by_press[b][pid]
+                for pid in problems
+            ]
+            means = sorted(statistics.fmean(diffs[j] for j in draw) for draw in draws)
+            lo = means[int(0.025 * (n_resamples - 1))]
+            hi = means[int(0.975 * (n_resamples - 1))]
+            histogram = collections.Counter(round(d, 6) for d in diffs)
+            pairs[f"{a}_vs_{b}"] = {
+                "mean_difference": statistics.fmean(diffs),
+                "ci95": [lo, hi],
+                "excludes_zero": (lo > 0.0) or (hi < 0.0),
+                "difference_histogram": [
+                    [value, histogram[value]] for value in sorted(histogram)
+                ],
+            }
+
+    # Mean absolute pairwise difference: stable at 3-4 presses in a way max-min
+    # is not, since max-min is driven by the two most extreme cells alone.
+    def _mapd(index: Sequence[int]) -> float:
+        vals = []
+        for i, a in enumerate(presses):
+            for b in presses[i + 1 :]:
+                vals.append(
+                    abs(
+                        statistics.fmean(
+                            residuals_by_press[a][problems[j]]
+                            - residuals_by_press[b][problems[j]]
+                            for j in index
+                        )
+                    )
+                )
+        return statistics.fmean(vals)
+
+    observed = _mapd(list(range(k)))
+    spread_means = sorted(_mapd(draw) for draw in draws)
+    return {
+        "presses": presses,
+        "n_problems": k,
+        "mean_abs_pairwise_difference": observed,
+        "mean_abs_pairwise_difference_ci95": [
+            spread_means[int(0.025 * (n_resamples - 1))],
+            spread_means[int(0.975 * (n_resamples - 1))],
+        ],
+        "pairs": pairs,
+        "n_pairs_excluding_zero": sum(1 for p in pairs.values() if p["excludes_zero"]),
+        "seed": seed,
+        "n_resamples": n_resamples,
+    }
+
+
+def resolution_spread(
+    free_by_press: Mapping[str, Mapping[str, float]],
+    readout_by_press: Mapping[str, Mapping[str, float]],
+    *,
+    n_resamples: int = 2000,
+    seed: int = 0,
+) -> dict[str, Any]:
+    """How much policy separation survives held-trace evaluation, per regime.
+
+    POST-HOC. This analysis was formed after every cell had been read; it is
+    exploratory and labelled as such wherever it appears (PREREGISTRATION
+    Amendment L). Stating that plainly is the price of running it at all.
+
+    The question is whether readout-style evaluation can *rank* policies, and
+    the honest form of it is a comparison of spreads: how far apart the presses
+    sit under free-running versus under readout, on the same problems. Both are
+    accuracy-scale quantities measured on the same conditions, so this compares
+    readout to readout and free-run to free-run -- no off-policy caveat applies.
+
+    Design choices that matter:
+
+    * The spread is the **mean absolute pairwise difference**, not max minus
+      min. With three or four presses, max-min is a function of the two extreme
+      cells alone and moves discontinuously when they swap.
+    * The reported quantity is the **difference** of the two spreads, with a
+      percentile CI. The ratio is descriptive only: at the saturated end the
+      readout spread approaches zero, and a ratio CI on a near-zero denominator
+      is not an honest interval.
+    * Bootstrap resamples problems (the sampling unit used throughout) and
+      drives both spreads from the same draw, so the difference is paired.
+
+    ``rank_agreement`` is the fraction of press pairs ordered the same way by
+    both protocols, which distinguishes "readout ranks them differently" from
+    "readout cannot separate them at all".
+    """
+    presses = sorted(set(free_by_press) & set(readout_by_press))
+    if len(presses) < 2:
+        raise ValueError("need at least two presses")
+    common = set.intersection(
+        *(
+            [set(free_by_press[p]) for p in presses]
+            + [set(readout_by_press[p]) for p in presses]
+        )
+    )
+    if not common:
+        raise ValueError("no problems in common")
+    problems = sorted(common)
+    k = len(problems)
+
+    def _spread(
+        table: Mapping[str, Mapping[str, float]], index: Sequence[int]
+    ) -> float:
+        vals = []
+        for i, a in enumerate(presses):
+            for b in presses[i + 1 :]:
+                vals.append(
+                    abs(
+                        statistics.fmean(
+                            table[a][problems[j]] - table[b][problems[j]] for j in index
+                        )
+                    )
+                )
+        return statistics.fmean(vals)
+
+    whole = list(range(k))
+    free_spread = _spread(free_by_press, whole)
+    readout_spread = _spread(readout_by_press, whole)
+
+    rng = random.Random(seed)
+    draws = [[rng.randrange(k) for _ in range(k)] for _ in range(n_resamples)]
+    diffs = sorted(
+        _spread(free_by_press, draw) - _spread(readout_by_press, draw) for draw in draws
+    )
+    lo = diffs[int(0.025 * (n_resamples - 1))]
+    hi = diffs[int(0.975 * (n_resamples - 1))]
+
+    # Rank agreement over press pairs, ties counted as agreement only when both
+    # protocols tie -- a readout tie against a free-run ordering is exactly the
+    # failure this analysis is about.
+    agree = 0
+    total = 0
+    for i, a in enumerate(presses):
+        for b in presses[i + 1 :]:
+            fa = statistics.fmean(free_by_press[a][p] for p in problems)
+            fb = statistics.fmean(free_by_press[b][p] for p in problems)
+            ra = statistics.fmean(readout_by_press[a][p] for p in problems)
+            rb = statistics.fmean(readout_by_press[b][p] for p in problems)
+            total += 1
+            if ((fa > fb) and (ra > rb)) or ((fa < fb) and (ra < rb)):
+                agree += 1
+            elif (fa == fb) and (ra == rb):
+                agree += 1
+
+    return {
+        "presses": presses,
+        "n_problems": k,
+        "free_run_spread": free_spread,
+        "readout_spread": readout_spread,
+        "spread_difference": free_spread - readout_spread,
+        "spread_difference_ci95": [lo, hi],
+        "spread_difference_excludes_zero": (lo > 0.0) or (hi < 0.0),
+        "spread_ratio_descriptive": (
+            readout_spread / free_spread if free_spread > 0 else None
+        ),
+        "rank_agreement": agree / total if total else None,
+        "n_press_pairs": total,
+        "seed": seed,
+        "n_resamples": n_resamples,
+        "analysis_status": "post-hoc, exploratory (PREREGISTRATION Amendment L)",
+    }

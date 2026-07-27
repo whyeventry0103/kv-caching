@@ -1,0 +1,332 @@
+{
+  "benchmark": "math500",
+  "budget": "256",
+  "coverage": {
+    "h2o": {
+      "n_problems_free": 100,
+      "n_problems_readout_defined": 100,
+      "n_problems_used": 100
+    },
+    "random": {
+      "n_problems_free": 100,
+      "n_problems_readout_defined": 100,
+      "n_problems_used": 100
+    },
+    "rkv": {
+      "n_problems_free": 100,
+      "n_problems_readout_defined": 100,
+      "n_problems_used": 100
+    },
+    "streamingllm": {
+      "n_problems_free": 100,
+      "n_problems_readout_defined": 100,
+      "n_problems_used": 100
+    }
+  },
+  "mean_abs_pairwise_difference": 0.03847222222222222,
+  "mean_abs_pairwise_difference_ci95": [
+    0.02,
+    0.09375
+  ],
+  "n_pairs_excluding_zero": 0,
+  "n_problems": 100,
+  "n_resamples": 2000,
+  "note": "Per-problem residual = free - readout; the full-cache reference cancels, so this contrast is independent of the Amendment K reference choice. Report a pair as differing only if its paired CI excludes zero -- the marginal accuracy CIs are not the right comparison for a paired quantity.",
+  "pairs": {
+    "h2o_vs_random": {
+      "ci95": [
+        -0.095,
+        0.07916666666666666
+      ],
+      "difference_histogram": [
+        [
+          -1.25,
+          1
+        ],
+        [
+          -1.0,
+          1
+        ],
+        [
+          -0.75,
+          7
+        ],
+        [
+          -0.5,
+          10
+        ],
+        [
+          -0.25,
+          16
+        ],
+        [
+          0.0,
+          32
+        ],
+        [
+          0.25,
+          15
+        ],
+        [
+          0.5,
+          9
+        ],
+        [
+          0.666667,
+          1
+        ],
+        [
+          0.75,
+          5
+        ],
+        [
+          1.0,
+          3
+        ]
+      ],
+      "excludes_zero": false,
+      "mean_difference": -0.008333333333333333
+    },
+    "h2o_vs_rkv": {
+      "ci95": [
+        -0.1575,
+        0.0
+      ],
+      "difference_histogram": [
+        [
+          -1.0,
+          5
+        ],
+        [
+          -0.75,
+          3
+        ],
+        [
+          -0.5,
+          13
+        ],
+        [
+          -0.25,
+          16
+        ],
+        [
+          0.0,
+          38
+        ],
+        [
+          0.25,
+          13
+        ],
+        [
+          0.5,
+          8
+        ],
+        [
+          0.75,
+          4
+        ]
+      ],
+      "excludes_zero": false,
+      "mean_difference": -0.075
+    },
+    "h2o_vs_streamingllm": {
+      "ci95": [
+        -0.08,
+        0.0775
+      ],
+      "difference_histogram": [
+        [
+          -1.0,
+          1
+        ],
+        [
+          -0.75,
+          6
+        ],
+        [
+          -0.5,
+          9
+        ],
+        [
+          -0.25,
+          16
+        ],
+        [
+          0.0,
+          38
+        ],
+        [
+          0.25,
+          14
+        ],
+        [
+          0.5,
+          8
+        ],
+        [
+          0.75,
+          7
+        ],
+        [
+          1.0,
+          1
+        ]
+      ],
+      "excludes_zero": false,
+      "mean_difference": -0.0025
+    },
+    "random_vs_rkv": {
+      "ci95": [
+        -0.14333333333333334,
+        0.0075000000000000015
+      ],
+      "difference_histogram": [
+        [
+          -1.0,
+          1
+        ],
+        [
+          -0.75,
+          7
+        ],
+        [
+          -0.666667,
+          1
+        ],
+        [
+          -0.5,
+          12
+        ],
+        [
+          -0.25,
+          15
+        ],
+        [
+          0.0,
+          43
+        ],
+        [
+          0.25,
+          10
+        ],
+        [
+          0.5,
+          4
+        ],
+        [
+          0.75,
+          6
+        ],
+        [
+          1.0,
+          1
+        ]
+      ],
+      "excludes_zero": false,
+      "mean_difference": -0.06666666666666667
+    },
+    "random_vs_streamingllm": {
+      "ci95": [
+        -0.07833333333333332,
+        0.08833333333333333
+      ],
+      "difference_histogram": [
+        [
+          -1.0,
+          2
+        ],
+        [
+          -0.75,
+          8
+        ],
+        [
+          -0.666667,
+          1
+        ],
+        [
+          -0.5,
+          9
+        ],
+        [
+          -0.25,
+          16
+        ],
+        [
+          0.0,
+          22
+        ],
+        [
+          0.25,
+          20
+        ],
+        [
+          0.5,
+          16
+        ],
+        [
+          0.75,
+          5
+        ],
+        [
+          1.0,
+          1
+        ]
+      ],
+      "excludes_zero": false,
+      "mean_difference": 0.005833333333333334
+    },
+    "rkv_vs_streamingllm": {
+      "ci95": [
+        -0.02,
+        0.165
+      ],
+      "difference_histogram": [
+        [
+          -1.0,
+          6
+        ],
+        [
+          -0.75,
+          3
+        ],
+        [
+          -0.5,
+          5
+        ],
+        [
+          -0.25,
+          13
+        ],
+        [
+          0.0,
+          32
+        ],
+        [
+          0.25,
+          17
+        ],
+        [
+          0.5,
+          9
+        ],
+        [
+          0.75,
+          10
+        ],
+        [
+          1.0,
+          5
+        ]
+      ],
+      "excludes_zero": false,
+      "mean_difference": 0.0725
+    }
+  },
+  "presses": [
+    "h2o",
+    "random",
+    "rkv",
+    "streamingllm"
+  ],
+  "seed": 0
+}

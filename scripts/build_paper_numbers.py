@@ -368,6 +368,90 @@ def build_catalogue() -> list[Entry]:
                 "windowed mean per-step TV (step-pooled estimator)",
             )
 
+    # Resolution collapse (Amendment L, POST-HOC). One artifact per regime.
+    for label, fname in (
+        ("res256", "resolution_math500_256.json"),
+        ("res2048", "resolution_math500_2048.json"),
+        ("resaime", "resolution_aime24_2048.json"),
+    ):
+        path = CLASSB / fname
+        rel = path.relative_to(PROJECT_ROOT)
+        payload = _load(path)
+        for field_name, key, desc in (
+            ("free_run_spread", "free_spread", "mean abs pairwise free-run difference"),
+            (
+                "readout_spread",
+                "readout_spread",
+                "mean abs pairwise readout difference",
+            ),
+            ("spread_difference", "difference", "free-run spread minus readout spread"),
+            (
+                "rank_agreement",
+                "rank_agreement",
+                "fraction of press pairs ordered alike",
+            ),
+        ):
+            add(
+                f"{label}.{key}",
+                payload[field_name],
+                f"{rel}#/{field_name}",
+                desc,
+            )
+        for i, bound in enumerate(payload["spread_difference_ci95"]):
+            add(
+                f"{label}.difference_ci{i}",
+                bound,
+                f"{rel}#/spread_difference_ci95/{i}",
+                "problem-clustered 95% CI on the spread difference",
+            )
+        # Percentage form of the descriptive ratio, catalogued explicitly.
+        add(
+            f"{label}.ratio_pct",
+            100.0 * payload["spread_ratio_descriptive"],
+            f"{rel}#/spread_ratio_descriptive",
+            "readout spread as a percent of free-run spread (descriptive, no CI)",
+        )
+
+    # Paired cross-policy residual contrast. This supersedes the residual-spread
+    # argument: a spread is a paired quantity and was being set against unpaired
+    # marginal CI half-widths, which is not an admissible comparison in either
+    # direction.
+    rescon = _load(CLASSB / "residual_contrast_256.json")
+    rel = (CLASSB / "residual_contrast_256.json").relative_to(PROJECT_ROOT)
+    add(
+        "residual_contrast.mapd",
+        rescon["mean_abs_pairwise_difference"],
+        f"{rel}#/mean_abs_pairwise_difference",
+        "mean absolute pairwise residual difference, paired on the problem",
+    )
+    for i, bound in enumerate(rescon["mean_abs_pairwise_difference_ci95"]):
+        add(
+            f"residual_contrast.mapd_ci{i}",
+            bound,
+            f"{rel}#/mean_abs_pairwise_difference_ci95/{i}",
+            "problem-clustered 95% CI on the mean absolute pairwise difference",
+        )
+    add(
+        "residual_contrast.n_pairs_excluding_zero",
+        rescon["n_pairs_excluding_zero"],
+        f"{rel}#/n_pairs_excluding_zero",
+        "how many of the six paired contrasts exclude zero",
+    )
+    for name, pair in sorted(rescon["pairs"].items()):
+        add(
+            f"residual_contrast.{name}",
+            pair["mean_difference"],
+            f"{rel}#/pairs/{name}/mean_difference",
+            "paired per-problem residual difference",
+        )
+        for i, bound in enumerate(pair["ci95"]):
+            add(
+                f"residual_contrast.{name}.ci{i}",
+                bound,
+                f"{rel}#/pairs/{name}/ci95/{i}",
+                "problem-clustered 95% CI on the paired difference",
+            )
+
     contrast = _load(CLASSB / "policy_contrast_256.json")
     rel = (CLASSB / "policy_contrast_256.json").relative_to(PROJECT_ROOT)
     add(

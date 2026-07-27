@@ -1,0 +1,40 @@
+{
+  "analysis_status": "post-hoc, exploratory (PREREGISTRATION Amendment L)",
+  "benchmark": "aime24",
+  "budget": "2048",
+  "coverage": {
+    "random": {
+      "n_problems_free": 30,
+      "n_problems_readout_defined": 28
+    },
+    "rkv": {
+      "n_problems_free": 30,
+      "n_problems_readout_defined": 28
+    },
+    "streamingllm": {
+      "n_problems_free": 30,
+      "n_problems_readout_defined": 28
+    }
+  },
+  "free_run_spread": 0.10119047619047618,
+  "label": "aime24-2048",
+  "n_press_pairs": 3,
+  "n_problems": 28,
+  "n_resamples": 2000,
+  "note": "Readout spread vs free-run spread, mean absolute pairwise difference, paired on the problem. The DIFFERENCE carries the CI; the ratio is descriptive only, because at the saturated end the denominator approaches zero. Post-hoc: label exploratory wherever cited.",
+  "presses": [
+    "random",
+    "rkv",
+    "streamingllm"
+  ],
+  "rank_agreement": 0.0,
+  "readout_spread": 0.0,
+  "seed": 0,
+  "spread_difference": 0.10119047619047618,
+  "spread_difference_ci95": [
+    0.03571428571428571,
+    0.17857142857142858
+  ],
+  "spread_difference_excludes_zero": true,
+  "spread_ratio_descriptive": 0.0
+}
