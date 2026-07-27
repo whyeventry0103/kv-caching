@@ -59,6 +59,32 @@ def test_paired_policy_contrast_requires_common_problems():
         paired_policy_contrast({"a": [True]}, {"b": [True]})
 
 
+def test_percentile_ci_mc_error_separates_a_safe_margin_from_a_fragile_one():
+    """The point of the measurement: distinguish a real margin from a seed."""
+    from kvcache.stats import percentile_ci_mc_error
+
+    # Comfortably negative: every resample stays below zero.
+    safe = percentile_ci_mc_error([-0.9, -0.8, -0.85, -0.95] * 25, n_seeds=20)
+    assert safe["upper"]["max"] < 0
+    assert safe["upper"]["crosses_zero"] == 0
+    assert safe["upper"]["margin_sd"] is None or safe["upper"]["margin_sd"] > 3
+
+    # Straddling zero: the upper endpoint is positive regardless of seed.
+    fragile = percentile_ci_mc_error([-1.0, 1.0] * 50, n_seeds=20)
+    assert fragile["upper"]["max"] > 0
+    assert fragile["n_resamples"] == 2000
+    assert fragile["n_units"] == 100
+
+
+def test_percentile_ci_mc_error_rejects_an_empty_sample():
+    import pytest as _pytest
+
+    from kvcache.stats import percentile_ci_mc_error
+
+    with _pytest.raises(ValueError):
+        percentile_ci_mc_error([])
+
+
 def test_paired_policy_contrast_records_bootstrap_provenance():
     """A percentile CI with no recorded seed is not reproducible.
 

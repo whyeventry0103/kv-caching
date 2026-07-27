@@ -1,0 +1,13 @@
+{
+  "classifications": {
+    "correct": 19,
+    "genuine_wrong_or_ambiguous": 1
+  },
+  "grader_disagreements": 0,
+  "grader_false_negatives": 0,
+  "grader_false_positives": 0,
+  "grader_version": "hendrycks-is-equiv-v1",
+  "regraded_accuracy": 0.95,
+  "rows": 20,
+  "stored_accuracy": 0.95
+}

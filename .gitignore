@@ -5,7 +5,13 @@
 data/
 runs/
 logs/
-results/
+# Raw generations stay out; the report artifacts the paper's numbers trace to
+# come IN. paper_numbers.json points at results/diag/**, so keeping that
+# ignored would mean "every number traces to an artifact" was only true of a
+# bundle nobody has seen. A reviewer clones the repo, not the bundle.
+results/*
+!results/diag/
+*.log
 *.npy
 __pycache__/
 .pytest_cache/

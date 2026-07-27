@@ -1,0 +1,158 @@
+{
+  "cells": [
+    {
+      "budget": "2048",
+      "compressed_accuracy": 0.2833333333333333,
+      "compressed_accuracy_ci95": [
+        0.15,
+        0.425
+      ],
+      "compressed_correct": 34,
+      "full_accuracy": 0.37083333333333335,
+      "mean_auc_tv": null,
+      "mean_frac_above_p05": null,
+      "mean_frac_above_p10": null,
+      "mean_free_run_tokens": 10841.016666666666,
+      "mean_readout_tokens": 465.725,
+      "mean_summed_tv": null,
+      "n_problems": 30,
+      "n_readout_undefined": 27,
+      "n_reverse_readout": 0,
+      "onset_nonnull": null,
+      "press": "random",
+      "readout_accuracy": 0.46236559139784944,
+      "readout_accuracy_ci95": [
+        0.3274,
+        0.6607
+      ],
+      "readout_change": 0.09153225806451609,
+      "readout_correct": 43,
+      "residual_bracket": null,
+      "reverse_readout_accuracy": null,
+      "reverse_readout_change": null,
+      "reverse_residual_ci95": null,
+      "rows": 120,
+      "signed_flip_mass": {
+        "gained": 0.05,
+        "lost": 0.125,
+        "net": -0.075
+      },
+      "total_change": -0.08750000000000002,
+      "truncated": 37,
+      "truncation_rate": 0.30833333333333335,
+      "unexplained_residual": -0.17903225806451611,
+      "unexplained_residual_ci95": [
+        -0.3486,
+        -0.0762
+      ]
+    },
+    {
+      "budget": "2048",
+      "compressed_accuracy": 0.21666666666666667,
+      "compressed_accuracy_ci95": [
+        0.1,
+        0.3583
+      ],
+      "compressed_correct": 26,
+      "full_accuracy": 0.37083333333333335,
+      "mean_auc_tv": null,
+      "mean_frac_above_p05": null,
+      "mean_frac_above_p10": null,
+      "mean_free_run_tokens": 11836.566666666668,
+      "mean_readout_tokens": 480.85833333333335,
+      "mean_summed_tv": null,
+      "n_problems": 30,
+      "n_readout_undefined": 27,
+      "n_reverse_readout": 0,
+      "onset_nonnull": null,
+      "press": "rkv",
+      "readout_accuracy": 0.46236559139784944,
+      "readout_accuracy_ci95": [
+        0.3274,
+        0.6607
+      ],
+      "readout_change": 0.09153225806451609,
+      "readout_correct": 43,
+      "residual_bracket": null,
+      "reverse_readout_accuracy": null,
+      "reverse_readout_change": null,
+      "reverse_residual_ci95": null,
+      "rows": 120,
+      "signed_flip_mass": {
+        "gained": 0.016666666666666666,
+        "lost": 0.15833333333333333,
+        "net": -0.14166666666666666
+      },
+      "total_change": -0.15416666666666667,
+      "truncated": 54,
+      "truncation_rate": 0.45,
+      "unexplained_residual": -0.24569892473118277,
+      "unexplained_residual_ci95": [
+        -0.4194,
+        -0.1389
+      ]
+    },
+    {
+      "budget": "2048",
+      "compressed_accuracy": 0.14166666666666666,
+      "compressed_accuracy_ci95": [
+        0.0417,
+        0.2583
+      ],
+      "compressed_correct": 17,
+      "full_accuracy": 0.37083333333333335,
+      "mean_auc_tv": null,
+      "mean_frac_above_p05": null,
+      "mean_frac_above_p10": null,
+      "mean_free_run_tokens": 10215.741666666667,
+      "mean_readout_tokens": 454.9166666666667,
+      "mean_summed_tv": null,
+      "n_problems": 30,
+      "n_readout_undefined": 27,
+      "n_reverse_readout": 0,
+      "onset_nonnull": null,
+      "press": "streamingllm",
+      "readout_accuracy": 0.46236559139784944,
+      "readout_accuracy_ci95": [
+        0.3274,
+        0.6607
+      ],
+      "readout_change": 0.09153225806451609,
+      "readout_correct": 43,
+      "residual_bracket": null,
+      "reverse_readout_accuracy": null,
+      "reverse_readout_change": null,
+      "reverse_residual_ci95": null,
+      "rows": 120,
+      "signed_flip_mass": {
+        "gained": 0.016666666666666666,
+        "lost": 0.23333333333333334,
+        "net": -0.21666666666666667
+      },
+      "total_change": -0.22916666666666669,
+      "truncated": 28,
+      "truncation_rate": 0.23333333333333334,
+      "unexplained_residual": -0.3206989247311828,
+      "unexplained_residual_ci95": [
+        -0.5086,
+        -0.2015
+      ]
+    }
+  ],
+  "claim_discipline": "Residual is accuracy change unexplained by on-reference readout, not a measured cause.",
+  "full_cache": {
+    "accuracy": 0.37083333333333335,
+    "correct": 89,
+    "rows": 240,
+    "truncated": 53
+  },
+  "runs": {
+    "compression": "/home/sk10741/kvcache-storage/runs/grid-aime24-2048",
+    "fullcache": "/home/sk10741/kvcache-storage/runs/fc-aime24",
+    "readout": [
+      "/home/sk10741/kvcache-storage/runs/readout-aime24-2048"
+    ],
+    "replay": null,
+    "reverse_readout": null
+  }
+}

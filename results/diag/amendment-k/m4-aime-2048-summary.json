@@ -1,0 +1,237 @@
+{
+  "cells": [
+    {
+      "budget": "2048",
+      "compressed_accuracy": 0.2833333333333333,
+      "compressed_accuracy_ci95": [
+        0.15,
+        0.425
+      ],
+      "compressed_correct": 34,
+      "full_accuracy": 0.35833333333333334,
+      "full_accuracy_all_rows": 0.37083333333333335,
+      "mean_auc_tv": null,
+      "mean_frac_above_p05": null,
+      "mean_frac_above_p10": null,
+      "mean_free_run_tokens": 10841.016666666666,
+      "mean_readout_tokens": 465.725,
+      "mean_summed_tv": null,
+      "n_problems": 30,
+      "n_readout_undefined": 27,
+      "n_reverse_readout": 0,
+      "onset_nonnull": null,
+      "press": "random",
+      "primary_bounds": {
+        "readout_accuracy": [
+          0.35833333333333334,
+          0.5833333333333334
+        ],
+        "readout_change": [
+          0.0,
+          0.22500000000000003
+        ],
+        "residual": [
+          -0.30000000000000004,
+          -0.07500000000000001
+        ],
+        "residual_bracket": null,
+        "reverse_change": null,
+        "reverse_readout_accuracy": null
+      },
+      "readout_accuracy": 0.46236559139784944,
+      "readout_accuracy_ci95": [
+        0.3274,
+        0.6607
+      ],
+      "readout_change": 0.0,
+      "readout_correct": 43,
+      "reference_population": {
+        "fc_accuracy_cell": 0.35833333333333334,
+        "fc_accuracy_readout_defined": 0.46236559139784944,
+        "fc_accuracy_reverse_defined": null,
+        "n_conditions": 120,
+        "n_readout_defined": 93,
+        "n_reverse_defined": 0
+      },
+      "residual_bracket": null,
+      "reverse_readout_accuracy": null,
+      "reverse_readout_change": null,
+      "reverse_residual_ci95": null,
+      "rows": 120,
+      "signed_flip_mass": {
+        "gained": 0.05,
+        "lost": 0.125,
+        "net": -0.075
+      },
+      "total_change": -0.07500000000000001,
+      "truncated": 37,
+      "truncation_rate": 0.30833333333333335,
+      "unexplained_residual": -0.11827956989247307,
+      "unexplained_residual_ci95": [
+        -0.3276,
+        -0.0506
+      ]
+    },
+    {
+      "budget": "2048",
+      "compressed_accuracy": 0.21666666666666667,
+      "compressed_accuracy_ci95": [
+        0.1,
+        0.3583
+      ],
+      "compressed_correct": 26,
+      "full_accuracy": 0.35833333333333334,
+      "full_accuracy_all_rows": 0.37083333333333335,
+      "mean_auc_tv": null,
+      "mean_frac_above_p05": null,
+      "mean_frac_above_p10": null,
+      "mean_free_run_tokens": 11836.566666666668,
+      "mean_readout_tokens": 480.85833333333335,
+      "mean_summed_tv": null,
+      "n_problems": 30,
+      "n_readout_undefined": 27,
+      "n_reverse_readout": 0,
+      "onset_nonnull": null,
+      "press": "rkv",
+      "primary_bounds": {
+        "readout_accuracy": [
+          0.35833333333333334,
+          0.5833333333333334
+        ],
+        "readout_change": [
+          0.0,
+          0.22500000000000003
+        ],
+        "residual": [
+          -0.3666666666666667,
+          -0.14166666666666666
+        ],
+        "residual_bracket": null,
+        "reverse_change": null,
+        "reverse_readout_accuracy": null
+      },
+      "readout_accuracy": 0.46236559139784944,
+      "readout_accuracy_ci95": [
+        0.3274,
+        0.6607
+      ],
+      "readout_change": 0.0,
+      "readout_correct": 43,
+      "reference_population": {
+        "fc_accuracy_cell": 0.35833333333333334,
+        "fc_accuracy_readout_defined": 0.46236559139784944,
+        "fc_accuracy_reverse_defined": null,
+        "n_conditions": 120,
+        "n_readout_defined": 93,
+        "n_reverse_defined": 0
+      },
+      "residual_bracket": null,
+      "reverse_readout_accuracy": null,
+      "reverse_readout_change": null,
+      "reverse_residual_ci95": null,
+      "rows": 120,
+      "signed_flip_mass": {
+        "gained": 0.016666666666666666,
+        "lost": 0.15833333333333333,
+        "net": -0.14166666666666666
+      },
+      "total_change": -0.14166666666666666,
+      "truncated": 54,
+      "truncation_rate": 0.45,
+      "unexplained_residual": -0.1935483870967742,
+      "unexplained_residual_ci95": [
+        -0.4023,
+        -0.125
+      ]
+    },
+    {
+      "budget": "2048",
+      "compressed_accuracy": 0.14166666666666666,
+      "compressed_accuracy_ci95": [
+        0.0417,
+        0.2583
+      ],
+      "compressed_correct": 17,
+      "full_accuracy": 0.35833333333333334,
+      "full_accuracy_all_rows": 0.37083333333333335,
+      "mean_auc_tv": null,
+      "mean_frac_above_p05": null,
+      "mean_frac_above_p10": null,
+      "mean_free_run_tokens": 10215.741666666667,
+      "mean_readout_tokens": 454.9166666666667,
+      "mean_summed_tv": null,
+      "n_problems": 30,
+      "n_readout_undefined": 27,
+      "n_reverse_readout": 0,
+      "onset_nonnull": null,
+      "press": "streamingllm",
+      "primary_bounds": {
+        "readout_accuracy": [
+          0.35833333333333334,
+          0.5833333333333334
+        ],
+        "readout_change": [
+          0.0,
+          0.22500000000000003
+        ],
+        "residual": [
+          -0.4416666666666667,
+          -0.21666666666666667
+        ],
+        "residual_bracket": null,
+        "reverse_change": null,
+        "reverse_readout_accuracy": null
+      },
+      "readout_accuracy": 0.46236559139784944,
+      "readout_accuracy_ci95": [
+        0.3274,
+        0.6607
+      ],
+      "readout_change": 0.0,
+      "readout_correct": 43,
+      "reference_population": {
+        "fc_accuracy_cell": 0.35833333333333334,
+        "fc_accuracy_readout_defined": 0.46236559139784944,
+        "fc_accuracy_reverse_defined": null,
+        "n_conditions": 120,
+        "n_readout_defined": 93,
+        "n_reverse_defined": 0
+      },
+      "residual_bracket": null,
+      "reverse_readout_accuracy": null,
+      "reverse_readout_change": null,
+      "reverse_residual_ci95": null,
+      "rows": 120,
+      "signed_flip_mass": {
+        "gained": 0.016666666666666666,
+        "lost": 0.23333333333333334,
+        "net": -0.21666666666666667
+      },
+      "total_change": -0.21666666666666667,
+      "truncated": 28,
+      "truncation_rate": 0.23333333333333334,
+      "unexplained_residual": -0.27956989247311825,
+      "unexplained_residual_ci95": [
+        -0.4914,
+        -0.1815
+      ]
+    }
+  ],
+  "claim_discipline": "Residual is accuracy change unexplained by on-reference readout, not a measured cause. Top-level cell values are COMPLETE-CASE (Amendment K layer 2): each change is measured against the reference restricted to the same conditions. Boundary detection is post-treatment, so the primary estimand is `primary_bounds` (layer 1: the full cell population, undefined rows imputed both ways). Never subtract a global bank mean from a subset accuracy.",
+  "full_cache": {
+    "accuracy": 0.37083333333333335,
+    "correct": 89,
+    "rows": 240,
+    "truncated": 53
+  },
+  "reference_convention": "amendment-k-cell-population",
+  "runs": {
+    "compression": "/home/sk10741/kvcache-storage/runs/grid-aime24-2048",
+    "fullcache": "/home/sk10741/kvcache-storage/runs/fc-aime24",
+    "readout": [
+      "/home/sk10741/kvcache-storage/runs/readout-aime24-2048"
+    ],
+    "replay": null,
+    "reverse_readout": null
+  }
+}

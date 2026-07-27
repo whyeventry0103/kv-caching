@@ -151,9 +151,23 @@ def main() -> int:
         f"({sum(1 for e in catalogue if e.kind == 'derived')} derived)"
     )
     print(f"documents : {', '.join(d.name for d in args.documents)}")
+    # State the counting basis in the output. Three mutually inconsistent totals
+    # for "the number of literals" were once in circulation at the same time,
+    # because occurrences, distinct values, and a sourced-count that also
+    # counted the stale subset were all reported as if they were the same
+    # quantity. These counts are now part of the paper's provenance story, so
+    # the definition travels with them.
+    distinct = len({lit.raw for lit in literals})
+    print(
+        f"basis     : OCCURRENCES of numeric literals in the stripped text "
+        f"({distinct} distinct raw forms); buckets below partition the total"
+    )
     print(f"literals  : {report['total']}")
     for name, count in report["by_classification"].items():
         print(f"  {name:<12} {count:>5}")
+    total_check = sum(report["by_classification"].values())
+    if total_check != report["total"]:  # pragma: no cover - arithmetic guard
+        raise SystemExit(f"bucket sum {total_check} != total {report['total']}")
 
     unsourced = report["unsourced"]
     if unsourced:

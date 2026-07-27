@@ -1,0 +1,22 @@
+| pid | seed | n_tok | cap | marker | stored | regraded | disagree | class |
+|---|---|---|---|---|---|---|---|---|
+| test/algebra/2584.json | 11 | 1986 | False | True | True | True | False | correct |
+| test/algebra/2584.json | 23 | 1320 | False | True | True | True | False | correct |
+| test/algebra/2584.json | 47 | 1605 | False | True | True | True | False | correct |
+| test/algebra/2584.json | 89 | 2219 | False | True | True | True | False | correct |
+| test/intermediate_algebra/1994.json | 11 | 3611 | False | True | True | True | False | correct |
+| test/intermediate_algebra/1994.json | 23 | 3292 | False | True | True | True | False | correct |
+| test/intermediate_algebra/1994.json | 47 | 14694 | False | True | True | True | False | correct |
+| test/intermediate_algebra/1994.json | 89 | 2803 | False | True | True | True | False | correct |
+| test/precalculus/1303.json | 11 | 2253 | False | True | True | True | False | correct |
+| test/precalculus/1303.json | 23 | 1774 | False | True | True | True | False | correct |
+| test/precalculus/1303.json | 47 | 1464 | False | True | True | True | False | correct |
+| test/precalculus/1303.json | 89 | 1621 | False | True | True | True | False | correct |
+| test/precalculus/807.json | 11 | 1023 | False | True | True | True | False | correct |
+| test/precalculus/807.json | 23 | 1520 | False | True | True | True | False | correct |
+| test/precalculus/807.json | 47 | 1268 | False | True | True | True | False | correct |
+| test/precalculus/807.json | 89 | 1312 | False | True | True | True | False | correct |
+| test/precalculus/927.json | 11 | 5345 | False | True | False | False | False | genuine_wrong_or_ambiguous |
+| test/precalculus/927.json | 23 | 2007 | False | True | True | True | False | correct |
+| test/precalculus/927.json | 47 | 2405 | False | True | True | True | False | correct |
+| test/precalculus/927.json | 89 | 2764 | False | True | True | True | False | correct |

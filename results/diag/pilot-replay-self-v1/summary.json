@@ -1,0 +1,24 @@
+{
+  "compression_events": 0,
+  "control": "full-cache self-replay",
+  "global_max_tv": 0.0,
+  "global_mean_tv": 0.0,
+  "global_min_tv": 0.0,
+  "global_sum_tv": 0.0,
+  "no_tdp_crossing_fraction": 1.0,
+  "no_tdp_crossing_rows": 20,
+  "nonzero_steps": 0,
+  "profiles": 20,
+  "rows": 20,
+  "step_range": [
+    990,
+    4130
+  ],
+  "steps": 48144,
+  "threshold_crossings": {
+    "p05": 0,
+    "p10": 0,
+    "p15": 0,
+    "p20": 0
+  }
+}

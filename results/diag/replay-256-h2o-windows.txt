@@ -1,0 +1,18 @@
+windowed TV over 400 profiles (full horizon):
+  before: per-profile 0.0000 over 400 profiles; pooled 0.0000 over 26000 steps
+  first50: per-profile 0.0008 over 400 profiles; pooled 0.0008 over 20000 steps
+  later: per-profile 0.0765 over 400 profiles; pooled 0.1023 over 1325966 steps
+Figure 0 [SUMMARY (protocol schematic)]
+  wrote fig0_protocol.pdf / .png
+Figure 1 [SUMMARY]
+  wrote fig1_phenomenon.pdf / .png
+Figure 2 [SUMMARY]
+  wrote fig2_bracket.pdf / .png
+Figure 3 [SUMMARY]
+  wrote fig3_add.pdf / .png
+Figure 4 [DATA (full curve)]
+  wrote fig4_tvprofile.pdf / .png
+Figure 5 [SUMMARY]
+  wrote fig5_twofc.pdf / .png
+
+All figures written to /home/sk10741/kvcache-storage/runs/harvest/replay-256-h2o/

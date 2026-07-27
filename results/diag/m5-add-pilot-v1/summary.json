@@ -1,0 +1,277 @@
+{
+  "cells": [
+    {
+      "budget": "2048",
+      "mean_add": 0.0,
+      "mean_entropy_shift": 0.0,
+      "mean_termination_shift": 0.0,
+      "mean_within_answered_tv": 0.0,
+      "n_problems": 5,
+      "n_significant_bh_0p05": 0,
+      "per_problem": [
+        {
+          "add": 0.0,
+          "entropy_shift": 0.0,
+          "flip_mass": 0.0,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/algebra/2584.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 0.0,
+          "entropy_shift": 0.0,
+          "flip_mass": 0.0,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/intermediate_algebra/1994.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 0.0,
+          "entropy_shift": 0.0,
+          "flip_mass": 0.0,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/precalculus/1303.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 0.0,
+          "entropy_shift": 0.0,
+          "flip_mass": 0.0,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/precalculus/807.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 0.0,
+          "entropy_shift": 0.0,
+          "flip_mass": 0.0,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/precalculus/927.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.0
+        }
+      ],
+      "press": "random",
+      "signed_flip_mass": {
+        "gained": 0.0,
+        "lost": 0.0,
+        "net": 0.0
+      }
+    },
+    {
+      "budget": "256",
+      "mean_add": 0.55,
+      "mean_entropy_shift": 0.9794518022954796,
+      "mean_termination_shift": 0.2,
+      "mean_within_answered_tv": 0.5333333333333334,
+      "n_problems": 5,
+      "n_significant_bh_0p05": 0,
+      "per_problem": [
+        {
+          "add": 0.75,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -0.75,
+          "perm_p": 0.14285714285714285,
+          "perm_p_bh": 0.23809523809523805,
+          "pid": "test/algebra/2584.json",
+          "termination_shift": 0.25,
+          "within_answered_tv": 0.6666666666666667
+        },
+        {
+          "add": 0.75,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -0.75,
+          "perm_p": 0.14285714285714285,
+          "perm_p_bh": 0.23809523809523805,
+          "pid": "test/intermediate_algebra/1994.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.75
+        },
+        {
+          "add": 0.25,
+          "entropy_shift": 0.6873351446188083,
+          "flip_mass": -0.25,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/precalculus/1303.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.25
+        },
+        {
+          "add": 0.0,
+          "entropy_shift": 0.0,
+          "flip_mass": 0.0,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/precalculus/807.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 0.6873351446188083,
+          "flip_mass": -1.0,
+          "perm_p": 0.02857142857142857,
+          "perm_p_bh": 0.14285714285714285,
+          "pid": "test/precalculus/927.json",
+          "termination_shift": 0.75,
+          "within_answered_tv": 1.0
+        }
+      ],
+      "press": "random",
+      "signed_flip_mass": {
+        "gained": 0.0,
+        "lost": 0.55,
+        "net": -0.55
+      }
+    },
+    {
+      "budget": "2048",
+      "mean_add": 0.15,
+      "mean_entropy_shift": 0.3954111830917452,
+      "mean_termination_shift": 0.05,
+      "mean_within_answered_tv": 0.11666666666666667,
+      "n_problems": 5,
+      "n_significant_bh_0p05": 0,
+      "per_problem": [
+        {
+          "add": 0.0,
+          "entropy_shift": 0.0,
+          "flip_mass": 0.0,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/algebra/2584.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 0.5,
+          "entropy_shift": 1.2897207708399179,
+          "flip_mass": -0.5,
+          "perm_p": 0.42857142857142855,
+          "perm_p_bh": 1.0,
+          "pid": "test/intermediate_algebra/1994.json",
+          "termination_shift": 0.25,
+          "within_answered_tv": 0.33333333333333337
+        },
+        {
+          "add": 0.0,
+          "entropy_shift": 0.0,
+          "flip_mass": 0.0,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/precalculus/1303.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 0.0,
+          "entropy_shift": 0.0,
+          "flip_mass": 0.0,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/precalculus/807.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 0.25,
+          "entropy_shift": 0.6873351446188083,
+          "flip_mass": 0.0,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/precalculus/927.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.25
+        }
+      ],
+      "press": "streamingllm",
+      "signed_flip_mass": {
+        "gained": 0.0,
+        "lost": 0.1,
+        "net": -0.1
+      }
+    },
+    {
+      "budget": "256",
+      "mean_add": 0.8,
+      "mean_entropy_shift": 1.2204060527839233,
+      "mean_termination_shift": 0.25,
+      "mean_within_answered_tv": 0.8,
+      "n_problems": 5,
+      "n_significant_bh_0p05": 4,
+      "per_problem": [
+        {
+          "add": 1.0,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -1.0,
+          "perm_p": 0.02857142857142857,
+          "perm_p_bh": 0.03571428571428571,
+          "pid": "test/algebra/2584.json",
+          "termination_shift": 0.25,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.2897207708399179,
+          "flip_mass": -1.0,
+          "perm_p": 0.02857142857142857,
+          "perm_p_bh": 0.03571428571428571,
+          "pid": "test/intermediate_algebra/1994.json",
+          "termination_shift": 0.5,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.2897207708399179,
+          "flip_mass": -1.0,
+          "perm_p": 0.02857142857142857,
+          "perm_p_bh": 0.03571428571428571,
+          "pid": "test/precalculus/1303.json",
+          "termination_shift": 0.5,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 0.0,
+          "entropy_shift": 0.0,
+          "flip_mass": 0.0,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/precalculus/807.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -1.0,
+          "perm_p": 0.02857142857142857,
+          "perm_p_bh": 0.03571428571428571,
+          "pid": "test/precalculus/927.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 1.0
+        }
+      ],
+      "press": "streamingllm",
+      "signed_flip_mass": {
+        "gained": 0.0,
+        "lost": 0.8,
+        "net": -0.8
+      }
+    }
+  ],
+  "note": "ADD is answer-level distribution divergence (a lower bound on behavioral change), reported with signed flip-mass. Per-problem permutation power is low at small n; the powered unit is the benchmark via aggregation.",
+  "runs": {
+    "compression": "results/runs/pilot-compression-v2",
+    "fullcache": "results/runs/pilot-fullcache-tokenized-v2"
+  }
+}

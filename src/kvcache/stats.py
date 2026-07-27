@@ -91,6 +91,66 @@ def negative_control_ok(
     return abs(excess_add) <= add_tolerance and tdp_percentile >= tdp_floor
 
 
+def percentile_ci_mc_error(
+    values: Sequence[float],
+    *,
+    n_resamples: int = 2000,
+    n_seeds: int = 200,
+) -> dict[str, Any]:
+    """Monte-Carlo error of a percentile bootstrap CI's endpoints.
+
+    A percentile interval is itself a random variable: at a fixed resample
+    count its endpoints move with the RNG seed. This repeats the standard
+    2000-resample percentile bootstrap over ``n_seeds`` seeds and reports how
+    far the endpoints travel, which is the quantity needed to say whether an
+    "excludes zero" claim rests on a real margin or on a lucky seed.
+
+    Deliberately does NOT raise the resample count: 2000 with 2.5/97.5 indices
+    is the stated method throughout this repo, and changing it would be a
+    protocol deviation touching every interval in the paper. The fix for
+    irreproducibility is to pin and record the seed (see
+    ``paired_policy_contrast``), not to round the interval -- a rounded
+    interval is still seed-dependent, it merely hides the dependence.
+
+    ``margin_sd`` is reported per endpoint: the distance from zero in units of
+    the endpoint's own MC standard deviation. A margin under ~3 means the sign
+    of the endpoint is not safely established at this resample count.
+    """
+    if not values:
+        raise ValueError("cannot bootstrap an empty sample")
+    k = len(values)
+    los: list[float] = []
+    his: list[float] = []
+    for seed in range(n_seeds):
+        rng = random.Random(seed)
+        means = sorted(
+            statistics.fmean(rng.choice(values) for _ in range(k))
+            for _ in range(n_resamples)
+        )
+        los.append(means[int(0.025 * (n_resamples - 1))])
+        his.append(means[int(0.975 * (n_resamples - 1))])
+
+    def _describe(samples: list[float]) -> dict[str, Any]:
+        sd = statistics.stdev(samples) if len(samples) > 1 else 0.0
+        mean = statistics.fmean(samples)
+        return {
+            "mean": mean,
+            "sd": sd,
+            "min": min(samples),
+            "max": max(samples),
+            "margin_sd": (abs(mean) / sd) if sd else None,
+            "crosses_zero": sum(1 for v in samples if v >= 0) if mean < 0 else None,
+        }
+
+    return {
+        "n_seeds": n_seeds,
+        "n_resamples": n_resamples,
+        "n_units": k,
+        "lower": _describe(los),
+        "upper": _describe(his),
+    }
+
+
 def paired_policy_contrast(
     a_by_problem: Mapping[str, Sequence[bool]],
     b_by_problem: Mapping[str, Sequence[bool]],

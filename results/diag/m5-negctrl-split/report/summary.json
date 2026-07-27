@@ -1,0 +1,76 @@
+{
+  "cells": [
+    {
+      "budget": "full",
+      "mean_add": 0.0,
+      "mean_entropy_shift": 0.0,
+      "mean_termination_shift": 0.0,
+      "mean_within_answered_tv": 0.0,
+      "n_problems": 5,
+      "n_significant_bh_0p05": 0,
+      "per_problem": [
+        {
+          "add": 0.0,
+          "entropy_shift": 0.0,
+          "flip_mass": 0.0,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/algebra/2584.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 0.0,
+          "entropy_shift": 0.0,
+          "flip_mass": 0.0,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/intermediate_algebra/1994.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 0.0,
+          "entropy_shift": 0.0,
+          "flip_mass": 0.0,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/precalculus/1303.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 0.0,
+          "entropy_shift": 0.0,
+          "flip_mass": 0.0,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/precalculus/807.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 0.0,
+          "entropy_shift": 0.0,
+          "flip_mass": 0.0,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/precalculus/927.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.0
+        }
+      ],
+      "press": "fullcache",
+      "signed_flip_mass": {
+        "gained": 0.0,
+        "lost": 0.0,
+        "net": 0.0
+      }
+    }
+  ],
+  "note": "ADD is answer-level distribution divergence (a lower bound on behavioral change), reported with signed flip-mass. Per-problem permutation power is low at small n; the powered unit is the benchmark via aggregation.",
+  "runs": {
+    "compression": "results/diag/m5-negctrl-split/bankB",
+    "fullcache": "results/diag/m5-negctrl-split/bankA"
+  }
+}

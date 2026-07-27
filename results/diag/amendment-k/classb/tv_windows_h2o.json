@@ -1,0 +1,27 @@
+{
+  "label": "replay-diss256-h2o (H2O-style, budget 256)",
+  "median_onset": 65.0,
+  "n_profiles": 400,
+  "note": "Onset-aligned windowed per-step TV, full horizon. 'before' is the replay harness self-control and MUST be 0.0000; a non-zero value is an instrument bug, not a finding. The paper reports the per_profile estimator (the trace is the sampling unit).",
+  "profiles_dir": "/home/sk10741/kvcache-storage/runs/replay-diss256-h2o/profiles/math500/r1_distill_qwen_7b",
+  "windows": {
+    "before": {
+      "n_profiles": 400,
+      "n_steps": 26000,
+      "per_profile": 0.0,
+      "pooled": 0.0
+    },
+    "first50": {
+      "n_profiles": 400,
+      "n_steps": 20000,
+      "per_profile": 0.0007748766736200069,
+      "pooled": 0.0007748766736200069
+    },
+    "later": {
+      "n_profiles": 400,
+      "n_steps": 1325966,
+      "per_profile": 0.07651344269530305,
+      "pooled": 0.10232500012330935
+    }
+  }
+}

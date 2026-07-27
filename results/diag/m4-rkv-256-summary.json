@@ -1,0 +1,72 @@
+{
+  "cells": [
+    {
+      "budget": "256",
+      "compressed_accuracy": 0.52,
+      "compressed_accuracy_ci95": [
+        0.435,
+        0.61
+      ],
+      "compressed_correct": 208,
+      "full_accuracy": 0.8825,
+      "mean_auc_tv": null,
+      "mean_frac_above_p05": null,
+      "mean_frac_above_p10": null,
+      "mean_free_run_tokens": 8032.5425,
+      "mean_readout_tokens": 408.2425,
+      "mean_summed_tv": null,
+      "n_problems": 100,
+      "n_readout_undefined": 8,
+      "n_reverse_readout": 346,
+      "onset_nonnull": null,
+      "press": "rkv",
+      "readout_accuracy": 0.798469387755102,
+      "readout_accuracy_ci95": [
+        0.71,
+        0.85
+      ],
+      "readout_change": -0.08403061224489794,
+      "readout_correct": 313,
+      "residual_bracket": [
+        -0.278469387755102,
+        -0.22065028901734096
+      ],
+      "reverse_readout_accuracy": 0.661849710982659,
+      "reverse_readout_change": -0.22065028901734096,
+      "reverse_residual_ci95": [
+        -0.3554,
+        -0.2025
+      ],
+      "rows": 400,
+      "signed_flip_mass": {
+        "gained": 0.0025,
+        "lost": 0.3675,
+        "net": -0.365
+      },
+      "total_change": -0.36249999999999993,
+      "truncated": 54,
+      "truncation_rate": 0.135,
+      "unexplained_residual": -0.278469387755102,
+      "unexplained_residual_ci95": [
+        -0.335,
+        -0.195
+      ]
+    }
+  ],
+  "claim_discipline": "Residual is accuracy change unexplained by on-reference readout, not a measured cause.",
+  "full_cache": {
+    "accuracy": 0.8825,
+    "correct": 1765,
+    "rows": 2000,
+    "truncated": 38
+  },
+  "runs": {
+    "compression": "/home/sk10741/kvcache-storage/runs/grid-diss256-rkv",
+    "fullcache": "/home/sk10741/kvcache-storage/runs/math500-fc-powered-merged",
+    "readout": [
+      "/home/sk10741/kvcache-storage/runs/readout-diss256-rkv"
+    ],
+    "replay": null,
+    "reverse_readout": "/home/sk10741/kvcache-storage/runs/reverse-readout-diss256-rkv"
+  }
+}

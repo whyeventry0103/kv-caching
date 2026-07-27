@@ -1,0 +1,52 @@
+{
+  "accuracy_a": 0.4225,
+  "accuracy_b": 0.2375,
+  "benchmark": "math500",
+  "budget": "256",
+  "ci95": [
+    0.13,
+    0.24
+  ],
+  "difference_histogram": [
+    [
+      -0.5,
+      1
+    ],
+    [
+      -0.25,
+      5
+    ],
+    [
+      0.0,
+      50
+    ],
+    [
+      0.25,
+      17
+    ],
+    [
+      0.5,
+      18
+    ],
+    [
+      0.75,
+      8
+    ],
+    [
+      1.0,
+      1
+    ]
+  ],
+  "losses": 6,
+  "mean_difference": 0.185,
+  "n_problems": 100,
+  "n_problems_dropped": 0,
+  "n_resamples": 2000,
+  "non_negative": 94,
+  "note": "Report as 'non-negative on N/M problems (W strict wins / T ties / L losses)', never as 'beats on N/M' -- PAPER_FINDINGS section 5.",
+  "press_a": "random",
+  "press_b": "streamingllm",
+  "seed": 0,
+  "ties": 50,
+  "wins": 44
+}

@@ -1,0 +1,2043 @@
+{
+  "cells": [
+    {
+      "budget": "256",
+      "mean_add": 0.55875,
+      "mean_entropy_shift": 0.694292290388026,
+      "mean_termination_shift": 0.22375,
+      "mean_within_answered_tv": 0.5044326241134751,
+      "n_problems": 100,
+      "n_significant_bh_0p05": 42,
+      "per_problem": [
+        {
+          "add": 0.0,
+          "entropy_shift": 0.0,
+          "flip_mass": 0.0,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/algebra/1004.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 0.0,
+          "entropy_shift": 0.0,
+          "flip_mass": 0.0,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/algebra/1035.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 0.6873351446188083,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.006966213862765587,
+          "pid": "test/algebra/1072.json",
+          "termination_shift": 0.75,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 0.25,
+          "entropy_shift": 0.6873351446188083,
+          "flip_mass": -0.25,
+          "perm_p": 0.3333333333333333,
+          "perm_p_bh": 0.44444444444444436,
+          "pid": "test/algebra/1098.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.25
+        },
+        {
+          "add": 0.25,
+          "entropy_shift": 0.6873351446188083,
+          "flip_mass": -0.25,
+          "perm_p": 0.3333333333333333,
+          "perm_p_bh": 0.44444444444444436,
+          "pid": "test/algebra/1265.json",
+          "termination_shift": 0.25,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 0.0,
+          "flip_mass": 0.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.006966213862765587,
+          "pid": "test/algebra/1349.json",
+          "termination_shift": 1.0,
+          "within_answered_tv": null
+        },
+        {
+          "add": 0.75,
+          "entropy_shift": 1.2897207708399179,
+          "flip_mass": -0.75,
+          "perm_p": 0.01818181818181818,
+          "perm_p_bh": 0.04329004329004329,
+          "pid": "test/algebra/1837.json",
+          "termination_shift": 0.5,
+          "within_answered_tv": 0.5
+        },
+        {
+          "add": 0.5,
+          "entropy_shift": 1.2897207708399179,
+          "flip_mass": -0.75,
+          "perm_p": 0.09090909090909091,
+          "perm_p_bh": 0.15673981191222572,
+          "pid": "test/algebra/187.json",
+          "termination_shift": 0.25,
+          "within_answered_tv": 0.33333333333333337
+        },
+        {
+          "add": 0.25,
+          "entropy_shift": 0.6873351446188083,
+          "flip_mass": -0.25,
+          "perm_p": 0.3333333333333333,
+          "perm_p_bh": 0.44444444444444436,
+          "pid": "test/algebra/2023.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.25
+        },
+        {
+          "add": 0.5,
+          "entropy_shift": 1.2897207708399179,
+          "flip_mass": -0.5,
+          "perm_p": 0.09090909090909091,
+          "perm_p_bh": 0.15673981191222572,
+          "pid": "test/algebra/2036.json",
+          "termination_shift": 0.25,
+          "within_answered_tv": 0.33333333333333337
+        },
+        {
+          "add": 0.5,
+          "entropy_shift": 1.2897207708399179,
+          "flip_mass": -1.0,
+          "perm_p": 0.09090909090909091,
+          "perm_p_bh": 0.15673981191222572,
+          "pid": "test/algebra/2046.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.5
+        },
+        {
+          "add": 0.5,
+          "entropy_shift": 1.2897207708399179,
+          "flip_mass": -0.5,
+          "perm_p": 0.09090909090909091,
+          "perm_p_bh": 0.15673981191222572,
+          "pid": "test/algebra/2193.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.5
+        },
+        {
+          "add": 0.0,
+          "entropy_shift": 0.0,
+          "flip_mass": 0.0,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/algebra/2214.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -0.75,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.006966213862765587,
+          "pid": "test/algebra/2253.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 0.0,
+          "entropy_shift": 0.0,
+          "flip_mass": 0.0,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/algebra/24.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 0.625,
+          "entropy_shift": 0.8504506095834812,
+          "flip_mass": -0.625,
+          "perm_p": 0.06666666666666667,
+          "perm_p_bh": 0.14814814814814817,
+          "pid": "test/algebra/2427.json",
+          "termination_shift": 0.5,
+          "within_answered_tv": 0.375
+        },
+        {
+          "add": 0.5,
+          "entropy_shift": 1.2897207708399179,
+          "flip_mass": -0.5,
+          "perm_p": 0.09090909090909091,
+          "perm_p_bh": 0.15673981191222572,
+          "pid": "test/algebra/2584.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.5
+        },
+        {
+          "add": 0.75,
+          "entropy_shift": 1.2897207708399179,
+          "flip_mass": -0.75,
+          "perm_p": 0.01818181818181818,
+          "perm_p_bh": 0.04329004329004329,
+          "pid": "test/algebra/2700.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.75
+        },
+        {
+          "add": 0.25,
+          "entropy_shift": 0.6873351446188083,
+          "flip_mass": -0.25,
+          "perm_p": 0.3333333333333333,
+          "perm_p_bh": 0.44444444444444436,
+          "pid": "test/algebra/305.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.25
+        },
+        {
+          "add": 0.25,
+          "entropy_shift": 0.6873351446188083,
+          "flip_mass": -0.25,
+          "perm_p": 0.3333333333333333,
+          "perm_p_bh": 0.44444444444444436,
+          "pid": "test/algebra/567.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.25
+        },
+        {
+          "add": 0.0,
+          "entropy_shift": 0.0,
+          "flip_mass": 0.0,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/algebra/722.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 0.0,
+          "entropy_shift": 0.0,
+          "flip_mass": 0.0,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/algebra/769.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 0.75,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -0.75,
+          "perm_p": 0.01818181818181818,
+          "perm_p_bh": 0.04329004329004329,
+          "pid": "test/algebra/873.json",
+          "termination_shift": 0.25,
+          "within_answered_tv": 0.6666666666666667
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.2897207708399179,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.006966213862765587,
+          "pid": "test/algebra/892.json",
+          "termination_shift": 0.25,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.006966213862765587,
+          "pid": "test/algebra/893.json",
+          "termination_shift": 0.25,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 0.25,
+          "entropy_shift": 0.6873351446188083,
+          "flip_mass": -0.25,
+          "perm_p": 0.3333333333333333,
+          "perm_p_bh": 0.44444444444444436,
+          "pid": "test/counting_and_probability/1114.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.25
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 0.6873351446188083,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.006966213862765587,
+          "pid": "test/counting_and_probability/119.json",
+          "termination_shift": 0.75,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 0.75,
+          "entropy_shift": 1.0372311229619084,
+          "flip_mass": -0.375,
+          "perm_p": 0.08484848484848485,
+          "perm_p_bh": 0.15673981191222572,
+          "pid": "test/counting_and_probability/134.json",
+          "termination_shift": 0.25,
+          "within_answered_tv": 0.6666666666666666
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 0.6873351446188083,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.006966213862765587,
+          "pid": "test/counting_and_probability/377.json",
+          "termination_shift": 0.75,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 0.875,
+          "entropy_shift": -0.7556471805599456,
+          "flip_mass": -0.25,
+          "perm_p": 0.26464646464646463,
+          "perm_p_bh": 0.44107744107744107,
+          "pid": "test/counting_and_probability/525.json",
+          "termination_shift": 0.375,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 0.25,
+          "entropy_shift": 0.6873351446188083,
+          "flip_mass": -0.25,
+          "perm_p": 0.3333333333333333,
+          "perm_p_bh": 0.44444444444444436,
+          "pid": "test/counting_and_probability/666.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.25
+        },
+        {
+          "add": 0.25,
+          "entropy_shift": 0.6873351446188083,
+          "flip_mass": -0.25,
+          "perm_p": 0.3333333333333333,
+          "perm_p_bh": 0.44444444444444436,
+          "pid": "test/geometry/178.json",
+          "termination_shift": 0.25,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 0.0,
+          "entropy_shift": 0.0,
+          "flip_mass": 0.0,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/geometry/248.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 0.0,
+          "entropy_shift": 0.0,
+          "flip_mass": 0.0,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/geometry/353.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 0.42909883108112323,
+          "flip_mass": -0.125,
+          "perm_p": 0.014141414141414142,
+          "perm_p_bh": 0.04040404040404041,
+          "pid": "test/geometry/434.json",
+          "termination_shift": 0.5,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 0.0,
+          "entropy_shift": 0.0,
+          "flip_mass": 0.0,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/geometry/456.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.006966213862765587,
+          "pid": "test/geometry/627.json",
+          "termination_shift": 0.25,
+          "within_answered_tv": 0.9999999999999999
+        },
+        {
+          "add": 0.0,
+          "entropy_shift": 0.0,
+          "flip_mass": 0.0,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/geometry/967.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.006966213862765587,
+          "pid": "test/intermediate_algebra/1000.json",
+          "termination_shift": 0.25,
+          "within_answered_tv": 0.9999999999999999
+        },
+        {
+          "add": 0.25,
+          "entropy_shift": 0.6873351446188083,
+          "flip_mass": -0.25,
+          "perm_p": 0.3333333333333333,
+          "perm_p_bh": 0.44444444444444436,
+          "pid": "test/intermediate_algebra/1168.json",
+          "termination_shift": 0.25,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 0.42909883108112323,
+          "flip_mass": -0.75,
+          "perm_p": 0.014141414141414142,
+          "perm_p_bh": 0.04040404040404041,
+          "pid": "test/intermediate_algebra/1197.json",
+          "termination_shift": -0.125,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 0.6873351446188083,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.006966213862765587,
+          "pid": "test/intermediate_algebra/1217.json",
+          "termination_shift": 0.75,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.006966213862765587,
+          "pid": "test/intermediate_algebra/1247.json",
+          "termination_shift": 0.25,
+          "within_answered_tv": 0.9999999999999999
+        },
+        {
+          "add": 0.75,
+          "entropy_shift": 1.2897207708399179,
+          "flip_mass": -0.75,
+          "perm_p": 0.01818181818181818,
+          "perm_p_bh": 0.04329004329004329,
+          "pid": "test/intermediate_algebra/134.json",
+          "termination_shift": 0.5,
+          "within_answered_tv": 0.5
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 0.8504506095834812,
+          "flip_mass": 0.0,
+          "perm_p": 0.006060606060606061,
+          "perm_p_bh": 0.01893939393939394,
+          "pid": "test/intermediate_algebra/1388.json",
+          "termination_shift": 0.25,
+          "within_answered_tv": 0.9999999999999999
+        },
+        {
+          "add": 0.5,
+          "entropy_shift": -0.3465735902799727,
+          "flip_mass": -0.125,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/intermediate_algebra/1454.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.006966213862765587,
+          "pid": "test/intermediate_algebra/1849.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 0.75,
+          "entropy_shift": 1.3220241998634539,
+          "flip_mass": -0.625,
+          "perm_p": 0.06666666666666667,
+          "perm_p_bh": 0.14814814814814817,
+          "pid": "test/intermediate_algebra/1994.json",
+          "termination_shift": 0.25,
+          "within_answered_tv": 0.6666666666666666
+        },
+        {
+          "add": 0.5,
+          "entropy_shift": 0.8181471805599453,
+          "flip_mass": -0.5,
+          "perm_p": 0.09090909090909091,
+          "perm_p_bh": 0.15673981191222572,
+          "pid": "test/intermediate_algebra/2046.json",
+          "termination_shift": 0.5,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 0.5,
+          "entropy_shift": 1.2897207708399179,
+          "flip_mass": -0.5,
+          "perm_p": 0.09090909090909091,
+          "perm_p_bh": 0.15673981191222572,
+          "pid": "test/intermediate_algebra/207.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.5
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.006966213862765587,
+          "pid": "test/intermediate_algebra/279.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": 0.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.006966213862765587,
+          "pid": "test/intermediate_algebra/428.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.2897207708399179,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.006966213862765587,
+          "pid": "test/intermediate_algebra/47.json",
+          "termination_shift": 0.5,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.3220241998634539,
+          "flip_mass": -0.875,
+          "perm_p": 0.010101010101010102,
+          "perm_p_bh": 0.03060912151821243,
+          "pid": "test/intermediate_algebra/607.json",
+          "termination_shift": 0.25,
+          "within_answered_tv": 0.9999999999999999
+        },
+        {
+          "add": 0.25,
+          "entropy_shift": 0.6873351446188083,
+          "flip_mass": -0.25,
+          "perm_p": 0.3333333333333333,
+          "perm_p_bh": 0.44444444444444436,
+          "pid": "test/intermediate_algebra/623.json",
+          "termination_shift": 0.25,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 0.5,
+          "entropy_shift": -1.0993147528693494,
+          "flip_mass": 0.0,
+          "perm_p": 0.2080808080808081,
+          "perm_p_bh": 0.35267933573018323,
+          "pid": "test/intermediate_algebra/662.json",
+          "termination_shift": 0.5,
+          "within_answered_tv": null
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.2897207708399179,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.006966213862765587,
+          "pid": "test/intermediate_algebra/956.json",
+          "termination_shift": 0.5,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 0.0,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.006966213862765587,
+          "pid": "test/number_theory/1032.json",
+          "termination_shift": 1.0,
+          "within_answered_tv": null
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 0.0,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.006966213862765587,
+          "pid": "test/number_theory/1055.json",
+          "termination_shift": 1.0,
+          "within_answered_tv": null
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.006966213862765587,
+          "pid": "test/number_theory/357.json",
+          "termination_shift": 0.25,
+          "within_answered_tv": 0.9999999999999999
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 0.6873351446188083,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.006966213862765587,
+          "pid": "test/number_theory/45.json",
+          "termination_shift": 0.75,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 0.5,
+          "entropy_shift": 1.2897207708399179,
+          "flip_mass": -0.5,
+          "perm_p": 0.09090909090909091,
+          "perm_p_bh": 0.15673981191222572,
+          "pid": "test/number_theory/46.json",
+          "termination_shift": 0.25,
+          "within_answered_tv": 0.33333333333333337
+        },
+        {
+          "add": 0.0,
+          "entropy_shift": 0.0,
+          "flip_mass": 0.0,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/number_theory/515.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": -0.068312035941137,
+          "flip_mass": -0.5,
+          "perm_p": 0.006060606060606061,
+          "perm_p_bh": 0.01893939393939394,
+          "pid": "test/number_theory/516.json",
+          "termination_shift": 0.75,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 0.0,
+          "entropy_shift": 0.0,
+          "flip_mass": 0.0,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/number_theory/572.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 0.5,
+          "entropy_shift": 1.2897207708399179,
+          "flip_mass": -0.5,
+          "perm_p": 0.09090909090909091,
+          "perm_p_bh": 0.15673981191222572,
+          "pid": "test/number_theory/627.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.5
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.006966213862765587,
+          "pid": "test/number_theory/737.json",
+          "termination_shift": 0.25,
+          "within_answered_tv": 0.9999999999999999
+        },
+        {
+          "add": 0.5,
+          "entropy_shift": 1.2897207708399179,
+          "flip_mass": -0.5,
+          "perm_p": 0.09090909090909091,
+          "perm_p_bh": 0.15673981191222572,
+          "pid": "test/number_theory/864.json",
+          "termination_shift": 0.25,
+          "within_answered_tv": 0.33333333333333337
+        },
+        {
+          "add": 0.625,
+          "entropy_shift": -0.7556471805599452,
+          "flip_mass": 0.25,
+          "perm_p": 0.3151515151515151,
+          "perm_p_bh": 0.44444444444444436,
+          "pid": "test/prealgebra/105.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.625
+        },
+        {
+          "add": 0.5,
+          "entropy_shift": 0.017119222830582093,
+          "flip_mass": 0.0,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/prealgebra/1139.json",
+          "termination_shift": -0.125,
+          "within_answered_tv": 0.6666666666666666
+        },
+        {
+          "add": 0.25,
+          "entropy_shift": 0.6873351446188083,
+          "flip_mass": -0.25,
+          "perm_p": 0.3333333333333333,
+          "perm_p_bh": 0.44444444444444436,
+          "pid": "test/prealgebra/1233.json",
+          "termination_shift": 0.25,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 0.0,
+          "entropy_shift": 0.0,
+          "flip_mass": 0.0,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/prealgebra/1247.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 0.0,
+          "entropy_shift": 0.0,
+          "flip_mass": 0.0,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/prealgebra/1302.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 0.25,
+          "entropy_shift": 0.6873351446188083,
+          "flip_mass": -0.25,
+          "perm_p": 0.3333333333333333,
+          "perm_p_bh": 0.44444444444444436,
+          "pid": "test/prealgebra/1388.json",
+          "termination_shift": 0.25,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 0.75,
+          "entropy_shift": 0.6873351446188083,
+          "flip_mass": -0.75,
+          "perm_p": 0.01818181818181818,
+          "perm_p_bh": 0.04329004329004329,
+          "pid": "test/prealgebra/1558.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.75
+        },
+        {
+          "add": 0.0,
+          "entropy_shift": 0.0,
+          "flip_mass": 0.0,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/prealgebra/1622.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 0.028677924431394608,
+          "flip_mass": -0.125,
+          "perm_p": 0.030303030303030304,
+          "perm_p_bh": 0.07047216349541931,
+          "pid": "test/prealgebra/1646.json",
+          "termination_shift": 0.5,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 0.0,
+          "entropy_shift": 0.0,
+          "flip_mass": 0.0,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/prealgebra/1747.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 0.75,
+          "entropy_shift": 0.6873351446188083,
+          "flip_mass": -0.75,
+          "perm_p": 0.01818181818181818,
+          "perm_p_bh": 0.04329004329004329,
+          "pid": "test/prealgebra/1761.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.75
+        },
+        {
+          "add": 0.5,
+          "entropy_shift": 1.2897207708399179,
+          "flip_mass": -0.5,
+          "perm_p": 0.09090909090909091,
+          "perm_p_bh": 0.15673981191222572,
+          "pid": "test/prealgebra/1840.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.5
+        },
+        {
+          "add": 0.0,
+          "entropy_shift": 0.0,
+          "flip_mass": 0.0,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/prealgebra/192.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 0.0,
+          "entropy_shift": 0.0,
+          "flip_mass": 0.0,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/prealgebra/1924.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 0.0,
+          "entropy_shift": 0.0,
+          "flip_mass": 0.0,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/prealgebra/307.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 0.0,
+          "entropy_shift": 0.0,
+          "flip_mass": 0.0,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/prealgebra/572.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 0.0,
+          "entropy_shift": 0.0,
+          "flip_mass": 0.125,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/prealgebra/930.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 0.75,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -0.75,
+          "perm_p": 0.01818181818181818,
+          "perm_p_bh": 0.04329004329004329,
+          "pid": "test/prealgebra/951.json",
+          "termination_shift": 0.25,
+          "within_answered_tv": 0.6666666666666666
+        },
+        {
+          "add": 0.0,
+          "entropy_shift": 0.0,
+          "flip_mass": 0.0,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/precalculus/1105.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 0.6873351446188083,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.006966213862765587,
+          "pid": "test/precalculus/1146.json",
+          "termination_shift": 0.75,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.006966213862765587,
+          "pid": "test/precalculus/1199.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.2897207708399179,
+          "flip_mass": 0.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.006966213862765587,
+          "pid": "test/precalculus/1300.json",
+          "termination_shift": 0.5,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 0.25,
+          "entropy_shift": 0.6873351446188083,
+          "flip_mass": -0.25,
+          "perm_p": 0.3333333333333333,
+          "perm_p_bh": 0.44444444444444436,
+          "pid": "test/precalculus/1303.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.25
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.2897207708399179,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.006966213862765587,
+          "pid": "test/precalculus/1313.json",
+          "termination_shift": 0.5,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.2897207708399179,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.006966213862765587,
+          "pid": "test/precalculus/24313.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 0.24806498336237154,
+          "flip_mass": -0.875,
+          "perm_p": 0.00404040404040404,
+          "perm_p_bh": 0.013468013468013467,
+          "pid": "test/precalculus/285.json",
+          "termination_shift": 0.75,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 0.25,
+          "entropy_shift": 0.6873351446188083,
+          "flip_mass": -0.25,
+          "perm_p": 0.3333333333333333,
+          "perm_p_bh": 0.44444444444444436,
+          "pid": "test/precalculus/34.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.25
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.2897207708399179,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.006966213862765587,
+          "pid": "test/precalculus/675.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 0.5,
+          "entropy_shift": 1.2897207708399179,
+          "flip_mass": -0.5,
+          "perm_p": 0.09090909090909091,
+          "perm_p_bh": 0.15673981191222572,
+          "pid": "test/precalculus/779.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.5
+        },
+        {
+          "add": 0.0,
+          "entropy_shift": 0.0,
+          "flip_mass": 0.0,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/precalculus/807.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 0.0,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.006966213862765587,
+          "pid": "test/precalculus/927.json",
+          "termination_shift": 1.0,
+          "within_answered_tv": null
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 0.0,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.006966213862765587,
+          "pid": "test/precalculus/990.json",
+          "termination_shift": 1.0,
+          "within_answered_tv": null
+        }
+      ],
+      "press": "random",
+      "signed_flip_mass": {
+        "gained": 0.00375,
+        "lost": 0.465,
+        "net": -0.46125
+      }
+    },
+    {
+      "budget": "256",
+      "mean_add": 0.75125,
+      "mean_entropy_shift": 1.2282166138737998,
+      "mean_termination_shift": 0.08125,
+      "mean_within_answered_tv": 0.74875,
+      "n_problems": 100,
+      "n_significant_bh_0p05": 72,
+      "per_problem": [
+        {
+          "add": 0.0,
+          "entropy_shift": 0.0,
+          "flip_mass": 0.0,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/algebra/1004.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 0.75,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -0.75,
+          "perm_p": 0.01818181818181818,
+          "perm_p_bh": 0.026737967914438502,
+          "pid": "test/algebra/1035.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.75
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.00481000481000481,
+          "pid": "test/algebra/1072.json",
+          "termination_shift": 0.25,
+          "within_answered_tv": 0.9999999999999999
+        },
+        {
+          "add": 0.0,
+          "entropy_shift": 0.0,
+          "flip_mass": 0.0,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/algebra/1098.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 0.0,
+          "entropy_shift": 0.0,
+          "flip_mass": 0.0,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/algebra/1265.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": 0.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.00481000481000481,
+          "pid": "test/algebra/1349.json",
+          "termination_shift": 0.25,
+          "within_answered_tv": 0.9999999999999999
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.00481000481000481,
+          "pid": "test/algebra/1837.json",
+          "termination_shift": 0.25,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 0.75,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -0.75,
+          "perm_p": 0.01818181818181818,
+          "perm_p_bh": 0.026737967914438502,
+          "pid": "test/algebra/187.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.75
+        },
+        {
+          "add": 0.75,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -0.75,
+          "perm_p": 0.01818181818181818,
+          "perm_p_bh": 0.026737967914438502,
+          "pid": "test/algebra/2023.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.75
+        },
+        {
+          "add": 0.75,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -0.75,
+          "perm_p": 0.01818181818181818,
+          "perm_p_bh": 0.026737967914438502,
+          "pid": "test/algebra/2036.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.75
+        },
+        {
+          "add": 0.75,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -1.0,
+          "perm_p": 0.01818181818181818,
+          "perm_p_bh": 0.026737967914438502,
+          "pid": "test/algebra/2046.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.75
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.00481000481000481,
+          "pid": "test/algebra/2193.json",
+          "termination_shift": 0.25,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.2897207708399179,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.00481000481000481,
+          "pid": "test/algebra/2214.json",
+          "termination_shift": 0.25,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 0.75,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -0.75,
+          "perm_p": 0.01818181818181818,
+          "perm_p_bh": 0.026737967914438502,
+          "pid": "test/algebra/2253.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.75
+        },
+        {
+          "add": 0.0,
+          "entropy_shift": 0.0,
+          "flip_mass": 0.0,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/algebra/24.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 0.875,
+          "entropy_shift": 1.3220241998634539,
+          "flip_mass": -0.875,
+          "perm_p": 0.010101010101010102,
+          "perm_p_bh": 0.021043771043771045,
+          "pid": "test/algebra/2427.json",
+          "termination_shift": 0.25,
+          "within_answered_tv": 0.8749999999999999
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.00481000481000481,
+          "pid": "test/algebra/2584.json",
+          "termination_shift": 0.25,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.00481000481000481,
+          "pid": "test/algebra/2700.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.00481000481000481,
+          "pid": "test/algebra/305.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.00481000481000481,
+          "pid": "test/algebra/567.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 0.75,
+          "entropy_shift": 1.2897207708399179,
+          "flip_mass": -0.75,
+          "perm_p": 0.01818181818181818,
+          "perm_p_bh": 0.026737967914438502,
+          "pid": "test/algebra/722.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.75
+        },
+        {
+          "add": 0.75,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -0.75,
+          "perm_p": 0.01818181818181818,
+          "perm_p_bh": 0.026737967914438502,
+          "pid": "test/algebra/769.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.75
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.00481000481000481,
+          "pid": "test/algebra/873.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.00481000481000481,
+          "pid": "test/algebra/892.json",
+          "termination_shift": 0.25,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.00481000481000481,
+          "pid": "test/algebra/893.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 0.25,
+          "entropy_shift": 0.6873351446188083,
+          "flip_mass": -0.25,
+          "perm_p": 0.3333333333333333,
+          "perm_p_bh": 0.38314176245210724,
+          "pid": "test/counting_and_probability/1114.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.25
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.00481000481000481,
+          "pid": "test/counting_and_probability/119.json",
+          "termination_shift": 0.25,
+          "within_answered_tv": 0.9999999999999999
+        },
+        {
+          "add": 0.375,
+          "entropy_shift": -0.036728093539173834,
+          "flip_mass": 0.125,
+          "perm_p": 0.4909090909090909,
+          "perm_p_bh": 0.5578512396694215,
+          "pid": "test/counting_and_probability/134.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.375
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.00481000481000481,
+          "pid": "test/counting_and_probability/377.json",
+          "termination_shift": 0.25,
+          "within_answered_tv": 0.9999999999999999
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": -0.2840735902799729,
+          "flip_mass": -0.25,
+          "perm_p": 0.25656565656565655,
+          "perm_p_bh": 0.31288494703128844,
+          "pid": "test/counting_and_probability/525.json",
+          "termination_shift": -0.125,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 0.75,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -0.75,
+          "perm_p": 0.01818181818181818,
+          "perm_p_bh": 0.026737967914438502,
+          "pid": "test/counting_and_probability/666.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.75
+        },
+        {
+          "add": 0.75,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -0.75,
+          "perm_p": 0.01818181818181818,
+          "perm_p_bh": 0.026737967914438502,
+          "pid": "test/geometry/178.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.75
+        },
+        {
+          "add": 0.0,
+          "entropy_shift": 0.0,
+          "flip_mass": 0.0,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/geometry/248.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 0.5,
+          "entropy_shift": 1.2897207708399179,
+          "flip_mass": -0.5,
+          "perm_p": 0.09090909090909091,
+          "perm_p_bh": 0.11363636363636365,
+          "pid": "test/geometry/353.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.5
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 0.9006724213610959,
+          "flip_mass": -0.125,
+          "perm_p": 0.030303030303030304,
+          "perm_p_bh": 0.04208754208754209,
+          "pid": "test/geometry/434.json",
+          "termination_shift": 0.25,
+          "within_answered_tv": 0.9999999999999999
+        },
+        {
+          "add": 0.5,
+          "entropy_shift": 1.2897207708399179,
+          "flip_mass": -0.5,
+          "perm_p": 0.09090909090909091,
+          "perm_p_bh": 0.11363636363636365,
+          "pid": "test/geometry/456.json",
+          "termination_shift": 0.25,
+          "within_answered_tv": 0.33333333333333337
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.2897207708399179,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.00481000481000481,
+          "pid": "test/geometry/627.json",
+          "termination_shift": 0.5,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 0.6873351446188083,
+          "flip_mass": -0.25,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.00481000481000481,
+          "pid": "test/geometry/967.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.00481000481000481,
+          "pid": "test/intermediate_algebra/1000.json",
+          "termination_shift": 0.25,
+          "within_answered_tv": 0.9999999999999999
+        },
+        {
+          "add": 0.75,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -0.75,
+          "perm_p": 0.01818181818181818,
+          "perm_p_bh": 0.026737967914438502,
+          "pid": "test/intermediate_algebra/1168.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.75
+        },
+        {
+          "add": 0.875,
+          "entropy_shift": 0.9006724213610959,
+          "flip_mass": -0.75,
+          "perm_p": 0.030303030303030304,
+          "perm_p_bh": 0.04208754208754209,
+          "pid": "test/intermediate_algebra/1197.json",
+          "termination_shift": 0.125,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 0.75,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -1.0,
+          "perm_p": 0.01818181818181818,
+          "perm_p_bh": 0.026737967914438502,
+          "pid": "test/intermediate_algebra/1217.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.75
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.00481000481000481,
+          "pid": "test/intermediate_algebra/1247.json",
+          "termination_shift": 0.25,
+          "within_answered_tv": 0.9999999999999999
+        },
+        {
+          "add": 0.5,
+          "entropy_shift": 1.2897207708399179,
+          "flip_mass": -0.5,
+          "perm_p": 0.09090909090909091,
+          "perm_p_bh": 0.11363636363636365,
+          "pid": "test/intermediate_algebra/134.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.5
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.3220241998634539,
+          "flip_mass": 0.0,
+          "perm_p": 0.010101010101010102,
+          "perm_p_bh": 0.021043771043771045,
+          "pid": "test/intermediate_algebra/1388.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 0.875,
+          "entropy_shift": -0.3465735902799727,
+          "flip_mass": -0.125,
+          "perm_p": 0.12727272727272726,
+          "perm_p_bh": 0.15712682379349044,
+          "pid": "test/intermediate_algebra/1454.json",
+          "termination_shift": -0.5,
+          "within_answered_tv": 0.75
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.00481000481000481,
+          "pid": "test/intermediate_algebra/1849.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 0.8504506095834812,
+          "flip_mass": -0.875,
+          "perm_p": 0.006060606060606061,
+          "perm_p_bh": 0.013774104683195593,
+          "pid": "test/intermediate_algebra/1994.json",
+          "termination_shift": 0.5,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 0.5,
+          "entropy_shift": 1.2897207708399179,
+          "flip_mass": -0.5,
+          "perm_p": 0.09090909090909091,
+          "perm_p_bh": 0.11363636363636365,
+          "pid": "test/intermediate_algebra/2046.json",
+          "termination_shift": 0.25,
+          "within_answered_tv": 0.33333333333333337
+        },
+        {
+          "add": 0.5,
+          "entropy_shift": 1.2897207708399179,
+          "flip_mass": -0.5,
+          "perm_p": 0.09090909090909091,
+          "perm_p_bh": 0.11363636363636365,
+          "pid": "test/intermediate_algebra/207.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.5
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.00481000481000481,
+          "pid": "test/intermediate_algebra/279.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 0.75,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": 0.0,
+          "perm_p": 0.01818181818181818,
+          "perm_p_bh": 0.026737967914438502,
+          "pid": "test/intermediate_algebra/428.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.75
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.2897207708399179,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.00481000481000481,
+          "pid": "test/intermediate_algebra/47.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.3220241998634539,
+          "flip_mass": -0.875,
+          "perm_p": 0.010101010101010102,
+          "perm_p_bh": 0.021043771043771045,
+          "pid": "test/intermediate_algebra/607.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.00481000481000481,
+          "pid": "test/intermediate_algebra/623.json",
+          "termination_shift": 0.25,
+          "within_answered_tv": 0.9999999999999999
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 0.6619796082505411,
+          "flip_mass": 0.0,
+          "perm_p": 0.022222222222222223,
+          "perm_p_bh": 0.032206119162640906,
+          "pid": "test/intermediate_algebra/662.json",
+          "termination_shift": -0.5,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.2897207708399179,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.00481000481000481,
+          "pid": "test/intermediate_algebra/956.json",
+          "termination_shift": 0.5,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.00481000481000481,
+          "pid": "test/number_theory/1032.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.2897207708399179,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.00481000481000481,
+          "pid": "test/number_theory/1055.json",
+          "termination_shift": 0.5,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.00481000481000481,
+          "pid": "test/number_theory/357.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.2897207708399179,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.00481000481000481,
+          "pid": "test/number_theory/45.json",
+          "termination_shift": 0.25,
+          "within_answered_tv": 0.9999999999999999
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.00481000481000481,
+          "pid": "test/number_theory/46.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 0.5,
+          "entropy_shift": 1.2897207708399179,
+          "flip_mass": -0.5,
+          "perm_p": 0.09090909090909091,
+          "perm_p_bh": 0.11363636363636365,
+          "pid": "test/number_theory/515.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.5
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 0.5340735902799726,
+          "flip_mass": -0.5,
+          "perm_p": 0.006060606060606061,
+          "perm_p_bh": 0.013774104683195593,
+          "pid": "test/number_theory/516.json",
+          "termination_shift": 0.5,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 0.25,
+          "entropy_shift": 0.6873351446188083,
+          "flip_mass": -0.25,
+          "perm_p": 0.3333333333333333,
+          "perm_p_bh": 0.38314176245210724,
+          "pid": "test/number_theory/572.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.25
+        },
+        {
+          "add": 0.75,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -0.75,
+          "perm_p": 0.01818181818181818,
+          "perm_p_bh": 0.026737967914438502,
+          "pid": "test/number_theory/627.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.75
+        },
+        {
+          "add": 0.75,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -0.75,
+          "perm_p": 0.01818181818181818,
+          "perm_p_bh": 0.026737967914438502,
+          "pid": "test/number_theory/737.json",
+          "termination_shift": 0.25,
+          "within_answered_tv": 0.6666666666666666
+        },
+        {
+          "add": 0.75,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -0.75,
+          "perm_p": 0.01818181818181818,
+          "perm_p_bh": 0.026737967914438502,
+          "pid": "test/number_theory/864.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.75
+        },
+        {
+          "add": 0.875,
+          "entropy_shift": -0.1532615543388356,
+          "flip_mass": -0.25,
+          "perm_p": 0.07272727272727272,
+          "perm_p_bh": 0.099626400996264,
+          "pid": "test/prealgebra/105.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.875
+        },
+        {
+          "add": 0.5,
+          "entropy_shift": 0.017119222830582093,
+          "flip_mass": 0.0,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/prealgebra/1139.json",
+          "termination_shift": -0.125,
+          "within_answered_tv": 0.6666666666666666
+        },
+        {
+          "add": 0.75,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -0.75,
+          "perm_p": 0.01818181818181818,
+          "perm_p_bh": 0.026737967914438502,
+          "pid": "test/prealgebra/1233.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.75
+        },
+        {
+          "add": 0.75,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -0.75,
+          "perm_p": 0.01818181818181818,
+          "perm_p_bh": 0.026737967914438502,
+          "pid": "test/prealgebra/1247.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.75
+        },
+        {
+          "add": 0.0,
+          "entropy_shift": 0.0,
+          "flip_mass": -0.25,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/prealgebra/1302.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 0.75,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -0.75,
+          "perm_p": 0.01818181818181818,
+          "perm_p_bh": 0.026737967914438502,
+          "pid": "test/prealgebra/1388.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.75
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.2897207708399179,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.00481000481000481,
+          "pid": "test/prealgebra/1558.json",
+          "termination_shift": 0.25,
+          "within_answered_tv": 0.9999999999999999
+        },
+        {
+          "add": 0.25,
+          "entropy_shift": 0.6873351446188083,
+          "flip_mass": -0.25,
+          "perm_p": 0.3333333333333333,
+          "perm_p_bh": 0.38314176245210724,
+          "pid": "test/prealgebra/1622.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.25
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 0.028677924431394608,
+          "flip_mass": -0.125,
+          "perm_p": 0.030303030303030304,
+          "perm_p_bh": 0.04208754208754209,
+          "pid": "test/prealgebra/1646.json",
+          "termination_shift": 0.5,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 0.25,
+          "entropy_shift": 0.6873351446188083,
+          "flip_mass": -0.25,
+          "perm_p": 0.3333333333333333,
+          "perm_p_bh": 0.38314176245210724,
+          "pid": "test/prealgebra/1747.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.25
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.2897207708399179,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.00481000481000481,
+          "pid": "test/prealgebra/1761.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.00481000481000481,
+          "pid": "test/prealgebra/1840.json",
+          "termination_shift": 0.25,
+          "within_answered_tv": 0.9999999999999999
+        },
+        {
+          "add": 0.0,
+          "entropy_shift": 0.0,
+          "flip_mass": -0.5,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/prealgebra/192.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 0.0,
+          "entropy_shift": 0.0,
+          "flip_mass": 0.0,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/prealgebra/1924.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 0.0,
+          "entropy_shift": 0.0,
+          "flip_mass": 0.0,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/prealgebra/307.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 0.0,
+          "entropy_shift": 0.0,
+          "flip_mass": 0.0,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/prealgebra/572.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 0.5,
+          "entropy_shift": 1.2897207708399179,
+          "flip_mass": -0.375,
+          "perm_p": 0.09090909090909091,
+          "perm_p_bh": 0.11363636363636365,
+          "pid": "test/prealgebra/930.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.5
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.00481000481000481,
+          "pid": "test/prealgebra/951.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 0.25,
+          "entropy_shift": 0.6873351446188083,
+          "flip_mass": -0.25,
+          "perm_p": 0.3333333333333333,
+          "perm_p_bh": 0.38314176245210724,
+          "pid": "test/precalculus/1105.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.25
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.00481000481000481,
+          "pid": "test/precalculus/1146.json",
+          "termination_shift": 0.25,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.2897207708399179,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.00481000481000481,
+          "pid": "test/precalculus/1199.json",
+          "termination_shift": 0.5,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": 0.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.00481000481000481,
+          "pid": "test/precalculus/1300.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.2897207708399179,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.00481000481000481,
+          "pid": "test/precalculus/1303.json",
+          "termination_shift": 0.5,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -0.75,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.00481000481000481,
+          "pid": "test/precalculus/1313.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.2897207708399179,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.00481000481000481,
+          "pid": "test/precalculus/24313.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.3220241998634539,
+          "flip_mass": -0.875,
+          "perm_p": 0.010101010101010102,
+          "perm_p_bh": 0.021043771043771045,
+          "pid": "test/precalculus/285.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 0.75,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -0.75,
+          "perm_p": 0.01818181818181818,
+          "perm_p_bh": 0.026737967914438502,
+          "pid": "test/precalculus/34.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.75
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.2897207708399179,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.00481000481000481,
+          "pid": "test/precalculus/675.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.00481000481000481,
+          "pid": "test/precalculus/779.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 0.0,
+          "entropy_shift": 0.0,
+          "flip_mass": 0.0,
+          "perm_p": 1.0,
+          "perm_p_bh": 1.0,
+          "pid": "test/precalculus/807.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 0.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.00481000481000481,
+          "pid": "test/precalculus/927.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 1.0
+        },
+        {
+          "add": 1.0,
+          "entropy_shift": 1.7612943611198906,
+          "flip_mass": -1.0,
+          "perm_p": 0.00202020202020202,
+          "perm_p_bh": 0.00481000481000481,
+          "pid": "test/precalculus/990.json",
+          "termination_shift": 0.0,
+          "within_answered_tv": 1.0
+        }
+      ],
+      "press": "streamingllm",
+      "signed_flip_mass": {
+        "gained": 0.00125,
+        "lost": 0.6475,
+        "net": -0.64625
+      }
+    }
+  ],
+  "note": "ADD is answer-level distribution divergence (a lower bound on behavioral change), reported with signed flip-mass. Per-problem permutation power is low at small n; the powered unit is the benchmark via aggregation.",
+  "runs": {
+    "compression": "/home/sk10741/kvcache-storage/runs/grid-diss256-tok",
+    "fullcache": "/home/sk10741/kvcache-storage/runs/math500-fc-powered-merged"
+  }
+}

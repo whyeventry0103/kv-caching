@@ -1,0 +1,66 @@
+{
+  "cells": [
+    {
+      "budget": "256",
+      "compressed_accuracy": 0.2475,
+      "compressed_accuracy_ci95": [
+        0.18,
+        0.3175
+      ],
+      "compressed_correct": 99,
+      "full_accuracy": 0.8825,
+      "mean_auc_tv": null,
+      "mean_frac_above_p05": null,
+      "mean_frac_above_p10": null,
+      "mean_free_run_tokens": 4358.7825,
+      "mean_readout_tokens": 421.7425,
+      "mean_summed_tv": null,
+      "n_problems": 100,
+      "n_readout_undefined": 8,
+      "n_reverse_readout": 0,
+      "onset_nonnull": null,
+      "press": "h2o",
+      "readout_accuracy": 0.5969387755102041,
+      "readout_accuracy_ci95": [
+        0.5025,
+        0.6675
+      ],
+      "readout_change": -0.2855612244897958,
+      "readout_correct": 234,
+      "residual_bracket": null,
+      "reverse_readout_accuracy": null,
+      "reverse_readout_change": null,
+      "reverse_residual_ci95": null,
+      "rows": 400,
+      "signed_flip_mass": {
+        "gained": 0.0,
+        "lost": 0.6375,
+        "net": -0.6375
+      },
+      "total_change": -0.635,
+      "truncated": 42,
+      "truncation_rate": 0.105,
+      "unexplained_residual": -0.3494387755102042,
+      "unexplained_residual_ci95": [
+        -0.4025,
+        -0.27
+      ]
+    }
+  ],
+  "claim_discipline": "Residual is accuracy change unexplained by on-reference readout, not a measured cause.",
+  "full_cache": {
+    "accuracy": 0.8825,
+    "correct": 1765,
+    "rows": 2000,
+    "truncated": 38
+  },
+  "runs": {
+    "compression": "/home/sk10741/kvcache-storage/runs/grid-diss256-h2o",
+    "fullcache": "/home/sk10741/kvcache-storage/runs/math500-fc-powered-merged",
+    "readout": [
+      "/home/sk10741/kvcache-storage/runs/readout-diss256-h2o"
+    ],
+    "replay": null,
+    "reverse_readout": null
+  }
+}

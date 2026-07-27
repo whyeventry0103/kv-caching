@@ -1,0 +1,12 @@
+{
+  "classifications": {
+    "correct": 20
+  },
+  "grader_disagreements": 0,
+  "grader_false_negatives": 0,
+  "grader_false_positives": 0,
+  "grader_version": "hendrycks-is-equiv-v1",
+  "regraded_accuracy": 1.0,
+  "rows": 20,
+  "stored_accuracy": 1.0
+}

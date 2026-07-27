@@ -1,0 +1,125 @@
+{
+  "cells": [
+    {
+      "budget": "256",
+      "compressed_accuracy": 0.4225,
+      "compressed_accuracy_ci95": [
+        0.345,
+        0.5
+      ],
+      "compressed_correct": 169,
+      "full_accuracy": 0.8825,
+      "mean_auc_tv": 0.08572707710815623,
+      "mean_frac_above_p05": 0.30186585912686204,
+      "mean_frac_above_p10": 0.23862438204304737,
+      "mean_free_run_tokens": 8043.7075,
+      "mean_readout_tokens": 526.555,
+      "mean_summed_tv": 389.8544133681979,
+      "n_problems": 100,
+      "n_readout_undefined": 8,
+      "n_reverse_readout": 308,
+      "onset_nonnull": 400,
+      "press": "random",
+      "readout_accuracy": 0.7653061224489796,
+      "readout_accuracy_ci95": [
+        0.6858,
+        0.8167
+      ],
+      "readout_change": -0.1171938775510204,
+      "readout_correct": 300,
+      "residual_bracket": [
+        -0.34280612244897957,
+        -0.2461363636363636
+      ],
+      "reverse_readout_accuracy": 0.6363636363636364,
+      "reverse_readout_change": -0.2461363636363636,
+      "reverse_residual_ci95": [
+        -0.3832,
+        -0.2132
+      ],
+      "rows": 400,
+      "signed_flip_mass": {
+        "gained": 0.005,
+        "lost": 0.4675,
+        "net": -0.4625
+      },
+      "total_change": -0.45999999999999996,
+      "truncated": 93,
+      "truncation_rate": 0.2325,
+      "unexplained_residual": -0.34280612244897957,
+      "unexplained_residual_ci95": [
+        -0.4017,
+        -0.2583
+      ]
+    },
+    {
+      "budget": "256",
+      "compressed_accuracy": 0.2375,
+      "compressed_accuracy_ci95": [
+        0.175,
+        0.305
+      ],
+      "compressed_correct": 95,
+      "full_accuracy": 0.8825,
+      "mean_auc_tv": 0.08287845470538871,
+      "mean_frac_above_p05": 0.2913716332681214,
+      "mean_frac_above_p10": 0.2280416293430822,
+      "mean_free_run_tokens": 5273.74,
+      "mean_readout_tokens": 679.51,
+      "mean_summed_tv": 394.2758461542954,
+      "n_problems": 100,
+      "n_readout_undefined": 8,
+      "n_reverse_readout": 372,
+      "onset_nonnull": 400,
+      "press": "streamingllm",
+      "readout_accuracy": 0.5841836734693877,
+      "readout_accuracy_ci95": [
+        0.495,
+        0.6475
+      ],
+      "readout_change": -0.29831632653061224,
+      "readout_correct": 229,
+      "residual_bracket": [
+        -0.46583333333333327,
+        -0.3466836734693878
+      ],
+      "reverse_readout_accuracy": 0.4166666666666667,
+      "reverse_readout_change": -0.46583333333333327,
+      "reverse_residual_ci95": [
+        -0.5529,
+        -0.41
+      ],
+      "rows": 400,
+      "signed_flip_mass": {
+        "gained": 0.0025,
+        "lost": 0.65,
+        "net": -0.6475
+      },
+      "total_change": -0.645,
+      "truncated": 28,
+      "truncation_rate": 0.07,
+      "unexplained_residual": -0.3466836734693878,
+      "unexplained_residual_ci95": [
+        -0.4025,
+        -0.2675
+      ]
+    }
+  ],
+  "claim_discipline": "Residual is accuracy change unexplained by on-reference readout, not a measured cause.",
+  "full_cache": {
+    "accuracy": 0.8825,
+    "correct": 1765,
+    "rows": 2000,
+    "truncated": 38
+  },
+  "runs": {
+    "compression": "/home/sk10741/kvcache-storage/runs/grid-diss256-tok",
+    "fullcache": "/home/sk10741/kvcache-storage/runs/math500-fc-powered-merged",
+    "readout": [
+      "/home/sk10741/kvcache-storage/runs/readout-diss256-g0",
+      "/home/sk10741/kvcache-storage/runs/readout-diss256-g1"
+    ],
+    "replay": "/home/sk10741/kvcache-storage/runs/replay-diss256",
+    "reverse_readout": "/home/sk10741/kvcache-storage/runs/reverse-readout-diss256"
+  }
+}
