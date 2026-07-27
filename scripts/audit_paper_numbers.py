@@ -26,8 +26,10 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
 from kvcache.paper_numbers import (
+    REFERENCE_RELATIVE_ARTIFACTS,
     Entry,
     check_guarded_section,
+    check_reference_conventions,
     classify,
     extract_literals,
     summarise,
@@ -241,7 +243,31 @@ def main() -> int:
                 "\n4-CURRENT gate: clean (no archival exemption, all literals sourced)"
             )
 
-    if args.strict and (unsourced or guarded_problems):
+    # Amendment K enforcement. The defect class is "a quantity compared against
+    # the reference", and the fix was once applied to nine cells and stopped
+    # there. Every artifact in that class must now declare the convention it was
+    # computed under, so an undeclared or stale one fails the gate rather than
+    # waiting to be noticed.
+    diag = PROJECT_ROOT / "results" / "diag"
+    loaded: dict[str, dict] = {}
+    for name in REFERENCE_RELATIVE_ARTIFACTS:
+        for candidate in (diag / "amendment-k" / name, diag / name):
+            if candidate.exists():
+                loaded[name] = json.loads(candidate.read_text(encoding="utf-8"))
+                break
+    convention_problems = check_reference_conventions(loaded)
+    if convention_problems:
+        print(f"\nREFERENCE-CONVENTION GATE FAILED ({len(convention_problems)}):")
+        for problem in convention_problems:
+            print(f"  {problem}")
+    else:
+        print(
+            f"reference-convention gate: clean "
+            f"({len(REFERENCE_RELATIVE_ARTIFACTS)} artifacts declare "
+            f"amendment-k-cell-population)"
+        )
+
+    if args.strict and (unsourced or guarded_problems or convention_problems):
         return 1
     return 0
 

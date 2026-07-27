@@ -292,3 +292,87 @@ def test_guarded_section_gate_reports_a_missing_section():
 
     problems = check_guarded_section("# Findings\n\nno current section\n", _cat())
     assert any("no 4-CURRENT section" in p for p in problems)
+
+
+def test_reference_convention_gate_accepts_a_declared_artifact():
+    from kvcache.paper_numbers import (
+        CURRENT_REFERENCE_CONVENTION,
+        REFERENCE_RELATIVE_ARTIFACTS,
+        check_reference_conventions,
+    )
+
+    good = {
+        name: {"reference_convention": CURRENT_REFERENCE_CONVENTION}
+        for name in REFERENCE_RELATIVE_ARTIFACTS
+    }
+    assert check_reference_conventions(good) == []
+
+
+def test_reference_convention_gate_catches_an_undeclared_artifact():
+    """The exact state the four ADD artifacts were in: compliant, undeclared."""
+    from kvcache.paper_numbers import (
+        CURRENT_REFERENCE_CONVENTION,
+        REFERENCE_RELATIVE_ARTIFACTS,
+        check_reference_conventions,
+    )
+
+    payloads = {
+        name: {"reference_convention": CURRENT_REFERENCE_CONVENTION}
+        for name in REFERENCE_RELATIVE_ARTIFACTS
+    }
+    payloads[REFERENCE_RELATIVE_ARTIFACTS[0]] = {"mean_add": 0.5}
+    problems = check_reference_conventions(payloads)
+    assert any("declares no reference_convention" in p for p in problems)
+
+
+def test_reference_convention_gate_catches_a_stale_convention():
+    from kvcache.paper_numbers import (
+        CURRENT_REFERENCE_CONVENTION,
+        REFERENCE_RELATIVE_ARTIFACTS,
+        check_reference_conventions,
+    )
+
+    payloads = {
+        name: {"reference_convention": CURRENT_REFERENCE_CONVENTION}
+        for name in REFERENCE_RELATIVE_ARTIFACTS
+    }
+    payloads[REFERENCE_RELATIVE_ARTIFACTS[1]] = {"reference_convention": "pre-k-bank"}
+    problems = check_reference_conventions(payloads)
+    assert any("expected" in p for p in problems)
+
+
+def test_reference_convention_gate_allows_an_explicitly_retired_value():
+    """fc-readout-control keeps its pre-K figure on purpose, so the stale number
+    stays recognisable. That must not read as a regression."""
+    from kvcache.paper_numbers import (
+        CURRENT_REFERENCE_CONVENTION,
+        REFERENCE_RELATIVE_ARTIFACTS,
+        check_reference_conventions,
+    )
+
+    payloads = {
+        name: {"reference_convention": CURRENT_REFERENCE_CONVENTION}
+        for name in REFERENCE_RELATIVE_ARTIFACTS
+    }
+    payloads["fc-readout-control.json"] = {
+        "reference_convention": CURRENT_REFERENCE_CONVENTION,
+        "resampling_effect_unmatched_RETIRED": 0.023,
+    }
+    assert check_reference_conventions(payloads) == []
+    # ...but the same value NOT marked retired is a failure.
+    payloads["fc-readout-control.json"] = {
+        "reference_convention": CURRENT_REFERENCE_CONVENTION,
+        "resampling_effect_unmatched": 0.023,
+    }
+    assert any(
+        "not\n" not in p and "pre-Amendment-K" in p
+        for p in check_reference_conventions(payloads)
+    )
+
+
+def test_reference_convention_gate_treats_a_missing_artifact_as_failure():
+    """Silently passing because a file was absent is how a class-wide check
+    stops checking anything."""
+    from kvcache.paper_numbers import check_reference_conventions
+
+    assert any("missing" in p for p in check_reference_conventions({}))

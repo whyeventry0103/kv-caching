@@ -307,7 +307,7 @@
           "perm_p_bh": 0.9199134199134199,
           "pid": "test/counting_and_probability/525.json",
           "termination_shift": 0.125,
-          "within_answered_tv": 0.9999999999999998
+          "within_answered_tv": 0.9999999999999999
         },
         {
           "add": 0.25,
@@ -537,7 +537,7 @@
           "perm_p_bh": 0.00808080808080808,
           "pid": "test/intermediate_algebra/47.json",
           "termination_shift": 0.25,
-          "within_answered_tv": 0.9999999999999999
+          "within_answered_tv": 1.0
         },
         {
           "add": 1.0,
@@ -677,7 +677,7 @@
           "perm_p_bh": 0.00808080808080808,
           "pid": "test/number_theory/737.json",
           "termination_shift": 0.25,
-          "within_answered_tv": 1.0
+          "within_answered_tv": 0.9999999999999999
         },
         {
           "add": 0.0,
@@ -807,7 +807,7 @@
           "perm_p_bh": 0.04914004914004914,
           "pid": "test/prealgebra/1840.json",
           "termination_shift": 0.25,
-          "within_answered_tv": 0.6666666666666666
+          "within_answered_tv": 0.6666666666666667
         },
         {
           "add": 0.0,
@@ -1019,6 +1019,8 @@
     }
   ],
   "note": "ADD is answer-level distribution divergence (a lower bound on behavioral change), reported with signed flip-mass. Per-problem permutation power is low at small n; the powered unit is the benchmark via aggregation.",
+  "reference_convention": "amendment-k-cell-population",
+  "reference_convention_basis": "per-problem paired: flip mass is mean over pids of (compressed accuracy on pid - FC accuracy on pid), intersected on pid, so no reference-mean population question arises",
   "runs": {
     "compression": "/home/sk10741/kvcache-storage/runs/grid-diss256-rkv",
     "fullcache": "/home/sk10741/kvcache-storage/runs/math500-fc-powered-merged"

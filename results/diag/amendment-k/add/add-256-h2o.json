@@ -307,7 +307,7 @@
           "perm_p_bh": 0.1652892561983471,
           "pid": "test/counting_and_probability/525.json",
           "termination_shift": 0.625,
-          "within_answered_tv": 0.9999999999999998
+          "within_answered_tv": 1.0
         },
         {
           "add": 0.5,
@@ -417,7 +417,7 @@
           "perm_p_bh": 0.04887585532746823,
           "pid": "test/intermediate_algebra/1197.json",
           "termination_shift": 0.125,
-          "within_answered_tv": 0.9999999999999999
+          "within_answered_tv": 1.0
         },
         {
           "add": 0.75,
@@ -437,7 +437,7 @@
           "perm_p_bh": 0.00505050505050505,
           "pid": "test/intermediate_algebra/1247.json",
           "termination_shift": 0.25,
-          "within_answered_tv": 1.0
+          "within_answered_tv": 0.9999999999999999
         },
         {
           "add": 0.25,
@@ -537,7 +537,7 @@
           "perm_p_bh": 0.00505050505050505,
           "pid": "test/intermediate_algebra/47.json",
           "termination_shift": 0.25,
-          "within_answered_tv": 0.9999999999999999
+          "within_answered_tv": 1.0
         },
         {
           "add": 1.0,
@@ -617,7 +617,7 @@
           "perm_p_bh": 0.00505050505050505,
           "pid": "test/number_theory/45.json",
           "termination_shift": 0.25,
-          "within_answered_tv": 1.0
+          "within_answered_tv": 0.9999999999999999
         },
         {
           "add": 0.25,
@@ -747,7 +747,7 @@
           "perm_p_bh": 0.00505050505050505,
           "pid": "test/prealgebra/1388.json",
           "termination_shift": 0.25,
-          "within_answered_tv": 0.9999999999999999
+          "within_answered_tv": 1.0
         },
         {
           "add": 1.0,
@@ -917,7 +917,7 @@
           "perm_p_bh": 0.00505050505050505,
           "pid": "test/precalculus/1303.json",
           "termination_shift": 0.25,
-          "within_answered_tv": 1.0
+          "within_answered_tv": 0.9999999999999999
         },
         {
           "add": 1.0,
@@ -1019,6 +1019,8 @@
     }
   ],
   "note": "ADD is answer-level distribution divergence (a lower bound on behavioral change), reported with signed flip-mass. Per-problem permutation power is low at small n; the powered unit is the benchmark via aggregation.",
+  "reference_convention": "amendment-k-cell-population",
+  "reference_convention_basis": "per-problem paired: flip mass is mean over pids of (compressed accuracy on pid - FC accuracy on pid), intersected on pid, so no reference-mean population question arises",
   "runs": {
     "compression": "/home/sk10741/kvcache-storage/runs/grid-diss256-h2o",
     "fullcache": "/home/sk10741/kvcache-storage/runs/math500-fc-powered-merged"

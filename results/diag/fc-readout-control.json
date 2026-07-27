@@ -6,7 +6,7 @@
   "n_reference_rows": 2000,
   "n_matched_rows": 392,
   "fc_accuracy_matched": 0.9030612244897959,
-  "fc_accuracy_unmatched": 0.8825,
   "resampling_effect_matched": 0.0025510204081633514,
-  "resampling_effect_unmatched_RETIRED": 0.023112244897959267
+  "resampling_effect_unmatched_RETIRED": 0.023112244897959267,
+  "fc_accuracy_unmatched_RETIRED": 0.8825
 }

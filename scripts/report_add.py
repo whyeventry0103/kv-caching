@@ -151,6 +151,19 @@ def build_add_report(
             "fullcache": str(fullcache_root),
             "compression": str(compression_root),
         },
+        # Amendment K applies to signed flip-mass, which IS reference-relative
+        # (compressed minus full-cache accuracy). It is compliant by
+        # construction rather than by correction: the difference is formed
+        # per-problem against that same problem's reference rows, and pids
+        # absent from the reference bank are skipped, so the two sides are
+        # always the same population. Declared explicitly so the sweep can
+        # verify it mechanically instead of by re-reading this loop.
+        "reference_convention": "amendment-k-cell-population",
+        "reference_convention_basis": (
+            "per-problem paired: flip mass is mean over pids of "
+            "(compressed accuracy on pid - FC accuracy on pid), intersected on "
+            "pid, so no reference-mean population question arises"
+        ),
         "note": (
             "ADD is answer-level distribution divergence (a lower bound on behavioral "
             "change), reported with signed flip-mass. Per-problem permutation power is "

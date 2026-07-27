@@ -381,3 +381,80 @@ def check_guarded_section(text: str, catalogue: list[Entry]) -> list[str]:
                 f"4-CURRENT has an unsourced literal {lit.raw!r}: {lit.context[:70]}"
             )
     return problems
+
+
+# Artifacts that carry at least one reference-relative quantity -- a value
+# formed by comparing something against the full-cache reference. Amendment K
+# was a defect in exactly this class, and it was applied to the decomposition
+# cells and stopped there, leaving the retired comparison inside
+# fc-readout-control for weeks. Enumerating the class and checking it
+# mechanically is what converts "we checked" into "it cannot regress".
+#
+# Membership is by *quantity*, not by producer: an artifact belongs here if any
+# number in it is a difference against the reference, however it was computed.
+REFERENCE_RELATIVE_ARTIFACTS = (
+    "m4-powered-diss256-summary.json",
+    "m4-h2o256-full-summary.json",
+    "m4-rkv-256-summary.json",
+    "m4-2048-summary.json",
+    "m4-2048-h2o-summary.json",
+    "m4-aime-2048-summary.json",
+    "m4-llama-256-summary.json",
+    "m4-q15b-256-summary.json",
+    "m4-q14b-256-summary.json",
+    "add/add-256-randslm.json",
+    "add/add-256-h2o.json",
+    "add/add-256-rkv.json",
+    "add/add-2048.json",
+    "fc-readout-control.json",
+)
+
+CURRENT_REFERENCE_CONVENTION = "amendment-k-cell-population"
+
+# Values that identify a pre-Amendment-K artifact even if it claims compliance:
+# the unmatched full-bank means that the retired convention differenced against.
+_PRE_K_MARKERS = ("unmatched", "subset-vs-bank", "pre-amendment-k")
+
+
+def check_reference_conventions(
+    artifacts: dict[str, dict[str, Any]],
+) -> list[str]:
+    """Verify every reference-relative artifact declares the current convention.
+
+    ``artifacts`` maps a name (as listed in
+    :data:`REFERENCE_RELATIVE_ARTIFACTS`) to its loaded payload. A missing
+    artifact is a failure, not a skip: silently passing because a file was not
+    found is how a class-wide check stops checking anything.
+
+    A retired value may still appear, but only under a key that names it as
+    retired -- fc-readout-control deliberately keeps its pre-K figure so the
+    stale number stays recognisable, and that must not be mistaken for a
+    regression.
+    """
+    problems: list[str] = []
+    for name in REFERENCE_RELATIVE_ARTIFACTS:
+        payload = artifacts.get(name)
+        if payload is None:
+            problems.append(f"{name}: reference-relative artifact missing")
+            continue
+        declared = payload.get("reference_convention")
+        if declared is None:
+            problems.append(
+                f"{name}: carries a reference-relative quantity but declares no "
+                "reference_convention"
+            )
+        elif declared != CURRENT_REFERENCE_CONVENTION:
+            problems.append(
+                f"{name}: reference_convention is {declared!r}, expected "
+                f"{CURRENT_REFERENCE_CONVENTION!r}"
+            )
+        for key in payload:
+            lowered = key.lower()
+            if any(marker in lowered for marker in _PRE_K_MARKERS) and (
+                "retired" not in lowered
+            ):
+                problems.append(
+                    f"{name}: key {key!r} looks pre-Amendment-K and is not "
+                    "marked RETIRED"
+                )
+    return problems

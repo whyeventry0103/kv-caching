@@ -915,3 +915,70 @@ it does, our "no >100% regime at 7B" finding is confirmed as scale-specific
 exactly as Amendment E anticipated, and if it does not, the published claim does
 not replicate under a parity-certified port and that is a finding about the
 claim.
+
+---
+
+## Amendment K, addendum (2026-07-28): the fix was incomplete, and the class is now swept and enforced
+
+**Disclosure first: Amendment K was applied to the nine decomposition cells and
+stopped there.** For roughly a day the retired mismatched-population comparison
+remained inside `fc-readout-control` — the control whose only job is to calibrate
+the readout channel against the "readout is easy by construction" objection. It
+differenced `Acc_ro(FC) = 0.9056`, defined on 392 rows, against the 2000-row bank
+at `0.8825`, giving `+0.023`. On the matched population the answer-resampling
+effect is **`+0.003`**. The correction happens to *help* the paper — the residuals
+are two orders of magnitude above the control rather than one — so per the
+standing rule the timing is disclosed here rather than quietly banked, and the
+old value is retained in the artifact under `resampling_effect_unmatched_RETIRED`
+so it stays recognisable.
+
+That a systemic fix could be applied to nine artifacts and miss a tenth is the
+generalisable lesson, not the instance. The class has now been enumerated,
+classified, and made enforceable.
+
+### The sweep
+
+Every code path that computes a quantity against a reference, classified. "K-irrelevant"
+carries a reason; assertion alone was not accepted.
+
+| Path | Class | Reason |
+|---|---|---|
+| `scripts/report_m4.py` | **K-compliant** | Emits `full_accuracy` = the cell's own reference population (line ~379) as the comparator for every change; the 2000-row bank figure is emitted separately as `full_accuracy_all_rows` and at `#/full_cache/accuracy` for provenance only. Declares `reference_convention`. Layer-1 `primary_bounds` fix the population at all cell conditions. |
+| `scripts/harvest_results.py` (`readout_acc`) | **was K-violating, now compliant** | The finding above. Now restricts the bank to the readout-defined conditions and emits `fc_accuracy_matched`, `resampling_effect_matched`, and `reference_convention`; the retired form is kept under an explicit `_RETIRED` suffix. |
+| `scripts/report_add.py` | **K-irrelevant, now declared** | Signed flip-mass *is* reference-relative, but it is formed per problem: mean over pids of (compressed accuracy on that pid − FC accuracy on that pid), with pids absent from the reference bank skipped. Both sides are the same population by construction, so no reference-mean question arises. ADD itself is a per-problem distribution TV, likewise paired. Now declares the convention and the basis so this is machine-checkable rather than re-derivable only by reading the loop. |
+| `scripts/report_two_fc_control.py` | **K-irrelevant** | Compares two full-cache banks to each other, paired on pid. There is no compressed arm and no defined-subset restriction. |
+| `scripts/report_self_replay.py` | **K-irrelevant** | Emits TV quantities (`global_mean_tv` and per-profile summaries). No accuracy, no reference mean. |
+| `scripts/report_tv_windows.py` | **K-irrelevant** | Windowed per-step TV over replay profiles. Distribution-fidelity scale; never differenced against an accuracy. |
+| `scripts/report_policy_contrast.py` | **K-irrelevant** | Random vs StreamingLLM, paired per problem. The full-cache reference does not enter the statistic at all. |
+| `scripts/report_residual_contrast.py` | **K-irrelevant, and provably so** | The per-problem residual is `free − readout`; `Acc_FC` cancels exactly out of `(free − Acc_FC) − (readout − Acc_FC)`. This contrast cannot be affected by the reference-population choice. |
+| `scripts/report_resolution.py` | **K-irrelevant** | Compares free-run spread against readout spread. Both are within-protocol spreads; no reference term. |
+| `scripts/report_compute.py`, `scripts/report_prompt_lengths.py` | **K-irrelevant** | Wall-clock and token counts. No accuracy. |
+| `scripts/diagnose_math_failures.py` | **K-irrelevant** | Per-row regrade and classification. Compares a row to its own gold, never to a population mean. |
+| `src/kvcache/decomposition.py` | **K-compliant** | Defines the estimands; the reverse endpoint's collapse to `acc_rev − acc_fc` is documented in the module. Population selection happens in the caller. |
+| `src/kvcache/stats.py` | **K-irrelevant** | `paired_policy_contrast`, `paired_residual_contrast`, `resolution_spread` and `percentile_ci_mc_error` are all paired or within-protocol; none takes a reference mean. |
+| `src/kvcache/metrics/add.py`, `tdp.py`, `noise_control.py` | **K-irrelevant** | Distribution-scale instruments. `noise_control` compares TV profiles to TV profiles. |
+| `scripts/make_paper_figures.py` | **K-compliant** | Since 2026-07-27 it loads every constant from `paper_numbers.json`, so it inherits the convention rather than holding a copy. It names `FC_BANK` and `FC` separately so the two references cannot be confused. |
+
+**Retired-pattern grep.** Searching the tree for a defined-subset accuracy
+differenced against a full-bank mean returned three hits, all accounted for:
+`harvest_results.py` (the deliberately retained `_RETIRED` value),
+`report_m4.py:236` (the bank figure, emitted as provenance and never used as a
+comparator — verified by tracing all four of its uses), and
+`report_self_replay.py:58` (a TV mean, not an accuracy). **No K-violating path
+remains.**
+
+### Enforcement
+
+`kvcache.paper_numbers.check_reference_conventions` enumerates the fourteen
+artifacts that carry a reference-relative quantity and fails the audit gate if
+any lacks `reference_convention`, declares a value other than
+`amendment-k-cell-population`, or carries a key whose name marks it pre-K
+without marking it retired. A missing artifact is a failure rather than a skip:
+silently passing because a file was absent is how a class-wide check stops
+checking anything. This runs in `make audit`, so the class cannot regress
+unnoticed the way it did here.
+
+Building the check immediately caught the four ADD artifacts, which were
+compliant but undeclared — exactly the state in which a future reader has to
+re-derive compliance by reading the code, which is what allowed the original
+omission.

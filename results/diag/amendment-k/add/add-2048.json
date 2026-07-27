@@ -1264,7 +1264,7 @@
           "perm_p_bh": 0.06734006734006734,
           "pid": "test/algebra/892.json",
           "termination_shift": 0.25,
-          "within_answered_tv": 0.9999999999999999
+          "within_answered_tv": 1.0
         },
         {
           "add": 0.0,
@@ -1494,7 +1494,7 @@
           "perm_p_bh": 0.06734006734006734,
           "pid": "test/intermediate_algebra/1849.json",
           "termination_shift": 0.25,
-          "within_answered_tv": 1.0
+          "within_answered_tv": 0.9999999999999999
         },
         {
           "add": 0.5,
@@ -1794,7 +1794,7 @@
           "perm_p_bh": 0.7575757575757576,
           "pid": "test/prealgebra/1646.json",
           "termination_shift": 0.25,
-          "within_answered_tv": 0.9999999999999999
+          "within_answered_tv": 1.0
         },
         {
           "add": 0.0,
@@ -2036,6 +2036,8 @@
     }
   ],
   "note": "ADD is answer-level distribution divergence (a lower bound on behavioral change), reported with signed flip-mass. Per-problem permutation power is low at small n; the powered unit is the benchmark via aggregation.",
+  "reference_convention": "amendment-k-cell-population",
+  "reference_convention_basis": "per-problem paired: flip mass is mean over pids of (compressed accuracy on pid - FC accuracy on pid), intersected on pid, so no reference-mean population question arises",
   "runs": {
     "compression": "/home/sk10741/kvcache-storage/runs/grid-diss2048-tok",
     "fullcache": "/home/sk10741/kvcache-storage/runs/math500-fc-powered-merged"
