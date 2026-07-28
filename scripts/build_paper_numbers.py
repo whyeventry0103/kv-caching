@@ -831,6 +831,25 @@ def build_catalogue() -> list[Entry]:
         )
         grader_total_rows += int(payload["rows"])
         grader_total_disagreements += int(payload["grader_disagreements"])
+    # Worst-case grader bias in each accuracy CHANGE: the treated arm's
+    # under-crediting rate minus the control arm's. This is the quantity the
+    # threat is actually about -- a rate that is high in both arms biases
+    # nothing. Quoted in section 5; it had no entry, and was passing the gate
+    # only because the old sign-blind lookup matched it to a positive value.
+    by_key.update({e.key: e.value for e in entries})
+    _control = "grader.math500-fc-powered-merged.xc_worst_shift"
+    if _control in by_key:
+        for cell in ("tok", "h2o", "rkv"):
+            treated = f"grader.{cell}.xc_worst_shift"
+            if treated in by_key:
+                derive(
+                    f"grader.{cell}.xc_bias_vs_control",
+                    by_key[treated] - by_key[_control],
+                    f"{treated} - {_control}",
+                    (treated, _control),
+                    "worst-case bias in this cell's accuracy change",
+                )
+
     if grader_total_rows:
         gsrc = f"sum over {grader_dir.relative_to(PROJECT_ROOT)}/*.json"
         add(

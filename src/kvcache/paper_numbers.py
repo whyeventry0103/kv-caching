@@ -161,17 +161,41 @@ class Entry:
         honest rule is that rounding a fractional quantity to zero places
         destroys it, whatever its magnitude; counts (wins, problems, profiles,
         the onset step) are genuinely integers and still match their bare form.
+
+        See :meth:`display_rules` for the same set with each form attributed to
+        the rule that produced it. That attribution is what lets a test assert
+        "no rule, no match" rather than re-encoding the rules a second time.
         """
-        out: set[str] = set()
+        return set(self.display_rules(places))
+
+    def display_rules(
+        self, places: tuple[int, ...] = (0, 1, 2, 3, 4)
+    ) -> dict[str, str]:
+        """Display string -> the name of the rule that licenses it.
+
+        The rules are data, not prose, because this module has now had three
+        separate defects in which a display form was produced by no stated rule
+        at all (the bibliography label, the zero-place inflation, and its
+        replacement which still let a fractional value claim its integer
+        rounding). Each was found by accident. With the rules enumerated, a
+        property test can assert the invariant -- every sourced match is
+        reproducible from a named rule -- instead of testing the instances
+        somebody already noticed.
+        """
+        out: dict[str, str] = {}
+
+        def offer(form: str, rule: str) -> None:
+            out.setdefault(form.lstrip("+"), rule)
+
         if self.value.is_integer():
-            out.add(f"{self.value:.0f}")
-            out.add(f"{abs(self.value):.0f}")
+            offer(f"{self.value:.0f}", "integer-valued")
+            offer(f"{abs(self.value):.0f}", "integer-valued-magnitude")
         for p in places:
             if p == 0:
                 continue
-            out.add(f"{self.value:.{p}f}")
-            out.add(f"{abs(self.value):.{p}f}")
-        return {s.lstrip("+") for s in out}
+            offer(f"{self.value:.{p}f}", f"round-{p}")
+            offer(f"{abs(self.value):.{p}f}", f"round-{p}-magnitude")
+        return out
 
 
 @dataclass
@@ -206,9 +230,14 @@ def strip_latex_noise(text: str) -> str:
         text = "".join("\n" if ch == "\n" else " " for ch in head) + text[start:]
     # Strip comments (an unescaped % to end of line).
     text = re.sub(r"(?<!\\)%[^\n]*", blank, text)
-    # Strip the bibliography: its label width, then its entire body.
-    text = _STRUCTURAL_ENVIRONMENTS.sub(blank, text)
+    # Strip the bibliography BODY FIRST, then any surviving label width.
+    # Order is load-bearing and was wrong: blanking the label width destroys the
+    # "\begin{thebibliography}" anchor that the body pattern searches for, so
+    # the body was never stripped at all. That went unnoticed because arXiv IDs
+    # were being excluded by the separate identifier rule and the remaining
+    # numbers fell into the "year" bucket -- the symptom was masked, not absent.
     text = _BIBLIOGRAPHY_BODY.sub(blank, text)
+    text = _STRUCTURAL_ENVIRONMENTS.sub(blank, text)
     # Strip structural commands together with their bracketed/braced arguments.
     for name in _STRIP_COMMANDS:
         pattern = re.compile(
@@ -308,8 +337,16 @@ def classify(
         if lit.value in allowed_f:
             lit.classification = "protocol"
             continue
-        stripped = lit.raw.replace("{,}", "").lstrip("-")
-        keys = by_display.get(stripped) or by_display.get(lit.raw.replace("{,}", ""))
+        # Look the literal up AS WRITTEN. Every entry already offers both its
+        # signed form and its magnitude ("a residual of 0.34"), so stripping the
+        # sign here adds nothing and costs correctness: it let a literal of
+        # -0.343 be sourced to an entry whose value is +0.343, which no display
+        # rule of that entry produces. In this paper residuals are negative and
+        # plenty of quantities are positive, so sign-blind attribution can name
+        # a source of the wrong sign. Found by the property test asserting that
+        # every sourced match is reproducible from a declared rule.
+        raw = lit.raw.replace("{,}", "")
+        keys = by_display.get(raw)
         if keys:
             # An EXACT value match outranks one that only holds after rounding.
             # Without this, a literal is attributed to whichever catalogue entry

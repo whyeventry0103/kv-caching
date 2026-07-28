@@ -497,7 +497,15 @@ def main() -> int:
         now, args.stop_hour, args.stop_minute
     )
     if not max_hours:
-        log(f"<1h to {args.stop_hour}:{args.stop_minute:02d} stop -> no launch")
+        # Distinguish "the window is nearly over" from "we are outside it
+        # entirely". Both correctly refuse, but they need different responses:
+        # the first is normal end-of-session, the second means cron fired off
+        # schedule or someone ran it by hand. Reporting both as "<1h to stop"
+        # cost a session a diagnosis of a launch that was simply not yet due.
+        stop_label = f"{args.stop_hour}:{args.stop_minute:02d}"
+        past_stop = (now.hour, now.minute) >= (args.stop_hour, args.stop_minute)
+        reason = "past today's stop" if past_stop else "<1h to stop"
+        log(f"{reason} ({stop_label}); next window opens 01:45 -> no launch")
         return 0
 
     gpus = parse_fake_gpus(args.fake_gpus) if args.fake_gpus else query_gpus()
