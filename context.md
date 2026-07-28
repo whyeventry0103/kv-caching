@@ -18,6 +18,49 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ VERIFICATION PASS (2026-07-28) — three gates now, and two real
+  defects found by sampling the OUTPUT rather than re-running the gate.**
+  **(1) The grader audit was measuring nothing.** `diagnose_math_failures.py`
+  re-scored with the *same* `is_equiv` on the *same* stored answers, so 0/1600
+  disagreements was true by construction — a replay-determinism check wearing a
+  grader-validity label. Now cross-checked against an **independent**
+  normalization (sympify canonical form on the extracted answer; `math_verify`
+  is in neither pinned stack). Real result: the two disagree on **0.6–2.8%** of
+  comparable rows, and the treated arms **bracket** the FC arm (1.2 / 2.8 / 0.6
+  vs 1.1%) rather than exceeding it, so the asymmetry the threat needs is
+  absent. Worst-case bias in any Δ: **−0.001 / +0.014 / −0.006** — ≤0.014, no
+  consistent sign, ~24× below the residuals. Candidates for human review, not
+  corrections; still not human verification.
+  **(2) Layer-1 bounds are NOT confidence intervals** and my "tighter, clears
+  zero more comfortably" framing was wrong. They are deterministic, width
+  exactly `n_undef/N`, zero sampling uncertainty. Defined explicitly in §3 now,
+  with "no uncertainty statement attaches to them; every inferential claim rests
+  on the complete-case CI", and three significance-shaped uses rewritten.
+  **(3) Amendment K swept across the whole class** (15 paths classified with
+  reasons, in a K addendum) and made **enforceable**:
+  `check_reference_conventions` fails the gate on any of 14 reference-relative
+  artifacts lacking `reference_convention`. Building it immediately caught the
+  4 ADD artifacts (compliant but *undeclared* — the exact state that let the
+  original omission happen).
+  **(4) D.4 sampling the rendered PDF caught two sites the gate PASSES**: §2 and
+  §4.3 used the 0.882 bank where the 0.885 matched comparator belongs (0.882 is
+  catalogued, so the gate is silent). **The gate proves a value is in the
+  catalogue; it does not prove it is the right quantity for that sentence.**
+  **(5) Class A locators VERIFIED against the sources** (DeepSeek Table 5:
+  7B=92.8, 14B=93.9; R-KV abstract verbatim 105%/16%, model confirmed, dataset
+  inferred). Source says 16%, not ~16% — our tilde removed.
+  **(6) Personal email out of source** (env-var + refuse-to-send).
+  **(7) BACKUP EXPOSURE — needs your decision.** Remote is current for source
+  (218/218 byte-identical) but **not complete**: its git clone is pinned at
+  `3e19f8b` with none of our 19 unpushed commits, and it has **no
+  `results/diag`**. The committed artifacts the Reproducibility claim depends on
+  exist in exactly one place.
+  Honest before/after under ONE extractor definition: unsourced **278 → 0**
+  (total 1577 → 1062; the drop is arXiv IDs/model scales/section refs/dates no
+  longer counted as claims). Gates: lint, **219 tests**, dryrun, audit --strict
+  0, PDF ×2 25pp. The 1.40422pt Overfull is **pre-existing** (identical at
+  `55be556`). A **git stash** from an earlier session exists — NOT dropped.
+
   **★★★★ UNIT 9.4 + UNIT 10 + PART D (2026-07-28).**
   **Grader audit: CLEAN, and it found a script bug on the way.** All three
   budget-256 compressed cells re-graded: **0 disagreements over 1600 rows**, 0
