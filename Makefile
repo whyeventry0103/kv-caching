@@ -1,4 +1,4 @@
-.PHONY: lint test dryrun audit parity sync sync-apply setup check smoke bank grid replay metrics figures
+.PHONY: lint test dryrun audit parity integrate sync sync-apply setup check smoke bank grid replay metrics figures
 
 PYTHON := $(if $(wildcard .venv/bin/python),.venv/bin/python,python)
 RUFF := $(if $(wildcard .venv/bin/ruff),.venv/bin/ruff,ruff)
@@ -26,6 +26,13 @@ audit:
 # old commit with no results/ at all, which is invisible to a hash of the source.
 parity:
 	$(PYTHON) scripts/check_parity.py --strict
+
+# Integrate a finished cell: harvest -> recatalogue -> gate -> figures -> PDF,
+# printing a before/after diff of every number that moved. UNIT=<harvest unit>.
+# It does not edit the .tex: docs/INTEGRATION_CHECKLIST.md holds the
+# pre-registered read that says what the result means.
+integrate:
+	$(PYTHON) scripts/integrate_cell.py --unit $(UNIT)
 
 dryrun:
 	$(PYTHON) scripts/build_bank.py --config configs/experiments/smoke_fullcache.yaml --dry-run
