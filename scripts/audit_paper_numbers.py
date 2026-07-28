@@ -131,6 +131,12 @@ PROTOCOL_FLOATS = {
     0.95,  # top-p
     2.5,
     97.5,  # percentile-interval indices
+    # Pre-registered decision thresholds. These are protocol -- the value was
+    # fixed in PREREGISTRATION before the data existed -- and must not be
+    # sourced to whichever measurement happens to equal them. The 0.5 readout-
+    # share threshold was being credited to a budget-256 accuracy CI bound.
+    0.5,
+    0.75,
 }
 
 
