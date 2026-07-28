@@ -18,6 +18,39 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ PARITY + LAUNCH PASS (2026-07-29). Parts A–C done; D–F NOT done —
+  read the honest split below before planning.**
+  **BACKUP EXISTS NOW.** Private mirror `backup` →
+  `github.com/whyeventry0103/kv-caching-backup` (verified `isPrivate: true`),
+  carrying full history **and** `results/diag`. Plus a local bundle at
+  `~/kvcache-backups/`. **`origin` untouched.** Push to `backup` at every unit
+  boundary. Policy in `remoteserver.md` §36.
+  **FULL PARITY, and `make parity` keeps it.** Remote was on `3e19f8b` with no
+  history and **zero** `results/`; commits transferred by **bundle over scp**
+  (not by giving a shared box a private-repo credential), `git reset --mixed`
+  (content hash verified identical before/after), `results/diag` rsynced.
+  Now: commit ✅ source-tree hash ✅ 68/68 artifacts byte-identical ✅.
+  Remote-only result files are treated as **expected new output, not drift**.
+  **SEVEN CELLS QUEUED (31→38 jobs), all reads pre-registered first.**
+  512/1024 (the **confirmatory** test of the resolution collapse, Amendment L);
+  `grid-hottcap` (Amendment N.1 — HOTT's cap of **2048 tokens, greedy**,
+  verified from their own text; we match the **cap only**, greedy stays
+  **unmatched** and must be stated); `fc-aime24-llama8b` + R-KV in its
+  **published** config (N.2/N.3).
+  **Cron re-armed, narrower than before:** queue runner only; email and arXiv
+  sweep stay OFF; `check_parity` logs either side of each batch. Armed copy
+  `~/crontab.armed.2026-07-29`; disarm `crontab -r`.
+  **NOT launched immediately, deliberately** — the 01:45–10:45 watcher window
+  refused at 23:48 and I did not force it. Cron fires 01:45.
+  **The stash is gone, but two of its ideas are now ours:** exact-value match
+  outranking rounded match (fixes the coincidental-attribution defect I reported
+  last pass) and an `external` bucket for numbers only a human can verify.
+  Buckets: sourced 577, **external 13**, protocol 451, unsourced **0**.
+  **STILL OUTSTANDING (Parts D/E/F — none started):** Unit 5.2–5.9, layer-1
+  bootstrap, content-token TV, **all figure work**, the semantic prose audit,
+  mechanical compression, `make integrate`, `INTEGRATION_CHECKLIST.md`, and the
+  final 20-number verification. See the report's §7.
+
   **★★★★★ VERIFICATION PASS (2026-07-28) — three gates now, and two real
   defects found by sampling the OUTPUT rather than re-running the gate.**
   **(1) The grader audit was measuring nothing.** `diagnose_math_failures.py`
