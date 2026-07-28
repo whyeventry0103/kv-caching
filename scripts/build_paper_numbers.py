@@ -950,6 +950,32 @@ def build_catalogue() -> list[Entry]:
     ):
         external(key, value, cite, locator, desc)
 
+    # Whole-number display forms, catalogued explicitly for exactly the
+    # quantities the prose quotes rounded. Entry.displays() no longer generates
+    # a zero-place form for a fractional value -- a ratio of 6.7 must not claim
+    # every bare "7" -- so a legitimate rounding like "280 GPU-hours" needs an
+    # entry of its own. Listing them is the point: each one is a decision that
+    # this quantity is quoted whole somewhere, not a blanket licence.
+    by_key.update({e.key: e.value for e in entries})
+    for key, desc in (
+        ("compute.gpu_hours", "GPU-hours, quoted whole in the setup"),
+        ("mean_trace_pooled.diss256", "pooled trace length, quoted whole"),
+        ("mean_trace_pooled.b2048", "pooled trace length, quoted whole"),
+        ("aime_mean_trace_tokens", "AIME trace length, quoted whole"),
+        ("auc_tv_spread_pct", "AUC-TV spread, quoted whole"),
+        ("residual_points.diss256.random", "residual in accuracy points, whole"),
+        ("residual_over_resampling.diss256.random", "residual/resampling, whole"),
+        ("residual_over_resampling.rkv256.rkv", "residual/resampling, whole"),
+    ):
+        if key in by_key:
+            derive(
+                f"{key}.rounded",
+                round(by_key[key]),
+                f"round({key})",
+                (key,),
+                desc,
+            )
+
     # Percentage forms, catalogued explicitly rather than generated, so that a
     # value quoted as "29.8\\%" is sourced without every entry also matching
     # unrelated two-digit numbers elsewhere in the text.

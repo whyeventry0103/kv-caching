@@ -147,10 +147,17 @@ def test_displays_omits_the_zero_place_form_of_a_sub_unit_value():
     assert "0.9" in forms and "0.88" in forms and "0.882" in forms
 
 
-def test_displays_keeps_the_zero_place_form_of_a_magnitude_above_one():
-    """ "230 GPU-hours" and "105%" are legitimate zero-place displays."""
-    assert "280" in _entry("gpu_hours", 279.87).displays()
-    assert "105" in _entry("rkv_pct", 105.0).displays()
+def test_only_integer_valued_entries_claim_the_zero_place_form():
+    """This asserted that 279.87 claims "280", encoding the weaker rule that
+    dropped the zero-place form only for |v| < 1. That was wrong for the same
+    reason the |v| < 1 rule existed: rounding a fractional quantity to zero
+    places destroys it, whatever its magnitude, and lets one entry claim any
+    integer it happens to round onto. Quoting "280 GPU-hours" is legitimate, and
+    is served by an explicit `.rounded` catalogue entry -- a listed decision
+    rather than a blanket licence."""
+    assert "280" not in _entry("gpu_hours", 279.87).displays()
+    assert "279.87" in _entry("gpu_hours", 279.87).displays()
+    assert "105" in _entry("rkv_pct", 105.0).displays()  # genuinely an integer
 
 
 def test_displays_still_covers_an_exact_zero():
@@ -376,3 +383,48 @@ def test_reference_convention_gate_treats_a_missing_artifact_as_failure():
     from kvcache.paper_numbers import check_reference_conventions
 
     assert any("missing" in p for p in check_reference_conventions({}))
+
+
+def _ext(key: str, value: float) -> Entry:
+    return Entry(key=key, value=value, kind="external", source="\\cite{x} @ Table 2")
+
+
+def test_fractional_entries_do_not_match_bare_integers():
+    """A ratio of 6.7 must not claim every bare "7". The earlier rule dropped
+    the zero-place form only for |v| < 1, which still allowed exactly that."""
+    assert "1" not in _entry("add", 0.715).displays()
+    assert "0.7" in _entry("add", 0.715).displays()
+    assert "7" not in _entry("ratio", 6.7).displays()
+    assert "44" in _entry("wins", 44.0).displays()  # counts are real integers
+
+
+def test_exact_match_outranks_a_rounded_one():
+    """Provenance by coincidence of rounding is not provenance. Sampling the
+    PDF found two literals credited to whichever entry happened to round onto
+    them."""
+    cat = [_ext("hott.fc", 0.47), _entry("ours.flip", 0.4675)]
+    lits = extract_literals("HOTT reports 0.47", "t", strip=False)
+    classify(lits, cat)
+    assert lits[0].matched_keys == ("hott.fc",)
+    rounded = extract_literals("our flip mass 0.4675", "t", strip=False)
+    classify(rounded, cat)
+    assert rounded[0].matched_keys == ("ours.flip",)
+
+
+def test_external_only_matches_get_their_own_bucket():
+    """Their verification path differs in kind: a human must open the cited
+    table. Calling that "sourced" overstates what the gate checked."""
+    cat = [_ext("hott.fc", 0.47), _entry("ours.residual", -0.3367)]
+    lits = extract_literals("baseline of 0.47 here", "t", strip=False)
+    classify(lits, cat)
+    assert lits[0].classification == "external"
+    ours = extract_literals("residual -0.337", "t", strip=False)
+    classify(ours, cat)
+    assert ours[0].classification == "sourced"
+
+
+def test_an_internal_match_outranks_an_external_one_at_equal_precision():
+    cat = [_ext("hott.fc", 0.47), _entry("ours.exact", 0.47)]
+    lits = extract_literals("value 0.47", "t", strip=False)
+    classify(lits, cat)
+    assert lits[0].classification == "sourced"

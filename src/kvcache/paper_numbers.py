@@ -153,13 +153,21 @@ class Entry:
         made every bare 0 and 1 in the prose match some residual or accuracy:
         418 occurrences -- 65% of the reported "sourced" count -- were config
         constants credited to unrelated entries. Nobody writes an accuracy of
-        0.882 as "1". The catalogue only claims a display it could plausibly be
-        written as, so sub-unit values start at one decimal place; integers and
-        larger magnitudes keep the zero-place form ("230 GPU-hours", "105%").
+        0.882 as "1".
+
+        **The zero-place form is generated only for integer-valued entries.**
+        An earlier version of this rule dropped it merely for ``|value| < 1``,
+        which still let a ratio of 6.7 claim every bare "7" in the prose. The
+        honest rule is that rounding a fractional quantity to zero places
+        destroys it, whatever its magnitude; counts (wins, problems, profiles,
+        the onset step) are genuinely integers and still match their bare form.
         """
         out: set[str] = set()
+        if self.value.is_integer():
+            out.add(f"{self.value:.0f}")
+            out.add(f"{abs(self.value):.0f}")
         for p in places:
-            if p == 0 and abs(self.value) < 1.0 and self.value != 0.0:
+            if p == 0:
                 continue
             out.add(f"{self.value:.{p}f}")
             out.add(f"{abs(self.value):.{p}f}")
@@ -287,6 +295,8 @@ def classify(
     allowed = allowed_integers or set()
     allowed_f = allowed_floats or set()
     by_display: dict[str, list[str]] = {}
+    external_keys = {e.key for e in catalogue if e.kind == "external"}
+    exact_value = {e.key: e.value for e in catalogue}
     for entry in catalogue:
         for form in entry.displays():
             by_display.setdefault(form, []).append(entry.key)
@@ -301,8 +311,23 @@ def classify(
         stripped = lit.raw.replace("{,}", "").lstrip("-")
         keys = by_display.get(stripped) or by_display.get(lit.raw.replace("{,}", ""))
         if keys:
-            lit.classification = "sourced"
-            lit.matched_keys = tuple(sorted(set(keys)))
+            # An EXACT value match outranks one that only holds after rounding.
+            # Without this, a literal is attributed to whichever catalogue entry
+            # happens to round onto it -- provenance by coincidence. Sampling the
+            # rendered PDF found two such attributions (0.158 credited to an AIME
+            # flip-mass rather than the paired CI bound it actually is), and while
+            # the value was right in both cases, a gate that names the wrong
+            # source cannot help anyone checking the number.
+            unique = sorted(set(keys))
+            exact = [k for k in unique if exact_value.get(k) == lit.value]
+            candidates = exact or unique
+            # A number we measured outranks one we transcribed, and a match that
+            # is ONLY external is reported as such: its verification path is
+            # different in kind -- a human must open the cited table and check
+            # the transcription, which no gate here can do.
+            internal = [k for k in candidates if k not in external_keys]
+            lit.classification = "sourced" if internal else "external"
+            lit.matched_keys = tuple(candidates)
             continue
         if lit.value.is_integer() and 1900 <= lit.value <= 2100:
             lit.classification = "year"
