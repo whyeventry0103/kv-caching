@@ -18,6 +18,43 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ ITEMS 0–4 (2026-07-29). Stopped at an item boundary; items 5–10 NOT
+  started.**
+  **(0) Nothing launched, and that was correct** — only 11 min of remote time
+  had passed, not a night. Verified rather than assumed: simulating 01:45 shows
+  `grid-diss512` launching sharded across both GPUs (seeds 11,47 / 23,89,
+  MAX_HOURS=9.0). Cron fires 01:45. Fixed a misleading refusal message that
+  conflated "past today's stop" with "<1h to stop".
+  **(1) Property tests found DEFECTS 7 AND 8.** Display rules are now *data*
+  (`Entry.display_rules()`), so "no rule, no match" is assertable.
+  **Defect 7 — sign-blind attribution:** `classify()` stripped the minus before
+  lookup, so `−0.343` could be sourced to an entry valued `+0.343`. Residuals
+  here are negative and many quantities positive.
+  **Defect 8 — the bibliography-body strip NEVER WORKED:** blanking the label
+  width first destroys the `\begin{thebibliography}` anchor. Masked for two
+  passes because the arXiv IDs were excluded by the *separate* identifier rule.
+  Counts moved: `year` 21→2, and `−0.001` (a grader-bias delta) became unsourced
+  and is now catalogued for all three cells.
+  **(2) ADD 1-ULP FIXED, not accepted.** Cause: `distribution_tv` summed over
+  set-iteration order and the renorm masses over dict-insertion order — i.e.
+  glob order. Both now sum **sorted**. Every aggregate bitwise identical; two
+  consecutive remote runs now byte-identical. No "within 1 ULP" declaration
+  needed; byte-diff tooling stays.
+  **(3) `make integrate UNIT=<u>`** — harvest → recatalogue → before/after diff
+  of every moved number → gate → figures → PDF. **Refuses a summary without
+  `reference_convention`**; stops on a red audit. Does *not* edit the `.tex`.
+  **`docs/INTEGRATION_CHECKLIST.md` writes BOTH 512/1024 branches now** — the
+  REFUTES branch withdraws §4.1 as a primary contribution and withdraws the
+  reframe title outright.
+  **(4) Semantic audit: no wrong numbers.** Two systematic passes over all 449
+  sourced sites + hand-check of the 10 real candidates. Fixed: pre-registered
+  thresholds 0.5/0.75 were being *sourced to measurements* that happened to equal
+  them. Recorded, not fixed: HOTT's 0.03 classifies `sourced` not `external`
+  because our own 0.03 outranks it — `matched_keys` records both.
+  **NOT DONE (items 5–10):** figures, D.2 layer-1 bootstrap, D.3 content-token
+  TV, D.1 seven analyses, D.6 compression, A.2 footnote, A.5 playbook audit,
+  Part F final verification.
+
   **★★★★★ PARITY + LAUNCH PASS (2026-07-29). Parts A–C done; D–F NOT done —
   read the honest split below before planning.**
   **BACKUP EXISTS NOW.** Private mirror `backup` →
