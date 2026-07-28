@@ -137,8 +137,9 @@ under every imputation — it is not significance. Every inferential claim in th
 rests on the complete-case CI.
 
 Other current values that moved and are easy to re-introduce stale:
-- Pure answer-resampling effect (FC readout of FC traces, matched): **+0.003**, not
-  +0.023. Residuals are 132× (Random) / 105× (R-KV) that — *two* orders of magnitude.
+- Pure answer-resampling effect (FC readout of FC traces, matched): **+0.003**.
+  Residuals are 132× (Random) / 105× (R-KV) that — *two* orders of magnitude.
+  (The superseded unmatched figure is in the archival log, not here.)
 - Dose-response factor 256 vs 2048: **4.4–10.2×**.
 - Budget-2048 residuals: **−0.033 / −0.079 / −0.059**, CIs [−0.065, −0.010] /
   [−0.125, −0.042] / [−0.102, −0.020], all excluding zero.

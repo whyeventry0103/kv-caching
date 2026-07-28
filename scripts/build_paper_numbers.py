@@ -915,29 +915,37 @@ def build_catalogue() -> list[Entry]:
             "rkv.published_pct_of_full",
             105.0,
             "rkv2025",
-            "UNVERIFIED (headline; R1-Distill-Llama-8B, AIME-24)",
-            "R-KV's published >100% headline -- our port runs a different scale",
+            'Abstract, verbatim; Sec. 4 "Ratio Budget" para (R1-Llama-8B)',
+            "R-KV's published >100% headline. VERIFIED 2026-07-28 against the "
+            'arXiv text: "Given 16% KV cache budget, our method even surpasses '
+            'the FullKV baseline, reaching 105% of its accuracy", in the '
+            "R1-Llama-8B paragraph. The DATASET is not named in that sentence; "
+            "AIME-24 is inferred because 16% sits above its stated 10% lossless "
+            "point and below MATH-500's 34%. Model confirmed, dataset inferred.",
         ),
         (
             "rkv.published_cache_pct",
             16.0,
             "rkv2025",
-            "UNVERIFIED (headline; R1-Distill-Llama-8B, AIME-24)",
-            "cache fraction at R-KV's published headline",
+            'Abstract, verbatim; Sec. 4 "Ratio Budget" para (R1-Llama-8B)',
+            "cache fraction at R-KV's published headline. VERIFIED 2026-07-28: "
+            "the source says 16%, not ~16%.",
         ),
         (
             "deepseek.qwen7b_math500",
             0.928,
             "deepseek2025r1",
-            "UNVERIFIED (distilled-model MATH-500 pass@1, R1-Distill-Qwen-7B)",
-            "published 7B MATH-500 pass@1; our 0.882 bank is anchored against it",
+            "Table 5 (distilled models on reasoning benchmarks), MATH-500 pass@1",
+            "published 7B MATH-500 pass@1; our 0.882 bank is anchored against it. "
+            "VERIFIED 2026-07-28: row DeepSeek-R1-Distill-Qwen-7B reads 92.8.",
         ),
         (
             "deepseek.qwen14b_math500",
             0.939,
             "deepseek2025r1",
-            "UNVERIFIED (distilled-model MATH-500 pass@1, R1-Distill-Qwen-14B)",
-            "published 14B MATH-500 pass@1; the 14B bank gate band was set from it",
+            "Table 5 (distilled models on reasoning benchmarks), MATH-500 pass@1",
+            "published 14B MATH-500 pass@1; the 14B bank gate band was set from "
+            "it. VERIFIED 2026-07-28: row DeepSeek-R1-Distill-Qwen-14B reads 93.9.",
         ),
     ):
         external(key, value, cite, locator, desc)
