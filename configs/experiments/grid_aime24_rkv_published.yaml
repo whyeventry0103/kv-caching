@@ -1,0 +1,24 @@
+name: grid_aime24_rkv_published
+stage: grid
+# R-KV IN ITS PUBLISHED CONFIGURATION (Amendment N.2): R1-Distill-Llama-8B on
+# AIME-24, the model and benchmark of the 105%-at-16% headline. Section 5
+# currently says we tested R-KV's claim "in an adjacent configuration"; this is
+# the cell that lets that wording be replaced with something stronger, in either
+# direction.
+#
+# Budget 2048 is ~16% of the mean AIME trace at this scale, matching the ratio
+# their headline quotes. Our certified port (Jaccard 1.0 + generation smoke).
+models: [r1_distill_llama_8b]
+benchmarks: [aime24]
+subset:
+  aime24: 30
+presses: [rkv, fullcache]
+budgets: [2048, full]
+seeds: [11, 23, 47, 89]
+max_new_tokens:
+  aime24: 16384
+compression_interval: 64
+estimated_generation_count: 240
+scale_authorized: true
+remote_only: true
+store_token_ids: true

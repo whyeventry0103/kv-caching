@@ -54,6 +54,9 @@ dryrun:
 	$(PYTHON) scripts/run_grid.py --config configs/experiments/grid_math500_diss1024.yaml --dry-run
 	$(PYTHON) scripts/run_replay.py --config configs/experiments/readout_math500_diss512.yaml --dry-run
 	$(PYTHON) scripts/run_replay.py --config configs/experiments/readout_math500_diss1024.yaml --dry-run
+	$(PYTHON) scripts/run_grid.py --config configs/experiments/grid_math500_hottcap.yaml --dry-run
+	$(PYTHON) scripts/build_bank.py --config configs/experiments/bank_aime24_llama8b.yaml --dry-run
+	$(PYTHON) scripts/run_grid.py --config configs/experiments/grid_aime24_rkv_published.yaml --dry-run
 	$(PYTHON) scripts/build_bank.py --config configs/experiments/bank_fullcache.yaml --dry-run
 	$(PYTHON) scripts/run_grid.py --config configs/experiments/grid_compression.yaml --dry-run
 	$(PYTHON) scripts/run_replay.py --config configs/experiments/replay_decomposition.yaml --dry-run

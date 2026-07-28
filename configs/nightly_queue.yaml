@@ -342,3 +342,81 @@ jobs:
     min_free_gb: 40
     progress_kind: readout
     requires: grid-diss256-q14b
+
+  # ---- 2026-07-29 batch: confirmatory + gap-closing cells ------------------
+  # Reads pre-registered BEFORE queueing: Amendment L/M.5 (512/1024) and
+  # Amendment N (HOTT cap, R-KV published config). Do not re-derive them.
+
+  # Budgets 512 and 1024: the CONFIRMATORY test of the resolution-collapse
+  # finding. Amendment L pre-commits the prediction (ratio strictly between the
+  # 256 value 0.78 and the 2048 value 0.12, monotone in budget); a ratio outside
+  # [0.12, 0.78] or a non-monotone ordering REFUTES the gradual-collapse reading
+  # and is to be reported as a refutation.
+  - name: grid-diss512
+    command: grid
+    config: configs/experiments/grid_math500_diss512.yaml
+    run_name: grid-diss512
+    total: 800
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 24
+    progress_kind: grid
+    requires: null
+  - name: readout-diss512
+    command: replay
+    config: configs/experiments/readout_math500_diss512.yaml
+    run_name: readout-diss512
+    total: 800
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 24
+    progress_kind: readout
+    requires: grid-diss512
+  - name: grid-diss1024
+    command: grid
+    config: configs/experiments/grid_math500_diss1024.yaml
+    run_name: grid-diss1024
+    total: 800
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 24
+    progress_kind: grid
+    requires: readout-diss512
+  - name: readout-diss1024
+    command: replay
+    config: configs/experiments/readout_math500_diss1024.yaml
+    run_name: readout-diss1024
+    total: 800
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 24
+    progress_kind: readout
+    requires: grid-diss1024
+
+  # HOTT-configuration cell (Amendment N.1). Cap 2048, everything else ours.
+  # Cheap: the cap itself bounds runtime.
+  - name: grid-hottcap
+    command: grid
+    config: configs/experiments/grid_math500_hottcap.yaml
+    run_name: grid-hottcap
+    total: 800
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 24
+    progress_kind: grid
+    requires: null
+
+  # R-KV in its published configuration (Amendment N.2), and the bank it needs.
+  - name: fc-aime24-llama8b
+    command: bank
+    config: configs/experiments/bank_aime24_llama8b.yaml
+    run_name: fc-aime24-llama8b
+    total: 120
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 40
+    progress_kind: grid
+    requires: null
+  - name: grid-aime24-rkv-published
+    command: grid
+    config: configs/experiments/grid_aime24_rkv_published.yaml
+    run_name: grid-aime24-rkv-published
+    total: 240
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 40
+    progress_kind: grid
+    requires: fc-aime24-llama8b

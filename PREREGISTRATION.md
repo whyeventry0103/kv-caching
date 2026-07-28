@@ -982,3 +982,82 @@ Building the check immediately caught the four ADD artifacts, which were
 compliant but undeclared — exactly the state in which a future reader has to
 re-derive compliance by reading the code, which is what allowed the original
 omission.
+
+---
+
+## Amendment N (2026-07-29): pre-registered reads for the three newly queued cells
+
+Written before any of these runs. Each read states what every outcome means,
+including the outcomes that cost us something.
+
+### N.1 The HOTT-configuration cell (`grid_math500_hottcap`)
+
+**What is matched, and what is not.** HOTT's setup, verified against the paper's
+own text: *"Each model is allowed to generate a maximum of 2048 new tokens via
+greedy decoding"*, over budgets {128, 256, 384, 512}. This cell changes **only
+the generation cap**, to 2048. Sampling stays at T=0.6 / top-p 0.95, because the
+generation path hardcodes `do_sample=True` and adding greedy decoding is a change
+to result-bearing code that deserves its own unit rather than a late edit.
+**Greedy therefore remains an unmatched variable and every statement of this
+result must say so.**
+
+**Prior, stated before the run:** our Random/StreamingLLM traces average 6,725
+tokens, so a 2048 cap truncates the majority of them, and truncated generations
+score incorrect in every denominator here. We expect a large drop.
+
+**Pre-committed read.** Let `Acc_FC@2048cap` be full-cache MATH-500 accuracy
+under the cap, against our 0.882 at 16384 and HOTT's 0.47.
+
+- **EXPLAINED** — `Acc_FC@2048cap` lands within roughly 0.05 of 0.47: the
+  digit-level gap is a decode-length artifact, our channel argument is untouched,
+  and §2 stops needing to hedge about "different decode-length and sampling"
+  because we will have measured it. Report the truncation rate alongside, since
+  it is the mechanism.
+- **PARTLY EXPLAINED** — it moves substantially toward 0.47 but stops short
+  (say 0.55–0.70): the cap is the dominant term and something else (greedy
+  decoding, prompt template, grader) carries the rest. Report the residual gap
+  as unexplained rather than attributing it to the unmatched variable by
+  assumption.
+- **NOT EXPLAINED** — it stays near 0.882: our stated explanation for the gap is
+  wrong. This is the outcome that costs us: §2's parenthetical becomes a claim we
+  tested and failed to support, and it must be rewritten to say we cannot account
+  for the difference. **Report it that way.**
+
+The StreamingLLM-128 arm is read the same way against HOTT's 0.03.
+
+### N.2 R-KV in its published configuration (`grid_aime24_rkv_published`)
+
+R1-Distill-Llama-8B on AIME-24 at budget 2048 (~16% of the mean trace at this
+scale), against its own new reference bank (`bank_aime24_llama8b`, N.3). This is
+the model and benchmark of the 105%-at-16% headline; §5 currently says we tested
+the claim "in an adjacent configuration".
+
+**Pre-committed read.** Let `r = Acc_rkv / Acc_FC` on this cell, with a
+problem-clustered CI on the difference.
+
+- **REPLICATES (r ≥ 1.0, CI on the difference includes or exceeds zero)** — the
+  >100% regime is real in its own configuration, our "no >100% regime at 7B on
+  MATH-500" finding is confirmed as **scale- and benchmark-specific exactly as
+  Amendment E anticipated**, and §5's wording strengthens in *their* favour. We
+  report that plainly; it does not weaken the trajectory residual, which is a
+  separate quantity.
+- **DOES NOT REPLICATE (r < 1.0 with the difference CI excluding zero)** — a
+  parity-certified port does not reproduce the published headline in the
+  published configuration. That is a finding about the claim, and it must be
+  stated with maximal care: our port matched their code at Jaccard 1.0 on
+  retained sets, so the honest phrasing is that we could not reproduce it, not
+  that the claim is false. Report our accuracy, theirs, the CI, and the port
+  certification together.
+- **INCONCLUSIVE (CI spans, n=30 problems)** — say so. AIME-24 is 30 problems and
+  this cell may simply lack power; that is a limitation, not a result.
+
+**We do not re-cut this in our favour under any branch.** If it replicates, the
+paper says the regime is real at their scale.
+
+### N.3 `bank_aime24_llama8b`
+
+A reference bank, not a test. Gate: accuracy in [0.30, 0.70] (R-KV's own paper
+and the DeepSeek report put R1-Distill-Llama-8B AIME-24 pass@1 near 0.50). Out of
+band ⇒ investigate as an instrument problem before any cell is read against it,
+per the standing rule that a value outside its expected shape is a bug until the
+instrument is re-validated.

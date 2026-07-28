@@ -1,0 +1,34 @@
+name: grid_math500_hottcap
+stage: grid
+# HOTT-CONFIGURATION CELL (PREREGISTRATION Amendment N.1). Isolates ONE variable:
+# the generation-length cap.
+#
+# HOTT's setup, verified against the paper's own text 2026-07-28: "Each model is
+# allowed to generate a maximum of 2048 new tokens via greedy decoding", over
+# cache budgets {128, 256, 384, 512}. Our runs cap at 16384 and sample at
+# T=0.6/top-p=0.95. Our full-cache MATH-500 baseline is 0.882 against their 0.47,
+# and we have never tested our own explanation for that gap.
+#
+# This cell changes the cap to 2048 and NOTHING ELSE. Sampling stays at
+# T=0.6/top-p=0.95 because greedy decoding is not supported by the generation
+# path (do_sample is hardcoded True) and adding it is a change to result-bearing
+# code that deserves its own unit, not a late edit. So greedy remains an
+# UNMATCHED variable and the read is scoped accordingly: this measures how much
+# of the gap the cap alone explains.
+#
+# Prior: our Random/StreamingLLM traces average 6,725 tokens, so a 2048 cap
+# truncates the majority, and truncations score incorrect in every denominator.
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+subset:
+  math500: 100
+presses: [fullcache, streamingllm]
+budgets: [full, 128]
+seeds: [11, 23, 47, 89]
+max_new_tokens:
+  math500: 2048
+compression_interval: 64
+estimated_generation_count: 800
+scale_authorized: true
+remote_only: true
+store_token_ids: true

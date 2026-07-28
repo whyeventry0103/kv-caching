@@ -1,0 +1,17 @@
+name: bank_aime24_llama8b
+stage: bank
+# Reference bank for the R-KV published-configuration cell (Amendment N.2).
+# R-KV's headline is R1-Distill-Llama-8B on AIME-24; we own a Llama-8B MATH-500
+# bank (fc-llama50) and an AIME-24 bank for Qwen-7B, but not this pair, so the
+# cell cannot be read without it.
+models: [r1_distill_llama_8b]
+benchmarks: [aime24]
+presses: [fullcache]
+budgets: [full]
+seeds: [11, 23, 47, 89]
+max_new_tokens:
+  aime24: 16384
+estimated_generation_count: 120
+scale_authorized: true
+remote_only: true
+store_token_ids: true
