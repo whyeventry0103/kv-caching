@@ -77,7 +77,7 @@
           "perm_p_bh": 0.00505050505050505,
           "pid": "test/algebra/1837.json",
           "termination_shift": 0.25,
-          "within_answered_tv": 0.9999999999999999
+          "within_answered_tv": 1.0
         },
         {
           "add": 0.75,
@@ -307,7 +307,7 @@
           "perm_p_bh": 0.1652892561983471,
           "pid": "test/counting_and_probability/525.json",
           "termination_shift": 0.625,
-          "within_answered_tv": 1.0
+          "within_answered_tv": 0.9999999999999998
         },
         {
           "add": 0.5,
@@ -417,7 +417,7 @@
           "perm_p_bh": 0.04887585532746823,
           "pid": "test/intermediate_algebra/1197.json",
           "termination_shift": 0.125,
-          "within_answered_tv": 1.0
+          "within_answered_tv": 0.9999999999999999
         },
         {
           "add": 0.75,
@@ -537,7 +537,7 @@
           "perm_p_bh": 0.00505050505050505,
           "pid": "test/intermediate_algebra/47.json",
           "termination_shift": 0.25,
-          "within_answered_tv": 1.0
+          "within_answered_tv": 0.9999999999999999
         },
         {
           "add": 1.0,
@@ -547,7 +547,7 @@
           "perm_p_bh": 0.021958717610891524,
           "pid": "test/intermediate_algebra/607.json",
           "termination_shift": 0.25,
-          "within_answered_tv": 1.0
+          "within_answered_tv": 0.9999999999999999
         },
         {
           "add": 0.5,
@@ -577,7 +577,7 @@
           "perm_p_bh": 0.00505050505050505,
           "pid": "test/intermediate_algebra/956.json",
           "termination_shift": 0.25,
-          "within_answered_tv": 1.0
+          "within_answered_tv": 0.9999999999999999
         },
         {
           "add": 1.0,
@@ -607,7 +607,7 @@
           "perm_p_bh": 0.00505050505050505,
           "pid": "test/number_theory/357.json",
           "termination_shift": 0.25,
-          "within_answered_tv": 1.0
+          "within_answered_tv": 0.9999999999999999
         },
         {
           "add": 1.0,
@@ -807,7 +807,7 @@
           "perm_p_bh": 0.00505050505050505,
           "pid": "test/prealgebra/1840.json",
           "termination_shift": 0.25,
-          "within_answered_tv": 0.9999999999999999
+          "within_answered_tv": 1.0
         },
         {
           "add": 0.75,

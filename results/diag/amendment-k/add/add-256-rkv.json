@@ -47,7 +47,7 @@
           "perm_p_bh": 0.04914004914004914,
           "pid": "test/algebra/1098.json",
           "termination_shift": 0.25,
-          "within_answered_tv": 0.6666666666666666
+          "within_answered_tv": 0.6666666666666667
         },
         {
           "add": 0.0,
@@ -297,7 +297,7 @@
           "perm_p_bh": 0.04914004914004914,
           "pid": "test/counting_and_probability/377.json",
           "termination_shift": 0.25,
-          "within_answered_tv": 0.6666666666666666
+          "within_answered_tv": 0.6666666666666667
         },
         {
           "add": 0.875,
@@ -307,7 +307,7 @@
           "perm_p_bh": 0.9199134199134199,
           "pid": "test/counting_and_probability/525.json",
           "termination_shift": 0.125,
-          "within_answered_tv": 0.9999999999999999
+          "within_answered_tv": 0.9999999999999998
         },
         {
           "add": 0.25,
@@ -527,7 +527,7 @@
           "perm_p_bh": 0.00808080808080808,
           "pid": "test/intermediate_algebra/428.json",
           "termination_shift": 0.25,
-          "within_answered_tv": 1.0
+          "within_answered_tv": 0.9999999999999999
         },
         {
           "add": 1.0,
@@ -537,7 +537,7 @@
           "perm_p_bh": 0.00808080808080808,
           "pid": "test/intermediate_algebra/47.json",
           "termination_shift": 0.25,
-          "within_answered_tv": 1.0
+          "within_answered_tv": 0.9999999999999999
         },
         {
           "add": 1.0,
@@ -677,7 +677,7 @@
           "perm_p_bh": 0.00808080808080808,
           "pid": "test/number_theory/737.json",
           "termination_shift": 0.25,
-          "within_answered_tv": 0.9999999999999999
+          "within_answered_tv": 1.0
         },
         {
           "add": 0.0,

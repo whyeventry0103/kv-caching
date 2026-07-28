@@ -69,7 +69,21 @@ def answer_distribution(
 
 
 def distribution_tv(a: dict[str, float], b: dict[str, float]) -> float:
-    return 0.5 * sum(abs(a.get(x, 0.0) - b.get(x, 0.0)) for x in a.keys() | b.keys())
+    """Total variation between two answer distributions.
+
+    Summed in SORTED key order, not set-iteration order. Floating-point addition
+    is not associative, so an order that depends on which answers happened to be
+    encountered first -- which in turn depends on the order the row files were
+    globbed -- makes the result reproducible only to within a ULP. That is
+    exactly what was observed: regenerating the ADD artifacts reproduced every
+    aggregate bitwise but moved per-problem within_answered_tv by one ULP on 4 of
+    100 rows. Sorting removes the dependence rather than documenting it, which
+    matters because the byte-diff regenerability check and the nightly parity
+    check both assume bitwise determinism, and a gate that flakes gets ignored.
+    """
+    return 0.5 * sum(
+        abs(a.get(x, 0.0) - b.get(x, 0.0)) for x in sorted(a.keys() | b.keys())
+    )
 
 
 def add_tv(
@@ -117,8 +131,11 @@ def add_decomposition(
     term_comp = comp_dist.get(OTHER_ANSWER, 0.0)
     answered_full = {a: p for a, p in full_dist.items() if a != OTHER_ANSWER}
     answered_comp = {a: p for a, p in comp_dist.items() if a != OTHER_ANSWER}
-    mass_full = sum(answered_full.values())
-    mass_comp = sum(answered_comp.values())
+    # Sorted summation, for the reason given in distribution_tv: these masses
+    # are the renormalization denominators, so an order-dependent last bit here
+    # propagates into every within-answered probability.
+    mass_full = sum(answered_full[a] for a in sorted(answered_full))
+    mass_comp = sum(answered_comp[a] for a in sorted(answered_comp))
     if mass_full > 0 and mass_comp > 0:
         renorm_full = {a: p / mass_full for a, p in answered_full.items()}
         renorm_comp = {a: p / mass_comp for a, p in answered_comp.items()}

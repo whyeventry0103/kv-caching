@@ -1264,7 +1264,7 @@
           "perm_p_bh": 0.06734006734006734,
           "pid": "test/algebra/892.json",
           "termination_shift": 0.25,
-          "within_answered_tv": 1.0
+          "within_answered_tv": 0.9999999999999999
         },
         {
           "add": 0.0,
@@ -1494,7 +1494,7 @@
           "perm_p_bh": 0.06734006734006734,
           "pid": "test/intermediate_algebra/1849.json",
           "termination_shift": 0.25,
-          "within_answered_tv": 0.9999999999999999
+          "within_answered_tv": 1.0
         },
         {
           "add": 0.5,
