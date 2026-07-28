@@ -1,4 +1,4 @@
-.PHONY: lint test dryrun audit sync sync-apply setup check smoke bank grid replay metrics figures
+.PHONY: lint test dryrun audit parity sync sync-apply setup check smoke bank grid replay metrics figures
 
 PYTHON := $(if $(wildcard .venv/bin/python),.venv/bin/python,python)
 RUFF := $(if $(wildcard .venv/bin/ruff),.venv/bin/ruff,ruff)
@@ -20,6 +20,12 @@ test:
 audit:
 	$(PYTHON) scripts/build_paper_numbers.py --out paper_numbers.json
 	$(PYTHON) scripts/audit_paper_numbers.py --strict
+
+# Local/remote parity: commit, source tree hash, and per-file result artifact
+# checksums. The source-tree guard alone was not enough -- the remote sat on an
+# old commit with no results/ at all, which is invisible to a hash of the source.
+parity:
+	$(PYTHON) scripts/check_parity.py --strict
 
 dryrun:
 	$(PYTHON) scripts/build_bank.py --config configs/experiments/smoke_fullcache.yaml --dry-run
