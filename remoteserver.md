@@ -1699,3 +1699,34 @@ refused apply and the fix, the remote briefly held the new source files with a
 the invariant exists to prevent. It is now consistent. If an apply ever refuses
 again, treat the remote as *unknown* until the hash is reconciled; do not
 assume the transfer did not land.
+
+---
+
+## 36. Backup policy (2026-07-28)
+
+The exposure this closes: 19 unpushed commits plus the only copy of every
+artifact `paper_numbers.json` resolves to, on one disk. The GPU box is not a
+backup — `sync_source.sh` deliberately transfers neither `.git` nor `results/`,
+so the remote held source only, and its own clone was pinned at `3e19f8b` with
+none of our history.
+
+**Two layers, both verified:**
+
+1. **Private GitHub mirror.** `backup` →
+   `https://github.com/whyeventry0103/kv-caching-backup.git`, created private
+   (`isPrivate: true`, verified via `gh repo view`). Carries full history *and*
+   `results/diag`, which the public repo's workflow never needed to.
+   **Push at every unit boundary:** `git push backup main`.
+2. **Local bundle**, as the stopgap that needs no network:
+   `git bundle create ~/kvcache-backups/kv-caching-$(date +%Y%m%d)-$(git rev-parse --short HEAD).bundle --all`
+   Verify with `git bundle verify <file>` — it must say "records a complete
+   history". Refresh whenever the mirror has been unreachable.
+
+**`origin` (`whyeventry0103/kv-caching`, public) stays untouched until the
+endgame.** Nothing is pushed there before the anonymization scrub, which still
+has to remove the personal address from `context.md`'s narrative bullets and
+keep `docs/strategy/` out of the artifact. The backup mirror is private
+precisely so that constraint costs us nothing in the meantime.
+
+**Do not** add `backup` to any automated hook or cron. It is a manual boundary
+action, so that "what is backed up" always corresponds to a state someone chose.
