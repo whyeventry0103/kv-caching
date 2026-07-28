@@ -181,3 +181,36 @@ readout protocol" (consistent with fig0's texture-not-hue role); subset scale
 - Within-group bar order everywhere = Table 2 order (Random, SLM, H2O, R-KV),
   except Fig 3 which is descending-ADD (SLM, H2O, Random, R-KV) — both
   deliberate; do not "harmonize" one into the other.
+
+## 9. Constraints the Unit 9 redesign must inherit (recorded 2026-07-28)
+
+These are open defects observed in the rendered PNGs, not preferences. The
+redesign is the right place to fix them; patching the current figures first
+would be wasted work.
+
+- **`fig2_bracket`: value labels collide with the CI whiskers.** On every
+  forward-readout rung the label is drawn at the marker while the whisker
+  extends past it, so `0.765`, `0.584`, `0.597` and `0.798` all overlap their
+  own interval tick. Visible at 100% zoom; it is the reason the figure reads as
+  cluttered even before the density problem. The planned one-panel
+  slope/dumbbell redesign must place labels clear of the interval geometry —
+  offset above the mark, or outside the axis, but not at the mark.
+- **`fig2_bracket` is four panels carrying ~40 numbers.** It is the paper's core
+  result figure and cannot be read in 30 seconds. The redesign moves the bracket
+  numbers to a table and keeps three marks per press (full cache, forward
+  readout, free-run) plus reverse readout as a distinct open marker.
+- **`fig4_tvprofile` does not contain the numbers the text cites.** Its y-axis
+  tops near 0.07 and its horizon stops at +400, while the text quotes a later
+  window mean of 0.088 and a step-pooled 0.118. Extend the horizon or add an
+  inset; as drawn, a reader who checks the figure against the sentence finds
+  they disagree.
+- **`fig1_phenomenon` shows only free-running accuracy**, which is what HOTT
+  already showed. Adding readout as a paired lighter series is what makes it
+  *our* figure.
+
+**Standing constraint for any figure change from 2026-07-27 onward:** every
+constant is loaded from `paper_numbers.json` via `_k()`. Do not reintroduce a
+literal, and do not add a fallback — a missing key must raise. A figure drawn
+from stale constants is worse than no figure, because it looks finished. This is
+how the figures went on drawing pre-Amendment-K values while the summaries and
+the `.tex` had both been regenerated.

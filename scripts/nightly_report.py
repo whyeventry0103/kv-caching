@@ -3,8 +3,9 @@
 
 Reports: the whole queue with per-job progress, what ran last night, total progress % to
 queue completion (and whether the paper-core jobs are done), and any crash/stuck alert.
-Sends via direct-to-MX delivery to an @lums.edu.pk address (the remote is on the LUMS
-network; the O365 MX accepts inbound mail for the domain, no credentials needed).
+Sends via direct-to-MX delivery. The recipient and MX host come from
+KVCACHE_REPORT_TO and KVCACHE_REPORT_MX; there is no compiled-in default and
+the script refuses to send without them.
 
 --dry-run prints the report and does NOT send. It is wrapped so a failure still emails
 an error (a silent cron failure would mean no status at all).
@@ -16,6 +17,7 @@ import argparse
 import importlib.util
 import smtplib
 import socket
+import os
 import sys
 import traceback
 from datetime import datetime
@@ -32,8 +34,12 @@ na = importlib.util.module_from_spec(_spec)
 sys.modules.setdefault("nightly_autorun", na)
 _spec.loader.exec_module(na)
 
-TO_ADDR = "27100172@lums.edu.pk"
-MX = "lums-edu-pk.mail.protection.outlook.com"
+# Recipient is configuration, not source. A personal address hardcoded in a
+# script is the kind of thing that survives an anonymization scrub because
+# nobody greps for it -- so it lives in the environment, and the script refuses
+# to send without it rather than falling back to a baked-in default.
+TO_ADDR = os.environ.get("KVCACHE_REPORT_TO", "")
+MX = os.environ.get("KVCACHE_REPORT_MX", "")
 # Jobs that constitute the writable paper core (256 decomposition + bracket + Figure 4).
 CORE_JOBS = {"grid-diss256-tok", "reverse-readout-diss256", "replay-diss256"}
 PREV_SNAPSHOT = PROJECT_ROOT / "logs" / "nightly_report_prev.json"
@@ -214,7 +220,12 @@ def generate_report(write_snapshot: bool = True) -> tuple[str, str]:
 
 def send_email(subject: str, body: str) -> str:
     """Authenticated SMTP if ~/.kvcache_smtp.json exists (reliable, e.g. Gmail app-pw);
-    else fall back to direct-to-MX. Returns the recipient actually used."""
+    else fall back to direct-to-MX. Returns the recipient actually used.
+
+    Refuses rather than defaulting: an unset recipient must fail loudly, because
+    the alternative is a baked-in personal address that quietly survives every
+    anonymization pass.
+    """
     import json
     from email.utils import formatdate, make_msgid
     from pathlib import Path
@@ -239,6 +250,11 @@ def send_email(subject: str, body: str) -> str:
         return to
     host = socket.gethostname()
     msg["From"] = f"kvcache-autorun@{host}.lums.edu.pk"
+    if not TO_ADDR or not MX:
+        raise SystemExit(
+            "KVCACHE_REPORT_TO and KVCACHE_REPORT_MX must be set to send; "
+            "no default recipient is compiled in (see the module docstring)."
+        )
     msg["To"] = TO_ADDR
     msg["Message-ID"] = make_msgid(domain=f"{host}.lums.edu.pk")
     with smtplib.SMTP(MX, 25, timeout=40) as s:
