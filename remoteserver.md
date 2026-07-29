@@ -1730,3 +1730,29 @@ precisely so that constraint costs us nothing in the meantime.
 
 **Do not** add `backup` to any automated hook or cron. It is a manual boundary
 action, so that "what is backed up" always corresponds to a state someone chose.
+
+---
+
+## 37. Cron state during paper work (2026-07-29)
+
+**Armed:** the queue runner (01:45 + 01:55, then every 10 min through 10:45) and
+the **daily status email at 10:55**. `check_parity` runs either side of the
+nightly batch into `logs/parity.log`.
+
+**Disabled:** `scoop_sweep.py` (weekly arXiv API call) — it produces no results
+and makes an outward call during paper work.
+
+**The report recipient lives in the crontab, not in the source.**
+`scripts/nightly_report.py` reads `KVCACHE_REPORT_TO` / `KVCACHE_REPORT_MX` and
+**refuses to send without them** — there is no compiled-in default, so no
+personal address ships in a file. The crontab line supplies both.
+
+*Why this note exists:* the email silently stopped for two days. Two causes, both
+introduced deliberately and neither flagged to the paper owner: the cron line was
+commented out during the Amendment-K pause, and the address was then moved to an
+env var with a refuse-to-send. Each was defensible alone; together they removed a
+status channel without telling anyone. **If you disable a notification, say so in
+the same breath as disabling it.**
+
+Armed copy: `~/crontab.armed.2026-07-29`. Pre-pause backup:
+`~/crontab.backup.2026-07-27`. Disarm everything: `crontab -r`.
