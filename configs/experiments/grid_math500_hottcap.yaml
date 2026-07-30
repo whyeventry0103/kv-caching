@@ -18,17 +18,20 @@ stage: grid
 #
 # Prior: our Random/StreamingLLM traces average 6,725 tokens, so a 2048 cap
 # truncates the majority, and truncations score incorrect in every denominator.
+#
+# The full-cache arm lives in bank_math500_hottcap.yaml: a grid config cannot
+# carry budgets: [full, ...] because run_grid.py does int(budget).
 models: [r1_distill_qwen_7b]
 benchmarks: [math500]
 subset:
   math500: 100
-presses: [fullcache, streamingllm]
-budgets: [full, 128]
+presses: [streamingllm]
+budgets: [128]
 seeds: [11, 23, 47, 89]
 max_new_tokens:
   math500: 2048
 compression_interval: 64
-estimated_generation_count: 800
+estimated_generation_count: 400
 scale_authorized: true
 remote_only: true
 store_token_ids: true

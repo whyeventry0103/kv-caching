@@ -1,0 +1,25 @@
+name: bank_math500_hottcap
+stage: bank
+# The full-cache arm of the HOTT-configuration cell (Amendment N.1), split out
+# because a GRID config cannot express a full-cache arm: run_grid.py does
+# int(budget) and "full" is not an integer. The first version put
+# budgets: [full, 128] in one grid config and crashed on every launch for three
+# nights with ValueError: invalid literal for int() with base 10: 'full'.
+#
+# This is the measurement N.1 actually turns on: our own full-cache MATH-500
+# accuracy under HOTT's 2048-token cap, against our 0.882 at 16384 and their
+# 0.47. Greedy remains UNMATCHED (generation.py hardcodes do_sample=True), so
+# this isolates the cap alone and every statement of the result must say so.
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+subset:
+  math500: 100
+presses: [fullcache]
+budgets: [full]
+seeds: [11, 23, 47, 89]
+max_new_tokens:
+  math500: 2048
+estimated_generation_count: 400
+scale_authorized: true
+remote_only: true
+store_token_ids: true

@@ -8,17 +8,22 @@ stage: grid
 #
 # Budget 2048 is ~16% of the mean AIME trace at this scale, matching the ratio
 # their headline quotes. Our certified port (Jaccard 1.0 + generation smoke).
+#
+# The full-cache reference is bank_aime24_llama8b (a separate bank stage): a
+# grid config cannot carry budgets: [..., full] -- run_grid.py does int(budget).
+# This config had the same latent crash as grid_math500_hottcap and would have
+# failed on its first launch too.
 models: [r1_distill_llama_8b]
 benchmarks: [aime24]
 subset:
   aime24: 30
-presses: [rkv, fullcache]
-budgets: [2048, full]
+presses: [rkv]
+budgets: [2048]
 seeds: [11, 23, 47, 89]
 max_new_tokens:
   aime24: 16384
 compression_interval: 64
-estimated_generation_count: 240
+estimated_generation_count: 120
 scale_authorized: true
 remote_only: true
 store_token_ids: true

@@ -1,10 +1,17 @@
 name: readout_math500_diss512
-stage: readout
-# Forward readout for the budget-512 confirmatory cell (Amendment M.5). The
-# resolution statistic needs BOTH arms -- free-run spread and readout spread on
-# the same problems -- so this is not optional alongside grid_math500_diss512.
+stage: replay
+mode: readout
+# Forward readout for the budget-512 confirmatory cell (Amendments L / M.5).
+# The resolution statistic needs BOTH arms -- free-run spread and readout spread
+# on the same problems -- so this is not optional alongside grid_math500_diss512.
 #
-# NOT LAUNCHED. Written and dry-run validated only.
+# Fixed 2026-07-30: the first version declared "stage: readout" with a
+# "reference_run" key and no mode, and the launcher refused it three nights
+# running ("replay config needs pilot/scale_authorized + a mode"). The replay
+# runner takes stage: replay + mode: readout + reference_run_name, matching
+# readout_math500_diss256_q15b.yaml. It never dry-ran as a replay config because
+# the Makefile line invoked it correctly while the config named the wrong stage.
+reference_run_name: math500-fc-powered-merged
 models: [r1_distill_qwen_7b]
 benchmarks: [math500]
 subset:
@@ -12,11 +19,8 @@ subset:
 presses: [streamingllm, random]
 budgets: [512]
 seeds: [11, 23, 47, 89]
-reference_run: math500-fc-powered-merged
-max_new_tokens:
-  math500: 16384
 compression_interval: 64
-estimated_generation_count: 800
+max_answer_tokens: 2048
+estimated_generation_count: 0
+estimated_replay_count: 800
 scale_authorized: true
-remote_only: true
-store_token_ids: true

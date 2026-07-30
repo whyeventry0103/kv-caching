@@ -391,11 +391,20 @@ jobs:
 
   # HOTT-configuration cell (Amendment N.1). Cap 2048, everything else ours.
   # Cheap: the cap itself bounds runtime.
+  - name: bank-hottcap
+    command: bank
+    config: configs/experiments/bank_math500_hottcap.yaml
+    run_name: bank-hottcap
+    total: 400
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 24
+    progress_kind: grid
+    requires: null
   - name: grid-hottcap
     command: grid
     config: configs/experiments/grid_math500_hottcap.yaml
     run_name: grid-hottcap
-    total: 800
+    total: 400
     seeds: [11, 23, 47, 89]
     min_free_gb: 24
     progress_kind: grid
@@ -415,7 +424,7 @@ jobs:
     command: grid
     config: configs/experiments/grid_aime24_rkv_published.yaml
     run_name: grid-aime24-rkv-published
-    total: 240
+    total: 120
     seeds: [11, 23, 47, 89]
     min_free_gb: 40
     progress_kind: grid
