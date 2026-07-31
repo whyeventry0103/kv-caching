@@ -1,0 +1,35 @@
+{
+  "analysis_status": "post-hoc, exploratory (PREREGISTRATION Amendment L)",
+  "benchmark": "math500",
+  "budget": "2048",
+  "coverage": {
+    "random": {
+      "n_problems_free": 100,
+      "n_problems_readout_defined": 100
+    },
+    "streamingllm": {
+      "n_problems_free": 100,
+      "n_problems_readout_defined": 100
+    }
+  },
+  "free_run_spread": 0.0425,
+  "label": "pair-2048",
+  "n_press_pairs": 1,
+  "n_problems": 100,
+  "n_resamples": 2000,
+  "note": "Readout spread vs free-run spread, mean absolute pairwise difference, paired on the problem. The DIFFERENCE carries the CI; the ratio is descriptive only, because at the saturated end the denominator approaches zero. Post-hoc: label exploratory wherever cited.",
+  "presses": [
+    "random",
+    "streamingllm"
+  ],
+  "rank_agreement": 0.0,
+  "readout_spread": 0.0025,
+  "seed": 0,
+  "spread_difference": 0.04,
+  "spread_difference_ci95": [
+    0.0075,
+    0.075
+  ],
+  "spread_difference_excludes_zero": true,
+  "spread_ratio_descriptive": 0.058823529411764705
+}

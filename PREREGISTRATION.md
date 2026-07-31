@@ -1061,3 +1061,48 @@ and the DeepSeek report put R1-Distill-Llama-8B AIME-24 pass@1 near 0.50). Out o
 band ⇒ investigate as an instrument problem before any cell is read against it,
 per the standing rule that a value outside its expected shape is a bug until the
 instrument is re-validated.
+
+---
+
+## Amendment L, result (2026-07-31): the confirmatory test at budget 512 CONFIRMS
+
+`grid-diss512` and `readout-diss512` completed 800/800 each. The prediction
+Amendment L pre-committed — that the readout-to-free-run spread ratio at budgets
+512 and 1024 would fall strictly between the budget-256 value and the budget-2048
+value, monotone in budget — **holds at 512**. Budget 1024 is still running and
+its arm of the prediction is untested.
+
+**Result as pre-registered** (artifact
+`results/diag/amendment-k/classb/resolution_math500_512.json`, seed 0, 2000
+resamples): free-run spread 0.2025, readout spread 0.0608, **ratio 0.3004**,
+spread difference +0.1417 with 95% CI [+0.0700, +0.2075], excluding zero. The
+pre-registered interval was (0.12, 0.78); 0.300 is strictly inside it.
+
+**A comparability check, and the disclosure that goes with it.** The budget-256
+and budget-2048 resolution values were computed over four and three presses
+respectively, while budget 512 has two (Random and StreamingLLM). Because the
+spread is a mean absolute pairwise difference, the press *set* affects it, so the
+budget comparison was not strictly like-for-like. **After seeing the 512 result**
+we recomputed 256 and 2048 restricted to the same two presses. This is a
+sensitivity analysis of a pre-registered quantity rather than a new estimand, but
+it was run after the fact and is labelled accordingly.
+
+| budget | free-run spread | readout spread | ratio | difference CI |
+|---|---|---|---|---|
+| 256 | 0.1850 | 0.1792 | 0.9685 | [−0.0783, +0.0883] spans zero |
+| 512 | 0.2025 | 0.0608 | 0.3004 | [+0.0700, +0.2075] excludes zero |
+| 2048 | 0.0425 | 0.0025 | 0.0588 | [+0.0075, +0.0750] excludes zero |
+
+The ordering is monotone on the matched pair as well, and 0.300 lies strictly
+between the matched-pair endpoints (0.0588, 0.9685). **The verdict is the same
+under both readings**, which is the useful property: the confirmation does not
+depend on which press set the endpoints were computed over.
+
+Two things the matched-pair view shows more sharply than the mixed-press one.
+At budget 256 the readout spread is 0.1792 against a free-run spread of 0.1850 —
+readout retains **essentially all** of the policy separation, not merely most of
+it. And at 2048 rank agreement on this pair is 0, so the two protocols order the
+two policies oppositely where readout certifies near-losslessness.
+
+**Not yet claimed.** Budget 1024 is unrun. Until it lands, the confirmatory test
+is passed at one of its two points, and the paper must say exactly that.

@@ -371,8 +371,15 @@ def build_catalogue() -> list[Entry]:
     # Resolution collapse (Amendment L, POST-HOC). One artifact per regime.
     for label, fname in (
         ("res256", "resolution_math500_256.json"),
+        ("res512", "resolution_math500_512.json"),
         ("res2048", "resolution_math500_2048.json"),
         ("resaime", "resolution_aime24_2048.json"),
+        # Matched-press-pair recomputation of 256 and 2048 (Random + SLM only),
+        # so the budget comparison holds the press SET fixed. Run AFTER the 512
+        # result was seen, as a comparability check; disclosed as such in
+        # Amendment L's result section.
+        ("respair256", "resolution_pair_256.json"),
+        ("respair2048", "resolution_pair_2048.json"),
     ):
         path = CLASSB / fname
         rel = path.relative_to(PROJECT_ROOT)
@@ -405,6 +412,12 @@ def build_catalogue() -> list[Entry]:
                 "problem-clustered 95% CI on the spread difference",
             )
         # Percentage form of the descriptive ratio, catalogued explicitly.
+        add(
+            f"{label}.ratio",
+            payload["spread_ratio_descriptive"],
+            f"{rel}#/spread_ratio_descriptive",
+            "readout spread as a fraction of free-run spread (descriptive, no CI)",
+        )
         add(
             f"{label}.ratio_pct",
             100.0 * payload["spread_ratio_descriptive"],
