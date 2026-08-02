@@ -64,8 +64,8 @@
 \@writefile{toc}{\contentsline {section}{\numberline {4}Results}{10}{section.4}\protected@file@percent }
 \newlabel{sec:results}{{4}{10}{Results}{section.4}{}}
 \newlabel{sec:results@cref}{{[section][4][]4}{[1][10][]10}{}{}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Held-trace evaluation loses resolution exactly where it certifies}{10}{subsection.4.1}\protected@file@percent }
-\newlabel{sec:resolution}{{4.1}{10}{Held-trace evaluation loses resolution exactly where it certifies}{subsection.4.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Held-trace resolution at four budgets}{10}{subsection.4.1}\protected@file@percent }
+\newlabel{sec:resolution}{{4.1}{10}{Held-trace resolution at four budgets}{subsection.4.1}{}}
 \newlabel{sec:resolution@cref}{{[subsection][1][4]4.1}{[1][10][]10}{}{}{}}
 \citation{vase2026}
 \@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces How much policy separation survives held-trace readout. Spread is the mean absolute pairwise difference in per-problem accuracy (max\,--\,min is unstable at three or four presses). The \emph  {difference} carries the interval; the ratio is descriptive, because at the saturated end its denominator approaches zero. Rank agreement counts press pairs ordered alike by both protocols. \textbf  {Post-hoc and exploratory} (Amendment L).}}{11}{table.caption.8}\protected@file@percent }
@@ -76,7 +76,7 @@
 \newlabel{sec:phenomenon@cref}{{[subsection][2][4]4.2}{[1][11][]11}{}{}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Left: free-running accuracy by method and budget --- the collapse is a budget effect (matched full cache $0.885$; at 256, Random $0.422$ / StreamingLLM $0.237$ / H2O-style$^{\dagger }$ $0.247$ / R-KV$^{\ddagger }$ $0.520$; at 2048, $0.850$ / $0.807$ / $0.823$, the near-lossless pole; light tints $=$ budget 2048; $\dagger $, $\ddagger $ per \cref  {tab:decomp}). Even the best policy at 256, the reasoning-specific R-KV, loses $0.36$ of the reference accuracy. Right: per-problem paired differences at budget 256 --- Random $-$ StreamingLLM is $+0.185$ on average (95\% CI $[0.130, 0.240]$) and non-negative on 94/100 problems (44 strict wins, 50 ties, 6 losses).}}{12}{figure.caption.9}\protected@file@percent }
 \newlabel{fig:phenomenon}{{2}{12}{Left: free-running accuracy by method and budget --- the collapse is a budget effect (matched full cache $0.885$; at 256, Random $0.422$ / StreamingLLM $0.237$ / H2O-style$^{\dagger }$ $0.247$ / R-KV$^{\ddagger }$ $0.520$; at 2048, $0.850$ / $0.807$ / $0.823$, the near-lossless pole; light tints $=$ budget 2048; $\dagger $, $\ddagger $ per \cref {tab:decomp}). Even the best policy at 256, the reasoning-specific R-KV, loses $0.36$ of the reference accuracy. Right: per-problem paired differences at budget 256 --- Random $-$ StreamingLLM is $+0.185$ on average (95\% CI $[0.130, 0.240]$) and non-negative on 94/100 problems (44 strict wins, 50 ties, 6 losses)}{figure.caption.9}{}}
-\newlabel{fig:phenomenon@cref}{{[figure][2][]2}{[1][12][]12}{}{}{}}
+\newlabel{fig:phenomenon@cref}{{[figure][2][]2}{[1][11][]12}{}{}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Forward decomposition: the loss is mostly not readout}{12}{subsection.4.3}\protected@file@percent }
 \newlabel{sec:forward}{{4.3}{12}{Forward decomposition: the loss is mostly not readout}{subsection.4.3}{}}
 \newlabel{sec:forward@cref}{{[subsection][3][4]4.3}{[1][12][]12}{}{}{}}
@@ -107,10 +107,10 @@
 \newlabel{tab:add@cref}{{[table][5][]5}{[1][16][]17}{}{}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Two failure styles that headline accuracy conflates, split along the recoverable-vs-concentrated line: both concentrated policies are nearly all within-answered (StreamingLLM $0.749$ of ADD $0.751$; H2O-style $0.713$ of $0.715$) --- silent answer flips --- while Random and R-KV carry larger termination-mass shifts ($+0.224$ and $+0.149$). R-KV's ADD is the lowest of the four ($0.459$), coherent with its highest free-running accuracy; flip-mass is overwhelmingly toward lost correct answers for all four. Dashed line marks the two-FC noise floor ($0.068$).}}{18}{figure.caption.15}\protected@file@percent }
 \newlabel{fig:add}{{5}{18}{Two failure styles that headline accuracy conflates, split along the recoverable-vs-concentrated line: both concentrated policies are nearly all within-answered (StreamingLLM $0.749$ of ADD $0.751$; H2O-style $0.713$ of $0.715$) --- silent answer flips --- while Random and R-KV carry larger termination-mass shifts ($+0.224$ and $+0.149$). R-KV's ADD is the lowest of the four ($0.459$), coherent with its highest free-running accuracy; flip-mass is overwhelmingly toward lost correct answers for all four. Dashed line marks the two-FC noise floor ($0.068$)}{figure.caption.15}{}}
-\newlabel{fig:add@cref}{{[figure][5][]5}{[1][18][]18}{}{}{}}
+\newlabel{fig:add@cref}{{[figure][5][]5}{[1][17][]18}{}{}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.7}Negative control: the instrument does not false-positive}{18}{subsection.4.7}\protected@file@percent }
 \newlabel{sec:control}{{4.7}{18}{Negative control: the instrument does not false-positive}{subsection.4.7}{}}
-\newlabel{sec:control@cref}{{[subsection][7][4]4.7}{[1][18][]18}{}{}{}}
+\newlabel{sec:control@cref}{{[subsection][7][4]4.7}{[1][17][]18}{}{}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {5}Threats to Validity}{18}{section.5}\protected@file@percent }
 \newlabel{sec:threats}{{5}{18}{Threats to Validity}{section.5}{}}
 \newlabel{sec:threats@cref}{{[section][5][]5}{[1][18][]18}{}{}{}}
@@ -128,9 +128,9 @@
 \newlabel{tab:validity}{{6}{23}{The validity kit that ships with the audit. Each row is a way an instrument could have fabricated a finding, and the control that rules it out}{table.caption.18}{}}
 \newlabel{tab:validity@cref}{{[table][6][]6}{[1][22][]23}{}{}{}}
 \@writefile{toc}{\contentsline {paragraph}{The trajectory audit.}{23}{section*.19}\protected@file@percent }
+\bibcite{xiao2023streamingllm}{1}
 \@writefile{toc}{\contentsline {paragraph}{What we have not measured.}{24}{section*.20}\protected@file@percent }
 \@writefile{toc}{\contentsline {paragraph}{Reproducibility.}{24}{section*.21}\protected@file@percent }
-\bibcite{xiao2023streamingllm}{1}
 \bibcite{zhang2023h2o}{2}
 \bibcite{li2024snapkv}{3}
 \bibcite{rkv2025}{4}
@@ -149,4 +149,4 @@
 \bibcite{barriers2025}{17}
 \bibcite{physics2026}{18}
 \bibcite{vase2026}{19}
-\gdef \@abspage@last{26}
+\gdef \@abspage@last{25}

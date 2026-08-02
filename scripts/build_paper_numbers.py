@@ -372,6 +372,7 @@ def build_catalogue() -> list[Entry]:
     for label, fname in (
         ("res256", "resolution_math500_256.json"),
         ("res512", "resolution_math500_512.json"),
+        ("res1024", "resolution_math500_1024.json"),
         ("res2048", "resolution_math500_2048.json"),
         ("resaime", "resolution_aime24_2048.json"),
         # Matched-press-pair recomputation of 256 and 2048 (Random + SLM only),

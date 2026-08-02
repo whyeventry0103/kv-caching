@@ -1,5 +1,25 @@
 # Proposed reframe — title and abstract, STAGED not applied
 
+> ## WITHDRAWN 2026-08-02 — read this before anything below
+>
+> **The reframe is withdrawn.** B.9 gated it on Unit 6's resolution relationship
+> being monotone with CIs supporting it. Budgets 512 and 1024 have since run, and
+> the pre-registered prediction was **refuted**: the ratio falls 0.97 → 0.30 →
+> 0.04 and then rises to 0.06 at 2048, non-monotone, with the 1024 value outside
+> the pre-committed interval (PREREGISTRATION, Amendment L final result).
+>
+> Both proposed titles — "Blind Where It Certifies" and "Readout Accuracy Loses
+> Resolution Exactly Where It Certifies Near-Losslessness" — assert the graded
+> reading that the data does not support. **Keep the current title.** The
+> contribution reorder that placed resolution collapse first is withdrawn for the
+> same reason.
+>
+> What survives is the endpoint comparison (readout separates the policies at
+> budget 256 and cannot at 1024/2048/AIME), which is now §4.1 "Held-trace
+> resolution at four budgets", demoted from a primary contribution. Everything
+> below is kept as the record of a proposal the data closed off.
+
+
 **Status: not in the `.tex`.** Per the work order's B.9, the structural parts of the
 reframe (the new §4.1 resolution section, the validity kit, the claim calibration,
 the ρ_rev cancellation, the matched-schedule argument) have landed in the paper

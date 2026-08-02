@@ -1106,3 +1106,58 @@ two policies oppositely where readout certifies near-losslessness.
 
 **Not yet claimed.** Budget 1024 is unrun. Until it lands, the confirmatory test
 is passed at one of its two points, and the paper must say exactly that.
+
+---
+
+## Amendment L, final result (2026-08-02): the confirmatory prediction is REFUTED
+
+Budget 1024 completed (grid and readout, 800/800 each). **The prediction
+Amendment L pre-committed does not hold, and we report it as a refutation rather
+than reinterpreting it.**
+
+**The pre-committed criterion, quoted from Amendment L:** *"the readout-to-free-run
+spread ratio at 512 and 1024 will fall strictly between the 256 value (0.78) and
+the 2048 value (0.12), and the spread difference will move from spanning zero
+toward excluding it as budget rises. If the ratio at 512 or 1024 falls outside
+[0.12, 0.78], or the ordering is non-monotone in budget, the gradual-collapse
+reading is refuted and we will report it as such rather than reinterpreting."*
+
+**Full series, matched press pair (Random, StreamingLLM) at all four budgets:**
+
+| budget | free-run spread | readout spread | ratio | spread difference (95% CI) | rank agr. |
+|---|---|---|---|---|---|
+| 256 | 0.1850 | 0.1792 | 0.9685 | +0.0058 [−0.0783, +0.0883] | 1/1 |
+| 512 | 0.2025 | 0.0608 | 0.3004 | +0.1417 [+0.0700, +0.2075] | 1/1 |
+| 1024 | 0.1125 | 0.0050 | **0.0444** | +0.1075 [+0.0600, +0.1600] | 1/1 |
+| 2048 | 0.0425 | 0.0025 | 0.0588 | +0.0400 [+0.0075, +0.0750] | 0/1 |
+
+**Both clauses fail.** The 1024 ratio of 0.0444 is **outside** the pre-committed
+interval (0.12, 0.78), and the ordering is **non-monotone**: the ratio falls
+0.9685 → 0.3004 → 0.0444 and then *rises* to 0.0588 at 2048. Either alone is a
+refutation under the stated criterion; both fail.
+
+**Diagnosis, offered as description and not as rescue.** The readout spread is
+monotone across all four budgets (0.1792 → 0.0608 → 0.0050 → 0.0025). The
+free-run spread is not (0.1850 → 0.2025 → 0.1125 → 0.0425): it *rises* from 256
+to 512 and collapses by 2048, because at the near-lossless pole the two policies
+converge in free-running accuracy and there is little separation left to lose.
+The ratio therefore inverts through its denominator, not because readout recovers
+resolution. **We note this because it is true, and we do not substitute the
+monotone numerator for the ratio we pre-registered.** A prediction about a ratio
+is refuted by that ratio.
+
+**What survives, stated separately so it is not mistaken for a rescue.** The
+spread *difference* excludes zero at 512, 1024 and 2048, and spans zero at 256.
+Readout retains essentially all policy separation at budget 256 (0.1792 against
+0.1850) and almost none at 1024 and 2048 (0.0050 and 0.0025). The endpoint
+observation — that held-trace evaluation discriminates where it reports damage
+and not where it certifies — is measured and stands. **The graded, monotone-in-
+budget reading of it does not.**
+
+**Consequences, applied.** Per the branch written before the data landed
+(`docs/INTEGRATION_CHECKLIST.md` §1, Branch B): §4.1 is demoted from a primary
+contribution and retitled to state the endpoints without the graded claim; the
+proposed reframe title is withdrawn, since both candidates were built on the
+graded reading; the contribution reorder that placed resolution collapse first is
+withdrawn. The post-hoc status of the original observation is unchanged and
+remains disclosed.

@@ -419,6 +419,7 @@ jobs:
     seeds: [11, 23, 47, 89]
     min_free_gb: 40
     progress_kind: grid
+    bench: aime24
     requires: null
   - name: grid-aime24-rkv-published
     command: grid
@@ -428,4 +429,5 @@ jobs:
     seeds: [11, 23, 47, 89]
     min_free_gb: 40
     progress_kind: grid
+    bench: aime24
     requires: fc-aime24-llama8b

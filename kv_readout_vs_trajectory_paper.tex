@@ -209,7 +209,7 @@ The decomposition's read was pre-committed before the powered numbers existed, w
 
 All compression-cell results are at budget 256 on MATH-500 unless stated; confidence intervals are problem-clustered bootstrap 95\% CIs against the single pinned FC reference. All experimental cells reported in this paper, including the scale-axis check (R1-Distill-Qwen-1.5B/-14B, Amendment J), are final; the scale-axis cells appear in \cref{sec:threats,sec:conclusion}.
 
-\subsection{Held-trace evaluation loses resolution exactly where it certifies}
+\subsection{Held-trace resolution at four budgets}
 \label{sec:resolution}
 
 Before the decomposition, one property of the readout protocol deserves stating on its own, because it bounds what any held-trace evaluation can tell you. Ask how far apart the policies sit under each protocol --- the mean absolute pairwise difference in per-problem accuracy, paired on the problem --- and compare the two spreads. Both quantities are accuracy-scale and measured on the same conditions, so this compares readout against readout and free-run against free-run; the off-policy caveat that attaches to the residual (\cref{sec:reverse}) does not arise here.
@@ -220,26 +220,23 @@ Before the decomposition, one property of the readout protocol deserves stating 
 \toprule
 Regime & Free-run spread & Readout spread & Difference (95\% CI) & Ratio & Rank agr. \\
 \midrule
-MATH-500 @256  & 0.170 & 0.133 & $+0.038$ $[-0.012, 0.084]$ & 0.78 & 6/6 \\
-MATH-500 @512  & 0.203 & 0.061 & $+0.142$ $[0.070, 0.207]$ & 0.30 & 1/1 \\
-MATH-500 @2048 & 0.028 & 0.003 & $+0.025$ $[0.007, 0.047]$ & 0.12 & 1/3 \\
-AIME-24 @2048  & 0.101 & 0.000 & $+0.101$ $[0.036, 0.179]$ & 0.00 & 0/3 \\
-\midrule
-\multicolumn{6}{l}{\emph{Matched press pair (Random, StreamingLLM) at all three MATH-500 budgets:}} \\
 MATH-500 @256  & 0.185 & 0.179 & $+0.006$ $[-0.078, 0.088]$ & 0.97 & 1/1 \\
 MATH-500 @512  & 0.203 & 0.061 & $+0.142$ $[0.070, 0.207]$ & 0.30 & 1/1 \\
+MATH-500 @1024 & 0.113 & 0.005 & $+0.107$ $[0.060, 0.160]$ & 0.04 & 1/1 \\
 MATH-500 @2048 & 0.043 & 0.003 & $+0.040$ $[0.008, 0.075]$ & 0.06 & 0/1 \\
+\midrule
+AIME-24 @2048  & 0.101 & 0.000 & $+0.101$ $[0.036, 0.179]$ & 0.00 & 0/3 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\cref{tab:resolution} shows the pattern. At budget 256 --- the regime where readout reports a large accuracy drop --- readout retains essentially all of the discriminating power: the spread difference \emph{spans zero} and the two protocols order all six press pairs identically. At the two cells where readout certifies near-losslessness, the difference \emph{excludes zero} and rank agreement falls to 1 of 3 and then 0 of 3. On AIME-24 the readout spread is exactly $0.000$: all three presses score identically on every one of the 93 conditions with a defined answer boundary, a readout change of exactly $0.000$ against the matched reference, while free-running separates the same three policies by roughly $2\times$.
+\cref{tab:resolution} shows what held-trace evaluation can and cannot see. At budget 256 --- the regime where readout reports a large accuracy drop --- readout retains \emph{essentially all} of the discriminating power: a readout spread of $0.179$ against a free-running spread of $0.185$, a difference that spans zero, and identical ordering of the pair. At budgets 1024 and 2048, where readout certifies near-losslessness, its spread falls to $0.005$ and $0.003$, the difference excludes zero, and at 2048 the two protocols order the pair \emph{oppositely}. On AIME-24 the readout spread is exactly $0.000$: all three presses score identically on every one of the 93 conditions with a defined answer boundary, a readout change of exactly $0.000$ against the matched reference, while free-running separates them by roughly $2\times$.
 
-The honest statement of this is narrow and, we think, more interesting narrow. It is \emph{not} that readout cannot rank compression policies: our own budget-256 cell is a counterexample, and readout ranks all four presses correctly there. It is that the protocol's resolution degrades as the thing it measures gets smaller, so it discriminates well precisely where it reports damage and goes blind precisely where it issues a certificate. A near-lossless readout result is therefore weak evidence in a specific, measurable way: in the regime that produces it, the protocol has been shown to be unable to tell policies apart that free-running separates.
+\textbf{We pre-registered a stronger reading than this, and the data refuted it.} Having noticed the pattern post-hoc, Amendment L fixed the design in code and pre-committed the prediction it implies: that the readout-to-free-run spread ratio at budgets 512 and 1024 would fall strictly between the 256 and 2048 values, monotone in budget, with a stated refutation condition. Both cells were then run. The ratio falls $0.97 \to 0.30 \to 0.04$ and then \emph{rises} to $0.06$ at 2048, so the ordering is non-monotone, and the 1024 value lies outside the pre-committed interval. Under the criterion as written this is a refutation, and we report it as one. The graded, monotone-in-budget account of the resolution loss is not supported.
 
-We flag the original observation as post-hoc: the question was formed after the budget-256, budget-2048 and AIME cells had been read, and it is the measurement of a pattern we first noticed rather than one we predicted. Amendment L therefore fixed the design in code before the write-up and pre-committed the confirmatory version --- that the ratio at budgets 512 and 1024 would fall strictly between the 256 and 2048 values, monotone in budget.
+The reason is worth stating because it is diagnostic rather than exculpatory. The readout spread itself \emph{is} monotone across all four budgets ($0.179 \to 0.061 \to 0.005 \to 0.003$); the free-running spread is not ($0.185 \to 0.203 \to 0.113 \to 0.043$), because at the near-lossless pole the two policies converge in free-running accuracy and there is little separation left to lose. The ratio therefore inverts through its denominator. We record this, and we do not substitute the monotone numerator for the ratio we pre-registered: a prediction about a ratio is refuted by that ratio.
 
-\textbf{The budget-512 cell has since been run, and the prediction holds there.} Its ratio is $0.30$, strictly inside the pre-committed interval, with a spread difference of $+0.142$ $[0.070, 0.207]$ excluding zero. Because the spread is a mean absolute pairwise difference, the press \emph{set} affects it, and the 256, 512 and 2048 cells cover four, two and three presses respectively; we therefore recomputed all three on the one press pair they share (lower block of \cref{tab:resolution}). The ordering is monotone either way and $0.30$ lies strictly between the matched-pair endpoints as well, so the confirmation does not depend on which presses the endpoints were computed over. That recomputation was run after the 512 result was seen and is reported as the sensitivity check it is. The matched pair also sharpens the endpoints: at budget 256 readout retains \emph{essentially all} the separation ($0.179$ against $0.185$), and at 2048 the two protocols order the pair oppositely. \textbf{Budget 1024 has not finished, so the confirmatory test is passed at one of its two points and we claim no more than that.}
+What survives is the endpoint comparison, which is measured and which we state without the graded gloss: held-trace evaluation separates these policies where it reports damage and fails to separate them where it issues a certificate. That is a property of the protocol worth knowing, and it bounds what a near-lossless readout result can be taken to establish. It is \emph{not} evidence that resolution degrades smoothly with budget, and the original observation remains post-hoc.
 
 \subsection{The powered phenomenon: collapse, and random beats recency}
 \label{sec:phenomenon}
