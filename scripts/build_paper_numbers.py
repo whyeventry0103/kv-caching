@@ -368,6 +368,24 @@ def build_catalogue() -> list[Entry]:
                 "windowed mean per-step TV (step-pooled estimator)",
             )
 
+    # HOTT-configuration cell (Amendment N.1): how much of the baseline gap
+    # HOTT's 2048-token generation cap accounts for on its own. Greedy decoding
+    # is NOT matched, so the residual gap is not attributable to the cap.
+    _hc_path = CLASSB / "hottcap.json"
+    _hc_rel = _hc_path.relative_to(PROJECT_ROOT)
+    _hc = _load(_hc_path)
+    for _cell, _short in (("fullcache", "fc"), ("streamingllm128", "slm128")):
+        for _field, _desc in (
+            ("accuracy", "accuracy under HOTT's 2048-token generation cap"),
+            ("truncation_rate", "truncation rate under that cap"),
+        ):
+            add(
+                f"hottcap.{_short}.{_field}",
+                _hc["cells"][_cell][_field],
+                f"{_hc_rel}#/cells/{_cell}/{_field}",
+                _desc,
+            )
+
     # Resolution collapse (Amendment L, POST-HOC). One artifact per regime.
     for label, fname in (
         ("res256", "resolution_math500_256.json"),
@@ -1023,6 +1041,35 @@ def build_catalogue() -> list[Entry]:
                 (e.key,),
                 "percentage form of the preceding ratio",
             )
+
+    # Amendment N.1: what the generation cap leaves unexplained.
+    #
+    # KNOWN GATE LIMITATION, recorded here because the green tick is misleading.
+    # The paper's 0.045 (0.515 - 0.47) is sourced, but the audit attributes it to
+    # `llama.random.readout_ci1`, an unrelated Llama CI bound that happens to
+    # equal 0.045 exactly. This derived entry does NOT change that: exact-match
+    # precedence prefers the entry whose stored float is exactly 0.045 over this
+    # one's 0.04500000000000004. So the number is real and its arithmetic is
+    # checked here, but the audit's provenance trail for it points at the wrong
+    # quantity.
+    #
+    # This is the residual weakness of value-based attribution: two distinct
+    # quantities that share a value are indistinguishable without context. It is
+    # the same family as the sign-blind-attribution defect (fixed) and the
+    # coincidence-matching risk that made display rules data. A real fix needs
+    # context-aware matching (surrounding tokens), which is not built.
+    #
+    # Placed after the external entries because hott.fullcache_math500 is added
+    # below the derived section.
+    _bk = {e.key: e.value for e in entries}
+    add(
+        "hottcap.residual_gap",
+        _bk["hottcap.fc.accuracy"] - _bk["hott.fullcache_math500"],
+        "hottcap.fc.accuracy - hott.fullcache_math500",
+        "baseline gap left after HOTT's generation cap is matched",
+        kind="derived",
+        inputs=("hottcap.fc.accuracy", "hott.fullcache_math500"),
+    )
 
     return entries
 

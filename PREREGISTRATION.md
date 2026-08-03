@@ -1261,3 +1261,41 @@ events. The R-KV PASS marker was deliberately **not** written by that run: the
 marker is the promotion mechanism for R-KV as a whole and is defined over
 R1-Distill-Qwen-7B, so a smoke on another model reports its result and promotes
 nothing.
+
+---
+
+## Amendment N.1, result (2026-08-03): the HOTT baseline gap is a generation-cap artifact
+
+`bank_hottcap` (400 rows) and `grid_hottcap` (400 rows) completed. Read as
+pre-registered in N.1, branch **EXPLAINED**.
+
+**Result.** Re-running our own full-cache condition under HOTT's 2048-token
+generation cap, changing nothing else, drops accuracy from **0.882** to
+**0.515**, with **0.430** of generations truncated at the cap and scored
+incorrect (230/400 cap hits). HOTT report 0.47. The cap alone therefore accounts
+for nearly all of the baseline gap, leaving **0.045**.
+
+The StreamingLLM-128 arm, read the same way against HOTT's 0.03, lands at
+**0.100** with **0.475** truncation.
+
+**Mandatory caveat, as pre-written.** This cell matches HOTT's 2048-token
+generation cap and **not** their greedy decoding, which our generation path does
+not support; sampling remains $T=0.6$, top-$p$ 0.95. It therefore measures how
+much of the baseline gap the cap alone accounts for, and any residual gap is not
+attributable to the cap.
+
+**Consequences, applied per `docs/INTEGRATION_CHECKLIST.md` §2 (EXPLAINED).**
+§2's parenthetical no longer asserts a decode-length explanation; it reports the
+measurement. §5's "we do not reproduce HOTT's baseline" item is removed from the
+not-measured list, because it is now measured; what remains untested there is
+greedy decoding, and that is what §5 now says.
+
+**A gate limitation found while landing this, recorded rather than hidden.** The
+0.045 residual is sourced, but the number audit attributes it to
+`llama.random.readout_ci1` — an unrelated Llama CI bound that happens to equal
+0.045 exactly. A derived entry `hottcap.residual_gap` was added and does **not**
+change the attribution, because exact-match precedence prefers the entry whose
+stored float is exactly 0.045. The number and its arithmetic are checked; the
+audit's provenance trail for that one literal points at the wrong quantity.
+Value-based attribution cannot separate two distinct quantities that share a
+value without context-aware matching, which is not built.

@@ -38,24 +38,24 @@
 \citation{bengio2015scheduled}
 \citation{ross2011dagger}
 \citation{leviathan2023speculative}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Reasoning under compression}{5}{subsection.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Teacher forcing versus free running}{5}{subsection.2.3}\protected@file@percent }
 \citation{deepseek2025r1}
 \citation{hendrycks2021math}
 \citation{lightman2023verify}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Reasoning under compression}{5}{subsection.2.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Teacher forcing versus free running}{5}{subsection.2.3}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {3}Estimands and Experimental Design}{6}{section.3}\protected@file@percent }
 \newlabel{sec:estimands}{{3}{6}{Estimands and Experimental Design}{section.3}{}}
-\newlabel{sec:estimands@cref}{{[section][3][]3}{[1][5][]6}{}{}{}}
+\newlabel{sec:estimands@cref}{{[section][3][]3}{[1][6][]6}{}{}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Setup}{6}{subsection.3.1}\protected@file@percent }
 \newlabel{sec:setup}{{3.1}{6}{Setup}{subsection.3.1}{}}
-\newlabel{sec:setup@cref}{{[subsection][1][3]3.1}{[1][5][]6}{}{}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces The four generation protocols behind the estimands. Fill encodes the cache condition while a span is processed (grey $=$ full cache; hatched $=$ compression active); the text in each span says where its tokens come from (self-generated versus teacher-forced replay of exact stored token IDs). Forward readout scores answer generation \emph  {under compression} given the full-cache reference trace; reverse readout scores \emph  {full-cache} answer generation given the compressed model's own trace. The residual $\rho (m) = \Delta _{\mathrm  {tot}}(m) - \Delta _{\mathrm  {ro}}(m)$ is the free-running loss unexplained by on-reference readout; the forward and reverse estimates bracket the on-policy residual (\cref  {sec:reverse}).}}{7}{figure.caption.5}\protected@file@percent }
-\newlabel{fig:protocol}{{1}{7}{The four generation protocols behind the estimands. Fill encodes the cache condition while a span is processed (grey $=$ full cache; hatched $=$ compression active); the text in each span says where its tokens come from (self-generated versus teacher-forced replay of exact stored token IDs). Forward readout scores answer generation \emph {under compression} given the full-cache reference trace; reverse readout scores \emph {full-cache} answer generation given the compressed model's own trace. The residual $\res {m} = \dtot {m} - \dro {m}$ is the free-running loss unexplained by on-reference readout; the forward and reverse estimates bracket the on-policy residual (\cref {sec:reverse})}{figure.caption.5}{}}
-\newlabel{fig:protocol@cref}{{[figure][1][]1}{[1][7][]7}{}{}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Estimands}{7}{subsection.3.2}\protected@file@percent }
+\newlabel{sec:setup@cref}{{[subsection][1][3]3.1}{[1][6][]6}{}{}{}}
 \citation{ross2011dagger}
-\newlabel{eq:residual}{{3}{8}{Residual --- a definition, not a measured cause}{equation.3}{}}
-\newlabel{eq:residual@cref}{{[equation][3][]3}{[1][8][]8}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Estimands}{7}{subsection.3.2}\protected@file@percent }
+\newlabel{eq:residual}{{3}{7}{Residual --- a definition, not a measured cause}{equation.3}{}}
+\newlabel{eq:residual@cref}{{[equation][3][]3}{[1][7][]7}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces The four generation protocols behind the estimands. Fill encodes the cache condition while a span is processed (grey $=$ full cache; hatched $=$ compression active); the text in each span says where its tokens come from (self-generated versus teacher-forced replay of exact stored token IDs). Forward readout scores answer generation \emph  {under compression} given the full-cache reference trace; reverse readout scores \emph  {full-cache} answer generation given the compressed model's own trace. The residual $\rho (m) = \Delta _{\mathrm  {tot}}(m) - \Delta _{\mathrm  {ro}}(m)$ is the free-running loss unexplained by on-reference readout; the forward and reverse estimates bracket the on-policy residual (\cref  {sec:reverse}).}}{8}{figure.caption.5}\protected@file@percent }
+\newlabel{fig:protocol}{{1}{8}{The four generation protocols behind the estimands. Fill encodes the cache condition while a span is processed (grey $=$ full cache; hatched $=$ compression active); the text in each span says where its tokens come from (self-generated versus teacher-forced replay of exact stored token IDs). Forward readout scores answer generation \emph {under compression} given the full-cache reference trace; reverse readout scores \emph {full-cache} answer generation given the compressed model's own trace. The residual $\res {m} = \dtot {m} - \dro {m}$ is the free-running loss unexplained by on-reference readout; the forward and reverse estimates bracket the on-policy residual (\cref {sec:reverse})}{figure.caption.5}{}}
+\newlabel{fig:protocol@cref}{{[figure][1][]1}{[1][7][]8}{}{}{}}
 \@writefile{toc}{\contentsline {paragraph}{Undefined rows, and what a primary bound is and is not.}{8}{section*.6}\protected@file@percent }
 \@writefile{toc}{\contentsline {paragraph}{What the comparison holds fixed, and why it is not exposure bias.}{8}{section*.7}\protected@file@percent }
 \citation{ranzato2016exposure}
@@ -76,7 +76,7 @@
 \newlabel{sec:phenomenon@cref}{{[subsection][2][4]4.2}{[1][11][]11}{}{}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces The two protocols, side by side, on the same cells. Solid bars are free-running accuracy; hatched bars are held-trace readout accuracy on the same policy and budget. Matched full cache $0.885$ (dashed). At budget 256 the protocols disagree sharply --- free-running Random $0.422$ / StreamingLLM $0.237$ / H2O-style$^{\dagger }$ $0.247$ / R-KV$^{\ddagger }$ $0.520$, against readout $0.765$ / $0.584$ / $0.597$ / $0.798$ on the identical conditions. At budget 2048 they converge: free-running $0.850$ / $0.807$ / $0.823$ against readout $0.901$ / $0.903$ / $0.898$, at or just above the matched reference. Even the best policy at 256, the reasoning-specific R-KV, loses $0.36$ of the reference accuracy under free generation. Light tints $=$ budget 2048; $\dagger $, $\ddagger $ per \cref  {tab:decomp}. Inset: per-problem paired differences at budget 256 --- Random $-$ StreamingLLM is $+0.185$ on average (95\% CI $[0.130, 0.240]$) and non-negative on 94/100 problems (44 strict wins, 50 ties, 6 losses).}}{12}{figure.caption.9}\protected@file@percent }
 \newlabel{fig:phenomenon}{{2}{12}{The two protocols, side by side, on the same cells. Solid bars are free-running accuracy; hatched bars are held-trace readout accuracy on the same policy and budget. Matched full cache $0.885$ (dashed). At budget 256 the protocols disagree sharply --- free-running Random $0.422$ / StreamingLLM $0.237$ / H2O-style$^{\dagger }$ $0.247$ / R-KV$^{\ddagger }$ $0.520$, against readout $0.765$ / $0.584$ / $0.597$ / $0.798$ on the identical conditions. At budget 2048 they converge: free-running $0.850$ / $0.807$ / $0.823$ against readout $0.901$ / $0.903$ / $0.898$, at or just above the matched reference. Even the best policy at 256, the reasoning-specific R-KV, loses $0.36$ of the reference accuracy under free generation. Light tints $=$ budget 2048; $\dagger $, $\ddagger $ per \cref {tab:decomp}. Inset: per-problem paired differences at budget 256 --- Random $-$ StreamingLLM is $+0.185$ on average (95\% CI $[0.130, 0.240]$) and non-negative on 94/100 problems (44 strict wins, 50 ties, 6 losses)}{figure.caption.9}{}}
-\newlabel{fig:phenomenon@cref}{{[figure][2][]2}{[1][11][]12}{}{}{}}
+\newlabel{fig:phenomenon@cref}{{[figure][2][]2}{[1][12][]12}{}{}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Forward decomposition: the loss is mostly not readout}{12}{subsection.4.3}\protected@file@percent }
 \newlabel{sec:forward}{{4.3}{12}{Forward decomposition: the loss is mostly not readout}{subsection.4.3}{}}
 \newlabel{sec:forward@cref}{{[subsection][3][4]4.3}{[1][12][]12}{}{}{}}
@@ -107,10 +107,10 @@
 \newlabel{tab:add@cref}{{[table][5][]5}{[1][16][]17}{}{}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Two failure styles that headline accuracy conflates, split along the recoverable-vs-concentrated line: both concentrated policies are nearly all within-answered (StreamingLLM $0.749$ of ADD $0.751$; H2O-style $0.713$ of $0.715$) --- silent answer flips --- while Random and R-KV carry larger termination-mass shifts ($+0.224$ and $+0.149$). R-KV's ADD is the lowest of the four ($0.459$), coherent with its highest free-running accuracy; flip-mass is overwhelmingly toward lost correct answers for all four. Dashed line marks the two-FC noise floor ($0.068$).}}{18}{figure.caption.15}\protected@file@percent }
 \newlabel{fig:add}{{5}{18}{Two failure styles that headline accuracy conflates, split along the recoverable-vs-concentrated line: both concentrated policies are nearly all within-answered (StreamingLLM $0.749$ of ADD $0.751$; H2O-style $0.713$ of $0.715$) --- silent answer flips --- while Random and R-KV carry larger termination-mass shifts ($+0.224$ and $+0.149$). R-KV's ADD is the lowest of the four ($0.459$), coherent with its highest free-running accuracy; flip-mass is overwhelmingly toward lost correct answers for all four. Dashed line marks the two-FC noise floor ($0.068$)}{figure.caption.15}{}}
-\newlabel{fig:add@cref}{{[figure][5][]5}{[1][17][]18}{}{}{}}
+\newlabel{fig:add@cref}{{[figure][5][]5}{[1][18][]18}{}{}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.7}Negative control: the instrument does not false-positive}{18}{subsection.4.7}\protected@file@percent }
 \newlabel{sec:control}{{4.7}{18}{Negative control: the instrument does not false-positive}{subsection.4.7}{}}
-\newlabel{sec:control@cref}{{[subsection][7][4]4.7}{[1][17][]18}{}{}{}}
+\newlabel{sec:control@cref}{{[subsection][7][4]4.7}{[1][18][]18}{}{}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {5}Threats to Validity}{18}{section.5}\protected@file@percent }
 \newlabel{sec:threats}{{5}{18}{Threats to Validity}{section.5}{}}
 \newlabel{sec:threats@cref}{{[section][5][]5}{[1][18][]18}{}{}{}}
@@ -121,16 +121,16 @@
 \@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces AIME-24 at budget 2048 (subset scale: 30 problems $\times $ 4 seeds; own reference bank at $0.371$). Free-running separates the three policies ($0.283$ / $0.217$ / $0.142$); their readout accuracies are \emph  {identical} at $0.462$ --- same correctness on every one of the 93 conditions where an answer boundary is defined (27 of the 120 are undefined for every press), with 85 of those 93 converging to the same extracted answer through visibly different generations. Held-trace evaluation cannot see the difference between these policies at all; no press approaches the reference (no $>$100\% regime).}}{21}{figure.caption.17}\protected@file@percent }
 \newlabel{fig:aime}{{7}{21}{AIME-24 at budget 2048 (subset scale: 30 problems $\times $ 4 seeds; own reference bank at $0.371$). Free-running separates the three policies ($0.283$ / $0.217$ / $0.142$); their readout accuracies are \emph {identical} at $0.462$ --- same correctness on every one of the 93 conditions where an answer boundary is defined (27 of the 120 are undefined for every press), with 85 of those 93 converging to the same extracted answer through visibly different generations. Held-trace evaluation cannot see the difference between these policies at all; no press approaches the reference (no $>$100\% regime)}{figure.caption.17}{}}
 \newlabel{fig:aime@cref}{{[figure][7][]7}{[1][21][]21}{}{}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {6}Conclusion}{22}{section.6}\protected@file@percent }
-\newlabel{sec:conclusion}{{6}{22}{Conclusion}{section.6}{}}
-\newlabel{sec:conclusion@cref}{{[section][6][]6}{[1][22][]22}{}{}{}}
 \@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces The validity kit that ships with the audit. Each row is a way an instrument could have fabricated a finding, and the control that rules it out.}}{23}{table.caption.18}\protected@file@percent }
 \newlabel{tab:validity}{{6}{23}{The validity kit that ships with the audit. Each row is a way an instrument could have fabricated a finding, and the control that rules it out}{table.caption.18}{}}
 \newlabel{tab:validity@cref}{{[table][6][]6}{[1][22][]23}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Conclusion}{23}{section.6}\protected@file@percent }
+\newlabel{sec:conclusion}{{6}{23}{Conclusion}{section.6}{}}
+\newlabel{sec:conclusion@cref}{{[section][6][]6}{[1][22][]23}{}{}{}}
 \@writefile{toc}{\contentsline {paragraph}{The trajectory audit.}{23}{section*.19}\protected@file@percent }
-\bibcite{xiao2023streamingllm}{1}
 \@writefile{toc}{\contentsline {paragraph}{What we have not measured.}{24}{section*.20}\protected@file@percent }
 \@writefile{toc}{\contentsline {paragraph}{Reproducibility.}{24}{section*.21}\protected@file@percent }
+\bibcite{xiao2023streamingllm}{1}
 \bibcite{zhang2023h2o}{2}
 \bibcite{li2024snapkv}{3}
 \bibcite{rkv2025}{4}
@@ -149,4 +149,4 @@
 \bibcite{barriers2025}{17}
 \bibcite{physics2026}{18}
 \bibcite{vase2026}{19}
-\gdef \@abspage@last{25}
+\gdef \@abspage@last{26}

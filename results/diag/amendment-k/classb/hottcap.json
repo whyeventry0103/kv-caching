@@ -1,0 +1,27 @@
+{
+  "artifact": "hottcap",
+  "amendment": "N.1",
+  "note": "HOTT-configuration cell: HOTT's 2048-token generation cap, everything else ours. Greedy decoding is NOT matched; sampling stays T=0.6, top-p=0.95. Measures the cap's contribution alone.",
+  "reference_convention": "amendment-k-cell-population",
+  "generated": "2026-08-03T07:52:20.186894+00:00",
+  "cells": {
+    "fullcache": {
+      "run": "bank-hottcap",
+      "n_rows": 400,
+      "accuracy": 0.515,
+      "truncation_rate": 0.43,
+      "cap_hits": 230,
+      "press": "fullcache",
+      "budget": "full"
+    },
+    "streamingllm128": {
+      "run": "grid-hottcap",
+      "n_rows": 400,
+      "accuracy": 0.1,
+      "truncation_rate": 0.475,
+      "cap_hits": 264,
+      "press": "streamingllm",
+      "budget": "128"
+    }
+  }
+}
