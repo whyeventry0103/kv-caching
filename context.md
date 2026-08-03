@@ -18,6 +18,53 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-08-03 — AIME cell unblocked and relaunched; N.3 bank gate FAILED;
+  three figure defects fixed. HEAD `3e1f042`.**
+  **(1) The stuck job was a real capability gap, not a config bug.**
+  `grid-aime24-rkv-published` had crashed on every launch since 2026-08-01:
+  `NotImplementedError` — the R-KV window-query recompute hand-rolled unscaled
+  RoPE, and R1-Distill-Llama-8B uses llama3 scaling. The guard was right to
+  refuse. Fixed by delegating to transformers' `ROPE_INIT_FUNCTIONS`
+  (`src/kvcache/presses/rkv.py:rope_inv_freq`). Certified three ways: a test
+  locks the unscaled branch **bitwise-identical** to the old formula so no
+  existing number moves; the per-event self-check against the model's own
+  `position_embeddings` is retained; the real-generation smoke on
+  Llama-8B/AIME-24 **passed at Jaccard 1.0000** over 448 compressions. That
+  smoke deliberately does NOT write the PASS marker — the marker is R-KV's
+  promotion mechanism and is defined over Qwen-7B.
+  **(2) `fc-aime24-llama8b` finished 120/120 and FAILED its N.3 gate: 0.2750
+  against [0.30, 0.70].** So N.2 is NOT readable and stays unread; §2's
+  "adjacent configuration" hedge for R-KV still stands. Diagnosis: truncation
+  0.2583 at the 16384 cap; non-truncated accuracy 0.3708 (in band); the accepted
+  Qwen-7B bank does the same at the same cap (0.2208 / 0.3708). Not a pipeline
+  bug — a cap artifact.
+  **(3) Amendment O written BEFORE the re-run**, raising the cap to the published
+  32768 with the timing disclosed: the 16384 result is permanent, both caps are
+  reported, the band is not widened, and there is **ONE attempt** — a second
+  failure cuts N.2/N.3. That last clause is what stops this being a search for a
+  cap that passes.
+  **IN FLIGHT:** `fc-aime24-llama8b-cap32768`, launched 11:32 on both GPUs
+  (new run name so the 16384 rows are never touched), ~6h expected, resumable;
+  cron continues it at 01:45 if the 23:30 window closes. Then
+  `grid-aime24-rkv-published-cap32768` (dependency-gated).
+  **(4) Figures: three recorded defects fixed, one still open.** fig2's value
+  labels were struck through by their own CI whiskers on all four panels (now
+  past `max(mark, ci_hi)`). fig1 showed only free-running accuracy — readout is
+  now a hatched paired series at both budgets, so Fig 1 states the thesis
+  (256: 0.422/0.237/0.247/0.520 free vs 0.765/0.584/0.597/0.798 readout;
+  2048: they converge) instead of restating HOTT; ~38% of its area was a blank
+  panel holding a text box and is reclaimed. fig4's recorded defect was **stale**
+  — already fixed. **Still open: fig2's density** (4 panels, ~40 numbers) — the
+  one-panel redesign is NOT done.
+  **(5) Also:** cleared a stale "stuck" alert naming a retired job (state backed
+  up); Fig 1's caption had described a histogram panel the committed artifact
+  never had, now corrected.
+  **NEXT:** read the 32768 bank against the O.4 branches when it lands. Still
+  untouched from the earlier list: D.1 seven analyses, D.2 layer-1 bootstrap,
+  D.3 content-token TV, **D.6 mechanical compression (25pp vs ICLR's 9pp — the
+  real submission blocker)**, A.2 R-KV footnote, A.5 playbook audit, Part F
+  final verification, and one `\todo{anonymized-prereg-link}`.
+
   **★★★★★ ITEMS 0–4 (2026-07-29). Stopped at an item boundary; items 5–10 NOT
   started.**
   **(0) Nothing launched, and that was correct** — only 11 min of remote time

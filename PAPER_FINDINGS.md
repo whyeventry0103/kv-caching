@@ -164,6 +164,45 @@ Superseded values are listed at the top of the archival log below.
      the 4-CURRENT gate ends the guarded span at the next heading, so a marker
      placed first would fall inside the section it is meant to sit outside. -->
 
+#### 2026-08-03 — the N.3 AIME bank FAILED its gate; cap raised to the published 32768 (Amendment O)
+
+`bank_aime24_llama8b` completed 120/120 and **failed** its pre-registered N.3
+gate: accuracy **0.2750** against a band of [0.30, 0.70]. Per N.3 the bank is an
+instrument problem until re-validated, so `grid_aime24_rkv_published` (N.2) is
+**not readable** and stays unread. §2's "adjacent configuration" hedge for R-KV
+therefore still stands, unchanged.
+
+Diagnosis (Amendment O.2): truncation **0.2583** (31/120 rows hit the 16384
+cap), accuracy among non-truncated rows **0.3708** (in band). The accepted
+Qwen-7B AIME bank behaves the same way at the same cap (truncation 0.2208,
+accuracy 0.3708, non-truncated 0.4759). The pipeline is not broken; the cap
+costs both models about a quarter of their generations, and at 8B that is enough
+to cross the floor.
+
+Remedy and its honest account (Amendment O.3): the cap moves to **32768**, the
+published generation length used by DeepSeek's own R1-Distill evaluation and by
+R-KV's AIME headline — a cell whose purpose is "the published configuration"
+must use the published generation length, which was a config design error
+independent of any result. But it was found while investigating a disappointing
+number, so: the 16384 result is permanent and reported beside whatever 32768
+gives; both caps and both truncation rates are reported wherever the cell is
+stated; the band is **not** widened and 0.2750 is **not** reclassified as a pass;
+and there is **one attempt** — a second failure cuts N.2/N.3 outright.
+Re-runs use new run names so the 16384 artifacts are never touched.
+
+Separately (Amendment O.5), the N.2 cell had been crashing on every launch since
+2026-08-01: the R-KV window-query recompute hand-rolled unscaled RoPE and
+R1-Distill-Llama-8B uses llama3 scaling, so the guard refused — correctly. The
+schedule now comes from transformers' own `ROPE_INIT_FUNCTIONS`; the unscaled
+branch is locked bitwise-identical to the old formula (so no existing number
+moves), the per-event self-check is retained, and the real-generation smoke on
+Llama-8B/AIME-24 passed at **Jaccard 1.0000** over 448 compressions.
+
+Reportable regardless of what happens next: **about a quarter of AIME-24 traces
+from these models do not terminate within 16384 tokens.** That is a measurement
+about evaluating reasoning models under a token budget, and it applies to any
+AIME number quoted at a cap.
+
 **Superseded values, listed so they are recognised if they resurface — do not reuse.**
 Dose factor 3.6–6.8×. Resampling effect +0.023. Residuals −0.343 / −0.347 / −0.349 and
 R-KV −0.278. Reverse endpoints −0.246 / −0.466 / −0.463 / −0.221. Readout shares
