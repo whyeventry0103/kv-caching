@@ -411,23 +411,26 @@ jobs:
     requires: null
 
   # R-KV in its published configuration (Amendment N.2), and the bank it needs.
-  - name: fc-aime24-llama8b
+  # Amendment O: re-run at the published 32768 cap under NEW run names. The
+  # 16384 artifacts (fc-aime24-llama8b, gate-failed at 0.2750) are permanent
+  # record and are deliberately not resumed into, renamed, or deleted.
+  - name: fc-aime24-llama8b-cap32768
     command: bank
     config: configs/experiments/bank_aime24_llama8b.yaml
-    run_name: fc-aime24-llama8b
+    run_name: fc-aime24-llama8b-cap32768
     total: 120
     seeds: [11, 23, 47, 89]
     min_free_gb: 40
     progress_kind: grid
     bench: aime24
     requires: null
-  - name: grid-aime24-rkv-published
+  - name: grid-aime24-rkv-published-cap32768
     command: grid
     config: configs/experiments/grid_aime24_rkv_published.yaml
-    run_name: grid-aime24-rkv-published
+    run_name: grid-aime24-rkv-published-cap32768
     total: 120
     seeds: [11, 23, 47, 89]
     min_free_gb: 40
     progress_kind: grid
     bench: aime24
-    requires: fc-aime24-llama8b
+    requires: fc-aime24-llama8b-cap32768

@@ -31,6 +31,60 @@ RKV_RETAIN_RATIO = 0.1
 RKV_RETAIN_DIRECTION = "last"
 
 
+def rope_inv_freq(
+    config: Any,
+    head_dim: int,
+    device: Any,
+    rope_init_functions: Any = None,
+) -> tuple[Any, float]:
+    """Return ``(inv_freq, attention_scaling)`` for the window-query recompute.
+
+    R-KV needs RoPE-applied queries for the last `window` positions, but kvpress
+    supplies ``position_embeddings`` for the CURRENT position only, so the window's
+    cos/sin must be rebuilt here. This delegates the frequency schedule to
+    transformers' own ``ROPE_INIT_FUNCTIONS`` rather than re-deriving it, because a
+    hand-rolled schedule is only correct for unscaled RoPE: the first attempt at the
+    R-KV published-configuration cell (R1-Distill-Llama-8B, ``rope_type='llama3'``)
+    crashed on every launch against a guard that refused anything scaled, which was
+    the guard behaving correctly.
+
+    For an unscaled config this reproduces ``1/theta**(2i/d)`` exactly, so models
+    already measured under the previous hand-rolled path are bitwise unaffected --
+    that equivalence is locked by a test. Scaling families the installed
+    transformers does not implement still refuse rather than silently mis-rotating.
+    """
+    import torch
+
+    scaling = getattr(config, "rope_scaling", None)
+    if not scaling:
+        inv_freq = 1.0 / (
+            float(config.rope_theta)
+            ** (
+                torch.arange(0, head_dim, 2, device=device, dtype=torch.float32)
+                / head_dim
+            )
+        )
+        return inv_freq, 1.0
+
+    rope_type = scaling.get("rope_type") or scaling.get("type")
+    if rope_init_functions is None:
+        from transformers.modeling_rope_utils import (  # noqa: I001
+            ROPE_INIT_FUNCTIONS as rope_init_functions,
+        )
+    if rope_type not in rope_init_functions:
+        raise NotImplementedError(
+            "rkv window-query recompute has no frequency schedule for "
+            f"rope_type={rope_type!r}; got rope_scaling={scaling!r}"
+        )
+    inv_freq, attention_scaling = rope_init_functions[rope_type](config, device)
+    if inv_freq.shape[-1] * 2 != head_dim:
+        raise RuntimeError(
+            f"rkv rope inv_freq length {inv_freq.shape[-1]} does not match "
+            f"head_dim {head_dim}; the config's rope dim disagrees with the query"
+        )
+    return inv_freq, float(attention_scaling)
+
+
 def compute_attention_scores(
     query_states: Any, key_states: Any, pooling: str = "max"
 ) -> Any:
@@ -169,9 +223,12 @@ def build_rkv_scorer(kvpress_module: Any) -> Any:
         def _recompute_window_query(module, hidden_states, kwargs):
             # R-KV importance uses the last `window` (8) queries. At decode time
             # kvpress supplies position_embeddings for the CURRENT position only, so
-            # the window's cos/sin are recomputed analytically (standard RoPE) for
-            # positions p-n+1..p and self-checked against the framework's rotation
-            # at p -- a silent mis-rotation can never ship a wrong retained set.
+            # the window's cos/sin are rebuilt here for positions p-n+1..p and
+            # self-checked against the framework's rotation at p -- a silent
+            # mis-rotation can never ship a wrong retained set. The frequency
+            # schedule comes from transformers' own rope-init (see rope_inv_freq),
+            # so scaled families like llama3 are the framework's arithmetic, not
+            # ours, and the self-check below certifies it on every event.
             import torch
             from kvpress.presses.snapkv_press import (
                 get_prerope_query_states,
@@ -181,27 +238,16 @@ def build_rkv_scorer(kvpress_module: Any) -> Any:
             n = min(RKV_WINDOW_SIZE, hidden_states.shape[1])
             q = get_prerope_query_states(module, hidden_states[:, -n:])
             config = module.config
-            if getattr(config, "rope_scaling", None):
-                raise NotImplementedError(
-                    "rkv window-query recompute supports standard RoPE only; got "
-                    f"rope_scaling={config.rope_scaling!r}"
-                )
             head_dim = q.shape[-1]
             pos_end = int(kwargs["cache_position"][-1].item())
             positions = torch.arange(
                 pos_end - n + 1, pos_end + 1, device=q.device, dtype=torch.float32
             )
-            inv_freq = 1.0 / (
-                float(config.rope_theta)
-                ** (
-                    torch.arange(0, head_dim, 2, device=q.device, dtype=torch.float32)
-                    / head_dim
-                )
-            )
-            freqs = positions[:, None] * inv_freq[None, :]
+            inv_freq, attention_scaling = rope_inv_freq(config, head_dim, q.device)
+            freqs = positions[:, None] * inv_freq.to(positions.dtype)[None, :]
             emb = torch.cat((freqs, freqs), dim=-1)
-            cos = emb.cos()[None].to(q.dtype)
-            sin = emb.sin()[None].to(q.dtype)
+            cos = (emb.cos() * attention_scaling)[None].to(q.dtype)
+            sin = (emb.sin() * attention_scaling)[None].to(q.dtype)
             cos_cur, _ = kwargs["position_embeddings"]
             if not torch.allclose(
                 cos[:, -1].float(), cos_cur[:, -1].float(), atol=1e-2

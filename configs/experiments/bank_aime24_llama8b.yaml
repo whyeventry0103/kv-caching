@@ -9,8 +9,13 @@ benchmarks: [aime24]
 presses: [fullcache]
 budgets: [full]
 seeds: [11, 23, 47, 89]
+# Amendment O.3 (2026-08-03): cap raised 16384 -> 32768, the published
+# generation length (DeepSeek's own R1-Distill eval and R-KV's AIME-24 headline).
+# A "published configuration" cell run at half the published generation length
+# does not test the published configuration. The 16384 run's result is permanent
+# and reported alongside this one; ONE attempt only -- see Amendment O.3(4).
 max_new_tokens:
-  aime24: 16384
+  aime24: 32768
 estimated_generation_count: 120
 scale_authorized: true
 remote_only: true

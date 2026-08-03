@@ -29,6 +29,9 @@ from datetime import UTC
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
+# The model the PASS marker (and therefore rkv's promotion) is defined over.
+DEFAULT_SMOKE_MODEL = "r1_distill_qwen_7b"
+
 
 def _yaml(path: Path) -> dict:
     import yaml
@@ -53,6 +56,19 @@ def main() -> int:
     )
     # Accepted-and-ignored so the nightly launcher can invoke this like any other
     # stage (launch.sh always appends --config / --resume / --seeds).
+    parser.add_argument(
+        "--model",
+        default=DEFAULT_SMOKE_MODEL,
+        help="model key from configs/models.yaml. The default is the model the "
+        "PASS marker certifies; pass another (e.g. r1_distill_llama_8b, which "
+        "uses llama3-scaled RoPE) to exercise the window-query recompute on a "
+        "different rope family. A non-default model NEVER writes the marker.",
+    )
+    parser.add_argument(
+        "--bench",
+        default="math500",
+        help="benchmark to draw smoke problems from",
+    )
     parser.add_argument("--config", default="", help="ignored (launcher compat)")
     parser.add_argument("--resume", action="store_true", help="ignored")
     parser.add_argument("--seeds", default="", help="ignored (launcher compat)")
@@ -74,12 +90,19 @@ def main() -> int:
     models_cfg = _yaml(PROJECT_ROOT / "configs/models.yaml")["models"]
     benchmarks_cfg = _yaml(PROJECT_ROOT / "configs/benchmarks.yaml")["benchmarks"]
     sampling_cfg = _yaml(PROJECT_ROOT / "configs/sampling.yaml")
-    model_cfg = models_cfg["r1_distill_qwen_7b"]
+    if args.model not in models_cfg:
+        raise SystemExit(f"REFUSED: unknown model {args.model!r}")
+    if args.bench not in benchmarks_cfg:
+        raise SystemExit(f"REFUSED: unknown benchmark {args.bench!r}")
+    model_cfg = models_cfg[args.model]
     model, tokenizer = load_model_and_tokenizer(model_cfg, allow_download=False)
+    subset: dict = {"count": args.n_problems}
+    if args.bench == "math500":
+        subset["stratify_by"] = "level"
     problems = load_benchmark(
-        "math500",
-        benchmarks_cfg["math500"],
-        subset={"count": args.n_problems, "stratify_by": "level"},
+        args.bench,
+        benchmarks_cfg[args.bench],
+        subset=subset,
         allow_download=False,
     )
 
@@ -186,6 +209,17 @@ def main() -> int:
         marker = str(
             Path(os.environ["KVCACHE_BASE_RUNS_ROOT"]) / "rkv-gen-smoke-PASS.json"
         )
+    if marker and args.model != DEFAULT_SMOKE_MODEL:
+        # The marker is the promotion mechanism for rkv as a whole. A smoke on a
+        # different model verifies THAT model's recompute path; letting it write
+        # the marker would promote rkv on evidence from a configuration the
+        # promotion was never defined over. Report the pass, promote nothing.
+        print(
+            f"marker NOT written: --model {args.model} is not the model the "
+            f"promotion is defined over ({DEFAULT_SMOKE_MODEL}). This run "
+            "verifies that model's recompute path only."
+        )
+        marker = ""
     if marker:
         import json as _json
         from datetime import datetime

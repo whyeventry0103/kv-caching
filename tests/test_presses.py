@@ -216,3 +216,95 @@ def test_rkv_scorer_overrides_snapkv_dataclass_defaults():
     assert scorer.window_size == RKV_WINDOW_SIZE == 8
     assert scorer.kernel_size == RKV_KERNEL_SIZE == 7
     assert scorer.mix_lambda == RKV_MIX_LAMBDA
+
+
+def test_rope_inv_freq_unscaled_matches_the_hand_rolled_formula():
+    # The scaled-RoPE fix replaced a hand-rolled inv_freq with transformers'
+    # rope-init. Every number already measured (Qwen-7B, Llama-8B on MATH-500)
+    # came from the hand-rolled path, so the unscaled branch must reproduce it
+    # exactly or those results silently change meaning. Bitwise equality, not
+    # approx: this is the equivalence the previous runs are certified under.
+    from types import SimpleNamespace
+
+    torch = pytest.importorskip("torch")
+
+    from kvcache.presses.rkv import rope_inv_freq
+
+    head_dim = 128
+    config = SimpleNamespace(rope_theta=10000.0, rope_scaling=None)
+    inv_freq, attention_scaling = rope_inv_freq(config, head_dim, torch.device("cpu"))
+    expected = 1.0 / (
+        10000.0 ** (torch.arange(0, head_dim, 2, dtype=torch.float32) / head_dim)
+    )
+    assert attention_scaling == 1.0
+    assert torch.equal(inv_freq, expected)
+
+
+def test_rope_inv_freq_delegates_scaled_families_to_the_framework():
+    # llama3-scaled RoPE (R1-Distill-Llama-8B) must go to the framework's own
+    # schedule rather than the unscaled formula -- the R-KV published-configuration
+    # cell crashed on every launch until it did.
+    from types import SimpleNamespace
+
+    torch = pytest.importorskip("torch")
+
+    from kvcache.presses.rkv import rope_inv_freq
+
+    head_dim = 8
+    sentinel = torch.arange(1, head_dim // 2 + 1, dtype=torch.float32)
+    calls = []
+
+    def fake_llama3(config, device):
+        calls.append((config, device))
+        return sentinel, 2.0
+
+    config = SimpleNamespace(
+        rope_theta=500000.0,
+        rope_scaling={"rope_type": "llama3", "factor": 8.0},
+    )
+    inv_freq, attention_scaling = rope_inv_freq(
+        config,
+        head_dim,
+        torch.device("cpu"),
+        rope_init_functions={"llama3": fake_llama3},
+    )
+    assert len(calls) == 1
+    assert torch.equal(inv_freq, sentinel)
+    assert attention_scaling == 2.0
+
+
+def test_rope_inv_freq_still_refuses_an_unknown_scaling_family():
+    # Narrowing the guard must not remove it: a family the installed transformers
+    # has no schedule for still refuses rather than silently mis-rotating.
+    from types import SimpleNamespace
+
+    torch = pytest.importorskip("torch")
+
+    from kvcache.presses.rkv import rope_inv_freq
+
+    config = SimpleNamespace(
+        rope_theta=10000.0, rope_scaling={"rope_type": "not_a_real_family"}
+    )
+    with pytest.raises(NotImplementedError, match="not_a_real_family"):
+        rope_inv_freq(
+            config, 8, torch.device("cpu"), rope_init_functions={"llama3": None}
+        )
+
+
+def test_rope_inv_freq_rejects_a_head_dim_mismatch():
+    # A config whose rope dim disagrees with the query head_dim would broadcast
+    # into a wrong rotation instead of failing; make it fail.
+    from types import SimpleNamespace
+
+    torch = pytest.importorskip("torch")
+
+    from kvcache.presses.rkv import rope_inv_freq
+
+    config = SimpleNamespace(rope_theta=1.0, rope_scaling={"rope_type": "llama3"})
+    with pytest.raises(RuntimeError, match="head_dim"):
+        rope_inv_freq(
+            config,
+            128,
+            torch.device("cpu"),
+            rope_init_functions={"llama3": lambda c, d: (torch.ones(4), 1.0)},
+        )

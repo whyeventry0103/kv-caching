@@ -1161,3 +1161,103 @@ proposed reframe title is withdrawn, since both candidates were built on the
 graded reading; the contribution reorder that placed resolution collapse first is
 withdrawn. The post-hoc status of the original observation is unchanged and
 remains disclosed.
+
+---
+
+## Amendment O (2026-08-03): the N.3 bank gate FAILED, and the generation cap is raised to the published one
+
+### O.1 The gate failure, stated first
+
+`bank_aime24_llama8b` completed 120/120 (30 problems x seeds 11/23/47/89) and
+**failed its N.3 gate**. Pre-registered band: accuracy in [0.30, 0.70]. Measured:
+**0.2750**. Per N.3 the bank is an instrument problem until re-validated, and no
+cell may be read against it. `grid_aime24_rkv_published` (N.2) is therefore
+**not readable** and stays unread.
+
+This is recorded before any remedy, and it is not deleted by what follows.
+
+### O.2 Diagnosis: the failure is the generation cap, not the pipeline
+
+- **Truncation rate 0.2583** (31/120 rows hit the 16384-token cap). Per standing
+  protocol truncations stay in the denominator scored incorrect, so they enter
+  the accuracy directly.
+- **Accuracy among non-truncated rows: 0.3708**, inside the gate band.
+- The already-accepted Qwen-7B AIME bank (`fc-aime24`, n=240) shows the *same
+  behaviour* at the same cap: truncation 0.2208, accuracy 0.3708, non-truncated
+  0.4759. The pipeline is doing at 8B what it does at 7B.
+- Both banks land far below their published references (DeepSeek report
+  R1-Distill-Qwen-7B ~0.555 and R1-Distill-Llama-8B ~0.504 on AIME-24), by
+  similar proportions (0.67x and 0.55x).
+
+The instrument is not broken. The 16384 cap costs both models roughly a quarter
+of their generations, and at 8B that is enough to push the point estimate below
+the floor.
+
+### O.3 The cap change, and the honest account of its timing
+
+**The change.** `bank_aime24_llama8b` and `grid_aime24_rkv_published` move from
+`max_new_tokens: 16384` to **32768** for AIME-24, and are re-run from scratch.
+
+**The justification that does not depend on the result.** N.2 exists to test
+R-KV *in its published configuration*. The published configuration includes the
+generation length: DeepSeek's own evaluation of the R1-Distill models and R-KV's
+AIME-24 headline both use a 32768-token budget. Capping at 16384 was a design
+error in our config, discoverable from the published setup before any data
+existed. Running a "published configuration" cell at half the published
+generation length does not test the published configuration.
+
+**The timing, disclosed because it matters.** We did not notice this before
+running. The error was found while investigating an out-of-band gate result, and
+a change to a protocol parameter made after seeing a disappointing number is
+exactly the move this preregistration exists to constrain. We therefore bind
+ourselves as follows:
+
+1. **The 16384 result is permanent.** Accuracy 0.2750 at truncation 0.2583, gate
+   failed, is reported in the paper's record alongside whatever 32768 produces.
+   It is not superseded and not deleted.
+2. **Both caps are reported wherever this cell is stated**, with the truncation
+   rate at each. A reader sees the cap's effect, not just the final number.
+3. **The gate band is unchanged**: [0.30, 0.70]. It is not widened, and 0.2750
+   is not reclassified as a pass.
+4. **One attempt only.** If the bank fails the gate again at 32768, N.2 and N.3
+   are **cut**, §2 keeps its "adjacent configuration" hedge, and no third cap is
+   tried. This clause exists to stop an unbounded search for a cap that passes.
+
+### O.4 Pre-registered read for the re-run, written before it runs
+
+- **Bank in band [0.30, 0.70]** ⇒ the instrument is re-validated, N.2 becomes
+  readable, and N.2's pre-registered branches (REPLICATES / DOES NOT REPLICATE /
+  INCONCLUSIVE, Amendment N.2, unchanged) apply against the 32768 bank.
+- **Bank still out of band** ⇒ per O.3(4), N.2/N.3 are cut. We report that we
+  could not build a reference bank for R1-Distill-Llama-8B on AIME-24 that met a
+  pre-registered sanity band under our generation path, and that we therefore did
+  not test R-KV's published configuration. That is a limitation, stated as one.
+- Either way, the **truncation-rate finding is reported**: a quarter of AIME-24
+  traces from these models do not terminate within 16384 tokens, which is a
+  measurement about evaluating reasoning models under a token budget and is
+  relevant to any AIME result quoted at a cap.
+
+### O.5 Scaled-RoPE support in the R-KV window-query recompute
+
+`grid_aime24_rkv_published` had additionally crashed on every launch since
+2026-08-01 with `NotImplementedError: rkv window-query recompute supports
+standard RoPE only` — R1-Distill-Llama-8B uses llama3-scaled RoPE and the
+recompute hand-rolled the unscaled frequency schedule. The guard was correct:
+it refused rather than scoring with wrong rotations.
+
+**Fix.** The frequency schedule now comes from transformers' own
+`ROPE_INIT_FUNCTIONS` for whatever `rope_type` the config declares, rather than
+being re-derived locally. This is a deletion of hand-rolled arithmetic, not an
+addition. The guard is narrowed, not removed: a scaling family the installed
+transformers has no schedule for still refuses.
+
+**Certification.** (i) A test locks the unscaled branch to **bitwise-identical**
+frequencies against the previous hand-rolled formula, so every number already
+measured under the old path is unchanged; (ii) the per-event self-check against
+the model's own `position_embeddings` is retained and fires on every compression;
+(iii) the real-generation smoke was run on R1-Distill-Llama-8B / AIME-24 and
+**passed at selection Jaccard 1.0000** over 448 compressions and 5 verified
+events. The R-KV PASS marker was deliberately **not** written by that run: the
+marker is the promotion mechanism for R-KV as a whole and is defined over
+R1-Distill-Qwen-7B, so a smoke on another model reports its result and promotes
+nothing.
