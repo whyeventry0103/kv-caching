@@ -203,6 +203,31 @@ from these models do not terminate within 16384 tokens.** That is a measurement
 about evaluating reasoning models under a token budget, and it applies to any
 AIME number quoted at a cap.
 
+#### 2026-08-04 — Part F verification: the core cell re-derived end to end, and a gate weakness quantified
+
+**Re-derivation.** `report_m4` was re-run on the remote over the raw rows
+(`math500-fc-powered-merged`, `grid-diss256-tok`, `replay-diss256`,
+`readout-diss256-g0/g1`, `reverse-readout-diss256`) and its output compared
+field by field against the committed `m4-powered-diss256-summary.json`:
+**every field identical**, including the full-cache line (0.8825, 1765/2000, 38
+truncated). This re-derives the abstract's budget-256 numbers — readout 0.765 /
+0.584, free-run 0.422 / 0.237, reverse 0.636, residuals −0.337 / −0.344 — from
+rows rather than from the summary they were read out of. Free-run accuracies and
+the H2O cell were additionally re-counted straight from the JSONL rows
+(0.4225 / 0.2375 / 0.2475) and agree to the displayed digit.
+
+**A gate weakness, quantified rather than left implicit.** The number audit
+answers "does every literal have a source", not "is that the right source".
+Restricted to result-precision (3+ decimal) literals, **351 occurrences match
+more than one catalogue entry**, so for those the green tick does not pin the
+number to one quantity. The concrete instance: the paper's 0.045 (0.515 − 0.47)
+attributes to `llama.random.readout_ci1`, an unrelated Llama CI bound, and the
+derived `hottcap.residual_gap` entry does not displace it because exact-match
+precedence prefers the entry whose stored float is exactly 0.045. The audit now
+**reports this count on every run** instead of printing an unqualified pass.
+Most of the exposure is small-magnitude values where coincidence is inherent; a
+real fix needs context-aware matching, which is not built.
+
 **Superseded values, listed so they are recognised if they resurface — do not reuse.**
 Dose factor 3.6–6.8×. Resampling effect +0.023. Residuals −0.343 / −0.347 / −0.349 and
 R-KV −0.278. Reverse endpoints −0.246 / −0.466 / −0.463 / −0.221. Readout shares

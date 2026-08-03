@@ -1299,3 +1299,43 @@ stored float is exactly 0.045. The number and its arithmetic are checked; the
 audit's provenance trail for that one literal points at the wrong quantity.
 Value-based attribution cannot separate two distinct quantities that share a
 value without context-aware matching, which is not built.
+
+---
+
+## Amendment O, result (2026-08-04): the re-run bank PASSES the N.3 gate, exactly at the floor
+
+`fc-aime24-llama8b-cap32768` completed 120/120 (30 problems x seeds 11/23/47/89)
+at the published 32768-token cap.
+
+**Result, stated precisely because the margin is zero.** Accuracy
+**36/120 = 3/10 = 0.300000 exactly**. The pre-registered N.3 band is
+[0.30, 0.70], inclusive. The value sits **exactly on the floor**, so this is a
+**PASS under the criterion as written** — and it is a pass with no margin
+whatsoever, which we state rather than round away. We do not re-cut the
+criterion in either direction: the band was fixed in advance, 0.300000 is inside
+it, and a boundary pass is a pass.
+
+**The cap diagnosis was correct.** Truncation fell from **0.2583** at 16384 to
+**0.0750** at 32768 (14 cap hits, down from 42), and mean generated length rose
+to 14799 tokens. The rows that were being discarded as truncated are now
+completing.
+
+**What did not happen: accuracy did not rise to the published reference.**
+Overall accuracy moved only 0.2750 -> 0.3000, and accuracy among non-truncated
+rows *fell*, 0.3708 -> 0.3243. Recovering the truncated generations mostly
+recovered *hard* problems the model then answers incorrectly. So the cap
+explained the gate failure without closing the distance to the ~0.504 that
+DeepSeek report for this model; our bank sits well below its published
+reference, and that remains true and is reported.
+
+**Consequences, per O.4.** The bank is re-validated as an instrument, so
+**N.2 becomes readable** and `grid_aime24_rkv_published` runs against this bank
+at the matched 32768 cap. N.2's pre-registered branches (REPLICATES / DOES NOT
+REPLICATE / INCONCLUSIVE, Amendment N.2) are unchanged and apply as written.
+Both caps remain reported per O.3(2): 16384 gave 0.2750 at 0.2583 truncation and
+failed the gate; 32768 gives 0.3000 at 0.0750 truncation and passes it at the
+floor.
+
+**O.5 confirmed in production.** The R-KV cell launched and is generating on both
+GPUs against the llama3-scaled RoPE path. Before the fix it raised
+`NotImplementedError` within seconds of every launch.

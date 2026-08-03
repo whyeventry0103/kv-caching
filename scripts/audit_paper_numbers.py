@@ -273,6 +273,31 @@ def main() -> int:
             f"amendment-k-cell-population)"
         )
 
+    # Attribution strength. "Sourced" means a catalogue entry can produce this
+    # display string -- NOT that it is the right entry. The paper's 0.045
+    # (0.515 - 0.47) attributes to llama.random.readout_ci1, an unrelated CI
+    # bound that happens to equal 0.045, and a derived hottcap.residual_gap entry
+    # does not displace it because exact-match precedence prefers the entry whose
+    # stored float is exactly 0.045. Value-based matching cannot separate two
+    # quantities that share a value. This does not gate -- it reports, so the
+    # green tick is not read as more assurance than it carries.
+    by_display: dict[str, set[str]] = {}
+    for entry in catalogue:
+        for form in entry.display_rules():
+            by_display.setdefault(form, set()).add(entry.key)
+    ambiguous = 0
+    for lit in literals:
+        raw = lit.raw.lstrip("+-")
+        if "." not in raw or len(raw.split(".")[1]) < 3:
+            continue  # coarse forms collide by nature; not the risk class
+        if len(by_display.get(raw, set())) > 1:
+            ambiguous += 1
+    print(
+        f"attribution strength: {ambiguous} of the result-precision "
+        f"(3+ decimal) literal occurrences match MORE THAN ONE catalogue "
+        f"entry, so 'sourced' does not pin them to one quantity"
+    )
+
     if args.strict and (unsourced or guarded_problems or convention_problems):
         return 1
     return 0
