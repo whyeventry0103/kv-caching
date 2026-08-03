@@ -184,29 +184,50 @@ readout protocol" (consistent with fig0's texture-not-hue role); subset scale
 
 ## 9. Constraints the Unit 9 redesign must inherit (recorded 2026-07-28)
 
-These are open defects observed in the rendered PNGs, not preferences. The
-redesign is the right place to fix them; patching the current figures first
-would be wasted work.
+**STATUS 2026-08-03: three of the four are FIXED; one remains open.** The
+"wait for the redesign" advice below was written when the redesign looked
+imminent. It stopped being right once these figures had to be shown to a
+reader, so the defects were fixed in place. Marked inline.
 
-- **`fig2_bracket`: value labels collide with the CI whiskers.** On every
+These are open defects observed in the rendered PNGs, not preferences.
+
+- **[FIXED 2026-08-03] `fig2_bracket`: value labels collide with the CI whiskers.** On every
   forward-readout rung the label is drawn at the marker while the whisker
   extends past it, so `0.765`, `0.584`, `0.597` and `0.798` all overlap their
   own interval tick. Visible at 100% zoom; it is the reason the figure reads as
   cluttered even before the density problem. The planned one-panel
   slope/dumbbell redesign must place labels clear of the interval geometry —
   offset above the mark, or outside the axis, but not at the mark.
-- **`fig2_bracket` is four panels carrying ~40 numbers.** It is the paper's core
-  result figure and cannot be read in 30 seconds. The redesign moves the bracket
-  numbers to a table and keeps three marks per press (full cache, forward
-  readout, free-run) plus reverse readout as a distinct open marker.
-- **`fig4_tvprofile` does not contain the numbers the text cites.** Its y-axis
+  *Fixed:* the label now sits past `max(mark, ci_hi)`, so it clears the interval
+  on all four panels and the whisker is fully visible for the first time.
+- **[FIXED, already] `fig4_tvprofile` does not contain the numbers the text cites.** Its y-axis
   tops near 0.07 and its horizon stops at +400, while the text quotes a later
   window mean of 0.088 and a step-pooled 0.118. Extend the horizon or add an
   inset; as drawn, a reader who checks the figure against the sentence finds
   they disagree.
-- **`fig1_phenomenon` shows only free-running accuracy**, which is what HOTT
-  already showed. Adding readout as a paired lighter series is what makes it
-  *our* figure.
+  *Resolved:* the figure is now the windowed 3-bar form and carries 0.0000 /
+  0.0018 / 0.0884 directly, including the pre-eviction zero self-control. This
+  entry was stale when re-checked on 2026-08-03.
+- **[FIXED 2026-08-03] `fig1_phenomenon` shows only free-running accuracy**,
+  which is what HOTT already showed. Adding readout as a paired lighter series
+  is what makes it *our* figure.
+  *Fixed:* readout is now a hatched paired series at both budgets (hatch = "the
+  readout protocol", consistent with fig0/fig6). The figure now states the
+  paper's thesis directly: the protocols disagree at 256 and agree at 2048.
+  Two further defects were found only by viewing the first render -- the
+  contrast box and the new legend each struck a budget-group header -- and were
+  fixed with headroom; a third (the Acc_FC dashline striking Random@2048's
+  "0.850") with a white backing box on every value label.
+  *Also reclaimed:* in SUMMARY mode the second panel was `axis("off")` plus a
+  three-line text box, spending ~38% of the figure on text. The second axis is
+  now built only when there is a histogram to put in it. The .tex caption had
+  described the DATA-mode histogram panel that the committed artifact never
+  had; it now describes what is actually rendered.
+
+- **[STILL OPEN] `fig2_bracket` is four panels carrying ~40 numbers** (see
+  above). The label collision is fixed but the density is not: the one-panel
+  slope/dumbbell redesign that moves the bracket numbers to a table has NOT
+  been done.
 
 **Standing constraint for any figure change from 2026-07-27 onward:** every
 constant is loaded from `paper_numbers.json` via `_k()`. Do not reintroduce a

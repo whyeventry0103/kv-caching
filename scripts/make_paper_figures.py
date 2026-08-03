@@ -130,6 +130,10 @@ def _cell(name: str) -> dict:
 
 C = {name: _cell(name) for name in _CELL}
 C2048 = {name: _k(f"{s}.free") for name, s in _B2048.items()}
+# Readout at 2048, paired with C2048's free-run values. Fig 1 shows both
+# protocols side by side; free-running accuracy alone is what prior work already
+# reported, so the paired series is what makes Fig 1 this paper's figure.
+C2048_READOUT = {name: _k(f"{s}.readout") for name, s in _B2048.items()}
 PHEN = dict(
     gap=_k("contrast256.mean"),
     gap_ci=(_k("contrast256.ci0"), _k("contrast256.ci1")),
@@ -329,9 +333,16 @@ def fig0_protocol(out_dir: Path):
 def fig1_phenomenon(out_dir: Path, runs_root: Path | None):
     per_problem = _load_paired_diffs(runs_root) if runs_root else None
     print(f"Figure 1 [{'DATA (paired-diff panel)' if per_problem else 'SUMMARY'}]")
-    fig, (axb, axh) = plt.subplots(
-        1, 2, figsize=(7.6, 2.9), gridspec_kw={"width_ratios": [1.65, 1]}
-    )
+    # In SUMMARY mode the second panel used to be axis("off") plus a text box,
+    # spending ~38% of the figure on three lines of text. Only build it when
+    # there is a histogram to put in it.
+    if per_problem:
+        fig, (axb, axh) = plt.subplots(
+            1, 2, figsize=(7.6, 2.9), gridspec_kw={"width_ratios": [1.65, 1]}
+        )
+    else:
+        fig, axb = plt.subplots(1, 1, figsize=(7.6, 3.1))
+        axh = None
     labels = [
         "Full\ncache",
         "Random\n256",
@@ -352,19 +363,75 @@ def fig1_phenomenon(out_dir: Path, runs_root: Path | None):
         C2048["StreamingLLM"],
         C2048["H2O-style"],
     ]
+    # Readout for the same cells, in the same order; None for full cache, which
+    # IS the reference and has no readout condition to pair against.
+    readouts = [
+        None,
+        C["Random"]["readout"],
+        C["StreamingLLM"]["readout"],
+        C["H2O-style"]["readout"],
+        C["R-KV"]["readout"],
+        C2048_READOUT["Random"],
+        C2048_READOUT["StreamingLLM"],
+        C2048_READOUT["H2O-style"],
+    ]
     colors = [GREY, BLUE, ORANGE, PURPLE, SKY, BLUE_LT, ORANGE_LT, PURPLE_LT]
     # Gap between the budget groups: secondary encoding on top of the tint scheme
     # (and it visually separates SKY from BLUE_LT, the closest validated pair).
     xs = [0, 1, 2, 3, 4, 5.55, 6.55, 7.55]
-    axb.bar(xs, vals, color=colors, width=0.62, edgecolor="white", linewidth=0.8)
-    for x, v in zip(xs, vals, strict=True):
-        axb.text(x, v + 0.018, f"{v:.3f}", ha="center", fontsize=7.6, color=INK)
+    bw = 0.34
+    # Headroom band, top to bottom: group headers, then the legend and the
+    # contrast box side by side, then the tallest bar (0.903). Viewing the first
+    # render is what showed both boxes striking the headers.
+    HDR_Y = 1.045 if per_problem else 1.27
+    # Value labels get a white backing box: the Acc_FC dashline runs at 0.885 and
+    # struck through Random@2048's "0.850". Same fix as the protocol schematic's
+    # in-bar labels -- back the text, don't move the line.
+    LBL = dict(bbox=dict(boxstyle="round,pad=0.12", fc="white", ec="none", alpha=0.85))
+    for x, v, r, c in zip(xs, vals, readouts, colors, strict=True):
+        if r is None:
+            axb.bar([x], [v], color=c, width=bw * 1.5, edgecolor="white", linewidth=0.8)
+            axb.text(
+                x, v + 0.018, f"{v:.3f}", ha="center", fontsize=6.8, color=INK, **LBL
+            )
+            continue
+        # Free-run solid, readout hatched -- hatch means "the readout protocol"
+        # everywhere in this paper (fig0's texture-not-hue role, and fig6).
+        axb.bar([x - bw / 2], [v], color=c, width=bw, edgecolor="white", linewidth=0.8)
+        axb.bar(
+            [x + bw / 2],
+            [r],
+            color=c,
+            width=bw,
+            edgecolor="white",
+            linewidth=0.8,
+            alpha=0.45,
+            hatch="///",
+        )
+        axb.text(
+            x - bw / 2,
+            v + 0.018,
+            f"{v:.3f}",
+            ha="center",
+            fontsize=6.8,
+            color=INK,
+            **LBL,
+        )
+        axb.text(
+            x + bw / 2,
+            r + 0.018,
+            f"{r:.3f}",
+            ha="center",
+            fontsize=6.8,
+            color=INK,
+            **LBL,
+        )
     axb.axhline(FC, color=GREY, lw=0.8, ls=(0, (2, 3)), zorder=0)
     # Budget-group headers carry the realized compression ratios (pre-registered
     # Setup numbers), so the dose structure is legible from the figure alone.
     axb.text(
         2.5,
-        1.045,
+        HDR_Y,
         "budget 256  (3.8% of mean trace)",
         ha="center",
         fontsize=7.2,
@@ -373,7 +440,7 @@ def fig1_phenomenon(out_dir: Path, runs_root: Path | None):
     )
     axb.text(
         6.55,
-        1.045,
+        HDR_Y,
         "budget 2048  (56.6%)",
         ha="center",
         fontsize=7.2,
@@ -382,10 +449,34 @@ def fig1_phenomenon(out_dir: Path, runs_root: Path | None):
     )
     axb.set_xticks(xs)
     axb.set_xticklabels(labels, fontsize=7.6)
-    axb.set_ylabel("Free-running accuracy (MATH-500)")
-    axb.set_ylim(0, 1.0)
+    axb.set_ylabel("Accuracy (MATH-500)")
+    axb.set_ylim(0, 1.0 if per_problem else 1.32)
     axb.set_xlim(-0.6, 8.15)
     _ygrid(axb)
+    # Identity is never colour-alone: the two protocols are told apart by fill
+    # texture, and the legend names them.
+    from matplotlib.patches import Patch
+
+    axb.legend(
+        handles=[
+            Patch(facecolor=GREY, edgecolor="white", label="Free-running"),
+            Patch(
+                facecolor=GREY,
+                edgecolor="white",
+                alpha=0.45,
+                hatch="///",
+                label="Held-trace readout",
+            ),
+        ],
+        loc="upper right",
+        bbox_to_anchor=(1.0, 1.0 if per_problem else 0.925),
+        fontsize=6.8,
+        frameon=True,
+        framealpha=1.0,
+        edgecolor=SPINE,
+        ncol=2 if per_problem else 1,
+        borderpad=0.4,
+    )
     gaptxt = (
         f"Random $-$ SLM @256: $+{PHEN['gap']:.3f}$\n"
         f"95% CI [{PHEN['gap_ci'][0]:.3f}, {PHEN['gap_ci'][1]:.3f}]\n"
@@ -408,15 +499,19 @@ def fig1_phenomenon(out_dir: Path, runs_root: Path | None):
             bbox=dict(boxstyle="round,pad=0.4", fc="white", ec=SPINE, lw=0.7),
         )
     else:
-        axh.axis("off")
-        axh.text(
-            0.5,
-            0.5,
+        # No histogram to draw, so the contrast rides in the bar panel's own
+        # headroom instead of on a dedicated blank axis. White fill so it reads
+        # over the Acc_FC dashline (the established fix for that collision).
+        axb.text(
+            0.015,
+            0.90,
             gaptxt,
-            ha="center",
-            va="center",
-            fontsize=8.5,
-            bbox=dict(boxstyle="round,pad=0.6", fc="white", ec=SPINE, lw=0.7),
+            transform=axb.transAxes,
+            ha="left",
+            va="top",
+            fontsize=6.8,
+            color=INK,
+            bbox=dict(boxstyle="round,pad=0.4", fc="white", ec=SPINE, lw=0.7),
         )
     fig.tight_layout(w_pad=2.0)
     _save(fig, out_dir, "fig1_phenomenon")
@@ -438,12 +533,18 @@ def fig2_bracket(out_dir: Path, m4_summary: dict | None):
         ax.set_axisbelow(True)
         # Faint reference vertical at Acc_FC so every rung reads against it.
         ax.axvline(FC, color=GREY, lw=0.7, ls=(0, (1, 2)), alpha=0.75, zorder=0)
+        ci = d.get("readout_ci")
         for y, v in zip(ys, vals, strict=True):
             color = GREY if y == 3 else MC[m]
             ax.plot([0, v], [y, y], color=color, lw=2.0, solid_capstyle="round")
             ax.plot(v, y, "o", color=color, ms=6.5, mec="white", mew=0.8)
-            ax.text(v + 0.025, y, f"{v:.3f}", va="center", fontsize=8, color=INK)
-        ci = d.get("readout_ci")
+            # Clear the label of the interval geometry. The forward-readout rung
+            # (y=2) carries a CI whose upper whisker runs PAST the marker, so a
+            # label pinned to the marker gets struck through by its own interval
+            # -- visible on all four panels before this fix. Push the label past
+            # whichever is further right, the mark or the whisker.
+            label_x = max(v, ci[1]) if (ci and y == 2) else v
+            ax.text(label_x + 0.025, y, f"{v:.3f}", va="center", fontsize=8, color=INK)
         if ci:
             ax.plot([ci[0], ci[1]], [2, 2], color=MC[m], lw=0.9, alpha=0.55)
             for x in ci:
