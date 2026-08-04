@@ -236,6 +236,45 @@ bound 0.242 (200-seed range [0.2375, 0.2450]). Compute ~224–230 GPU-h / ~7,307
 generations. Budget-2048 residuals −0.051 / −0.096 / −0.075. AIME residuals −0.179 /
 −0.246 / −0.321. Truncation-adjusted −0.110 / −0.277.
 
+#### 2026-08-04 — R-KV in its published configuration: pre-registered branch REPLICATES
+
+`grid_aime24_rkv_published` finished 120/120 at the 32768 cap against the
+re-validated bank. Read per Amendment N.2, branch selected **by code**
+(`kvcache.stats.published_config_branch`, emitted as a field of the artifact) so
+it could not be re-cut after the numbers were seen. Artifact:
+`results/diag/amendment-k/classb/rkv_published_cap32768.json`.
+
+**Result.** R1-Distill-Llama-8B, AIME-24, budget 2048 (mean realized cache
+**0.1886**), 30 problems x 4 seeds, matched population. Full cache **0.3000**
+(36/120), R-KV **0.3083** (37/120), **r = 1.0278**. Paired difference
+**+0.0083**, problem-clustered 95% CI **[-0.0750, +0.0917]**; 7 wins / 17 ties /
+6 losses. Branch **REPLICATES**.
+
+**Say it with its precision, always.** The margin is one generation (37 vs 36 of
+120), the CI spans zero, n=30 problems, and the reference bank cleared its N.3
+band at exactly the floor. Defensible: our certified port is **not worse than
+full cache at ~19% of it** in the published configuration. NOT defensible:
+"we reproduced 105%". Also not defensible in the other direction: calling this
+INCONCLUSIVE — r >= 1.0 with a CI including zero is REPLICATES under the rule as
+pre-registered, and the rule was written before the data.
+
+**Reported because it favours R-KV:** its traces run longer (18869.7 vs 14799.3
+mean tokens) and truncate at **0.2083** vs **0.0750**, every truncation scored
+incorrect, and it still leads; among non-truncated rows it leads **0.3895** to
+**0.3243**.
+
+**Free determinism check.** The queue relaunched the same cell under its own run
+name while the manual run (`rkvpub-g0/g1`) was in flight — the queue's progress
+counter reads the run directory, so different run names made the work invisible
+to it. The duplicate reached 47 rows. They are **not merged** (that would
+double-count problems). On all 47 overlapping conditions the two independent
+processes agree exactly: same trace, same canonical answer, same token count,
+same correctness. Sampled decoding at T=0.6 reproduced bitwise across processes
+and GPU assignments.
+
+**Operational note, so it is not repeated:** launching outside the queue must use
+the queue's run name, or the queue will relaunch the same job.
+
 ### 4a. The powered phenomenon (budget 256)
 FC 0.882 → **StreamingLLM 0.237**, **Random 0.422**. Random beats the "principled" recency
 policy by **+0.185, 95% CI [0.130, 0.242]**; per-problem difference **≥ 0 on 94/100 problems

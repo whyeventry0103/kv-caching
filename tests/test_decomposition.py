@@ -235,3 +235,32 @@ def test_resolution_spread_flags_itself_post_hoc():
     t = {"a": {p: 1.0 for p in pids}, "b": {p: 0.0 for p in pids}}
     got = resolution_spread(t, t, n_resamples=20, seed=0)
     assert "post-hoc" in got["analysis_status"]
+
+
+def test_published_config_branch_replicates_only_when_ratio_at_least_one():
+    """Amendment N.2's REPLICATES branch needs BOTH conditions, not either."""
+    from kvcache.stats import published_config_branch
+
+    assert published_config_branch(1.05, [-0.02, 0.14])["branch"] == "REPLICATES"
+    # Same CI, ratio below 1.0: the CI spans zero, so this is under-powered,
+    # not a reproduction and not a refutation.
+    assert published_config_branch(0.95, [-0.02, 0.14])["branch"] == "INCONCLUSIVE"
+
+
+def test_published_config_branch_does_not_replicate_needs_ci_excluding_zero():
+    from kvcache.stats import published_config_branch
+
+    out = published_config_branch(0.62, [-0.21, -0.05])
+    assert out["branch"] == "DOES NOT REPLICATE"
+    assert out["difference_ci_spans_zero"] is False
+    # A shortfall whose CI touches zero is INCONCLUSIVE: n=30 problems may
+    # simply lack power, and N.2 says to call that a limitation, not a result.
+    assert published_config_branch(0.62, [-0.21, 0.0])["branch"] == "INCONCLUSIVE"
+
+
+def test_published_config_branch_names_its_preregistered_rule():
+    from kvcache.stats import published_config_branch
+
+    assert published_config_branch(1.0, [0.0, 0.0])["rule"] == (
+        "PREREGISTRATION Amendment N.2"
+    )

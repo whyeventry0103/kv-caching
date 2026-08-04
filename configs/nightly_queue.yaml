@@ -424,13 +424,17 @@ jobs:
     progress_kind: grid
     bench: aime24
     requires: null
-  - name: grid-aime24-rkv-published-cap32768
-    command: grid
-    config: configs/experiments/grid_aime24_rkv_published.yaml
-    run_name: grid-aime24-rkv-published-cap32768
-    total: 120
-    seeds: [11, 23, 47, 89]
-    min_free_gb: 40
-    progress_kind: grid
-    bench: aime24
-    requires: fc-aime24-llama8b-cap32768
+  # grid-aime24-rkv-published-cap32768 is COMPLETE and has been retired from the
+  # queue (2026-08-04). Its 120 rows are under run names `rkvpub-g0` / `rkvpub-g1`,
+  # because it was launched manually via launch_tmux.sh the moment the bank cleared
+  # its gate rather than waiting for the 01:45 window. The orchestrator counts
+  # progress by RUN DIRECTORY, so those rows were invisible to it and it relaunched
+  # the same job into `grid-aime24-rkv-published-cap32768`, reaching 47 rows before
+  # its window closed. Those 47 rows are kept: they overlap the cell exactly and
+  # agree with it on every field, which is recorded as a determinism check in
+  # PREREGISTRATION Amendment N.2's result. They are NOT part of the cell.
+  #
+  # The lesson, since the queue is the plan: a manual launch must use the queue's
+  # run_name, or the queue cannot see the work and will duplicate it.
+  # Read: Amendment N.2, branch REPLICATES. Artifact
+  # results/diag/amendment-k/classb/rkv_published_cap32768.json.

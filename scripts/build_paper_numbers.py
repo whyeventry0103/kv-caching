@@ -386,6 +386,60 @@ def build_catalogue() -> list[Entry]:
                 _desc,
             )
 
+    # R-KV in its published configuration (Amendment N.2): R1-Distill-Llama-8B
+    # on AIME-24 at budget 2048. The ratio and its CI are the pre-registered
+    # read; the accuracies and truncation rates are catalogued alongside because
+    # the ratio is a difference of two SMALL counts (37 vs 36 of 120) and must
+    # never be quoted without them.
+    _rp_path = CLASSB / "rkv_published_cap32768.json"
+    _rp_rel = _rp_path.relative_to(PROJECT_ROOT)
+    _rp = _load(_rp_path)
+    add(
+        "rkvpub.ratio",
+        _rp["accuracy_ratio_r"],
+        f"{_rp_rel}#/accuracy_ratio_r",
+        "R-KV accuracy / full-cache accuracy in the published configuration",
+    )
+    add(
+        "rkvpub.mean_difference",
+        _rp["contrast_cell_minus_fullcache"]["mean_difference"],
+        f"{_rp_rel}#/contrast_cell_minus_fullcache/mean_difference",
+        "R-KV minus full-cache accuracy, paired on the problem",
+    )
+    for _i, _end in enumerate(("ci0", "ci1")):
+        add(
+            f"rkvpub.{_end}",
+            _rp["contrast_cell_minus_fullcache"]["ci95"][_i],
+            f"{_rp_rel}#/contrast_cell_minus_fullcache/ci95/{_i}",
+            "problem-clustered 95% CI on that difference",
+        )
+    for _side, _blk in (("rkv", "cell"), ("fc", "full_cache")):
+        for _field, _desc in (
+            ("correct", "correct generations out of 120"),
+            ("accuracy", "accuracy in the published configuration"),
+            ("truncation", "truncation rate at the 32768-token cap"),
+            ("accuracy_non_truncated", "accuracy among non-truncated generations"),
+            ("mean_tokens", "mean generated tokens"),
+        ):
+            add(
+                f"rkvpub.{_side}.{_field}",
+                _rp[_blk][_field],
+                f"{_rp_rel}#/{_blk}/{_field}",
+                _desc,
+            )
+    add(
+        "rkvpub.realized_ratio",
+        _rp["cell"]["realized_compression_ratio"],
+        f"{_rp_rel}#/cell/realized_compression_ratio",
+        "mean realized cache fraction at budget 2048 on AIME-24",
+    )
+    add(
+        "rkvpub.realized_ratio_pct",
+        100.0 * _rp["cell"]["realized_compression_ratio"],
+        f"{_rp_rel}#/cell/realized_compression_ratio (x100)",
+        "the same fraction as a percentage, which is how the paper quotes it",
+    )
+
     # Resolution collapse (Amendment L, POST-HOC). One artifact per regime.
     for label, fname in (
         ("res256", "resolution_math500_256.json"),
@@ -1013,6 +1067,8 @@ def build_catalogue() -> list[Entry]:
         ("mean_trace_pooled.diss256", "pooled trace length, quoted whole"),
         ("mean_trace_pooled.b2048", "pooled trace length, quoted whole"),
         ("aime_mean_trace_tokens", "AIME trace length, quoted whole"),
+        ("rkvpub.rkv.mean_tokens", "published-config R-KV trace, quoted whole"),
+        ("rkvpub.fc.mean_tokens", "published-config full-cache trace, quoted whole"),
         ("auc_tv_spread_pct", "AUC-TV spread, quoted whole"),
         ("residual_points.diss256.random", "residual in accuracy points, whole"),
         ("residual_over_resampling.diss256.random", "residual/resampling, whole"),

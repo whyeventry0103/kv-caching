@@ -1,0 +1,85 @@
+{
+  "accuracy_ratio_r": 1.027777777777778,
+  "benchmark": "aime24",
+  "cell": {
+    "accuracy": 0.30833333333333335,
+    "accuracy_non_truncated": 0.3894736842105263,
+    "cap_hits": 31,
+    "correct": 37,
+    "mean_tokens": 18869.725,
+    "n_non_truncated": 95,
+    "realized_compression_ratio": 0.1886213883382081,
+    "rows": 120,
+    "truncation": 0.20833333333333334
+  },
+  "contrast_cell_minus_fullcache": {
+    "ci95": [
+      -0.075,
+      0.0917
+    ],
+    "difference_histogram": [
+      [
+        -0.5,
+        2
+      ],
+      [
+        -0.25,
+        4
+      ],
+      [
+        0.0,
+        17
+      ],
+      [
+        0.25,
+        5
+      ],
+      [
+        0.5,
+        2
+      ]
+    ],
+    "losses": 6,
+    "mean_difference": 0.008333333333333333,
+    "n_problems": 30,
+    "n_problems_dropped": 0,
+    "n_resamples": 2000,
+    "non_negative": 24,
+    "seed": 0,
+    "ties": 17,
+    "wins": 7
+  },
+  "full_cache": {
+    "accuracy": 0.3,
+    "accuracy_non_truncated": 0.32432432432432434,
+    "cap_hits": 14,
+    "correct": 36,
+    "mean_tokens": 14799.333333333334,
+    "n_non_truncated": 111,
+    "realized_compression_ratio": 1.0,
+    "rows": 120,
+    "truncation": 0.075
+  },
+  "independent_rerun_agreement": {
+    "correct_agreement_rate": 1.0,
+    "note": "Two independent processes, different run directories, different timestamps, same pinned seeds. same_trace equal to the overlap means decoding reproduced exactly; anything less is a determinism finding and must be reported as one, not averaged away.",
+    "overlapping_conditions": 47,
+    "same_answer_canon": 47,
+    "same_correct": 47,
+    "same_n_tokens": 47,
+    "same_trace": 47
+  },
+  "label": "rkv-published-config-cap32768",
+  "n_conditions": 120,
+  "preregistered_read": {
+    "branch": "REPLICATES",
+    "difference_ci95": [
+      -0.075,
+      0.0917
+    ],
+    "difference_ci_spans_zero": true,
+    "ratio": 1.027777777777778,
+    "rule": "PREREGISTRATION Amendment N.2"
+  },
+  "reference_convention": "amendment-k-cell-population"
+}

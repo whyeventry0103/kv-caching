@@ -423,3 +423,38 @@ def resolution_spread(
         "n_resamples": n_resamples,
         "analysis_status": "post-hoc, exploratory (PREREGISTRATION Amendment L)",
     }
+
+
+def published_config_branch(
+    ratio: float, difference_ci: Sequence[float]
+) -> dict[str, Any]:
+    """Select PREREGISTRATION Amendment N.2's branch from the numbers alone.
+
+    N.2 pre-commits three branches for the R-KV published-configuration cell,
+    keyed on ``r = Acc_cell / Acc_fullcache`` and the problem-clustered CI on
+    the accuracy difference (cell minus full cache):
+
+    * REPLICATES -- ``r >= 1.0`` and the difference CI includes or exceeds zero;
+    * DOES NOT REPLICATE -- ``r < 1.0`` and the difference CI excludes zero;
+    * INCONCLUSIVE -- the CI spans zero without the first branch applying.
+
+    This exists as code, and is called before the numbers are looked at, because
+    a read chosen after seeing the data is a rationalisation rather than a
+    pre-registration. The branch is therefore a function of the artifact, not of
+    whoever writes the paragraph.
+    """
+    lo, hi = float(difference_ci[0]), float(difference_ci[1])
+    spans_zero = lo <= 0.0 <= hi
+    if ratio >= 1.0 and hi >= 0.0:
+        branch = "REPLICATES"
+    elif ratio < 1.0 and not spans_zero:
+        branch = "DOES NOT REPLICATE"
+    else:
+        branch = "INCONCLUSIVE"
+    return {
+        "branch": branch,
+        "ratio": ratio,
+        "difference_ci95": [lo, hi],
+        "difference_ci_spans_zero": spans_zero,
+        "rule": "PREREGISTRATION Amendment N.2",
+    }

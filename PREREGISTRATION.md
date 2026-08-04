@@ -1339,3 +1339,63 @@ floor.
 **O.5 confirmed in production.** The R-KV cell launched and is generating on both
 GPUs against the llama3-scaled RoPE path. Before the fix it raised
 `NotImplementedError` within seconds of every launch.
+
+---
+
+## Amendment N.2, result (2026-08-04): REPLICATES, on a one-generation margin
+
+`grid_aime24_rkv_published` completed 120/120 at the 32768 cap against the
+re-validated bank (Amendment O.4). Read as pre-registered in N.2. Artifact:
+`results/diag/amendment-k/classb/rkv_published_cap32768.json`.
+
+**The branch was selected by code, not by judgment.** N.2's rule is implemented
+in `kvcache.stats.published_config_branch` and applied by
+`scripts/report_published_config.py`, which emits the branch as a field of the
+artifact. This exists so the read cannot be re-cut after the numbers are seen.
+
+**Result.** R1-Distill-Llama-8B, AIME-24, budget 2048, mean realized cache
+0.1886, 30 problems × 4 seeds, matched (problem, seed) population under the
+Amendment K convention:
+
+| | full cache | R-KV 2048 |
+|---|---|---|
+| accuracy | 0.3000 (36/120) | 0.3083 (37/120) |
+| truncation @32768 | 0.0750 | 0.2083 |
+| accuracy, non-truncated | 0.3243 (n=111) | 0.3895 (n=95) |
+| mean tokens | 14799.3 | 18869.7 |
+
+r = **1.0278**. Paired difference (R-KV − full cache) **+0.0083**, problem-
+clustered 95% CI **[−0.0750, +0.0917]**, 7 wins / 17 ties / 6 losses over 30
+problems. Branch: **REPLICATES** (r ≥ 1.0 and the difference CI includes zero,
+N.2 as written).
+
+**What this does and does not license, stated together.** The pre-registered
+branch strengthens R-KV's claim and the paper says so plainly. It is also a
+one-generation margin — 37 correct against 36 of 120 — on an interval that spans
+zero, over 30 problems, against a bank that cleared its N.3 band at exactly the
+floor. The defensible statement is that our certified port is **not worse than
+full cache at ~19% of it** in the published configuration; the 105% headline is
+neither reproduced at that magnitude nor contradicted. We do not upgrade this to
+a confirmed >100% regime, and we do not downgrade it to INCONCLUSIVE because we
+would prefer that — the rule was written first and it selects REPLICATES.
+
+**Two facts in R-KV's favour, recorded because they are.** R-KV's traces run
+longer (18870 vs 14799 mean tokens) and truncate nearly three times as often
+(0.2083 vs 0.0750), every truncation scored incorrect; it leads anyway. Among
+non-truncated generations it leads 0.3895 to 0.3243.
+
+**An unplanned replication, reported rather than discarded.** The queue relaunched
+this cell under its own run name while the manually launched run was in flight,
+because the manual launch used different run names (`rkvpub-g0/g1`) and the queue's
+progress counter reads the run directory. That duplicate produced 47 rows before
+its window closed. They are **not** merged into the cell — that would double-count
+problems. On all 47 overlapping (problem, seed) conditions the two independent
+processes agree **exactly**: same trace, same canonical answer, same token count,
+same correctness. Sampled decoding at T=0.6 reproduced bitwise across processes,
+runs and GPU assignments. The wasted GPU time is the cost of the run-name
+mismatch and is recorded as an operational error, not a protocol one.
+
+**Consequences.** §2's "adjacent configuration" hedge is replaced by the direct
+test; §5's no->100%-regime paragraph reports the cell with its precision; §5's
+not-measured item changes from "not tested in its own configuration" to "tested
+and under-powered". `tab:audit` is unchanged — what R-KV claims is unchanged.

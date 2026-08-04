@@ -469,6 +469,11 @@ REFERENCE_RELATIVE_ARTIFACTS = (
     "add/add-256-rkv.json",
     "add/add-2048.json",
     "fc-readout-control.json",
+    # Accuracy-versus-reference artifacts added after the original nine. Both
+    # declared the convention when written but were not in this tuple, so the
+    # class-wide check was not actually checking them.
+    "classb/hottcap.json",
+    "classb/rkv_published_cap32768.json",
 )
 
 CURRENT_REFERENCE_CONVENTION = "amendment-k-cell-population"

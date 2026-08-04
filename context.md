@@ -18,6 +18,58 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-08-04 — THE QUEUE IS DRAINED. R-KV's published configuration reads
+  REPLICATES on a one-generation margin. Every queued experimental run is done.**
+  **(1) The last cell landed.** `grid_aime24_rkv_published` completed 120/120 at
+  the 32768 cap against the re-validated bank (Amendment O.4). R1-Distill-Llama-8B,
+  AIME-24, budget 2048, mean realized cache **0.1886**, 30 problems x 4 seeds,
+  matched population. Full cache **0.3000** (36/120), R-KV **0.3083** (37/120),
+  **r = 1.0278**; paired difference **+0.0083**, problem-clustered 95% CI
+  **[-0.0750, +0.0917]**, 7 wins / 17 ties / 6 losses. Pre-registered branch
+  **REPLICATES** (Amendment N.2: r >= 1.0 and the CI includes zero).
+  **(2) The branch was chosen by code, not by judgment.** N.2's rule now lives in
+  `kvcache.stats.published_config_branch` and is emitted as a field of the artifact
+  by `scripts/report_published_config.py`, so the read cannot be re-cut after the
+  numbers are seen. Artifact:
+  `results/diag/amendment-k/classb/rkv_published_cap32768.json`.
+  **(3) Say it with its precision.** One generation (37 vs 36 of 120); CI spans
+  zero; n=30 problems; the bank cleared its N.3 band at exactly the floor.
+  Defensible: our certified port is **not worse than full cache at ~19% of it**
+  in the published configuration. NOT defensible: "we reproduced 105%". Also not
+  defensible in the other direction: calling it INCONCLUSIVE because we would
+  prefer that — the rule was written first and it selects REPLICATES.
+  **(4) Two facts favour R-KV and are reported for that reason:** it truncates far
+  more (**0.2083** vs **0.0750**, traces 18869.7 vs 14799.3 mean tokens, every
+  truncation scored incorrect) and leads anyway; among non-truncated rows it leads
+  **0.3895** to **0.3243**.
+  **(5) An operational error, recorded.** Launching outside the queue with different
+  run names (`rkvpub-g0/g1`) made the work invisible to the orchestrator, which
+  counts progress by run directory; it relaunched the same cell and burned ~3h of
+  GPU before its window closed, reaching 47 rows. Those rows are NOT merged (that
+  would double-count problems) — but on all 47 overlapping conditions the two
+  independent processes agree **exactly**: same trace, same canonical answer, same
+  token count, same correctness. Sampled decoding at T=0.6 reproduced bitwise
+  across processes and GPUs. The queue entry is retired with the lesson written
+  into `configs/nightly_queue.yaml`.
+  **(6) Queue state: `nightly_autorun.py --dry-run` on the remote now reports
+  "no launchable job".** Nothing is left to run.
+  **(7) Paper.** Sites updated per `docs/INTEGRATION_CHECKLIST.md` §3: §2's
+  "adjacent configuration" hedge replaced by the direct test; §5's
+  no->100%-regime paragraph carries the cell with its precision; §5's not-measured
+  item moved from "not tested in its own configuration" to "tested and
+  under-powered"; `fig:aime`'s caption now scopes its no->100% claim to the 7B
+  cell. `tab:audit` unchanged — what R-KV claims did not change. PDF rebuilt x2:
+  0 errors, 1 Overfull (pre-existing, line 293, 1.4pt), **26 pages**.
+  **(8) Gate hardening done in passing:** `classb/hottcap.json` and the new
+  `classb/rkv_published_cap32768.json` were declaring the Amendment K reference
+  convention but were NOT in `REFERENCE_RELATIVE_ARTIFACTS`, so the class-wide
+  check was not checking them. Both added; the gate now covers 16 artifacts.
+  **NEXT:** no runs pending. Remaining work is all analysis//writing:
+  fig2_bracket density redesign (STILL OPEN, `docs/FIGURES_PLAYBOOK.md` §9);
+  D.1/D.2/D.3; A.5 playbook audit; Part F for the non-core cells; and the page
+  budget (26pp vs ICLR 9pp) which the user is handling.
+
+
   **★★★★★ 2026-08-03 — AIME cell unblocked and relaunched; N.3 bank gate FAILED;
   three figure defects fixed. HEAD `3e1f042`.**
   **(1) The stuck job was a real capability gap, not a config bug.**
