@@ -439,6 +439,13 @@ def build_catalogue() -> list[Entry]:
         f"{_rp_rel}#/cell/realized_compression_ratio (x100)",
         "the same fraction as a percentage, which is how the paper quotes it",
     )
+    add(
+        "rkvpub.gain_pct",
+        100.0 * (_rp["accuracy_ratio_r"] - 1.0),
+        f"100 * ({_rp_rel}#/accuracy_ratio_r - 1)",
+        "nominal percent gain over full cache; the paper quotes it only to deny "
+        "that the cell establishes it",
+    )
 
     # Resolution collapse (Amendment L, POST-HOC). One artifact per regime.
     for label, fname in (
