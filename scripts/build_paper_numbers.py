@@ -1074,6 +1074,7 @@ def build_catalogue() -> list[Entry]:
         ("mean_trace_pooled.diss256", "pooled trace length, quoted whole"),
         ("mean_trace_pooled.b2048", "pooled trace length, quoted whole"),
         ("aime_mean_trace_tokens", "AIME trace length, quoted whole"),
+        ("aime_bank.mean_tokens", "AIME bank generation length, quoted whole"),
         ("rkvpub.rkv.mean_tokens", "published-config R-KV trace, quoted whole"),
         ("rkvpub.fc.mean_tokens", "published-config full-cache trace, quoted whole"),
         ("auc_tv_spread_pct", "AUC-TV spread, quoted whole"),
