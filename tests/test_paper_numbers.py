@@ -428,3 +428,56 @@ def test_an_internal_match_outranks_an_external_one_at_equal_precision():
     lits = extract_literals("value 0.47", "t", strip=False)
     classify(lits, cat)
     assert lits[0].classification == "sourced"
+
+
+def test_claim_gate_catches_a_number_that_moved_off_its_quantity():
+    """The defect audit_paper_numbers cannot see: right value, wrong quantity.
+
+    A literal that still collides with some other catalogue entry passes the
+    value-matching gate. The claim gate must fail it, because the entry it
+    CLAIMS to be no longer displays it.
+    """
+    import json
+    import subprocess
+    import sys
+    import tempfile
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parents[1]
+    catalogue = json.loads((root / "paper_numbers.json").read_text())
+    # Move the quantity the paper's 1.028 asserts, leaving every other entry
+    # (and therefore every value-based match) untouched.
+    for entry in catalogue["entries"]:
+        if entry["key"] == "rkvpub.ratio":
+            entry["value"] = 1.5
+    with tempfile.TemporaryDirectory() as tmp:
+        broken = Path(tmp) / "catalogue.json"
+        broken.write_text(json.dumps(catalogue))
+        proc = subprocess.run(
+            [
+                sys.executable,
+                str(root / "scripts" / "audit_paper_claims.py"),
+                "--catalogue",
+                str(broken),
+                "--strict",
+            ],
+            capture_output=True,
+            text=True,
+        )
+    assert proc.returncode == 1, proc.stdout
+    assert "rkvpub.ratio" in proc.stdout
+    assert "asserts '1.028'" in proc.stdout
+
+
+def test_claim_gate_passes_on_the_real_catalogue():
+    import subprocess
+    import sys
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parents[1]
+    proc = subprocess.run(
+        [sys.executable, str(root / "scripts" / "audit_paper_claims.py"), "--strict"],
+        capture_output=True,
+        text=True,
+    )
+    assert proc.returncode == 0, proc.stdout

@@ -1,5 +1,10 @@
 {
   "by_directory": {
+    "bank-hottcap": {
+      "generations": 400,
+      "hours": 3.6947576446115917,
+      "included": true
+    },
     "decodingpress-random-smoke-v1": {
       "generations": 1,
       "hours": 0.007213433755015204,
@@ -18,6 +23,16 @@
     "fc-aime24": {
       "generations": 240,
       "hours": 13.914861853028642,
+      "included": true
+    },
+    "fc-aime24-llama8b": {
+      "generations": 120,
+      "hours": 8.731280610980983,
+      "included": true
+    },
+    "fc-aime24-llama8b-cap32768": {
+      "generations": 120,
+      "hours": 12.076439592127377,
       "included": true
     },
     "fc-llama50": {
@@ -43,6 +58,16 @@
     "grid-aime24-2048": {
       "generations": 360,
       "hours": 27.90110888314288,
+      "included": true
+    },
+    "grid-aime24-rkv-published-cap32768": {
+      "generations": 47,
+      "hours": 5.298662770931583,
+      "included": true
+    },
+    "grid-diss1024": {
+      "generations": 800,
+      "hours": 19.391443239611885,
       "included": true
     },
     "grid-diss2048-h2o": {
@@ -83,6 +108,16 @@
     "grid-diss256-tok": {
       "generations": 800,
       "hours": 38.54148860377117,
+      "included": true
+    },
+    "grid-diss512": {
+      "generations": 800,
+      "hours": 25.16695732763399,
+      "included": true
+    },
+    "grid-hottcap": {
+      "generations": 400,
+      "hours": 4.307697530330495,
       "included": true
     },
     "grid-math500-dissociation-v1": {
@@ -170,6 +205,16 @@
       "hours": 9.811828904352991,
       "included": false
     },
+    "rkvpub-g0": {
+      "generations": 60,
+      "hours": 8.724494578784928,
+      "included": true
+    },
+    "rkvpub-g1": {
+      "generations": 60,
+      "hours": 7.700516227380657,
+      "included": true
+    },
     "smoke-fullcache-4096": {
       "generations": 1,
       "hours": 0.005539488797496435,
@@ -182,9 +227,9 @@
     }
   },
   "excluded_hours": 130.0007215387235,
-  "generations": 7200,
-  "gpu_hours": 279.86585819478876,
+  "generations": 10007,
+  "gpu_hours": 374.9581077171822,
   "n_directories_excluded": 22,
-  "n_directories_included": 14,
+  "n_directories_included": 23,
   "note": "Summed wall-clock over free-running/bank generation rows. Excludes teacher-forced work (readout, reverse readout, replay), the two shards superseded by the merged bank, and superseded pilots. Every directory is listed with its hours and an 'included' flag, so any exclusion can be re-added and its effect seen."
 }

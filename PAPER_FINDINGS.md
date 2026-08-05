@@ -54,7 +54,7 @@ and a **trajectory** part.
   **0.008**. SLM readout share = **0.492 -> 49.2%**. The residual gap is the number that
   moved most in relative terms (it was 0.004 against the mismatched reference), so the
   "the whole +0.185 lives in readout" sentence is now "0.181 of the 0.185".
-- **Compute:** **280 GPU-hours** of generation (summed wall-clock over **7,200** generations)
+- **Compute:** **375 GPU-hours** of generation (summed wall-clock over **10,007** generations)
   under the inclusion rule recorded in `results/diag/amendment-k/classb/compute.json`:
   free-running and reference-bank generation only, excluding teacher-forced work (readout,
   reverse readout, replay), superseded pilots, and the two shards subsumed by the merged
@@ -148,7 +148,10 @@ Other current values that moved and are easy to re-introduce stale:
 - Policy contrast CI: **[0.130, 0.240]** at the pinned seed. The published upper bound
   came from a seed that was never recorded; the artifact now pins seed, resample count,
   and a difference histogram sufficient to recompute the interval.
-- Compute: **280 GPU-hours over 7,200 generations** under the artifact's inclusion rule.
+- Compute: **375 GPU-hours over 10,007 generations** under the artifact's inclusion rule.
+  Corrected 2026-08-05 — the previous figure is in the superseded list below. Cause:
+  `INCLUDED` in `report_compute.py` is an allowlist and had drifted nine result-bearing
+  run directories behind. Found by `scripts/rederive_artifacts.py`, not by reading.
 
 Superseded values are listed at the top of the archival log below.
 
@@ -234,7 +237,9 @@ R-KV −0.278. Reverse endpoints −0.246 / −0.466 / −0.463 / −0.221. Read
 25/46/45/23%. Residual spread 0.006, readout-change spread 0.169. Policy-contrast upper
 bound 0.242 (200-seed range [0.2375, 0.2450]). Compute ~224–230 GPU-h / ~7,307
 generations. Budget-2048 residuals −0.051 / −0.096 / −0.075. AIME residuals −0.179 /
-−0.246 / −0.321. Truncation-adjusted −0.110 / −0.277.
+−0.246 / −0.321. Truncation-adjusted −0.110 / −0.277. Compute 280 GPU-hours / 7,200 generations
+(superseded 2026-08-05: the inclusion allowlist had drifted nine result-bearing run
+directories behind; the corrected figure is 375 / 10,007 in §4-CURRENT).
 
 #### 2026-08-04 — R-KV in its published configuration: pre-registered branch REPLICATES
 
@@ -274,6 +279,54 @@ and GPU assignments.
 
 **Operational note, so it is not repeated:** launching outside the queue must use
 the queue's run name, or the queue will relaunch the same job.
+
+#### 2026-08-05 — full verification sweep: 29/29 artifacts re-derived from rows; one stale number found and fixed
+
+**The gap this closed.** `audit_paper_numbers.py` proves every literal matches
+*some* catalogue entry, and the catalogue is built *from* `results/diag/`.
+Nothing checked that the artifacts still follow from the rows. An artifact
+written by a since-fixed pipeline, or edited by hand, would have passed every
+gate in the repo.
+
+**Artifact re-derivation (`scripts/rederive_artifacts.py`, new).** Runs on the
+remote, reconstructs each producing command — from the artifact's own recorded
+`runs` block where it has one, else from a manifest — re-runs it against the raw
+rows, and diffs field by field. Result: **29 of 29 IDENTICAL**, including the
+core cell (`m4-powered-diss256`), all four grader audits, all four ADD cells,
+all seven resolution regimes, and the R-KV published-configuration cell.
+Archived: `results/diag/rederive-2026-08-05.json`.
+
+**One real defect, found by it.** `compute.json` differed: `INCLUDED` in
+`report_compute.py` is a hardcoded allowlist and had drifted **nine
+result-bearing run directories** behind (grid-diss512, grid-diss1024,
+bank-hottcap, grid-hottcap, both AIME-Llama banks, both rkvpub shards, and the
+duplicate relaunch). Those cells *are* reported in the paper, so the compute
+statement had silently stopped covering the work it describes.
+**280 GPU-hours / 7,200 generations → 375 GPU-hours / 10,007 generations.**
+Corrected in the paper, in §1b, and in §4-CURRENT; the old figure is in the
+superseded list. Nothing else in the paper depends on it.
+
+**Intent gate (`scripts/audit_paper_claims.py` + `paper_claims.json`, new).**
+Value-matching cannot tell two quantities apart when they round alike — the
+known 360-occurrence ambiguity. `paper_claims.json` pins a number to the
+*quantity it asserts*: **79 load-bearing numbers** (abstract, contributions,
+`tab:decomp` in full, the R-KV published cell, the HOTT-cap cell, the compute
+and truncation statements) each verified to display the value of their named
+catalogue key. A regression test moves `rkvpub.ratio` and asserts the gate
+fails, so the gate is proven to bite. Wired into `make audit`.
+
+**Coverage, stated rather than implied.** **155** result-precision literal
+occurrences in the `.tex` remain both ambiguous and unpinned. They are not known
+to be wrong — every one is sourced and every backing artifact re-derives — but
+they rest on value-matching, so they are *not* verified to the standard the 79
+are. Pinning more is cheap; the number is printed by `make audit` so it cannot
+quietly grow.
+
+**Also checked.** PDF: 0 errors, 0 undefined references, 0 undefined citations,
+0 multiply-defined labels, 1 pre-existing Overfull (line 293, 1.4pt), 26 pages.
+Local/remote artifact parity: all 75 files match by sha256 (the 6 previously
+local-only artifacts were copied up). `make parity` still reports a commit
+mismatch — structural, because `sync_source.sh` never transfers `.git`.
 
 ### 4a. The powered phenomenon (budget 256)
 FC 0.882 → **StreamingLLM 0.237**, **Random 0.422**. Random beats the "principled" recency

@@ -135,7 +135,7 @@ That teacher-forced evaluation can diverge sharply from free-running behavior is
 
 \textbf{Statistical methodology.} All accuracy confidence intervals are problem-clustered bootstrap 95\% intervals: 2000 resamples of problems with replacement, percentile intervals (2.5/97.5 indices). The residual-bracket endpoints receive the same treatment (per resample of problems, forward $= \text{free} - \text{readout}$ accuracy over the resampled problems; reverse $= \text{reverse} - \text{full-cache}$). ADD significance uses a per-problem permutation null with 10{,}000 resamples of pooled relabelings, Benjamini--Hochberg corrected across problems.
 
-\textbf{Compute.} Generation totaled $280$ GPU-hours of summed wall-clock across $7{,}200$ generations. The total covers free-running and reference-bank generation only: teacher-forced work (readout, reverse readout, replay) is excluded, as are superseded pilots and the two shards subsumed by the merged bank. The released artifact lists every run directory with its hours and an inclusion flag, so any exclusion can be re-added and its effect seen.
+\textbf{Compute.} Generation totaled $375$ GPU-hours of summed wall-clock across $10{,}007$ generations. The total covers free-running and reference-bank generation only: teacher-forced work (readout, reverse readout, replay) is excluded, as are superseded pilots and the two shards subsumed by the merged bank. The released artifact lists every run directory with its hours and an inclusion flag, so any exclusion can be re-added and its effect seen.
 
 \subsection{Estimands}
 Let $\accfc$ denote full-cache accuracy on the pinned reference bank and let $m$ index a (method, budget) cell. \Cref{fig:protocol} shows the four generation protocols the estimands are built from.

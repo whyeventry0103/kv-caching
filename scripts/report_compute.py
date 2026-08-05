@@ -47,6 +47,24 @@ INCLUDED = (
     "grid-diss2048-tok",
     "grid-diss2048-h2o",
     "grid-aime24-2048",
+    # Added 2026-08-05. INCLUDED is an allowlist, so every cell run after it was
+    # written fell to "excluded" by default and the paper's compute sentence
+    # silently stopped covering the work it reports. Found by
+    # scripts/rederive_artifacts.py, which re-runs this report against the rows
+    # and diffs it -- the snapshot had drifted 9 directories behind.
+    "grid-diss512",  # resolution confirmatory test, section 4.1
+    "grid-diss1024",  # resolution confirmatory test, section 4.1
+    "bank-hottcap",  # HOTT-cap cell, section 2 (Amendment N.1)
+    "grid-hottcap",  # HOTT-cap StreamingLLM arm (Amendment N.1)
+    "fc-aime24-llama8b",  # 16384-cap bank; gate-failed, reported in Amendment O
+    "fc-aime24-llama8b-cap32768",  # the bank section 5's R-KV cell reads against
+    "rkvpub-g0",  # R-KV published configuration, section 5 (Amendment N.2)
+    "rkvpub-g1",
+    # The orchestrator's duplicate launch of the cell above. Its rows are NOT
+    # part of any cell (that would double-count problems); they back the
+    # determinism check in Amendment N.2's result. The GPU time was really
+    # spent, so a compute statement that omitted it would understate the cost.
+    "grid-aime24-rkv-published-cap32768",
 )
 
 

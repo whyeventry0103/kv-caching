@@ -18,6 +18,38 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-08-05 — VERIFICATION SWEEP. 29/29 artifacts re-derive from the raw
+  rows; one stale number found and corrected; an intent gate now pins 79 numbers.**
+  **(1) New: `scripts/rederive_artifacts.py`.** Re-runs every producing report on
+  the remote against the raw rows and diffs the artifact field by field. This was
+  the last unguarded link: `audit_paper_numbers` trusts `results/diag/`, and
+  nothing checked that `results/diag/` still follows from the rows. Result:
+  **29 of 29 IDENTICAL**, core cell included. Archived
+  `results/diag/rederive-2026-08-05.json`.
+  **(2) It found one real defect.** `report_compute.py`'s `INCLUDED` is a hardcoded
+  allowlist and had drifted **9 result-bearing run dirs** behind, so the paper's
+  compute statement had stopped covering the work it reports.
+  **280 GPU-h / 7,200 gens -> 375 GPU-h / 10,007 gens.** Fixed in the .tex, §1b and
+  §4-CURRENT; old figure moved to the superseded list. Nothing else depended on it.
+  **(3) New: `scripts/audit_paper_claims.py` + `paper_claims.json`.** Value-matching
+  cannot separate two quantities that round alike (the known 360-occurrence
+  ambiguity). The claims file pins a literal to the QUANTITY it asserts; **79**
+  load-bearing numbers verified (abstract, contributions, all of `tab:decomp`, the
+  R-KV published cell, the HOTT-cap cell, compute, truncation). A regression test
+  moves `rkvpub.ratio` and asserts the gate fails, so it is proven to bite. Wired
+  into `make audit`.
+  **(4) Residual risk, stated not hidden: 155** result-precision literals in the
+  .tex are still ambiguous AND unpinned. Not known wrong — all sourced, all backing
+  artifacts re-derive — but weaker than the 79. `make audit` prints the count.
+  **(5) Structural checks:** PDF 0 errors / 0 undefined refs / 0 undefined cites /
+  0 multiply-defined labels / 1 pre-existing Overfull (line 293) / 26 pages.
+  Local-remote artifact parity: **all 75 files match by sha256** (6 previously
+  local-only artifacts copied up). `make parity` still shows a commit mismatch —
+  structural, `sync_source.sh` never transfers `.git`.
+  **NEXT:** no runs pending. Optional: pin more of the 155; fig2 density redesign;
+  D.1/D.2/D.3; page budget (26pp vs ICLR 9pp, user handling).
+
+
   **★★★★★ 2026-08-04 — THE QUEUE IS DRAINED. R-KV's published configuration reads
   REPLICATES on a one-generation margin. Every queued experimental run is done.**
   **(1) The last cell landed.** `grid_aime24_rkv_published` completed 120/120 at

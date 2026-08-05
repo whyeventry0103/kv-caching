@@ -1,0 +1,176 @@
+[
+  {
+    "artifact": "amendment-k/classb/resolution_math500_256.json",
+    "status": "IDENTICAL",
+    "n_differences": 0,
+    "differences": []
+  },
+  {
+    "artifact": "amendment-k/classb/resolution_math500_512.json",
+    "status": "IDENTICAL",
+    "n_differences": 0,
+    "differences": []
+  },
+  {
+    "artifact": "amendment-k/classb/resolution_math500_1024.json",
+    "status": "IDENTICAL",
+    "n_differences": 0,
+    "differences": []
+  },
+  {
+    "artifact": "amendment-k/classb/resolution_math500_2048.json",
+    "status": "IDENTICAL",
+    "n_differences": 0,
+    "differences": []
+  },
+  {
+    "artifact": "amendment-k/classb/resolution_aime24_2048.json",
+    "status": "IDENTICAL",
+    "n_differences": 0,
+    "differences": []
+  },
+  {
+    "artifact": "amendment-k/classb/resolution_pair_256.json",
+    "status": "IDENTICAL",
+    "n_differences": 0,
+    "differences": []
+  },
+  {
+    "artifact": "amendment-k/classb/resolution_pair_2048.json",
+    "status": "IDENTICAL",
+    "n_differences": 0,
+    "differences": []
+  },
+  {
+    "artifact": "amendment-k/classb/residual_contrast_256.json",
+    "status": "IDENTICAL",
+    "n_differences": 0,
+    "differences": []
+  },
+  {
+    "artifact": "amendment-k/classb/policy_contrast_256.json",
+    "status": "IDENTICAL",
+    "n_differences": 0,
+    "differences": []
+  },
+  {
+    "artifact": "amendment-k/classb/compute.json",
+    "status": "IDENTICAL",
+    "n_differences": 0,
+    "differences": []
+  },
+  {
+    "artifact": "amendment-k/classb/rkv_published_cap32768.json",
+    "status": "IDENTICAL",
+    "n_differences": 0,
+    "differences": []
+  },
+  {
+    "artifact": "amendment-k/add/twofc.json",
+    "status": "IDENTICAL",
+    "n_differences": 0,
+    "differences": []
+  },
+  {
+    "artifact": "amendment-k/grader/grid-diss256-h2o.json",
+    "status": "IDENTICAL",
+    "n_differences": 0,
+    "differences": []
+  },
+  {
+    "artifact": "amendment-k/grader/grid-diss256-rkv.json",
+    "status": "IDENTICAL",
+    "n_differences": 0,
+    "differences": []
+  },
+  {
+    "artifact": "amendment-k/grader/grid-diss256-tok.json",
+    "status": "IDENTICAL",
+    "n_differences": 0,
+    "differences": []
+  },
+  {
+    "artifact": "amendment-k/grader/math500-fc-powered-merged.json",
+    "status": "IDENTICAL",
+    "n_differences": 0,
+    "differences": []
+  },
+  {
+    "artifact": "amendment-k/add/add-2048.json",
+    "status": "IDENTICAL",
+    "n_differences": 0,
+    "differences": []
+  },
+  {
+    "artifact": "amendment-k/add/add-256-h2o.json",
+    "status": "IDENTICAL",
+    "n_differences": 0,
+    "differences": []
+  },
+  {
+    "artifact": "amendment-k/add/add-256-randslm.json",
+    "status": "IDENTICAL",
+    "n_differences": 0,
+    "differences": []
+  },
+  {
+    "artifact": "amendment-k/add/add-256-rkv.json",
+    "status": "IDENTICAL",
+    "n_differences": 0,
+    "differences": []
+  },
+  {
+    "artifact": "amendment-k/m4-2048-h2o-summary.json",
+    "status": "IDENTICAL",
+    "n_differences": 0,
+    "differences": []
+  },
+  {
+    "artifact": "amendment-k/m4-2048-summary.json",
+    "status": "IDENTICAL",
+    "n_differences": 0,
+    "differences": []
+  },
+  {
+    "artifact": "amendment-k/m4-aime-2048-summary.json",
+    "status": "IDENTICAL",
+    "n_differences": 0,
+    "differences": []
+  },
+  {
+    "artifact": "amendment-k/m4-h2o256-full-summary.json",
+    "status": "IDENTICAL",
+    "n_differences": 0,
+    "differences": []
+  },
+  {
+    "artifact": "amendment-k/m4-llama-256-summary.json",
+    "status": "IDENTICAL",
+    "n_differences": 0,
+    "differences": []
+  },
+  {
+    "artifact": "amendment-k/m4-powered-diss256-summary.json",
+    "status": "IDENTICAL",
+    "n_differences": 0,
+    "differences": []
+  },
+  {
+    "artifact": "amendment-k/m4-q14b-256-summary.json",
+    "status": "IDENTICAL",
+    "n_differences": 0,
+    "differences": []
+  },
+  {
+    "artifact": "amendment-k/m4-q15b-256-summary.json",
+    "status": "IDENTICAL",
+    "n_differences": 0,
+    "differences": []
+  },
+  {
+    "artifact": "amendment-k/m4-rkv-256-summary.json",
+    "status": "IDENTICAL",
+    "n_differences": 0,
+    "differences": []
+  }
+]

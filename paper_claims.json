@@ -1,0 +1,401 @@
+{
+  "note": "Intent map for the paper's load-bearing numbers. audit_paper_numbers.py proves each literal matches SOME catalogue entry; this file names WHICH quantity each one asserts, so a literal that happens to equal an unrelated entry cannot pass. `context` must appear exactly once in the .tex and must contain `literal`; `key` must be able to display `literal` under its own rounding rules. Adding a claim is cheap; a number that matters and is not here is unpinned, which the checker reports as coverage.",
+  "claims": [
+    {
+      "context": "random eviction scores $0.765$ when the full-cache reasoning trace is teacher-forced",
+      "literal": "0.765",
+      "key": "diss256.random.readout"
+    },
+    {
+      "context": "but $0.422$ when the model writes its own trace",
+      "literal": "0.422",
+      "key": "diss256.random.free"
+    },
+    {
+      "context": "(matched full cache $0.885$; StreamingLLM $0.584$ versus $0.237$",
+      "literal": "0.885",
+      "key": "diss256.random.fc_cell"
+    },
+    {
+      "context": "StreamingLLM $0.584$ versus $0.237$;",
+      "literal": "0.584",
+      "key": "diss256.streamingllm.readout"
+    },
+    {
+      "context": "StreamingLLM $0.584$ versus $0.237$;",
+      "literal": "0.237",
+      "key": "diss256.streamingllm.free"
+    },
+    {
+      "context": "an attention-score heavy-hitter press $0.597$ versus $0.247$)",
+      "literal": "0.597",
+      "key": "h2o256.h2o.readout"
+    },
+    {
+      "context": "an attention-score heavy-hitter press $0.597$ versus $0.247$)",
+      "literal": "0.247",
+      "key": "h2o256.h2o.free"
+    },
+    {
+      "context": "a trajectory residual of $-0.337$ / $-0.344$ / $-0.344$ across three mechanistically unrelated eviction policies",
+      "literal": "0.337",
+      "key": "diss256.random.residual"
+    },
+    {
+      "context": "showing the same readout-invisible structure at $-0.268$ while free-running best",
+      "literal": "0.268",
+      "key": "rkv256.rkv.residual"
+    },
+    {
+      "context": "exactly zero before the first eviction, ${\\approx}0.002$ per step immediately after",
+      "literal": "0.002",
+      "key": "tv_diss256.first50"
+    },
+    {
+      "context": "and $0.088$ later in the trajectory",
+      "literal": "0.088",
+      "key": "tv_diss256.later"
+    },
+    {
+      "context": "two-full-cache negative control (noise floor $\\approx 0.07$",
+      "literal": "0.07",
+      "key": "twofc.mean_add"
+    },
+    {
+      "context": "full-cache accuracy $0.885$ collapses to $0.237$ (StreamingLLM) and $0.422$ (Random)",
+      "literal": "0.885",
+      "key": "diss256.random.fc_cell"
+    },
+    {
+      "context": "collapses to $0.237$ (StreamingLLM) and $0.422$ (Random)",
+      "literal": "0.237",
+      "key": "diss256.streamingllm.free"
+    },
+    {
+      "context": "$0.237$ (StreamingLLM) and $0.422$ (Random); random eviction beats the principled recency policy",
+      "literal": "0.422",
+      "key": "diss256.random.free"
+    },
+    {
+      "context": "random eviction beats the principled recency policy by $+0.185$, 95\\% CI $[0.130, 0.240]$",
+      "literal": "0.185",
+      "key": "contrast256.mean"
+    },
+    {
+      "context": "by $+0.185$, 95\\% CI $[0.130, 0.240]$, with per-problem difference",
+      "literal": "0.130",
+      "key": "contrast256.ci0"
+    },
+    {
+      "context": "by $+0.185$, 95\\% CI $[0.130, 0.240]$, with per-problem difference",
+      "literal": "0.240",
+      "key": "contrast256.ci1"
+    },
+    {
+      "context": "residual spread $0.008$, every CI excluding zero; 400 conditions per cell",
+      "literal": "0.008",
+      "key": "residual_spread.256_three_policies"
+    },
+    {
+      "context": "(Random $[-0.337,-0.282]$, StreamingLLM $[-0.470,-0.344]$",
+      "literal": "0.282",
+      "key": "diss256.random.bracket1"
+    },
+    {
+      "context": "StreamingLLM $[-0.470,-0.344]$, H2O-style $[-0.478,-0.344]$",
+      "literal": "0.470",
+      "key": "diss256.streamingllm.bracket0"
+    },
+    {
+      "context": "H2O-style $[-0.478,-0.344]$, R-KV $[-0.268,-0.251]$",
+      "literal": "0.478",
+      "key": "h2o256.h2o.bracket0"
+    },
+    {
+      "context": "R-KV $[-0.268,-0.251]$)",
+      "literal": "0.251",
+      "key": "rkv256.rkv.bracket1"
+    },
+    {
+      "context": "From $\\accfc = 0.885$, free-running accuracy at budget 256 falls to $\\mathbf{0.237}$",
+      "literal": "0.885",
+      "key": "diss256.random.fc_cell"
+    },
+    {
+      "context": "at budget 2048 the same presses free-run at $0.850$ (Random) and $0.807$ (StreamingLLM)",
+      "literal": "0.850",
+      "key": "b2048.random.free"
+    },
+    {
+      "context": "free-run at $0.850$ (Random) and $0.807$ (StreamingLLM)",
+      "literal": "0.807",
+      "key": "b2048.streamingllm.free"
+    },
+    {
+      "context": "the bank is 0.882 over 2000 rows",
+      "literal": "0.882",
+      "key": "diss256.fc_bank",
+      "document": "PAPER_FINDINGS.md"
+    },
+    {
+      "context": "our certified port reaches $1.028\\times$ full-cache accuracy: $0.308$ against $0.300$",
+      "literal": "1.028",
+      "key": "rkvpub.ratio"
+    },
+    {
+      "context": "full-cache accuracy: $0.308$ against $0.300$",
+      "literal": "0.308",
+      "key": "rkvpub.rkv.accuracy"
+    },
+    {
+      "context": "full-cache accuracy: $0.308$ against $0.300$",
+      "literal": "0.300",
+      "key": "rkvpub.fc.accuracy"
+    },
+    {
+      "context": "the paired difference is $+0.008$ with a problem-clustered $95\\%$ CI of $[-0.075, +0.092]$",
+      "literal": "0.008",
+      "key": "rkvpub.mean_difference"
+    },
+    {
+      "context": "a problem-clustered $95\\%$ CI of $[-0.075, +0.092]$ spanning zero",
+      "literal": "0.075",
+      "key": "rkvpub.ci0"
+    },
+    {
+      "context": "a problem-clustered $95\\%$ CI of $[-0.075, +0.092]$ spanning zero",
+      "literal": "0.092",
+      "key": "rkvpub.ci1"
+    },
+    {
+      "context": "budget 2048 ($18.9\\%$ realized cache)",
+      "literal": "18.9",
+      "key": "rkvpub.realized_ratio_pct"
+    },
+    {
+      "context": "traces of $18{,}870$ against $14{,}799$ mean tokens",
+      "literal": "18870",
+      "key": "rkvpub.rkv.mean_tokens.rounded"
+    },
+    {
+      "context": "traces of $18{,}870$ against $14{,}799$ mean tokens",
+      "literal": "14799",
+      "key": "rkvpub.fc.mean_tokens.rounded"
+    },
+    {
+      "context": "truncating at $0.208$ against $0.075$",
+      "literal": "0.208",
+      "key": "rkvpub.rkv.truncation"
+    },
+    {
+      "context": "among non-truncated generations it leads $0.389$ to $0.324$",
+      "literal": "0.389",
+      "key": "rkvpub.rkv.accuracy_non_truncated"
+    },
+    {
+      "context": "among non-truncated generations it leads $0.389$ to $0.324$",
+      "literal": "0.324",
+      "key": "rkvpub.fc.accuracy_non_truncated"
+    },
+    {
+      "context": "drops our accuracy from $0.882$ to $0.515$, with $0.430$ of generations truncated",
+      "literal": "0.515",
+      "key": "hottcap.fc.accuracy"
+    },
+    {
+      "context": "with $0.430$ of generations truncated at the cap and scored incorrect",
+      "literal": "0.430",
+      "key": "hottcap.fc.truncation_rate"
+    },
+    {
+      "context": "leaving $0.045$ against HOTT's $0.47$",
+      "literal": "0.045",
+      "key": "hottcap.residual_gap"
+    },
+    {
+      "context": "Truncation rate is reported per cell (\\cref{tab:decomp}: Random $0.233$, StreamingLLM $0.070$)",
+      "literal": "0.233",
+      "key": "diss256.random.trunc"
+    },
+    {
+      "context": "Random $0.233$, StreamingLLM $0.070$)",
+      "literal": "0.070",
+      "key": "diss256.streamingllm.trunc"
+    },
+    {
+      "context": "Random       & 0.422 $[0.345, 0.500]$ & 0.765 $[0.686, 0.817]$ & $-0.463$ & $-0.138$ & $\\mathbf{-0.337}$ & 29.8\\% & 0.233",
+      "literal": "0.345",
+      "key": "diss256.random.free_ci0"
+    },
+    {
+      "context": "Random       & 0.422 $[0.345, 0.500]$ & 0.765 $[0.686, 0.817]$ & $-0.463$ & $-0.138$ & $\\mathbf{-0.337}$ & 29.8\\% & 0.233",
+      "literal": "0.500",
+      "key": "diss256.random.free_ci1"
+    },
+    {
+      "context": "Random       & 0.422 $[0.345, 0.500]$ & 0.765 $[0.686, 0.817]$ & $-0.463$ & $-0.138$ & $\\mathbf{-0.337}$ & 29.8\\% & 0.233",
+      "literal": "0.686",
+      "key": "diss256.random.readout_ci0"
+    },
+    {
+      "context": "Random       & 0.422 $[0.345, 0.500]$ & 0.765 $[0.686, 0.817]$ & $-0.463$ & $-0.138$ & $\\mathbf{-0.337}$ & 29.8\\% & 0.233",
+      "literal": "0.817",
+      "key": "diss256.random.readout_ci1"
+    },
+    {
+      "context": "Random       & 0.422 $[0.345, 0.500]$ & 0.765 $[0.686, 0.817]$ & $-0.463$ & $-0.138$ & $\\mathbf{-0.337}$ & 29.8\\% & 0.233",
+      "literal": "0.463",
+      "key": "diss256.random.total_change"
+    },
+    {
+      "context": "Random       & 0.422 $[0.345, 0.500]$ & 0.765 $[0.686, 0.817]$ & $-0.463$ & $-0.138$ & $\\mathbf{-0.337}$ & 29.8\\% & 0.233",
+      "literal": "0.138",
+      "key": "diss256.random.readout_change"
+    },
+    {
+      "context": "Random       & 0.422 $[0.345, 0.500]$ & 0.765 $[0.686, 0.817]$ & $-0.463$ & $-0.138$ & $\\mathbf{-0.337}$ & 29.8\\% & 0.233",
+      "literal": "0.337",
+      "key": "diss256.random.residual"
+    },
+    {
+      "context": "Random       & 0.422 $[0.345, 0.500]$ & 0.765 $[0.686, 0.817]$ & $-0.463$ & $-0.138$ & $\\mathbf{-0.337}$ & 29.8\\% & 0.233",
+      "literal": "29.8",
+      "key": "readout_share.diss256.random.pct"
+    },
+    {
+      "context": "Random       & 0.422 $[0.345, 0.500]$ & 0.765 $[0.686, 0.817]$ & $-0.463$ & $-0.138$ & $\\mathbf{-0.337}$ & 29.8\\% & 0.233",
+      "literal": "0.233",
+      "key": "diss256.random.trunc"
+    },
+    {
+      "context": "StreamingLLM & 0.237 $[0.175, 0.305]$ & 0.584 $[0.495, 0.647]$ & $-0.647$ & $-0.319$ & $\\mathbf{-0.344}$ & 49.2\\% & 0.070",
+      "literal": "0.175",
+      "key": "diss256.streamingllm.free_ci0"
+    },
+    {
+      "context": "StreamingLLM & 0.237 $[0.175, 0.305]$ & 0.584 $[0.495, 0.647]$ & $-0.647$ & $-0.319$ & $\\mathbf{-0.344}$ & 49.2\\% & 0.070",
+      "literal": "0.305",
+      "key": "diss256.streamingllm.free_ci1"
+    },
+    {
+      "context": "StreamingLLM & 0.237 $[0.175, 0.305]$ & 0.584 $[0.495, 0.647]$ & $-0.647$ & $-0.319$ & $\\mathbf{-0.344}$ & 49.2\\% & 0.070",
+      "literal": "0.495",
+      "key": "diss256.streamingllm.readout_ci0"
+    },
+    {
+      "context": "StreamingLLM & 0.237 $[0.175, 0.305]$ & 0.584 $[0.495, 0.647]$ & $-0.647$ & $-0.319$ & $\\mathbf{-0.344}$ & 49.2\\% & 0.070",
+      "literal": "0.647",
+      "key": "diss256.streamingllm.readout_ci1"
+    },
+    {
+      "context": "StreamingLLM & 0.237 $[0.175, 0.305]$ & 0.584 $[0.495, 0.647]$ & $-0.647$ & $-0.319$ & $\\mathbf{-0.344}$ & 49.2\\% & 0.070",
+      "literal": "0.319",
+      "key": "diss256.streamingllm.readout_change"
+    },
+    {
+      "context": "StreamingLLM & 0.237 $[0.175, 0.305]$ & 0.584 $[0.495, 0.647]$ & $-0.647$ & $-0.319$ & $\\mathbf{-0.344}$ & 49.2\\% & 0.070",
+      "literal": "0.344",
+      "key": "diss256.streamingllm.residual"
+    },
+    {
+      "context": "StreamingLLM & 0.237 $[0.175, 0.305]$ & 0.584 $[0.495, 0.647]$ & $-0.647$ & $-0.319$ & $\\mathbf{-0.344}$ & 49.2\\% & 0.070",
+      "literal": "49.2",
+      "key": "readout_share.diss256.streamingllm.pct"
+    },
+    {
+      "context": "StreamingLLM & 0.237 $[0.175, 0.305]$ & 0.584 $[0.495, 0.647]$ & $-0.647$ & $-0.319$ & $\\mathbf{-0.344}$ & 49.2\\% & 0.070",
+      "literal": "0.070",
+      "key": "diss256.streamingllm.trunc"
+    },
+    {
+      "context": "H2O-style$^{\\dagger}$ & 0.247 $[0.180, 0.318]$ & 0.597 $[0.502, 0.667]$ & $-0.637$ & $-0.306$ & $\\mathbf{-0.344}$ & 48.0\\% & 0.105",
+      "literal": "0.180",
+      "key": "h2o256.h2o.free_ci0"
+    },
+    {
+      "context": "H2O-style$^{\\dagger}$ & 0.247 $[0.180, 0.318]$ & 0.597 $[0.502, 0.667]$ & $-0.637$ & $-0.306$ & $\\mathbf{-0.344}$ & 48.0\\% & 0.105",
+      "literal": "0.318",
+      "key": "h2o256.h2o.free_ci1"
+    },
+    {
+      "context": "H2O-style$^{\\dagger}$ & 0.247 $[0.180, 0.318]$ & 0.597 $[0.502, 0.667]$ & $-0.637$ & $-0.306$ & $\\mathbf{-0.344}$ & 48.0\\% & 0.105",
+      "literal": "0.502",
+      "key": "h2o256.h2o.readout_ci0"
+    },
+    {
+      "context": "H2O-style$^{\\dagger}$ & 0.247 $[0.180, 0.318]$ & 0.597 $[0.502, 0.667]$ & $-0.637$ & $-0.306$ & $\\mathbf{-0.344}$ & 48.0\\% & 0.105",
+      "literal": "0.667",
+      "key": "h2o256.h2o.readout_ci1"
+    },
+    {
+      "context": "H2O-style$^{\\dagger}$ & 0.247 $[0.180, 0.318]$ & 0.597 $[0.502, 0.667]$ & $-0.637$ & $-0.306$ & $\\mathbf{-0.344}$ & 48.0\\% & 0.105",
+      "literal": "0.637",
+      "key": "h2o256.h2o.total_change"
+    },
+    {
+      "context": "H2O-style$^{\\dagger}$ & 0.247 $[0.180, 0.318]$ & 0.597 $[0.502, 0.667]$ & $-0.637$ & $-0.306$ & $\\mathbf{-0.344}$ & 48.0\\% & 0.105",
+      "literal": "0.306",
+      "key": "h2o256.h2o.readout_change"
+    },
+    {
+      "context": "H2O-style$^{\\dagger}$ & 0.247 $[0.180, 0.318]$ & 0.597 $[0.502, 0.667]$ & $-0.637$ & $-0.306$ & $\\mathbf{-0.344}$ & 48.0\\% & 0.105",
+      "literal": "48.0",
+      "key": "readout_share.h2o256.h2o.pct"
+    },
+    {
+      "context": "H2O-style$^{\\dagger}$ & 0.247 $[0.180, 0.318]$ & 0.597 $[0.502, 0.667]$ & $-0.637$ & $-0.306$ & $\\mathbf{-0.344}$ & 48.0\\% & 0.105",
+      "literal": "0.105",
+      "key": "h2o256.h2o.trunc"
+    },
+    {
+      "context": "R-KV$^{\\ddagger}$ & 0.520 $[0.435, 0.610]$ & 0.798 $[0.710, 0.850]$ & $-0.365$ & $-0.105$ & $\\mathbf{-0.268}$ & 28.7\\% & 0.135",
+      "literal": "0.520",
+      "key": "rkv256.rkv.free"
+    },
+    {
+      "context": "R-KV$^{\\ddagger}$ & 0.520 $[0.435, 0.610]$ & 0.798 $[0.710, 0.850]$ & $-0.365$ & $-0.105$ & $\\mathbf{-0.268}$ & 28.7\\% & 0.135",
+      "literal": "0.435",
+      "key": "rkv256.rkv.free_ci0"
+    },
+    {
+      "context": "R-KV$^{\\ddagger}$ & 0.520 $[0.435, 0.610]$ & 0.798 $[0.710, 0.850]$ & $-0.365$ & $-0.105$ & $\\mathbf{-0.268}$ & 28.7\\% & 0.135",
+      "literal": "0.610",
+      "key": "rkv256.rkv.free_ci1"
+    },
+    {
+      "context": "R-KV$^{\\ddagger}$ & 0.520 $[0.435, 0.610]$ & 0.798 $[0.710, 0.850]$ & $-0.365$ & $-0.105$ & $\\mathbf{-0.268}$ & 28.7\\% & 0.135",
+      "literal": "0.798",
+      "key": "rkv256.rkv.readout"
+    },
+    {
+      "context": "R-KV$^{\\ddagger}$ & 0.520 $[0.435, 0.610]$ & 0.798 $[0.710, 0.850]$ & $-0.365$ & $-0.105$ & $\\mathbf{-0.268}$ & 28.7\\% & 0.135",
+      "literal": "0.710",
+      "key": "rkv256.rkv.readout_ci0"
+    },
+    {
+      "context": "R-KV$^{\\ddagger}$ & 0.520 $[0.435, 0.610]$ & 0.798 $[0.710, 0.850]$ & $-0.365$ & $-0.105$ & $\\mathbf{-0.268}$ & 28.7\\% & 0.135",
+      "literal": "0.850",
+      "key": "rkv256.rkv.readout_ci1"
+    },
+    {
+      "context": "R-KV$^{\\ddagger}$ & 0.520 $[0.435, 0.610]$ & 0.798 $[0.710, 0.850]$ & $-0.365$ & $-0.105$ & $\\mathbf{-0.268}$ & 28.7\\% & 0.135",
+      "literal": "0.365",
+      "key": "rkv256.rkv.total_change"
+    },
+    {
+      "context": "R-KV$^{\\ddagger}$ & 0.520 $[0.435, 0.610]$ & 0.798 $[0.710, 0.850]$ & $-0.365$ & $-0.105$ & $\\mathbf{-0.268}$ & 28.7\\% & 0.135",
+      "literal": "0.105",
+      "key": "rkv256.rkv.readout_change"
+    },
+    {
+      "context": "R-KV$^{\\ddagger}$ & 0.520 $[0.435, 0.610]$ & 0.798 $[0.710, 0.850]$ & $-0.365$ & $-0.105$ & $\\mathbf{-0.268}$ & 28.7\\% & 0.135",
+      "literal": "28.7",
+      "key": "readout_share.rkv256.rkv.pct"
+    },
+    {
+      "context": "R-KV$^{\\ddagger}$ & 0.520 $[0.435, 0.610]$ & 0.798 $[0.710, 0.850]$ & $-0.365$ & $-0.105$ & $\\mathbf{-0.268}$ & 28.7\\% & 0.135",
+      "literal": "0.135",
+      "key": "rkv256.rkv.trunc"
+    }
+  ]
+}

@@ -20,6 +20,19 @@ test:
 audit:
 	$(PYTHON) scripts/build_paper_numbers.py --out paper_numbers.json
 	$(PYTHON) scripts/audit_paper_numbers.py --strict
+	$(PYTHON) scripts/audit_paper_claims.py --strict
+
+# The link the gates above do NOT cover: they trust results/diag. This re-runs
+# every producing report against the raw rows on the REMOTE and diffs the
+# artifacts field by field. It cannot run locally (no rows here) -- that is why
+# it is documented rather than wired into `check`.
+#   ssh kvcache-gpu 'cd ~/kv-caching && \
+#     export REMOTE_DATA_ROOT=... HF_HOME=... HF_HUB_OFFLINE=1 && \
+#     .venv/bin/python scripts/rederive_artifacts.py \
+#       --runs-root <runs> --out /tmp/rederive.json'
+.PHONY: rederive-help
+rederive-help:
+	@sed -n '/^# The link the gates above/,/^\.PHONY: rederive-help/p' Makefile
 
 # Local/remote parity: commit, source tree hash, and per-file result artifact
 # checksums. The source-tree guard alone was not enough -- the remote sat on an

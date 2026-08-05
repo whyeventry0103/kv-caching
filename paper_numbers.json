@@ -1514,24 +1514,24 @@
     },
     {
       "key": "compute.generations",
-      "value": 7200.0,
-      "display": "7200.000",
+      "value": 10007.0,
+      "display": "10007.000",
       "kind": "primary",
       "source": "results/diag/amendment-k/classb/compute.json#/generations",
       "description": "generations counted in the compute total"
     },
     {
       "key": "compute.gpu_hours",
-      "value": 279.86585819478876,
-      "display": "279.866",
+      "value": 374.9581077171822,
+      "display": "374.958",
       "kind": "primary",
       "source": "results/diag/amendment-k/classb/compute.json#/gpu_hours",
       "description": "summed generation wall-clock under the artifact's stated inclusion rule"
     },
     {
       "key": "compute.gpu_hours.rounded",
-      "value": 280.0,
-      "display": "280.000",
+      "value": 375.0,
+      "display": "375.000",
       "kind": "derived",
       "source": "round(compute.gpu_hours)",
       "description": "GPU-hours, quoted whole in the setup",
