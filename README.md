@@ -116,6 +116,11 @@ Heavy commands refuse without an explicit `--i-understand`; first-time downloads
 
 Working draft. All queued experimental cells have landed, including the scale axis (1.5B/14B), the cross-architecture Llama-8B check, AIME-24, and R-KV in its own published configuration. Total generation: 375 GPU-hours over 10,007 generations. arXiv preprint targeted for 2026.
 
+## License
+
+MIT — see [`LICENSE`](LICENSE). The paper text and figures are the author's;
+the code, configs, and analysis harness are yours to reuse under MIT.
+
 ## Citation
 
 ```bibtex

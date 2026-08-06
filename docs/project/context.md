@@ -990,7 +990,7 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
   last night, total % to queue completion + paper-core status, crash/stuck alerts, GPU free.
   Transport = AUTHENTICATED Gmail SMTP (smtp.gmail.com:587) via creds in
   `~/.kvcache_smtp.json` on the remote (chmod 600, NOT in repo: {host,port,user,password,to};
-  user=m.ali.shah0103@gmail.com, to=same). Direct-to-MX was abandoned: O365 quarantines it
+  user=<personal-gmail>, to=same). Direct-to-MX was abandoned: O365 quarantines it
   (LUMS never received) and Gmail hard-rejects (sender IP has no PTR). The app-password is
   revocable in the Google account. `--dry-run` prints without sending; report logic reuses
   nightly_autorun (load_queue/count_progress). Crontab: watcher `*/10 2-8` + report `10 9`.
