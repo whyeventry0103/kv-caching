@@ -33,3 +33,6 @@ research_landscape.md
 *.fls
 *.fdb_latexmk
 *.synctex.gz
+*.egg-info/
+build/
+dist/
