@@ -5,7 +5,28 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "kvcache"
 version = "0.1.0"
+description = "The trajectory audit: separating readout distortion from trajectory distortion in KV-cache compression for reasoning models."
+readme = "README.md"
 requires-python = ">=3.11"
+# Runtime deps for the LOCAL surface only (configs, analysis, gates). torch,
+# transformers and kvpress are deliberately absent: this machine never loads
+# weights, and the CPU-only test gate is meaningful precisely because they are
+# not installed here. The pinned GPU environment is requirements.txt.
+# sympy is NOT optional despite being imported lazily: canonicalize() falls back
+# to a regex when it is missing and returns a DIFFERENT canonical answer
+# ("(1)/(2)" instead of "1/2"), so grading silently changes with its presence.
+# Every number in this repo was produced with it installed.
+dependencies = ["pyyaml>=6", "sympy>=1.12"]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8",
+  "ruff>=0.11",
+  "black>=25",
+  # make_paper_figures.py imports matplotlib at module level, and the figure
+  # runner is part of `make dryrun`, so the dev gate needs it.
+  "matplotlib>=3.8",
+]
 
 [tool.setuptools.packages.find]
 where = ["src"]

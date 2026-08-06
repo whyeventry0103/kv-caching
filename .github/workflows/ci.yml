@@ -1,0 +1,43 @@
+name: CI
+
+# The repo's own gate, run on every push. These four targets are exactly what
+# `docs/operations/WORKFLOW.md` requires before a sync, so CI failing means the
+# same thing locally and here. No GPU, no weights, no network fetches of models:
+# the whole point of the local surface is that it runs without them.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install (local surface only)
+        run: pip install -e '.[dev]'
+
+      - name: Lint
+        run: make lint
+
+      - name: Tests
+        run: make test
+
+      - name: Dry-run every runner x config
+        run: make dryrun
+
+      - name: Number-provenance gates
+        run: make audit
+
+      - name: Fail if the catalogue is not in sync with the artifacts
+        # `make audit` regenerates paper_numbers.json from results/diag/. If that
+        # rewrite changes the committed file, the checked-in catalogue is stale
+        # and every number gated against it was gated against the wrong thing.
+        run: git diff --exit-code -- paper_numbers.json

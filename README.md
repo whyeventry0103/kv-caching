@@ -6,6 +6,7 @@
 
 **Muhammad Ali Shah** · LUMS
 
+[![CI](https://github.com/whyeventry0103/kv-caching/actions/workflows/ci.yml/badge.svg)](https://github.com/whyeventry0103/kv-caching/actions/workflows/ci.yml)
 ![python](https://img.shields.io/badge/python-3.11-blue)
 ![tests](https://img.shields.io/badge/tests-236%20passing-brightgreen)
 ![status](https://img.shields.io/badge/status-working%20draft-orange)
@@ -64,7 +65,7 @@ This project is run under an unusually strict evidence discipline:
 
 - **Preregistered protocol** with append-only, dated amendments — including a pre-committed confirm/complicate/refute read that came out **COMPLICATE** and is reported as such.
 - **Every artifact re-derives from the raw generation rows.** `scripts/rederive_artifacts.py` replays each producing report against the JSONL on the GPU host and diffs it field by field: **29 of 29 identical**. It found one real defect — a compute figure whose inclusion list had silently drifted nine run directories behind.
-- **Numbers are gated twice.** `make audit` rebuilds the catalogue from the artifacts and fails on any unsourced literal; a second gate pins 79 load-bearing numbers to the *specific quantity* each asserts, so a figure cannot pass by coincidentally matching an unrelated value.
+- **Numbers are gated twice.** `make audit` rebuilds the catalogue from the artifacts and fails on any unsourced literal; a second gate pins 94 load-bearing numbers to the *specific quantity* each asserts, so a figure cannot pass by coincidentally matching an unrelated value.
 - **Two-stage integrity gate** for the R-KV port: retained-set parity vs the authors' code (Jaccard 1.0), then a real-generation smoke — which caught a real bug the synthetic harness could not see.
 - Truncated generations stay in every denominator, scored incorrect. Result rows are never patched — buggy-instrument data is regenerated wholesale.
 - Boundaries are self-reported: the random-beats-recency ordering **reverses on the Llama base**, and the paper says so in its own threats section.
@@ -100,6 +101,12 @@ make test     # pytest, CPU-only, a few seconds
 make dryrun   # validates every runner × config without touching a model
 make audit    # rebuild the number catalogue and gate the paper against it
 ```
+
+That is the whole local setup — verified from an empty virtualenv. It installs
+no deep-learning stack on purpose: this machine never loads weights, which is
+what makes the CPU-only test gate mean something. `requirements.txt` is the
+*pinned GPU environment* for the remote host (torch, transformers, kvpress and
+the CUDA wheels); do not install it locally.
 
 The local machine is for source, configs, docs, and CPU tests **only**; models, datasets, caches, and all experiments run on a remote GPU host. Read [`docs/operations/remoteserver.md`](docs/operations/remoteserver.md) before any setup, synchronization, or launch. The loop is rsync-first ([`docs/operations/WORKFLOW.md`](docs/operations/WORKFLOW.md)): edit and test locally, `make sync` to preview / `make sync-apply` to apply a source-only rsync, run remotely under tmux (`scripts/launch_tmux.sh` — persistent logs, SSH-disconnect-safe), then commit locally.
 
