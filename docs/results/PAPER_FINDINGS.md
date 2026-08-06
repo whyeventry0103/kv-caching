@@ -652,7 +652,7 @@ below the 0.5 degenerate threshold. This is 1 of 2 scale-axis cells
 (Amendment J); m4-q14b-256 (14B) is still running (0/400 all three stages as
 of this read) — do NOT apply the ≥3/4-replicate scope-upgrade sentence
 ("one model family across three scales…") until the 14B cell lands; that
-edit is pre-drafted in RESULTS_PLAYBOOK.md and fires only then.
+edit is pre-drafted in docs/results/RESULTS_PLAYBOOK.md and fires only then.
 In the paper: new threats paragraph "Scale-axis check (subset scale,
 Amendment J, in progress)" added after the Cross-architecture paragraph
 (`kv_readout_vs_trajectory_paper.tex` §threats); Generality paragraph's

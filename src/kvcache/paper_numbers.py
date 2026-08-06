@@ -56,7 +56,8 @@ _BIBLIOGRAPHY_BODY = re.compile(
     r"\\begin\{thebibliography\}.*?\\end\{thebibliography\}", re.DOTALL
 )
 
-# arXiv identifiers outside a bibliography (PAPER_FINDINGS.md cites them inline).
+# arXiv identifiers outside a bibliography (docs/results/PAPER_FINDINGS.md
+# cites them inline).
 _ARXIV_ID = re.compile(r"arXiv:\d{4}\.\d{4,5}(?:v\d+)?", re.IGNORECASE)
 
 # Bare arXiv identifiers in a table column, with no "arXiv:" prefix.
@@ -68,7 +69,8 @@ _BARE_ARXIV_ID = re.compile(r"\b\d{4}\.\d{5}\b")
 _SECTION_REF = re.compile(r"§\s?\d+(?:\.\d+)*[a-z]?")
 _ISO_DATE = re.compile(r"\b\d{4}-\d{2}-\d{2}\b")
 
-# An explicitly marked archival span. PAPER_FINDINGS.md's dated read-in log is a
+# An explicitly marked archival span. The dated read-in log in
+# docs/results/PAPER_FINDINGS.md is a
 # HISTORICAL RECORD: each entry is correct as of its date, and several exist
 # precisely to show a superseded value beside its correction (Amendment H's
 # bracket, the -0.465/-0.466 decimal). Rewriting those to current values would
@@ -254,7 +256,8 @@ def extract_literals(
     cleaned = strip_latex_noise(text) if strip else text
 
     # An arXiv identifier is a name. Stripped for both document kinds: the .tex
-    # keeps them in the bibliography (already blanked) but PAPER_FINDINGS.md
+    # keeps them in the bibliography (already blanked) but
+    # docs/results/PAPER_FINDINGS.md
     # cites them inline, where no LaTeX stripping runs.
     def _blank(match: re.Match[str]) -> str:
         return "".join("\n" if ch == "\n" else " " for ch in match.group(0))
@@ -403,7 +406,7 @@ _GUARDED_SECTION_END = re.compile(r"^#{1,6}\s+(?!4-CURRENT)\S.*$", re.MULTILINE)
 
 
 def guarded_section(text: str) -> str | None:
-    """The current-truth span of PAPER_FINDINGS.md, or None if absent.
+    """The current-truth span of docs/results/PAPER_FINDINGS.md, or None if absent.
 
     Runs from the ``4-CURRENT`` heading to the next heading of any level. The
     span is returned RAW -- archival spans inside it are deliberately not
@@ -428,14 +431,19 @@ def check_guarded_section(text: str, catalogue: list[Entry]) -> list[str]:
     """
     section = guarded_section(text)
     if section is None:
-        return ["PAPER_FINDINGS.md has no 4-CURRENT section (the gate needs one)"]
+        return [
+            "docs/results/PAPER_FINDINGS.md has no 4-CURRENT section "
+            "(the gate needs one)"
+        ]
     problems: list[str] = []
     if "AUDIT:ARCHIVAL" in section:
         problems.append(
             "4-CURRENT contains an AUDIT:ARCHIVAL marker: the current-truth "
             "section may not exempt itself from the gate"
         )
-    literals = extract_literals(section, "PAPER_FINDINGS.md#4-CURRENT", strip=False)
+    literals = extract_literals(
+        section, "docs/results/PAPER_FINDINGS.md#4-CURRENT", strip=False
+    )
     classify(literals, catalogue, allowed_integers=set(range(0, 3000)))
     for lit in literals:
         if lit.classification == "unsourced":

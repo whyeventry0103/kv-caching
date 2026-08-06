@@ -133,7 +133,7 @@ Never paste a command containing unresolved angle-bracket placeholders.
 <LOCAL_PROJECT_ROOT>/
 ├── .git/
 ├── README.md
-├── remoteserver.md
+├── docs/operations/remoteserver.md
 ├── configs/
 ├── scripts/
 ├── src/
@@ -1602,8 +1602,8 @@ the failure mode Lesson 14 exists to prevent. Do not read these entries as drift
 ### 2026-07-27 — `scp-verified-tree-hash` at commit `f0f809e`
 
 **What.** The Amendment K source change (`scripts/report_m4.py`,
-`scripts/harvest_results.py`, `tests/test_report_m4.py`, `PREREGISTRATION.md`,
-`CLAUDE.md`, `context.md`, `.gitignore`) was transferred by `scp` rather than
+`scripts/harvest_results.py`, `tests/test_report_m4.py`, `docs/protocol/PREREGISTRATION.md`,
+`CLAUDE.md`, `docs/project/context.md`, `.gitignore`) was transferred by `scp` rather than
 `make sync-apply`.
 
 **Why.** `make sync-apply` failed six consecutive times with
@@ -1724,7 +1724,7 @@ none of our history.
 
 **`origin` (`whyeventry0103/kv-caching`, public) stays untouched until the
 endgame.** Nothing is pushed there before the anonymization scrub, which still
-has to remove the personal address from `context.md`'s narrative bullets and
+has to remove the personal address from `docs/project/context.md`'s narrative bullets and
 keep `docs/strategy/` out of the artifact. The backup mirror is private
 precisely so that constraint costs us nothing in the meantime.
 

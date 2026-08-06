@@ -137,7 +137,7 @@ synced → `make lint` + `make test` bare → commit (name the unit/decision) �
 | `fig5_twofc` | negative control vs two exemplar cells | SUMMARY | control numbers change (they won't) |
 | `fig6_aime` | AIME @2048 press-independence: separated free-run bars vs identical hatched readout bars, FC dashline | SUMMARY (constants `CAIME`) | AIME cells change (they won't) |
 
-Pending-unit hooks (see RESULTS_PLAYBOOK.md): the Llama and AIME units are
+Pending-unit hooks (see docs/results/RESULTS_PLAYBOOK.md): the Llama and AIME units are
 TEXT-ONLY (no figure changes). If AIME Branch B (>100% regime) ever fires, that
 gets a figure decision of its own — do not improvise it into Fig 1.
 UPDATE 2026-07-18: the AIME read (Branch A) DID earn a threats-local figure —

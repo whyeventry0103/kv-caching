@@ -179,9 +179,9 @@ conclusion ✓. Identity is strong once the figure swap lands.
   teacher forcing; exposure bias; total variation; preregistration.
 - **Anonymization checklist:** repo URL + prereg link `\todo`s → anonymous.4open.science
   mirror; **scrub `scripts/nightly_report.py` (contains a personal email — found in this
-  pass) or exclude ops scripts from the artifact**; exclude `context.md`,
+  pass) or exclude ops scripts from the artifact**; exclude `docs/project/context.md`,
   `publication_strategy.md`, `research_landscape.md`, `notes/`, `COAUTHOR_REVIEW.md`,
-  `BEST_POSSIBLE_PAPER.md`, this file (internal docs); keep PREREGISTRATION.md, configs,
+  `BEST_POSSIBLE_PAPER.md`, this file (internal docs); keep docs/protocol/PREREGISTRATION.md, configs,
   src, scripts (analysis only), figures, tests. For the timestamp claim: the prereg's
   commit-dated history can be shown to chairs on request; the anonymized mirror carries
   the file with its amendment dates inline.

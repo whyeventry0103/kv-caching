@@ -998,8 +998,12 @@ def render_html(blocks: list[tuple[str, Any]]) -> str:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--format", choices=["md", "html", "both"], default="both")
-    parser.add_argument("--out-md", type=Path, default=PROJECT_ROOT / "RESULTS.md")
-    parser.add_argument("--out-html", type=Path, default=PROJECT_ROOT / "RESULTS.html")
+    parser.add_argument(
+        "--out-md", type=Path, default=PROJECT_ROOT / "docs/results/RESULTS.md"
+    )
+    parser.add_argument(
+        "--out-html", type=Path, default=PROJECT_ROOT / "docs/results/RESULTS.html"
+    )
     parser.add_argument(
         "--catalogue", type=Path, default=PROJECT_ROOT / "paper_numbers.json"
     )

@@ -27,7 +27,8 @@ Steps 3-5 are skipped if the harvest produced nothing new, so running it on an
 unfinished unit is free and safe.
 
 It deliberately does NOT edit the .tex. What a result means is a judgement, and
-``docs/INTEGRATION_CHECKLIST.md`` holds the pre-registered reads that make that
+``docs/operations/INTEGRATION_CHECKLIST.md`` holds the pre-registered reads
+that make that
 judgement mechanical. This script gets the numbers in and tells you what moved.
 """
 
@@ -198,7 +199,8 @@ def main() -> int:
         return 0
     rc = gate_and_build()
     print(
-        "\nNEXT: open docs/INTEGRATION_CHECKLIST.md at this unit. It holds the "
+        "\nNEXT: open docs/operations/INTEGRATION_CHECKLIST.md at this unit. "
+        "It holds the "
         "pre-registered read and the wording for each outcome. Do not re-derive "
         "the read."
     )

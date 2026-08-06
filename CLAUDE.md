@@ -25,16 +25,16 @@ survives the cut if they miss it).
 
 **The split that shapes everything:** this machine is local-only — source,
 configs, docs, lint, CPU unit tests. Models, datasets, caches, and every
-experiment run on a remote GPU server. `remoteserver.md` is the authoritative
-ops/safety policy; `docs/WORKFLOW.md` describes the loop (rsync-first,
+experiment run on a remote GPU server. `docs/operations/remoteserver.md` is the authoritative
+ops/safety policy; `docs/operations/WORKFLOW.md` describes the loop (rsync-first,
 "Policy B"). Never attempt generation, downloads, or anything needing loaded
 weights locally; the code guards against it and the guards are intentional.
 
-**Authority order for facts:** the repo's code > `PREREGISTRATION.md`
+**Authority order for facts:** the repo's code > `docs/protocol/PREREGISTRATION.md`
 (scientific protocol — frozen; changes only via dated amendments A–I and
-counting) > `PAPER_FINDINGS.md` (results record + framing rules) >
-`RESULTS_PLAYBOOK.md` (pre-reasoned read-ins for pending results) >
-`context.md` (dated narrative bullets, newest first) > this file. For code,
+counting) > `docs/results/PAPER_FINDINGS.md` (results record + framing rules) >
+`docs/results/RESULTS_PLAYBOOK.md` (pre-reasoned read-ins for pending results) >
+`docs/project/context.md` (dated narrative bullets, newest first) > this file. For code,
 disk is ground truth; the markdown can lag.
 
 **Local gate (verified against the Makefile):**
@@ -76,7 +76,7 @@ JSONL with `--resume` keyed on (benchmark, problem id, seed).
 `nightly_report.py --dry-run` on the remote; (2) `ssh kvcache-gpu 'cd
 ~/kv-caching && .venv/bin/python scripts/harvest_results.py'` — harvest
 decides readiness, never read a partial cell into the paper; (3) open
-`RESULTS_PLAYBOOK.md` at that unit, fill number slots, pick the branch the
+`docs/results/RESULTS_PLAYBOOK.md` at that unit, fill number slots, pick the branch the
 digest dictates, apply the listed edits verbatim; (4) rebuild the PDF
 (pdflatex ×2, check `^!` and Overfull), run gates bare, commit naming the
 unit, `make sync-apply`, copy the harvest `summary.json` to `results/diag/`.
@@ -85,7 +85,7 @@ watcher's preflight hash check fails that night.
 
 **Decisions already made — do not relitigate:** R-KV/AIME drop-dead
 2026-08-01; TV-matched-noise control, logic benchmarks, and Qwen3 deliberately
-not queued (reasons in context.md, 2026-07-05 bullet); Table 2 stays at
+not queued (reasons in docs/project/context.md, 2026-07-05 bullet); Table 2 stays at
 budget 256; abstract stays 256-led. Endgame after the queue drains: venue
 conversion per `docs/strategy/SUBMISSION_STRATEGY.md` §6 +
 `docs/strategy/BEST_POSSIBLE_PAPER.md` Phase 8 (strategy/review docs moved to
@@ -144,12 +144,12 @@ caught a real bug the harness could not see (commit 5c68acd).
   and do the work; a plan that restates the request is waste.
 - IF the plan must outlive the session (multi-day, queue-driven, or handoff),
   THEN the plan goes into a repo file, not chat — this is why
-  `configs/nightly_queue.yaml` and `RESULTS_PLAYBOOK.md` exist. A plan in
+  `configs/nightly_queue.yaml` and `docs/results/RESULTS_PLAYBOOK.md` exist. A plan in
   conversation memory is a plan that dies with the context window.
 - IF a future result will demand a judgment call, THEN pre-reason the
   branches *now*, while context is loaded, and write down which observable
   numbers select which branch (see the Branch A/B/C structure per unit in
-  `RESULTS_PLAYBOOK.md`, including a branch for the outcome you don't expect).
+  `docs/results/RESULTS_PLAYBOOK.md`, including a branch for the outcome you don't expect).
 
 ### 1.3 Ambiguity resolution
 
@@ -192,7 +192,7 @@ that.
 Example of in-scope initiative: while writing the handoff playbook, a check of
 `report_m4` revealed AIME cells would have silently read 0 rows (it lacked a
 `--bench` flag); fixing that was done immediately and called out, because the
-queued jobs depended on it (context.md 2026-07-06).
+queued jobs depended on it (docs/project/context.md 2026-07-06).
 
 ---
 
@@ -210,7 +210,7 @@ queued jobs depended on it (context.md 2026-07-06).
   baseline; reading the paper showed it does not, and the note was corrected
   before it could leak into the paper.
 - IF an external library's API is load-bearing, THEN probe it in isolation
-  and write the probe down (`docs/KVPRESS_API_PROBE.md`) rather than coding
+  and write the probe down (`docs/design/KVPRESS_API_PROBE.md`) rather than coding
   against the remembered API.
 
 ### 2.6 How much exploration before acting
@@ -291,7 +291,7 @@ Mechanisms, in the order they fire:
 - Parallelism that matters for throughput should be *designed and tested*,
   not improvised: the two-GPU queue runs via `nightly_autorun.py` with
   cross-job tail-fill and 24 tests, because an improvised version idled a GPU
-  for hours (the tail-fill bug, context.md 2026-07-04).
+  for hours (the tail-fill bug, docs/project/context.md 2026-07-04).
 
 ### 3.10 Matching conventions versus imposing your own
 
@@ -356,7 +356,7 @@ Mechanisms, in the order they fire:
   recording exactly what is and isn't available, evaluate the fix in an
   *isolated* environment with explicit go/no-go gates, and record gate
   failures as findings rather than pushing through. The kvpress decoding-API
-  blocker produced `docs/KVPRESS_API_PROBE.md` (f49a495), then an isolated
+  blocker produced `docs/design/KVPRESS_API_PROBE.md` (f49a495), then an isolated
   `.venv-next` with a pinned stack (68e48ef), then a written report whose
   status line is "Phase 2 gate failed; Phase 3 GPU smoke not run" (43895e8)
   — the migration proceeded only after the gates passed (56df135).
@@ -385,28 +385,28 @@ Mechanisms, in the order they fire:
 State lives in files, never only in your head. The standing registers:
 
 - `configs/nightly_queue.yaml` — what remains to run (the queue is the plan).
-- `context.md` — dated ★-bullets, newest first: what landed, the exact
+- `docs/project/context.md` — dated ★-bullets, newest first: what landed, the exact
   numbers with CIs, what is in flight with row counts (e.g. "readout-2048
   539/800"), and the next pending action.
-- `PAPER_FINDINGS.md` — dated result subsections, report-exact numbers,
+- `docs/results/PAPER_FINDINGS.md` — dated result subsections, report-exact numbers,
   archived summary paths under `results/diag/`.
-- `PREREGISTRATION.md` — every protocol change as a lettered amendment.
+- `docs/protocol/PREREGISTRATION.md` — every protocol change as a lettered amendment.
 
 - IF a stage completes, THEN checkpoint before starting the next: one line
   each for what is done, what is next, and anything surprising.
 - IF a run/result is read, THEN it gets a dated note *the same session* —
-  the templates at the bottom of `RESULTS_PLAYBOOK.md` are the required
+  the templates at the bottom of `docs/results/RESULTS_PLAYBOOK.md` are the required
   shape (unit, numbers, branch taken and why, sections touched, archive
   path).
 
 ### 5.16 What to checkpoint so work survives a reset
 
-Write checkpoints for a reader with zero context — context.md's own header
+Write checkpoints for a reader with zero context — docs/project/context.md's own header
 states the standard: "an LLM with zero prior context should be able to read
 this and resume exactly where we are."
 
 - IF a session is ending, a stage just completed, or you are about to start
-  anything long or risky, THEN update context.md's top bullet with: exact
+  anything long or risky, THEN update docs/project/context.md's top bullet with: exact
   numbers (with CIs), file paths, commit hashes, in-flight row counts, and
   the literal next command or unit name.
 - IF a handoff is foreseeable, THEN convert judgment into artifacts ahead of
@@ -445,7 +445,7 @@ this and resume exactly where we are."
 - IF answering a conceptual/scientific question, THEN show the reasoning —
   the reasoning is the deliverable.
 - IF writing a status/checkpoint, THEN dense dated bullets with exact
-  numbers, row counts, and next actions (see any context.md ★-bullet for the
+  numbers, row counts, and next actions (see any docs/project/context.md ★-bullet for the
   register).
 - Simple question → direct prose answer, no headers, no tables. Tables only
   for short enumerable facts.
@@ -482,7 +482,7 @@ Hard stops (never without explicit instruction in the current conversation):
 - Weaken any guard: `--i-understand`, download flags,
   `KVCACHE_PERSONAL_FREE_GB`, press-tier promotion, `TODO(human)` pins,
   dry-run defaults. The guard is load-bearing until proven otherwise.
-- Change anything frozen in PREREGISTRATION.md without writing an amendment
+- Change anything frozen in docs/protocol/PREREGISTRATION.md without writing an amendment
   there — a quiet edit to metrics, thresholds, seeds, decoding parameters,
   or pins is protocol violation, not convenience.
 
@@ -506,7 +506,7 @@ A change is done when all of these hold, in order:
    dry-run via the Makefile target (a runner absent from `dryrun` is
    unguarded — add the line or it isn't done).
 4. State files updated if results or protocol moved: PAPER_FINDINGS dated
-   note, context.md top bullet, PREREGISTRATION amendment if anything frozen
+   note, docs/project/context.md top bullet, PREREGISTRATION amendment if anything frozen
    changed, harvest `summary.json` archived to `results/diag/`.
 5. Committed with a message naming the unit/decision and its rationale
    (read `git log` — messages here carry the *why*, including what failed).
@@ -576,7 +576,7 @@ date contained one visual collision that only opening the PNG caught, so
 viewing the rendered artifact is a required step, not a nicety.
 
 **6. Deciding future judgment in advance (autonomy that survives handoff;
-commit 9f5e9d9, RESULTS_PLAYBOOK.md).** With 22 queued jobs set to land
+commit 9f5e9d9, docs/results/RESULTS_PLAYBOOK.md).** With 22 queued jobs set to land
 after the session that understood them ended, the response was to convert
 judgment into artifacts: a harvester that decides readiness (7 pending units
 correctly gated, 2 ready ones harvested in the live test), and a playbook

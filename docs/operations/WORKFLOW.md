@@ -1,7 +1,7 @@
 # Workflow
 
 The authoritative operations and safety policy is
-[`remoteserver.md`](../remoteserver.md). Read it before any remote action.
+[`docs/operations/remoteserver.md`](remoteserver.md). Read it before any remote action.
 
 ## Policy B loop
 

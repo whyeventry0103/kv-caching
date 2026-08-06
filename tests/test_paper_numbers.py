@@ -179,7 +179,8 @@ def test_bibliography_body_is_not_scanned_for_claims():
 
 
 def test_arxiv_ids_are_stripped_outside_latex_too():
-    """PAPER_FINDINGS.md cites them inline, where no LaTeX stripping runs."""
+    """docs/results/PAPER_FINDINGS.md cites them inline, where no LaTeX
+    stripping runs."""
     lits = extract_literals("HOTT (arXiv:2512.12008) reports 0.47", "t", strip=False)
     assert {lit.value for lit in lits} == {0.47}
 
@@ -203,7 +204,7 @@ def test_a_space_breaks_the_scale_suffix():
 
 
 def test_archival_span_is_skipped():
-    """PAPER_FINDINGS.md's dated log shows superseded values beside their
+    """docs/results/PAPER_FINDINGS.md's dated log shows superseded values beside their
     corrections on purpose. The gate stops stale numbers reaching the paper; it
     must not launder the record that documents them."""
     md = (

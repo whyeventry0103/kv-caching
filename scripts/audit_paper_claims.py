@@ -55,9 +55,12 @@ def main() -> int:
         "kv_readout_vs_trajectory_paper.tex": (
             PROJECT_ROOT / "kv_readout_vs_trajectory_paper.tex"
         ).read_text(encoding="utf-8"),
-        "PAPER_FINDINGS.md": (PROJECT_ROOT / "PAPER_FINDINGS.md").read_text(
-            encoding="utf-8"
-        ),
+        "docs/results/PAPER_FINDINGS.md": (
+            PROJECT_ROOT / "docs" / "results" / "PAPER_FINDINGS.md"
+        ).read_text(encoding="utf-8"),
+        # The README is the most-read surface in the repo, so its headline
+        # table is pinned to intent like the paper's own.
+        "README.md": (PROJECT_ROOT / "README.md").read_text(encoding="utf-8"),
     }
 
     claims = json.loads(args.claims.read_text(encoding="utf-8"))["claims"]

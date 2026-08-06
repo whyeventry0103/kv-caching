@@ -11,8 +11,8 @@ nothing is externalized before the reframe lands).
 
 This document is authoritative for *narrative and decisions*. For *code*, the repo is
 ground truth — always re-read files before acting (state moves fast; this file can
-lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
-`remoteserver.md` is authoritative for ops.
+lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protocol;
+`docs/operations/remoteserver.md` is authoritative for ops.
 
 ---
 
@@ -85,7 +85,7 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
   into `configs/nightly_queue.yaml`.
   **(6) Queue state: `nightly_autorun.py --dry-run` on the remote now reports
   "no launchable job".** Nothing is left to run.
-  **(7) Paper.** Sites updated per `docs/INTEGRATION_CHECKLIST.md` §3: §2's
+  **(7) Paper.** Sites updated per `docs/operations/INTEGRATION_CHECKLIST.md` §3: §2's
   "adjacent configuration" hedge replaced by the direct test; §5's
   no->100%-regime paragraph carries the cell with its precision; §5's not-measured
   item moved from "not tested in its own configuration" to "tested and
@@ -97,7 +97,7 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
   convention but were NOT in `REFERENCE_RELATIVE_ARTIFACTS`, so the class-wide
   check was not checking them. Both added; the gate now covers 16 artifacts.
   **NEXT:** no runs pending. Remaining work is all analysis//writing:
-  fig2_bracket density redesign (STILL OPEN, `docs/FIGURES_PLAYBOOK.md` §9);
+  fig2_bracket density redesign (STILL OPEN, `docs/operations/FIGURES_PLAYBOOK.md` §9);
   D.1/D.2/D.3; A.5 playbook audit; Part F for the non-core cells; and the page
   budget (26pp vs ICLR 9pp) which the user is handling.
 
@@ -174,7 +174,7 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
   **(3) `make integrate UNIT=<u>`** — harvest → recatalogue → before/after diff
   of every moved number → gate → figures → PDF. **Refuses a summary without
   `reference_convention`**; stops on a red audit. Does *not* edit the `.tex`.
-  **`docs/INTEGRATION_CHECKLIST.md` writes BOTH 512/1024 branches now** — the
+  **`docs/operations/INTEGRATION_CHECKLIST.md` writes BOTH 512/1024 branches now** — the
   REFUTES branch withdraws §4.1 as a primary contribution and withdraws the
   reframe title outright.
   **(4) Semantic audit: no wrong numbers.** Two systematic passes over all 449
@@ -192,7 +192,7 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
   `github.com/whyeventry0103/kv-caching-backup` (verified `isPrivate: true`),
   carrying full history **and** `results/diag`. Plus a local bundle at
   `~/kvcache-backups/`. **`origin` untouched.** Push to `backup` at every unit
-  boundary. Policy in `remoteserver.md` §36.
+  boundary. Policy in `docs/operations/remoteserver.md` §36.
   **FULL PARITY, and `make parity` keeps it.** Remote was on `3e19f8b` with no
   history and **zero** `results/`; commits transferred by **bundle over scp**
   (not by giving a shared box a private-repo credential), `git reset --mixed`
@@ -343,7 +343,7 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
   conditions, the comparator for every Δ/readout change/reverse endpoint), and
   the five comparator sites that said 0.882 now say 0.885 (abstract,
   contribution bullet, §4.1 opener, Fig 1 caption, Table 2 caption).
-  **(3) PAPER_FINDINGS.md: a CONFLICT with the work order, resolved the repo's
+  **(3) docs/results/PAPER_FINDINGS.md: a CONFLICT with the work order, resolved the repo's
   way.** §8.3 says drive its literals to zero. But §4a–4t is a *dated read-in
   log* and several entries exist precisely to show a wrong value beside its
   correction (§4c is Amendment H's old-vs-new). Flattening it would delete the
@@ -365,7 +365,7 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
   **★★★★★ UNIT 3 (2026-07-27) — the `.tex` is at ZERO unsourced literals.**
   `audit_paper_numbers.py --documents <tex> --strict` exits 0: 738 literals,
   440 sourced, 281 protocol, 17 year. Both-docs unsourced 377 → 174 (the
-  remainder is all `PAPER_FINDINGS.md`, Unit 4's job). PDF rebuilds ×2 clean —
+  remainder is all `docs/results/PAPER_FINDINGS.md`, Unit 4's job). PDF rebuilds ×2 clean —
   0 `^!`, one 1.4pt Overfull at L250, 21 pages.
   **Two more gate false-positive classes found and fixed** (same "audit the
   class" rule): the bibliography body was being scanned, reporting 13 arXiv IDs
@@ -502,7 +502,7 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
   unsourced before). **Audit effect: .tex unsourced 180 → 161, both-docs
   421 → 386; .tex sourced 371 → 433, protocol 232 → 189** (numbers formerly
   waved through the config allowlist now match a real artifact).
-  **(5b) `make sync` RESTORED to rsync (remoteserver.md §35).** The §34 scp
+  **(5b) `make sync` RESTORED to rsync (docs/operations/remoteserver.md §35).** The §34 scp
   deviation is CLOSED. Two causes, only one previously named: contention is
   real but *intermittent* (first apply died at load ~10, a retry moved all 220
   files) — and the actual blocker was that `amendk/` sat inside the hashed
@@ -518,7 +518,7 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
   **(6) NEXT.** A 14-unit work order is in play (Units 1–4 output-path
   hardening; 5–6 statistics + the resolution-collapse reframe; 7–9 claim
   calibration, structure, figures; 10 the TV-matched noise control that
-  `context.md` §1.3 calls MANDATORY and the paper does not contain; 11–12
+  `docs/project/context.md` §1.3 calls MANDATORY and the paper does not contain; 11–12
   budgets 512/1024 + second-tier; 13 the reframe/retitle; 14 endgame).
   Target **ICLR 2027, ~late September** — not the August arXiv path below.
   **Do not arXiv or anonymize before the reframe lands.**
@@ -563,7 +563,7 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
   Recorded PAPER_FINDINGS §4t; §7 status updated; RESULTS_PLAYBOOK unit
   marked fully CONSUMED. Archived results/diag/m4-q14b-256-summary.json.
   **REMAINING WORK: none experimental. Endgame only** — anonymization
-  scrub (personal email in scripts/nightly_report.py; exclude context.md/
+  scrub (personal email in scripts/nightly_report.py; exclude docs/project/context.md/
   docs/strategy/*/complete_setup.md from the public artifact), restore
   "Anonymous Authors" for ICLR's double-blind submission, arXiv upload,
   per `docs/strategy/SUBMISSION_STRATEGY.md` Phase 11. Drop-dead
@@ -582,7 +582,7 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
   "AIME-24 is queued" sentence in the Generality paragraph (AIME was
   already read 2026-07-18, §4r) while in there. m4-q14b-256 (14B) still
   0/400 — the ≥3/4-replicate scope-upgrade sentence ("one model family
-  across three scales…") is withheld until it lands; RESULTS_PLAYBOOK.md
+  across three scales…") is withheld until it lands; docs/results/RESULTS_PLAYBOOK.md
   marks q15b half-consumed, q14b still PENDING. No figure change (subset
   scale, threats-only per FIGURES_PLAYBOOK.md rule — revisit if q14b also
   replicates and the pair earns a small-multiples panel). Archive
@@ -692,7 +692,7 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
   in the figure, not just the caption). Fig 1+4 regenerated DATA-mode on remote,
   Fig 2 local DATA-mode; all viewed. (4) Paper formatting: caption package
   (small font, bold labels, 6pt skip) — builds clean. (5) NEW
-  **docs/FIGURES_PLAYBOOK.md**: the complete figure method for the Opus session
+  **docs/operations/FIGURES_PLAYBOOK.md**: the complete figure method for the Opus session
   (source of truth, .3f display convention, palette+validator, regen commands,
   per-figure anatomy, 9-item failure catalog, settled judgment calls);
   pointer added to RESULTS_PLAYBOOK general rules. Known matplotlib gotcha
@@ -814,7 +814,7 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
   CLAUDE.md §Handoff-operations.** Built today: (1) `scripts/harvest_results.py` —
   ONE command turns finished runs into report artifacts + digest (unit table inside;
   tested live: correctly gated 7 pending units, harvested the 2 ready ADD units);
-  (2) **RESULTS_PLAYBOOK.md** — pre-written BRANCHED paper text + tex anchors +
+  (2) **docs/results/RESULTS_PLAYBOOK.md** — pre-written BRANCHED paper text + tex anchors +
   figure/docs updates for EVERY pending unit (2048 decomp, h2o-2048, replay-h2o,
   rkv-256 incl. outlier branch, llama replication incl. non-replication branch,
   aime incl. >100% branch). (3) CLAUDE.md extended with the operating rules.
@@ -1092,7 +1092,7 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
   16 files, consistent stack/source/config hashes, 51/80 correct, 8/80 truncated,
   no logged errors, and no serialized tensor/cache artifacts. Cell results are in
   §6/§7. **M3 pilot REVIEWED & ACCEPTED by Claude (2026-06-14).** M4 design
-  (`docs/M4_REPLAY_DESIGN.md`) is **REVIEWED & APPROVED by Claude (2026-06-14)** with
+  (`docs/design/M4_REPLAY_DESIGN.md`) is **REVIEWED & APPROVED by Claude (2026-06-14)** with
   rulings (below). **M4.0 CPU implementation REVIEWED & APPROVED by Claude
   (2026-06-14)** — verified alignment, enabled-flag compression scoping (step-counter
   gated via forward_hook early-return), onset off-by-one (correct), self-replay
@@ -1274,7 +1274,7 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
     `mix_lambda`(0.07)·cosine-redundancy; recent window force-kept; no eager needed
     (recomputes Q@K). `build_rkv_press` wraps it in DecodingPress (for the parity
     harness only). **`get_press("rkv")` REFUSES (PARITY-GATED)** so R-KV cannot enter
-    any analysis until verified. Plan + exact parity procedure: `docs/RKV_PORT.md`.
+    any analysis until verified. Plan + exact parity procedure: `docs/design/RKV_PORT.md`.
     **PENDING (needs a free GPU — both busy with FC bank): the parity gate** — set up
     the authors' reference env, run their `r1_kv.py` (record_kept_token_indices) on
     Qwen-7B at two budgets, run our port on the same traces, require retained-set
@@ -1429,7 +1429,7 @@ lag). `PREREGISTRATION.md` is authoritative for scientific protocol;
   (mechanism interventions) → M8 (full pre-registered grid). **Do not skip ahead.**
 - **Uncommitted right now:** the verified RandomPress device fix + random probe config
   + probe tweaks (see §7). Two untracked planning docs (`publication_strategy.md`,
-  `research_landscape.md`) are intentionally never committed. `context.md` is also
+  `research_landscape.md`) are intentionally never committed. `docs/project/context.md` is also
   untracked and maintained as a handoff.
 
 ---
@@ -1689,9 +1689,9 @@ configs/
                 negative_control.yaml, smoke_*.yaml
 docs/  METRICS.md, REMOTE_SETUP.md, KVPRESS_API_PROBE.md, STACK_MIGRATION_M2_5.md,
        M4_REPLAY_DESIGN.md (design draft; no GPU authorization)
-PREREGISTRATION.md  protocol authority (+ dated "Amendment A" with grading/claims/
+docs/protocol/PREREGISTRATION.md  protocol authority (+ dated "Amendment A" with grading/claims/
                     off-policy/MCC/negative-control disciplines).
-remoteserver.md     ops manual authority.
+docs/operations/remoteserver.md     ops manual authority.
 publication_strategy.md, research_landscape.md  UNTRACKED planning docs. publication_
                     strategy.md is partly SUPERSEDED (its §3c/§4d describe the retired
                     KL / self-noise-τ design; PREREGISTRATION wins). Do not commit.
@@ -1824,7 +1824,7 @@ Milestones, in order:
     `</think>`/answer-marker boundary then sampled answer continuation, scored against
     dataset gold with `is_equiv`. Added replay/readout configs, replay audit, sidecar
     validation, duplicate guards, cache-bound/pre-onset stop conditions, and
-    `PREREGISTRATION.md` Amendment B defining the valid accuracy-scale readout
+    `docs/protocol/PREREGISTRATION.md` Amendment B defining the valid accuracy-scale readout
     decomposition. Local gate: ruff/black clean, **86 tests**, **18 dry-runs**, shell
     syntax clean. No sync, model load, GPU, or remote job was performed.
 
@@ -1834,14 +1834,14 @@ Milestones, in order:
 
 - **HEAD:** `0f56df4 Restore compression runner executable mode`.
 - **Uncommitted (tracked) changes:** M3 fixes plus M4.0 across `Makefile`,
-  `PREREGISTRATION.md`, `docs/METRICS.md`, `docs/KVPRESS_API_PROBE.md`,
+  `docs/protocol/PREREGISTRATION.md`, `docs/design/METRICS.md`, `docs/design/KVPRESS_API_PROBE.md`,
   `scripts/{audit_bank,build_bank,launch,probe_decoding,run_replay}.py`,
   `src/kvcache/{generation,replay}.py`,
   `src/kvcache/metrics/tdp.py`, `src/kvcache/presses/__init__.py`, and related tests.
 - **Untracked:** `configs/experiments/probe_decoding_random.yaml` (new random smoke),
   M4 pilot configs, `scripts/audit_replay.py`, `src/kvcache/token_ids.py`,
-  M4 tests, `docs/M4_REPLAY_DESIGN.md`, `publication_strategy.md`,
-  `research_landscape.md` (planning docs — never commit), and this `context.md`.
+  M4 tests, `docs/design/M4_REPLAY_DESIGN.md`, `publication_strategy.md`,
+  `research_landscape.md` (planning docs — never commit), and this `docs/project/context.md`.
 - **Local checks:** ruff clean, black clean, **86 tests pass**, all **18** aggregate
   dry-runs pass.
 - **Banks/reports present (local `results/`):**
@@ -1862,7 +1862,7 @@ Milestones, in order:
   different press/budget cells. It now uses
   `(bench,pid,model,press,budget,seed)` with a regression test. Full local gate is
   ruff/black clean, **68 tests**.
-- **kvpress DecodingPress semantics (verified, see docs/KVPRESS_API_PROBE.md):**
+- **kvpress DecodingPress semantics (verified, see docs/design/KVPRESS_API_PROBE.md):**
   `target_size` = exact KV tokens retained after each prune; compression every
   `compression_interval` decode steps; effective max cache ≈ `target_size +
   compression_interval`. We use `compression_interval=64`, `hidden_states_buffer_size=0`.
@@ -1967,7 +1967,7 @@ ssh kvcache-gpu 'grep "Finished: pilot-compression-v1-r2" \
   /home/sk10741/kv-caching/logs/pilot-compression-v1-r2.log'
 ```
 
-Reporting after remote actions follows `remoteserver.md` §31 (Action / Machine /
+Reporting after remote actions follows `docs/operations/remoteserver.md` §31 (Action / Machine /
 Commit / Sync / Files / Command / GPU / Log / Output / Status / Disk / Errors / Next).
 
 ---

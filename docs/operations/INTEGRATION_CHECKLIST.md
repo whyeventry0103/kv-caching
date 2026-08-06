@@ -15,8 +15,8 @@ into a rationalisation.
 3. Open this file at the unit. Take the branch the numbers select. **Apply the
    wording as written.**
 4. `make lint test dryrun audit parity`, each bare.
-5. Dated note in `PAPER_FINDINGS.md` §4-LOG (never in §4-CURRENT — that is
-   generated), top bullet in `context.md`, commit naming the unit, push to
+5. Dated note in `docs/results/PAPER_FINDINGS.md` §4-LOG (never in §4-CURRENT — that is
+   generated), top bullet in `docs/project/context.md`, commit naming the unit, push to
    `backup`.
 
 **Standing constraints for every entry below.** Truncations stay in every
@@ -104,7 +104,7 @@ Then:
 - **Contribution reorder is withdrawn** — resolution collapse cannot be
   contribution 1.
 - Record the refutation in Amendment L with the date, and in
-  `PAPER_FINDINGS.md` §4-LOG.
+  `docs/results/PAPER_FINDINGS.md` §4-LOG.
 
 **Do not** reinterpret a non-monotone result as "noisy but consistent". The
 prediction had an interval and an ordering; failing either is a refutation.

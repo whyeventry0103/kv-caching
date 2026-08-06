@@ -42,7 +42,7 @@ parity:
 
 # Integrate a finished cell: harvest -> recatalogue -> gate -> figures -> PDF,
 # printing a before/after diff of every number that moved. UNIT=<harvest unit>.
-# It does not edit the .tex: docs/INTEGRATION_CHECKLIST.md holds the
+# It does not edit the .tex: docs/operations/INTEGRATION_CHECKLIST.md holds the
 # pre-registered read that says what the result means.
 integrate:
 	$(PYTHON) scripts/integrate_cell.py --unit $(UNIT)

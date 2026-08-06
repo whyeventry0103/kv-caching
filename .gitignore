@@ -24,3 +24,12 @@ publication_strategy.md
 research_landscape.md
 
 .DS_Store
+
+# LaTeX build artifacts. The .tex and the built .pdf are tracked; the
+# intermediates are not -- they churn on every rebuild and carry no information.
+*.aux
+*.out
+*.toc
+*.fls
+*.fdb_latexmk
+*.synctex.gz

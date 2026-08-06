@@ -8,7 +8,8 @@ save outputs under <runs>/harvest/<unit>/, and print a compact digest of the
 numbers the paper needs. Already-harvested units are skipped (delete the unit's
 harvest dir to force a re-run); incomplete units print their progress.
 
-Morning workflow (see RESULTS_PLAYBOOK.md for what each number means and where
+Morning workflow (see docs/results/RESULTS_PLAYBOOK.md for what each number
+means and where
 it goes in the paper):
 
     ssh kvcache-gpu 'cd ~/kv-caching && .venv/bin/python scripts/harvest_results.py'

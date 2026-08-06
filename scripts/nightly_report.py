@@ -43,7 +43,8 @@ MX = os.environ.get("KVCACHE_REPORT_MX", "")
 # Jobs that constitute the writable paper core (256 decomposition + bracket + Figure 4).
 CORE_JOBS = {"grid-diss256-tok", "reverse-readout-diss256", "replay-diss256"}
 PREV_SNAPSHOT = PROJECT_ROOT / "logs" / "nightly_report_prev.json"
-# Scope decision 2026-07-03 (context.md): R-KV cells + AIME are cut to future work if
+# Scope decision 2026-07-03 (docs/project/context.md): R-KV cells + AIME are
+# cut to future work if
 # not producing rows by this date; the countdown keeps the decision visible.
 DROP_DEAD = datetime(2026, 8, 1)
 DROP_DEAD_LABEL = "R-KV cells + AIME"

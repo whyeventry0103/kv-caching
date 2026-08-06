@@ -121,6 +121,12 @@ PROTOCOL_INTEGERS = {
     10000,
     # Pilot exchangeability check (19/20 vs 20/20), stated as a limitation.
     19,
+    # Repo metadata quoted in README badges and prose: the passing-test count,
+    # the re-derived-artifact count, and the pinned-claim count. These describe
+    # the repository, not a measurement, and they move when the repo moves.
+    236,
+    79,
+    29,
 }
 
 # Protocol constants that are not integers: decoding parameters and the
@@ -137,6 +143,8 @@ PROTOCOL_FLOATS = {
     # share threshold was being credited to a budget-256 accuracy CI bound.
     0.5,
     0.75,
+    # Python version in the README badge -- a dependency pin, not a result.
+    3.11,
 }
 
 
@@ -168,7 +176,12 @@ def main() -> int:
         nargs="+",
         default=[
             PROJECT_ROOT / "kv_readout_vs_trajectory_paper.tex",
-            PROJECT_ROOT / "PAPER_FINDINGS.md",
+            PROJECT_ROOT / "docs" / "results" / "PAPER_FINDINGS.md",
+            # The README is the repo's front door and is hand-written, which is
+            # exactly why it needs the gate: it had drifted to a superseded set
+            # of residuals and a superseded resampling effect while every gated
+            # document was correct. Its result numbers are now checked too.
+            PROJECT_ROOT / "README.md",
         ],
     )
     parser.add_argument("--strict", action="store_true")
@@ -228,7 +241,8 @@ def main() -> int:
             if len(rows) > args.show:
                 print(f"    ... {len(rows) - args.show} more")
 
-    # The 4-CURRENT gate. PAPER_FINDINGS.md's dated log is deliberately exempt
+    # The 4-CURRENT gate. The dated log in docs/results/PAPER_FINDINGS.md is
+    # deliberately exempt
     # from the literal check, which leaves a hole: anything wrapped in an
     # archival marker stops being checked. The current-truth section a new
     # session reads as authoritative must not be able to use that hole, so it is

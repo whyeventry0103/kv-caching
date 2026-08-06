@@ -1,4 +1,4 @@
-"""Capture the run metadata required by remoteserver.md section 21."""
+"""Capture the run metadata required by docs/operations/remoteserver.md section 21."""
 
 from __future__ import annotations
 

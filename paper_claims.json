@@ -135,7 +135,7 @@
       "context": "the bank is 0.882 over 2000 rows",
       "literal": "0.882",
       "key": "diss256.fc_bank",
-      "document": "PAPER_FINDINGS.md"
+      "document": "docs/results/PAPER_FINDINGS.md"
     },
     {
       "context": "our certified port reaches $1.028\\times$ full-cache accuracy: $0.308$ against $0.300$",
@@ -396,6 +396,96 @@
       "context": "R-KV$^{\\ddagger}$ & 0.520 $[0.435, 0.610]$ & 0.798 $[0.710, 0.850]$ & $-0.365$ & $-0.105$ & $\\mathbf{-0.268}$ & 28.7\\% & 0.135",
       "literal": "0.135",
       "key": "rkv256.rkv.trunc"
+    },
+    {
+      "context": "| Random | 0.422 | 0.765 | **−0.337** | [−0.337, −0.282] |",
+      "literal": "0.422",
+      "key": "diss256.random.free",
+      "document": "README.md"
+    },
+    {
+      "context": "| Random | 0.422 | 0.765 | **−0.337** | [−0.337, −0.282] |",
+      "literal": "0.765",
+      "key": "diss256.random.readout",
+      "document": "README.md"
+    },
+    {
+      "context": "| Random | 0.422 | 0.765 | **−0.337** | [−0.337, −0.282] |",
+      "literal": "0.337",
+      "key": "diss256.random.residual",
+      "document": "README.md"
+    },
+    {
+      "context": "| Random | 0.422 | 0.765 | **−0.337** | [−0.337, −0.282] |",
+      "literal": "0.282",
+      "key": "diss256.random.bracket1",
+      "document": "README.md"
+    },
+    {
+      "context": "| StreamingLLM | 0.237 | 0.584 | **−0.344** | [−0.470, −0.344] |",
+      "literal": "0.237",
+      "key": "diss256.streamingllm.free",
+      "document": "README.md"
+    },
+    {
+      "context": "| StreamingLLM | 0.237 | 0.584 | **−0.344** | [−0.470, −0.344] |",
+      "literal": "0.584",
+      "key": "diss256.streamingllm.readout",
+      "document": "README.md"
+    },
+    {
+      "context": "| StreamingLLM | 0.237 | 0.584 | **−0.344** | [−0.470, −0.344] |",
+      "literal": "0.470",
+      "key": "diss256.streamingllm.bracket0",
+      "document": "README.md"
+    },
+    {
+      "context": "| H2O-style | 0.247 | 0.597 | **−0.344** | [−0.478, −0.344] |",
+      "literal": "0.247",
+      "key": "h2o256.h2o.free",
+      "document": "README.md"
+    },
+    {
+      "context": "| H2O-style | 0.247 | 0.597 | **−0.344** | [−0.478, −0.344] |",
+      "literal": "0.597",
+      "key": "h2o256.h2o.readout",
+      "document": "README.md"
+    },
+    {
+      "context": "| H2O-style | 0.247 | 0.597 | **−0.344** | [−0.478, −0.344] |",
+      "literal": "0.478",
+      "key": "h2o256.h2o.bracket0",
+      "document": "README.md"
+    },
+    {
+      "context": "| R-KV (certified port) | 0.520 | 0.798 | **−0.268** | [−0.268, −0.251] |",
+      "literal": "0.520",
+      "key": "rkv256.rkv.free",
+      "document": "README.md"
+    },
+    {
+      "context": "| R-KV (certified port) | 0.520 | 0.798 | **−0.268** | [−0.268, −0.251] |",
+      "literal": "0.798",
+      "key": "rkv256.rkv.readout",
+      "document": "README.md"
+    },
+    {
+      "context": "| R-KV (certified port) | 0.520 | 0.798 | **−0.268** | [−0.268, −0.251] |",
+      "literal": "0.268",
+      "key": "rkv256.rkv.residual",
+      "document": "README.md"
+    },
+    {
+      "context": "| R-KV (certified port) | 0.520 | 0.798 | **−0.268** | [−0.268, −0.251] |",
+      "literal": "0.251",
+      "key": "rkv256.rkv.bracket1",
+      "document": "README.md"
+    },
+    {
+      "context": "Matched full-cache reference **0.885**",
+      "literal": "0.885",
+      "key": "diss256.random.fc_cell",
+      "document": "README.md"
     }
   ]
 }

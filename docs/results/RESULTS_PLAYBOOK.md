@@ -1,4 +1,4 @@
-# RESULTS_PLAYBOOK.md — pre-written read-ins for every pending run
+# docs/results/RESULTS_PLAYBOOK.md — pre-written read-ins for every pending run
 
 Written 2026-07-06 (Fable handoff). For each pending harvest unit: the digest to
 expect, pre-drafted paper text with `{SLOT}` placeholders, the decision branches with
@@ -13,13 +13,13 @@ General rules for every unit:
   (copy it to `results/diag/`). Round to 3 decimals in text, keep CI brackets as-is.
 - After tex edits: rebuild PDF ×2, check `^!`/Overfull, run gates bare, commit with a
   message naming the unit, `make sync-apply`.
-- Update `PAPER_FINDINGS.md` (new dated subsection) and `context.md` (top bullet)
+- Update `docs/results/PAPER_FINDINGS.md` (new dated subsection) and `docs/project/context.md` (top bullet)
   every time — templates at the bottom.
 - Figure regen (when a unit says so): edit constants in
   `scripts/make_paper_figures.py`, sync, regenerate on remote with the DATA args used
-  in context.md 2026-07-06 bullets, scp back, **view the PNGs**, rebuild PDF.
+  in docs/project/context.md 2026-07-06 bullets, scp back, **view the PNGs**, rebuild PDF.
   **The complete figure method (palette validation, display convention, exact regen
-  commands, per-figure anatomy, failure catalog) is `docs/FIGURES_PLAYBOOK.md` —
+  commands, per-figure anatomy, failure catalog) is `docs/operations/FIGURES_PLAYBOOK.md` —
   read it before touching any figure.**
 
 ---
@@ -93,7 +93,7 @@ writing anything.
 R-KV self-check abort on new dims = STOP (instrument), not a result.
 Figures: NO figure changes for these units (subset scale, threats-only) unless
 ≥3/4 replicate AND the scale story earns a small multiples panel — decide then,
-per docs/FIGURES_PLAYBOOK.md; never improvise into Fig 1/2.
+per docs/operations/FIGURES_PLAYBOOK.md; never improvise into Fig 1/2.
 
 
 # ═══ CONSUMED UNITS — record only; branches taken are marked; do not redo ═══
@@ -269,7 +269,7 @@ Branch taken: {A/B/C} because {one line}. In the paper: {sections touched}.
 Archived: results/diag/{file}.json
 ```
 
-context.md top bullet:
+docs/project/context.md top bullet:
 ```
 **★ {UNIT} read ({DATE}):** {headline numbers}. Branch {X}. Paper: {sections}.
 Figures {regenerated|unchanged}. Next pending: {name of next unit}.

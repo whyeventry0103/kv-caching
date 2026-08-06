@@ -28,7 +28,7 @@ figures embedded; sweep clean.
 
 ---
 
-## Phase 0 — The research journey (reconstructed from context.md, PREREGISTRATION.md, docs/)
+## Phase 0 — The research journey (reconstructed from docs/project/context.md, docs/protocol/PREREGISTRATION.md, docs/)
 
 1. **Origin (Jun 10–13):** thesis-selection memo (`research_landscape.md`) picks
    KV-compression-for-reasoning over domain generalization, targeting the live
@@ -119,8 +119,8 @@ added `--print-windows` to `make_paper_figures.py` (runs on the remote profiles 
 | TV windows 0/0.0018/0.0884; AUC 0.086/0.083 | 800 profiles; now reproducible via `--print-windows` | High | curve-window vs full-horizon mean — caption handles |
 | ADD table + channels | report_add on grid vs FC bank | High | n=4 asymmetry — disclosed in Def. 5 |
 | Two-FC null (0.068/0.976/0%) | `report_two_fc_control.py` output, Amendment G | High | — |
-| R-KV parity Jaccard 1.0 | `docs/RKV_PORT.md`, parity artifacts, gated registry | High | smoke still pending — paper says so |
-| Eager/sdpa exchangeability 19/20 vs 20/20 | pilot check (context.md §, Amendment E) | Medium | n=20 only; fine for a threat-section control |
+| R-KV parity Jaccard 1.0 | `docs/design/RKV_PORT.md`, parity artifacts, gated registry | High | smoke still pending — paper says so |
+| Eager/sdpa exchangeability 19/20 vs 20/20 | pilot check (docs/project/context.md §, Amendment E) | Medium | n=20 only; fine for a threat-section control |
 
 No claim in the manuscript lacks repository evidence. One claim direction reversed by
 evidence during this review (bracket) — fixed at the source and disclosed via Amendment H.
@@ -260,13 +260,13 @@ Done: pinned versions; one-command figures; tests; prereg with amendments; scoop
 Before public: (a) fill bib author lists; (b) anonymize repo for submission (strategy
 §1b note); (c) top-level README section "Reproducing the paper" mapping each
 figure/table → command (mostly exists piecemeal; consolidate); (d) prune `.DS_Store`,
-add to .gitignore; (e) decide whether `context.md`/strategy docs ship in the public
+add to .gitignore; (e) decide whether `docs/project/context.md`/strategy docs ship in the public
 artifact (recommend NO — internal; keep prereg, configs, code, figures).
 
 ## Phase 13 — Changes applied this session (see git log for diffs)
 
 - Bracket bug: `decomposition.py`, `report_m4.py`, 2 test files, Amendment H,
-  PAPER_FINDINGS §4c, context.md, paper numbers (+ exact −0.466 reconciliation).
+  PAPER_FINDINGS §4c, docs/project/context.md, paper numbers (+ exact −0.466 reconciliation).
 - Paper: abstract rewrite; figure embedding + self-contained captions; ADD-additivity
   wording; per-cell counts; prereg-deviation disclosure; a-fortiori TV framing;
   related-work breadth (KIVI, Pitfalls, Barriers, physics, VaSE); bibliography repairs;

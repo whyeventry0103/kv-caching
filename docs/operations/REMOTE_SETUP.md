@@ -1,7 +1,7 @@
 # Remote Setup
 
 First fill every `TODO(human)` in `configs/remote.yaml` and the matching Project
-Configuration block in `remoteserver.md`. Do not infer infrastructure values.
+Configuration block in `docs/operations/remoteserver.md`. Do not infer infrastructure values.
 
 This is a shared server. `df -h` reports filesystem-wide free space and does not
 establish the user's personal quota. The user has confirmed at least 70 GB of

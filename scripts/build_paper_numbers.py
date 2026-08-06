@@ -978,7 +978,8 @@ def build_catalogue() -> list[Entry]:
     # These are not ours to regenerate, so "sourced" means something different:
     # a citation key plus a locator precise enough that a reviewer can check the
     # transcription without reading the whole paper. Where the repo's verified
-    # audit (PAPER_FINDINGS.md, "verified against the papers 2026-07") records a
+    # audit (docs/results/PAPER_FINDINGS.md, "verified against the papers
+    # 2026-07") records a
     # table, the table travels with the entry. Where it does not, the locator is
     # UNVERIFIED and main() prints it -- an unverified locator is a number we
     # believe but cannot point at, which is exactly the state worth surfacing

@@ -16,7 +16,8 @@ DEFERRED = {"kivi2", "triattention"}
 EAGER_ATTENTION = {"h2o"}
 
 # R-KV promotion gate (PREREGISTRATION Amendment E): the port is parity-verified
-# (retained-set Jaccard 1.0 vs the authors' code, docs/RKV_PORT.md); the remaining
+# (retained-set Jaccard 1.0 vs the authors' code, docs/design/RKV_PORT.md);
+# the remaining
 # gate is the REAL-GENERATION smoke. scripts/rkv_smoke.py writes this marker ONLY
 # when every smoke check passes, which mechanically promotes rkv to executable --
 # so the nightly queue can chain smoke -> rkv cells without a human in the loop.

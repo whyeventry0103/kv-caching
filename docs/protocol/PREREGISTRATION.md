@@ -818,7 +818,7 @@ rather than resolved by quietly dropping the entry.
 ### M.1 TV-matched full-cache noise control (`noise_control`)
 
 **Status: instrument gate built and tested; injection engine NOT built; run NOT
-launched.** `context.md` §1.3 designates this control mandatory, and the paper
+launched.** `docs/project/context.md` §1.3 designates this control mandatory, and the paper
 does not currently contain it. That is stated as a limitation in §6 rather than
 left implicit.
 
@@ -1155,7 +1155,7 @@ and not where it certifies — is measured and stands. **The graded, monotone-in
 budget reading of it does not.**
 
 **Consequences, applied.** Per the branch written before the data landed
-(`docs/INTEGRATION_CHECKLIST.md` §1, Branch B): §4.1 is demoted from a primary
+(`docs/operations/INTEGRATION_CHECKLIST.md` §1, Branch B): §4.1 is demoted from a primary
 contribution and retitled to state the endpoints without the graded claim; the
 proposed reframe title is withdrawn, since both candidates were built on the
 graded reading; the contribution reorder that placed resolution collapse first is
@@ -1284,7 +1284,7 @@ not support; sampling remains $T=0.6$, top-$p$ 0.95. It therefore measures how
 much of the baseline gap the cap alone accounts for, and any residual gap is not
 attributable to the cap.
 
-**Consequences, applied per `docs/INTEGRATION_CHECKLIST.md` §2 (EXPLAINED).**
+**Consequences, applied per `docs/operations/INTEGRATION_CHECKLIST.md` §2 (EXPLAINED).**
 §2's parenthetical no longer asserts a decode-length explanation; it reports the
 measurement. §5's "we do not reproduce HOTT's baseline" item is removed from the
 not-measured list, because it is now measured; what remains untested there is

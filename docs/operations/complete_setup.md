@@ -50,7 +50,7 @@ $PROJECT/
 │   ├── harvest_results.py  # readiness-gated result harvester (§11)
 │   ├── sync_source.sh      # Policy-B rsync (§5)
 │   ├── launch_tmux.sh / launch.sh / setup_remote.sh / check_remote.sh
-│   └── make_paper_figures.py  (figure method: docs/FIGURES_PLAYBOOK.md)
+│   └── make_paper_figures.py  (figure method: docs/operations/FIGURES_PLAYBOOK.md)
 ├── configs/
 │   ├── models.yaml, benchmarks.yaml, sampling.yaml   # PINNED revisions (§7)
 │   ├── experiments/*.yaml  # one config per run, named {stage}_{bench}_{variant}
@@ -60,8 +60,8 @@ $PROJECT/
 │   └── strategy/           # frozen one-off review/strategy deliverables (out of the release)
 ├── results/diag/           # gitignored archive of harvested summary JSONs
 ├── figures/                # committed rendered figures (pdf+png pairs)
-├── PREREGISTRATION.md, PAPER_FINDINGS.md, RESULTS_PLAYBOOK.md, context.md  (§12)
-└── remoteserver.md         # ops/safety policy for YOUR server (authoritative)
+├── docs/protocol/PREREGISTRATION.md, docs/results/PAPER_FINDINGS.md, docs/results/RESULTS_PLAYBOOK.md, docs/project/context.md  (§12)
+└── docs/operations/remoteserver.md         # ops/safety policy for YOUR server (authoritative)
 ```
 
 Rules that keep this healthy:
@@ -97,7 +97,7 @@ Rules that keep this healthy:
    (`curl https://huggingface.co/api/models/<org>/<model>` → `.sha`), record it
    with a dated comment, and re-derive it once before first use (two fetches,
    identical answer). A pin is a verified fact, not a convenience.
-6. Write `remoteserver.md`: who shares the box, disk etiquette, GPU count, the
+6. Write `docs/operations/remoteserver.md`: who shares the box, disk etiquette, GPU count, the
    personal-quota env var (§7), allowed hours, contact for conflicts.
 
 ## 3. Local development loop
@@ -176,7 +176,7 @@ make sync-apply   # the real rsync
   prefer additive changes (new flag/config/marker) over mutations — if you
   record per-row source hashes, gratuitous diffs are a provenance cost.
 - `results/diag/*.json` (archived summaries) stay untracked; the tracked
-  paper-trail is the dated notes in `PAPER_FINDINGS.md` quoting them.
+  paper-trail is the dated notes in `docs/results/PAPER_FINDINGS.md` quoting them.
 
 ## 7. Remote safety guards (each one earned its existence)
 
@@ -283,12 +283,12 @@ force a branch the numbers don't pick.
 
 | File | Role | Mutation rule |
 |---|---|---|
-| `PREREGISTRATION.md` | frozen protocol: metrics, thresholds, seeds, pins, pre-committed outcome criteria | append-only dated amendments (A, B, C, ...); a quiet edit is a protocol violation |
-| `PAPER_FINDINGS.md` | dated result records with report-exact numbers + framing/terminology discipline (the "never say X" list) + archive paths | new dated subsection per read, same session as the read |
-| `RESULTS_PLAYBOOK.md` | for every PENDING result: expected shape, pre-drafted paper text with `{SLOT}`s, decision branches incl. the unwanted outcomes, STOP rules separating instrument bugs from findings | written BEFORE results land, while context is loaded |
-| `context.md` | dated ★-bullets, newest first: exact numbers, row counts, commits, THE literal next action | top bullet updated every session end / stage completion |
+| `docs/protocol/PREREGISTRATION.md` | frozen protocol: metrics, thresholds, seeds, pins, pre-committed outcome criteria | append-only dated amendments (A, B, C, ...); a quiet edit is a protocol violation |
+| `docs/results/PAPER_FINDINGS.md` | dated result records with report-exact numbers + framing/terminology discipline (the "never say X" list) + archive paths | new dated subsection per read, same session as the read |
+| `docs/results/RESULTS_PLAYBOOK.md` | for every PENDING result: expected shape, pre-drafted paper text with `{SLOT}`s, decision branches incl. the unwanted outcomes, STOP rules separating instrument bugs from findings | written BEFORE results land, while context is loaded |
+| `docs/project/context.md` | dated ★-bullets, newest first: exact numbers, row counts, commits, THE literal next action | top bullet updated every session end / stage completion |
 | `CLAUDE.md` | operating spec for assistant sessions: ground truth, IF-THEN working rules, worked examples w/ commit hashes | evolves; conflicts resolve user > CLAUDE.md > instinct |
-| `remoteserver.md`, `docs/WORKFLOW.md`, `docs/FIGURES_PLAYBOOK.md` | ops policy, the loop, the figure method | as needed |
+| `docs/operations/remoteserver.md`, `docs/operations/WORKFLOW.md`, `docs/operations/FIGURES_PLAYBOOK.md` | ops policy, the loop, the figure method | as needed |
 
 Two disciplines make this system actually work:
 - **Pre-reason judgment while you have context**: when a future result will
@@ -323,17 +323,17 @@ Two disciplines make this system actually work:
 [ ] layout + Makefile + pyproject copied & renamed; git init; first commit
 [ ] venv local (dev tools) — heavy deps lazily imported, remote-only
 [ ] ssh alias + key; sync_source.sh env vars renamed; make sync (dry) clean
-[ ] remoteserver.md written; personal-quota env var chosen & guarded
+[ ] docs/operations/remoteserver.md written; personal-quota env var chosen & guarded
 [ ] setup_remote.sh run; remote venv pinned; runs root on big disk
 [ ] pins: models/datasets/packages (TODO(human) sentinels wired to refusals)
 [ ] first runner w/ full contract (--config/--dry-run/--resume/--seeds/guards)
 [ ] make dryrun line added; schema builders + row tests
 [ ] make smoke end-to-end on remote (tmux, log, resume verified by kill+relaunch)
-[ ] PREREGISTRATION.md frozen BEFORE the first result-bearing run
+[ ] docs/protocol/PREREGISTRATION.md frozen BEFORE the first result-bearing run
 [ ] nightly_queue.yaml + autorun + report ported; cron installed; one
     supervised night watched end-to-end before trusting it
 [ ] harvest_results.py Units for the first cells; RESULTS_PLAYBOOK entries
-    with branches + STOP rules; context.md started
+    with branches + STOP rules; docs/project/context.md started
 [ ] CLAUDE.md operating spec seeded from the previous project's
 ```
 
@@ -351,7 +351,7 @@ Two disciplines make this system actually work:
    + a decode↔encode round-trip check; all prior pilot data invalidated, not
    patched.
 6. Every figure batch shipped one defect only eyes caught → viewing rendered
-   artifacts is a required step (full catalog: docs/FIGURES_PLAYBOOK.md).
+   artifacts is a required step (full catalog: docs/operations/FIGURES_PLAYBOOK.md).
 7. A stale claim orbit: a new result made "order of magnitude / 0.56–0.75"
    false in four places → when a number lands, grep the docs for every claim
    near its topic.
