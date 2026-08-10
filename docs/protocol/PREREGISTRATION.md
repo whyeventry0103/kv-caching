@@ -1399,3 +1399,272 @@ mismatch and is recorded as an operational error, not a protocol one.
 test; §5's no->100%-regime paragraph reports the cell with its precision; §5's
 not-measured item changes from "not tested in its own configuration" to "tested
 and under-powered". `tab:audit` is unchanged — what R-KV claims is unchanged.
+
+---
+
+## Amendment P (2026-08-10): Meeting #2 instrumentation — pre-registered reads
+
+Five reads, all written before their computations run. Convention 2 (fixed by the
+supervisor at Meeting #2) is binding for every new quantity below:
+
+```
+Delta_tot       = Acc_free - Acc_fc
+readout_error   = Acc_ro   - Acc_fc          (measured)
+residual_fwd    = Delta_tot - readout_error  = Acc_free - Acc_ro
+reverse_readout = Acc_free - Acc_rev
+residual_rev    = Delta_tot - reverse_readout = Acc_rev - Acc_fc
+bracket         = [min(residual_fwd, residual_rev), max(residual_fwd, residual_rev)]
+```
+
+**Naming note, recorded rather than acted on.** This repo has never used
+Convention 1: there is no `compression_error` anywhere, and no `trajectory_error`
+computed as `Acc_free - Acc_rev` (verified by search over all tracked files). The
+existing artifact keys are the repo's own names and map one-to-one onto
+Convention 2: `readout_change` = `readout_error`, `unexplained_residual` =
+`residual_fwd`, `reverse_readout_change` = `residual_rev`, `residual_bracket` =
+`bracket`. Renaming the stored keys would change every artifact, invalidate the
+29/29 re-derivation baseline and every `paper_numbers.json` source pointer, for
+zero semantic gain. **New** artifacts use Convention 2 names; existing keys keep
+theirs, with the mapping recorded here and in the docs.
+
+### P.1 The additivity (interaction) test
+
+`readout_error` and `residual_rev` are measured independently of each other and
+of `Delta_tot`, so their sum against `Delta_tot` is a real test, not an identity.
+
+**The population rule, which is the whole difficulty.** Amendment K fixed each
+term's reference to that term's own population: `readout_error` is measured on
+the readout-defined conditions, `residual_rev` on the reverse-defined ones, and
+`Delta_tot` on all 400. Those are three different denominators. Summing them and
+calling the shortfall an interaction conflates a real interaction with a
+population mismatch — the exact defect class Amendment K exists for.
+
+**Therefore the primary estimand is computed on the COMMON population**: the
+conditions where the free-run row, the readout row, the reverse-readout row and
+the full-cache reference are all defined. All four accuracies are recomputed
+there; the interaction is
+
+```
+interaction = Delta_tot - (readout_error + residual_rev)
+            = Acc_free - Acc_ro - Acc_rev + Acc_fc      (on the common set)
+```
+
+Secondary, reported alongside for disclosure: the same quantity under each
+term's own Amendment-K population (what the stored artifacts give directly).
+
+**Uncertainty.** Problem-clustered bootstrap, resampling problems jointly across
+all four protocols (possible because they share the same problem set), 2000
+resamples, seed 0, percentile interval — the repo's standing convention,
+unchanged.
+
+**Pre-registered branches.** Only the SIGN is claimed, and only where the CI
+excludes zero.
+
+- **SPLIT CONFIRMED** — the interaction is negative for Random and R-KV and
+  positive for StreamingLLM and H2O-style, with all four CIs excluding zero.
+  Then a third structurally unrelated quantity recovers the
+  recoverable-vs-concentrated partition, and it is reported as convergent
+  evidence with the other two.
+- **PARTIAL** — the sign pattern holds but not every CI excludes zero. Report
+  per cell which signs are supported; the partition claim is weakened to the
+  cells that carry it.
+- **NO STRUCTURE** — most CIs include zero. Then additivity is not detectably
+  violated at this sample size, the convergent-evidence claim is **withdrawn**,
+  and that is the reported result. This is a real outcome, not a failure to
+  measure.
+- **CONTRADICTS** — signs exclude zero but do not follow the predicted
+  partition. Reported plainly, and the two prior derivations of the partition
+  are re-examined rather than this one being discarded.
+
+### P.2 Per-step profile extensions (Task 1)
+
+Computed from the 1200 already-stored profiles; no new generation. Per policy
+rather than pooled, over the full horizon (the stored profiles already contain
+it; only the rendered figure truncates at +/-400):
+
+- **running integral** of per-step TV, which distinguishes plateau (recovery)
+  from continued climb (compounding); per-step TV is memoryless and cannot.
+- **eviction-event alignment** — whether spikes coincide with the 64-step prune
+  interval and whether they partially decay between prunes.
+- **profile-shape classification** — monotone-drift vs spike-and-recover, per
+  trace, with the per-policy proportions reported.
+
+**Read.** Descriptive only. These are TV-scale quantities: per Definition 6 they
+may not license an accuracy-scale claim by adjacency. Any connection to accuracy
+must go through P.3's cross-cell prediction or a matched-magnitude control.
+
+**Confound, stated in advance.** Budget is fixed while context grows, so the
+realised compression ratio worsens monotonically within a trace. A rising
+profile is therefore consistent with a compression-ratio curve as well as a
+horizon curve, and **no mechanistic reading is licensed until the ratio-matched
+control (M.3) has run.** The shape statistics are reported before M.3; their
+interpretation is not.
+
+**Property to preserve and state.** These profiles are teacher-forced with the
+trace held fixed, so they isolate cache-state divergence with no feedback
+through sampled tokens. Free-running adds a second divergence source, making
+the teacher-forced profile an a fortiori lower bound on free-running divergence.
+
+### P.3 AUC-TV versus the residual (Task 3)
+
+A cross-scale prediction: a TV-scale quantity predicting an accuracy-scale one.
+Legitimate as a prediction that can fail; never as an assertion that divergence
+explains accuracy.
+
+- **Primary statistic: Spearman rank correlation** between per-cell AUC-TV and
+  the per-cell residual. "Proportional" is a strictly stronger claim than
+  "correlated"; linearity through the origin is tested only after, and a rank
+  correlation is never described as proportionality.
+- **Reported pooled AND within-budget.** AUC-TV and the residual both scale with
+  trace length and budget, so a pooled cross-cell correlation may be a budget
+  effect wearing a mechanism's clothes. If it holds only pooled, it is reported
+  as a budget effect.
+- **Problem-clustered bootstrap on the correlation**, 2000 resamples, seed 0.
+- **n is stated with every coefficient.** The current 3-point version is not a
+  correlation and is not reported as one.
+
+**Pre-registered branches.**
+
+- **PREDICTS** — Spearman rho > 0 in magnitude-consistent direction with a CI
+  excluding zero, pooled AND within at least one budget.
+- **BUDGET EFFECT ONLY** — pooled CI excludes zero, every within-budget CI
+  includes it. Reported as a budget effect, not a divergence-to-accuracy link.
+- **REFUTED** — CI includes zero pooled and within-budget. **This is a
+  substantive finding and is reported as one:** trace-divergence *magnitude*
+  would then not be what drives accuracy loss, which is more surprising and more
+  useful than the positive result. The mechanism section would be rewritten to
+  say that divergence localises *when* damage begins without predicting *how
+  much*.
+
+**Prior caution.** At budget 256 AUC-TV spans 0.073-0.086 across three policies
+(a 17% spread, no intervals) while residuals span 0.268-0.344. If AUC-TV barely
+varies where the residual does, any pooled correlation is carried by the budget
+axis. This is expected and is why within-budget is pre-committed.
+
+### P.4 Extended per-step measures (Task 4)
+
+The stored profiles retain only the TV scalar per step (`schema_version:
+tv-profile-v1`, fields `estimate/lower/upper` plus `reference_token_ids`) — no
+distributions — so JSD, top-1 agreement and rank displacement require a replay
+re-run. Verified by inspection, not assumed.
+
+Measures, all on the **softmax next-token distribution only**. Raw logits are
+excluded: uncalibrated across positions, arbitrary scale, and a temperature
+difference alone would make identical policies look different. Latent-state
+divergence is out of scope.
+
+- **TV** — retained for continuity with the published result.
+- **JSD** — bounded and symmetric, and unlike KL does not diverge exactly when
+  the compressed model commits confidently to a token the full model gave
+  near-zero mass. If KL is computed at all, both directions are computed and
+  both reported.
+- **top-1 agreement** — did the argmax change.
+- **rank displacement** — where the full-cache argmax lands under compression.
+
+**Read.** Whether JSD or top-1 localises onset earlier or more sharply than TV.
+Descriptive; the same Definition 6 constraint applies.
+
+### P.5 The restoration test (Task 2)
+
+At a fixed step in a compressed teacher-forced replay, re-insert the most
+recently evicted K/V entries and measure whether per-step divergence against the
+full cache falls.
+
+**Instrument gate, before any divergence is read.** Verify that the reinserted
+entries are actually present in the cache after reinsertion and bitwise
+identical to what was evicted — a retained-set check in the spirit of the R-KV
+Jaccard parity gate. A failed gate means the experiment did not run.
+
+**Three arms.**
+
+| Arm | Design | Reads as |
+|---|---|---|
+| budget-relaxed | reinsert; cache grows | upper bound, confounded with budget |
+| **budget-matched** | reinsert AND evict an equal number of others under the same policy | **the causal test** — does *which* tokens are present matter at fixed budget |
+| random-reinsert | reinsert an equal number of randomly chosen previously-evicted entries, budget-matched | separates "these tokens were load-bearing" from "any perturbation reduces divergence" |
+
+The budget-matched arm is the result. The relaxed arm is a reference point and
+must not be reported as the result.
+
+**Trigger.** Fixed step at 2x the median onset (step 130), pre-committed.
+Divergence-triggered selection is *not* used as primary: reinserting where
+divergence happened to spike invites regression to the mean, so some decay would
+be expected with no causal effect. If a divergence-triggered variant is run it
+carries a matched sham-trigger control.
+
+**Fraction reinserted:** one quarter of the budget, stated in advance.
+**Policies:** Random and StreamingLLM at minimum — they sit on opposite sides of
+the recoverable/concentrated split and should behave differently if the
+mechanism is real.
+
+**Pre-registered branches**, on the budget-matched arm, over the N=200 steps
+after the trigger:
+
+- **RESTORES** — mean per-step divergence after the trigger falls relative to
+  the same trace without reinsertion, CI on the paired difference excluding
+  zero, AND the random-reinsert control shows a significantly smaller drop.
+- **NON-SPECIFIC** — divergence falls but the random-reinsert control falls as
+  much. Then any cache perturbation helps and nothing is shown about *which*
+  tokens matter. Reported as such.
+- **NO RESTORATION** — no significant drop in the budget-matched arm. Evicted
+  information is not recoverable by reinsertion at this budget, which bounds how
+  the residual can be described.
+
+---
+
+## Amendment P.1, result (2026-08-10): the interaction partition does NOT survive a common population
+
+Run as pre-registered in P.1 over raw rows, all four budget-256 MATH-500 cells.
+Artifacts: `results/diag/amendment-k/classb/additivity/{random,streamingllm,h2o,rkv}-256.json`.
+
+**Primary estimand — common population, problem-clustered CI (2000 resamples, seed 0):**
+
+| cell | n cond | n prob | Delta_tot | readout_error | residual_rev | sum | **interaction** | 95% CI | excludes 0 |
+|---|---|---|---|---|---|---|---|---|---|
+| Random | 304 | 94 | −0.378 | −0.128 | −0.289 | −0.418 | **+0.039** | [−0.010, +0.088] | **no** |
+| StreamingLLM | 364 | 100 | −0.648 | −0.302 | −0.484 | −0.786 | **+0.137** | [+0.060, +0.218] | yes |
+| H2O-style | 352 | 100 | −0.636 | −0.287 | −0.489 | −0.776 | **+0.139** | [+0.063, +0.219] | yes |
+| R-KV | 340 | 98 | −0.318 | −0.076 | −0.256 | −0.332 | **+0.015** | [−0.029, +0.060] | **no** |
+
+**Branch: PARTIAL, and the predicted partition is not recovered.** Two of four
+interactions are distinguishable from zero, both positive, both concentrated
+policies — that part matches. But Random and R-KV do **not** show the predicted
+negative interaction: their point estimates are *positive* and their intervals
+include zero. The claim that the interaction sign "splits exactly along the
+recoverable-vs-concentrated line" is **not supported**. What survives is
+narrower: *the concentrated policies over-explain; the other two show no
+detectable interaction.*
+
+**Why the earlier reading looked different, which is the substantive point.**
+The proposed computation summed three terms measured on three different
+denominators — `Delta_tot` over all 400 conditions, `readout_error` over the
+readout-defined 392, `residual_rev` over the reverse-defined 308–372 — and read
+the shortfall as an interaction. That shortfall is partly population mismatch,
+the defect class Amendment K exists for. Three computations side by side:
+
+| cell | mixed-reference (as proposed) | per-term Amendment-K populations | **common population (estimand)** |
+|---|---|---|---|
+| Random | −0.076 | −0.042 | **+0.039** |
+| StreamingLLM | +0.140 | +0.142 | **+0.137** |
+| H2O-style | +0.135 | +0.146 | **+0.139** |
+| R-KV | −0.037 | −0.009 | **+0.015** |
+
+The two concentrated cells are stable across all three. **Random and R-KV flip
+sign**, and they are exactly the two cells with the smallest reverse-readout
+population (308 and 346 of 400, against 372 and 360 for StreamingLLM and
+H2O-style) — because reverse readout is defined only where the *compressed*
+trace reaches an answer boundary, and those two cells truncate most (0.233 and
+0.135, against 0.070 and 0.105). The apparent partition tracked how much
+population each cell lost, not a property of the channels.
+
+**Caveat that must travel with these numbers.** The common population excludes
+every condition where any protocol is undefined — disproportionately the
+non-terminating traces. It is therefore an easier subpopulation, visible in
+`Delta_tot` falling from −0.463 to −0.378 for Random. The interaction is an
+estimand on that subpopulation and is not a statement about the full cell.
+
+**Consequence.** The additivity test does not currently provide convergent
+evidence for the recoverable-vs-concentrated partition. The two prior
+derivations (reverse-side endpoints, ADD channels) are unaffected — this
+amendment removes a third line of support that was never validly established,
+rather than contradicting them.

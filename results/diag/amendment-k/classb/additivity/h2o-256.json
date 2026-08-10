@@ -1,0 +1,44 @@
+{
+  "amendment": "P.1",
+  "benchmark": "math500",
+  "budget": "256",
+  "press": "h2o",
+  "primary_common_population": {
+    "acc_fc": 0.9176136363636364,
+    "acc_free": 0.28125,
+    "acc_rev": 0.4289772727272727,
+    "acc_ro": 0.6306818181818182,
+    "convention": "2",
+    "delta_tot": -0.6363636363636364,
+    "interaction": 0.13920454545454541,
+    "interaction_ci95": [
+      0.06267806267806275,
+      0.2190201729106629
+    ],
+    "interaction_excludes_zero": true,
+    "interaction_pct_of_total": 21.874999999999993,
+    "interaction_sign": "positive",
+    "n_conditions": 352,
+    "n_problems": 100,
+    "n_resamples": 2000,
+    "population": "common: all four protocols defined",
+    "readout_error": -0.2869318181818181,
+    "residual_fwd": -0.34943181818181823,
+    "residual_rev": -0.48863636363636365,
+    "reverse_readout": -0.1477272727272727,
+    "seed": 0,
+    "sum_of_terms": -0.7755681818181818
+  },
+  "reference_convention": "amendment-k-cell-population",
+  "secondary_per_term_population": {
+    "delta_tot": -0.6375,
+    "interaction": 0.14640022675736963,
+    "n_free": 400,
+    "n_readout": 392,
+    "n_reverse": 360,
+    "note": "Each term on its own Amendment-K population (three different denominators). Reported for disclosure only; NOT the estimand.",
+    "readout_error": -0.30612244897959173,
+    "residual_rev": -0.4777777777777778,
+    "sum_of_terms": -0.7839002267573696
+  }
+}

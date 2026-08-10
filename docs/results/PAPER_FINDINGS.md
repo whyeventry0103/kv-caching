@@ -328,6 +328,44 @@ Local/remote artifact parity: all 75 files match by sha256 (the 6 previously
 local-only artifacts were copied up). `make parity` still reports a commit
 mismatch — structural, because `sync_source.sh` never transfers `.git`.
 
+#### 2026-08-10 — additivity test (Amendment P.1): the interaction partition is a population artifact
+
+**What was proposed.** That `readout_error + residual_rev` under-explains
+`Delta_tot` for Random and R-KV and over-explains it for StreamingLLM and
+H2O-style, by 10–22% in every cell — a third, structurally unrelated recovery of
+the recoverable-vs-concentrated partition.
+
+**What the rows say.** Computed on the COMMON population (conditions where all
+four protocols are defined), with problem-clustered CIs:
+
+| cell | interaction | 95% CI | excludes zero |
+|---|---|---|---|
+| Random | +0.039 | [−0.010, +0.088] | no |
+| StreamingLLM | +0.137 | [+0.060, +0.218] | yes |
+| H2O-style | +0.139 | [+0.063, +0.219] | yes |
+| R-KV | +0.015 | [−0.029, +0.060] | no |
+
+**The partition is not recovered.** Random and R-KV do not show the predicted
+negative interaction — their point estimates are positive and their intervals
+include zero. Only the two concentrated policies have a detectable interaction.
+
+**Root cause, and it is the familiar one.** The proposed figures summed three
+terms measured on three different denominators (400 / 392 / 308–372) and read
+the shortfall as an interaction; part of it was population mismatch. Random and
+R-KV flip sign between conventions and are exactly the two cells with the
+smallest reverse-readout population, because reverse readout is defined only
+where the compressed trace terminates and those two truncate most (0.233,
+0.135). The "partition" tracked truncation rate.
+
+**Standing rule this reinforces:** never sum accuracy terms measured on
+different populations. Amendment K fixed each term against its own reference;
+that makes each term correct in isolation and makes their SUM invalid without a
+common-population recomputation.
+
+**Do not reuse:** interaction −0.076 / +0.140 / +0.135 / −0.037, and the claim
+that additivity fails by 10–22% in every cell (it fails by 4.6% for R-KV and is
+not significant).
+
 ### 4a. The powered phenomenon (budget 256)
 FC 0.882 → **StreamingLLM 0.237**, **Random 0.422**. Random beats the "principled" recency
 policy by **+0.185, 95% CI [0.130, 0.242]**; per-problem difference **≥ 0 on 94/100 problems
