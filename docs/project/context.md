@@ -18,6 +18,46 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-08-10 — MEETING #2 round 1. Two findings, both contradicting the
+  brief; two of four tasks still unbuilt. HEAD after this: see git log.**
+  **(1) Amendment P** pre-registers all five Meeting-2 reads BEFORE running:
+  additivity (P.1), profile extensions (P.2), AUC-TV/residual with a refutation
+  branch (P.3), extended replay measures (P.4), restoration with three arms and
+  an instrument gate (P.5).
+  **(2) Convention 2: nothing to migrate.** This repo never used Convention 1 —
+  no `compression_error`, no `trajectory_error = Acc_free − Acc_rev` (searched
+  every tracked file). Existing keys map 1:1 (`readout_change`=readout_error,
+  `unexplained_residual`=residual_fwd, `reverse_readout_change`=residual_rev).
+  Renaming stored keys would rewrite all 29 artifacts and void the 29/29
+  re-derivation baseline for zero semantic gain — NOT done, mapping documented.
+  **(3) P.1 CONTRADICTS THE BRIEF.** The proposed additivity table summed three
+  terms on three different denominators (400 / 392 / 308–372) and mixed
+  conventions within one row. On the COMMON population with problem-clustered
+  CIs: Random **+0.039** [−0.010,+0.088] (n.s.), SLM **+0.137** [+0.060,+0.218],
+  H2O **+0.139** [+0.063,+0.219], R-KV **+0.015** [−0.029,+0.060] (n.s.).
+  Random and R-KV do NOT show the predicted negative interaction — signs flip
+  and CIs include zero. The "partition along recoverable-vs-concentrated" is
+  **not supported**; it tracked truncation rate (those two cells lose the most
+  reverse-readout population: 308 and 346 of 400). Branch PARTIAL.
+  **(4) P.2: eviction-locked for Random ONLY.** Aggregate phase amplitude vs
+  sham: Random 0.179/0.073 peaking at phase **0** (the prune step); SLM
+  0.106/0.065 peaking at 13; H2O 0.101/0.063 peaking at 21. The pooled artifact
+  hid this. Trace-level drift 86–90% of traces, median ratio 2.8–3.9×.
+  **(5) I withdrew one of my own statistics before reporting it.** A per-trace
+  "within-cycle recovery" measure gave 85–89% "drift+recover" — a sham with
+  shuffled phase labels reproduced it (0.752 vs 0.737). Noise. Removed from the
+  module; eviction alignment is now aggregate-only, always against a sham.
+  **(6) Task 4 confirmed to need a re-run:** stored profiles are
+  `tv-profile-v1` and keep only the TV scalar per step, no distributions.
+  **(7) Full horizon was ALREADY in the data** — only the figure truncates at
+  ±400. `windowed_tv` computes both estimators over the full horizon.
+  **NOT DONE:** the extended replay pass (P.4) and the restoration build (P.5)
+  are specified and pre-registered but NOT written. Task 3's correlation needs
+  P.4's profiles across cells (currently n=3, which is not a correlation).
+  **NEXT:** build the extended replay measures, gate, smoke on <=5 problems,
+  queue; then restoration with its retained-set instrument gate.
+
+
   **★★★★★ 2026-08-05 — VERIFICATION SWEEP. 29/29 artifacts re-derive from the raw
   rows; one stale number found and corrected; an intent gate now pins 79 numbers.**
   **(1) New: `scripts/rederive_artifacts.py`.** Re-runs every producing report on

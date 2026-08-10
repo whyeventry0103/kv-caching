@@ -1,0 +1,81 @@
+"""Hand-constructed checks for the profile shape statistics (Amendment P.2)."""
+
+import pytest
+
+from kvcache.metrics.profile_shape import (
+    classify_shape,
+    phase_profile,
+    running_integral,
+    summarise_profiles,
+)
+
+
+def test_running_integral_accumulates_only_after_onset():
+    est = [0.0] * 10 + [1.0] * 100  # onset at 10
+    out = running_integral(est, 10)
+    assert out["cum_at_50"] == pytest.approx(50.0)
+    assert out["cum_at_100"] == pytest.approx(100.0)
+    assert out["cum_at_200"] is None  # trace ends first
+    assert out["cum_total"] == pytest.approx(100.0)
+
+
+def test_phase_profile_localises_a_spike_at_the_prune_step():
+    interval = 4
+    est = [0.0] * 8 + [1.0, 0.0, 0.0, 0.0] * 10  # spike every 4 steps from onset
+    phase = phase_profile(est, 8, interval)
+    assert phase[0] == pytest.approx(1.0)
+    assert all(p == pytest.approx(0.0) for p in phase[1:])
+
+
+def test_flat_profile_does_not_drift():
+    interval = 8
+    est = [0.0] * 8 + [0.05] * (8 * 8)
+    out = classify_shape(est, 8, interval)
+    assert out["shape"] == "flat"
+    assert not out["drifts"]
+
+
+def test_a_rising_profile_is_classified_as_drift():
+    interval = 8
+    tail = [0.01 + 0.001 * i for i in range(8 * 20)]
+    out = classify_shape([0.0] * 8 + tail, 8, interval)
+    assert out["drifts"] is True
+    assert out["drift_ratio"] > 1.5
+
+
+def test_aggregate_phase_amplitude_separates_signal_from_its_sham():
+    """The per-trace recovery axis was removed because a sham reproduced it.
+
+    Eviction alignment is only claimable where the AGGREGATE phase profile has
+    an amplitude the shuffled-label sham does not reproduce.
+    """
+    interval = 4
+    cycle = [1.0, 0.5, 0.2, 0.1]
+    out = summarise_profiles([([0.0] * 4 + cycle * 40, 4, interval)] * 8)
+    assert out["phase_peak_index"] == 0
+    assert out["phase_amplitude"] == pytest.approx(0.9)
+    # Shuffling destroys the structure, so the sham amplitude must be far lower.
+    assert out["phase_amplitude_sham"] < 0.5
+
+
+def test_recovery_axis_is_gone_so_it_cannot_be_reported_by_accident():
+    out = classify_shape([0.0] * 4 + [1.0, 0.5, 0.2, 0.1] * 20, 4, 4)
+    assert "recovers" not in out
+    assert "within_cycle_decay_fraction" not in out
+
+
+def test_summarise_reports_counts_fractions_and_its_own_thresholds():
+    interval = 4
+    flat = [0.0] * 4 + [0.05] * (4 * 10)
+    spiky = [0.0] * 4 + [1.0, 0.5, 0.2, 0.1] * 10
+    out = summarise_profiles([(flat, 4, interval), (spiky, 4, interval)])
+    assert out["n_profiles"] == 2
+    assert sum(out["shape_counts"].values()) == 2
+    assert out["thresholds"]["drift_ratio"] == 1.5
+    assert "sham_seed" in out["thresholds"]
+    assert "Definition 6" in out["scale_discipline"]
+
+
+def test_profiles_without_an_onset_are_skipped_not_counted():
+    out = summarise_profiles([([0.1] * 40, None, 4), ([0.1] * 40, 4, 4)])
+    assert out["n_profiles"] == 1

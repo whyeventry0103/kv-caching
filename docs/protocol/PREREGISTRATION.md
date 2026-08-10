@@ -1668,3 +1668,60 @@ evidence for the recoverable-vs-concentrated partition. The two prior
 derivations (reverse-side endpoints, ADD channels) are unaffected — this
 amendment removes a third line of support that was never validly established,
 rather than contradicting them.
+
+---
+
+## Amendment P.2, result (2026-08-10): eviction-locked for Random only; and a statistic of mine that was noise
+
+Computed over the 1200 stored profiles, no new generation. Artifacts:
+`results/diag/amendment-k/classb/shape/{diss256,h2o256}.json`.
+
+**A statistic was withdrawn before it was reported.** The first implementation
+classified a trace as "recovering" when its per-trace phase profile fell by at
+least 10% from peak to trough, and reported 85–89% of traces as
+"drift+recover" with a median within-cycle decay of 0.75. That statistic is
+noise. With 64 buckets of noisy per-step values, peak-minus-trough is dominated
+by sampling variation: a **sham control** — the same steps assigned to shuffled
+phase labels, destroying all real phase structure — reproduced it almost
+exactly (observed median 0.752 against sham 0.737 over 200 Random traces). The
+per-trace recovery axis is not measurable at this noise level and has been
+removed from the module. Eviction alignment is now tested only on the aggregate
+phase profile, always against its sham.
+
+**Aggregate phase profile (mean divergence by position in the 64-step prune cycle):**
+
+| policy | amplitude | sham amplitude | ratio | peak at phase |
+|---|---|---|---|---|
+| Random | 0.179 | 0.073 | 2.5× | **0 — the prune step** |
+| StreamingLLM | 0.106 | 0.065 | 1.6× | 13 |
+| H2O-style | 0.101 | 0.063 | 1.6× | 21 |
+
+**Read: eviction events are the proximate trigger for Random, and are not for
+the concentrated policies.** Random peaks exactly on the prune step with an
+amplitude 2.5× its sham and decays across the cycle. StreamingLLM and H2O-style
+peak mid-cycle with barely more amplitude than shuffled labels produce. The
+pooled artifact could not show this — it averaged Random and StreamingLLM
+together.
+
+**Not claimed:** no interval was computed on the amplitude excess (one sham
+draw per trace, averaged over 400). The ratios above are suggestive of a real
+per-policy difference, not established. A proper null needs a sham
+*distribution*.
+
+**Trace-level growth (robust; quarter-means over hundreds of steps):**
+monotone-drift in 86–90% of traces, median last-quarter/first-quarter ratio
+3.94 (Random), 2.77 (StreamingLLM), 3.74 (H2O-style).
+
+**Running integral** of per-step TV shows no plateau — the accumulation *rate*
+climbs monotonically from 0.0013/step at onset+50 to 0.079/step at onset+1600.
+**Survivorship caveat:** only 269 of 400 traces reach +1600, and longer traces
+diverge more, so the late points are computed on a longer-trace subpopulation.
+The climb is therefore not cleanly separable from selection at this stage.
+
+**Per-policy AUC-TV** (needed for P.3): Random 0.0857, StreamingLLM 0.0829,
+H2O-style 0.0730 — consistent with the three previously published values.
+
+**Interpretation remains withheld.** Per P.2 these are TV-scale quantities and
+the ratio-matched control (M.3) has not run, so no mechanistic reading of the
+rising profile is licensed: it is still consistent with a compression-ratio
+curve rather than a horizon curve.
