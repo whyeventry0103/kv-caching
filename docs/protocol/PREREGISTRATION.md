@@ -1586,6 +1586,19 @@ Jaccard parity gate. A failed gate means the experiment did not run.
 The budget-matched arm is the result. The relaxed arm is a reference point and
 must not be reported as the result.
 
+**Four arms, not three (added 2026-08-11 per the Meeting #2 reply).** A
+`none` arm — the same traces with no intervention at all — is required, because
+divergence at the trigger step has a trajectory of its own and some of it would
+decay anyway. Every effect is a *paired difference against `none` on the same
+traces*, never a before/after within one arm. Without it, "divergence dropped
+after reinsertion" is unfalsifiable. `random` is the null for *which* tokens;
+`none` is the null for *time*.
+
+**Accuracy under restoration, if the cost permits.** Divergence recovery cannot
+license an accuracy claim, and an accuracy-scale restoration result would need
+no bridging argument. If it is one extra generation pass it is worth running,
+and it is reported as the primary read if it exists.
+
 **Trigger.** Fixed step at 2x the median onset (step 130), pre-committed.
 Divergence-triggered selection is *not* used as primary: reinserting where
 divergence happened to spike invites regression to the mean, so some decay would
