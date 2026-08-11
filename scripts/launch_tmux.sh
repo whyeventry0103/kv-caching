@@ -44,6 +44,21 @@ mkdir -p logs
 # preflight checks the run directory for a clash and for a live process,
 # and checking a different name than the job writes to would gate nothing.
 RUN_NAME="${KVCACHE_RUN_NAME:-$SESSION}"
+# The orchestrator recognises a live shard ONLY by the session name pattern
+# "<run_name>-g<idx>" (nightly_autorun.live_map). A manual shard named anything
+# else is invisible to it: it will see the GPUs as free and launch duplicates
+# into the same run directory. Neither the run-dir clash guard nor the ps guard
+# catches that -- the orchestrator sets KVCACHE_ALLOW_EXISTING_RUN=1 to resume,
+# and ps shows the CONFIG name (underscores), not the run name (hyphens). So
+# refuse the mismatch here, where it is still cheap.
+if [[ -n "${KVCACHE_RUN_NAME:-}" && "$SESSION" != "$RUN_NAME" ]]; then
+  if [[ ! "$SESSION" =~ ^${RUN_NAME}-g[0-9]+$ ]]; then
+    echo "REFUSED: session '$SESSION' does not match '<run_name>-g<idx>' for run" >&2
+    echo "  name '$RUN_NAME'. The nightly orchestrator would not see this shard" >&2
+    echo "  as in flight and would launch a duplicate. Use ${RUN_NAME}-g0 etc." >&2
+    exit 2
+  fi
+fi
 bash scripts/check_remote.sh --config "$CONFIG" --run-name "$RUN_NAME"
 
 RUNNER="$PROJECT_ROOT/logs/$SESSION.runner.sh"
