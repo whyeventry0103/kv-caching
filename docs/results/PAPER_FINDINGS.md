@@ -362,6 +362,18 @@ different populations. Amendment K fixed each term against its own reference;
 that makes each term correct in isolation and makes their SUM invalid without a
 common-population recomputation.
 
+**Selection bounded both ways (2026-08-11).** Scoring the dropped conditions
+both ways narrows it further: only **StreamingLLM** excludes zero under both the
+sampling CI and the worst-case imputation ([+0.008, +0.188]). H2O-style's
+both-ways bound spans zero ([−0.040, +0.200]) despite its sampling CI excluding
+it. Random [−0.270, +0.210] and R-KV [−0.193, +0.108] are wide open.
+
+**The surviving claim, stated at its true strength:** StreamingLLM's two damage
+channels demonstrably destroy overlapping problems; H2O-style points the same
+way without surviving the selection bound; Random and R-KV show nothing. The
+estimand is "interaction among conditions where all protocols terminated", and
+that scope travels with the number.
+
 **Do not reuse:** interaction −0.076 / +0.140 / +0.135 / −0.037, and the claim
 that additivity fails by 10–22% in every cell (it fails by 4.6% for R-KV and is
 not significant).

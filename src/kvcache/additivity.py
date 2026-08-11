@@ -110,9 +110,40 @@ def additivity_test(
     lo = draws[int(0.025 * (n_resamples - 1))]
     hi = draws[int(0.975 * (n_resamples - 1))]
 
+    # Amendment K layer-1, applied to the SELECTION this estimand rests on.
+    # The common population drops every condition where any protocol is
+    # undefined -- disproportionately non-terminating traces -- so it is an
+    # easier subset. Scoring the dropped conditions both ways bounds how much
+    # that selection could be worth, and makes it visible instead of absorbed.
+    dropped = sorted((set(fc) & set(free)) - set(common))
+    bounds: list[float] | None = None
+    if dropped:
+        lo_tab = {k: False for k in dropped}
+        hi_tab = {k: True for k in dropped}
+        ends = []
+        for imputed in (lo_tab, hi_tab):
+            keys = list(common) + dropped
+            ends.append(
+                interaction_on(
+                    keys,
+                    fc,
+                    {**free, **{k: free[k] for k in dropped}},
+                    {**readout, **imputed},
+                    {**reverse, **imputed},
+                )["interaction"]
+            )
+        bounds = [min(ends), max(ends)]
+
     return {
         **point,
         "n_conditions": len(common),
+        "n_dropped_by_selection": len(dropped),
+        "primary_bound_interaction": bounds,
+        "estimand_scope": (
+            "interaction among conditions where ALL protocols terminated; the "
+            "common population excludes non-terminating traces and is therefore "
+            "an easier subset than the full cell"
+        ),
         "n_problems": len(problems),
         "interaction_ci95": [lo, hi],
         "interaction_excludes_zero": (lo > 0.0) or (hi < 0.0),

@@ -10,6 +10,7 @@
     "acc_ro": 0.6306818181818182,
     "convention": "2",
     "delta_tot": -0.6363636363636364,
+    "estimand_scope": "interaction among conditions where ALL protocols terminated; the common population excludes non-terminating traces and is therefore an easier subset than the full cell",
     "interaction": 0.13920454545454541,
     "interaction_ci95": [
       0.06267806267806275,
@@ -19,9 +20,14 @@
     "interaction_pct_of_total": 21.874999999999993,
     "interaction_sign": "positive",
     "n_conditions": 352,
+    "n_dropped_by_selection": 48,
     "n_problems": 100,
     "n_resamples": 2000,
     "population": "common: all four protocols defined",
+    "primary_bound_interaction": [
+      -0.040000000000000036,
+      0.20000000000000007
+    ],
     "readout_error": -0.2869318181818181,
     "residual_fwd": -0.34943181818181823,
     "residual_rev": -0.48863636363636365,

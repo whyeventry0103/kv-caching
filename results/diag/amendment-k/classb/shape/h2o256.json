@@ -9,6 +9,19 @@
       "n_profiles": 400,
       "phase_amplitude": 0.10054103192529928,
       "phase_amplitude_sham": 0.0632569575649429,
+      "phase_excess": {
+        "excess": 0.025710474264028123,
+        "excess_ci95": [
+          -0.010581503537792011,
+          0.043568039039267155
+        ],
+        "excess_excludes_zero": false,
+        "n_profiles": 400,
+        "n_resamples": 2000,
+        "phase_amplitude": 0.0773045761579695,
+        "phase_amplitude_sham": 0.051594101893941376,
+        "seed": 0
+      },
       "phase_peak_index": 21,
       "phase_profile_mean": [
         0.07209769331885572,

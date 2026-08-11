@@ -79,3 +79,31 @@ def test_summarise_reports_counts_fractions_and_its_own_thresholds():
 def test_profiles_without_an_onset_are_skipped_not_counted():
     out = summarise_profiles([([0.1] * 40, None, 4), ([0.1] * 40, 4, 4)])
     assert out["n_profiles"] == 1
+
+
+def test_phase_amplitude_excess_is_positive_only_for_real_phase_structure():
+    """A genuinely eviction-locked profile must beat its own sham."""
+    from kvcache.metrics.profile_shape import phase_amplitude_excess
+
+    interval = 4
+    locked = ([0.0] * 4 + [1.0, 0.5, 0.2, 0.1] * 40, 4, interval)
+    out = phase_amplitude_excess([locked] * 12, n_resamples=200, seed=0)
+    assert out["excess"] > 0
+    assert out["excess_excludes_zero"] is True
+
+
+def test_phase_amplitude_excess_does_not_fire_on_structureless_noise():
+    """The control that retired the per-trace statistic, as a standing test."""
+    import random as _random
+
+    from kvcache.metrics.profile_shape import phase_amplitude_excess
+
+    rng = _random.Random(7)
+    interval = 8
+    noisy = [
+        ([0.0] * 8 + [rng.random() for _ in range(8 * 40)], 8, interval)
+        for _ in range(12)
+    ]
+    out = phase_amplitude_excess(noisy, n_resamples=200, seed=0)
+    # No eviction-locked structure exists, so the excess must not exclude zero.
+    assert out["excess_excludes_zero"] is False

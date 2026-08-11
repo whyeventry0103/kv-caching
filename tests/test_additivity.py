@@ -77,3 +77,19 @@ def test_refuses_when_no_condition_is_defined_everywhere():
             _tbl([("p2", 0, True)]),
             _tbl([("p2", 0, True)]),
         )
+
+
+def test_selection_is_bounded_both_ways_not_absorbed():
+    """The dropped conditions must be scored both ways, per Amendment K layer 1."""
+    keys = [(f"p{i}", 0) for i in range(10)]
+    fc = dict.fromkeys(keys, True)
+    free = {k: (i % 2 == 0) for i, k in enumerate(keys)}
+    # Last three conditions are undefined for readout and reverse -> dropped.
+    readout = {k: True for k in keys[:7]}
+    reverse = {k: False for k in keys[:7]}
+    out = additivity_test(fc, free, readout, reverse, n_resamples=200)
+    assert out["n_conditions"] == 7
+    assert out["n_dropped_by_selection"] == 3
+    lo, hi = out["primary_bound_interaction"]
+    assert lo <= hi
+    assert "easier subset" in out["estimand_scope"]

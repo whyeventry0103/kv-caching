@@ -24,7 +24,10 @@ from typing import Any
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
-from kvcache.metrics.profile_shape import summarise_profiles  # noqa: E402
+from kvcache.metrics.profile_shape import (  # noqa: E402
+    phase_amplitude_excess,
+    summarise_profiles,
+)
 
 CELL = re.compile(r"^(?P<press>[a-z0-9]+)-(?P<budget>\d+)-s(?P<seed>\d+)$")
 
@@ -62,7 +65,12 @@ def main() -> int:
         "amendment": "P.2",
         "n_profile_files": n_files,
         "per_policy": {
-            press: summarise_profiles(items)
+            press: {
+                **summarise_profiles(items),
+                # Only the EXCESS over sham licenses an eviction-alignment
+                # claim; a raw amplitude is reproduced by shuffled labels.
+                "phase_excess": phase_amplitude_excess(items),
+            }
             for press, items in sorted(by_press.items())
         },
     }
@@ -73,9 +81,11 @@ def main() -> int:
             f"{press:<14} n={s['n_profiles']:<4} auc={s['auc_tv_mean']:.4f} "
             f"shapes={s['shape_fractions']} "
             f"drift_med={s['median_drift_ratio']:.2f} "
-            f"phase_amp={s['phase_amplitude']:.4f} "
-            f"sham={s['phase_amplitude_sham']:.4f} "
-            f"peak_idx={s['phase_peak_index']}"
+            f"amp={s['phase_amplitude']:.4f} sham={s['phase_amplitude_sham']:.4f} "
+            f"excess={s['phase_excess']['excess']:+.4f} "
+            f"CI={[round(x, 4) for x in s['phase_excess']['excess_ci95']]} "
+            f"excl0={s['phase_excess']['excess_excludes_zero']} "
+            f"peak={s['phase_peak_index']}"
         )
     print(f"wrote {a.out}")
     return 0

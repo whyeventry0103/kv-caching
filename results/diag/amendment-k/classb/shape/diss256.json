@@ -9,6 +9,19 @@
       "n_profiles": 400,
       "phase_amplitude": 0.17891163004224783,
       "phase_amplitude_sham": 0.07273836299964088,
+      "phase_excess": {
+        "excess": 0.09914655748637462,
+        "excess_ci95": [
+          0.06142192660600261,
+          0.12707553307355002
+        ],
+        "excess_excludes_zero": true,
+        "n_profiles": 400,
+        "n_resamples": 2000,
+        "phase_amplitude": 0.16555386359301608,
+        "phase_amplitude_sham": 0.06640730610664146,
+        "seed": 0
+      },
       "phase_peak_index": 0,
       "phase_profile_mean": [
         0.09917230785040788,
@@ -188,6 +201,19 @@
       "n_profiles": 400,
       "phase_amplitude": 0.10613776574673159,
       "phase_amplitude_sham": 0.06454919547233942,
+      "phase_excess": {
+        "excess": 0.038351954948727084,
+        "excess_ci95": [
+          0.0013270403001570258,
+          0.05597048636161109
+        ],
+        "excess_excludes_zero": true,
+        "n_profiles": 400,
+        "n_resamples": 2000,
+        "phase_amplitude": 0.08681735762131332,
+        "phase_amplitude_sham": 0.048465402672586234,
+        "seed": 0
+      },
       "phase_peak_index": 13,
       "phase_profile_mean": [
         0.08512301857601157,

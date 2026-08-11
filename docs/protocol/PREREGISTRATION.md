@@ -1657,11 +1657,34 @@ trace reaches an answer boundary, and those two cells truncate most (0.233 and
 0.135, against 0.070 and 0.105). The apparent partition tracked how much
 population each cell lost, not a property of the channels.
 
-**Caveat that must travel with these numbers.** The common population excludes
-every condition where any protocol is undefined — disproportionately the
-non-terminating traces. It is therefore an easier subpopulation, visible in
-`Delta_tot` falling from −0.463 to −0.378 for Random. The interaction is an
-estimand on that subpopulation and is not a statement about the full cell.
+**Scope, which must be attached wherever these numbers appear.** The estimand
+is *the interaction among conditions where all four protocols terminated* — not
+"the interaction". The common population drops every condition where any
+protocol is undefined, disproportionately non-terminating traces, so it is an
+easier subset: `Delta_tot` for Random falls from −0.463 to −0.378, a 0.085 shift
+larger than several effects the paper reports.
+
+**Selection bounded both ways, not absorbed (added 2026-08-11).** The dropped
+conditions are scored both ways, Amendment-K layer-1 style, to bound what the
+selection could be worth:
+
+| cell | interaction | sampling CI | dropped | **both-ways bound** |
+|---|---|---|---|---|
+| Random | +0.039 | [−0.010, +0.088] | 96 | [−0.270, +0.210] |
+| StreamingLLM | +0.137 | [+0.060, +0.218] | 36 | **[+0.008, +0.188]** |
+| H2O-style | +0.139 | [+0.063, +0.219] | 48 | [−0.040, +0.200] |
+| R-KV | +0.015 | [−0.029, +0.060] | 60 | [−0.193, +0.108] |
+
+**This narrows the surviving claim again.** Only **StreamingLLM** excludes zero
+under *both* sampling uncertainty and the worst-case imputation. **H2O-style's
+interaction is robust to sampling but not to selection** — its both-ways bound
+spans zero. So the defensible statement is not "the concentrated policies
+over-explain" but: *StreamingLLM's two damage channels demonstrably destroy
+overlapping problems; H2O-style points the same way without surviving the
+selection bound; Random and R-KV show nothing detectable.*
+
+The bound is deterministic and carries no sampling uncertainty; it is a range
+over imputations, never compared for width against a CI.
 
 **Consequence.** The additivity test does not currently provide convergent
 evidence for the recoverable-vs-concentrated partition. The two prior
@@ -1703,10 +1726,32 @@ peak mid-cycle with barely more amplitude than shuffled labels produce. The
 pooled artifact could not show this — it averaged Random and StreamingLLM
 together.
 
-**Not claimed:** no interval was computed on the amplitude excess (one sham
-draw per trace, averaged over 400). The ratios above are suggestive of a real
-per-policy difference, not established. A proper null needs a sham
-*distribution*.
+**Intervals added 2026-08-11** (trace-clustered bootstrap on the EXCESS over
+sham, 2000 resamples, seed 0; observed and sham recomputed together on each
+resample so their correlation is preserved):
+
+| policy | amplitude | sham | **excess** | 95% CI | excludes zero | peak phase |
+|---|---|---|---|---|---|---|
+| Random | 0.179 | 0.073 | **+0.099** | [+0.061, +0.127] | **yes** | **0 — the prune step** |
+| StreamingLLM | 0.106 | 0.065 | **+0.038** | [+0.001, +0.056] | yes, barely | 13 |
+| H2O-style | 0.101 | 0.063 | **+0.026** | [−0.011, +0.044] | **no** | 21 |
+
+**Revised read, more conservative than the ratios suggested.** Only Random has
+eviction-locked divergence that is clearly established: its phase peak sits
+exactly on the prune step and the excess is far from zero. StreamingLLM has weak
+phase structure whose interval only just clears zero, and its peak is mid-cycle,
+so it is not "locked to eviction" in the same sense. H2O-style shows **no
+detectable phase structure at all**. The earlier "2.5x vs 1.6x" framing
+overstated the concentrated pair; ratios of an amplitude to its sham are not a
+test, and the intervals are.
+
+**Scope limit that must travel with this.** R-KV — the other policy on the
+recoverable side of the taxonomy — has **no replay profiles at all** (the replay
+runs cover Random, StreamingLLM and H2O-style only). So the proposed
+correspondence "recoverable policies are eviction-locked, concentrated policies
+diverge on a lag" currently rests on one clear case per side plus one marginal
+case. It is a hypothesis this data is consistent with, not a demonstrated
+partition. An R-KV replay run would be the direct test and is not queued.
 
 **Trace-level growth (robust; quarter-means over hundreds of steps):**
 monotone-drift in 86–90% of traces, median last-quarter/first-quarter ratio

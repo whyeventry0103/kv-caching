@@ -187,3 +187,89 @@ def summarise_profiles(
             "sanctioned bridge."
         ),
     }
+
+
+def phase_amplitude_excess(
+    profiles: Sequence[tuple[Sequence[float], int | None, int]],
+    *,
+    n_resamples: int = 2000,
+    seed: int = 0,
+) -> dict[str, Any]:
+    """Aggregate phase amplitude minus its sham, with a trace-clustered CI.
+
+    The trace is the resampling unit. Observed and sham amplitudes are
+    recomputed together on each resample, so the interval is on the EXCESS;
+    resampling them independently would ignore their correlation and inflate it.
+
+    Per-trace phase SUMS and COUNTS are precomputed once, so a resample is a
+    vector add over traces rather than a re-bucketing of every step. The naive
+    version re-bucketed ~2.6M steps per resample and did not finish.
+
+    Only the excess licenses a claim. A raw amplitude is not evidence of
+    eviction alignment: shuffled phase labels produce one too.
+    """
+    obs_sum: list[list[float]] = []
+    obs_cnt: list[list[int]] = []
+    sham_sum: list[list[float]] = []
+    sham_cnt: list[list[int]] = []
+    interval = 0
+    for rank, (estimate, onset, iv) in enumerate(profiles):
+        if not estimate or onset is None:
+            continue
+        iv = int(iv)
+        interval = interval or iv
+        if iv != interval:
+            raise ValueError("profiles mix compression intervals")
+        tail = [float(v) for v in estimate[int(onset) :]]
+        o_s, o_c = [0.0] * iv, [0] * iv
+        for offset, value in enumerate(tail):
+            o_s[offset % iv] += value
+            o_c[offset % iv] += 1
+        rng = random.Random(SHAM_SEED + rank)
+        labels = [k % iv for k in range(len(tail))]
+        rng.shuffle(labels)
+        s_s, s_c = [0.0] * iv, [0] * iv
+        for value, label in zip(tail, labels, strict=True):
+            s_s[label] += value
+            s_c[label] += 1
+        obs_sum.append(o_s)
+        obs_cnt.append(o_c)
+        sham_sum.append(s_s)
+        sham_cnt.append(s_c)
+    if not obs_sum:
+        raise ValueError("no profiles with an onset")
+
+    def amplitudes(index: Sequence[int]) -> tuple[float | None, float | None]:
+        o_s, o_c = [0.0] * interval, [0] * interval
+        s_s, s_c = [0.0] * interval, [0] * interval
+        for i in index:
+            for ph in range(interval):
+                o_s[ph] += obs_sum[i][ph]
+                o_c[ph] += obs_cnt[i][ph]
+                s_s[ph] += sham_sum[i][ph]
+                s_c[ph] += sham_cnt[i][ph]
+        o = [(o_s[ph] / o_c[ph]) if o_c[ph] else None for ph in range(interval)]
+        sh = [(s_s[ph] / s_c[ph]) if s_c[ph] else None for ph in range(interval)]
+        return phase_amplitude(o), phase_amplitude(sh)
+
+    whole = list(range(len(obs_sum)))
+    obs_amp, sham_amp = amplitudes(whole)
+    rng = random.Random(seed)
+    draws: list[float] = []
+    for _ in range(n_resamples):
+        o, sh = amplitudes([rng.randrange(len(whole)) for _ in whole])
+        if o is not None and sh is not None:
+            draws.append(o - sh)
+    draws.sort()
+    lo = draws[int(0.025 * (len(draws) - 1))]
+    hi = draws[int(0.975 * (len(draws) - 1))]
+    return {
+        "n_profiles": len(obs_sum),
+        "phase_amplitude": obs_amp,
+        "phase_amplitude_sham": sham_amp,
+        "excess": (obs_amp - sham_amp) if (obs_amp and sham_amp) else None,
+        "excess_ci95": [lo, hi],
+        "excess_excludes_zero": (lo > 0.0) or (hi < 0.0),
+        "n_resamples": n_resamples,
+        "seed": seed,
+    }
