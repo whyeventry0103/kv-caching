@@ -1,0 +1,35 @@
+name: replay_ext_math500_diss256
+stage: replay
+mode: compression_replay
+# Amendment P.4 EXTENDED replay pass. One instrumented pass serving three of the
+# four Meeting-2 tasks: per step it records TV (continuity with the published v1
+# profile), JSD, top-1 agreement and rank displacement, all from the same softmax
+# pair in the same forward pass. Emits schema tv-profile-v2 so it can never be
+# pooled with the v1 profiles already on disk.
+#
+# SHAPED FOR TASK 3, WHICH NEEDS CELLS NOT SEEDS. The correlation is between a
+# per-CELL AUC and a per-CELL residual, so n is the number of cells. Measured
+# cost is ~120 s/profile, so 400 profiles per cell (the v1 depth) would buy 4
+# cells for ~53 GPU-hours. At 25 problems x 4 seeds = 100 profiles per cell the
+# same budget buys 8 cells, taking Task 3 from n=3 to n=7 usable cells. A
+# cell-level mean AUC is estimated fine at 100 profiles; the residual it is
+# correlated against is still the 100-problem quantity, and that asymmetry is
+# recorded in the artifact rather than hidden.
+#
+# R-KV is included deliberately: it is the only policy on the recoverable side
+# of the taxonomy with NO replay profiles at all, which currently leaves the
+# "recoverable = eviction-locked" reading of P.2 resting on one case per side.
+reference_run_name: math500-fc-powered-merged
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+subset:
+  math500: 25
+presses: [random, streamingllm, h2o, rkv]
+budgets: [256, 2048]
+seeds: [11, 23, 47, 89]
+compression_interval: 64
+extended_measures: true
+estimated_generation_count: 0
+estimated_replay_count: 800
+scale_authorized: true
+remote_only: true

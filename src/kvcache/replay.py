@@ -42,6 +42,13 @@ class ReplayProfile:
     max_before_prune: int | None
     max_after_prune: int | None
     tv_method: str = "exact"
+    # Amendment P.4 extended measures, computed in the SAME forward pass as TV.
+    # Empty tuples mean a v1-style TV-only profile; the writer emits
+    # schema_version accordingly so old and new profiles cannot be silently
+    # mixed in an analysis.
+    jsd: tuple[float, ...] = ()
+    top1_agree: tuple[bool, ...] = ()
+    rank_displacement: tuple[int, ...] = ()
 
 
 _ANSWER_BOUNDARY = re.compile(r"\\boxed\{|(?:final\s+)?answer\s*(?:is|:)", re.I)
@@ -162,8 +169,17 @@ def paired_teacher_forced_replay(
     forward: ForwardFn,
     press: Any,
     tv_fn: Callable[[Any, Any], float] = exact_tv_from_logits,
+    extended_measures: Callable[[Any, Any], dict[str, Any]] | None = None,
 ) -> ReplayProfile:
-    """Replay one fixed trace through independent full and test cache states."""
+    """Replay one fixed trace through independent full and test cache states.
+
+    ``extended_measures`` (Amendment P.4) computes JSD, top-1 agreement and rank
+    displacement from the SAME logits pair as TV, in the same forward pass --
+    the measures are free once the pair exists, and a second pass would not be
+    guaranteed to reproduce the same cache states. When it is supplied the TV it
+    returns is used, so TV and the new measures cannot come from different
+    computations.
+    """
     if not prompt_token_ids:
         raise ValueError("prompt_token_ids cannot be empty")
     if not trace_token_ids:
@@ -182,8 +198,14 @@ def paired_teacher_forced_replay(
         raise RuntimeError("backend replaced a replay cache object")
 
     profile: list[float] = []
+    extended: list[dict[str, Any]] = []
     for step, token in enumerate(trace_token_ids):
-        profile.append(tv_fn(full_logits, test_logits))
+        if extended_measures is not None:
+            measures = extended_measures(full_logits, test_logits)
+            extended.append(measures)
+            profile.append(float(measures["tv"]))
+        else:
+            profile.append(tv_fn(full_logits, test_logits))
         if step == len(trace_token_ids) - 1:
             break
         press.profile_step = step + 1
@@ -199,6 +221,9 @@ def paired_teacher_forced_replay(
         estimate=tuple(profile),
         lower=tuple(profile),
         upper=tuple(profile),
+        jsd=tuple(float(m["jsd"]) for m in extended),
+        top1_agree=tuple(bool(m["top1_agree"]) for m in extended),
+        rank_displacement=tuple(int(m["rank_displacement"]) for m in extended),
         reference_token_ids=tuple(int(token) for token in trace_token_ids),
         onset_step=getattr(press, "onset_step", None),
         compression_interval=getattr(press, "compression_interval", None),
@@ -378,6 +403,19 @@ def write_replay_profile(
     }
     if len(lengths) != 1:
         raise ValueError("replay profile arrays must have equal length")
+    extended = bool(profile.jsd or profile.top1_agree or profile.rank_displacement)
+    if extended:
+        extra = {
+            len(profile.jsd),
+            len(profile.top1_agree),
+            len(profile.rank_displacement),
+        }
+        if extra != lengths:
+            raise ValueError("extended measure arrays must match the TV profile length")
+        if any(not 0.0 <= value <= 1.0 for value in profile.jsd):
+            raise ValueError("JSD values must be in [0, 1] (base-2)")
+        if any(value < 0 for value in profile.rank_displacement):
+            raise ValueError("rank displacement cannot be negative")
     if any(
         not 0.0 <= value <= 1.0
         for values in (profile.estimate, profile.lower, profile.upper)
@@ -404,7 +442,10 @@ def write_replay_profile(
         raise FileExistsError(f"replay profile already exists: {path}")
     path.parent.mkdir(parents=True, exist_ok=True)
     payload = {
-        "schema_version": "tv-profile-v1",
+        # v2 carries the Amendment P.4 measures; v1 is TV-only. Versioning is
+        # load-bearing: an analysis that pooled the two would silently average
+        # profiles that do not contain the same fields.
+        "schema_version": "tv-profile-v2" if extended else "tv-profile-v1",
         "reference_key": list(reference_key),
         "condition": {"press": press_name, "budget": budget},
         **asdict(profile),

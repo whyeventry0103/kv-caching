@@ -1,0 +1,12 @@
+{
+  "amendment": "P.4",
+  "compared_steps": 15280,
+  "failures": [],
+  "n_failures": 0,
+  "n_shared": 6,
+  "n_v1": 800,
+  "n_v2": 6,
+  "passed": true,
+  "tolerance": 1e-06,
+  "worst_tv_delta": 0.0
+}

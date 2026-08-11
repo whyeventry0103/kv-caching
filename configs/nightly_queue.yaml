@@ -438,3 +438,19 @@ jobs:
   # run_name, or the queue cannot see the work and will duplicate it.
   # Read: Amendment N.2, branch REPLICATES. Artifact
   # results/diag/amendment-k/classb/rkv_published_cap32768.json.
+
+  # ---- Meeting #2 / Amendment P.4: the extended replay pass ----------------
+  # Gate-passed before queueing: scripts/gate_extended_replay.py showed the v2
+  # emitter reproduces v1 TV bitwise (worst delta 0.0 over 15,280 steps on 6
+  # shared profiles). Three of the four Meeting-2 tasks depend on this artifact,
+  # so it runs first. ~120 s/profile measured => ~27 GPU-hours, about 1.5 nights
+  # across both GPUs.
+  - name: replay-ext-diss256
+    command: replay
+    config: configs/experiments/replay_ext_math500_diss256.yaml
+    run_name: replay-ext-diss256
+    total: 800
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 28
+    progress_kind: grid
+    requires: null

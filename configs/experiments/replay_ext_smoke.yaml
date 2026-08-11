@@ -1,0 +1,20 @@
+name: replay_ext_smoke
+stage: replay
+mode: compression_replay
+# Gate before the powered extended pass: 3 problems x 1 seed x 2 presses.
+# Its job is to prove the v2 emitter reproduces v1 TV on shared conditions
+# before 1600 replays are spent -- see scripts/gate_extended_replay.py.
+reference_run_name: math500-fc-powered-merged
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+subset:
+  math500: 3
+presses: [random, streamingllm]
+budgets: [256]
+seeds: [11]
+compression_interval: 64
+extended_measures: true
+estimated_generation_count: 0
+estimated_replay_count: 6
+scale_authorized: true
+remote_only: true

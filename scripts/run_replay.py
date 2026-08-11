@@ -25,6 +25,7 @@ from kvcache.presses import (
     press_needs_eager_attention,
     press_seed,
 )
+from kvcache.metrics.divergence import measures_from_logits
 from kvcache.replay import (
     TransformersReplayBackend,
     build_replay_row,
@@ -175,6 +176,9 @@ def main() -> int:
     if os.environ.get("KVCACHE_REMOTE") != "1":
         raise SystemExit("REFUSED: non-dry execution requires KVCACHE_REMOTE=1")
     scale = bool(config.get("scale_authorized"))
+    # Amendment P.4: opt-in per config so existing replay configs keep
+    # emitting v1 profiles and nothing already published changes shape.
+    extended_measures = bool(config.get("extended_measures"))
     if not (config.get("pilot") or scale) or config.get("mode") not in {
         "self_replay",
         "compression_replay",
@@ -383,6 +387,9 @@ def main() -> int:
                             cache_factory=backend.cache_factory,
                             forward=backend.forward,
                             press=press,
+                            extended_measures=(
+                                measures_from_logits if extended_measures else None
+                            ),
                         )
                     if mode == "self_replay" and max(profile.estimate) > 1e-6:
                         raise SystemExit("self-replay TV exceeded 1e-6")

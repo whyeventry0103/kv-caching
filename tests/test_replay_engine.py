@@ -1,3 +1,4 @@
+import json
 from dataclasses import asdict
 from types import SimpleNamespace
 
@@ -264,4 +265,82 @@ def test_profile_writer_rejects_out_of_range_tv(tmp_path):
             budget="full",
             pid_hash="pid",
             profile=profile,
+        )
+
+
+def test_extended_measures_are_emitted_and_bump_the_schema_version(tmp_path):
+    """P.4: JSD/top-1/rank ride along with TV, and v2 marks their presence."""
+    pytest.importorskip("torch")
+    from dataclasses import replace
+
+    from kvcache.metrics.divergence import measures_from_logits
+    from kvcache.replay import ReplayProfile, write_replay_profile
+
+    n = 4
+    profile = ReplayProfile(
+        estimate=(0.1,) * n,
+        lower=(0.1,) * n,
+        upper=(0.1,) * n,
+        reference_token_ids=(1, 2, 3, 4),
+        onset_step=1,
+        compression_interval=2,
+        compression_events=2,
+        max_before_prune=8,
+        max_after_prune=4,
+        jsd=(0.05,) * n,
+        top1_agree=(True, True, False, False),
+        rank_displacement=(0, 0, 1, 3),
+    )
+    path = write_replay_profile(
+        tmp_path,
+        reference_key=["math500", "p1", "m", "x", "y", 11],
+        press_name="random",
+        budget=256,
+        pid_hash="abc",
+        profile=profile,
+    )
+    payload = json.loads(path.read_text())
+    assert payload["schema_version"] == "tv-profile-v2"
+    assert payload["jsd"] == [0.05] * n
+    assert payload["rank_displacement"] == [0, 0, 1, 3]
+
+    # A TV-only profile must still declare v1, so the two cannot be pooled.
+    v1 = replace(profile, jsd=(), top1_agree=(), rank_displacement=())
+    p1 = write_replay_profile(
+        tmp_path,
+        reference_key=["math500", "p2", "m", "x", "y", 11],
+        press_name="random",
+        budget=256,
+        pid_hash="def",
+        profile=v1,
+    )
+    assert json.loads(p1.read_text())["schema_version"] == "tv-profile-v1"
+    assert measures_from_logits is not None
+
+
+def test_extended_arrays_must_match_the_tv_length(tmp_path):
+    from kvcache.replay import ReplayProfile, write_replay_profile
+
+    bad = ReplayProfile(
+        estimate=(0.1, 0.1),
+        lower=(0.1, 0.1),
+        upper=(0.1, 0.1),
+        reference_token_ids=(1, 2),
+        onset_step=1,
+        compression_interval=2,
+        compression_events=1,
+        max_before_prune=4,
+        max_after_prune=2,
+        jsd=(0.05,),
+        top1_agree=(True, True),
+        rank_displacement=(0, 1),
+    )
+    with pytest.raises(ValueError, match="extended measure arrays"):
+        write_replay_profile(
+            tmp_path,
+            reference_key=["math500", "p", "m", "x", "y", 11],
+            press_name="random",
+            budget=256,
+            pid_hash="h",
+            profile=bad,
         )
