@@ -486,6 +486,46 @@
       "literal": "0.885",
       "key": "diss256.random.fc_cell",
       "document": "README.md"
+    },
+    {
+      "context": "$\\dro{}$ over the 392 with a defined answer boundary in the reference trace, where $\\accfc = 0.903$",
+      "literal": "0.903",
+      "key": "diss256.random.readout_ref"
+    },
+    {
+      "context": "$\\accro{}$, $\\dro{}$ and the residual are over the 392 with a defined answer boundary, against $\\accfc = 0.903$",
+      "literal": "0.903",
+      "key": "diss256.random.readout_ref"
+    },
+    {
+      "context": "would certify Random-256 at $0.765$ --- within sight of the $0.903$ readout-matched reference ---",
+      "literal": "0.903",
+      "key": "diss256.random.readout_ref"
+    },
+    {
+      "context": "readout $0.798$ (within sight of the $0.903$ readout-matched reference)",
+      "literal": "0.903",
+      "key": "rkv256.rkv.readout_ref"
+    },
+    {
+      "context": "($\\accfc^{\\,\\mathrm{rev}} = 0.919$ / $0.887$ / $0.897$ / $0.913$",
+      "literal": "0.919",
+      "key": "diss256.random.reverse_ref"
+    },
+    {
+      "context": "($\\accfc^{\\,\\mathrm{rev}} = 0.919$ / $0.887$ / $0.897$ / $0.913$",
+      "literal": "0.887",
+      "key": "diss256.streamingllm.reverse_ref"
+    },
+    {
+      "context": "($\\accfc^{\\,\\mathrm{rev}} = 0.919$ / $0.887$ / $0.897$ / $0.913$",
+      "literal": "0.897",
+      "key": "h2o256.h2o.reverse_ref"
+    },
+    {
+      "context": "($\\accfc^{\\,\\mathrm{rev}} = 0.919$ / $0.887$ / $0.897$ / $0.913$",
+      "literal": "0.913",
+      "key": "rkv256.rkv.reverse_ref"
     }
   ]
 }

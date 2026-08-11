@@ -113,6 +113,32 @@ def build_catalogue() -> list[Entry]:
                 f"{rel}#/cells/{press}/readout_change",
                 "readout change vs the matched reference",
             )
+            # The reference each change is ACTUALLY measured against. Amendment K
+            # fixes a separate matched reference per change, because readout is
+            # defined only where the reference trace reaches an answer boundary
+            # and reverse readout only where the compressed trace does. The
+            # paper named a single AccFC for all of them, which is false for two
+            # of the three -- these entries give the real ones a source so the
+            # prose can state them (Amendment P.3-adjacent documentation fix).
+            add(
+                f"{stem}.readout_ref",
+                cell["readout_accuracy"] - cell["readout_change"],
+                f"{rel}#/cells/{press}/readout_accuracy - .../readout_change",
+                "Acc_FC on the readout-defined conditions (the Delta_ro reference)",
+                kind="derived",
+                inputs=(f"{stem}.readout", f"{stem}.readout_change"),
+            )
+            if cell.get("reverse_readout_accuracy") is not None:
+                add(
+                    f"{stem}.reverse_ref",
+                    cell["reverse_readout_accuracy"] - cell["reverse_readout_change"],
+                    f"{rel}#/cells/{press}/reverse_readout_accuracy - "
+                    f".../reverse_readout_change",
+                    "Acc_FC on the reverse-defined conditions (the reverse "
+                    "endpoint's reference)",
+                    kind="derived",
+                    inputs=(f"{stem}.reverse", f"{stem}.reverse_change"),
+                )
             add(
                 f"{stem}.trunc",
                 cell["truncation_rate"],
