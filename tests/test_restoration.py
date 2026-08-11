@@ -132,3 +132,69 @@ def test_arms_must_cover_the_same_traces():
     }
     with pytest.raises(ValueError, match="same traces"):
         restoration_read(arms, trigger_step=10, window=10)
+
+
+def test_budget_matched_surgery_preserves_cache_size_and_is_bitwise_exact():
+    """The instrument gate's own test: same size, and the entries really moved."""
+    torch = pytest.importorskip("torch")
+    from kvcache.metrics.restoration import apply_reinsertion, retained_set_report
+
+    keys = torch.arange(2 * 3 * 8 * 4, dtype=torch.float32).reshape(2, 3, 8, 4)
+    values = keys * -1.0
+    evicted_k = torch.full((2, 3, 5, 4), 7.0)
+    evicted_v = torch.full((2, 3, 5, 4), -7.0)
+
+    new_k, new_v = apply_reinsertion(
+        keys,
+        values,
+        evicted_keys=evicted_k,
+        evicted_values=evicted_v,
+        reinsert_local=[0, 2],
+        evict_local=[1, 3],
+    )
+    assert new_k.shape[2] == keys.shape[2]  # budget preserved
+    assert new_v.shape[2] == values.shape[2]
+
+    expected = evicted_k.index_select(2, torch.tensor([0, 2]))
+    report = retained_set_report(new_k, expected, n_reinserted=2)
+    assert report["passed"] is True
+    assert report["max_abs_difference"] == 0.0
+
+
+def test_relaxed_surgery_grows_the_cache_by_exactly_the_reinsertion():
+    torch = pytest.importorskip("torch")
+    from kvcache.metrics.restoration import apply_reinsertion
+
+    keys = torch.zeros(1, 2, 6, 3)
+    values = torch.zeros(1, 2, 6, 3)
+    ek = torch.ones(1, 2, 4, 3)
+    new_k, _ = apply_reinsertion(
+        keys,
+        values,
+        evicted_keys=ek,
+        evicted_values=ek,
+        reinsert_local=[0, 1, 2],
+        evict_local=[],
+    )
+    assert new_k.shape[2] == 9
+
+
+def test_gate_fails_when_the_reinserted_entries_were_altered():
+    """A surgery that changes values it claimed only to move must be caught."""
+    torch = pytest.importorskip("torch")
+    from kvcache.metrics.restoration import retained_set_report
+
+    new_k = torch.ones(1, 1, 4, 2)
+    expected = torch.ones(1, 1, 2, 2) * 1.5  # not what is actually in the tail
+    report = retained_set_report(new_k, expected, n_reinserted=2)
+    assert report["passed"] is False
+    assert report["max_abs_difference"] == pytest.approx(0.5)
+
+
+def test_no_intervention_arm_passes_the_gate_trivially_and_says_so():
+    pytest.importorskip("torch")
+    from kvcache.metrics.restoration import retained_set_report
+
+    report = retained_set_report(None, None, n_reinserted=0)
+    assert report["passed"] is True
+    assert "no-intervention" in report["note"]

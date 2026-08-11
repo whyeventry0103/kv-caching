@@ -1,0 +1,36 @@
+name: replay_ratio_matched_m3
+stage: replay
+mode: compression_replay
+# Amendment M.3 -- THE RATIO-MATCHED CONTROL.
+#
+# Every existing profile fixes the budget at 256 while context grows, so the
+# realized compression ratio worsens monotonically WITHIN a trace. The observed
+# TV staircase is therefore equally consistent with a compression-ratio curve as
+# with a horizon curve, and Amendment P.2 states that no mechanistic reading is
+# licensed until this control exists.
+#
+# Here the ratio is held fixed instead: target_size = max(32, ratio * context),
+# recomputed at every compression. 0.038 is the realized budget-256 ratio on
+# MATH-500 (compression_ratio.diss256 = 0.0381), so this cell compresses to the
+# same FRACTION throughout rather than the same absolute size.
+#
+# READ (pre-registered in M.3, unchanged): if the staircase survives at fixed
+# ratio, the horizon reading stands and "mechanism" is licensed for it; if it
+# flattens, the profile is a ratio effect and section 4.4 is restated in those
+# terms.
+reference_run_name: math500-fc-powered-merged
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+subset:
+  math500: 25
+presses: [random, streamingllm]
+budgets: [256]           # nominal; overridden per step by matched_ratio
+matched_ratio: 0.038
+matched_min_budget: 32
+seeds: [11, 23, 47, 89]
+compression_interval: 64
+extended_measures: true
+estimated_generation_count: 0
+estimated_replay_count: 200
+scale_authorized: true
+remote_only: true

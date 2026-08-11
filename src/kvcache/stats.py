@@ -458,3 +458,101 @@ def published_config_branch(
         "difference_ci_spans_zero": spans_zero,
         "rule": "PREREGISTRATION Amendment N.2",
     }
+
+
+def spearman_rho(x: Sequence[float], y: Sequence[float]) -> float:
+    """Spearman rank correlation, with midranks for ties.
+
+    Amendment P.3 makes this the PRIMARY statistic for the AUC-vs-residual test,
+    not Pearson: "proportional" is a strictly stronger claim than "correlated",
+    and a rank correlation must never be described as proportionality. Linearity
+    through the origin is tested separately, and only after.
+    """
+    if len(x) != len(y):
+        raise ValueError("spearman needs paired samples")
+    if len(x) < 3:
+        raise ValueError("spearman on fewer than 3 points is not a correlation")
+
+    def ranks(values: Sequence[float]) -> list[float]:
+        order = sorted(range(len(values)), key=lambda i: values[i])
+        out = [0.0] * len(values)
+        i = 0
+        while i < len(order):
+            j = i
+            while j + 1 < len(order) and values[order[j + 1]] == values[order[i]]:
+                j += 1
+            midrank = (i + j) / 2.0 + 1.0
+            for k in range(i, j + 1):
+                out[order[k]] = midrank
+            i = j + 1
+        return out
+
+    rx, ry = ranks(x), ranks(y)
+    mx, my = statistics.fmean(rx), statistics.fmean(ry)
+    num = sum((a - mx) * (b - my) for a, b in zip(rx, ry, strict=True))
+    dx = math.sqrt(sum((a - mx) ** 2 for a in rx))
+    dy = math.sqrt(sum((b - my) ** 2 for b in ry))
+    if dx == 0 or dy == 0:
+        raise ValueError("spearman undefined when one variable is constant")
+    return num / (dx * dy)
+
+
+def correlation_with_cluster_bootstrap(
+    cells: Mapping[str, Mapping[str, Mapping[str, float]]],
+    *,
+    n_resamples: int = 2000,
+    seed: int = 0,
+) -> dict[str, Any]:
+    """Spearman between two per-cell quantities, with a problem-clustered CI.
+
+    ``cells`` maps cell name -> {"auc": {problem: value}, "residual": {problem:
+    value}}. Both cell-level quantities are re-derived from the SAME resampled
+    problems on every draw, so the interval reflects that the two are measured
+    on shared problems rather than treating them as independent.
+
+    n is the number of CELLS, and it is reported with every coefficient: a
+    three-point "correlation" is not one, and Amendment P.3 forbids presenting
+    it as such.
+    """
+    names = sorted(cells)
+    if len(names) < 3:
+        raise ValueError(f"{len(names)} cells is not a correlation")
+
+    def point(sampler=None) -> float:
+        xs, ys = [], []
+        for name in names:
+            auc, res = cells[name]["auc"], cells[name]["residual"]
+            problems = (
+                sampler(sorted(set(auc) & set(res)))
+                if sampler
+                else sorted(set(auc) & set(res))
+            )
+            xs.append(statistics.fmean(auc[p] for p in problems))
+            ys.append(statistics.fmean(res[p] for p in problems))
+        return spearman_rho(xs, ys)
+
+    observed = point()
+    rng = random.Random(seed)
+    draws = []
+    for _ in range(n_resamples):
+        try:
+            draws.append(point(lambda ps: [rng.choice(ps) for _ in ps]))
+        except ValueError:
+            continue  # a resample made a variable constant; skip, do not clamp
+    draws.sort()
+    lo = draws[int(0.025 * (len(draws) - 1))]
+    hi = draws[int(0.975 * (len(draws) - 1))]
+    return {
+        "n_cells": len(names),
+        "cells": names,
+        "spearman_rho": observed,
+        "rho_ci95": [lo, hi],
+        "excludes_zero": (lo > 0.0) or (hi < 0.0),
+        "n_resamples": n_resamples,
+        "n_usable_draws": len(draws),
+        "seed": seed,
+        "discipline": (
+            "Rank correlation. NEVER describe as proportionality; that is a "
+            "separate, stronger test (linearity through the origin)."
+        ),
+    }

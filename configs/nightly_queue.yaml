@@ -454,3 +454,42 @@ jobs:
     min_free_gb: 28
     progress_kind: grid
     requires: null
+
+  # ---- P.5 restoration: gate first, then the powered cell -------------------
+  # The smoke's ONLY job is the retained-set instrument gate (reinserted K/V
+  # present and bitwise identical). Amendment P.5 refuses to read divergence
+  # until it passes, so the powered cell `requires` it.
+  - name: restoration-smoke
+    command: replay
+    config: configs/experiments/restoration_smoke.yaml
+    run_name: restoration-smoke
+    total: 24
+    seeds: [11]
+    min_free_gb: 28
+    progress_kind: grid
+    requires: replay-ext-diss256
+  - name: restoration-diss256
+    command: replay
+    config: configs/experiments/restoration_diss256.yaml
+    run_name: restoration-diss256
+    total: 800
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 28
+    progress_kind: grid
+    requires: restoration-smoke
+
+  # ---- M.3 ratio-matched control -------------------------------------------
+  # Gates the INTERPRETATION of every divergence profile: until it runs, the
+  # staircase is equally consistent with a compression-ratio curve. Queued after
+  # restoration because restoration is a new mechanism while this is a control
+  # on an existing reading; reorder if the reading is needed sooner.
+  - name: replay-ratio-matched-m3
+    command: replay
+    config: configs/experiments/replay_ratio_matched_m3.yaml
+    run_name: replay-ratio-matched-m3
+    total: 200
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 28
+    progress_kind: grid
+    requires: restoration-diss256
+

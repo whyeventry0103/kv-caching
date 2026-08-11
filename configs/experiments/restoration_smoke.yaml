@@ -1,0 +1,24 @@
+name: restoration_smoke
+stage: replay
+mode: compression_replay
+# Amendment P.5 instrument gate: 3 problems x 1 seed x 2 presses, all four arms.
+# Its ONLY job is to prove the reinserted K/V entries are present and bitwise
+# identical to what was evicted. Divergence from this run is not read.
+reference_run_name: math500-fc-powered-merged
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+subset:
+  math500: 3
+presses: [random, streamingllm]
+budgets: [256]
+seeds: [11]
+compression_interval: 64
+extended_measures: true
+restoration:
+  arms: [none, relaxed, matched, random]
+  trigger_step: 130
+  reinsert_fraction: 0.25
+estimated_generation_count: 0
+estimated_replay_count: 24
+scale_authorized: true
+remote_only: true

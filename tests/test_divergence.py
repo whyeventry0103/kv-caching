@@ -70,12 +70,16 @@ def test_torch_path_agrees_with_the_reference_implementation():
     logits_test = torch.tensor([1.2, 1.9, 0.3, -0.2])
     from kvcache.metrics.divergence import measures_from_logits
 
+    # The live path runs in float32 (a float64 softmax over a 150k vocabulary at
+    # every step would dominate the replay), so agreement is to float32
+    # precision, not to float64. 1e-6 is ~10x the observed 1.7e-8 discrepancy
+    # and still far below the 4th decimal these measures are reported at.
     live = measures_from_logits(logits_full, logits_test)
     p = torch.softmax(logits_full, dim=-1).tolist()
     q = torch.softmax(logits_test, dim=-1).tolist()
     ref = measures_from_probs(p, q)
     for key in ("tv", "jsd"):
-        assert live[key] == pytest.approx(ref[key], abs=1e-9)
+        assert live[key] == pytest.approx(ref[key], abs=1e-6)
     assert live["top1_agree"] == ref["top1_agree"]
     assert live["rank_displacement"] == ref["rank_displacement"]
-    assert math.isclose(live["kl_fwd"], ref["kl_fwd"], abs_tol=1e-9)
+    assert math.isclose(live["kl_fwd"], ref["kl_fwd"], abs_tol=1e-6)

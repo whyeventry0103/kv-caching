@@ -36,6 +36,11 @@ echo "Source: $PROJECT_ROOT/"
 echo "Destination: $REMOTE:$REMOTE_PROJECT_ROOT/"
 echo "Mode: $([[ "$MODE" == "--apply" ]] && echo APPLY || echo DRY-RUN)"
 echo "No --delete is used. Remote data, caches, runs, logs, and environments are excluded."
+# The directory excludes above are ANCHORED with a leading slash. Unanchored,
+# rsync matches the name at any depth -- which silently excluded docs/results/
+# (and would have excluded any docs/logs/ or docs/data/) the moment the docs
+# tree gained a subdirectory with a reserved name. The remote then had no
+# PAPER_FINDINGS.md at all and two gate tests failed there while passing here.
 echo "SSH multiplexing is enabled; this sync should request the password at most once."
 
 ssh "${SSH_OPTIONS[@]}" -MNf "$REMOTE"
@@ -56,11 +61,11 @@ rsync "${RSYNC_FLAGS[@]}" \
   --exclude='.claude/' \
   --exclude='.venv/' \
   --exclude='.venv-*/' \
-  --exclude='data/' \
-  --exclude='kvcache-storage/' \
-  --exclude='runs/' \
-  --exclude='logs/' \
-  --exclude='results/' \
+  --exclude='/data/' \
+  --exclude='/kvcache-storage/' \
+  --exclude='/runs/' \
+  --exclude='/logs/' \
+  --exclude='/results/' \
   --exclude='__pycache__/' \
   --exclude='.pytest_cache/' \
   --exclude='.ruff_cache/' \

@@ -264,3 +264,48 @@ def test_published_config_branch_names_its_preregistered_rule():
     assert published_config_branch(1.0, [0.0, 0.0])["rule"] == (
         "PREREGISTRATION Amendment N.2"
     )
+
+
+def test_spearman_is_one_on_a_monotone_but_nonlinear_relation():
+    """The reason P.3 uses rank correlation: monotone need not be linear."""
+    from kvcache.stats import spearman_rho
+
+    x = [1.0, 2.0, 3.0, 4.0, 5.0]
+    y = [1.0, 4.0, 9.0, 16.0, 25.0]
+    assert spearman_rho(x, y) == pytest.approx(1.0)
+
+
+def test_spearman_handles_ties_with_midranks():
+    from kvcache.stats import spearman_rho
+
+    assert spearman_rho([1.0, 2.0, 2.0, 3.0], [1.0, 2.0, 2.0, 3.0]) == pytest.approx(
+        1.0
+    )
+
+
+def test_spearman_refuses_a_three_point_pseudo_correlation():
+    from kvcache.stats import spearman_rho
+
+    with pytest.raises(ValueError):
+        spearman_rho([1.0, 2.0], [1.0, 2.0])
+
+
+def test_correlation_bootstrap_reports_n_cells_and_refuses_too_few():
+    from kvcache.stats import correlation_with_cluster_bootstrap
+
+    cells = {
+        f"c{i}": {
+            "auc": {f"p{j}": 0.1 * i + 0.001 * j for j in range(6)},
+            "residual": {f"p{j}": -0.1 * i - 0.001 * j for j in range(6)},
+        }
+        for i in range(5)
+    }
+    out = correlation_with_cluster_bootstrap(cells, n_resamples=200)
+    assert out["n_cells"] == 5
+    assert out["spearman_rho"] == pytest.approx(-1.0)
+    assert "proportionality" in out["discipline"]
+
+    with pytest.raises(ValueError, match="not a correlation"):
+        correlation_with_cluster_bootstrap(
+            {k: cells[k] for k in ("c0", "c1")}, n_resamples=10
+        )

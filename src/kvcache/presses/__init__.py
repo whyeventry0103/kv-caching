@@ -249,3 +249,186 @@ def build_rkv_press(
         compression_interval=compression_interval,
         hidden_states_buffer_size=RKV_WINDOW_SIZE,
     )
+
+
+def build_ratio_matched_press(
+    name: str,
+    *,
+    ratio: float,
+    min_budget: int = 32,
+    compression_interval: int = 64,
+    seed: int | None = None,
+    kvpress_module: Any | None = None,
+) -> Any:
+    """A press whose budget TRACKS context length, holding the realized ratio fixed.
+
+    Amendment M.3. Every existing profile fixes the budget while context grows,
+    so the realized compression ratio worsens monotonically within a trace and
+    the observed TV staircase is equally consistent with a compression-ratio
+    curve as with a horizon curve. Until this control runs, no mechanistic
+    reading of the profile is licensed (Amendment P.2 states this explicitly).
+
+    Here ``target_size`` is recomputed at each compression as
+    ``max(min_budget, round(ratio * context_length))``, so the ratio is the
+    thing held constant and the horizon is the thing varying.
+    """
+    if not 0.0 < ratio < 1.0:
+        raise ValueError("ratio must lie strictly between 0 and 1")
+    if min_budget <= 0:
+        raise ValueError("min_budget must be positive")
+
+    base = build_press(
+        name,
+        budget=max(min_budget, 1),
+        compression_interval=compression_interval,
+        seed=seed,
+        kvpress_module=kvpress_module,
+    )
+    if base is None:
+        raise ValueError("fullcache has no ratio to match")
+
+    original_compress = base.compress
+
+    def compress(module, hidden_states, keys, values, attentions, kwargs):
+        context = int(keys.shape[2])
+        base.target_size = max(int(min_budget), int(round(ratio * context)))
+        base.ratio_trace = getattr(base, "ratio_trace", [])
+        base.ratio_trace.append(
+            {"context": context, "target_size": int(base.target_size)}
+        )
+        return original_compress(
+            module, hidden_states, keys, values, attentions, kwargs
+        )
+
+    base.compress = compress
+    base.matched_ratio = float(ratio)
+    base.min_budget = int(min_budget)
+    return base
+
+
+def build_restoration_press(
+    name: str,
+    *,
+    budget: int,
+    arm: str,
+    trigger_step: int,
+    reinsert_fraction: float = 0.25,
+    compression_interval: int = 64,
+    seed: int | None = None,
+    kvpress_module: Any | None = None,
+) -> Any:
+    """A press that stashes evicted K/V and reinserts them once, at a fixed step.
+
+    Amendment P.5. The stash is what makes restoration possible at all: kvpress
+    discards evicted entries, so they must be captured at the moment of eviction
+    or they are gone.
+
+    ``arm`` selects the intervention (see kvcache.metrics.restoration.ARMS).
+    ``none`` stashes but never intervenes -- it is the temporal null, and it must
+    run the identical code path so the comparison is not confounded by
+    bookkeeping differences.
+
+    The press records ``restoration_report`` after intervening, which the
+    instrument gate reads. Divergence from a run whose report did not pass is
+    not to be read.
+    """
+    from kvcache.metrics.restoration import (
+        ARMS,
+        apply_reinsertion,
+        plan_reinsertion,
+        retained_set_report,
+    )
+
+    if arm not in ARMS:
+        raise ValueError(f"unknown arm {arm!r}; expected one of {ARMS}")
+    if not 0.0 < reinsert_fraction <= 1.0:
+        raise ValueError("reinsert_fraction must lie in (0, 1]")
+
+    base = build_press(
+        name,
+        budget=budget,
+        compression_interval=compression_interval,
+        seed=seed,
+        kvpress_module=kvpress_module,
+    )
+    if base is None:
+        raise ValueError("fullcache evicts nothing, so it cannot be restored")
+
+    import random as _random
+
+    rng = _random.Random(seed if seed is not None else 0)
+    original_compress = base.compress
+    base.arm = arm
+    base.trigger_step = int(trigger_step)
+    base.n_reinsert = max(1, int(round(reinsert_fraction * budget)))
+    base.stash_keys = None
+    base.stash_values = None
+    base.restoration_report = None
+    base.intervened = False
+
+    def compress(module, hidden_states, keys, values, attentions, kwargs):
+        import torch
+
+        before = int(keys.shape[2])
+        new_keys, new_values = original_compress(
+            module, hidden_states, keys, values, attentions, kwargs
+        )
+        # Stash whatever this compression dropped. Bounded to the most recent
+        # `n_reinsert` entries: the intervention only ever needs the recent tail,
+        # and an unbounded stash would grow to the size of the discarded cache.
+        dropped = before - int(new_keys.shape[2])
+        if dropped > 0:
+            tail_k = keys[:, :, -dropped:, :].detach().clone()
+            tail_v = values[:, :, -dropped:, :].detach().clone()
+            if base.stash_keys is None:
+                base.stash_keys, base.stash_values = tail_k, tail_v
+            else:
+                base.stash_keys = torch.cat([base.stash_keys, tail_k], dim=2)
+                base.stash_values = torch.cat([base.stash_values, tail_v], dim=2)
+            keep = min(base.stash_keys.shape[2], base.n_reinsert * 4)
+            base.stash_keys = base.stash_keys[:, :, -keep:, :]
+            base.stash_values = base.stash_values[:, :, -keep:, :]
+
+        step = getattr(base, "profile_step", None)
+        if (
+            base.arm != "none"
+            and not base.intervened
+            and step is not None
+            and step >= base.trigger_step
+            and base.stash_keys is not None
+            and base.stash_keys.shape[2] >= base.n_reinsert
+        ):
+            plan = plan_reinsertion(
+                evicted_order=list(range(base.stash_keys.shape[2])),
+                retained=list(range(int(new_keys.shape[2]))),
+                n_reinsert=base.n_reinsert,
+                arm=base.arm,
+                rng=rng,
+            )
+            expected = base.stash_keys.index_select(
+                2, torch.tensor(plan["reinsert"], device=base.stash_keys.device)
+            )
+            new_keys, new_values = apply_reinsertion(
+                new_keys,
+                new_values,
+                evicted_keys=base.stash_keys,
+                evicted_values=base.stash_values,
+                reinsert_local=plan["reinsert"],
+                evict_local=plan["evict"],
+            )
+            base.restoration_report = {
+                **retained_set_report(
+                    new_keys, expected, n_reinserted=len(plan["reinsert"])
+                ),
+                "arm": base.arm,
+                "trigger_step": base.trigger_step,
+                "applied_at_step": int(step),
+                "cache_before": int(before),
+                "cache_after": int(new_keys.shape[2]),
+                "budget_matched": len(plan["evict"]) == len(plan["reinsert"]),
+            }
+            base.intervened = True
+        return new_keys, new_values
+
+    base.compress = compress
+    return base

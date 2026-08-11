@@ -308,3 +308,151 @@ def test_rope_inv_freq_rejects_a_head_dim_mismatch():
             torch.device("cpu"),
             rope_init_functions={"llama3": lambda c, d: (torch.ones(4), 1.0)},
         )
+
+
+def test_ratio_matched_press_scales_the_budget_with_context(monkeypatch):
+    """Amendment M.3: the RATIO is held fixed, so target_size must track context."""
+    from kvcache.presses import build_ratio_matched_press
+
+    class FakeBase:
+        target_size = 0
+
+        def compress(self, module, hidden_states, keys, values, attentions, kwargs):
+            return keys, values
+
+    import kvcache.presses as presses_module
+
+    monkeypatch.setattr(
+        presses_module, "build_press", lambda *a, **k: FakeBase(), raising=True
+    )
+    press = build_ratio_matched_press("random", ratio=0.25, min_budget=32)
+
+    class Keys:
+        def __init__(self, n):
+            self.shape = (1, 1, n, 8)
+
+    for context, expected in (
+        (1000, 250),
+        (4000, 1000),
+        (64, 32),
+    ):  # 64*.25=16 -> floor
+        press.compress(None, None, Keys(context), Keys(context), None, {})
+        assert press.target_size == expected
+    assert [e["context"] for e in press.ratio_trace] == [1000, 4000, 64]
+
+
+def test_ratio_matched_press_rejects_impossible_ratios():
+    import pytest as _pytest
+
+    from kvcache.presses import build_ratio_matched_press
+
+    for bad in (0.0, 1.0, -0.1, 1.5):
+        with _pytest.raises(ValueError):
+            build_ratio_matched_press("random", ratio=bad)
+
+
+def _fake_kvpress_base(monkeypatch):
+    """A base press that evicts the oldest entries down to target_size."""
+    import kvcache.presses as presses_module
+
+    class FakeBase:
+        target_size = 4
+        profile_step = 0
+
+        def compress(self, module, hidden_states, keys, values, attentions, kwargs):
+            n = keys.shape[2]
+            if n <= self.target_size:
+                return keys, values
+            return (
+                keys[:, :, -self.target_size :, :],
+                values[:, :, -self.target_size :, :],
+            )
+
+    base = FakeBase()
+    monkeypatch.setattr(presses_module, "build_press", lambda *a, **k: base)
+    return base
+
+
+def test_restoration_press_none_arm_never_intervenes(monkeypatch):
+    """The temporal null must run the same code path and change nothing."""
+    torch = pytest.importorskip("torch")
+    from kvcache.presses import build_restoration_press
+
+    base = _fake_kvpress_base(monkeypatch)
+    press = build_restoration_press(
+        "random", budget=4, arm="none", trigger_step=0, reinsert_fraction=0.5
+    )
+    keys = torch.arange(1 * 1 * 8 * 2, dtype=torch.float32).reshape(1, 1, 8, 2)
+    base.profile_step = 10
+    out_k, _ = press.compress(None, None, keys, keys.clone(), None, {})
+    assert out_k.shape[2] == 4  # plain compression only
+    assert press.restoration_report is None
+    assert press.intervened is False
+
+
+def test_restoration_press_matched_arm_holds_the_budget_and_passes_its_gate(
+    monkeypatch,
+):
+    torch = pytest.importorskip("torch")
+    from kvcache.presses import build_restoration_press
+
+    base = _fake_kvpress_base(monkeypatch)
+    press = build_restoration_press(
+        "random", budget=4, arm="matched", trigger_step=1, reinsert_fraction=0.5
+    )
+    keys = torch.arange(16, dtype=torch.float32).reshape(1, 1, 8, 2)
+    base.profile_step = 0
+    press.compress(None, None, keys, keys.clone(), None, {})  # builds the stash
+    base.profile_step = 5
+    out_k, _ = press.compress(None, None, keys, keys.clone(), None, {})
+
+    report = press.restoration_report
+    assert report is not None, "matched arm should have intervened"
+    assert report["passed"] is True
+    assert report["bitwise_identical"] is True
+    assert report["budget_matched"] is True
+    assert report["cache_after"] == 4  # unchanged: the whole point of this arm
+
+
+def test_restoration_press_relaxed_arm_grows_the_cache(monkeypatch):
+    torch = pytest.importorskip("torch")
+    from kvcache.presses import build_restoration_press
+
+    base = _fake_kvpress_base(monkeypatch)
+    press = build_restoration_press(
+        "random", budget=4, arm="relaxed", trigger_step=1, reinsert_fraction=0.5
+    )
+    keys = torch.arange(16, dtype=torch.float32).reshape(1, 1, 8, 2)
+    base.profile_step = 0
+    press.compress(None, None, keys, keys.clone(), None, {})
+    base.profile_step = 5
+    out_k, _ = press.compress(None, None, keys, keys.clone(), None, {})
+    assert out_k.shape[2] > 4
+    assert press.restoration_report["budget_matched"] is False
+
+
+def test_restoration_press_intervenes_exactly_once(monkeypatch):
+    torch = pytest.importorskip("torch")
+    from kvcache.presses import build_restoration_press
+
+    base = _fake_kvpress_base(monkeypatch)
+    press = build_restoration_press(
+        "random", budget=4, arm="matched", trigger_step=1, reinsert_fraction=0.5
+    )
+    keys = torch.arange(16, dtype=torch.float32).reshape(1, 1, 8, 2)
+    for step in (0, 5, 6, 7):
+        base.profile_step = step
+        press.compress(None, None, keys, keys.clone(), None, {})
+    assert press.restoration_report["applied_at_step"] == 5
+
+
+def test_restoration_press_rejects_a_bad_arm_or_fraction():
+    from kvcache.presses import build_restoration_press
+
+    for kwargs in (
+        {"arm": "bogus", "reinsert_fraction": 0.25},
+        {"arm": "matched", "reinsert_fraction": 0.0},
+        {"arm": "matched", "reinsert_fraction": 1.5},
+    ):
+        with pytest.raises(ValueError):
+            build_restoration_press("random", budget=4, trigger_step=1, **kwargs)

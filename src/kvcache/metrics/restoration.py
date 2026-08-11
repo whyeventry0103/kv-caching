@@ -189,3 +189,77 @@ def restoration_effect(tv_before: float, tv_after_reinsertion: float) -> float:
     causal reading on its own.
     """
     return tv_before - tv_after_reinsertion
+
+
+# --------------------------------------------------------------------------
+# Cache surgery. Kept as a pure function over tensors so the index bookkeeping
+# is testable without a model: the arithmetic that decides WHICH entries end up
+# in the cache is where a restoration test goes silently wrong.
+# --------------------------------------------------------------------------
+
+
+def apply_reinsertion(
+    keys: Any,
+    values: Any,
+    *,
+    evicted_keys: Any,
+    evicted_values: Any,
+    reinsert_local: Sequence[int],
+    evict_local: Sequence[int],
+) -> tuple[Any, Any]:
+    """Put stashed entries back and drop ``evict_local`` from the live cache.
+
+    ``keys``/``values`` are (batch, heads, positions, dim). ``reinsert_local``
+    indexes ``evicted_keys``; ``evict_local`` indexes ``keys``. Returns the new
+    pair. For the budget-matched arm the two lists have equal length, so the
+    cache size is unchanged -- the whole point of that arm.
+
+    Reinserted entries are appended rather than restored to their original
+    slots: kvpress caches are position-indexed by order, and re-threading them
+    into the middle would silently reorder every later entry's RoPE phase.
+    Appending is the honest operation and is what the retained-set gate checks.
+    """
+    import torch
+
+    keep = [i for i in range(keys.shape[2]) if i not in set(evict_local)]
+    kept_k = keys[:, :, keep, :]
+    kept_v = values[:, :, keep, :]
+    if not len(reinsert_local):
+        return kept_k, kept_v
+    idx = torch.as_tensor(list(reinsert_local), device=keys.device, dtype=torch.long)
+    add_k = evicted_keys.index_select(2, idx)
+    add_v = evicted_values.index_select(2, idx)
+    return (
+        torch.cat([kept_k, add_k], dim=2),
+        torch.cat([kept_v, add_v], dim=2),
+    )
+
+
+def retained_set_report(
+    new_keys: Any, expected_keys: Any, *, n_reinserted: int
+) -> dict[str, Any]:
+    """Instrument gate: are the reinserted entries present and BITWISE identical?
+
+    Amendment P.5 refuses to read any divergence until this passes, in the
+    spirit of the R-KV Jaccard parity gate. A reinsertion that silently dropped,
+    reordered or cast its entries would still produce a divergence curve, and
+    that curve would mean nothing.
+    """
+    import torch
+
+    if n_reinserted == 0:
+        return {"passed": True, "n_reinserted": 0, "note": "no-intervention arm"}
+    tail = new_keys[:, :, -n_reinserted:, :]
+    exact = bool(torch.equal(tail, expected_keys))
+    max_abs = float((tail - expected_keys).abs().max().item())
+    return {
+        "passed": exact,
+        "n_reinserted": int(n_reinserted),
+        "bitwise_identical": exact,
+        "max_abs_difference": max_abs,
+        "note": (
+            "Reinserted entries occupy the tail of the cache and must match the "
+            "stashed tensors exactly; a non-zero difference means the surgery "
+            "changed the values it claimed only to move."
+        ),
+    }

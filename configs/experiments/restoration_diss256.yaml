@@ -1,0 +1,31 @@
+name: restoration_diss256
+stage: replay
+mode: compression_replay
+# Amendment P.5 -- the restoration test, all four arms.
+#
+# Random and StreamingLLM sit on opposite sides of the recoverable/concentrated
+# split and should behave differently if the mechanism is real. The `none` arm
+# is the TEMPORAL NULL and is not optional: divergence at the trigger has a
+# trajectory of its own, and without it "divergence dropped after reinsertion"
+# is unfalsifiable. `random` is the null for WHICH tokens.
+#
+# Only the budget-matched arm answers the question. The relaxed arm is a
+# reference point and must never be reported as the result.
+reference_run_name: math500-fc-powered-merged
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+subset:
+  math500: 25
+presses: [random, streamingllm]
+budgets: [256]
+seeds: [11, 23, 47, 89]
+compression_interval: 64
+extended_measures: true
+restoration:
+  arms: [none, relaxed, matched, random]
+  trigger_step: 130
+  reinsert_fraction: 0.25
+estimated_generation_count: 0
+estimated_replay_count: 800
+scale_authorized: true
+remote_only: true
