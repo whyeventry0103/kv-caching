@@ -40,7 +40,11 @@ fi
 
 cd "$PROJECT_ROOT"
 mkdir -p logs
-bash scripts/check_remote.sh --config "$CONFIG" --run-name "$SESSION"
+# Resolve the run name ONCE so preflight and the job agree. They must: the
+# preflight checks the run directory for a clash and for a live process,
+# and checking a different name than the job writes to would gate nothing.
+RUN_NAME="${KVCACHE_RUN_NAME:-$SESSION}"
+bash scripts/check_remote.sh --config "$CONFIG" --run-name "$RUN_NAME"
 
 RUNNER="$PROJECT_ROOT/logs/$SESSION.runner.sh"
 {
@@ -55,7 +59,13 @@ RUNNER="$PROJECT_ROOT/logs/$SESSION.runner.sh"
       printf 'export %s=%q\n' "$name" "${!name}"
     fi
   done
-  printf 'export KVCACHE_RUN_NAME=%q\n' "$SESSION"
+  # The run name defaults to the session, but an explicitly set
+  # KVCACHE_RUN_NAME wins. Two GPUs sharding one job MUST write to one run
+  # directory: the orchestrator counts progress by run directory, so shards
+  # under per-session names are invisible to it and the job gets relaunched and
+  # duplicated. That has now happened twice (rkvpub-g0/g1, rext-g0/g1), both
+  # times because this line overwrote the caller's value unconditionally.
+  printf 'export KVCACHE_RUN_NAME=%q\n' "$RUN_NAME"
   printf 'cd %q\n' "$PROJECT_ROOT"
   printf 'exec bash scripts/launch.sh --i-understand %q %q' "$COMMAND" "$CONFIG"
   if (( ${#EXTRA_ARGS[@]} )); then
