@@ -101,8 +101,13 @@ def build_press(
     seed: int | None = None,
     kvpress_module: Any | None = None,
     decoding_press_cls: type | None = None,
+    instrumented: bool = False,
 ) -> Any | None:
-    """Build a verified decoding press; imports kvpress only when executed."""
+    """Build a verified decoding press; imports kvpress only when executed.
+
+    ``instrumented`` selects the replay-instrumented subclass. It is resolved
+    here, after kvpress is imported, so the CPU-only gate never imports it.
+    """
     normalized = name.lower()
     if normalized == "fullcache":
         return None
@@ -154,7 +159,11 @@ def build_press(
         base_press = build_rkv_scorer(kvpress_module)
     else:
         raise AssertionError("unreachable")
-    press_cls = decoding_press_cls or kvpress_module.DecodingPress
+    press_cls = decoding_press_cls or (
+        _enabled_decoding_press_cls(kvpress_module)
+        if instrumented
+        else kvpress_module.DecodingPress
+    )
     # R-KV scores importance over the last-8-query observation window, so DecodingPress
     # must buffer those hidden states; the other presses score from keys alone.
     if normalized == "rkv":
@@ -171,19 +180,15 @@ def build_press(
     )
 
 
-def build_replay_press(
-    name: str,
-    *,
-    budget: int,
-    compression_interval: int = 64,
-    seed: int | None = None,
-    kvpress_module: Any | None = None,
-) -> Any:
-    """Build an instrumented decoding press toggled explicitly by replay."""
-    if name.lower() == "fullcache":
-        return NoOpReplayPress()
-    if kvpress_module is None:
-        import kvpress as kvpress_module
+def _enabled_decoding_press_cls(kvpress_module: Any) -> type:
+    """The replay-instrumented DecodingPress subclass.
+
+    Factored out because EVERY press used inside a replay needs this
+    instrumentation, not just the plain one. ``profile_step`` in particular is
+    written by the replay loop and read by the restoration press to decide when
+    to intervene; a press built on a bare ``DecodingPress`` never has it, so the
+    trigger silently never fires and every arm degenerates to the null.
+    """
 
     class EnabledDecodingPress(kvpress_module.DecodingPress):
         def __post_init__(self) -> None:
@@ -216,13 +221,27 @@ def build_replay_press(
                 )
             return compressed_keys, compressed_values
 
+    return EnabledDecodingPress
+
+
+def build_replay_press(
+    name: str,
+    *,
+    budget: int,
+    compression_interval: int = 64,
+    seed: int | None = None,
+    kvpress_module: Any | None = None,
+) -> Any:
+    """Build an instrumented decoding press toggled explicitly by replay."""
+    if name.lower() == "fullcache":
+        return NoOpReplayPress()
     return build_press(
         name,
         budget=budget,
         compression_interval=compression_interval,
         seed=seed,
         kvpress_module=kvpress_module,
-        decoding_press_cls=EnabledDecodingPress,
+        instrumented=True,
     )
 
 
@@ -283,6 +302,7 @@ def build_ratio_matched_press(
         compression_interval=compression_interval,
         seed=seed,
         kvpress_module=kvpress_module,
+        instrumented=True,
     )
     if base is None:
         raise ValueError("fullcache has no ratio to match")
@@ -350,6 +370,7 @@ def build_restoration_press(
         compression_interval=compression_interval,
         seed=seed,
         kvpress_module=kvpress_module,
+        instrumented=True,
     )
     if base is None:
         raise ValueError("fullcache evicts nothing, so it cannot be restored")
@@ -428,6 +449,13 @@ def build_restoration_press(
                 "budget_matched": len(plan["evict"]) == len(plan["reinsert"]),
             }
             base.intervened = True
+            # The instrumented compress recorded the size BEFORE this surgery.
+            # Correct it, or the relaxed arm's cache growth is invisible to the
+            # runner's post-prune budget check -- the one arm that must show it.
+            events = getattr(base, "compressions", None)
+            if events:
+                events[-1]["after"] = int(new_keys.shape[2])
+                events[-1]["reinserted"] = len(plan["reinsert"])
         return new_keys, new_values
 
     base.compress = compress

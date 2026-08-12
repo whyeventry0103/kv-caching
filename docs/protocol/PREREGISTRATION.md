@@ -1783,3 +1783,124 @@ H2O-style 0.0730 — consistent with the three previously published values.
 the ratio-matched control (M.3) has not run, so no mechanistic reading of the
 rising profile is licensed: it is still consistent with a compression-ratio
 curve rather than a horizon curve.
+
+---
+
+## Amendment P.2, replication (2026-08-12): Random holds, StreamingLLM does not, and R-KV enters
+
+The extended replay pass (`replay-ext-diss256`, 800 v2 profiles: 25 problems x 4
+seeds x 4 presses x budgets {256, 2048}) is an **independent sample** from the
+one the 2026-08-10 read used (100 problems x 4 seeds, budget 256 only). It also
+closes that read's stated scope limit: **R-KV now has replay profiles.**
+
+**Budgets must not be pooled.** The first pass of this report pooled 256 and
+2048 and was wrong to: budget 2048 barely compresses these traces (AUC-TV 0.013
+vs 0.084-0.108 at budget 256; 86% of traces classified flat, against 87-96% drift
+at 256), so pooling dilutes any eviction-locked signal toward zero. The pooled
+Random excess read +0.105 and StreamingLLM +0.020; the split below is the
+readable one. `scripts/report_profile_shape.py` gained `--budget` for this, and
+its output now records the filter so a pooled number cannot be mistaken for a
+single-budget one.
+
+**Phase-amplitude excess over sham, budget 256** (n = 100 profiles per press;
+prior single-budget values from `results/diag/amendment-k/classb/shape/`):
+
+| press | excess, this sample | 95% CI | peak phase | prior excess | prior CI | prior peak |
+|---|---|---|---|---|---|---|
+| Random | +0.1068 | [+0.0395, +0.1315] | 0 | +0.0991 | [+0.0614, +0.1271] | 0 |
+| StreamingLLM | +0.0195 | [-0.0212, +0.0499] | 9 | +0.0384 | [+0.0013, +0.0560] | 13 |
+| H2O-style | +0.0293 | [-0.0306, +0.0480] | 24 | +0.0257 | [-0.0106, +0.0436] | 21 |
+| R-KV | +0.0620 | [+0.0016, +0.0775] | 9 | not measured | -- | -- |
+
+**Budget 2048: the phenomenon is absent for all four presses.** No excess
+excludes zero, and three of four point estimates are negative (Random -0.0538,
+StreamingLLM -0.0644, R-KV -0.0350, H2O-style +0.0127).
+
+**Reads.**
+
+1. **Random replicates cleanly** on an independent sample, same peak at phase 0
+   (the prune step). This is the one eviction-locked result the record carries.
+2. **StreamingLLM does not replicate.** Its prior interval excluded zero by
+   0.0013 -- a borderline result -- and the new sample's does not. Per the
+   standing rule that a pre-committed outcome is never re-cut in our favour, the
+   2026-08-10 StreamingLLM claim is **withdrawn**, not averaged with this one.
+   The honest statement is that StreamingLLM's phase locking is not established.
+3. **H2O-style is consistently null**, both samples, as before.
+4. **R-KV excludes zero but marginally** (lower bound +0.0016, the same knife
+   edge that StreamingLLM's prior result sat on and then fell off). With eight
+   press x budget comparisons in this family, one marginal exclusion is the
+   expected yield under no effect. **R-KV is recorded as suggestive, not
+   established**, and specifically must not be used to claim the recoverable /
+   concentrated partition: its peak phase is 9, not 0.
+5. The partition hypothesis from 2026-08-10 is therefore **weaker**, not
+   stronger, after adding the policy it most needed. One clear case (Random),
+   one withdrawn (StreamingLLM), one null (H2O-style), one marginal with the
+   wrong peak (R-KV).
+
+**Unchanged:** interpretation stays withheld pending M.3, and all of this is
+TV-scale (Definition 6).
+
+---
+
+## Amendment P.3, result (2026-08-12): BUDGET EFFECT ONLY
+
+`scripts/report_auc_residual.py` over the 800 v2 profiles, Spearman rank
+correlation with a problem-clustered bootstrap (2000 resamples, seed 0), against
+the catalogued per-cell residuals.
+
+* **Pooled across budgets:** rho = **-0.857**, CI [-0.893, -0.643], 7 cells,
+  excludes zero. (rkv-2048 skipped: no catalogued residual.)
+* **Within budget 256:** rho = **-0.200**, CI [-0.400, +0.800], 4 cells. Does
+  not exclude zero.
+* **Within budget 2048:** rho = -1.0, CI [-1.0, +1.0], 3 cells. Three points is
+  the script's floor and the interval is the whole range; this is not evidence.
+
+This is the pre-registered **BUDGET EFFECT ONLY** branch. The pooled correlation
+is carried by the contrast between budgets -- budget-256 cells have both large
+AUC and large residuals, budget-2048 cells have both small -- and does not
+survive holding budget fixed. The within-budget tests are also underpowered
+(4 and 3 cells), so the correct statement is *not established either way at this
+n*, not *refuted*.
+
+**Answer to the work order's Task 3 as asked:** AUC-TV is **not** shown to be
+proportional to the subtraction residual. Two separate reasons, both of which
+must travel with any restatement: (a) rank correlation is not proportionality --
+that is a strictly stronger claim (linearity through the origin) which was not
+tested; (b) what pooled correlation there is, is a budget effect.
+
+---
+
+## Amendment P.4, result (2026-08-12): the crossing test is degenerate by construction
+
+`scripts/report_onset_localization.py` over the 800 v2 profiles.
+
+**The pre-registered comparison cannot distinguish TV from JSD, and the reason
+is structural rather than empirical.** In teacher-forced replay the compressed
+and full-cache distributions are *identical* until the first prune, so pre-onset
+TV is exactly 0.0 and its spread is exactly zero. The crossing rule's zero-spread
+fallback then reduces "first crossing" to "first non-zero step". TV and JSD are
+non-zero on exactly the same steps -- verified directly on a profile: identical
+zero/non-zero pattern at all 10,769 steps -- so their crossings coincide
+necessarily. The medians agree to the step (192 at budget 256, 1920 at 2048,
+both exact multiples of the 64-step compression interval) and the means differ
+in the third decimal (138.26 vs 138.25) only through trace-length rounding.
+
+**No conclusion about JSD's onset sensitivity may be drawn from this test**, in
+either direction. Recording it as "JSD localises onset the same as TV" would be
+reporting an identity as a measurement.
+
+**Rank displacement does differ, and in the opposite direction to the one
+predicted.** Median first crossing 280-451 steps after onset versus 192 for
+TV/JSD, i.e. it is **coarser** at onset, not sharper. `divergence.py`'s docstring
+asserted the opposite ("Sharper than top-1 for localising onset"); that claim was
+written from the mechanism, not from data, and is corrected. The mechanism is
+sound but its sign was wrong: an integer rank does not move at all until a
+perturbation is large enough to reorder tokens, so it is *insensitive* early.
+
+**What would answer the actual question**, if it is worth answering: a
+scale-free formulation -- for each trace and measure, the first step reaching a
+fixed fraction of that trace's own late-trace level -- which compares the
+*shape* of the rise rather than its support. That is a post-hoc design, chosen
+after seeing that the pre-registered one is degenerate, and it is therefore
+**exploratory and must be labelled so** if it is ever run. It is not run here,
+and the P.4 verdict stands as written above.

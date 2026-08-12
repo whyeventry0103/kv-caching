@@ -90,6 +90,7 @@ def plan_reinsertion(
 def restoration_read(
     arms: Mapping[str, Mapping[str, Sequence[float]]],
     *,
+    applied_steps: Mapping[str, int] | None = None,
     trigger_step: int = TRIGGER_STEP,
     window: int = READ_WINDOW,
     n_resamples: int = 2000,
@@ -101,8 +102,20 @@ def restoration_read(
     cover the same traces: the comparison is paired, and an unpaired difference
     would confound the arm with which traces happened to be in it.
 
-    The reported effect is ``none`` minus ``arm`` over the read window, so a
-    POSITIVE effect means the intervention reduced divergence.
+    ``applied_steps`` maps trace_id -> the step the intervention ACTUALLY landed
+    on, and the window is anchored there rather than at ``trigger_step``. The
+    two differ: the press can only intervene during a compression event that
+    already has a full stash, so a nominal trigger of 130 lands at 256 in the
+    smoke, and the offset varies with prompt length. Anchoring on the nominal
+    step would put a trace-dependent stretch of *pre*-intervention steps inside
+    the window. Those steps contribute exactly zero to the paired difference --
+    every arm is identical before the intervention -- so the effect would be
+    diluted by a factor that differs per trace, which is a heterogeneous
+    estimand rather than merely a noisy one. The same anchor is applied to the
+    ``none`` arm, which is what keeps the pair comparable.
+
+    Falls back to ``trigger_step`` when ``applied_steps`` is absent, and records
+    which anchoring was used.
     """
     if "none" not in arms:
         raise ValueError(
@@ -113,19 +126,38 @@ def restoration_read(
     for name, series in arms.items():
         if set(series) != traces:
             raise ValueError(f"arm {name!r} does not cover the same traces as 'none'")
+    if applied_steps is not None:
+        missing = traces - set(applied_steps)
+        if missing:
+            raise ValueError(
+                f"no applied step for {len(missing)} trace(s); an unanchored trace "
+                "cannot be pooled with anchored ones"
+            )
 
-    def window_mean(values: Sequence[float]) -> float | None:
-        segment = list(values)[trigger_step : trigger_step + window]
+    def anchor(trace: str) -> int:
+        return trigger_step if applied_steps is None else int(applied_steps[trace])
+
+    def window_mean(values: Sequence[float], start: int) -> float | None:
+        segment = list(values)[start : start + window]
         return statistics.fmean(segment) if segment else None
 
     ordered = sorted(traces)
-    baseline = {t: window_mean(arms["none"][t]) for t in ordered}
+    baseline = {t: window_mean(arms["none"][t], anchor(t)) for t in ordered}
     usable = [t for t in ordered if baseline[t] is not None]
     if not usable:
         raise ValueError("no trace is long enough to reach the read window")
 
     out: dict[str, Any] = {
         "trigger_step": trigger_step,
+        "anchored_on": "applied_step" if applied_steps is not None else "trigger_step",
+        "applied_step_range": (
+            [
+                min(applied_steps[t] for t in usable),
+                max(applied_steps[t] for t in usable),
+            ]
+            if applied_steps is not None
+            else None
+        ),
         "window": window,
         "n_traces": len(usable),
         "n_resamples": n_resamples,
@@ -138,7 +170,7 @@ def restoration_read(
             continue
         deltas = []
         for t in usable:
-            treated = window_mean(series[t])
+            treated = window_mean(series[t], anchor(t))
             if treated is not None:
                 deltas.append(baseline[t] - treated)
         if not deltas:

@@ -1,0 +1,169 @@
+{
+  "amendment": "P.4",
+  "discipline": "Descriptive. All four are distributional quantities; per Definition 6 none licenses an accuracy-scale claim by adjacency.",
+  "k_sigma": 3.0,
+  "n_v1_skipped": 0,
+  "n_v2_profiles": 800,
+  "per_cell": {
+    "h2o-2048": {
+      "jsd": {
+        "iqr": 128.0,
+        "mean_steps_after_onset": 1910.7246376811595,
+        "median_steps_after_onset": 1920,
+        "n": 69
+      },
+      "rank_displacement": {
+        "iqr": 608.75,
+        "mean_steps_after_onset": 2622.903846153846,
+        "median_steps_after_onset": 2484.5,
+        "n": 52
+      },
+      "tv": {
+        "iqr": 128.0,
+        "mean_steps_after_onset": 1910.7246376811595,
+        "median_steps_after_onset": 1920,
+        "n": 69
+      }
+    },
+    "h2o-256": {
+      "jsd": {
+        "iqr": 128.0,
+        "mean_steps_after_onset": 138.25,
+        "median_steps_after_onset": 192.0,
+        "n": 100
+      },
+      "rank_displacement": {
+        "iqr": 222.0,
+        "mean_steps_after_onset": 366.95959595959596,
+        "median_steps_after_onset": 344,
+        "n": 99
+      },
+      "tv": {
+        "iqr": 128.0,
+        "mean_steps_after_onset": 138.26,
+        "median_steps_after_onset": 192.0,
+        "n": 100
+      }
+    },
+    "random-2048": {
+      "jsd": {
+        "iqr": 128.0,
+        "mean_steps_after_onset": 1910.7246376811595,
+        "median_steps_after_onset": 1920,
+        "n": 69
+      },
+      "rank_displacement": {
+        "iqr": 493.5,
+        "mean_steps_after_onset": 2562.68,
+        "median_steps_after_onset": 2451.0,
+        "n": 50
+      },
+      "tv": {
+        "iqr": 128.0,
+        "mean_steps_after_onset": 1910.7246376811595,
+        "median_steps_after_onset": 1920,
+        "n": 69
+      }
+    },
+    "random-256": {
+      "jsd": {
+        "iqr": 128.0,
+        "mean_steps_after_onset": 138.25,
+        "median_steps_after_onset": 192.0,
+        "n": 100
+      },
+      "rank_displacement": {
+        "iqr": 172.75,
+        "mean_steps_after_onset": 306.6530612244898,
+        "median_steps_after_onset": 280.0,
+        "n": 98
+      },
+      "tv": {
+        "iqr": 128.0,
+        "mean_steps_after_onset": 138.26,
+        "median_steps_after_onset": 192.0,
+        "n": 100
+      }
+    },
+    "rkv-2048": {
+      "jsd": {
+        "iqr": 128.0,
+        "mean_steps_after_onset": 1910.7391304347825,
+        "median_steps_after_onset": 1920,
+        "n": 69
+      },
+      "rank_displacement": {
+        "iqr": 659.5,
+        "mean_steps_after_onset": 2769.133333333333,
+        "median_steps_after_onset": 2696,
+        "n": 45
+      },
+      "tv": {
+        "iqr": 128.0,
+        "mean_steps_after_onset": 1910.7246376811595,
+        "median_steps_after_onset": 1920,
+        "n": 69
+      }
+    },
+    "rkv-256": {
+      "jsd": {
+        "iqr": 128.0,
+        "mean_steps_after_onset": 138.27,
+        "median_steps_after_onset": 192.0,
+        "n": 100
+      },
+      "rank_displacement": {
+        "iqr": 236.0,
+        "mean_steps_after_onset": 445.3541666666667,
+        "median_steps_after_onset": 451.0,
+        "n": 96
+      },
+      "tv": {
+        "iqr": 128.0,
+        "mean_steps_after_onset": 138.25,
+        "median_steps_after_onset": 192.0,
+        "n": 100
+      }
+    },
+    "streamingllm-2048": {
+      "jsd": {
+        "iqr": 128.0,
+        "mean_steps_after_onset": 1910.7391304347825,
+        "median_steps_after_onset": 1920,
+        "n": 69
+      },
+      "rank_displacement": {
+        "iqr": 391.0,
+        "mean_steps_after_onset": 2347.438596491228,
+        "median_steps_after_onset": 2260,
+        "n": 57
+      },
+      "tv": {
+        "iqr": 128.0,
+        "mean_steps_after_onset": 1910.7246376811595,
+        "median_steps_after_onset": 1920,
+        "n": 69
+      }
+    },
+    "streamingllm-256": {
+      "jsd": {
+        "iqr": 128.0,
+        "mean_steps_after_onset": 138.26,
+        "median_steps_after_onset": 192.0,
+        "n": 100
+      },
+      "rank_displacement": {
+        "iqr": 121.0,
+        "mean_steps_after_onset": 305.92929292929296,
+        "median_steps_after_onset": 321,
+        "n": 99
+      },
+      "tv": {
+        "iqr": 128.0,
+        "mean_steps_after_onset": 138.26,
+        "median_steps_after_onset": 192.0,
+        "n": 100
+      }
+    }
+  }
+}

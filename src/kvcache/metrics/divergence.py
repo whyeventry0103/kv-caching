@@ -17,9 +17,14 @@ Four measures, each answering something the others cannot:
 * **top-1 agreement** -- did the argmax change. Binary, and it captures the
   behaviourally consequential part of a shift that TV smears across the vocab.
 * **rank displacement** -- where the full-cache argmax lands under compression.
-  0 means still top-1. Sharper than top-1 for localising onset, because it
-  registers the token sliding from rank 0 to rank 3 before it ever leaves the
-  top spot.
+  0 means still top-1. It registers the token sliding from rank 0 to rank 3
+  before it ever leaves the top spot, so it carries information top-1 agreement
+  discards. **It does not localise onset earlier**: this docstring originally
+  claimed it was "sharper ... for localising onset", reasoning from the
+  mechanism rather than from data, and Amendment P.4 measured the opposite --
+  median first crossing 280-451 steps after onset against 192 for TV and JSD.
+  An integer rank cannot move until a perturbation is large enough to reorder
+  tokens, which makes it insensitive early, not sharp.
 
 KL is computed in **both** directions or not at all; a single direction invites
 reporting whichever is finite. Non-finite values are emitted as ``None`` rather

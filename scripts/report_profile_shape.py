@@ -37,6 +37,13 @@ def main() -> int:
     p.add_argument("--profiles-dir", required=True, type=Path)
     p.add_argument("--label", required=True)
     p.add_argument("--out", required=True, type=Path)
+    p.add_argument(
+        "--budget",
+        default="",
+        help="restrict to one budget. Pooling budgets is NOT neutral: a weaker "
+        "compression budget dilutes an eviction-locked phase signal, so a "
+        "pooled excess is not comparable to a single-budget one.",
+    )
     a = p.parse_args()
 
     by_press: dict[str, list[tuple[list[float], int | None, int]]] = defaultdict(list)
@@ -44,6 +51,8 @@ def main() -> int:
     for path in sorted(a.profiles_dir.rglob("*.json")):
         match = CELL.match(path.parent.name)
         if not match:
+            continue
+        if a.budget and match.group("budget") != a.budget:
             continue
         payload = json.loads(path.read_text(encoding="utf-8"))
         n_files += 1
@@ -63,6 +72,7 @@ def main() -> int:
     out: dict[str, Any] = {
         "label": a.label,
         "amendment": "P.2",
+        "budget_filter": a.budget or "ALL BUDGETS POOLED",
         "n_profile_files": n_files,
         "per_policy": {
             press: {

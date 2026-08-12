@@ -198,3 +198,58 @@ def test_no_intervention_arm_passes_the_gate_trivially_and_says_so():
     report = retained_set_report(None, None, n_reinserted=0)
     assert report["passed"] is True
     assert "no-intervention" in report["note"]
+
+
+def test_the_read_anchors_on_the_step_the_intervention_actually_landed_on():
+    """The nominal trigger and the applied step differ, and by a trace-dependent gap.
+
+    A press can only intervene during a compression event with a full stash, so
+    a nominal trigger of 130 landed at 256 in the smoke. Anchoring on 130 would
+    fold pre-intervention steps -- where every arm is identical, so the paired
+    difference is exactly zero -- into the window, diluting the effect by a
+    different factor per trace. Here trace "a" applies at 10 and trace "b" at
+    50; both show a clean 0.4 reduction over their own next 5 steps, so a
+    correctly anchored read recovers 0.4 and an unanchored one does not.
+    """
+    from kvcache.metrics.restoration import restoration_read
+
+    def series(applied):
+        values = [0.5] * 100
+        return values, [0.5] * applied + [0.1] * (100 - applied)
+
+    none_a, treated_a = series(10)
+    none_b, treated_b = series(50)
+    arms = {
+        "none": {"a": none_a, "b": none_b},
+        "matched": {"a": treated_a, "b": treated_b},
+    }
+    anchored = restoration_read(
+        arms,
+        applied_steps={"a": 10, "b": 50},
+        window=5,
+        n_resamples=200,
+    )
+    assert anchored["anchored_on"] == "applied_step"
+    assert anchored["applied_step_range"] == [10, 50]
+    assert anchored["arms"]["matched"]["effect_vs_no_intervention"] == pytest.approx(
+        0.4
+    )
+
+    unanchored = restoration_read(arms, trigger_step=10, window=5, n_resamples=200)
+    assert unanchored["anchored_on"] == "trigger_step"
+    # Trace "b" has not been treated yet at step 10, so its difference is 0 and
+    # the pooled effect is halved -- the dilution this anchoring exists to avoid.
+    assert unanchored["arms"]["matched"]["effect_vs_no_intervention"] == pytest.approx(
+        0.2
+    )
+
+
+def test_the_read_refuses_a_trace_with_no_applied_step():
+    from kvcache.metrics.restoration import restoration_read
+
+    arms = {
+        "none": {"a": [0.5] * 50, "b": [0.5] * 50},
+        "matched": {"a": [0.1] * 50, "b": [0.1] * 50},
+    }
+    with pytest.raises(ValueError, match="applied step"):
+        restoration_read(arms, applied_steps={"a": 10}, window=5, n_resamples=10)

@@ -21,10 +21,13 @@ from kvcache.datasets import load_benchmark
 from kvcache.determinism import log_versions
 from kvcache.models import load_model_and_tokenizer
 from kvcache.presses import (
+    build_ratio_matched_press,
     build_replay_press,
+    build_restoration_press,
     press_needs_eager_attention,
     press_seed,
 )
+from kvcache.metrics.restoration import REINSERT_FRACTION, TRIGGER_STEP
 from kvcache.metrics.divergence import measures_from_logits
 from kvcache.replay import (
     TransformersReplayBackend,
@@ -44,6 +47,73 @@ def _yaml(path: Path) -> dict[str, Any]:
 
     with path.open(encoding="utf-8") as handle:
         return yaml.safe_load(handle)
+
+
+def _condition_arms(config: dict[str, Any]) -> list[str | None]:
+    """The restoration arms this config runs, or ``[None]`` for a plain replay.
+
+    ``none`` is required whenever any arm runs: the effect of an intervention is
+    only defined against the no-intervention arm on the same traces, so a config
+    that omits it cannot produce a readable result (Amendment P.5).
+    """
+    restoration = config.get("restoration")
+    if not restoration:
+        return [None]
+    arms = list(restoration.get("arms") or [])
+    if not arms:
+        raise SystemExit("restoration config lists no arms")
+    if "none" not in arms:
+        raise SystemExit(
+            "the 'none' arm is required: without the temporal null a post-trigger "
+            "decline cannot be distinguished from what would have happened anyway"
+        )
+    if config.get("matched_ratio") is not None:
+        raise SystemExit(
+            "matched_ratio and restoration cannot run in one config: the "
+            "intervention and the budget schedule would be confounded"
+        )
+    return arms
+
+
+def _build_condition_press(
+    press_name: str,
+    *,
+    budget: int | str,
+    config: dict[str, Any],
+    seed: int,
+    arm: str | None,
+) -> Any:
+    """Select the press for this condition: plain replay, M.3 ratio-matched, or P.5."""
+    interval = int(config["compression_interval"])
+    effective_budget = 2048 if budget == "full" else int(budget)
+    if arm is not None:
+        restoration = config["restoration"]
+        return build_restoration_press(
+            press_name,
+            budget=effective_budget,
+            arm=arm,
+            trigger_step=int(restoration.get("trigger_step", TRIGGER_STEP)),
+            reinsert_fraction=float(
+                restoration.get("reinsert_fraction", REINSERT_FRACTION)
+            ),
+            compression_interval=interval,
+            seed=seed,
+        )
+    matched_ratio = config.get("matched_ratio")
+    if matched_ratio is not None:
+        return build_ratio_matched_press(
+            press_name,
+            ratio=float(matched_ratio),
+            min_budget=int(config.get("matched_min_budget", 32)),
+            compression_interval=interval,
+            seed=seed,
+        )
+    return build_replay_press(
+        press_name,
+        budget=effective_budget,
+        compression_interval=interval,
+        seed=seed,
+    )
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -256,7 +326,11 @@ def main() -> int:
 
     # The shard's real workload; the config's estimated_replay_count is only the
     # full-job sanity number used by the pilot guard above.
-    expected = len(eligible_rows) * len(config["presses"]) * len(config["budgets"])
+    arms = _condition_arms(config)
+    budget_arms = [(b, a) for b in config["budgets"] for a in arms]
+    expected = (
+        len(eligible_rows) * len(config["presses"]) * len(config["budgets"]) * len(arms)
+    )
     done_keys = _replay_done_keys(output_root, mode) if args.resume else set()
     skipped = 0
     if args.resume:
@@ -282,26 +356,30 @@ def main() -> int:
         trace_ids = token_record["trace_token_ids"]
         seed = int(row["decoding"]["seed"])
         for press_name in config["presses"]:
-            for budget in config["budgets"]:
+            for budget, arm in budget_arms:
+                # Each restoration arm is its own cell, so arms never collide on
+                # disk and --resume is per-arm.
+                cell_name = press_name if arm is None else f"{press_name}.{arm}"
                 if args.resume:
                     cond = (
-                        (_reference_key(row), press_name, str(budget))
+                        (_reference_key(row), cell_name, str(budget))
                         if mode == "readout"
                         else (
                             f"{config['reference_run_name']}:{_reference_key(row)}",
-                            press_name,
+                            cell_name,
                             str(budget),
                         )
                     )
                     if cond in done_keys:
                         skipped += 1
                         continue
-                press = build_replay_press(
+                press = _build_condition_press(
                     press_name,
-                    budget=2048 if budget == "full" else int(budget),
-                    compression_interval=int(config["compression_interval"]),
+                    budget=budget,
+                    config=config,
                     # Per-(problem, seed) RNG (decorrelate random eviction).
                     seed=press_seed(row["pid"], seed),
+                    arm=arm,
                 )
                 backend = TransformersReplayBackend(model)
                 runmeta = capture_runmeta(config["name"], args.config, seed)
@@ -393,9 +471,23 @@ def main() -> int:
                         )
                     if mode == "self_replay" and max(profile.estimate) > 1e-6:
                         raise SystemExit("self-replay TV exceeded 1e-6")
-                    if profile.compression_events and budget != "full":
+                    # The post-prune bound is variant-specific. A fixed-budget
+                    # replay must land at or under `budget`; the relaxed
+                    # restoration arm is EXPECTED to exceed it by exactly the
+                    # reinserted count (that is what makes it the confounded
+                    # reference arm); the ratio-matched press has no fixed budget
+                    # at all, so the fixed check would be meaningless.
+                    skip_budget_check = config.get("matched_ratio") is not None
+                    allowance = (
+                        int(getattr(press, "n_reinsert", 0)) if arm == "relaxed" else 0
+                    )
+                    if (
+                        profile.compression_events
+                        and budget != "full"
+                        and not skip_budget_check
+                    ):
                         if profile.max_after_prune is None or (
-                            profile.max_after_prune > int(budget)
+                            profile.max_after_prune > int(budget) + allowance
                         ):
                             raise SystemExit("post-prune cache exceeded target budget")
                         # Between prunes the cache holds the prefill (prompt) + one
@@ -403,8 +495,15 @@ def main() -> int:
                         # max(prompt_len, budget)+interval -- NOT budget+interval. Long-
                         # prompt MATH problems (prompt > budget) tripped the old bound.
                         # Post-prune <= budget (above) still checks the press prunes.
-                        prune_bound = max(len(prompt_ids), int(budget)) + int(
-                            config["compression_interval"]
+                        # The relaxed arm's one-off reinsertion inflates the
+                        # BETWEEN-prune peak too, not just the post-prune size:
+                        # the cache reaches budget+n_reinsert and then accrues a
+                        # further interval before the next prune. The smoke gate
+                        # caught this bound being applied to only half the check.
+                        prune_bound = (
+                            max(len(prompt_ids), int(budget))
+                            + int(config["compression_interval"])
+                            + allowance
                         )
                         if (
                             profile.max_before_prune is None
@@ -423,7 +522,7 @@ def main() -> int:
                     profile_path = write_replay_profile(
                         output_root,
                         reference_key=_reference_key(row),
-                        press_name=press_name,
+                        press_name=cell_name,
                         budget=budget,
                         pid_hash=pid_hash,
                         profile=profile,
@@ -431,6 +530,50 @@ def main() -> int:
                         # killed the process before the row was appended; overwrite it.
                         overwrite=args.resume,
                     )
+                    if arm is not None:
+                        # The instrument gate travels with the profile it gates.
+                        # An arm that should have intervened and did not is
+                        # recorded as such rather than left absent, so a reader
+                        # cannot mistake silence for a passing gate.
+                        report = getattr(press, "restoration_report", None)
+                        if report is None:
+                            report = {
+                                "passed": arm == "none",
+                                "arm": arm,
+                                "intervened": False,
+                                "note": (
+                                    "no intervention was recorded; expected only "
+                                    "for the 'none' arm"
+                                ),
+                            }
+                        gate_path = profile_path.with_name(
+                            profile_path.stem + ".restoration.json"
+                        )
+                        gate_path.write_text(
+                            json.dumps(report, indent=2, sort_keys=True, default=str),
+                            encoding="utf-8",
+                        )
+                    if config.get("matched_ratio") is not None:
+                        # The trace IS the evidence that the ratio was held fixed
+                        # and the horizon allowed to vary. Without it the control
+                        # is an assertion.
+                        trace_path = profile_path.with_name(
+                            profile_path.stem + ".ratio_trace.json"
+                        )
+                        trace_path.write_text(
+                            json.dumps(
+                                {
+                                    "matched_ratio": float(config["matched_ratio"]),
+                                    "min_budget": int(
+                                        config.get("matched_min_budget", 32)
+                                    ),
+                                    "trace": getattr(press, "ratio_trace", []),
+                                },
+                                indent=2,
+                                sort_keys=True,
+                            ),
+                            encoding="utf-8",
+                        )
                     logical_tokens = len(prompt_ids) + len(trace_ids)
                     ratio = (
                         1.0
@@ -439,7 +582,7 @@ def main() -> int:
                     )
                     replay_row = build_replay_row(
                         row,
-                        press_name=press_name,
+                        press_name=cell_name,
                         budget=budget,
                         compression_ratio=ratio,
                         replay_of=f"{config['reference_run_name']}:{_reference_key(row)}",

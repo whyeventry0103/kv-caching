@@ -780,6 +780,51 @@ no more scheduled runs.** Remaining work is the pre-planned endgame only
 (anonymization scrub, restore double-blind author block, arXiv upload,
 ICLR conversion) per `docs/strategy/SUBMISSION_STRATEGY.md` Phase 11.
 
+### 4u. Meeting #2 Tasks 3 and 4, and the P.2 replication (2026-08-12)
+
+Source run `replay-ext-diss256`: 800 `tv-profile-v2` profiles (25 problems x 4
+seeds x 4 presses x budgets {256, 2048}), the first replay data that includes
+**R-KV**. Artifacts: `results/diag/amendment-p/{shape_ext_b256,shape_ext_b2048,
+auc_resid_tv,onset_ext}.json`. Full reads in PREREGISTRATION Amendments P.2
+(replication), P.3 and P.4, all dated 2026-08-12.
+
+**Task 3 (AUC-TV vs the subtraction residual): BUDGET EFFECT ONLY.** Pooled
+Spearman rho = -0.857, CI [-0.893, -0.643] over 7 cells; within budget 256
+rho = -0.200, CI [-0.400, +0.800] over 4 cells; budget 2048 has only 3 cells and
+an interval spanning the whole range. The pooled association does not survive
+holding budget fixed. **Write it as "not established at this n", never as
+"proportional"** -- rank correlation is not proportionality, and that stronger
+claim (linearity through the origin) was not tested.
+
+**Task 4 (JSD / top-1 / rank displacement): the crossing test is degenerate.**
+TV and JSD are non-zero on exactly the same steps in teacher-forced replay
+(pre-onset both exactly 0.0; identical zero/non-zero pattern across all 10,769
+steps of the profile checked), so their first crossings coincide *necessarily*.
+Medians agree to the step (192 at budget 256, 1920 at 2048). **No claim about
+JSD's onset sensitivity may be made from this**, in either direction. Rank
+displacement does differ and is **coarser** at onset (median 280-451 vs 192),
+the opposite of what `divergence.py` predicted; that docstring is corrected.
+
+**Task 1 / P.2 replication: one result holds, one is withdrawn.** Budgets must
+be split -- budget 2048 barely compresses (AUC-TV 0.013 vs 0.084-0.108; 86% of
+traces flat) and pooling dilutes the signal. At budget 256, phase-amplitude
+excess over sham: **Random +0.1068 [+0.0395, +0.1315], peak phase 0** (replicates
++0.0991 [+0.0614, +0.1271], peak 0, on an independent sample);
+**StreamingLLM +0.0195 [-0.0212, +0.0499]** against a prior +0.0384 [+0.0013,
++0.0560] -- **the prior StreamingLLM claim is withdrawn**, its interval had
+excluded zero by 0.0013; H2O-style +0.0293 [-0.0306, +0.0480], null in both
+samples; **R-KV +0.0620 [+0.0016, +0.0775], peak 9** -- marginal, on the same
+knife edge StreamingLLM just fell off, and with 8 comparisons in the family it
+is the expected yield under no effect. At budget 2048 nothing excludes zero and
+three of four estimates are negative.
+
+**Framing consequence.** The "recoverable policies are eviction-locked" partition
+is **weaker** after adding the policy it most needed: one clear case (Random),
+one withdrawn (StreamingLLM), one null (H2O-style), one marginal whose peak is
+at phase 9 rather than 0 (R-KV). Random's eviction-locking is the only phase
+result the record carries. Interpretation of the rising profile stays withheld
+pending M.3.
+
 <!-- AUDIT:ARCHIVAL-END -->
 
 ## 5. Framing discipline (non-negotiable — apply throughout)

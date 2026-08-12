@@ -1,0 +1,110 @@
+{
+  "amendment": "P.3",
+  "measure": "tv",
+  "n_cells": 7,
+  "per_cell_summary": {
+    "h2o-2048": {
+      "auc_mean": 0.013877813188264984,
+      "n_problems": 25,
+      "residual": -0.058673469387755084
+    },
+    "h2o-256": {
+      "auc_mean": 0.08400522801682511,
+      "n_problems": 25,
+      "residual": -0.3443877551020409
+    },
+    "random-2048": {
+      "auc_mean": 0.01282887468173492,
+      "n_problems": 25,
+      "residual": -0.03316326530612246
+    },
+    "random-256": {
+      "auc_mean": 0.10750623825627756,
+      "n_problems": 25,
+      "residual": -0.336734693877551
+    },
+    "rkv-256": {
+      "auc_mean": 0.07972595798354334,
+      "n_problems": 25,
+      "residual": -0.2678571428571428
+    },
+    "streamingllm-2048": {
+      "auc_mean": 0.01859283392281451,
+      "n_problems": 25,
+      "residual": -0.07908163265306112
+    },
+    "streamingllm-256": {
+      "auc_mean": 0.10275934916439616,
+      "n_problems": 25,
+      "residual": -0.3443877551020408
+    }
+  },
+  "pooled": {
+    "cells": [
+      "h2o-2048",
+      "h2o-256",
+      "random-2048",
+      "random-256",
+      "rkv-256",
+      "streamingllm-2048",
+      "streamingllm-256"
+    ],
+    "discipline": "Rank correlation. NEVER describe as proportionality; that is a separate, stronger test (linearity through the origin).",
+    "excludes_zero": true,
+    "n_cells": 7,
+    "n_resamples": 2000,
+    "n_usable_draws": 2000,
+    "rho_ci95": [
+      -0.8928571428571428,
+      -0.6428571428571428
+    ],
+    "seed": 0,
+    "spearman_rho": -0.857142857142857
+  },
+  "residual_is_cell_level": "The residual is constant within a cell, so the clustered bootstrap carries AUC's sampling error only. It is NOT a joint interval over both quantities.",
+  "schema_versions": [
+    "tv-profile-v2"
+  ],
+  "skipped": [
+    "rkv-2048: no catalogued residual"
+  ],
+  "within_budget": {
+    "2048": {
+      "cells": [
+        "h2o-2048",
+        "random-2048",
+        "streamingllm-2048"
+      ],
+      "discipline": "Rank correlation. NEVER describe as proportionality; that is a separate, stronger test (linearity through the origin).",
+      "excludes_zero": false,
+      "n_cells": 3,
+      "n_resamples": 2000,
+      "n_usable_draws": 2000,
+      "rho_ci95": [
+        -0.9999999999999998,
+        0.9999999999999998
+      ],
+      "seed": 0,
+      "spearman_rho": -0.9999999999999998
+    },
+    "256": {
+      "cells": [
+        "h2o-256",
+        "random-256",
+        "rkv-256",
+        "streamingllm-256"
+      ],
+      "discipline": "Rank correlation. NEVER describe as proportionality; that is a separate, stronger test (linearity through the origin).",
+      "excludes_zero": false,
+      "n_cells": 4,
+      "n_resamples": 2000,
+      "n_usable_draws": 2000,
+      "rho_ci95": [
+        -0.3999999999999999,
+        0.7999999999999998
+      ],
+      "seed": 0,
+      "spearman_rho": -0.19999999999999996
+    }
+  }
+}

@@ -456,3 +456,67 @@ def test_restoration_press_rejects_a_bad_arm_or_fraction():
     ):
         with pytest.raises(ValueError):
             build_restoration_press("random", budget=4, trigger_step=1, **kwargs)
+
+
+def _fake_kvpress_module():
+    """A stand-in kvpress whose DecodingPress records what it was told to do."""
+    from types import SimpleNamespace
+
+    class DecodingPress:
+        def __init__(self, **kwargs):
+            self.__dict__.update(kwargs)
+            self.__post_init__()
+
+        def __post_init__(self):
+            pass
+
+        def forward_hook(self, module, input, kwargs, output):
+            return output
+
+        def compress(self, module, hidden_states, keys, values, attentions, kwargs):
+            n = keys.shape[2]
+            if n <= self.target_size:
+                return keys, values
+            return (
+                keys[:, :, -self.target_size :, :],
+                values[:, :, -self.target_size :, :],
+            )
+
+    class RandomPress:
+        def __init__(self, seed=None):
+            self.seed = seed
+
+    return SimpleNamespace(DecodingPress=DecodingPress, RandomPress=RandomPress)
+
+
+@pytest.mark.parametrize(
+    "builder,kwargs",
+    [
+        ("build_replay_press", {"budget": 8}),
+        ("build_ratio_matched_press", {"ratio": 0.25, "min_budget": 8}),
+        (
+            "build_restoration_press",
+            {"budget": 8, "arm": "matched", "trigger_step": 1},
+        ),
+    ],
+)
+def test_every_replay_press_carries_the_replay_instrumentation(builder, kwargs):
+    """Regression: a press used in replay MUST expose `enabled` and `profile_step`.
+
+    Both are written by the replay loop. `enabled` is what keeps the full-cache
+    reference forward uncompressed, and `profile_step` is what the restoration
+    trigger reads. A press built on a bare DecodingPress has neither, so the
+    reference arm would be silently compressed and the restoration trigger would
+    never fire -- every arm degenerating to the null while still producing a
+    plausible divergence curve. The unit tests above could not catch this
+    because they inject a fake base with `profile_step` already set.
+    """
+    import kvcache.presses as presses_module
+
+    press = getattr(presses_module, builder)(
+        "random", kvpress_module=_fake_kvpress_module(), **kwargs
+    )
+    assert hasattr(press, "enabled"), f"{builder} lacks the enabled toggle"
+    assert hasattr(press, "profile_step"), f"{builder} lacks profile_step"
+    assert press.enabled is False, "a replay press must start disabled"
+    assert isinstance(press.compressions, list)
