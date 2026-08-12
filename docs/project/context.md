@@ -18,6 +18,79 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-08-12 — Meeting #2 round 2. Extended pass DONE; Tasks 3 and 4
+  read; a P.2 result WITHDRAWN; a live-path press defect found and fixed;
+  restoration smoke gate PASSING. HEAD `da2f0e7`.**
+
+  **(1) `replay-ext-diss256` finished 800/800** v2 profiles (25 problems x 4
+  seeds x 4 presses x budgets {256, 2048}), 12:11 remote on 2026-08-12.
+  **R-KV has replay profiles for the first time**, closing P.2's stated scope
+  limit. Artifacts archived to `results/diag/amendment-p/`.
+
+  **(2) P.2 does not fully replicate, and budgets must be split.** My first run
+  of the shape report pooled budgets 256 and 2048 and was wrong to: at 2048 the
+  phenomenon is absent for all four presses (AUC-TV 0.013 vs 0.084-0.108; 86% of
+  traces flat), so pooling dilutes toward zero. `report_profile_shape.py` gained
+  `--budget` and now records the filter in its output. At budget 256, n=100 per
+  press: **Random +0.1068 [+0.0395,+0.1315] peak 0** (replicates +0.0991, peak 0,
+  independent sample); **StreamingLLM +0.0195 [-0.0212,+0.0499] — the prior
+  +0.0384 [+0.0013,+0.0560] claim is WITHDRAWN**, not averaged (it excluded zero
+  by 0.0013); H2O-style +0.0293 [-0.0306,+0.0480] null in both; **R-KV +0.0620
+  [+0.0016,+0.0775] peak 9 — marginal, and its peak is not at the prune step.**
+  Net: the recoverable/concentrated partition is **weaker** after adding the
+  policy it most needed. Random's eviction-locking is the only phase result the
+  record carries.
+
+  **(3) Task 3 = BUDGET EFFECT ONLY** (pre-registered branch). Pooled Spearman
+  rho **-0.857** [-0.893,-0.643] over 7 cells; within budget 256 **-0.200**
+  [-0.400,+0.800] over 4 cells; budget 2048 has 3 cells and an interval spanning
+  the whole range. Answer to "is AUC-TV proportional to the residual": **no, and
+  twice over** — rank correlation is not proportionality, and the pooled
+  association is a budget effect.
+
+  **(4) Task 4's crossing test is degenerate BY CONSTRUCTION.** Pre-onset TV is
+  exactly 0.0, so the zero-spread fallback reduces "first crossing" to "first
+  non-zero step", and TV and JSD are non-zero on identical steps (verified: same
+  zero/non-zero pattern across all 10,769 steps of a profile). Medians agree
+  exactly (192 at budget 256). **No JSD onset claim is available from this test.**
+  Rank displacement is **coarser** at onset (median 280-451 vs 192), the opposite
+  of what `divergence.py`'s docstring claimed from mechanism rather than data;
+  corrected in place.
+
+  **(5) A defect no unit test could see.** `build_ratio_matched_press` and
+  `build_restoration_press` were built on a bare `DecodingPress`, so neither had
+  `enabled` or `profile_step`. Live consequences: the restoration trigger reads
+  `profile_step`, so it would never fire and **all four arms would silently
+  degenerate to the null**; and `press_enabled(press, False)` — what keeps the
+  full-cache REFERENCE forward uncompressed — would be ignored, compressing the
+  reference too. The tests passed because they inject a fake base with
+  `profile_step` preset. Fixed via `instrumented=` on `build_press`, with a
+  regression test that fails on the old code for exactly those two builders.
+
+  **(6) `run_replay.py` now consumes the config blocks it never did.**
+  `restoration:` loops arms as separate cells (`random.matched-256-s11` etc.),
+  `matched_ratio` selects the M.3 press; the gate report and ratio trace persist
+  beside each profile. Tests in `tests/test_run_replay_variants.py`.
+
+  **(7) Restoration smoke: instrument gate PASSES.** Bitwise identical,
+  `max_abs_difference` 0.0; matched arm holds 256, relaxed grows to 320 as
+  designed. The smoke also caught two things the green suite did not: my
+  between-prune bound had the relaxed-arm allowance on only half the check (first
+  launch died on it), and **`applied_at_step` is 256, not the pre-registered
+  trigger 130** — a press can only intervene during a compression event with a
+  full stash, and the gap varies with prompt length. `restoration_read` now
+  anchors per trace on the applied step; anchoring on the nominal one dilutes the
+  effect by a trace-dependent factor.
+
+  **NEXT:** finish the smoke (8/24 at time of writing, ~4 min/condition, one GPU),
+  confirm every arm's gate passes, then `restoration-diss256` (800) and
+  `replay-ratio-matched-m3` (200). The nightly orchestrator will pick both up at
+  01:45 now that `replay-ext-diss256` reads complete; the smoke was launched
+  manually as `restoration-smoke-g0` so `live_map` can see it. **M.3 still gates
+  the interpretation of every divergence profile** — no mechanistic reading of
+  the rising staircase is licensed until it runs.
+
+
   **★★★★★ 2026-08-10 — MEETING #2 round 1. Two findings, both contradicting the
   brief; two of four tasks still unbuilt. HEAD after this: see git log.**
   **(1) Amendment P** pre-registers all five Meeting-2 reads BEFORE running:
