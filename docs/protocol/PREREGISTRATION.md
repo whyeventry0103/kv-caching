@@ -1904,3 +1904,54 @@ fixed fraction of that trace's own late-trace level -- which compares the
 after seeing that the pre-registered one is degenerate, and it is therefore
 **exploratory and must be labelled so** if it is ever run. It is not run here,
 and the P.4 verdict stands as written above.
+
+---
+
+## Amendment P.5, instrument gate (2026-08-12): PASSED, and two design faults it caught
+
+`restoration-smoke` (3 problems x 1 seed x 2 presses x 4 arms = 24 conditions),
+run 2026-08-12 12:43-13:26 remote. Artifact
+`results/diag/amendment-p/restoration_smoke_diag.json`.
+
+**The gate passes: 24/24 reports, zero failures.** Every treated arm reinserted
+entries **bitwise identical** to what was evicted (`max_abs_difference` 0.0 in
+all cases). `matched` and `random` hold the cache at exactly 256; `relaxed`
+grows to exactly 320 = 256 + 64 reinserted, which is what makes it the
+budget-confounded reference arm. The powered cell is therefore unblocked.
+
+**Live-path validation, over and above the gate.** On a checked trace the arms
+are bit-identical up to step 256 and first differ at **step 257** -- exactly one
+step after the intervention, which is where a cache edit can first reach the
+distribution -- then differ materially per step (0.0567 / 0.0990 / 0.0817 for
+none / matched / relaxed at the same step). Pre-intervention identity is what
+makes the paired design valid, and it is now observed rather than assumed.
+
+**Fault 1: the pre-registered trigger step is not the step the intervention
+lands on.** `TRIGGER_STEP = 130` was pre-committed as 2x the median onset. The
+press can only intervene during a compression event that already holds a full
+stash, so the observed `applied_at_step` is **192 or 256 depending on the
+trace** -- it tracks prompt length, not the nominal trigger. Anchoring the read
+window at 130 would place a *trace-dependent* stretch of pre-intervention steps
+inside the window. Those steps contribute exactly zero to the paired difference
+(the arms are identical there), so the effect would be diluted by a factor that
+differs per trace: a heterogeneous estimand, not merely a noisy one.
+`restoration_read` now takes `applied_steps` and anchors per trace, records
+`anchored_on` and the applied-step range, and `report_restoration.py` drops any
+trace whose treated arms disagree on the step rather than pooling them onto one
+anchor. In the smoke the arms agree within every trace, so no trace is dropped.
+**This is a correction to how P.5 is READ, not to what it does**; the
+intervention itself is unchanged and `TRIGGER_STEP` retains its meaning as the
+earliest step at which intervention is permitted.
+
+**Fault 2 (mine, in the runner's guard).** The post-prune budget check was given
+a relaxed-arm allowance but the between-prune check was not, so the first launch
+died on `between-prune cache exceeded expected bound`. The relaxed arm inflates
+both peaks. Fixed and the allowance applied to both.
+
+**Not a result.** Per this amendment, divergence from the smoke is not read. The
+reader was nonetheless exercised end-to-end on it to prove it runs, and its n=3
+output is recorded as a diagnostic only: `NO RESTORATION` in both cells, with
+all effects within +/-0.001 of zero. That is three traces and carries no
+evidential weight; it is noted only so that a near-zero powered result is not
+mistaken for a late surprise. The powered cell `restoration-diss256` (800
+conditions, both GPUs) launched 13:29 remote the same day.

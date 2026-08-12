@@ -82,13 +82,31 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
   anchors per trace on the applied step; anchoring on the nominal one dilutes the
   effect by a trace-dependent factor.
 
-  **NEXT:** finish the smoke (8/24 at time of writing, ~4 min/condition, one GPU),
-  confirm every arm's gate passes, then `restoration-diss256` (800) and
-  `replay-ratio-matched-m3` (200). The nightly orchestrator will pick both up at
-  01:45 now that `replay-ext-diss256` reads complete; the smoke was launched
-  manually as `restoration-smoke-g0` so `live_map` can see it. **M.3 still gates
-  the interpretation of every divergence profile** — no mechanistic reading of
-  the rising staircase is licensed until it runs.
+  **(8) Smoke DONE 24/24, gate PASSED, powered cell LAUNCHED.** Zero gate
+  failures; every treated arm bitwise identical (`max_abs_difference` 0.0);
+  matched/random hold 256, relaxed grows to exactly 320. Live-path validation
+  beyond the gate: arms are bit-identical to step 256 and first differ at **257**
+  — one step after the intervention, where a cache edit can first reach the
+  distribution — then differ materially per step. `applied_at_step` is **192 or
+  256 depending on the trace**, never the nominal 130, which is why the read is
+  now anchored per trace. Reader exercised end-to-end: `NO RESTORATION` at n=3,
+  all effects within ±0.001 of zero — **a diagnostic, not a result** (P.5 forbids
+  reading smoke divergence), recorded only so a near-zero powered result is not
+  mistaken for a late surprise.
+
+  **IN FLIGHT (launched 13:29 remote 2026-08-12):** `restoration-diss256-g0`
+  (seeds 11,23) and `-g1` (seeds 47,89), both GPUs at 85%, 800 conditions.
+  Smoke rate was ~1.8 min/condition/GPU, so expect **~12 h**, finishing around
+  01:30 on 2026-08-13. Launched manually rather than waiting for the 01:45
+  window — the same precedent as `rkvpub-g0/g1` — using the queue's `run_name`
+  so `live_map` sees the shards; the second shard needs
+  `KVCACHE_ALLOW_EXISTING_RUN=1`, which is what the orchestrator itself sets.
+
+  **THEN:** `scripts/report_restoration.py --run restoration-diss256` (built and
+  tested; refuses on a failed OR missing gate, and on anchor disagreement), then
+  `replay-ratio-matched-m3` (200). **M.3 still gates the interpretation of every
+  divergence profile** — no mechanistic reading of the rising staircase is
+  licensed until it runs, including of Random's eviction-locking.
 
 
   **★★★★★ 2026-08-10 — MEETING #2 round 1. Two findings, both contradicting the
