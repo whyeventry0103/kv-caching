@@ -1,4 +1,5 @@
 import json
+import sys
 from dataclasses import asdict
 from types import SimpleNamespace
 
@@ -344,3 +345,68 @@ def test_extended_arrays_must_match_the_tv_length(tmp_path):
             pid_hash="h",
             profile=bad,
         )
+
+
+def test_sidecars_written_beside_a_profile_are_not_mistaken_for_profiles():
+    """Regression: `rglob("*.json")` over a run's profile tree also matches sidecars.
+
+    `<pid>.restoration.json` and `<pid>.ratio_trace.json` sit in the same
+    directory as `<pid>.json`. Counting them doubled a live progress figure
+    (M.3 read 200/200 when it was 100/200) and would make every profile reader
+    KeyError on a payload with no `estimate`. One predicate for all readers.
+    """
+    from kvcache.replay import is_profile_file
+
+    assert is_profile_file("runs/x/profiles/b/deadbeef00.json")
+    assert not is_profile_file("runs/x/profiles/b/deadbeef00.restoration.json")
+    assert not is_profile_file("runs/x/profiles/b/deadbeef00.ratio_trace.json")
+
+
+def test_every_profile_reader_skips_sidecars(tmp_path):
+    """The three report scripts must agree; a new sidecar must not break one."""
+    import importlib.util
+    import json as _json
+    from pathlib import Path as _Path
+
+    root = _Path(__file__).resolve().parents[1]
+    cell = tmp_path / "profiles" / "math500" / "model" / "random-256-s11"
+    cell.mkdir(parents=True)
+    # Long enough past onset that the drift statistic is defined; the summary
+    # line formats it, so a degenerate fixture fails for an unrelated reason.
+    series = [0.0] * 100 + [0.05 + 0.0005 * i for i in range(900)]
+    (cell / "aa.json").write_text(
+        _json.dumps(
+            {
+                "estimate": series,
+                "jsd": series,
+                "top1_agree": [True] * len(series),
+                "rank_displacement": [0] * len(series),
+                "onset_step": 100,
+                "compression_interval": 64,
+                "schema_version": "tv-profile-v2",
+            }
+        ),
+        encoding="utf-8",
+    )
+    # A sidecar with NO "estimate" key -- the shape that would crash a reader.
+    (cell / "aa.ratio_trace.json").write_text(
+        _json.dumps({"matched_ratio": 0.038, "trace": []}), encoding="utf-8"
+    )
+
+    spec = importlib.util.spec_from_file_location(
+        "rps", root / "scripts" / "report_profile_shape.py"
+    )
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    out = tmp_path / "shape.json"
+    sys.argv = [
+        "report_profile_shape.py",
+        "--profiles-dir",
+        str(tmp_path / "profiles"),
+        "--label",
+        "t",
+        "--out",
+        str(out),
+    ]
+    assert module.main() == 0
+    assert _json.loads(out.read_text(encoding="utf-8"))["n_profile_files"] == 1

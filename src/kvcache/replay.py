@@ -385,6 +385,20 @@ def score_readout_answer(gold_answer: str, generated_text: str) -> bool:
     return bool(answer) and is_equiv(gold_answer, answer)
 
 
+def is_profile_file(path: str | Path) -> bool:
+    """True for a stored TV profile, False for a sidecar written beside it.
+
+    Profiles are ``<pid_hash>.json``. Sidecars added alongside them carry a
+    compound suffix -- ``<pid_hash>.restoration.json``,
+    ``<pid_hash>.ratio_trace.json`` -- so a bare ``rglob("*.json")`` over a run's
+    profile tree picks them up too. That silently doubled a progress count and
+    would have made every profile reader fail on a payload with no ``estimate``
+    key. One predicate, used by every reader, so the next sidecar cannot
+    reintroduce it.
+    """
+    return Path(path).suffixes[-2:] == [".json"]
+
+
 def write_replay_profile(
     root: str | Path,
     *,

@@ -28,6 +28,8 @@ from typing import Any
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
+from kvcache.replay import is_profile_file  # noqa: E402
+
 CELL = re.compile(r"^(?P<press>[a-z0-9]+)-(?P<budget>\d+)-s(?P<seed>\d+)$")
 # A crossing is the first step at or after onset whose value exceeds this
 # multiple of the pre-onset baseline spread. Fixed here, before the run.
@@ -66,6 +68,8 @@ def main() -> int:
     n_v2 = 0
     skipped_v1 = 0
     for path in sorted(a.profiles_dir.rglob("*.json")):
+        if not is_profile_file(path):
+            continue  # sidecar (.restoration.json / .ratio_trace.json)
         m = CELL.match(path.parent.name)
         if not m:
             continue

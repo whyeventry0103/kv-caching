@@ -28,6 +28,7 @@ from kvcache.metrics.profile_shape import (  # noqa: E402
     phase_amplitude_excess,
     summarise_profiles,
 )
+from kvcache.replay import is_profile_file  # noqa: E402
 
 CELL = re.compile(r"^(?P<press>[a-z0-9]+)-(?P<budget>\d+)-s(?P<seed>\d+)$")
 
@@ -49,6 +50,8 @@ def main() -> int:
     by_press: dict[str, list[tuple[list[float], int | None, int]]] = defaultdict(list)
     n_files = 0
     for path in sorted(a.profiles_dir.rglob("*.json")):
+        if not is_profile_file(path):
+            continue  # sidecar (.restoration.json / .ratio_trace.json)
         match = CELL.match(path.parent.name)
         if not match:
             continue
