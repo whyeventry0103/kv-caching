@@ -51,16 +51,28 @@ def plan_reinsertion(
     n_reinsert: int,
     arm: str,
     rng: random.Random,
+    evict_rng: random.Random | None = None,
 ) -> dict[str, list[int]]:
     """Which cache positions to put back, and which to drop to stay budget-matched.
 
-    ``evicted_order`` is every previously evicted position, MOST RECENT LAST --
-    the order matters because "most recently evicted" is the intervention and
-    "randomly chosen from the same pool" is its control.
+    ``evicted_order`` indexes the STASH of previously evicted entries, MOST
+    RECENT LAST -- the order matters because "most recently evicted" is the
+    intervention and "randomly chosen from the same pool" is its control.
+    ``retained`` indexes the LIVE CACHE. **These are different index spaces**,
+    and an earlier version of this function intersected them: it excluded from
+    the eviction pool any live position whose number happened to coincide with a
+    reinserted stash index. That made ``matched`` (which reinserts the highest
+    stash indices) structurally unable to evict the highest cache positions --
+    the most recent tokens -- while ``random`` evicted them at the uniform rate.
+    The two arms then differed in two ways at once, so the control could not
+    isolate WHICH tokens were load-bearing. No exclusion is needed at all: a
+    stashed entry was evicted earlier and is not in the live cache, so the
+    intervention can never accidentally target it.
 
-    The budget-matched arms evict from ``retained`` to make room. Positions that
-    are being reinserted are never chosen for eviction, which would make the
-    intervention a no-op that still looked like one.
+    ``evict_rng``, when given, draws the eviction set from a stream independent
+    of the reinsertion choice. Arms constructed with the same seed then evict
+    the SAME entries, which is what leaves "which entries return" as the only
+    difference between ``matched`` and ``random``.
     """
     if arm not in ARMS:
         raise ValueError(f"unknown arm {arm!r}; expected one of {ARMS}")
@@ -81,10 +93,14 @@ def plan_reinsertion(
     if arm == "relaxed":
         return {"reinsert": sorted(reinsert), "evict": []}
 
-    pool = [p for p in retained if p not in set(reinsert)]
+    pool = list(retained)
     if len(pool) < n_reinsert:
         raise ValueError("not enough retained entries to stay budget-matched")
-    return {"reinsert": sorted(reinsert), "evict": sorted(rng.sample(pool, n_reinsert))}
+    chooser = evict_rng if evict_rng is not None else rng
+    return {
+        "reinsert": sorted(reinsert),
+        "evict": sorted(chooser.sample(pool, n_reinsert)),
+    }
 
 
 def restoration_read(

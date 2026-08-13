@@ -493,3 +493,31 @@ jobs:
     progress_kind: grid
     requires: restoration-diss256
 
+
+  # ---- P.5 re-run after the index-space bug ---------------------------------
+  # restoration-diss256 completed 800/800 and was INVALIDATED: plan_reinsertion
+  # intersected two different index spaces (stash indices vs live-cache
+  # indices), which barred the `matched` arm from evicting the most recent
+  # quarter of the cache while `random` evicted it at the uniform rate. The arms
+  # therefore differed in two ways at once and `random` (-0.248) could not serve
+  # as the control for `matched` (-0.001). See PREREGISTRATION "Amendment P.5,
+  # correction (2026-08-13)".
+  #
+  # The invalid 800 profiles are PERMANENT RECORD under run name
+  # `restoration-diss256`: not resumed into, not renamed, not deleted -- the same
+  # treatment as the gate-failed fc-aime24-llama8b artifacts above. The corrected
+  # cell runs under a new run name against the SAME config, since only the press
+  # internals changed.
+  #
+  # Ordered after M.3 because M.3 was already in flight when the bug was found,
+  # and M.3 gates the interpretation of every divergence profile including this
+  # one.
+  - name: restoration-diss256-v2
+    command: replay
+    config: configs/experiments/restoration_diss256.yaml
+    run_name: restoration-diss256-v2
+    total: 800
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 28
+    progress_kind: grid
+    requires: replay-ratio-matched-m3

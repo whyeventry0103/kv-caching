@@ -1955,3 +1955,81 @@ all effects within +/-0.001 of zero. That is three traces and carries no
 evidential weight; it is noted only so that a near-zero powered result is not
 mistaken for a late surprise. The powered cell `restoration-diss256` (800
 conditions, both GPUs) launched 13:29 remote the same day.
+
+---
+
+## Amendment P.5, correction (2026-08-13): the powered cell is INVALIDATED by an index-space bug in the arm design
+
+`restoration-diss256` completed 800/800 on 2026-08-13 and was read. **The read is
+withdrawn and the 800 profiles are invalidated for the arm comparison.** They are
+kept as permanent record under their original run name, and the corrected cell
+runs under a new one; nothing is resumed into, renamed, or deleted.
+
+**The numbers that were produced** (archived, explicitly named invalid, at
+`results/diag/amendment-p/restoration_diss256_INVALID_indexbug.json`; effects are
+`none` minus arm, so negative = divergence INCREASED):
+
+| cell | matched | random | relaxed | verdict as read |
+|---|---|---|---|---|
+| random-256 | -0.0012 [-0.0018, -0.0007] | **-0.2484** [-0.3328, -0.1747] | -0.0014 [-0.0021, -0.0008] | NO RESTORATION |
+| streamingllm-256 | -0.0014 [-0.0021, -0.0009] | **-0.2443** [-0.3279, -0.1710] | -0.0014 [-0.0021, -0.0008] | NO RESTORATION |
+
+**What triggered the investigation:** the `random` control was ~200x the size of
+`matched`. A control arm that dwarfs the treatment it controls for is a claim
+about the instrument, not about the mechanism, so it was checked before being
+reported.
+
+**Root cause.** `plan_reinsertion` chose the eviction set with
+
+```python
+pool = [p for p in retained if p not in set(reinsert)]
+```
+
+where `reinsert` indexes the **stash** of previously evicted entries and
+`retained` indexes the **live cache** -- two independent 0-based index spaces in
+which a shared number means nothing. The intent ("do not evict something you are
+reinserting") is vacuous: a stashed entry was evicted earlier and is not in the
+live cache, so it can never be selected. The line's actual effect was to delete
+from the eviction pool whichever live positions numerically coincided with the
+reinserted stash indices.
+
+**Measured consequence.** `matched` reinserts the highest stash indices (the most
+recent evictions), so the exclusion barred it from evicting any cache position
+above 191: **0 of its 64 evictions fell in the most recent quarter of the cache,
+against 18 of 64 for `random`** (~16 expected under uniform sampling; verified
+directly, stash = cache = 256, n = 64). Cache index tracks recency, so the arms
+differed in two ways at once -- which entries returned, and which were dropped to
+make room. `random`'s -0.248 is therefore substantially a *we evicted recent
+entries* effect and cannot be read as *these tokens were not load-bearing*, which
+is the only thing that arm exists to test. `matched`'s eviction set was likewise
+a biased subset, not "an equal number of others under the same policy" as this
+amendment specifies, so its number is affected too. The whole cell goes.
+
+**Fix, and a design strengthening it forced.**
+
+1. `pool = list(retained)` -- no cross-space exclusion; every live position stays
+   eligible.
+2. The eviction set is now drawn from an **independent RNG stream** (`evict_rng`),
+   seeded identically in every arm. Previously both draws came from one stream,
+   so an arm that had already consumed draws choosing what to reinsert landed on
+   a different eviction set. With the fix, `matched` and `random` evict the
+   **same** entries and differ only in which entries return -- which is what
+   makes `random` a control at all. This is a strengthening of the pre-registered
+   design, not a change of estimand: the arm definitions in this amendment are
+   unchanged, the implementation now matches them.
+
+Regression tests: `tests/test_restoration.py` asserts that no position is
+structurally excluded from the eviction pool and that arms sharing a seed evict
+identical sets. An older test that asserted the buggy invariant (built on
+deliberately overlapping index spaces) is replaced, with its premise recorded.
+
+**What survives.** The instrument gate is unaffected: `retained_set_report`
+checks that reinserted entries are bitwise identical to what was stashed, which
+is independent of the selection policy. Its 24/24 pass and the live-path
+validation (arms bit-identical to step 256, first differing at 257) stand. The
+smoke's n=3 diagnostic is withdrawn along with the powered read.
+
+**Pre-registered read for the re-run is unchanged** and is restated here so it
+cannot be adjusted after the fact: RESTORES iff `matched` is positive and
+excludes zero and exceeds `random`; NON-SPECIFIC iff `random` reproduces it;
+NO RESTORATION otherwise. The corrected cell is `restoration-diss256-v2`.

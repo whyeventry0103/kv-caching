@@ -378,6 +378,11 @@ def build_restoration_press(
     import random as _random
 
     rng = _random.Random(seed if seed is not None else 0)
+    # A SEPARATE stream for the eviction choice, seeded identically in every arm.
+    # Drawing both from one stream made the eviction set depend on whether the
+    # arm had already consumed draws selecting what to reinsert, so `matched` and
+    # `random` evicted different entries and differed in two ways at once.
+    evict_rng = _random.Random((seed if seed is not None else 0) + 1_000_003)
     original_compress = base.compress
     base.arm = arm
     base.trigger_step = int(trigger_step)
@@ -425,6 +430,7 @@ def build_restoration_press(
                 n_reinsert=base.n_reinsert,
                 arm=base.arm,
                 rng=rng,
+                evict_rng=evict_rng,
             )
             expected = base.stash_keys.index_select(
                 2, torch.tensor(plan["reinsert"], device=base.stash_keys.device)

@@ -55,16 +55,36 @@ def test_random_arm_draws_from_the_whole_evicted_pool_not_the_recent_tail():
     assert min(picks) < 10, "random arm never sampled an older eviction"
 
 
-def test_reinserted_positions_are_never_chosen_for_eviction():
-    for seed in range(20):
+def test_the_eviction_set_is_drawn_from_the_whole_live_cache():
+    """Replaces an assertion that encoded the index-space bug.
+
+    The old test passed `evicted_order=[1,2,3]` and `retained=[1,2,3,10,11,12]`
+    -- "overlap on purpose" -- and asserted the two sets never intersect. That
+    premise is the defect: the real caller passes `range(stash_size)` and
+    `range(cache_size)`, two independent 0-based spaces in which a shared number
+    means nothing. Enforcing disjointness there removed real cache positions
+    from the eviction pool purely because of their numeric value, which is how
+    `matched` came to be barred from evicting recent entries. The invariant that
+    actually matters is the one asserted here: every retained position stays
+    eligible, so the eviction set is an unbiased sample of the live cache.
+    """
+    retained = list(range(64))
+    seen: set[int] = set()
+    # 200 seeds: a given position is missed with probability (1-8/64)^200 ~ 3e-12,
+    # so the coverage assertion below is deterministic in practice rather than flaky.
+    for seed in range(200):
         plan = plan_reinsertion(
-            evicted_order=[1, 2, 3],
-            retained=[1, 2, 3, 10, 11, 12],  # overlap on purpose
-            n_reinsert=2,
+            evicted_order=list(range(64)),
+            retained=retained,
+            n_reinsert=8,
             arm="matched",
             rng=random.Random(seed),
         )
-        assert not set(plan["reinsert"]) & set(plan["evict"])
+        assert set(plan["evict"]) <= set(retained)
+        assert len(set(plan["evict"])) == 8
+        seen |= set(plan["evict"])
+    # Nothing is structurally excluded: across seeds every position is reachable.
+    assert seen == set(retained)
 
 
 def test_none_arm_does_nothing():
@@ -253,3 +273,58 @@ def test_the_read_refuses_a_trace_with_no_applied_step():
     }
     with pytest.raises(ValueError, match="applied step"):
         restoration_read(arms, applied_steps={"a": 10}, window=5, n_resamples=10)
+
+
+def test_the_eviction_pool_is_not_intersected_across_index_spaces():
+    """Regression: `retained` indexes the live cache, `reinsert` indexes the stash.
+
+    Excluding one from the other barred `matched` -- which reinserts the highest
+    stash indices -- from ever evicting the highest CACHE indices, i.e. the most
+    recent tokens, while `random` evicted them at the uniform rate. The arms then
+    differed in two ways at once and the control could not isolate which tokens
+    mattered. On the powered cell this showed up as random = -0.248 against
+    matched = -0.001.
+    """
+    import random as _random
+
+    from kvcache.metrics.restoration import plan_reinsertion
+
+    stash = cache = 256
+    n = 64
+    top_quarter = {}
+    for arm in ("matched", "random"):
+        plan = plan_reinsertion(
+            evicted_order=list(range(stash)),
+            retained=list(range(cache)),
+            n_reinsert=n,
+            arm=arm,
+            rng=_random.Random(0),
+            evict_rng=_random.Random(7),
+        )
+        assert len(plan["evict"]) == n
+        top_quarter[arm] = sum(1 for p in plan["evict"] if p >= 192)
+    # Both arms must now be free to evict recent entries; before the fix
+    # `matched` was structurally pinned to exactly zero.
+    assert top_quarter["matched"] > 0
+    assert top_quarter["matched"] == top_quarter["random"]
+
+
+def test_arms_sharing_a_seed_evict_the_same_entries():
+    """What makes `random` a control: only WHICH entries return may differ."""
+    import random as _random
+
+    from kvcache.metrics.restoration import plan_reinsertion
+
+    def plan(arm):
+        return plan_reinsertion(
+            evicted_order=list(range(256)),
+            retained=list(range(256)),
+            n_reinsert=32,
+            arm=arm,
+            rng=_random.Random(11),
+            evict_rng=_random.Random(11),
+        )
+
+    matched, chance = plan("matched"), plan("random")
+    assert matched["evict"] == chance["evict"], "arms must evict the same entries"
+    assert matched["reinsert"] != chance["reinsert"], "and reinsert different ones"

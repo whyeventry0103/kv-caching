@@ -1,0 +1,106 @@
+{
+  "amendment": "P.5",
+  "cells": {
+    "random-256": {
+      "anchor_disagreements": [],
+      "anchored_on": "applied_step",
+      "applied_step_range": [
+        192,
+        256
+      ],
+      "arms": {
+        "matched": {
+          "effect_ci95": [
+            -0.001823032100455841,
+            -0.0006907590174250486
+          ],
+          "effect_vs_no_intervention": -0.0012221749913272017,
+          "excludes_zero": true,
+          "n_traces": 100
+        },
+        "random": {
+          "effect_ci95": [
+            -0.3327761132348925,
+            -0.17465265121345513
+          ],
+          "effect_vs_no_intervention": -0.24837119759600468,
+          "excludes_zero": true,
+          "n_traces": 100
+        },
+        "relaxed": {
+          "effect_ci95": [
+            -0.002051414988474154,
+            -0.0008042097904361052
+          ],
+          "effect_vs_no_intervention": -0.0013789958297705698,
+          "excludes_zero": true,
+          "n_traces": 100
+        }
+      },
+      "baseline_mean_divergence": 0.03831494966160596,
+      "n_anchor_disagreements": 0,
+      "n_resamples": 2000,
+      "n_traces": 100,
+      "note": "Positive effect = divergence reduced relative to no intervention. Only the 'matched' arm answers the causal question; 'relaxed' is confounded with cache size and is a reference point only. A 'matched' effect that 'random' reproduces shows that any perturbation helps, not that the reinserted tokens were load-bearing.",
+      "seed": 0,
+      "trigger_step": 130,
+      "verdict": "NO RESTORATION",
+      "window": 200
+    },
+    "streamingllm-256": {
+      "anchor_disagreements": [],
+      "anchored_on": "applied_step",
+      "applied_step_range": [
+        192,
+        256
+      ],
+      "arms": {
+        "matched": {
+          "effect_ci95": [
+            -0.0021218391428171933,
+            -0.0008651890136168739
+          ],
+          "effect_vs_no_intervention": -0.0014497913520513204,
+          "excludes_zero": true,
+          "n_traces": 100
+        },
+        "random": {
+          "effect_ci95": [
+            -0.32787600528237154,
+            -0.1709813879844851
+          ],
+          "effect_vs_no_intervention": -0.24431866352921716,
+          "excludes_zero": true,
+          "n_traces": 100
+        },
+        "relaxed": {
+          "effect_ci95": [
+            -0.002108497786801125,
+            -0.0008333449024514518
+          ],
+          "effect_vs_no_intervention": -0.001428456246687501,
+          "excludes_zero": true,
+          "n_traces": 100
+        }
+      },
+      "baseline_mean_divergence": 0.04449427724612501,
+      "n_anchor_disagreements": 0,
+      "n_resamples": 2000,
+      "n_traces": 100,
+      "note": "Positive effect = divergence reduced relative to no intervention. Only the 'matched' arm answers the causal question; 'relaxed' is confounded with cache size and is a reference point only. A 'matched' effect that 'random' reproduces shows that any perturbation helps, not that the reinserted tokens were load-bearing.",
+      "seed": 0,
+      "trigger_step": 130,
+      "verdict": "NO RESTORATION",
+      "window": 200
+    }
+  },
+  "gate": {
+    "failed": 0,
+    "missing": 0,
+    "overridden": false
+  },
+  "measure": "tv",
+  "n_profiles": 800,
+  "run": "restoration-diss256",
+  "window": 200
+}
