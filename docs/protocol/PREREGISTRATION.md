@@ -2091,3 +2091,33 @@ whose phase-0 peak is exactly what a compression-ratio curve would produce.
 The corrected cell is `replay-ratio-matched-m3-v2`. The invalid 200 profiles are
 permanent record under their original run name: not resumed into, not renamed,
 not deleted.
+
+### Amendment M.3-v2, read condition (2026-08-15, written before the cell completes)
+
+The corrected press works -- on the first v2 trace `logical_context` rises
+116 -> 1012 and `target_size` varies (32-38) instead of pinning at the floor.
+But a floor of 32 at ratio 0.038 only stops binding once the logical context
+reaches 32/0.038 ~= 842 tokens. **Below that the cell is a fixed-32 budget whose
+realized ratio WORSENS as context grows -- the exact confound M.3 exists to
+remove.** On that first (short) trace, 336 of 420 events sat at the floor and
+the realized median ratio was 0.0567, not 0.038.
+
+`min_budget` is NOT being changed: it is pre-registered at 32, and altering a
+protocol parameter after seeing data is the thing this document exists to
+prevent. Instead the read is conditioned, and the condition is fixed here before
+the cell finishes:
+
+**The M.3 comparison uses only steps where the press was above the floor**
+(`at_floor == False` in the ratio trace). Steps at the floor are reported as a
+coverage figure, never silently pooled. Measured on the budget-256 profiles of
+the extended pass, the threshold is ~step 692 for a typical ~150-token prompt;
+**24 of 25 traces exceed it and 83.9% of all steps qualify**, so the restriction
+is a coverage caveat rather than a power problem.
+
+If the above-floor coverage of the completed v2 cell falls materially below that
+83.9% estimate, the read is reported as underpowered rather than forced.
+
+**The verdict itself is unchanged:** staircase survives at fixed ratio -> the
+horizon reading stands and a mechanistic reading is licensed; staircase flattens
+-> the profile is a compression-ratio effect and section 4.4 is restated in
+those terms.
