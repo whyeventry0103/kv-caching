@@ -521,3 +521,28 @@ jobs:
     min_free_gb: 28
     progress_kind: grid
     requires: replay-ratio-matched-m3
+
+  # ---- M.3 re-run after the floor-collapse bug ------------------------------
+  # replay-ratio-matched-m3 completed 200/200 and was INVALIDATED: the press
+  # computed target_size against keys.shape[2] -- the CURRENT CACHE, i.e. the
+  # previous compression's own output -- instead of the logical context. That is
+  # a feedback loop: compress to 32, accrue 64, round(0.038*96)=4 -> floor 32,
+  # forever. All 377,104 compression events across all 200 traces sat at the
+  # floor, so the cell was a constant-32 budget -- the exact property M.3 exists
+  # to remove. See PREREGISTRATION "Amendment M.3, correction (2026-08-14)".
+  #
+  # The invalid 200 profiles are PERMANENT RECORD under run name
+  # `replay-ratio-matched-m3`. Same config; only the press internals changed.
+  #
+  # This still GATES the interpretation of every divergence profile, including
+  # P.2's eviction-locking result. It is ordered after the restoration re-run
+  # only because that run was already in flight when this bug was found.
+  - name: replay-ratio-matched-m3-v2
+    command: replay
+    config: configs/experiments/replay_ratio_matched_m3.yaml
+    run_name: replay-ratio-matched-m3-v2
+    total: 200
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 28
+    progress_kind: grid
+    requires: restoration-diss256-v2

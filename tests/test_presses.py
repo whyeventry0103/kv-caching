@@ -310,35 +310,72 @@ def test_rope_inv_freq_rejects_a_head_dim_mismatch():
         )
 
 
-def test_ratio_matched_press_scales_the_budget_with_context(monkeypatch):
-    """Amendment M.3: the RATIO is held fixed, so target_size must track context."""
-    from kvcache.presses import build_ratio_matched_press
+class _Keys:
+    def __init__(self, n):
+        self.shape = (1, 1, n, 8)
 
-    class FakeBase:
-        target_size = 0
 
-        def compress(self, module, hidden_states, keys, values, attentions, kwargs):
+class _EvictingFakeBase:
+    """A fake that ACTUALLY evicts down to target_size.
+
+    The previous fake returned its input unchanged, so the cache never shrank
+    and the ratio-vs-cache-size feedback loop could not occur. That is exactly
+    how the collapse below reached a 200-profile GPU run undetected.
+    """
+
+    target_size = 0
+
+    def compress(self, module, hidden_states, keys, values, attentions, kwargs):
+        n = keys.shape[2]
+        if n <= self.target_size:
             return keys, values
+        return _Keys(self.target_size), _Keys(self.target_size)
 
+
+def test_ratio_matched_press_scales_with_the_logical_context_not_the_cache(monkeypatch):
+    """Amendment M.3: the ratio is taken against the context the model would have.
+
+    Regression for the feedback loop that made the first M.3 run a constant-32
+    cell: target computed off `keys.shape[2]` (the previous compression's
+    output) collapses to `min_budget` and never leaves it.
+    """
     import kvcache.presses as presses_module
 
-    monkeypatch.setattr(
-        presses_module, "build_press", lambda *a, **k: FakeBase(), raising=True
+    base = _EvictingFakeBase()
+    monkeypatch.setattr(presses_module, "build_press", lambda *a, **k: base)
+    press = presses_module.build_ratio_matched_press(
+        "random", ratio=0.25, min_budget=32
     )
-    press = build_ratio_matched_press("random", ratio=0.25, min_budget=32)
 
-    class Keys:
-        def __init__(self, n):
-            self.shape = (1, 1, n, 8)
+    # Prefill of 1000, then repeated 64-token intervals -- the real shape.
+    press.compress(None, None, _Keys(1000), _Keys(1000), None, {})
+    assert press.target_size == 250
+    targets = [press.target_size]
+    for _ in range(6):
+        cache = press.target_size + 64
+        press.compress(None, None, _Keys(cache), _Keys(cache), None, {})
+        targets.append(press.target_size)
 
-    for context, expected in (
-        (1000, 250),
-        (4000, 1000),
-        (64, 32),
-    ):  # 64*.25=16 -> floor
-        press.compress(None, None, Keys(context), Keys(context), None, {})
-        assert press.target_size == expected
-    assert [e["context"] for e in press.ratio_trace] == [1000, 4000, 64]
+    # The logical context grows by 64 each interval, so the target must GROW.
+    assert targets == sorted(targets), targets
+    assert targets[-1] > targets[0], "target collapsed instead of tracking context"
+    assert not any(e["at_floor"] for e in press.ratio_trace)
+    # And the realized ratio stays at the requested value, which is the point.
+    last = press.ratio_trace[-1]
+    assert last["target_size"] == round(0.25 * last["logical_context"])
+
+
+def test_ratio_matched_press_still_honours_the_floor_on_a_short_context(monkeypatch):
+    import kvcache.presses as presses_module
+
+    base = _EvictingFakeBase()
+    monkeypatch.setattr(presses_module, "build_press", lambda *a, **k: base)
+    press = presses_module.build_ratio_matched_press(
+        "random", ratio=0.25, min_budget=32
+    )
+    press.compress(None, None, _Keys(64), _Keys(64), None, {})  # 64*.25=16 -> floor
+    assert press.target_size == 32
+    assert press.ratio_trace[-1]["at_floor"] is True
 
 
 def test_ratio_matched_press_rejects_impossible_ratios():

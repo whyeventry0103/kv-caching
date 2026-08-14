@@ -1,0 +1,13 @@
+{
+  "defect": "target_size computed against keys.shape[2] (the compressed cache) instead of the logical context; feedback loop collapses to min_budget",
+  "events_at_floor_32": 377104,
+  "fraction_at_floor": 1.0,
+  "max_context_observed": 408,
+  "max_target_ever_chosen": 32,
+  "n_compression_events": 377104,
+  "n_traces": 200,
+  "realized": "constant 32-token budget",
+  "requested_ratio": 0.038,
+  "run": "replay-ratio-matched-m3",
+  "status": "INVALID"
+}

@@ -308,17 +308,41 @@ def build_ratio_matched_press(
         raise ValueError("fullcache has no ratio to match")
 
     original_compress = base.compress
+    # Cumulative evictions PER LAYER: compress fires once per layer per event,
+    # so a single counter would multiply the total by the layer count.
+    evicted_so_far: dict[int, int] = {}
 
     def compress(module, hidden_states, keys, values, attentions, kwargs):
-        context = int(keys.shape[2])
-        base.target_size = max(int(min_budget), int(round(ratio * context)))
+        layer = int(getattr(module, "layer_idx", 0) or 0)
+        cache = int(keys.shape[2])
+        # The ratio must be taken against the context the model WOULD have had,
+        # not against what survived the last compression. Using the cache size
+        # is a feedback loop that collapses to `min_budget` and stays there:
+        # compress to 32, accrue one 64-step interval, 0.038*96 = 3.6 -> floor
+        # 32, forever. The first run of M.3 hit the floor on 100% of 377,104
+        # events and was really a constant-32 cell -- the opposite of the
+        # control it claims to be. Everything ever evicted was once in the
+        # cache, so `evicted + cache` reconstructs the full logical context
+        # without the press needing to know the prompt length.
+        logical = evicted_so_far.get(layer, 0) + cache
+        base.target_size = max(int(min_budget), int(round(ratio * logical)))
         base.ratio_trace = getattr(base, "ratio_trace", [])
         base.ratio_trace.append(
-            {"context": context, "target_size": int(base.target_size)}
+            {
+                "layer": layer,
+                "cache": cache,
+                "logical_context": logical,
+                "target_size": int(base.target_size),
+                "at_floor": int(base.target_size) == int(min_budget),
+            }
         )
-        return original_compress(
+        new_keys, new_values = original_compress(
             module, hidden_states, keys, values, attentions, kwargs
         )
+        evicted_so_far[layer] = evicted_so_far.get(layer, 0) + (
+            cache - int(new_keys.shape[2])
+        )
+        return new_keys, new_values
 
     base.compress = compress
     base.matched_ratio = float(ratio)

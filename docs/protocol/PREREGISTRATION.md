@@ -2033,3 +2033,61 @@ smoke's n=3 diagnostic is withdrawn along with the powered read.
 cannot be adjusted after the fact: RESTORES iff `matched` is positive and
 excludes zero and exceeds `random`; NON-SPECIFIC iff `random` reproduces it;
 NO RESTORATION otherwise. The corrected cell is `restoration-diss256-v2`.
+
+---
+
+## Amendment M.3, correction (2026-08-14): the ratio-matched control was a constant-32 cell; INVALIDATED
+
+`replay-ratio-matched-m3` completed 200/200 on 2026-08-14. **The run is
+invalidated: it did not implement the control it names.** Evidence archived at
+`results/diag/amendment-p/m3_INVALID_floor_collapse.json`.
+
+**What it actually ran.** Across **all 200 traces and all 377,104 compression
+events, the chosen `target_size` was 32 -- the `min_budget` floor -- 100% of the
+time.** The largest target ever chosen was 32; the largest cache ever observed
+was 408 entries. The requested ratio was 0.038; the realized median ratio was
+0.333. So the cell held a **constant, very small absolute budget**, which is
+precisely the property M.3 exists to remove, and it is more aggressive than the
+budget-256 cells it was meant to be compared against.
+
+**Root cause: a feedback loop.** The press computed
+
+```python
+context = int(keys.shape[2])
+base.target_size = max(min_budget, round(ratio * context))
+```
+
+`keys.shape[2]` is the CURRENT CACHE SIZE -- itself the output of the previous
+compression -- not the context the model would have had. So: compress to 32,
+accrue one 64-step interval to 96, `round(0.038 * 96) = 4` -> floored to 32,
+compress to 32, forever. The cache can never grow, so the ratio can never be
+realized. The intended quantity is the logical context (prompt + everything
+generated so far).
+
+**Why no test caught it.** The unit test's fake base returned its input
+unchanged, so the cache never shrank and the loop could not form. A test whose
+fake cannot exhibit the failure mode is not a test of that failure mode. It has
+been replaced with a fake that actually evicts to `target_size`, and the new
+test reproduces the collapse on the old code (target 250 -> 32 on the first
+event).
+
+**Fix.** Everything ever evicted was once in the cache, so
+`logical = cumulative_evicted + current_cache` reconstructs the full context
+without the press needing to know the prompt length. Eviction is accumulated
+**per layer**, since `compress` fires once per layer per event and a single
+counter would multiply the total by the layer count. The trace now records
+`logical_context` and an explicit `at_floor` flag per event, so a future floor
+collapse is visible in the artifact itself rather than requiring this analysis.
+
+**Consequence for the reading.** M.3's pre-registered read is UNCHANGED and is
+restated so it cannot be adjusted later: if the divergence staircase survives at
+fixed ratio, the horizon reading stands and a mechanistic reading is licensed;
+if it flattens, the profile is a compression-ratio effect and section 4.4 is
+restated in those terms. **That read has still not been performed.** Until the
+corrected cell runs, no mechanistic reading of any divergence profile is
+licensed -- including the Amendment P.2 finding that Random is eviction-locked,
+whose phase-0 peak is exactly what a compression-ratio curve would produce.
+
+The corrected cell is `replay-ratio-matched-m3-v2`. The invalid 200 profiles are
+permanent record under their original run name: not resumed into, not renamed,
+not deleted.
