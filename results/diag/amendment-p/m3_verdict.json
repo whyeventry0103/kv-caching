@@ -1,0 +1,95 @@
+{
+  "amendment": "M.3",
+  "excluded": {
+    "never_left_floor": 8,
+    "no_fixed_counterpart": 0,
+    "window_too_short": 8
+  },
+  "fixed_run": "replay-ext-diss256",
+  "matched_run": "replay-ratio-matched-m3-v2",
+  "min_window": 200,
+  "per_press": {
+    "random": {
+      "drift_difference_matched_minus_fixed": {
+        "ci95": [
+          -0.6549856128343904,
+          -0.4166968609791592
+        ],
+        "mean": -0.5390823828747654,
+        "n_clusters": 24,
+        "n_observations": 92,
+        "n_resamples": 2000,
+        "seed": 0
+      },
+      "drift_fixed": {
+        "ci95": [
+          1.0606294998081072,
+          1.33878016941032
+        ],
+        "mean": 1.2008917218206379,
+        "n_clusters": 24,
+        "n_observations": 92,
+        "n_resamples": 2000,
+        "seed": 0
+      },
+      "drift_matched": {
+        "ci95": [
+          0.614454189847276,
+          0.7092569334712779
+        ],
+        "mean": 0.6618093389458727,
+        "n_clusters": 24,
+        "n_observations": 92,
+        "n_resamples": 2000,
+        "seed": 0
+      },
+      "fixed_cell_rises": true,
+      "matched_cell_rises": false,
+      "n_observations": 92,
+      "n_problems": 24,
+      "verdict": "STAIRCASE FLATTENS AT FIXED RATIO -> ratio effect"
+    },
+    "streamingllm": {
+      "drift_difference_matched_minus_fixed": {
+        "ci95": [
+          -0.7604211380738105,
+          -0.3658639306796242
+        ],
+        "mean": -0.5593749641861472,
+        "n_clusters": 24,
+        "n_observations": 92,
+        "n_resamples": 2000,
+        "seed": 0
+      },
+      "drift_fixed": {
+        "ci95": [
+          1.0995847701666441,
+          1.5198976012999081
+        ],
+        "mean": 1.298817465131997,
+        "n_clusters": 24,
+        "n_observations": 92,
+        "n_resamples": 2000,
+        "seed": 0
+      },
+      "drift_matched": {
+        "ci95": [
+          0.6795493661049138,
+          0.8054298894832244
+        ],
+        "mean": 0.73944250094585,
+        "n_clusters": 24,
+        "n_observations": 92,
+        "n_resamples": 2000,
+        "seed": 0
+      },
+      "fixed_cell_rises": true,
+      "matched_cell_rises": false,
+      "n_observations": 92,
+      "n_problems": 24,
+      "verdict": "STAIRCASE FLATTENS AT FIXED RATIO -> ratio effect"
+    }
+  },
+  "restriction": "each trace trimmed to begin where its own ratio-matched press left min_budget; the fixed-budget counterpart is cut at the SAME step",
+  "retained_fraction_of_trace_median": 0.759
+}

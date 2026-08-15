@@ -309,3 +309,46 @@ def test_correlation_bootstrap_reports_n_cells_and_refuses_too_few():
         correlation_with_cluster_bootstrap(
             {k: cells[k] for k in ("c0", "c1")}, n_resamples=10
         )
+
+
+def test_cluster_bootstrap_mean_hand_computed():
+    """Mean is over observations; the interval comes from resampling CLUSTERS."""
+    from kvcache.stats import cluster_bootstrap_mean
+
+    # Two clusters, two observations each: mean = (1+3+5+7)/4 = 4.0
+    out = cluster_bootstrap_mean(
+        {"a": [1.0, 3.0], "b": [5.0, 7.0]}, n_resamples=500, seed=0
+    )
+    assert out["mean"] == pytest.approx(4.0)
+    assert out["n_clusters"] == 2
+    assert out["n_observations"] == 4
+    # Resampling 2 clusters with replacement can only draw {aa, ab, ba, bb},
+    # i.e. resample means of exactly 2.0, 4.0 or 6.0 -- so the CI is bounded.
+    assert out["ci95"][0] >= 2.0
+    assert out["ci95"][1] <= 6.0
+
+
+def test_cluster_bootstrap_mean_is_not_an_observation_bootstrap():
+    """A big cluster must not shrink the interval the way pooling would.
+
+    Two clusters of 100 identical values each, far apart: resampling CLUSTERS
+    must reach both extremes, whereas resampling observations would concentrate
+    tightly around the pooled mean.
+    """
+    from kvcache.stats import cluster_bootstrap_mean
+
+    out = cluster_bootstrap_mean(
+        {"lo": [0.0] * 100, "hi": [10.0] * 100}, n_resamples=500, seed=0
+    )
+    assert out["mean"] == pytest.approx(5.0)
+    assert out["ci95"][0] == pytest.approx(0.0)
+    assert out["ci95"][1] == pytest.approx(10.0)
+
+
+def test_cluster_bootstrap_mean_refuses_empty_input():
+    from kvcache.stats import cluster_bootstrap_mean
+
+    with pytest.raises(ValueError):
+        cluster_bootstrap_mean({})
+    with pytest.raises(ValueError):
+        cluster_bootstrap_mean({"a": []})

@@ -1,0 +1,9 @@
+{
+  "traces": 200,
+  "events": 377104,
+  "above_floor_pct": 83.5,
+  "per_trace_cov_median_pct": 74.2,
+  "traces_zero_coverage": 8,
+  "max_target": 626,
+  "realized_ratio_above_floor_median": 0.038
+}

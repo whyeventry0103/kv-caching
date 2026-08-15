@@ -556,3 +556,44 @@ def correlation_with_cluster_bootstrap(
             "separate, stronger test (linearity through the origin)."
         ),
     }
+
+
+def cluster_bootstrap_mean(
+    by_cluster: Mapping[str, Sequence[float]],
+    *,
+    n_resamples: int = 2000,
+    seed: int = 0,
+) -> dict[str, Any]:
+    """Mean and percentile CI, resampling CLUSTERS (problems) with replacement.
+
+    The repo's standing convention for any problem-level quantity: 2000
+    resamples, seed 0, percentile interval. Resampling individual observations
+    would treat several seeds of one problem as independent evidence, which they
+    are not -- they share the problem's difficulty and its trace.
+    """
+    keys = sorted(by_cluster)
+    if not keys:
+        raise ValueError("cannot bootstrap an empty sample")
+    flat = [v for k in keys for v in by_cluster[k]]
+    if not flat:
+        raise ValueError("every cluster is empty")
+
+    rng = random.Random(seed)
+    draws = []
+    for _ in range(n_resamples):
+        picked = [by_cluster[keys[rng.randrange(len(keys))]] for _ in keys]
+        values = [v for group in picked for v in group]
+        if values:
+            draws.append(statistics.fmean(values))
+    draws.sort()
+    return {
+        "mean": statistics.fmean(flat),
+        "ci95": [
+            draws[int(0.025 * (len(draws) - 1))],
+            draws[int(0.975 * (len(draws) - 1))],
+        ],
+        "n_clusters": len(keys),
+        "n_observations": len(flat),
+        "n_resamples": n_resamples,
+        "seed": seed,
+    }

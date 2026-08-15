@@ -2177,3 +2177,74 @@ mechanism I proposed for it was not.
 at one trigger with `reinsert_fraction` 0.25 and a 200-step read window. A null
 here is a null for that intervention, not for reinsertion in general: a larger
 fraction, a different trigger, or repeated reinsertion are untested.
+
+---
+
+## Amendment M.3, result (2026-08-15): the staircase is a COMPRESSION-RATIO effect
+
+`replay-ratio-matched-m3-v2`, 200/200 conditions on the corrected press.
+Artifacts: `results/diag/amendment-p/{m3_verdict,m3v2_coverage,
+shape_m3v2_UNRESTRICTED}.json`.
+
+**The pre-committed read condition is satisfied.** Above-floor coverage is
+**83.5%** of compression events against the 83.9% predicted on 2026-08-15 before
+the cell finished; per-trace median coverage 74.2%; realized ratio on above-floor
+events exactly **0.038**, and the largest target chosen was 626, so the budget
+genuinely tracked context this time.
+
+**Verdict, on the restricted and paired window** (each trace trimmed to where
+its own press left the floor; the fixed-budget counterpart cut at the SAME
+absolute step; drift = last-quarter mean / first-quarter mean; problem-clustered
+bootstrap, 2000 resamples, seed 0; 24 problems and 92 observations per press;
+median 75.9% of each trace retained; excluded: 8 profiles never left the floor,
+8 windows shorter than 200 steps):
+
+| press | drift, FIXED budget 256 | drift, RATIO-matched 0.038 | branch |
+|---|---|---|---|
+| Random | **1.201** [1.061, 1.339] | **0.662** [0.614, 0.709] | FLATTENS -> ratio effect |
+| StreamingLLM | **1.299** [1.100, 1.520] | **0.739** [0.680, 0.805] | FLATTENS -> ratio effect |
+
+**This is the pre-registered "flattens" branch for both policies.** Section 4.4
+is to be restated in compression-ratio terms: the rising divergence profile is
+what a monotonically worsening ratio produces, not evidence of a horizon
+mechanism. **No mechanistic reading of the rising staircase is licensed.**
+
+Three things must travel with this result.
+
+1. **What was actually manipulated.** Holding the ratio fixed *is* letting the
+   absolute budget grow with context (32 -> 626 here). "Fixed ratio" and
+   "growing absolute cache" are the same manipulation by construction, so the
+   honest statement is: the staircase disappears when the budget grows in
+   proportion to the context. It is not a demonstration that horizon length is
+   irrelevant holding cache size fixed -- that is a different experiment.
+2. **The restriction shrinks the staircase it is testing.** Over the whole
+   trace the fixed cell drifts 2.93 (Random) and 2.26 (StreamingLLM); over the
+   comparable above-floor window it drifts 1.20 and 1.30. Trimming removes the
+   early trace where most of the rise happens. The staircase is still present
+   and its interval still excludes 1, so the comparison stands, but it is a
+   milder staircase than the headline figure.
+3. **The matched cell does not merely flatten -- it reverses** (drift 0.66-0.74,
+   below 1). Divergence *falls* across the trace when the budget grows with
+   context. That is consistent with the ratio being the driver, and is the
+   direction a growing absolute cache would produce.
+
+**An aggregation bug in the verdict script was caught before this was reported.**
+The first run keyed observations by problem id alone, so each of the four seeds
+overwrote the previous one and three quarters of the data was silently dropped.
+On that reduced sample Random read `drift_fixed = 1.085 [0.923, 1.247]` -- an
+interval spanning 1 -- and the script correctly refused it as "no staircase in
+the fixed cell over this window -> not readable". With all 92 observations the
+same cell reads 1.201 [1.061, 1.339]. The verdict above uses the full data; the
+refusal branch worked as designed on the partial data.
+
+**Consequence for Amendment P.2.** The eviction-locking finding (Random's phase
+excess peaking at the prune step) was flagged on 2026-08-12 as possibly being
+what a ratio-driven curve would produce. That question is now testable and is
+NOT yet answered here: the phase statistics computed on this cell
+(`shape_m3v2_UNRESTRICTED.json`: Random excess +0.326 [0.263, 0.339] peak 0;
+StreamingLLM +0.102 [0.065, 0.128] peak 6, both excluding zero) were computed
+over the WHOLE trace including the floor-bound period, which is the harshest
+compression in the run and would inflate phase amplitude. **They are recorded as
+preliminary and must not be cited as evidence that eviction-locking survives
+ratio matching** until the phase analysis is repeated on the same restricted
+window as the drift comparison above.
