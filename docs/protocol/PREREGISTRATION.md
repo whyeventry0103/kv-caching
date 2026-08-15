@@ -2121,3 +2121,59 @@ If the above-floor coverage of the completed v2 cell falls materially below that
 horizon reading stands and a mechanistic reading is licensed; staircase flattens
 -> the profile is a compression-ratio effect and section 4.4 is restated in
 those terms.
+
+---
+
+## Amendment P.5, result (2026-08-15): NO RESTORATION, on the corrected arms
+
+`restoration-diss256-v2`, 800/800 conditions, 200 per seed. **Instrument gate:
+800/800 pass, zero failures** -- every treated arm bitwise identical to what was
+stashed (`max_abs_difference` 0.0), `matched`/`random` holding the cache at 256,
+`relaxed` at 320. Zero anchor disagreements: within every trace the treated arms
+landed on the same step, so one anchor per trace is valid. Artifact
+`results/diag/amendment-p/restoration_diss256_v2.json`.
+
+Effects are `none` minus arm over a 200-step window anchored per trace on the
+applied step (192 or 256), so **positive = divergence reduced**:
+
+| cell | matched (the causal test) | random (specificity control) | relaxed (confounded reference) | verdict |
+|---|---|---|---|---|
+| Random-256 | **-0.0013** [-0.0019, -0.0007] | -0.2485 [-0.3330, -0.1748] | -0.0014 [-0.0021, -0.0008] | **NO RESTORATION** |
+| StreamingLLM-256 | **-0.0015** [-0.0022, -0.0009] | -0.2442 [-0.3278, -0.1709] | -0.0014 [-0.0021, -0.0008] | **NO RESTORATION** |
+
+Baseline (no-intervention) mean divergence over the same window: 0.0383
+(Random), 0.0445 (StreamingLLM).
+
+**The pre-registered answer to Meeting #2 Task 2 is NO.** Reinserting the most
+recently evicted K/V entries does not reduce divergence. The `matched` effect is
+*negative* -- divergence very slightly INCREASED -- and excludes zero, though at
+0.0013-0.0015 against a baseline of 0.038-0.045 it is ~3% of the divergence
+being explained and is better read as "indistinguishable from no help" than as
+a real harm. The `relaxed` arm, which is allowed to grow the cache, does no
+better, so the null is not an artifact of holding the budget fixed.
+
+**The specificity control carries the interesting part.** Reinserting the same
+*number* of entries chosen randomly from the evicted pool -- with the SAME
+entries dropped to make room, which is what the corrected implementation
+guarantees -- increases divergence by 0.245-0.249, roughly six times the
+baseline divergence. So the cache is acutely sensitive to *which* entries occupy
+it, while restoring the specific entries a policy just evicted is nearly
+neutral. Eviction damage, at this budget and horizon, is not undone by putting
+the tokens back.
+
+**A prior hypothesis of mine was wrong, and the record should show it.** When
+the v1 cell was invalidated (2026-08-13) I attributed `random`'s large effect to
+the index-space bug, which had barred `matched` from evicting recent entries (0
+of 64 in the top quarter, against 18 for `random`). The corrected run reproduces
+the same aggregate to four decimals (v1 `random` -0.2484 vs v2 -0.2485; v1
+`matched` -0.0012 vs v2 -0.0013) while **every single per-trace profile differs**
+(0 of 25 identical per cell checked). So the fix did take effect and did change
+the trajectories; the eviction confound simply was not what produced the effect.
+The invalidation was still correct -- with arms differing in two ways the
+contrast was uninterpretable regardless of how the numbers landed -- but the
+mechanism I proposed for it was not.
+
+**Scope.** One model, MATH-500, budget 256, two policies, a single intervention
+at one trigger with `reinsert_fraction` 0.25 and a 200-step read window. A null
+here is a null for that intervention, not for reinsertion in general: a larger
+fraction, a different trigger, or repeated reinsertion are untested.
