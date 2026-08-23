@@ -825,6 +825,99 @@ at phase 9 rather than 0 (R-KV). Random's eviction-locking is the only phase
 result the record carries. Interpretation of the rising profile stays withheld
 pending M.3.
 
+### 4v. Meeting #2 Task 2 (restoration) and the M.3 ratio-matched control (2026-08-15)
+
+Two powered cells landed and were read. Both required a re-run: the first
+attempt at each was invalidated by a defect in our own instrument, and both
+invalidations are recorded in PREREGISTRATION (P.5 correction 2026-08-13, M.3
+correction 2026-08-14). Artifacts:
+`results/diag/amendment-p/{restoration_diss256_v2,m3_verdict,m3v2_coverage}.json`.
+
+**Task 2 — reinsertion does NOT reduce divergence.** `restoration-diss256-v2`,
+800/800 conditions, 200 per seed. Instrument gate **800/800 pass, zero
+failures, zero missing, zero anchor disagreements**: every treated arm bitwise
+identical to what was stashed (`max_abs_difference` 0.0), `matched`/`random`
+holding the cache at 256, `relaxed` at 320. Effects are `none` minus arm over a
+200-step window anchored per trace on the applied step (192 or 256), so
+**positive would mean divergence reduced**:
+
+| cell | matched (the causal test) | random (specificity control) | relaxed (confounded reference) | baseline divergence |
+|---|---|---|---|---|
+| Random-256 | **-0.0013** [-0.0019, -0.0007] | -0.2485 [-0.3330, -0.1748] | -0.0014 [-0.0021, -0.0008] | 0.0383 |
+| StreamingLLM-256 | **-0.0015** [-0.0022, -0.0009] | -0.2442 [-0.3278, -0.1709] | -0.0014 [-0.0021, -0.0008] | 0.0445 |
+
+Verdict **NO RESTORATION** in both cells. The `matched` effect is negative and
+excludes zero, but at 0.0013-0.0015 against a baseline of 0.038-0.044 it is ~3%
+of the divergence and is to be written as **indistinguishable from no help**,
+never as a measured harm. The `relaxed` arm, which is allowed to grow the cache,
+does no better, so the null is not an artifact of holding the budget fixed.
+
+**The specificity control carries the interesting part.** Reinserting the same
+*number* of entries chosen randomly from the evicted pool -- with the SAME
+entries dropped to make room, which the corrected implementation guarantees via
+a shared eviction stream -- increases divergence by 0.244-0.249, roughly six
+times the baseline. So the cache is acutely sensitive to *which* entries occupy
+it, while restoring the specific entries a policy just evicted is nearly
+neutral. **Eviction damage, at this budget and horizon, is not undone by putting
+the tokens back.**
+
+Scope, and it is narrow: one model, MATH-500, budget 256, two policies, a single
+intervention at one trigger with `reinsert_fraction` 0.25 and a 200-step read
+window. A null here is a null for that intervention, not for reinsertion in
+general.
+
+**M.3 — the divergence staircase is a COMPRESSION-RATIO effect.**
+`replay-ratio-matched-m3-v2`, 200/200. The read condition was fixed in writing
+before the cell completed (PREREGISTRATION, M.3-v2 read condition) and is met:
+above-floor coverage **83.5%** of 377,104 compression events against the 83.9%
+predicted, per-trace median coverage 74.2%, realized ratio on above-floor events
+exactly **0.038**, largest target chosen 626.
+
+Drift = last-quarter mean / first-quarter mean over the restricted, paired
+window (each trace trimmed to where its own press left the floor; the
+fixed-budget counterpart cut at the SAME absolute step; problem-clustered
+bootstrap, 2000 resamples, seed 0; 24 problems / 92 observations per press;
+median 75.9% of each trace retained; excluded: 8 profiles never left the floor,
+8 windows under 200 steps):
+
+| press | drift, FIXED budget 256 | drift, RATIO-matched 0.038 | matched - fixed |
+|---|---|---|---|
+| Random | **1.201** [1.061, 1.339] | **0.662** [0.615, 0.709] | -0.539 [-0.655, -0.417] |
+| StreamingLLM | **1.299** [1.100, 1.520] | **0.739** [0.680, 0.805] | -0.559 [-0.760, -0.366] |
+
+Both take the pre-registered **FLATTENS** branch. **Section 4.4 is to be
+restated in compression-ratio terms, and no mechanistic reading of the rising
+divergence profile is licensed.** The rise is what a monotonically worsening
+ratio produces.
+
+Three qualifiers that must travel with it:
+
+1. **What was manipulated.** Holding the ratio fixed *is* letting the absolute
+   budget grow with context (32 -> 626 here); they are the same manipulation by
+   construction. The honest claim is that the staircase disappears when the
+   budget grows in proportion to context -- NOT that horizon length is
+   irrelevant at fixed cache size, which is a different experiment.
+2. **The restriction shrinks the staircase being tested.** Over the whole trace
+   the fixed cell drifts 2.93 (Random) and 2.26 (StreamingLLM); over the
+   comparable above-floor window it drifts 1.20 and 1.30. Trimming removes the
+   early trace where most of the rise sits. The staircase is still present and
+   its interval still excludes 1, so the comparison stands, but the milder
+   figure is the one licensed for this comparison.
+3. **The matched cell does not merely flatten -- it reverses** (drift 0.66-0.74,
+   below 1): divergence *falls* across the trace when the budget grows with
+   context.
+
+**Consequence for §4u's P.2 result, and it is UNRESOLVED.** The eviction-locking
+finding (Random's phase excess peaking at the prune step) was flagged as
+possibly being what a ratio-driven curve would produce. Phase statistics
+computed on this cell (`shape_m3v2_UNRESTRICTED.json`: Random excess +0.326
+[0.263, 0.339] peak 0; StreamingLLM +0.102 [0.065, 0.128] peak 6, both excluding
+zero) were computed over the WHOLE trace including the floor-bound period -- the
+harshest compression in the run, which would inflate phase amplitude. **They are
+preliminary and must not be cited as evidence that eviction-locking survives
+ratio matching** until the phase analysis is repeated on the same restricted
+window as the drift comparison above. That analysis is not yet written.
+
 <!-- AUDIT:ARCHIVAL-END -->
 
 ## 5. Framing discipline (non-negotiable — apply throughout)

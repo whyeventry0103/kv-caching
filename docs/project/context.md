@@ -18,6 +18,70 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-08-15 — BOTH powered cells landed and were read. Task 2 = NO
+  RESTORATION; M.3 = the staircase is a RATIO effect. All four Meeting-#2 tasks
+  now have answers. No runs pending; GPUs idle. HEAD `c4a0f1b`.
+  (Record brought current 2026-08-23.)**
+
+  **(1) Task 2 / P.5 — `restoration-diss256-v2`, 800/800, gate 800/800 PASS**
+  (zero failures, zero missing, zero anchor disagreements; every treated arm
+  bitwise identical, `max_abs_difference` 0.0). Effects are `none` minus arm, so
+  positive would mean divergence reduced:
+  Random-256 matched **-0.0013** [-0.0019,-0.0007], random -0.2485
+  [-0.3330,-0.1748], relaxed -0.0014; baseline 0.0383.
+  StreamingLLM-256 matched **-0.0015** [-0.0022,-0.0009], random -0.2442
+  [-0.3278,-0.1709], relaxed -0.0014; baseline 0.0445.
+  **NO RESTORATION** in both. matched is ~3% of baseline divergence — write it as
+  *indistinguishable from no help*, never as harm. The relaxed arm does no
+  better, so the null is not a budget-match artifact. The specificity control is
+  the interesting part: reinserting the same NUMBER of randomly chosen evicted
+  entries, with the SAME entries dropped, costs ~6x baseline — the cache is
+  acutely sensitive to WHICH entries occupy it, yet restoring what a policy just
+  evicted is nearly neutral.
+
+  **(2) M.3 — `replay-ratio-matched-m3-v2`, 200/200. RATIO EFFECT.** Read
+  condition (fixed in writing before the cell finished) met: above-floor coverage
+  **83.5%** of 377,104 events vs 83.9% predicted; realized ratio on above-floor
+  events exactly 0.038; max target 626. On the restricted, paired window (24
+  pids / 92 obs per press, median 75.9% of trace retained; excluded 8
+  never-left-floor + 8 too-short):
+  Random drift fixed **1.201** [1.061,1.339] vs matched **0.662** [0.615,0.709];
+  StreamingLLM fixed **1.299** [1.100,1.520] vs matched **0.739** [0.680,0.805].
+  Both take the pre-registered FLATTENS branch. **§4.4 is to be restated in
+  compression-ratio terms; no mechanistic reading of the rising profile is
+  licensed.** Qualifiers: holding ratio fixed IS letting absolute budget grow
+  (32→626) — the same manipulation, so this is NOT "horizon is irrelevant at
+  fixed cache size"; the restriction shrinks the staircase it tests (whole-trace
+  drift 2.93/2.26 vs 1.20/1.30 on the comparable window); and the matched cell
+  reverses rather than merely flattens.
+
+  **(3) Both cells were re-runs.** The first attempt at each was invalidated by a
+  defect in our own instrument — P.5 by an index-space bug in
+  `plan_reinsertion` (stash indices intersected with live-cache indices, which
+  barred `matched` from evicting recent entries), M.3 by a feedback loop that
+  computed the target from the compressed cache instead of the logical context
+  and pinned 100% of 377,104 events to the `min_budget` floor. Both invalidated
+  wholesale and re-run, never patched; the invalid profiles are permanent record
+  under their original run names. See PREREGISTRATION, P.5 correction
+  (2026-08-13) and M.3 correction (2026-08-14). A hypothesis of mine was ALSO
+  wrong and is recorded: I attributed v1's large `random` effect to the
+  index-space bug; v2 reproduces the aggregate to four decimals while every
+  per-trace profile differs, so the fix took effect and the confound was not the
+  cause.
+
+  **(4) UNRESOLVED — P.2's eviction-locking under ratio matching.** Phase
+  statistics on the M.3 cell (Random excess +0.326 [0.263,0.339] peak 0;
+  StreamingLLM +0.102 [0.065,0.128] peak 6) were computed over the WHOLE trace
+  including the floor-bound period, the harshest compression in the run, which
+  would inflate phase amplitude. **Preliminary; not citable** until the phase
+  analysis is redone on the same restricted window as the drift comparison.
+
+  **NEXT, in order:** (a) redo the phase analysis on the restricted window to
+  settle (4); (b) paper edits — nothing in `kv_readout_vs_trajectory_paper.tex`
+  reflects Tasks 2/3/4, the P.2 StreamingLLM withdrawal, or M.3; §4.4 needs the
+  ratio restatement. No GPU work is queued.
+
+
   **★★★★★ 2026-08-12 — Meeting #2 round 2. Extended pass DONE; Tasks 3 and 4
   read; a P.2 result WITHDRAWN; a live-path press defect found and fixed;
   restoration smoke gate PASSING. HEAD `da2f0e7`.**
@@ -94,19 +158,21 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
   reading smoke divergence), recorded only so a near-zero powered result is not
   mistaken for a late surprise.
 
-  **IN FLIGHT (launched 13:29 remote 2026-08-12):** `restoration-diss256-g0`
-  (seeds 11,23) and `-g1` (seeds 47,89), both GPUs at 85%, 800 conditions.
+  **LAUNCHED 13:29 remote 2026-08-12 (outcome below, no longer in flight):**
+  `restoration-diss256-g0` (seeds 11,23) and `-g1` (seeds 47,89), 800 conditions.
+  → completed 800/800, then **INVALIDATED** by the `plan_reinsertion`
+  index-space bug and superseded by `restoration-diss256-v2`. See the
+  2026-08-15 bullet and PREREGISTRATION "Amendment P.5, correction (2026-08-13)".
   Smoke rate was ~1.8 min/condition/GPU, so expect **~12 h**, finishing around
   01:30 on 2026-08-13. Launched manually rather than waiting for the 01:45
   window — the same precedent as `rkvpub-g0/g1` — using the queue's `run_name`
   so `live_map` sees the shards; the second shard needs
   `KVCACHE_ALLOW_EXISTING_RUN=1`, which is what the orchestrator itself sets.
 
-  **THEN:** `scripts/report_restoration.py --run restoration-diss256` (built and
-  tested; refuses on a failed OR missing gate, and on anchor disagreement), then
-  `replay-ratio-matched-m3` (200). **M.3 still gates the interpretation of every
-  divergence profile** — no mechanistic reading of the rising staircase is
-  licensed until it runs, including of Random's eviction-locking.
+  **THEN (superseded — both have since run and been read; see the 2026-08-15
+  bullet):** `report_restoration.py`, then `replay-ratio-matched-m3` (200).
+  M.3's first attempt was also invalidated (floor collapse) and re-run as
+  `-v2`; its verdict is RATIO EFFECT.
 
 
   **★★★★★ 2026-08-10 — MEETING #2 round 1. Two findings, both contradicting the

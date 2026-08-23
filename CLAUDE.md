@@ -18,10 +18,14 @@ commit hashes are cited so you can verify that yourself (`git show <hash>`).
 
 This is a research codebase for separating **readout distortion** from
 **trajectory distortion** in KV-cache compression for reasoning LLMs. Current
-stage: results mostly in, paper active (`kv_readout_vs_trajectory_paper.tex`),
-a nightly queue (`configs/nightly_queue.yaml`) draining the remaining runs
-(R-KV, AIME, Llama-8B; drop-dead for R-KV/AIME cells: 2026-08-01 — the paper
-survives the cut if they miss it).
+stage (2026-08-23): **all experimental work is complete and read — no runs are
+queued or pending.** The original campaign plus Amendment J finished 2026-07-24;
+the Meeting-#2 cells (Amendments P.1-P.5 and the M.3 control) finished
+2026-08-15. Remaining work is analysis and writing:
+`kv_readout_vs_trajectory_paper.tex` does not yet reflect Meeting-#2 Tasks 2/3/4,
+the P.2 StreamingLLM withdrawal, or M.3's ratio-effect verdict (§4.4 needs
+restating in compression-ratio terms). `configs/nightly_queue.yaml` is a
+historical record of what ran; every job in it is complete.
 
 **The split that shapes everything:** this machine is local-only — source,
 configs, docs, lint, CPU unit tests. Models, datasets, caches, and every
@@ -31,7 +35,7 @@ ops/safety policy; `docs/operations/WORKFLOW.md` describes the loop (rsync-first
 weights locally; the code guards against it and the guards are intentional.
 
 **Authority order for facts:** the repo's code > `docs/protocol/PREREGISTRATION.md`
-(scientific protocol — frozen; changes only via dated amendments A–I and
+(scientific protocol — frozen; changes only via dated amendments A–P and
 counting) > `docs/results/PAPER_FINDINGS.md` (results record + framing rules) >
 `docs/results/RESULTS_PLAYBOOK.md` (pre-reasoned read-ins for pending results) >
 `docs/project/context.md` (dated narrative bullets, newest first) > this file. For code,
@@ -41,7 +45,7 @@ disk is ground truth; the markdown can lag.
 
 ```bash
 make lint     # ruff check . && black --check .   (88 cols, py311)
-make test     # pytest -q  — CPU-only, no network, no weights (136 tests as of 2026-07-27)
+make test     # pytest -q  — CPU-only, no weights (302 pass + 14 skip, 2026-08-23)
 make dryrun   # every runner script × config planned in --dry-run mode
 ```
 
@@ -52,14 +56,13 @@ up after it). Sync: `make sync` (dry-run preview), `make sync-apply` (real).
 `sync_source.sh` never uses `--delete` and never transfers `.git`,
 environments, data, caches, runs, logs, or results.
 
-**Layout:** `src/kvcache/` — all computation and scientific logic (`bank.py`,
-`replay.py`, `generation.py`, `grading.py`, `canonicalize.py`,
-`determinism.py`, `stats.py`, `io_schema.py`, `token_ids.py`; subpackages
-`presses/`, `metrics/`). `scripts/` — thin orchestration only; it has its own
-`scripts/CLAUDE.md`, read it before working there. `configs/` — registries +
-`configs/experiments/` per-run YAMLs named `{stage}_{benchmark}_{variant}.yaml`.
-`tests/` mirrors module names. Root markdown files are the paper's paper
-trail — project state, not disposable notes.
+**Layout:** `src/kvcache/` — all computation and scientific logic (run `ls` for
+the current module list; subpackages `presses/`, `metrics/`). `scripts/` — thin
+orchestration only; it has its own `scripts/CLAUDE.md`, read it before working
+there. `configs/` — registries + `configs/experiments/` per-run YAMLs named
+`{stage}_{benchmark}_{variant}.yaml`. `tests/` mirrors module names. Root
+markdown files are the paper's paper trail — project state, not disposable
+notes.
 
 **Standing guards (never weaken; each has caught or prevented a real
 failure):** heavy scripts refuse without `--i-understand`; downloads require
@@ -72,7 +75,8 @@ own promotion mechanism (`rkv` promotes iff the smoke-marker file exists —
 that gate caught a real bug, commit 5c68acd); output rows are append-only
 JSONL with `--resume` keyed on (benchmark, problem id, seed).
 
-**Morning loop while the queue drains:** (1) read the status email or
+**Morning loop (HISTORICAL — the queue is drained as of 2026-08-15; kept as the
+procedure to follow if any cell is ever re-run):** (1) read the status email or
 `nightly_report.py --dry-run` on the remote; (2) `ssh kvcache-gpu 'cd
 ~/kv-caching && .venv/bin/python scripts/harvest_results.py'` — harvest
 decides readiness, never read a partial cell into the paper; (3) open
@@ -83,8 +87,9 @@ unit, `make sync-apply`, copy the harvest `summary.json` to `results/diag/`.
 After **any** `scp` to the remote, finish with `make sync-apply` or the
 watcher's preflight hash check fails that night.
 
-**Decisions already made — do not relitigate:** R-KV/AIME drop-dead
-2026-08-01; TV-matched-noise control, logic benchmarks, and Qwen3 deliberately
+**Decisions already made — do not relitigate:** R-KV/AIME drop-dead 2026-08-01
+(met — both cells completed 2026-08-04); TV-matched-noise control, logic
+benchmarks, and Qwen3 deliberately
 not queued (reasons in docs/project/context.md, 2026-07-05 bullet); Table 2 stays at
 budget 256; abstract stays 256-led. Endgame after the queue drains: venue
 conversion per `docs/strategy/SUBMISSION_STRATEGY.md` §6 +
@@ -92,7 +97,7 @@ conversion per `docs/strategy/SUBMISSION_STRATEGY.md` §6 +
 `docs/strategy/` 2026-07-18; `complete_setup.md` moved to `docs/`),
 anonymization scrub (a personal email is embedded in
 `scripts/nightly_report.py`; internal strategy docs stay out of the artifact),
-arXiv ~mid-August.
+arXiv (target was ~mid-August; now gated on the paper edits above, not on runs).
 
 **Terminology discipline (binding; full list in PAPER_FINDINGS §5):** the
 residual is "accuracy change unexplained by on-reference readout," never a
