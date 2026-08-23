@@ -74,7 +74,7 @@ and a **trajectory** part.
 > and *compounds* over the generated trajectory.**
 
 >
-> **⚠ MECHANISM CLAUSE REQUIRES RESTATEMENT (flagged 2026-08-23, unresolved).**
+> **MECHANISM CLAUSE REQUIRES RESTATEMENT (flagged 2026-08-23, unresolved).**
 > The final clause — "*compounds* over the generated trajectory" — reads as a
 > HORIZON mechanism. Amendment M.3 (§4v) shows the rising divergence profile is
 > what a monotonically worsening compression ratio produces, and states that no
@@ -1014,7 +1014,7 @@ window as the drift comparison above. That analysis is not yet written.
   **NO RESTORATION** (gate 800/800). Task 3 — **BUDGET EFFECT ONLY**. Task 4 —
   crossing test **degenerate by construction**. Plus M.3 — the staircase is a
   **compression-ratio effect**, which delicenses the mechanism reading of the
-  divergence profile (see the ⚠ in §2). Both powered cells were re-runs after
+  divergence profile (see the restatement flag in §2). Both powered cells were re-runs after
   defects in our own instruments; both v1 cells invalidated wholesale, never
   patched. **Unresolved:** P.2's eviction-locking under ratio matching.
 - **ORIGINAL CAMPAIGN + AMENDMENT J COMPLETE 2026-07-24 — that queue fully

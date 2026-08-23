@@ -2036,7 +2036,7 @@ Milestones, in order:
 
 ## 7. Exact current state — HISTORICAL SNAPSHOT (M4.0 era, ~2026-06)
 
-> **⚠ SUPERSEDED. Do not read §§7-9 as current state.** They describe the repo
+> **SUPERSEDED. Do not read sections 7-9 as current state.** They describe the repo
 > during M4.0 development: 86 tests (now 302), uncommitted M4.0 work (long since
 > committed), and a code review that the dated log shows was passed. Kept as the
 > historical record of that handoff. **For current state read §0's top bullet.**
