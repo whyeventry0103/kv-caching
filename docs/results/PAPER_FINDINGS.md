@@ -73,6 +73,20 @@ and a **trajectory** part.
 > trajectory residual, and it arises from a divergence that is ~zero at the moment of eviction
 > and *compounds* over the generated trajectory.**
 
+>
+> **⚠ MECHANISM CLAUSE REQUIRES RESTATEMENT (flagged 2026-08-23, unresolved).**
+> The final clause — "*compounds* over the generated trajectory" — reads as a
+> HORIZON mechanism. Amendment M.3 (§4v) shows the rising divergence profile is
+> what a monotonically worsening compression ratio produces, and states that no
+> mechanistic reading of it is licensed. The clause is not false as a
+> *description* of the fixed-budget regime everyone deploys — divergence does
+> accumulate there, and §4v gives the drift figures for both windows; what is
+> unlicensed is attributing that accumulation to horizon
+> rather than to the worsening ratio. The first two clauses — invisibility to
+> readout-style evaluation, and the residual as the gap — are untouched by M.3
+> and stand. **Do not cite the mechanism clause as-is; the restatement wording
+> is an open decision, not yet made.**
+
 Do NOT frame around ">100% / denoising": we did not observe any accuracy gains on small-budget
 MATH, so that regime is explicitly out of scope for the headline (see §6).
 
@@ -882,7 +896,7 @@ median 75.9% of each trace retained; excluded: 8 profiles never left the floor,
 
 | press | drift, FIXED budget 256 | drift, RATIO-matched 0.038 | matched - fixed |
 |---|---|---|---|
-| Random | **1.201** [1.061, 1.339] | **0.662** [0.615, 0.709] | -0.539 [-0.655, -0.417] |
+| Random | **1.201** [1.061, 1.339] | **0.662** [0.614, 0.709] | -0.539 [-0.655, -0.417] |
 | StreamingLLM | **1.299** [1.100, 1.520] | **0.739** [0.680, 0.805] | -0.559 [-0.760, -0.366] |
 
 Both take the pre-registered **FLATTENS** branch. **Section 4.4 is to be
@@ -955,8 +969,11 @@ window as the drift comparison above. That analysis is not yet written.
 <!-- AUDIT:ARCHIVAL-END -->
 
 ## 6. Limitations / threats to validity (write this as a STRENGTH section)
-- **Generality (primary):** results are one model / one benchmark / budget 256 with two eviction
-  methods. Budget-2048 (dose-response), H2O, R-KV, and AIME are *in progress* to widen this.
+- **Generality (primary):** the primary decomposition is one model / one benchmark / budget 256
+  with two eviction methods. Budget-2048 (dose-response), H2O, R-KV and AIME are **complete** and
+  widen it (all read in §4-CURRENT); the scope sentence is "one model family spanning three scales
+  (1.5B/7B/14B), plus a Llama-base check." Method-invariance and generality claims remain
+  exploratory at this scope.
 - **No >100% regime observed** → the paper is framed as "near-lossless-under-readout vs
   collapse-under-free-generation," not around denoising/gains.
 - **Off-policy bias** on the residual is *bounded* by reverse replay, not eliminated; the
@@ -979,7 +996,9 @@ window as the drift comparison above. That analysis is not yet written.
 - **DONE (added 2026-07-15):** Llama cross-architecture check (§4o — SLM
   replicates, Random degenerates, both reported plainly); AIME-24 FC bank (§4p).
 - **DONE (added 2026-07-17):** fc-readout-control (§4q — resampling effect
-  +0.023, measured; Branch A).
+  +0.023 unmatched, measured; Branch A). **Superseded for citation:** the
+  current matched figure is **+0.003** (§4-CURRENT). The +0.023 values in this
+  changelog are historical records of what was measured on those dates.
 - **DONE (added 2026-07-18):** m4-aime-2048 (§4r) — ORIGINAL CAMPAIGN 100%
   READ. No >100% regime; residual replicates on 2nd benchmark; readout
   is press-INDEPENDENT at that dose (restated prompt-inclusive as 19.5% in
@@ -990,8 +1009,17 @@ window as the drift comparison above. That analysis is not yet written.
   bracket (span-zero, tied to the +0.023 resampling floor), reported
   plainly. Scope-upgrade sentence applied: "one model family spanning
   three scales (1.5B/7B/14B), plus a Llama-base check."
-- **ALL EXPERIMENTAL WORK COMPLETE 2026-07-24 — nightly queue fully
-  drained, no runs remain.** Endgame only from here: anonymization scrub,
+- **DONE (added 2026-08-15):** Meeting #2, all four tasks (§4u, §4v). Task 1 —
+  P.2 replicated for Random, **StreamingLLM WITHDRAWN**, R-KV marginal. Task 2 —
+  **NO RESTORATION** (gate 800/800). Task 3 — **BUDGET EFFECT ONLY**. Task 4 —
+  crossing test **degenerate by construction**. Plus M.3 — the staircase is a
+  **compression-ratio effect**, which delicenses the mechanism reading of the
+  divergence profile (see the ⚠ in §2). Both powered cells were re-runs after
+  defects in our own instruments; both v1 cells invalidated wholesale, never
+  patched. **Unresolved:** P.2's eviction-locking under ratio matching.
+- **ORIGINAL CAMPAIGN + AMENDMENT J COMPLETE 2026-07-24 — that queue fully
+  drained.** (Superseded as a statement about the project as a whole: the
+  Meeting-#2 cells ran afterwards. See the 2026-08-15 entry below.) Endgame only from here: anonymization scrub,
   restore double-blind author block, arXiv, ICLR conversion
   (`docs/strategy/SUBMISSION_STRATEGY.md` Phase 11). Drop-dead 2026-08-01
   met with 8 days to spare.

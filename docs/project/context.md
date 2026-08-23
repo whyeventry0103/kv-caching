@@ -2,12 +2,18 @@
 
 **Purpose of this file:** a complete, self-contained handoff. An LLM with zero prior
 context should be able to read this and resume exactly where we are. Last updated
-2026-07-27. Repo: `/Users/apple/dev/kv-caching` (moved off `~/Desktop` 2026-06-14 to
+2026-08-23. Repo: `/Users/apple/dev/kv-caching` (moved off `~/Desktop` 2026-06-14 to
 escape a recurring macOS TCC lockout; `~/Desktop/kv-caching` is a **symlink** to this
 path, not a second copy — verified 2026-07-27), branch `main`, GitHub
-`whyeventry0103/kv-caching`. Current HEAD: `81c2642`
-(number-provenance gate; 7 commits ahead of origin, nothing pushed — correct,
-nothing is externalized before the reframe lands).
+`whyeventry0103/kv-caching`. For the current commit run `git rev-parse --short
+HEAD` — this file no longer pins one, because a pinned hash goes stale on the
+next commit and has done so repeatedly. **Push state (checked 2026-08-23):
+`origin/main` is at `c4a0f1b` and `backup/main` at `b13b628`, so work HAS been
+pushed to origin — the older "nothing is externalized before the reframe lands"
+note no longer describes reality and the anonymization scrub is now the live
+concern, not a future one.** **§0's dated bullets are the ONLY living record of
+current state. §§7-9 are a frozen M4.0-era snapshot, fenced as historical below
+— do not read them as current.**
 
 This document is authoritative for *narrative and decisions*. For *code*, the repo is
 ground truth — always re-read files before acting (state moves fast; this file can
@@ -45,7 +51,7 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
   events exactly 0.038; max target 626. On the restricted, paired window (24
   pids / 92 obs per press, median 75.9% of trace retained; excluded 8
   never-left-floor + 8 too-short):
-  Random drift fixed **1.201** [1.061,1.339] vs matched **0.662** [0.615,0.709];
+  Random drift fixed **1.201** [1.061,1.339] vs matched **0.662** [0.614,0.709];
   StreamingLLM fixed **1.299** [1.100,1.520] vs matched **0.739** [0.680,0.805].
   Both take the pre-registered FLATTENS branch. **§4.4 is to be restated in
   compression-ratio terms; no mechanistic reading of the rising profile is
@@ -1747,7 +1753,8 @@ recomputes it and refuses if files changed after sync.
 ## 3. Infrastructure (CURRENT)
 
 ### Local
-- `/Users/apple/Desktop/kv-caching`, macOS, zsh. **Note:** `~/Desktop` is a
+- `/Users/apple/dev/kv-caching` (canonical since 2026-06-14; `~/Desktop/kv-caching`
+  is a symlink to it), macOS, zsh. **Note:** `~/Desktop` is a
   TCC-protected folder; a sync that swaps the project directory inode can transiently
   break the sandboxed shell's CWD handle (EPERM "Operation not permitted"). It is
   **not** a real permission problem and self-heals; recovery levers: re-anchor the
@@ -2027,7 +2034,12 @@ Milestones, in order:
 
 ---
 
-## 7. Exact current state
+## 7. Exact current state — HISTORICAL SNAPSHOT (M4.0 era, ~2026-06)
+
+> **⚠ SUPERSEDED. Do not read §§7-9 as current state.** They describe the repo
+> during M4.0 development: 86 tests (now 302), uncommitted M4.0 work (long since
+> committed), and a code review that the dated log shows was passed. Kept as the
+> historical record of that handoff. **For current state read §0's top bullet.**
 
 - **HEAD:** `0f56df4 Restore compression runner executable mode`.
 - **Uncommitted (tracked) changes:** M3 fixes plus M4.0 across `Makefile`,
@@ -2066,7 +2078,7 @@ Milestones, in order:
 
 ---
 
-## 8. Immediate next steps (in order)
+## 8. Immediate next steps (in order) — HISTORICAL (M4.0 era; all completed)
 
 1. **Claude reviews the M4.0 code and tests.** Focus on token sidecar validation,
    enabled-flag press scoping, absolute cache positions, onset indexing, exact-TV
@@ -2087,7 +2099,7 @@ KIVI (separate quantized-cache wrapper, not a press), RSP-anything (needs redesi
 
 ---
 
-## 9. Open items / tech debt (non-blocking)
+## 9. Open items / tech debt (non-blocking) — HISTORICAL (M4.0 era)
 
 - **Grader comparability (before the reproduction figure, NOT before M3/M4):** verify
   which grader HOTT / kvpress-eval / MATH-500 use (`math_verify` vs Hendrycks). We use
