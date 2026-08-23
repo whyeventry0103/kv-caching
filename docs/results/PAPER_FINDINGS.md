@@ -93,11 +93,11 @@ MATH, so that regime is explicitly out of scope for the headline (see §6).
 ## 3. Setup
 - **Model:** DeepSeek-R1-Distill-Qwen-7B. **Benchmark:** MATH-500. Sampling T=0.6, top-p=0.95.
 - **Full-cache reference:** 250 problems × n=8 = 2000 generations, **FC accuracy 0.882**.
-- **Compression cells:** 100 problems × n=4, budget **256** (the collapse pole); budget **2048**
-  *(in progress)*.
+- **Compression cells:** 100 problems × n=4, budget **256** (the collapse pole) and budget
+  **2048** (dose-response) — both **complete and read** (§4-CURRENT).
 - **Methods (eviction presses):** StreamingLLM, Random (per-(problem,seed) RNG), H2O
-  (ObservedAttentionPress; eager attention) *(in progress)*, R-KV (parity-verified port;
-  cells pending) *(in progress)*.
+  (ObservedAttentionPress; eager attention), R-KV (parity-verified port) — all four
+  **complete and read** (§4-CURRENT).
 - **Stack:** transformers 4.56.2, kvpress 0.5.3; decoding-time `DecodingPress`,
   `compression_interval=64`, `target_size=budget`.
 - **Estimands:**
