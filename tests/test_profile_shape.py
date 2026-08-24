@@ -1,5 +1,8 @@
 """Hand-constructed checks for the profile shape statistics (Amendment P.2)."""
 
+import sys as _sys
+from pathlib import Path as _Path
+
 import pytest
 
 from kvcache.metrics.profile_shape import (
@@ -107,3 +110,108 @@ def test_phase_amplitude_excess_does_not_fire_on_structureless_noise():
     out = phase_amplitude_excess(noisy, n_resamples=200, seed=0)
     # No eviction-locked structure exists, so the excess must not exclude zero.
     assert out["excess_excludes_zero"] is False
+
+
+def test_floor_exit_step_and_restriction_are_hand_checkable():
+    """Amendment P.2-v2 windowing. Shared with the M.3 drift comparison."""
+    from kvcache.metrics.profile_shape import floor_exit_step, restrict_to_floor_exit
+
+    # First event sees prompt + one interval, nothing evicted -> prompt = 164-64 = 100.
+    trace = [
+        {"logical_context": 164, "at_floor": True},
+        {"logical_context": 228, "at_floor": True},
+        {"logical_context": 900, "at_floor": False},
+        {"logical_context": 964, "at_floor": False},
+    ]
+    assert floor_exit_step(trace, 64) == 800  # 900 - 100
+
+    # Never leaves the floor -> excluded, not zero.
+    assert floor_exit_step([{"logical_context": 164, "at_floor": True}], 64) is None
+    assert floor_exit_step([], 64) is None
+
+    # Trim re-bases the onset: the whole retained window is post-onset.
+    trimmed, onset, _ = restrict_to_floor_exit([0.1] * 1200, 65, trace, 64)
+    assert len(trimmed) == 400
+    assert onset == 0
+
+    # Shorter than the 200-step floor -> excluded.
+    assert restrict_to_floor_exit([0.1] * 900, 65, trace, 64) is None
+
+
+def test_the_restriction_actually_changes_the_statistic(tmp_path):
+    """A restricted run must not silently equal the unrestricted one.
+
+    Builds one cell whose early (floor-bound) segment carries a strong
+    prune-aligned spike and whose late segment is flat, so trimming the floor
+    period MUST lower the phase amplitude. If the flag were a no-op this fails.
+    """
+    import importlib.util
+    import json as _json
+
+    root = _Path(__file__).resolve().parents[1]
+    cell = tmp_path / "profiles" / "math500" / "model" / "random-256-s11"
+    cell.mkdir(parents=True)
+    interval, n = 64, 2000
+    # Spiky before step 800, flat after.
+    series = [
+        (0.9 if (i % interval == 0) else 0.05) if i < 800 else 0.05 for i in range(n)
+    ]
+    (cell / "aa.json").write_text(
+        _json.dumps(
+            {
+                "estimate": series,
+                "onset_step": 64,
+                "compression_interval": interval,
+                "schema_version": "tv-profile-v2",
+            }
+        ),
+        encoding="utf-8",
+    )
+    (cell / "aa.ratio_trace.json").write_text(
+        _json.dumps(
+            {
+                "matched_ratio": 0.038,
+                "min_budget": 32,
+                "trace": [
+                    {"logical_context": 64 + interval, "at_floor": True},
+                    {"logical_context": 800 + 64, "at_floor": False},
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    spec = importlib.util.spec_from_file_location(
+        "rps", root / "scripts" / "report_profile_shape.py"
+    )
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+
+    def run(restrict):
+        out = tmp_path / f"o{int(restrict)}.json"
+        argv = [
+            "report_profile_shape.py",
+            "--profiles-dir",
+            str(tmp_path / "profiles"),
+            "--label",
+            "t",
+            "--out",
+            str(out),
+        ]
+        if restrict:
+            argv.append("--restrict-to-floor-exit")
+        _sys.argv = argv
+        assert mod.main() == 0
+        return _json.loads(out.read_text(encoding="utf-8"))
+
+    unres, res = run(False), run(True)
+    assert unres["window"].startswith("WHOLE TRACE")
+    assert res["window"].startswith("RESTRICTED")
+    assert res["excluded"] == {
+        "never_left_floor": 0,
+        "window_too_short": 0,
+        "no_ratio_trace": 0,
+    }
+    a_un = unres["per_policy"]["random"]["phase_amplitude"]
+    a_re = res["per_policy"]["random"]["phase_amplitude"]
+    assert a_re < a_un, f"restriction did not reduce amplitude: {a_re} vs {a_un}"

@@ -1,0 +1,35 @@
+name: shape_p2v2_restricted
+stage: analysis
+mode: shape_restricted
+# Amendment P.2-v2 -- the LAST open item from Meeting #2.
+#
+# Does Random's eviction-locking (P.2) survive ratio-matching? M.3 showed the
+# rising divergence profile is a compression-ratio effect and delicensed the
+# mechanistic reading; the phase result was left unresolved because Random's
+# phase-0 peak is exactly what a ratio-driven curve would produce.
+#
+# CPU-ONLY re-analysis of profiles that already exist. No generation, no model,
+# no GPU. The read condition and its three branches were pre-registered in
+# PREREGISTRATION.md ("Amendment P.2-v2, read condition", 2026-08-24) BEFORE any
+# number was computed -- do not re-cut the verdict after seeing the output.
+#
+# The window is the SAME as the M.3 drift comparison, via the same package
+# function (kvcache.metrics.profile_shape.floor_exit_step), because the two
+# verdicts are only comparable if the window is literally the same code.
+source_run: replay-ratio-matched-m3-v2
+budget: "256"
+restrict_to_floor_exit: true
+# Written under the RUNS ROOT first (that is where the orchestrator looks for
+# markers and the only tree it owns), then archived into the repo. Same
+# convention as the harvest summary.json.
+run_artifact: shape-p2v2-restricted/shape_m3v2_RESTRICTED.json
+out_artifact: results/diag/amendment-p/shape_m3v2_RESTRICTED.json
+# Sanity reference (UNRESTRICTED, whole trace, already on disk):
+#   Random       +0.326 [0.263, 0.339] peak 0
+#   StreamingLLM +0.102 [0.065, 0.128] peak 6
+# The restricted excess is EXPECTED to be smaller; at or above these values is a
+# possible windowing bug and must be investigated before being reported.
+estimated_generation_count: 0
+estimated_replay_count: 0
+scale_authorized: true
+remote_only: false

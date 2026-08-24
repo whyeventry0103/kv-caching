@@ -2248,3 +2248,74 @@ compression in the run and would inflate phase amplitude. **They are recorded as
 preliminary and must not be cited as evidence that eviction-locking survives
 ratio matching** until the phase analysis is repeated on the same restricted
 window as the drift comparison above.
+
+---
+
+## Amendment P.2-v2, read condition (2026-08-24, written BEFORE any computation)
+
+Amendment M.3 (result, 2026-08-15) showed the rising divergence profile is a
+compression-ratio effect and delicensed the mechanistic reading of it. It left
+one question open, and PAPER_FINDINGS §4v records it as unresolved: **does the
+Amendment P.2 eviction-locking finding survive ratio-matching?** Random's
+phase-amplitude excess peaking at phase 0 is exactly the signature a
+ratio-driven curve could produce, so the P.2 result cannot be cited as a
+mechanism until it is re-measured where the ratio is held fixed.
+
+Phase statistics have already been computed on the ratio-matched cell over the
+WHOLE trace (`shape_m3v2_UNRESTRICTED.json`: Random +0.326 [0.263, 0.339] peak
+0; StreamingLLM +0.102 [0.065, 0.128] peak 6). **Those are not the test.** They
+include the floor-bound early period, which is the harshest compression in the
+run and would inflate phase amplitude. This amendment fixes the read for the
+restricted measurement before it is made, exactly as M.3-v2's read condition did
+on 2026-08-15.
+
+**Window — identical to the M.3 drift comparison, no new definition.** Each
+trace is trimmed to begin at the step where its own ratio-matched press left
+`min_budget` (the first `at_floor == False` event in its ratio trace; step =
+`logical_context - prompt`, with `prompt = first logical_context - interval`).
+Profiles that never left the floor are excluded. Windows shorter than 200 steps
+are excluded. Exclusions are counted and reported, never silently dropped. The
+windowing function is the one that produced `m3_verdict.json`, promoted to the
+package and imported by both readers so the two analyses cannot drift apart.
+
+**Statistic — unchanged from P.2.** Phase-amplitude excess over the
+phase-label-shuffled sham null, trace-clustered bootstrap, 2000 resamples,
+seed 0, percentile CI. The sham is what makes any amplitude claim meaningful;
+a raw amplitude is reproduced by shuffled labels.
+
+**Branches, fixed here. Random is the test; the verdict is Random's.**
+
+* **A — REPLICATES UNDER RATIO-MATCHING.** Random's excess CI excludes zero AND
+  its peak phase is 0 (the prune step). Reading: eviction-locking is a genuine
+  eviction-timing effect, not an artifact of the worsening ratio. This would
+  restore a mechanistic reading for the phase result specifically -- and for
+  that result ONLY. It would NOT restore the horizon reading of the rising
+  staircase, which M.3 settled separately.
+* **B — SURVIVES BUT IS NOT PRUNE-ALIGNED.** Excess CI excludes zero but peak
+  phase is not 0. Reading: something periodic survives ratio-matching, but the
+  specific "locked to the prune step" claim does not. P.2's wording would have
+  to drop "eviction-locked" and say only that a periodic component persists.
+* **C — DOES NOT SURVIVE.** Excess CI includes zero. Reading: the P.2 phase
+  finding is a ratio artifact. It is withdrawn on the same terms StreamingLLM
+  was withdrawn on 2026-08-12, and the paper carries no eviction-locking claim.
+
+**Pre-committed expectation, recorded so it cannot be revised afterwards:** the
+restricted excess is expected to be SMALLER than the unrestricted +0.326,
+because the floor period is the harshest compression in the run. A restricted
+value at or above the unrestricted one would be surprising and is to be
+investigated as a possible windowing bug before it is reported as a finding.
+
+**StreamingLLM is descriptive only.** Its fixed-budget phase claim was WITHDRAWN
+on 2026-08-12 (+0.0195 [-0.0212, +0.0499], failing to replicate a prior +0.0384
+that had excluded zero by 0.0013). Whatever its restricted value is, it **must
+not be used to resurrect the withdrawn claim**; a policy that failed at fixed
+budget cannot be rehabilitated by a different cell. It is reported for
+completeness and as a second read on the windowing.
+
+**Coverage floor.** The M.3 drift comparison retained 24 problems / 92
+observations per press, median 75.9% of each trace. If this analysis retains
+materially less, the result is reported as **underpowered** rather than forced
+into a branch. Coverage is reported with the numbers, not on request.
+
+**If the result fits no branch**, it is reported plainly with a dated note and
+no branch is forced -- the standing rule from `docs/results/RESULTS_PLAYBOOK.md`.

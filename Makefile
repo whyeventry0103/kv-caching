@@ -79,6 +79,7 @@ dryrun:
 	$(PYTHON) scripts/run_replay.py --config configs/experiments/replay_ratio_matched_m3.yaml --dry-run
 	$(PYTHON) scripts/run_replay.py --config configs/experiments/restoration_smoke.yaml --dry-run
 	$(PYTHON) scripts/run_replay.py --config configs/experiments/restoration_diss256.yaml --dry-run
+	$(PYTHON) scripts/run_shape_analysis.py --config configs/experiments/shape_p2v2_restricted.yaml --dry-run
 	$(PYTHON) scripts/build_bank.py --config configs/experiments/bank_math500_hottcap.yaml --dry-run
 	$(PYTHON) scripts/run_grid.py --config configs/experiments/grid_math500_hottcap.yaml --dry-run
 	$(PYTHON) scripts/build_bank.py --config configs/experiments/bank_aime24_llama8b.yaml --dry-run

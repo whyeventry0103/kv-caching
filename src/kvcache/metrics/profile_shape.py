@@ -25,7 +25,7 @@ from __future__ import annotations
 
 import random
 import statistics
-from collections.abc import Iterable, Sequence
+from collections.abc import Iterable, Mapping, Sequence
 from typing import Any
 
 # Offsets from onset at which the running integral is reported.
@@ -273,3 +273,68 @@ def phase_amplitude_excess(
         "n_resamples": n_resamples,
         "seed": seed,
     }
+
+
+# --------------------------------------------------------------------------
+# Floor-exit windowing (Amendments M.3 and P.2-v2).
+#
+# A ratio-matched press with min_budget=32 at ratio 0.038 keeps hitting the
+# floor until the logical context reaches ~842 tokens. Below that the cell is a
+# FIXED-32 budget whose realized ratio worsens as context grows -- the very
+# confound the ratio matching removes -- and that period sits at the START of
+# every trace. Any statistic computed over the whole trace is therefore
+# contaminated by the harshest compression in the run.
+#
+# This lives in the package, not in a script, because two separate readers
+# (the M.3 drift comparison and the P.2-v2 phase re-analysis) must use the SAME
+# window or their verdicts are not comparable.
+# --------------------------------------------------------------------------
+
+MIN_RESTRICTED_WINDOW = 200  # a statistic over fewer steps than this is not reported
+
+
+def floor_exit_step(
+    trace: Sequence[Mapping[str, Any]], compression_interval: int
+) -> int | None:
+    """First step at which a ratio-matched press stopped sitting on ``min_budget``.
+
+    ``trace`` is the ``trace`` list of a ``*.ratio_trace.json`` sidecar. The
+    first compression sees prompt + one interval with nothing yet evicted, so
+    ``prompt = first logical_context - interval`` and any event's step is
+    ``logical_context - prompt``.
+
+    Returns ``None`` when the press never left the floor, which is an exclusion,
+    not a zero.
+    """
+    if not trace:
+        return None
+    prompt = int(trace[0]["logical_context"]) - int(compression_interval)
+    for event in trace:
+        if not event.get("at_floor"):
+            return max(0, int(event["logical_context"]) - prompt)
+    return None
+
+
+def restrict_to_floor_exit(
+    estimate: Sequence[float],
+    onset: int | None,
+    trace: Sequence[Mapping[str, Any]],
+    compression_interval: int,
+    *,
+    min_window: int = MIN_RESTRICTED_WINDOW,
+) -> tuple[list[float], int, str] | None:
+    """Trim a profile to its above-floor window, re-basing the onset.
+
+    Returns ``(trimmed_estimate, new_onset, "")`` or ``None`` with a reason when
+    the profile is excluded. The onset is re-based because the shape statistics
+    index phase from it; a trim that starts after the original onset leaves the
+    whole retained window post-onset, i.e. ``new_onset == 0``.
+    """
+    start = floor_exit_step(trace, compression_interval)
+    if start is None:
+        return None
+    trimmed = list(estimate)[start:]
+    if len(trimmed) < min_window:
+        return None
+    new_onset = max(0, (int(onset) if onset is not None else 0) - start)
+    return trimmed, new_onset, ""

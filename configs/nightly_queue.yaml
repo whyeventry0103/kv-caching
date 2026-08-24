@@ -546,3 +546,31 @@ jobs:
     min_free_gb: 28
     progress_kind: grid
     requires: restoration-diss256-v2
+
+  # ---- P.2-v2: the last open Meeting-#2 item (CPU-ONLY re-analysis) ---------
+  # Does Random's eviction-locking survive ratio-matching? M.3 delicensed the
+  # mechanistic reading of the rising profile and left this unresolved, because
+  # Random's phase-0 peak is exactly what a ratio-driven curve would produce.
+  #
+  # NO GPU, NO GENERATION. It re-reads profiles that already exist in
+  # replay-ratio-matched-m3-v2 and takes about a minute. min_free_gb is 1 only
+  # because the schema requires a number; the job never touches a GPU. It is
+  # queued rather than run by hand so it executes unattended in the 01:45 window
+  # like everything else, and so its provenance sits in the same place.
+  #
+  # The read condition and its three branches were pre-registered BEFORE any
+  # number was computed -- PREREGISTRATION.md "Amendment P.2-v2, read condition"
+  # (2026-08-24). Do NOT re-cut the verdict after seeing the output.
+  #
+  # progress_kind: marker -- done when the artifact exists, since there are no
+  # rows to count.
+  - name: shape-p2v2-restricted
+    command: shape
+    config: configs/experiments/shape_p2v2_restricted.yaml
+    run_name: shape-p2v2-restricted
+    total: 1
+    seeds: [11]
+    min_free_gb: 1
+    progress_kind: marker
+    marker: shape-p2v2-restricted/shape_m3v2_RESTRICTED.json
+    requires: replay-ratio-matched-m3-v2

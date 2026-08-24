@@ -40,6 +40,7 @@ from typing import Any
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
+from kvcache.metrics.profile_shape import floor_exit_step  # noqa: E402
 from kvcache.replay import is_profile_file  # noqa: E402
 from kvcache.stats import cluster_bootstrap_mean  # noqa: E402
 
@@ -47,20 +48,10 @@ CELL = re.compile(r"^(?P<press>[a-z0-9]+)-(?P<budget>\d+)-s(?P<seed>\d+)$")
 MIN_WINDOW = 200  # a drift ratio over fewer steps than this is not reported
 
 
-def _floor_exit_step(trace: list[dict[str, Any]], interval: int) -> int | None:
-    """First step at which this press stopped sitting on `min_budget`.
-
-    The first compression sees prompt + one interval with nothing yet evicted,
-    so `prompt = first_logical_context - interval`, and any event's step is
-    `logical_context - prompt`.
-    """
-    if not trace:
-        return None
-    prompt = int(trace[0]["logical_context"]) - interval
-    for event in trace:
-        if not event.get("at_floor"):
-            return max(0, int(event["logical_context"]) - prompt)
-    return None  # never left the floor
+# The windowing lives in the package so this reader and the P.2-v2 phase
+# re-analysis cannot drift apart -- their verdicts are only comparable if the
+# window is literally the same code.
+_floor_exit_step = floor_exit_step
 
 
 def _drift(series: list[float]) -> float | None:
