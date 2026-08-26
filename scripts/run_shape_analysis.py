@@ -38,7 +38,28 @@ def main() -> int:
     parser.add_argument("--config", required=True, type=Path)
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--i-understand", action="store_true")
+    # The nightly orchestrator appends --resume --seeds <list> to EVERY job it
+    # launches (nightly_autorun.build_launch_specs), because every job before
+    # this one was a sharded generation run. This analysis has nothing to shard
+    # and nothing to resume -- it is one CPU pass over existing profiles -- but
+    # it must ACCEPT the flags or argparse exits rc=2 before doing any work.
+    # That is exactly how the 2026-08-25 launch failed three times until the
+    # orchestrator marked the job stuck.
+    parser.add_argument(
+        "--resume",
+        action="store_true",
+        help="accepted for orchestrator compatibility; this job is a single "
+        "idempotent pass and always recomputes",
+    )
+    parser.add_argument(
+        "--seeds",
+        default="",
+        help="accepted for orchestrator compatibility; this job reads whole "
+        "cells and does not shard by seed",
+    )
     args = parser.parse_args()
+    if args.seeds:
+        print(f"note: --seeds {args.seeds} ignored; this analysis is not sharded")
 
     config = _yaml(args.config)
     for key in ("source_run", "run_artifact", "out_artifact", "restrict_to_floor_exit"):
