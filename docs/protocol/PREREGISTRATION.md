@@ -2319,3 +2319,106 @@ into a branch. Coverage is reported with the numbers, not on request.
 
 **If the result fits no branch**, it is reported plainly with a dated note and
 no branch is forced -- the standing rule from `docs/results/RESULTS_PLAYBOOK.md`.
+
+---
+
+## Amendment P.2-v2, result (2026-08-27): BRANCH A -- eviction-locking SURVIVES ratio-matching
+
+`shape-p2v2-restricted` over `replay-ratio-matched-m3-v2`, CPU-only re-analysis
+of existing profiles. Artifact
+`results/diag/amendment-p/shape_m3v2_RESTRICTED.json`. Read condition and
+branches were fixed on 2026-08-24, before any number existed.
+
+**Coverage meets the pre-registered floor exactly.** 24 problems / 92
+observations per press, median **75.9%** of each trace retained -- identical to
+the M.3 drift comparison, which is the intended consequence of sharing one
+windowing function. Exclusions, counted not dropped: **8 profiles never left the
+floor, 8 windows shorter than 200 steps**, 0 missing ratio traces.
+
+| press | UNRESTRICTED (whole trace) | RESTRICTED (above-floor) | peak phase |
+|---|---|---|---|
+| Random | +0.326 [0.263, 0.339], peak 0 | **+0.252 [0.184, 0.271]** | **0** |
+| StreamingLLM | +0.102 [0.065, 0.128], peak 6 | +0.076 [0.031, 0.099] | 1 |
+
+**Verdict: BRANCH A -- REPLICATES UNDER RATIO-MATCHING.** Random's excess
+excludes zero and peaks at phase 0, the prune step. Per the pre-registered
+reading: the phase result is a genuine eviction-timing effect, not an artifact
+of the worsening compression ratio.
+
+**The pre-committed sanity expectation held.** Both restricted excesses are
+SMALLER than their unrestricted counterparts (0.252 < 0.326; 0.076 < 0.102), as
+predicted on 2026-08-24, because the floor-bound period is the harshest
+compression in the run. Had they come out larger, the amendment required
+investigating a windowing bug before reporting -- see below, where a windowing
+bug was in fact found by a different route.
+
+**What this does and does not license.** It restores a mechanistic reading for
+the PHASE result only. It does **not** disturb Amendment M.3: the rising
+envelope of the divergence profile remains a compression-ratio effect, and no
+mechanistic reading of the staircase is licensed. The two results are compatible
+and should be stated together -- *within* each prune cycle divergence is locked
+to the eviction event, while the *envelope* across cycles tracks the worsening
+ratio rather than the horizon. The restricted window's own drift confirms the
+envelope half: median 0.65 (Random) / 0.71 (StreamingLLM), and 97.8% of traces
+classify flat once the floor period is removed.
+
+**StreamingLLM remains WITHDRAWN and this does not rehabilitate it.** Its
+restricted excess excludes zero, but per the 2026-08-24 amendment a policy whose
+fixed-budget claim failed to replicate on 2026-08-12 cannot be revived by a
+different cell. Its peak is phase 1, not 0. Reported for completeness only.
+
+### A windowing bug was found and corrected mid-analysis; both readings are shown
+
+**The timing is disclosed because the correction changed the verdict in our
+favour.** The first run of this analysis reported Random peak phase **1**, which
+is branch B ("survives but is not prune-aligned"). Peak 1 looked like an
+off-by-one, so the windowing was checked before the branch was applied. It was
+one:
+
+`phase_profile` buckets on `(index - onset) % interval` with bucket 0 defined as
+the prune step. `restrict_to_floor_exit` re-based the onset as
+`max(0, onset - start)`, which is 0 whenever the trim starts after onset --
+always -- silently rotating every phase index by `(start - onset) % interval`.
+That offset was measured at **exactly 63 on all 96 Random traces**: a
+deterministic systematic rotation of one bucket, not noise. The correct
+re-basing is the congruence itself, `(onset - start) % interval`.
+
+Both readings, so the effect of the correction is visible rather than asserted:
+
+| press | restricted, MISALIGNED | restricted, CORRECTED |
+|---|---|---|
+| Random | +0.248 [0.182, 0.264], peak **1** | +0.252 [0.184, 0.271], peak **0** |
+| StreamingLLM | +0.073 [0.026, 0.094], peak 2 | +0.076 [0.031, 0.099], peak 1 |
+
+The excesses barely move; the correction is a rotation, and what it changes is
+which bucket is called the prune step -- exactly the quantity the branch turns
+on. **This is the honest hazard: a one-bucket rotation is the difference between
+branch B and branch A, and the bug was found only because the anomalous result
+prompted the check.** Three things make the fix outcome-independent rather than
+motivated, and they are recorded so a reader can judge:
+
+1. The bug is provable from the definition, without reference to any result: the
+   phase congruence is not preserved unless the onset is re-based by it.
+2. The regression test places spikes exactly on true prune steps and asserts the
+   restricted profile still peaks at bucket 0, for five different trim points.
+   It fails on the old re-basing and passes on the new one, independent of any
+   real data.
+3. The measured offset was constant at 63 across all 96 traces. A judgement call
+   does not produce a constant.
+
+An earlier test of mine asserted `onset == 0` after trimming -- it encoded the
+bug -- and was corrected with that reason recorded rather than deleted.
+
+**Amendment M.3's drift verdict is unaffected** and was re-run to confirm: the
+drift comparison uses `floor_exit_step` but never the onset re-basing, and
+reproduces bit-identically (Random 1.201 / 0.662; StreamingLLM 1.299 / 0.739).
+
+### Operational note
+
+This job failed three times on 2026-08-25 before it ever ran. The nightly
+orchestrator appends `--resume --seeds <list>` to every launch;
+`run_shape_analysis.py` did not accept them, so argparse exited rc=2 before
+doing any work and the orchestrator marked the job stuck, leaving an empty run
+directory. Hand dry-running the runner did not catch it, because the hand
+invocation omits exactly the flags the orchestrator adds. A regression test now
+asserts that contract for every command the queue can dispatch.

@@ -921,7 +921,12 @@ Three qualifiers that must travel with it:
    below 1): divergence *falls* across the trace when the budget grows with
    context.
 
-**Consequence for §4u's P.2 result, and it is UNRESOLVED.** The eviction-locking
+**RESOLVED 2026-08-27 -- see §4w. Eviction-locking SURVIVES ratio-matching
+(branch A): Random +0.252 [0.184, 0.271], peak phase 0, on the same restricted
+window as the drift comparison. The preliminary whole-trace numbers below are
+superseded and must not be cited.**
+
+**Consequence for §4u's P.2 result, as recorded at the time (now resolved).** The eviction-locking
 finding (Random's phase excess peaking at the prune step) was flagged as
 possibly being what a ratio-driven curve would produce. Phase statistics
 computed on this cell (`shape_m3v2_UNRESTRICTED.json`: Random excess +0.326
@@ -931,6 +936,49 @@ harshest compression in the run, which would inflate phase amplitude. **They are
 preliminary and must not be cited as evidence that eviction-locking survives
 ratio matching** until the phase analysis is repeated on the same restricted
 window as the drift comparison above. That analysis is not yet written.
+
+### 4w. Amendment P.2-v2: eviction-locking survives ratio-matching (2026-08-27)
+
+The last open Meeting-#2 item, and it closes **branch A**. CPU-only re-analysis
+of the `replay-ratio-matched-m3-v2` profiles on the same restricted window as
+the M.3 drift comparison. Read condition pre-registered 2026-08-24, before any
+number existed. Artifact
+`results/diag/amendment-p/shape_m3v2_RESTRICTED.json`; full detail and the
+correction disclosure in PREREGISTRATION "Amendment P.2-v2, result".
+
+Coverage matches the drift comparison exactly -- 24 problems / 92 observations
+per press, median 75.9% of each trace retained; excluded and counted: 8 profiles
+that never left the floor, 8 windows under 200 steps.
+
+| press | whole trace | restricted (above-floor) | peak phase |
+|---|---|---|---|
+| Random | +0.326 [0.263, 0.339] | **+0.252 [0.184, 0.271]** | **0** (prune step) |
+| StreamingLLM | +0.102 [0.065, 0.128] | +0.076 [0.031, 0.099] | 1 |
+
+**Random's eviction-locking is real and survives ratio-matching.** Both
+restricted excesses are smaller than their whole-trace values, as pre-committed,
+because the floor-bound period is the harshest compression in the run.
+
+**State this together with M.3, never alone.** Within each prune cycle,
+divergence is locked to the eviction event -- that is a mechanism and is now
+licensed. Across cycles, the rising envelope is a compression-ratio effect and
+no mechanistic reading of it is licensed (M.3, §4v). The restricted window shows
+both halves at once: phase excess excludes zero while drift is 0.65-0.71 and
+97.8% of traces classify flat. **Do not let the restored phase mechanism leak
+into the staircase claim.**
+
+**StreamingLLM stays WITHDRAWN.** Its restricted excess excludes zero, but a
+fixed-budget claim that failed to replicate on 2026-08-12 is not rehabilitated
+by a different cell, and its peak is phase 1 rather than 0. Descriptive only.
+
+**A one-bucket windowing bug was found and corrected mid-analysis, and it moved
+the verdict from branch B to branch A** -- i.e. in our favour, so the timing is
+disclosed and both readings are published side by side in the amendment. The
+re-based onset was not preserving phase alignment, rotating every phase index by
+a measured, constant 63 buckets across all 96 traces. The excesses barely moved
+(+0.248 to +0.252); what moved was which bucket counts as the prune step, which
+is exactly what the branch turns on. Amendment M.3's drift verdict does not use
+the onset re-basing and reproduces bit-identically.
 
 <!-- AUDIT:ARCHIVAL-END -->
 

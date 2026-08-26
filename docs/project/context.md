@@ -24,6 +24,45 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-08-27 — LAST Meeting-#2 item CLOSED. Amendment P.2-v2: Random's
+  eviction-locking SURVIVES ratio-matching (branch A). All four tasks plus both
+  controls are now read. No runs pending; GPUs idle.**
+
+  **(1) Result.** Restricted to the same above-floor window as the M.3 drift
+  comparison: Random excess **+0.252 [0.184, 0.271], peak phase 0** (the prune
+  step) — branch A, REPLICATES UNDER RATIO-MATCHING. StreamingLLM +0.076
+  [0.031, 0.099] peak 1, but it stays WITHDRAWN — a fixed-budget claim that
+  failed to replicate on 2026-08-12 is not revived by a different cell.
+  Coverage matches the drift comparison exactly: 24 problems / 92 obs per press,
+  median 75.9% of trace; excluded and counted: 8 never left the floor, 8 windows
+  under 200 steps. Both restricted excesses are smaller than their whole-trace
+  values (0.326 → 0.252; 0.102 → 0.076), as pre-committed on 2026-08-24.
+
+  **(2) The framing that must travel with it.** Within a prune cycle, divergence
+  is eviction-locked — mechanism, now licensed. Across cycles, the rising
+  envelope is a compression-ratio effect and stays unlicensed (M.3). The
+  restricted window shows both at once: phase excess excludes zero while drift
+  is 0.65–0.71 and 97.8% of traces are flat. **Do not let the restored phase
+  mechanism leak into the staircase claim.**
+
+  **(3) A windowing bug moved the verdict in our favour, so it is disclosed.**
+  The first run read peak 1 (branch B). The re-based onset was not preserving
+  phase alignment, rotating every phase index by a measured constant 63 buckets
+  across all 96 traces. Fixed, re-run, and BOTH readings are published side by
+  side in the amendment. Excesses barely moved (+0.248 → +0.252); what moved is
+  which bucket is the prune step, which is exactly what the branch turns on.
+  M.3's drift verdict does not use the re-basing and reproduces bit-identically.
+
+  **(4) The job had failed three times on 2026-08-25** before it ever ran: the
+  orchestrator appends `--resume --seeds` to every launch and the new runner
+  rejected them, so argparse exited rc=2 and the job was marked stuck. Fixed,
+  with a regression test covering every command the queue can dispatch.
+
+  **NEXT:** paper edits only. §4.4 restatement in compression-ratio terms and
+  the §2 thesis mechanism-clause wording are now unblocked — both are open
+  decisions, deliberately not made here. No GPU work is queued.
+
+
   **★★★★★ 2026-08-15 — BOTH powered cells landed and were read. Task 2 = NO
   RESTORATION; M.3 = the staircase is a RATIO effect. All four Meeting-#2 tasks
   now have answers. No runs pending; GPUs idle. HEAD `c4a0f1b`.

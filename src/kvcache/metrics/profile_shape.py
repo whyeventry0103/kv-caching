@@ -326,9 +326,19 @@ def restrict_to_floor_exit(
     """Trim a profile to its above-floor window, re-basing the onset.
 
     Returns ``(trimmed_estimate, new_onset, "")`` or ``None`` with a reason when
-    the profile is excluded. The onset is re-based because the shape statistics
-    index phase from it; a trim that starts after the original onset leaves the
-    whole retained window post-onset, i.e. ``new_onset == 0``.
+    the profile is excluded.
+
+    **The re-based onset must PRESERVE PHASE ALIGNMENT, not merely be
+    non-negative.** ``phase_profile`` buckets on ``(index - onset) % interval``
+    with bucket 0 defined as the prune step, so the re-based onset has to keep
+    that congruence in the trimmed frame. Setting it to ``max(0, onset - start)``
+    -- i.e. 0 whenever the trim starts after onset, which is always -- silently
+    rotates every phase index by ``(start - onset) % interval``. On the
+    replay-ratio-matched-m3-v2 profiles that offset is 63 on all 96 traces, so
+    the whole phase profile came out rotated by exactly one bucket and the peak
+    read 1 where the prune step is 0.
+
+    The correct re-basing is the congruence itself: ``(onset - start) % interval``.
     """
     start = floor_exit_step(trace, compression_interval)
     if start is None:
@@ -336,5 +346,6 @@ def restrict_to_floor_exit(
     trimmed = list(estimate)[start:]
     if len(trimmed) < min_window:
         return None
-    new_onset = max(0, (int(onset) if onset is not None else 0) - start)
+    interval = int(compression_interval)
+    new_onset = ((int(onset) if onset is not None else 0) - start) % interval
     return trimmed, new_onset, ""

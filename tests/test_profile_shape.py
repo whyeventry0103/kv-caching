@@ -129,10 +129,14 @@ def test_floor_exit_step_and_restriction_are_hand_checkable():
     assert floor_exit_step([{"logical_context": 164, "at_floor": True}], 64) is None
     assert floor_exit_step([], 64) is None
 
-    # Trim re-bases the onset: the whole retained window is post-onset.
+    # Trim re-bases the onset to PRESERVE PHASE ALIGNMENT.
+    # The original assertion here was `onset == 0`, which encoded the
+    # off-by-one: setting the re-based onset to zero rotates every phase bucket
+    # by (start - onset) % interval, so bucket 0 stops being the prune step.
+    # The correct value is the congruence (onset - start) % interval.
     trimmed, onset, _ = restrict_to_floor_exit([0.1] * 1200, 65, trace, 64)
     assert len(trimmed) == 400
-    assert onset == 0
+    assert onset == (65 - 800) % 64 == 33
 
     # Shorter than the 200-step floor -> excluded.
     assert restrict_to_floor_exit([0.1] * 900, 65, trace, 64) is None
@@ -215,3 +219,46 @@ def test_the_restriction_actually_changes_the_statistic(tmp_path):
     a_un = unres["per_policy"]["random"]["phase_amplitude"]
     a_re = res["per_policy"]["random"]["phase_amplitude"]
     assert a_re < a_un, f"restriction did not reduce amplitude: {a_re} vs {a_un}"
+
+
+@pytest.mark.parametrize("floor_exit", [800, 801, 833, 900, 1024])
+def test_restriction_preserves_phase_alignment_to_the_prune_step(floor_exit):
+    """The re-based onset must keep bucket 0 = the prune step.
+
+    Regression for a real off-by-one: the first implementation set the re-based
+    onset to max(0, onset - start), which is 0 whenever the trim starts after
+    onset -- always. That rotates every phase index by (start - onset) % interval.
+    On the replay-ratio-matched-m3-v2 profiles the offset was 63 on all 96
+    traces, so the phase profile came out rotated one bucket and the Amendment
+    P.2-v2 peak read 1 where the prune step is 0 -- which is the difference
+    between its branch B and its branch A.
+
+    Here the spikes sit exactly on the true prune steps, so a correctly aligned
+    restriction MUST still peak at bucket 0 for every trim point.
+    """
+    from kvcache.metrics.profile_shape import phase_profile, restrict_to_floor_exit
+
+    interval, onset, n = 64, 65, 4000
+    # Spike exactly at each prune step in the ORIGINAL frame.
+    series = [
+        1.0 if (i >= onset and (i - onset) % interval == 0) else 0.01 for i in range(n)
+    ]
+    assert (
+        phase_profile(series, onset, interval).index(
+            max(phase_profile(series, onset, interval))
+        )
+        == 0
+    ), "fixture is wrong: untrimmed profile must peak at 0"
+
+    trace = [
+        {"logical_context": onset + interval, "at_floor": True},
+        # floor_exit_step = logical_context - prompt, prompt = first_lc - interval
+        {"logical_context": floor_exit + onset, "at_floor": False},
+    ]
+    trimmed, new_onset, _ = restrict_to_floor_exit(series, onset, trace, interval)
+    profile = phase_profile(trimmed, new_onset, interval)
+    peak = profile.index(max(v for v in profile if v is not None))
+    assert peak == 0, (
+        f"trim at {floor_exit} rotated the phase profile: peak={peak}, "
+        f"expected 0 (the prune step)"
+    )
