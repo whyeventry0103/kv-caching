@@ -45,7 +45,7 @@ disk is ground truth; the markdown can lag.
 
 ```bash
 make lint     # ruff check . && black --check .   (88 cols, py311)
-make test     # pytest -q  — CPU-only, no weights (302 pass + 14 skip, 2026-08-23)
+make test     # pytest -q  — CPU-only, no weights (311 pass + 14 skip, 2026-08-28)
 make dryrun   # every runner script × config planned in --dry-run mode
 ```
 

@@ -297,16 +297,42 @@ def launch_candidates(
     return candidates, notes
 
 
+def stuck_jobs(runs_root: Path, jobs: list[Job], state: dict) -> set[str]:
+    """Jobs that failed MAX_FAILS launches AND are still incomplete.
+
+    Completeness is ground truth and outranks the failure counter. A job can
+    fail its launches, get marked stuck, and later be completed by other means
+    -- shape-p2v2-restricted did exactly that: three failed launches on
+    2026-08-25 because its runner rejected the orchestrator's --resume/--seeds,
+    then a successful manual run on 2026-08-27 once the runner was fixed.
+    Without this filter the orchestrator kept logging it as stuck while its
+    artifact sat on disk, so the log contradicted the filesystem.
+    """
+    by_name = {j.name: j for j in jobs}
+    return {
+        name
+        for name, s in state.items()
+        if s.get("fails", 0) >= MAX_FAILS
+        and name in by_name
+        and count_progress(runs_root, by_name[name]) < by_name[name].total
+    }
+
+
 def select_job(
     runs_root: Path, jobs: list[Job], skip: set[str] | None = None
 ) -> tuple[Job | None, str]:
     skip = skip or set()
     by_name = {j.name: j for j in jobs}
     for job in jobs:
-        if job.name in skip:
-            continue  # marked stuck (repeated no-progress failures) -> don't reselect
+        # Completeness is ground truth and is checked FIRST. A job can fail its
+        # launches, be marked stuck, and later be completed by other means (a
+        # manual run, a fixed runner) -- shape-p2v2-restricted did exactly that
+        # on 2026-08-27. Checking `skip` first left it reported as stuck forever
+        # even though its artifact existed, so the log contradicted the disk.
         if count_progress(runs_root, job) >= job.total:
             continue
+        if job.name in skip:
+            continue  # marked stuck (repeated no-progress failures) -> don't reselect
         if job.requires is not None:
             req = by_name.get(job.requires)
             if req is None:
@@ -474,7 +500,7 @@ def main() -> int:
 
     runs_root = Path(BASE_ENV["REMOTE_RUNS_ROOT"])
     state = load_state()
-    stuck = {n for n, s in state.items() if s.get("fails", 0) >= MAX_FAILS}
+    stuck = stuck_jobs(runs_root, jobs, state)
     if stuck:
         log(f"stuck jobs (skipped, {MAX_FAILS}+ no-progress launches): {sorted(stuck)}")
 

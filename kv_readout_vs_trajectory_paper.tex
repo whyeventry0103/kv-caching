@@ -63,6 +63,14 @@ Our diagnosis begins with an observation about evaluation protocol. Most method 
 
 We answer with an explicit decomposition. For each compression method $m$ we measure the \emph{total} accuracy change of compressed free-running generation against a pinned full-cache reference bank; the \emph{on-reference readout} change, obtained by teacher-forcing the exact full-cache reasoning token IDs to the reasoning/answer boundary and then generating only the answer span under compression; and the \emph{residual}, defined --- and only defined --- as the accuracy change unexplained by on-reference readout. Because the readout intervention conditions on the full-cache trajectory, it is off-policy with respect to the states the compressed model actually visits, and the residual is biased toward the trajectory share~\cite{ross2011dagger}. We therefore state this caveat up front, not in rebuttal, and bound the bias symmetrically with \emph{reverse replay}: the compressed free-run trace read out under the full cache. Forward and reverse readout together bracket the on-policy residual. Two further instruments complete the suite: \emph{ADD}, a total-variation measure of answer-distribution distortion with a permutation null, a termination-versus-within-answered decomposition, and a signed flip-mass that separates gained from lost correct answers; and an onset-aligned per-step total-variation profile over teacher-forced replay, which localizes \emph{when} divergence arises relative to the first eviction event. Together, these instruments constitute the \emph{trajectory audit} (\cref{fig:protocol}), stated as a reusable, intervention-agnostic protocol in \cref{sec:conclusion}.
 
+%% TODO(M.3-RESTATEMENT): Amendment M.3 (2026-08-15) showed the RISE of this
+%% profile is a compression-ratio effect -- at fixed ratio the drift reverses
+%% (0.66-0.74 < 1) -- so no mechanistic reading of the compounding is licensed.
+%% Amendment P.2-v2 (2026-08-27) separately CONFIRMED the phase alignment to
+%% prune events survives ratio-matching (Random +0.252 [0.184, 0.271], peak 0).
+%% The measurements below are correct AS MEASUREMENTS at fixed budget 256; what
+%% needs restating is attributing the growth to horizon rather than to the
+%% worsening ratio. Wording is an OPEN DECISION -- see PAPER_FINDINGS 4v/4w.
 \paragraph{Thesis.} At aggressive cache budgets, accuracy loss under compression is large and largely \emph{invisible to teacher-forced / readout-style evaluation} --- which is consistent with method papers that evaluate on held-fixed traces report near-lossless while free-running evaluation reports severe, method-specific degradation (for StreamingLLM, collapse). The gap is the trajectory residual, and it arises from a divergence that is approximately zero at the moment of eviction and \emph{compounds} over the generated trajectory.
 
 We emphasize what the thesis is not. We observed no accuracy \emph{gains} under compression on small-budget MATH-500, so no ``denoising'' or $>$100\%-of-baseline regime is claimed; the paper is framed strictly as near-lossless-under-readout versus collapse-under-free-generation. And throughout, divergence quantities (ADD, per-step TV, the residual) are reported as \emph{behavioral-fidelity loss}, never as ``damage to reasoning ability'': correctness is the only quality arbiter, and every divergence quantity is accompanied by its signed flip-mass.
@@ -74,6 +82,14 @@ We emphasize what the thesis is not. We observed no accuracy \emph{gains} under 
   \item \textbf{The powered phenomenon}: at budget 256 on MATH-500 (DeepSeek-R1-Distill-Qwen-7B), full-cache accuracy $0.885$ collapses to $0.237$ (StreamingLLM) and $0.422$ (Random); random eviction beats the principled recency policy by $+0.185$, 95\% CI $[0.130, 0.240]$, with per-problem difference $\ge 0$ on 94/100 problems (44 strict wins, 50 ties, 6 losses) --- an architecture-dependent ordering: it reverses on the Llama base (\cref{sec:phenomenon,sec:threats}).
   \item \textbf{A large, readout-invisible trajectory residual} of $\approx -0.34$ across three mechanistically unrelated eviction policies (uniform, positional, attention-score; residual spread $0.008$, every CI excluding zero; 400 conditions per cell), with the method differences living in the readout channel --- on the forward estimand, a residual of similar magnitude exists for every policy tested, reported as exploratory (\cref{sec:forward}).
   \item \textbf{An off-policy defense}: forward and reverse readout give two $\text{total}-\text{readout}$ residual estimates whose min/max bracket excludes zero for every policy (Random $[-0.337,-0.282]$, StreamingLLM $[-0.470,-0.344]$, H2O-style $[-0.478,-0.344]$, R-KV $[-0.268,-0.251]$), with problem-clustered 95\% CIs on all eight endpoints excluding zero --- so the central claim survives the covariate-shift correction with statistical significance, while the \emph{method-level} readout-vs-trajectory attribution is reported as estimand-dependent and exploratory (\cref{sec:reverse}).
+%% TODO(M.3-RESTATEMENT): Amendment M.3 (2026-08-15) showed the RISE of this
+%% profile is a compression-ratio effect -- at fixed ratio the drift reverses
+%% (0.66-0.74 < 1) -- so no mechanistic reading of the compounding is licensed.
+%% Amendment P.2-v2 (2026-08-27) separately CONFIRMED the phase alignment to
+%% prune events survives ratio-matching (Random +0.252 [0.184, 0.271], peak 0).
+%% The measurements below are correct AS MEASUREMENTS at fixed budget 256; what
+%% needs restating is attributing the growth to horizon rather than to the
+%% worsening ratio. Wording is an OPEN DECISION -- see PAPER_FINDINGS 4v/4w.
   \item \textbf{The mechanism}: onset-aligned TV profiles over 800 replays show divergence of exactly $0.0000$ before the first eviction, $0.0018$ in the first 50 post-eviction steps, compounding to $0.0884$ later --- slow-compounding drift that single-step evaluation structurally misses (\cref{sec:mechanism}).
   \item \textbf{Instrument validity}: a two-full-cache negative control establishing an ADD noise floor of $\approx 0.07$ (mean permutation $p = 0.976$, 0\% of problems significant) against compression-cell ADD of $0.46$--$0.75$, plus a Jaccard-1.0 retained-set parity certification of our R-KV port (\cref{sec:control}).
 \end{itemize}
@@ -305,6 +321,14 @@ Third, undefined-boundary reverse rows could be \emph{informative} missingness: 
 \label{fig:bracket}
 \end{figure}
 
+%% TODO(M.3-RESTATEMENT): Amendment M.3 (2026-08-15) showed the RISE of this
+%% profile is a compression-ratio effect -- at fixed ratio the drift reverses
+%% (0.66-0.74 < 1) -- so no mechanistic reading of the compounding is licensed.
+%% Amendment P.2-v2 (2026-08-27) separately CONFIRMED the phase alignment to
+%% prune events survives ratio-matching (Random +0.252 [0.184, 0.271], peak 0).
+%% The measurements below are correct AS MEASUREMENTS at fixed budget 256; what
+%% needs restating is attributing the growth to horizon rather than to the
+%% worsening ratio. Wording is an OPEN DECISION -- see PAPER_FINDINGS 4v/4w.
 \subsection{The mechanism: divergence is zero at eviction and compounds}
 \label{sec:mechanism}
 Why does readout-style evaluation miss a 34-point loss? \cref{fig:tvprofile} answers with onset-aligned per-step TV between full-cache and compressed teacher-forced replay of identical token IDs (800 profiles; median onset at step 65, one step after the first prune at the compression interval of 64).
@@ -327,10 +351,26 @@ Later steps ($>$50 after) & $\mathbf{0.0884}$ \\
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.72\linewidth]{figures/fig4_tvprofile.pdf}
+%% TODO(M.3-RESTATEMENT): Amendment M.3 (2026-08-15) showed the RISE of this
+%% profile is a compression-ratio effect -- at fixed ratio the drift reverses
+%% (0.66-0.74 < 1) -- so no mechanistic reading of the compounding is licensed.
+%% Amendment P.2-v2 (2026-08-27) separately CONFIRMED the phase alignment to
+%% prune events survives ratio-matching (Random +0.252 [0.184, 0.271], peak 0).
+%% The measurements below are correct AS MEASUREMENTS at fixed budget 256; what
+%% needs restating is attributing the growth to horizon rather than to the
+%% worsening ratio. Wording is an OPEN DECISION -- see PAPER_FINDINGS 4v/4w.
 \caption{Onset-aligned mean per-step TV over 800 replay profiles: exactly zero before the first eviction, near-zero immediately after, then a compounding staircase whose steps align with eviction events (every 64 decoding steps) --- slow drift, not an instantaneous readout error. The curve is shown to $+400$ steps of onset; the later-steps windowed mean of $0.0884$ (\cref{tab:tv}, per-trace estimator; step-pooled $0.118$) covers the full horizon, where divergence continues to grow.}
 \label{fig:tvprofile}
 \end{figure}
 
+%% TODO(M.3-RESTATEMENT): Amendment M.3 (2026-08-15) showed the RISE of this
+%% profile is a compression-ratio effect -- at fixed ratio the drift reverses
+%% (0.66-0.74 < 1) -- so no mechanistic reading of the compounding is licensed.
+%% Amendment P.2-v2 (2026-08-27) separately CONFIRMED the phase alignment to
+%% prune events survives ratio-matching (Random +0.252 [0.184, 0.271], peak 0).
+%% The measurements below are correct AS MEASUREMENTS at fixed budget 256; what
+%% needs restating is attributing the growth to horizon rather than to the
+%% worsening ratio. Wording is an OPEN DECISION -- see PAPER_FINDINGS 4v/4w.
 Three readings. First, the \textbf{temporal structure}: the divergence induced by eviction is near-zero \emph{at the moment it happens} ($0.0018$ per step over the next 50 steps) and grows to $0.088$ later in the trajectory --- a slow-compounding drift. Note the a-fortiori structure of this measurement: the profile is computed under teacher forcing, with the trace held fixed, so the compounding reflects accumulating cache-state divergence alone, with \emph{no} feedback through sampled tokens; free-running generation adds a second divergence source on top of this --- feedback through the model's own sampled outputs. Any single-step or short-horizon evaluation therefore measures the $\approx 0.002$ pre-compounding regime, and accuracy-scale readout evaluation registers only the distortion present at answer time --- not the counterfactual rewriting of the trajectory that free-running generation exposes. Second, \textbf{divergence magnitude is of similar order across policies}: AUC-TV is $0.086$ (Random), $0.083$ (StreamingLLM) and $0.073$ (H2O-style, over its 400 profiles), a $17\%$ spread with no intervals, and median onset is 65 in each. We report this on its own scale and do not offer it as corroboration of the accuracy-scale similarity: a TV-scale quantity cannot license an accuracy-scale claim (the ADD definition in \cref{sec:estimands} states the separation), and the paired accuracy test in \cref{sec:forward} is what supports that claim. Third, \textbf{instrument validity}: the exactly-zero pre-eviction TV doubles as a self-control --- the replay harness introduces no divergence of its own.
 
 \subsection{ADD: silent answer-distribution distortion, with signed flips}
@@ -432,6 +472,14 @@ Reference population & change measured across mismatched populations & every est
 \section{Conclusion}
 \label{sec:conclusion}
 
+%% TODO(M.3-RESTATEMENT): Amendment M.3 (2026-08-15) showed the RISE of this
+%% profile is a compression-ratio effect -- at fixed ratio the drift reverses
+%% (0.66-0.74 < 1) -- so no mechanistic reading of the compounding is licensed.
+%% Amendment P.2-v2 (2026-08-27) separately CONFIRMED the phase alignment to
+%% prune events survives ratio-matching (Random +0.252 [0.184, 0.271], peak 0).
+%% The measurements below are correct AS MEASUREMENTS at fixed budget 256; what
+%% needs restating is attributing the growth to horizon rather than to the
+%% worsening ratio. Wording is an OPEN DECISION -- see PAPER_FINDINGS 4v/4w.
 At aggressive cache budgets, accuracy loss under compression is large and largely invisible to teacher-forced, readout-style evaluation. At budget 256 on MATH-500, three mechanistically unrelated eviction policies --- uniform, positional, and attention-score --- carry the same trajectory residual of roughly $-0.34$, and the certified port of the reasoning-specific R-KV policy, the best free-runner tested, still carries $-0.28$ --- accuracy loss that held-fixed-trace evaluation does not register, because the underlying divergence is zero at the moment of eviction and compounds over the trajectory that follows. That is why KV-compression method papers, which evaluate on readout-shaped protocols, report near-lossless, while HOTT's free-running evaluation reports severe, method-specific degradation --- for StreamingLLM, collapse: both are measuring correctly, on different channels of the same loss. The forward decomposition identifies the residual; the reverse-replay bracket shows it is reached independently by a second, oppositely-biased estimate; the TV profile supplies the compounding mechanism; and ADD shows the answer distribution is silently rewritten, with flip-mass overwhelmingly toward lost correct answers. The residual also tracks the dose: at budget 2048, readout is statistically lossless and the small remaining free-running loss is still trajectory-shaped.
 
 \paragraph{The trajectory audit.} The paper's durable deliverable is the protocol behind these findings, and it generalizes beyond KV eviction. For any intervention applied \emph{during} generation --- cache quantization, speculative decoding, early exit, retrieval truncation, context compression --- (1) hold a reference trace fixed and measure the intervention's accuracy effect on answer readout; (2) free-run the intervention and measure the total effect; (3) read the intervention's own traces out \emph{without} it, so the forward and reverse estimates bracket the trajectory part of the cost; and (4) check the per-step divergence profile for compounding after the intervention's onset. The audit ships with its own validity kit --- a two-condition negative control, an exactly-zero pre-intervention self-check, a resampling calibration, and exact-replication determinism --- so a new application can certify its instruments before reading any number. An evaluation that holds the trace fixed cannot price an intervention that changes the trace; the bracket says how much of the price it misses. We demonstrate the audit on one intervention family here, and we conjecture --- but have not shown --- that it transfers to the others; running it costs one extra teacher-forced pass per condition relative to the deployment decisions it informs.

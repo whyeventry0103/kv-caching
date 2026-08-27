@@ -336,3 +336,47 @@ def test_extra_args_appended_to_launch_argv(tmp_path):
     )
     specs = M.build_launch_specs(job, {0: [11, 23]}, 5.0)
     assert specs[0].launch_argv[-1] == "--allow-model-download"
+
+
+def test_a_completed_job_is_never_reported_stuck(tmp_path):
+    """Completeness is ground truth and must outrank the failure counter.
+
+    shape-p2v2-restricted failed three launches on 2026-08-25 (its runner
+    rejected the orchestrator's --resume/--seeds), was marked stuck, and was
+    then completed by hand on 2026-08-27 once the runner was fixed. The
+    orchestrator kept logging it as stuck while its artifact sat on disk -- the
+    log contradicting the filesystem.
+    """
+
+    def job(name):
+        return M.Job(
+            name=name,
+            command="shape",
+            config="configs/experiments/x.yaml",
+            run_name=name,
+            total=1,
+            seeds=[11],
+            min_free_gb=1,
+            progress_kind="marker",
+            marker=f"{name}/artifact.json",
+            requires=None,
+        )
+
+    runs = tmp_path / "runs"
+    (runs / "done-job").mkdir(parents=True)
+    (runs / "done-job" / "artifact.json").write_text("{}", encoding="utf-8")
+    (runs / "really-stuck").mkdir(parents=True)  # no artifact -> incomplete
+
+    jobs = [job("done-job"), job("really-stuck")]
+    state = {
+        "done-job": {"fails": M.MAX_FAILS},
+        "really-stuck": {"fails": M.MAX_FAILS},
+    }
+
+    stuck = M.stuck_jobs(runs, jobs, state)
+    assert (
+        "done-job" not in stuck
+    ), "a job whose artifact exists must not be reported stuck"
+    assert (
+        "really-stuck" in stuck
+    ), "a job that really did fail and is incomplete must still be reported"
