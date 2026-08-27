@@ -114,14 +114,17 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
   per-trace profile differs, so the fix took effect and the confound was not the
   cause.
 
-  **(4) UNRESOLVED — P.2's eviction-locking under ratio matching.** Phase
+  **(4) [RESOLVED 2026-08-27 — see the top bullet. Branch A: Random +0.252
+  [0.184, 0.271], peak phase 0, on the restricted window. The whole-trace
+  figures quoted below are the preliminary ones and are NOT citable.]
+  As recorded on 2026-08-15 — P.2's eviction-locking under ratio matching.** Phase
   statistics on the M.3 cell (Random excess +0.326 [0.263,0.339] peak 0;
   StreamingLLM +0.102 [0.065,0.128] peak 6) were computed over the WHOLE trace
   including the floor-bound period, the harshest compression in the run, which
   would inflate phase amplitude. **Preliminary; not citable** until the phase
   analysis is redone on the same restricted window as the drift comparison.
 
-  **NEXT, in order:** (a) redo the phase analysis on the restricted window to
+  **NEXT, in order (superseded — (a) was done 2026-08-27):** (a) redo the phase analysis on the restricted window to
   settle (4); (b) paper edits — nothing in `kv_readout_vs_trajectory_paper.tex`
   reflects Tasks 2/3/4, the P.2 StreamingLLM withdrawal, or M.3; §4.4 needs the
   ratio restatement. No GPU work is queued.
