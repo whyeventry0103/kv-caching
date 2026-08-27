@@ -6,19 +6,34 @@ import argparse
 import hashlib
 from pathlib import Path
 
-IGNORED_PARTS = {
+# Matched at ANY depth: these are build/VCS artifacts that legitimately nest.
+IGNORED_ANY_DEPTH = {
     ".claude",
     ".git",
     ".venv",
     ".pytest_cache",
     ".ruff_cache",
     "__pycache__",
+}
+# Matched ONLY at the repository root. These are the big generated trees, and
+# the distinction is load-bearing: matching them at any depth silently excluded
+# `docs/results/` -- PAPER_FINDINGS.md (the results record and #3 in the
+# authority order), RESULTS_PLAYBOOK.md, RESULTS.md -- from the source-tree
+# hash. The parity gate is what certifies local and remote hold the same
+# source, so it was blind to divergence in exactly the document whose whole job
+# is to be the shared record. `sync_source.sh` already draws this distinction
+# correctly (`--exclude='/results/'` anchored, `--exclude='__pycache__/'` not),
+# and this set now mirrors it so the hash covers exactly what sync transfers.
+IGNORED_ROOT_ONLY = {
     "data",
     "kvcache-storage",
     "logs",
     "results",
     "runs",
 }
+# Retained for callers that imported the old name; it is the union and must not
+# be used for path filtering.
+IGNORED_PARTS = IGNORED_ANY_DEPTH | IGNORED_ROOT_ONLY
 IGNORED_SUFFIXES = {".npy", ".pyc", ".safetensors"}
 IGNORED_FILES = {".sync-state"}
 
@@ -35,7 +50,9 @@ def source_tree_hash(root: str | Path) -> str:
             continue
         if any(part.startswith(".venv-") for part in relative.parts):
             continue
-        if any(part in IGNORED_PARTS for part in relative.parts):
+        if any(part in IGNORED_ANY_DEPTH for part in relative.parts):
+            continue
+        if relative.parts and relative.parts[0] in IGNORED_ROOT_ONLY:
             continue
         if path.suffix in IGNORED_SUFFIXES:
             continue

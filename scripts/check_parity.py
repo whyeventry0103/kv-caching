@@ -96,15 +96,47 @@ def main() -> int:
     local_commit = subprocess.run(
         ["git", "rev-parse", "HEAD"], capture_output=True, text=True, cwd=PROJECT_ROOT
     ).stdout.strip()
-    remote_commit = _ssh(f"cd {REMOTE_ROOT} && git rev-parse HEAD").strip()
-    print("== commit")
-    print(f"  local  {local_commit}")
-    print(f"  remote {remote_commit}")
-    if local_commit != remote_commit:
-        problems.append("commit mismatch: remote is not on the local commit")
+    # The authoritative record of WHICH COMMIT the remote's source came from is
+    # `.sync-state`, which sync_source.sh writes atomically with the files it
+    # transfers. The remote's own `.git` is a vestigial clone that sync
+    # deliberately never updates (`--exclude='.git/'`), so comparing against it
+    # could never match -- this line reported MISMATCH on every run regardless
+    # of actual state, which is a gate that teaches people to ignore it. The
+    # stale clone is still reported, labelled, because the docstring's original
+    # concern (a misleading checkout sitting on the box) is real; it just is not
+    # a parity failure.
+    remote_state = _ssh(f"cat {REMOTE_ROOT}/.sync-state 2>/dev/null || true")
+    state = dict(
+        line.split("=", 1) for line in remote_state.splitlines() if "=" in line
+    )
+    remote_commit = state.get("source_commit", "")
+    stale_clone = _ssh(
+        f"cd {REMOTE_ROOT} && git rev-parse HEAD 2>/dev/null || echo '(no clone)'"
+    ).strip()
+    print("== commit (from the remote's .sync-state, written by sync)")
+    print(f"  local           {local_commit}")
+    print(f"  remote synced   {remote_commit or '(no .sync-state)'}")
+    print(f"  remote .git     {stale_clone}  [vestigial; sync never transfers .git]")
+    if not remote_commit:
+        problems.append("remote has no .sync-state: cannot verify what source it holds")
+        print("  UNVERIFIABLE")
+    elif local_commit != remote_commit:
+        problems.append(
+            "commit mismatch: remote source was synced from a different commit"
+        )
         print("  MISMATCH")
     else:
         print("  match")
+
+    # sync records the hash of `git status --porcelain` at sync time. The hash of
+    # empty output is the sha256 of the empty string; anything else means the
+    # sync was taken from a dirty tree, so some synced bytes correspond to no
+    # commit. Reported, not failed -- syncing work in progress is legitimate.
+    empty_status = hashlib.sha256(b"").hexdigest()
+    status_hash = state.get("status_hash", "")
+    if status_hash and status_hash != empty_status:
+        print("  note: synced from a DIRTY working tree -- some synced files are")
+        print("        not described by the commit above")
 
     local_tree = source_tree_hash(PROJECT_ROOT)
     remote_tree = _ssh(
