@@ -8,7 +8,7 @@ disk is ground truth — the markdown can lag.
 
 | File | |
 |---|---|
-| [`PREREGISTRATION.md`](protocol/PREREGISTRATION.md) | The frozen scientific protocol and its append-only, dated amendment log (A–O). Every deviation lives here as an amendment; nothing frozen changes without one. Start here to judge whether a result was predicted or discovered. |
+| [`PREREGISTRATION.md`](protocol/PREREGISTRATION.md) | The frozen scientific protocol and its append-only, dated amendment log (A–P, plus P.1–P.5, M.3 and P.2-v2). Every deviation lives here as an amendment; nothing frozen changes without one. Start here to judge whether a result was predicted or discovered. |
 
 ## results/ — what was measured
 
@@ -17,7 +17,7 @@ disk is ground truth — the markdown can lag.
 | [`RESULTS.md`](results/RESULTS.md) | **The results record.** Every cell, control and caveat. Generated from `paper_numbers.json`; regenerate with `python scripts/export_results.py --format both` rather than editing. |
 | [`RESULTS.html`](results/RESULTS.html) | The same content as a standalone designed page (dark/light, print-ready). |
 | [`PAPER_FINDINGS.md`](results/PAPER_FINDINGS.md) | The dated results log, the §4-CURRENT headline table, and the **binding framing rules** (§5) — the exact phrasings claims must use. Gated: §4-CURRENT may contain no unsourced number. |
-| [`RESULTS_PLAYBOOK.md`](results/RESULTS_PLAYBOOK.md) | Pre-reasoned read-ins: for each pending unit, which observable numbers select which interpretation. Written before the results landed, so a reader fills slots instead of exercising fresh judgement. |
+| [`RESULTS_PLAYBOOK.md`](results/RESULTS_PLAYBOOK.md) | Pre-reasoned read-ins: for each unit (all CONSUMED — the queue is drained), which observable numbers select which interpretation. Written before the results landed, so a reader fills slots instead of exercising fresh judgement. |
 
 ## operations/ — how to run it
 
@@ -27,7 +27,7 @@ disk is ground truth — the markdown can lag.
 | [`WORKFLOW.md`](operations/WORKFLOW.md) | The local↔remote loop (rsync-first, "Policy B"). |
 | [`REMOTE_SETUP.md`](operations/REMOTE_SETUP.md) | One-time remote host preparation. |
 | [`complete_setup.md`](operations/complete_setup.md) | End-to-end project bootstrap. |
-| [`INTEGRATION_CHECKLIST.md`](operations/INTEGRATION_CHECKLIST.md) | What each queued run touches and what to write when it lands — the pre-registered read per unit. |
+| [`INTEGRATION_CHECKLIST.md`](operations/INTEGRATION_CHECKLIST.md) | What each run (all landed — kept as procedure, not a live queue) touches and what to write when it lands — the pre-registered read per unit. |
 | [`FIGURES_PLAYBOOK.md`](operations/FIGURES_PLAYBOOK.md) | Figure method, conventions, and the open-defects list. |
 
 ## design/ — how it works and why

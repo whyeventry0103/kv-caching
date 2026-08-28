@@ -34,6 +34,18 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--config", required=True, type=Path)
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--i-understand", action="store_true")
+
+    # Orchestrator argv contract -- see src/kvcache/cli.py for why.
+
+    parser.add_argument(
+        "--resume",
+        action="store_true",
+        help="accepted for orchestrator compatibility; ignored",
+    )
+
+    parser.add_argument(
+        "--seeds", default="", help="accepted for orchestrator compatibility; ignored"
+    )
     return parser
 
 

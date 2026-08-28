@@ -80,9 +80,11 @@ The collapse is a budget effect. Same presses, same harness, budget 2048 (**56.6
 - The residual shrinks by a factor of **4.4x to 10.2x** between budget 256 and budget 2048.
 - At 2048 readout sits at or just above the matched reference, and the Random over StreamingLLM ordering persists.
 
-## 6. Mechanism — per-step TV divergence
+## 6. Per-step TV divergence (mechanism: see the caveat)
 
 Onset-aligned total variation between full-cache and compressed teacher-forced replay. This localizes where divergence *starts*, not where accuracy is lost.
+
+**Caveat (Amendment M.3, 2026-08-15).** The RISE in these windows is a compression-ratio effect, not a horizon mechanism: every profile here holds the budget fixed while context grows, so the realized ratio worsens monotonically. Held at a fixed ratio the drift reverses (0.66-0.74 < 1). **No mechanistic reading of the compounding is licensed.** What DOES survive ratio-matching is the phase alignment to prune events (Amendment P.2-v2, 2026-08-27: Random phase-amplitude excess +0.252 [0.184, 0.271], peak phase 0). State the two together — within a prune cycle divergence is eviction-locked; across cycles the envelope tracks the ratio.
 
 | Window | Random + StreamingLLM (800 profiles) | H2O-style (400) |
 |---|---|---|

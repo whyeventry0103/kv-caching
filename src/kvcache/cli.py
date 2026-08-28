@@ -18,6 +18,24 @@ def parser(description: str) -> argparse.ArgumentParser:
         action="store_true",
         help="confirm this remote command may launch costly GPU work",
     )
+    # The nightly orchestrator appends --resume --seeds <list> to EVERY launch
+    # (nightly_autorun.build_launch_specs). A runner that rejects them exits
+    # rc=2 at argparse before doing any work; that is how shape-p2v2-restricted
+    # failed three times on 2026-08-25 and got marked stuck. Every command
+    # launch.sh can dispatch must therefore accept them, whether or not it
+    # shards -- runners that do not shard simply ignore them.
+    result.add_argument(
+        "--resume",
+        action="store_true",
+        help="accepted for orchestrator compatibility; ignored by runners that "
+        "are a single idempotent pass",
+    )
+    result.add_argument(
+        "--seeds",
+        default="",
+        help="accepted for orchestrator compatibility; ignored by runners that "
+        "do not shard by seed",
+    )
     return result
 
 

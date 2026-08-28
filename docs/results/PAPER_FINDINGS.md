@@ -1,7 +1,9 @@
 # Paper findings — consolidated evidence base (for drafting)
 
 This is the authoritative, self-contained record of all results, framing rules, and honest
-limitations for the paper. All numbers are final unless marked *(in progress)*.
+limitations for the paper. **All experimental work is complete as of 2026-08-27;
+every number here is final.** The *(in progress)* convention is retained only for
+reading historical entries in the dated log below.
 
 ## 1. The problem we resolve
 Two literatures contradict each other on KV-cache compression for reasoning models:
@@ -37,7 +39,7 @@ HOTT does evaluate R-KV free-running (relevant to the audit table / related work
 
 R-KV is the **counterexample** to "methods evaluate readout-style": it evaluates free-running
 reasoning and claims **gains** (105% of full-KV @ ~16% cache, R1-Distill-Llama-8B, AIME-24).
-That claimed >100% regime is exactly what our in-progress R-KV/AIME cells test — NOT something we
+That claimed >100% regime is exactly what our R-KV/AIME cells test (both complete and read — §4m, §4r) — NOT something we
 claim to have explained. Do not lump R-KV with the readout-evaluated methods.
 
 Our contribution is a **measurement/analysis paper** (not a new compression method) that
@@ -1064,7 +1066,9 @@ the onset re-basing and reproduces bit-identically.
   **compression-ratio effect**, which delicenses the mechanism reading of the
   divergence profile (see the restatement flag in §2). Both powered cells were re-runs after
   defects in our own instruments; both v1 cells invalidated wholesale, never
-  patched. **Unresolved:** P.2's eviction-locking under ratio matching.
+  patched. **Unresolved at the time; RESOLVED 2026-08-27** — Amendment P.2-v2
+  closed it on branch A (eviction-locking survives ratio-matching); the figures
+  are in §4w. **All Meeting-#2 items are now closed.**
 - **ORIGINAL CAMPAIGN + AMENDMENT J COMPLETE 2026-07-24 — that queue fully
   drained.** (Superseded as a statement about the project as a whole: the
   Meeting-#2 cells ran afterwards. See the 2026-08-15 entry below.) Endgame only from here: anonymization scrub,

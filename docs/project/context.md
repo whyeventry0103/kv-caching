@@ -2,7 +2,7 @@
 
 **Purpose of this file:** a complete, self-contained handoff. An LLM with zero prior
 context should be able to read this and resume exactly where we are. Last updated
-2026-08-23. Repo: `/Users/apple/dev/kv-caching` (moved off `~/Desktop` 2026-06-14 to
+2026-08-28. Repo: `/Users/apple/dev/kv-caching` (moved off `~/Desktop` 2026-06-14 to
 escape a recurring macOS TCC lockout; `~/Desktop/kv-caching` is a **symlink** to this
 path, not a second copy — verified 2026-07-27), branch `main`, GitHub
 `whyeventry0103/kv-caching`. For the current commit run `git rev-parse --short

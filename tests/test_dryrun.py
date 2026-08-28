@@ -89,14 +89,23 @@ def test_every_queued_runner_accepts_the_orchestrator_argv_contract():
     import subprocess
     import sys as _sys
 
-    import yaml
-
     root = Path(__file__).resolve().parents[1]
-    queue = yaml.safe_load((root / "configs" / "nightly_queue.yaml").read_text())
-    jobs = queue["jobs"] if isinstance(queue, dict) else queue
     launch = (root / "scripts" / "launch.sh").read_text()
 
-    for command in sorted({j["command"] for j in jobs}):
+    # Derive from launch.sh's dispatch table, NOT from the queue. A runner is
+    # exposed to the orchestrator the moment launch.sh can dispatch it; taking
+    # the command list from nightly_queue.yaml only tests what is queued TODAY,
+    # so the assertion would first fire one commit after someone queues a job
+    # for an unprepared runner -- i.e. exactly one commit too late to prevent
+    # the 2026-08-25 failure it exists to prevent.
+    dispatchable = sorted(
+        set(re.findall(r"^\s+([a-z-]+)\)\s*PY_SCRIPT=", launch, re.M))
+    )
+    assert (
+        len(dispatchable) >= 5
+    ), f"parsed too few commands from launch.sh: {dispatchable}"
+
+    for command in dispatchable:
         match = re.search(
             rf'^\s*{re.escape(command)}\)\s*PY_SCRIPT="([^"]+)"', launch, re.M
         )

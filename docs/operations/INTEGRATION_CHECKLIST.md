@@ -1,5 +1,12 @@
 # Integration checklist — what each queued run touches, and what to write
 
+> **ALL UNITS IN THIS FILE HAVE LANDED (verified 2026-08-28).** The queue is
+> drained: 45/45 jobs complete, no runs pending. diss512/1024, grid-hottcap and
+> aime24-llama8b/rkv-published were all read (Amendments L-final, N.1, O, N.2).
+> This file is retained as the *procedure* to follow if a cell is ever re-run —
+> not as a list of live work.
+
+
 **Purpose.** When a queued run finishes, this file plus `make integrate UNIT=<u>`
 should be enough to land it without a fresh reasoning pass. `make integrate`
 gets the numbers in and prints what moved; this file says what the numbers
