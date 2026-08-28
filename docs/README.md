@@ -28,6 +28,7 @@ disk is ground truth — the markdown can lag.
 | [`REMOTE_SETUP.md`](operations/REMOTE_SETUP.md) | One-time remote host preparation. |
 | [`complete_setup.md`](operations/complete_setup.md) | End-to-end project bootstrap. |
 | [`INTEGRATION_CHECKLIST.md`](operations/INTEGRATION_CHECKLIST.md) | What each run (all landed — kept as procedure, not a live queue) touches and what to write when it lands — the pre-registered read per unit. |
+| [`PRE_RELEASE_SCRUB.md`](operations/PRE_RELEASE_SCRUB.md) | The one deliberate step to run if and when the repo is made public — author block, repo URL, `docs/strategy/`, `context.md`. **NOT run**; both remotes are private. |
 | [`FIGURES_PLAYBOOK.md`](operations/FIGURES_PLAYBOOK.md) | Figure method, conventions, and the open-defects list. |
 
 ## design/ — how it works and why
