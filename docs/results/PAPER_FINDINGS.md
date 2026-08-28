@@ -1030,6 +1030,17 @@ the onset re-basing and reproduces bit-identically.
   exact ties up. This rule is now enforced structurally rather than by discipline:
   `make_paper_figures.py` loads every constant from `paper_numbers.json` and formats it
   at render time, so a hand-rounded tie has nowhere left to enter.
+
+  **Scale exception (added 2026-08-30, do NOT "correct" it back).** The rule
+  fixes how a number is rounded, not that every quantity must be shown at three
+  decimals regardless of magnitude. The Amendment P.5 matched- and relaxed-arm
+  effects and their CI bounds are shown at **four** decimals in the paper,
+  because at three each point estimate lands on one of its own displayed
+  interval bounds (Random `-0.001` against an upper bound of `-0.001`;
+  StreamingLLM `-0.002` against a lower bound of `-0.002`), which makes a
+  correct null read as a malformed interval. The values are still `f"{v:.4f}"`
+  of the artifact float, so the anti-hand-rounding guarantee is unchanged; only
+  the width differs. This is the single quantity family where that applies.
 <!-- AUDIT:ARCHIVAL-BEGIN -->
   Historical instances caught under this rule, kept because they are how the rule was
   learned: H2O-style free 0.248 → 0.247 (99/400 = 0.2475) and SLM@2048 free 0.808 →

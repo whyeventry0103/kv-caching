@@ -435,20 +435,22 @@ the same traces. The instrument gate passed on all $800$ profiles (reinserted
 entries bitwise identical to what was stashed, maximum absolute difference
 $0.0$). Effects are the no-intervention arm minus the treated arm, so a
 \emph{positive} value would mean divergence reduced: budget-matched
-reinsertion gives $-0.001$ (CI $[-0.002, -0.001]$) for Random against a
-baseline divergence of $0.038$, and $-0.002$ (CI $[-0.002, -0.001]$) for
+reinsertion gives $-0.0013$ (CI $[-0.0019, -0.0007]$) for Random against a
+baseline divergence of $0.038$, and $-0.0015$ (CI $[-0.0022, -0.0009]$) for
 StreamingLLM against $0.044$. At roughly $3\%$ of the baseline the matched arm
 is \textbf{indistinguishable from no help}; we do not read it as a measured
 harm, and the relaxed arm, which is permitted to grow the cache, does no better
-($-0.001$ for both), so the null is not an artifact of holding the budget
-fixed.
+($-0.0014$ for both), so the null is not an artifact of holding the budget
+fixed. (These four quantities are shown to four decimals: at three, each
+estimate lands on one of its own displayed interval bounds, which would make a
+correct null read as a malformed interval.)
 
 The specificity control is where the information is. Re-inserting the same
 \emph{number} of entries drawn at random from the evicted pool --- with the
 same entries dropped to make room, so the arms differ only in \emph{which}
 entries return --- moves divergence by $-0.249$ (Random) and $-0.244$
-(StreamingLLM), five to six times the baseline. The cache is acutely sensitive
-to which entries occupy it, while restoring the specific entries a policy just
+(StreamingLLM), which is $6.49\times$ and $5.49\times$ their respective
+baselines. The cache is acutely sensitive to which entries occupy it, while restoring the specific entries a policy just
 evicted is close to neutral. This is a divergence-scale result and carries no
 accuracy claim: no flip-mass is implied and none is reported. Its scope is
 narrow and we state it rather than let it be inferred --- one trigger, a
@@ -459,7 +461,7 @@ for reinsertion in general.
 \textbf{AUC-TV does not predict the residual once budget is held fixed.} Across
 the seven cells with both quantities, the rank correlation between AUC-TV and
 the accuracy change unexplained by on-reference readout is $\rho = -0.857$ (CI
-$[-0.893, -0.643]$). Within budget $256$ alone it is $\rho = -0.200$ (CI
+$[-0.893, -0.643]$). Within budget $256$ ($3.8\%$ realized cache) alone it is $\rho = -0.200$ (CI
 $[-0.400, +0.800]$) over four cells. The pooled association is carried by the
 contrast between budgets, and does not survive conditioning on budget. With
 four and three cells respectively the within-budget tests are underpowered, so
@@ -472,7 +474,8 @@ intended to ask whether JSD or top-1 agreement localises onset earlier than TV.
 Under teacher forcing the compressed and full-cache distributions are identical
 until the first prune, so pre-onset TV is exactly $0.0$ and the crossing rule
 reduces to ``first non-zero step''. Their median crossings agree
-exactly, at $192$ steps after onset at budget $256$, and across the $400$
+exactly, at $192$ steps after onset at budget $256$ ($3.8\%$ realized cache),
+and across the $400$
 budget-$256$ profiles TV and JSD share a non-zero support on $382$ of them ---
 the $18$ exceptions differ somewhere in the trace but not in a way the crossing
 rule can see, since it reads only the first non-zero step.
@@ -601,9 +604,11 @@ on true prune steps and asserts the restricted profile still peaks at bucket
 zero, failing on the old re-basing and passing on the new; and a rotation
 constant across all $96$ traces is not what a judgement call produces. The two
 measured results this cell yields are reported together throughout, since
-neither is interpretable alone: within a prune cycle the divergence is locked to
-the eviction event, and across cycles the envelope rises with the worsening
-realized compression ratio while the ratio-matched arm's drift does not.
+neither is interpretable alone. Within a prune cycle the divergence is locked to
+the eviction event. Across cycles the envelope rises in the fixed-budget arm,
+where the realized compression ratio worsens monotonically, and does not in the
+ratio-matched arm. Both are measurements; this paragraph does not say what
+produces the rise.
 % =====================================================================
 \section{Conclusion}
 \label{sec:conclusion}

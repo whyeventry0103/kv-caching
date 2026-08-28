@@ -1199,6 +1199,24 @@ def build_catalogue() -> list[Entry]:
                     f"{_arm} arm effect CI bound ({_press})",
                 )
 
+    # Specificity-control magnitude, derived so the paper can state it without
+    # a verbal range. The earlier prose said "five to six times", which excludes
+    # Random's actual 6.49 -- a characterisation the number gate cannot catch
+    # because it was words, not a literal.
+    for _cell, _c in _p5["cells"].items():
+        _press = _cell.split("-")[0]
+        add(
+            f"p5.{_press}.random_over_baseline",
+            abs(_c["arms"]["random"]["effect_vs_no_intervention"])
+            / _c["baseline_mean_divergence"],
+            f"|{_p5rel} :: cells.{_cell}.arms.random.effect| / "
+            f"cells.{_cell}.baseline_mean_divergence",
+            f"random-reinsertion effect as a multiple of baseline "
+            f"divergence ({_press})",
+            kind="derived",
+            inputs=(f"p5.{_press}.random.effect", f"p5.{_press}.baseline_divergence"),
+        )
+
     # Task 3 (Amendment P.3): AUC-TV against the subtraction residual.
     _p3 = _load(P / "auc_resid_tv.json")
     _p3rel = (P / "auc_resid_tv.json").relative_to(PROJECT_ROOT)
