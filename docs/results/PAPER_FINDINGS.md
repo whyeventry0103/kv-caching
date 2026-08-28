@@ -179,7 +179,28 @@ Superseded values are listed at the top of the archival log below.
      audit skips this span deliberately. Do NOT "update" these entries -- several
      exist to show a wrong value beside its correction, which is the point. New
      results append a new dated subsection; corrections go in §4-CURRENT and in a
-     PREREGISTRATION amendment. The heading above must stay ABOVE this marker:
+     PREREGISTRATION amendment.
+
+     PATH NOTE (added 2026-08-29), so an archival citation stays mechanically
+     resolvable. Entries below cite nine artifacts as `results/diag/m4-*-
+     summary.json`. Those files were re-derived on 2026-07-27/29 under Amendment
+     K's population discipline -- each change measured against its OWN
+     population rather than the unrestricted 0.8825 bank -- and the corrected
+     versions live at `results/diag/amendment-k/<same name>.json`. That
+     amendment-k copy is CANONICAL: build_paper_numbers.py and
+     rederive_artifacts.py both read it, nothing reads the originals, and the
+     paper quotes only its values. The originals are retained, renamed
+     `<name>_PRE-AMENDMENT-K.json`. To resolve a citation below, append that
+     suffix; to get the number the paper uses, read the amendment-k copy.
+
+     The re-derivation was not cosmetic. For H2O at budget 2048 the same named
+     quantity changed SIGN: `readout_change` is +0.0155 in the pre-Amendment-K
+     file and -0.0051 in the canonical one. A bare filename resolving to two
+     files with opposite signs is exactly the ambiguity the rename removes; an
+     invariant test now keeps identity-bearing basenames unique under
+     results/diag/ (tests/test_paper_numbers_properties.py).
+
+     The heading above must stay ABOVE this marker:
      the 4-CURRENT gate ends the guarded span at the next heading, so a marker
      placed first would fall inside the section it is meant to sit outside. -->
 

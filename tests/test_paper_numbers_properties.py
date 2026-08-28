@@ -215,3 +215,53 @@ def test_the_real_catalogue_has_no_two_entries_sharing_an_exact_value_and_rule()
         f"{len(collisions)} exact-value collisions in the catalogue; if this "
         "grew, a new derived quantity is duplicating an existing one"
     )
+
+
+def test_identity_bearing_artifact_basenames_are_unique_under_results_diag():
+    """No two artifacts under results/diag/ may share an identity-bearing name.
+
+    Nine `m4-*-summary.json` files existed at BOTH results/diag/ and
+    results/diag/amendment-k/ with different values -- the top-level copies
+    measured every change against the unrestricted 0.8825 bank, the amendment-k
+    copies against each change's own population per Amendment K. The
+    divergence was not cosmetic: H2O-2048's `readout_change` was **+0.0155**
+    top-level against **-0.0051** canonical, opposite signs for the same named
+    quantity. build_paper_numbers.py and rederive_artifacts.py both read the
+    amendment-k copies, so the paper was always correct; but a bare filename
+    resolved to two different files, which is how a wrong number gets cited by
+    someone reading a citation rather than the loader.
+
+    ROLE names are exempt and that exemption is deliberate, not a workaround:
+    `summary.json`, `records.json` and `table.md` describe a file's ROLE inside
+    its own unit directory (`<unit>/summary.json`) and are never referenced by
+    bare basename -- the directory disambiguates. Identity names like
+    `m4-rkv-256-summary.json` name a specific artifact and ARE cited bare, so
+    they must resolve to exactly one file. Adding a fourth role name has to be
+    a conscious edit here, which is the point.
+    """
+    import collections
+
+    role_names = {"summary.json", "records.json", "table.md"}
+    diag = Path(__file__).resolve().parents[1] / "results" / "diag"
+    assert diag.is_dir(), f"missing {diag}"
+
+    by_base = collections.defaultdict(list)
+    for path in diag.rglob("*"):
+        if path.is_file():
+            by_base[path.name].append(path.relative_to(diag).as_posix())
+
+    collisions = {
+        name: sorted(paths)
+        for name, paths in by_base.items()
+        if len(paths) > 1 and name not in role_names
+    }
+    assert not collisions, (
+        "identity-bearing basenames must resolve to one file under "
+        f"results/diag/, found {len(collisions)}: "
+        + "; ".join(f"{n} -> {p}" for n, p in sorted(collisions.items()))
+    )
+
+    # A role name is only legitimate when each copy sits in its own directory.
+    for name in role_names:
+        dirs = [str(Path(p).parent) for p in by_base.get(name, [])]
+        assert len(dirs) == len(set(dirs)), f"{name} duplicated within one directory"
