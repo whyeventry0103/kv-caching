@@ -36,3 +36,4 @@ research_landscape.md
 *.egg-info/
 build/
 dist/
+scratch/
