@@ -416,6 +416,84 @@ Splitting the FC bank into two disjoint four-seed halves and running the full AD
 
 A second validity artifact gated the R-KV cells: our R-KV port reproduces the authors' retained-token sets \emph{exactly} (Jaccard $1.0$ at budgets $\{128, 256, 384, 512\}$ on synthetic tensors) --- a mechanism-level match, which is the test that catches a subtly wrong port. The pre-registered real-generation smoke then also passed (retained-set Jaccard $1.0000$ against the live press during decoding), and only after both gates did R-KV rows enter analysis (\cref{tab:decomp}).
 
+
+% =====================================================================
+\subsection{Follow-up probes: reinsertion, divergence--residual coupling, and onset localisation}
+\label{sec:followups}
+Four pre-registered follow-ups tested whether the divergence channel supports
+more than it has been asked to. Three returned nulls or a structural
+degeneracy, and one retired a claim of our own. We report them at the same
+length as the positive results, because a divergence measure that is
+\emph{not} load-bearing is part of what the reader needs in order to price the
+measure that is.
+
+\textbf{Reinserting evicted entries does not reduce divergence.} At budget
+$256$ ($3.8\%$ realized cache), we re-inserted the most recently evicted
+key/value entries at a fixed trigger and measured per-step TV against the
+full-cache trace over the next $200$ steps, against a no-intervention arm on
+the same traces. The instrument gate passed on all $800$ profiles (reinserted
+entries bitwise identical to what was stashed, maximum absolute difference
+$0.0$). Effects are the no-intervention arm minus the treated arm, so a
+\emph{positive} value would mean divergence reduced: budget-matched
+reinsertion gives $-0.001$ (CI $[-0.002, -0.001]$) for Random against a
+baseline divergence of $0.038$, and $-0.002$ (CI $[-0.002, -0.001]$) for
+StreamingLLM against $0.044$. At roughly $3\%$ of the baseline the matched arm
+is \textbf{indistinguishable from no help}; we do not read it as a measured
+harm, and the relaxed arm, which is permitted to grow the cache, does no better
+($-0.001$ for both), so the null is not an artifact of holding the budget
+fixed.
+
+The specificity control is where the information is. Re-inserting the same
+\emph{number} of entries drawn at random from the evicted pool --- with the
+same entries dropped to make room, so the arms differ only in \emph{which}
+entries return --- moves divergence by $-0.249$ (Random) and $-0.244$
+(StreamingLLM), five to six times the baseline. The cache is acutely sensitive
+to which entries occupy it, while restoring the specific entries a policy just
+evicted is close to neutral. This is a divergence-scale result and carries no
+accuracy claim: no flip-mass is implied and none is reported. Its scope is
+narrow and we state it rather than let it be inferred --- one trigger, a
+reinsertion fraction of $0.25$ of the budget, a $200$-step read window, two
+policies, one model, one benchmark. A null for that intervention is not a null
+for reinsertion in general.
+
+\textbf{AUC-TV does not predict the residual once budget is held fixed.} Across
+the seven cells with both quantities, the rank correlation between AUC-TV and
+the accuracy change unexplained by on-reference readout is $\rho = -0.857$ (CI
+$[-0.893, -0.643]$). Within budget $256$ alone it is $\rho = -0.200$ (CI
+$[-0.400, +0.800]$) over four cells. The pooled association is carried by the
+contrast between budgets, and does not survive conditioning on budget. With
+four and three cells respectively the within-budget tests are underpowered, so
+the honest statement is \textbf{not established at this $n$} --- not refuted.
+Two further limits travel with it: rank correlation is not proportionality, and
+the stronger claim --- linearity through the origin --- was never tested.
+
+\textbf{The onset-localisation comparison is structurally degenerate.} We had
+intended to ask whether JSD or top-1 agreement localises onset earlier than TV.
+Under teacher forcing the compressed and full-cache distributions are identical
+until the first prune, so pre-onset TV is exactly $0.0$ and the crossing rule
+reduces to ``first non-zero step''. Their median crossings agree
+exactly, at $192$ steps after onset at budget $256$, and across the $400$
+budget-$256$ profiles TV and JSD share a non-zero support on $382$ of them ---
+the $18$ exceptions differ somewhere in the trace but not in a way the crossing
+rule can see, since it reads only the first non-zero step.
+\textbf{No claim about JSD's onset sensitivity is available from this test in
+either direction}; reporting agreement here would be reporting an identity as a
+measurement. One genuine finding survives: rank displacement crosses at a
+median of $280$ to $451$ steps after onset against $192$ for TV and JSD, so it
+is \emph{coarser} at onset, not sharper. That is the opposite of what our own
+implementation notes asserted, which had reasoned from the mechanism --- an
+integer rank cannot move until a perturbation is large enough to reorder
+tokens --- rather than from data. The data corrected the note.
+
+\textbf{A phase-amplitude claim of ours is withdrawn.} On the published cell we
+had measured StreamingLLM's phase-amplitude excess over a shuffled-label sham
+at $0.038$ (CI $[0.001, 0.056]$), an interval excluding zero by $0.001$. On an
+independent sample the same quantity is $0.020$ (CI $[-0.021, 0.050]$), which
+does not exclude zero. We \textbf{withdraw} the claim rather than average the
+two. Averaging a borderline positive with a non-replication would launder the
+failure to replicate into a weak positive, and would report a number neither
+sample supports; a claim that does not survive an independent sample is not
+half-true.
 % =====================================================================
 \section{Threats to Validity}
 \label{sec:threats}
@@ -468,6 +546,64 @@ Reference population & change measured across mismatched populations & every est
 
 \emph{Control:} the two-FC negative control (\cref{sec:control}) bounds ADD's noise floor at $\approx 0.07$ with $0\%$ false positives, and the exactly-zero pre-eviction TV in \cref{fig:tvprofile} certifies the replay harness. The generation path itself is deterministic under our seeding: an independent re-run of the entire budget-256 grid (adding token-ID sidecars) reproduced all 800 rows \emph{exactly} --- identical per-row correctness, truncation, and generated token counts. Truncated generations are never excluded (scored incorrect, in all denominators), removing a common silent selection effect.
 
+
+\textbf{Two instruments were invalidated wholesale, and neither was patched.}
+Both follow-up cells that required new instrumentation failed their first
+attempt through a defect in our own code, and in both cases the response was to
+discard the cell rather than repair the data. In the restoration cell, the
+routine choosing which entries to evict intersected two different index spaces
+--- stash indices against live-cache indices --- which barred the budget-matched
+arm from evicting the most recent quarter of the cache while the random control
+evicted it at the uniform rate. The arms therefore differed in two ways at once
+and the contrast was uninterpretable regardless of how the numbers fell. In the
+ratio-matched control, the press computed its target from the compressed cache
+rather than from the logical context, a feedback loop that pinned $100\%$ of
+$377{,}104$ compression events to the minimum-budget floor; that cell held a
+constant small absolute budget, which is the precise property it existed to
+remove. Both were re-run under new run names. The invalid profiles are retained
+under their original names rather than deleted, because a disclosure whose
+underlying artifact has been removed cannot be checked.
+
+\textbf{A diagnosis of ours was wrong, and stays on the record beside the
+correction that disproved it.} When the restoration cell was invalidated we
+attributed the large random-arm effect to the index-space defect. The corrected
+re-run reproduces that aggregate to four decimal places while \emph{every}
+per-trace profile differs, which shows the fix took effect and that the eviction
+confound was not what produced the effect. The invalidation was still correct
+--- arms differing in two ways are uninterpretable whatever the numbers --- but
+our stated mechanism for it was not, and we report the wrong diagnosis rather
+than quietly replacing it with the right one.
+
+%% TODO(M.3-RESTATEMENT): this paragraph cites BOTH 2026-08 findings together
+%% (the ratio-matched control and the within-cycle phase result) because neither
+%% may travel alone. It confines itself to what was MEASURED and deliberately
+%% attributes the envelope's rise to nothing -- that attribution is the open
+%% clause. Phase 4 must visit this site.
+\textbf{A windowing defect moved a verdict in our favour, so we publish both
+readings.} The phase re-analysis restricted each trace to the window in which
+the ratio-matched press was above its budget floor --- the same window as the
+drift comparison, since the two are only comparable if the window is the same
+code. The first implementation re-based the onset in a way that did not preserve
+the phase congruence, rotating every phase index by a constant $63$ buckets
+across all $96$ Random traces. Under the rotation Random's phase-amplitude
+excess read $0.248$ (CI $[0.182, 0.264]$) with a peak at phase $1$, and
+StreamingLLM $0.073$ (CI $[0.026, 0.094]$) peaking at phase $2$. Corrected, the
+same quantities are $0.252$ (CI $[0.184, 0.271]$) peaking at phase $0$ --- the
+prune step --- and $0.076$ (CI $[0.031, 0.099]$) peaking at phase $1$. The
+excesses barely move; what moves is which bucket counts as the prune step, and
+that is precisely what the pre-registered branch turned on. The defect was
+caught before the branch was applied, but it was caught because the anomalous
+result prompted the check, and the correction favoured us --- so we state the
+timing and print both readings rather than only the one we kept. Three things
+make the fix independent of the outcome: the congruence failure is provable from
+the definition without reference to any result; a regression test places spikes
+on true prune steps and asserts the restricted profile still peaks at bucket
+zero, failing on the old re-basing and passing on the new; and a rotation
+constant across all $96$ traces is not what a judgement call produces. The two
+measured results this cell yields are reported together throughout, since
+neither is interpretable alone: within a prune cycle the divergence is locked to
+the eviction event, and across cycles the envelope rises with the worsening
+realized compression ratio while the ratio-matched arm's drift does not.
 % =====================================================================
 \section{Conclusion}
 \label{sec:conclusion}

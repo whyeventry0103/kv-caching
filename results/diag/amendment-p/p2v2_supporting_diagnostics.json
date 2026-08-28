@@ -1,0 +1,36 @@
+{
+  "_provenance": {
+    "amendment": "P.2-v2 / P.4 supporting diagnostics",
+    "generated": "2026-08-30",
+    "purpose": "Two measurements the paper cites that had no artifact: the constant phase rotation introduced by the pre-fix onset re-basing, and the extent to which TV and JSD share a non-zero support. Re-derived from the stored profiles on 2026-08-30 rather than transcribed from session notes."
+  },
+  "phase_rotation": {
+    "random": {
+      "constant_shift": 63,
+      "n_traces": 96,
+      "profile_length_max": 16384,
+      "profile_length_median": 2795,
+      "rotation_shifts": {
+        "63": 96
+      },
+      "shift_is_constant": true
+    },
+    "streamingllm": {
+      "constant_shift": 63,
+      "n_traces": 96,
+      "profile_length_max": 16384,
+      "profile_length_median": 2795,
+      "rotation_shifts": {
+        "63": 96
+      },
+      "shift_is_constant": true
+    }
+  },
+  "tv_jsd_support": {
+    "profile_length_max": 16384,
+    "profile_length_median": 2718,
+    "profiles_checked": 400,
+    "profiles_where_tv_jsd_nonzero_patterns_differ": 18,
+    "total_steps_compared": 1737384
+  }
+}

@@ -1162,6 +1162,174 @@ def build_catalogue() -> list[Entry]:
         inputs=("hottcap.fc.accuracy", "hott.fullcache_math500"),
     )
 
+    # ---- Meeting #2 / Amendment P-series: the 2026-08 cells ---------------
+    # These artifacts were read after the original campaign closed. Cataloguing
+    # them from disk is what lets the paper cite them at all: audit --strict
+    # refuses any result-precision literal it cannot trace back to a file, and
+    # before this block every P-series number in the .tex would have been
+    # unsourced. Two coincidental value collisions in the existing catalogue
+    # (-0.0013 against an unrelated flip-mass, 0.0384 against a compression
+    # ratio) are exactly why "sourced" is checked per key, not per value.
+    P = DIAG / "amendment-p"
+
+    # Task 2 (Amendment P.5): restoration arms, corrected cell.
+    _p5 = _load(P / "restoration_diss256_v2.json")
+    _p5rel = (P / "restoration_diss256_v2.json").relative_to(PROJECT_ROOT)
+    for _cell, _c in _p5["cells"].items():
+        _press = _cell.split("-")[0]
+        add(
+            f"p5.{_press}.baseline_divergence",
+            _c["baseline_mean_divergence"],
+            f"{_p5rel} :: cells.{_cell}.baseline_mean_divergence",
+            f"no-intervention mean per-step TV over the read window ({_press})",
+        )
+        for _arm, _v in _c["arms"].items():
+            add(
+                f"p5.{_press}.{_arm}.effect",
+                _v["effect_vs_no_intervention"],
+                f"{_p5rel} :: cells.{_cell}.arms.{_arm}.effect_vs_no_intervention",
+                f"{_arm} arm minus no-intervention over the read window ({_press}); "
+                "positive would mean divergence reduced",
+            )
+            for _i, _b in enumerate(_v["effect_ci95"]):
+                add(
+                    f"p5.{_press}.{_arm}.ci{'lo' if _i == 0 else 'hi'}",
+                    _b,
+                    f"{_p5rel} :: cells.{_cell}.arms.{_arm}.effect_ci95[{_i}]",
+                    f"{_arm} arm effect CI bound ({_press})",
+                )
+
+    # Task 3 (Amendment P.3): AUC-TV against the subtraction residual.
+    _p3 = _load(P / "auc_resid_tv.json")
+    _p3rel = (P / "auc_resid_tv.json").relative_to(PROJECT_ROOT)
+    add(
+        "p3.pooled.rho",
+        _p3["pooled"]["spearman_rho"],
+        f"{_p3rel} :: pooled.spearman_rho",
+        "Spearman rank correlation, AUC-TV vs residual, pooled across budgets",
+    )
+    for _i, _b in enumerate(_p3["pooled"]["rho_ci95"]):
+        add(
+            f"p3.pooled.ci{'lo' if _i == 0 else 'hi'}",
+            _b,
+            f"{_p3rel} :: pooled.rho_ci95[{_i}]",
+            "pooled rank-correlation CI bound",
+        )
+    for _bud, _w in _p3["within_budget"].items():
+        add(
+            f"p3.b{_bud}.rho",
+            _w["spearman_rho"],
+            f"{_p3rel} :: within_budget.{_bud}.spearman_rho",
+            f"rank correlation within budget {_bud}",
+        )
+        for _i, _b in enumerate(_w["rho_ci95"]):
+            add(
+                f"p3.b{_bud}.ci{'lo' if _i == 0 else 'hi'}",
+                _b,
+                f"{_p3rel} :: within_budget.{_bud}.rho_ci95[{_i}]",
+                f"within-budget-{_bud} rank-correlation CI bound",
+            )
+
+    # Task 1 / Amendment P.2: phase-amplitude excess over the shuffled sham.
+    for _tag, _relpath, _presses in (
+        ("prior", CLASSB / "shape" / "diss256.json", ("streamingllm",)),
+        ("ext", P / "shape_ext_b256.json", ("streamingllm",)),
+        ("restricted", P / "shape_m3v2_RESTRICTED.json", ("random", "streamingllm")),
+        (
+            "misaligned",
+            P / "shape_m3v2_RESTRICTED_INVALID_phase-rotation.json",
+            ("random", "streamingllm"),
+        ),
+    ):
+        _d = _load(_relpath)
+        _r = _relpath.relative_to(PROJECT_ROOT)
+        for _press in _presses:
+            _s = _d["per_policy"][_press]
+            add(
+                f"phase.{_tag}.{_press}.excess",
+                _s["phase_excess"]["excess"],
+                f"{_r} :: per_policy.{_press}.phase_excess.excess",
+                f"phase-amplitude excess over sham ({_press}, {_tag} window)",
+            )
+            for _i, _b in enumerate(_s["phase_excess"]["excess_ci95"]):
+                add(
+                    f"phase.{_tag}.{_press}.ci{'lo' if _i == 0 else 'hi'}",
+                    _b,
+                    f"{_r} :: per_policy.{_press}.phase_excess.excess_ci95[{_i}]",
+                    f"phase-excess CI bound ({_press}, {_tag} window)",
+                )
+
+    # Task 4 onset localisation, and the two supporting diagnostics that had no
+    # artifact until they were re-derived from the stored profiles on
+    # 2026-08-30. Cataloguing them is what lets the paper state them at all.
+    _o = _load(P / "onset_ext.json")
+    _orel = (P / "onset_ext.json").relative_to(PROJECT_ROOT)
+    _b256 = {k: v for k, v in _o["per_cell"].items() if k.endswith("-256")}
+    add(
+        "p4.crossing_median_tv_jsd",
+        _b256["random-256"]["tv"]["median_steps_after_onset"],
+        f"{_orel} :: per_cell.random-256.tv.median_steps_after_onset",
+        "median first-crossing, TV and JSD, budget 256 (identical by construction)",
+    )
+    _rd = [c["rank_displacement"]["median_steps_after_onset"] for c in _b256.values()]
+    add(
+        "p4.rank_displacement_median_min",
+        min(_rd),
+        f"{_orel} :: min over per_cell.*-256.rank_displacement",
+        "earliest rank-displacement median crossing across budget-256 cells",
+    )
+    add(
+        "p4.rank_displacement_median_max",
+        max(_rd),
+        f"{_orel} :: max over per_cell.*-256.rank_displacement",
+        "latest rank-displacement median crossing across budget-256 cells",
+    )
+
+    _dg = _load(P / "p2v2_supporting_diagnostics.json")
+    _dgrel = (P / "p2v2_supporting_diagnostics.json").relative_to(PROJECT_ROOT)
+    add(
+        "p2v2.rotation_constant",
+        _dg["phase_rotation"]["random"]["constant_shift"],
+        f"{_dgrel} :: phase_rotation.random.constant_shift",
+        "phase-bucket rotation introduced by the pre-fix onset re-basing",
+    )
+    add(
+        "p2v2.rotation_n_traces",
+        _dg["phase_rotation"]["random"]["n_traces"],
+        f"{_dgrel} :: phase_rotation.random.n_traces",
+        "Random traces over which the rotation was constant",
+    )
+    add(
+        "p4.tvjsd_profiles_checked",
+        _dg["tv_jsd_support"]["profiles_checked"],
+        f"{_dgrel} :: tv_jsd_support.profiles_checked",
+        "budget-256 profiles compared for shared TV/JSD non-zero support",
+    )
+    add(
+        "p4.tvjsd_shared_support",
+        _dg["tv_jsd_support"]["profiles_checked"]
+        - _dg["tv_jsd_support"]["profiles_where_tv_jsd_nonzero_patterns_differ"],
+        f"{_dgrel} :: profiles_checked - profiles_where_..._differ",
+        "profiles on which TV and JSD share a non-zero support",
+        kind="derived",
+        inputs=("p4.tvjsd_profiles_checked",),
+    )
+    add(
+        "p4.tvjsd_differing",
+        _dg["tv_jsd_support"]["profiles_where_tv_jsd_nonzero_patterns_differ"],
+        f"{_dgrel} :: tv_jsd_support.profiles_where_tv_jsd_nonzero_patterns_differ",
+        "profiles whose TV and JSD non-zero supports differ somewhere",
+    )
+
+    _fc = _load(P / "m3_INVALID_floor_collapse.json")
+    add(
+        "m3v1.compression_events",
+        _fc["n_compression_events"],
+        f"{(P / 'm3_INVALID_floor_collapse.json').relative_to(PROJECT_ROOT)} "
+        ":: n_compression_events",
+        "compression events in the invalidated M.3 v1 cell, all pinned to the floor",
+    )
+
     return entries
 
 
