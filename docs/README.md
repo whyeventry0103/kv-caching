@@ -46,6 +46,7 @@ disk is ground truth — the markdown can lag.
 | File | |
 |---|---|
 | [`context.md`](project/context.md) | Dated ★-bullets, newest first: what landed, exact numbers, what is in flight, the next action. Written so a reader with zero prior context can resume. |
+| [`MECHANISM_CLAUSE_CANDIDATES.md`](project/MECHANISM_CLAUSE_CANDIDATES.md) | Three candidate wordings for the thesis mechanism clause and the §4.4 title, with propagation cost and the strongest attack on each. **Decision pending**; nothing is in the paper. |
 | [`scoop-watch.md`](project/scoop-watch.md) | Related-work watch list. |
 
 ## strategy/ — internal
