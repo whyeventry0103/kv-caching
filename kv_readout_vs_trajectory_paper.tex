@@ -348,22 +348,32 @@ Later steps ($>$50 after) & $\mathbf{0.0884}$ \\
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.72\linewidth]{figures/fig4_tvprofile.pdf}
-%% RESOLVED(M.3-RESTATEMENT) 2026-09-08, site 4 of 7 -- PARTIAL, and the
-%% remaining half is a PLOTTING task, not a wording one. The x-axis is
-%% "decoding step relative to first eviction"; at a fixed budget the realized
-%% compression ratio is a deterministic function of that axis (ratio =
-%% budget / context, context grows with the step), so a single rising curve
-%% against a horizon axis asserts the horizon reading visually no matter what
-%% this caption says. The caption below therefore DISCLAIMS what the picture
-%% shows, which is the correct interim state but not the end state.
-%% FIX: overlay the ratio-matched arm from replay-ratio-matched-m3-v2 on these
-%% same axes (one curve rises, the other flattens/reverses), via
-%% scripts/make_paper_figures.py --profiles-dir. Blocked 2026-09-08: neither
-%% replay-ext-diss256 nor replay-ratio-matched-m3-v2 exists locally (only
-%% pilots/smokes are in results/runs/), and the profiles live on the remote,
-%% which is refusing connections. Do this when the remote is back; the data
-%% already exists and no GPU work is needed.
-\caption{Onset-aligned mean per-step TV over 800 replay profiles at fixed budget $256$: exactly zero before the first eviction --- a self-control on the replay harness --- near-zero immediately after, then a rising staircase whose steps align with eviction events (every 64 decoding steps). The curve is shown to $+400$ steps of onset; the later-steps windowed mean of $0.0884$ (\cref{tab:tv}, per-trace estimator; step-pooled $0.118$) covers the full horizon. \textbf{The rise is not evidence of a horizon mechanism, and this axis cannot separate one.} At a fixed budget the realized compression ratio is a deterministic function of the step, so horizon and dose are confounded by construction here; holding the ratio fixed instead removes the rise and reverses it (\cref{sec:threats}). What the profile licenses is the localization --- where the divergence is small and where it is large --- not an account of what makes it grow.}
+%% RESOLVED(M.3-RESTATEMENT) 2026-09-08, site 4 of 7 -- now FULLY resolved,
+%% and the resolution was not the one that was planned. The plan was to overlay
+%% the ratio-matched arm on fig4's own axes. Two findings killed that plan and
+%% replaced it with something better:
+%%
+%%  (a) The committed fig4 is NOT the onset-aligned curve. It is the three-window
+%%      SUMMARY bar chart (before / first-50 / later), because the figure script
+%%      only draws the curve when --profiles-dir is given and the profiles live
+%%      on the remote. The caption here previously described "a rising staircase"
+%%      and "the curve is shown to +400 steps of onset" -- a curve the figure has
+%%      never shown. That mismatch predates the M.3 restatement and is fixed now.
+%%      The bar chart has no horizon axis, so the "figure asserts the horizon
+%%      reading visually" problem does not apply to what the paper actually
+%%      prints; it applied to the DATA-mode rendering nobody had looked at.
+%%
+%%  (b) Overlaying the two arms on shared TV axes would have been MISLEADING.
+%%      Measured 2026-09-08 on the paired traces: over the retained window the
+%%      ratio-matched arm sits ~100x above the fixed arm in absolute TV (0.197 vs
+%%      0.0036 in the first-50 window), because its floor is min_budget 32
+%%      against a budget of 256. M.3's verdict is a DRIFT statement within each
+%%      arm, never a level comparison between them, so a shared-axis overlay
+%%      would invite a level reading nothing in this project licenses.
+%%
+%% What replaced it: fig:ratiomatched, the drift-normalized paired control on
+%% M.3's own above-floor window. See its own comment block at that figure.
+\caption{Mean per-step TV between full-cache and compressed teacher-forced replay over 800 profiles at fixed budget $256$, in three windows relative to the first eviction (\cref{tab:tv}; per-trace estimator, each trace counted once). The pre-eviction bar is exactly $0.0000$ and is a \emph{self-control}: under teacher forcing both models consume identical token IDs until the first prune, so any non-zero value here would indicate a defect in the replay harness rather than an effect. The contrast the paper rests on is the remaining two bars --- $0.0018$ per step over the 50 steps in which the eviction happens, against $0.0884$ later --- which is why readout-shaped protocols, sampling at answer time, register so little of the loss. \textbf{These are window means, not a growth curve, and no horizon mechanism is claimed from them}: at a fixed budget the realized compression ratio worsens as context accumulates, so horizon and dose are confounded by construction, and holding the ratio fixed removes the growth entirely (\cref{fig:ratiomatched}).}
 \label{fig:tvprofile}
 \end{figure}
 
@@ -616,6 +626,22 @@ the eviction event. Across cycles the envelope rises in the fixed-budget arm,
 where the realized compression ratio worsens monotonically, and does not in the
 ratio-matched arm. Both are measurements; this paragraph does not say what
 produces the rise.
+
+%% ADDED 2026-09-08 with the M.3 restatement. This is the figure the mechanism
+%% clause work concluded the paper needed, and it replaces the "overlay the
+%% ratio-matched arm onto fig4" plan -- see the site-4 comment at fig:tvprofile
+%% for why that plan was rejected (the two arms differ ~100x in LEVEL over this
+%% window, and M.3's claim is about drift WITHIN each arm, not level between
+%% them). Data: results/diag/amendment-p/m3_drift_curves.json, emitted by
+%% report_m3_verdict.py --curves-out, which reuses the verdict's own pairing and
+%% windowing code so the figure and the number cannot drift apart. That run also
+%% re-derived m3_verdict.json byte-identically (sha256 match) from the raw rows.
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.95\linewidth]{figures/fig7_ratiomatched.pdf}
+\caption{The ratio-matched control, on the paired above-floor window the M.3 verdict uses ($92$ paired traces per policy; $8$ profiles never left the budget floor and $8$ windows fell under $200$ steps, all excluded and counted). Each trace is divided by its \emph{own} first-quarter mean before averaging, so the plotted quantity is the drift the verdict reports: above $1.0$ means divergence rose across the window, below means it fell. At a fixed budget (solid) it rises --- drift $1.201$ $[1.061, 1.339]$ for Random and $1.299$ $[1.100, 1.520]$ for StreamingLLM. Holding the realized compression ratio fixed instead (dashed) it does not merely flatten but reverses --- $0.662$ $[0.614, 0.709]$ and $0.739$ $[0.680, 0.805]$. \textbf{Levels are deliberately not comparable between the two arms} and are normalized away here: over this window the ratio-matched press has been compressing far harder (its floor is $32$ against a budget of $256$), so only the within-arm drift is licensed. Holding the ratio fixed also \emph{requires} letting the absolute cache grow ($32 \to 626$ tokens observed), so this does not show that horizon is irrelevant at a fixed cache size --- that experiment was not run.}
+\label{fig:ratiomatched}
+\end{figure}
 % =====================================================================
 \section{Conclusion}
 \label{sec:conclusion}

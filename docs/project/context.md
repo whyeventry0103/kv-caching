@@ -24,6 +24,57 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-09-08 (later) — REMOTE BACK. parity OK for the first time this
+  session, the M.3 figure BUILT, and fig4's caption found to describe a figure
+  the paper has never printed. Paper still 29 pages. GPUs idle, nothing queued.**
+
+  **(1) Remote restored; `make parity` OK.** Uptime 66 days, so it never
+  rebooted — sshd or the network path was down, not the box. Synced (dry-run
+  reviewed first): commit, source tree, and all **98** result artifacts agree.
+  All five gates now green: lint, 318 tests, dryrun, audit --strict, parity.
+
+  **(2) fig4's caption described a curve the figure does not show — pre-existing,
+  now fixed.** The committed `fig4_tvprofile` is the three-window SUMMARY bar
+  chart (0.0000 / 0.0018 / 0.0884); the curve only renders with
+  `--profiles-dir`, which needs the remote. The caption nonetheless said
+  "compounding staircase ... the curve is shown to +400 steps of onset."
+  Verified from the PNG and from text extracted out of the embedded PDF. This
+  also retires the premise behind candidate C: the "figure asserts the horizon
+  reading via its x-axis" problem applied to a DATA-mode rendering nobody had
+  looked at, never to the printed paper.
+
+  **(3) The planned overlay was REJECTED on measurement.** The two arms are
+  perfectly paired (200 profiles, all 200 (press,seed,pid) keys shared) but sit
+  ~2 orders of magnitude apart in level — first-50 mean TV 0.0036 fixed vs
+  0.1972 matched; at offset 0, 0.0008 vs 0.3289 — because the matched press
+  spends the early trace pinned at min_budget 32 against 256. M.3's verdict is
+  drift WITHIN each arm, never level BETWEEN them, so a shared-axis overlay
+  would have invited the exact unlicensed reading the figure exists to prevent.
+
+  **(4) Built instead: `fig:ratiomatched` (fig7).** Paired above-floor window,
+  each trace normalized by its own first quarter, so 1.0 = no drift and the
+  plotted quantity IS the verdict: fixed rises (1.201 / 1.299), matched reverses
+  (0.662 / 0.739). Artifact `results/diag/amendment-p/m3_drift_curves.json` from
+  `report_m3_verdict.py --curves-out` — additive, and `m3_verdict.json` came out
+  **byte-identical** (sha256) with the flag on, which doubles as a re-derivation
+  check against the raw rows.
+
+  **(5) 13 numbers went from uncited to pinned.** Printing the drift numbers made
+  `audit --strict` fail with 11 unsourced literals (the gate working). Both
+  drift means, all 8 CI bounds, the paired-trace count and max_target 626 are
+  now catalogued from artifacts and pinned in paper_claims.json (102 → 115).
+
+  **(6) The candidate-C reopening condition is CLOSED, not pending.** C needed a
+  figure showing BOTH levels on shared axes; fig7 shows one (the across-cycle
+  envelope + control). The within-cycle phase result is still unplotted, so
+  **candidate A stands.** Reopen only if someone plots the phase profile
+  alongside the envelope. Full reasoning: MECHANISM_CLAUSE_CANDIDATES.md
+  ("Revisit of the C condition"), PAPER_FINDINGS §4y.
+
+  **NEXT:** (a) venue conversion, then the page budget — in that order, see the
+  earlier bullet's item (6); (b) 8 commits unpushed, push authorization NOT
+  granted.
+
   **★★★★★ 2026-09-08 — MECHANISM CLAUSE DECIDED AND PROPAGATED. Candidate A,
   sharpened. Zero TODO(M.3-RESTATEMENT) markers left in the .tex. Paper still 29
   pages. No runs pending; GPUs idle; remote UNREACHABLE all session.**

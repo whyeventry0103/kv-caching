@@ -828,6 +828,67 @@ def fig4_tvprofile(out_dir: Path, profiles_dir: Path | None):
     _save(fig, out_dir, "fig4_tvprofile")
 
 
+# ---------------------------------------------------------------- Figure 7
+def fig7_ratiomatched(out_dir: Path, curves: dict | None):
+    """The ratio-matched control, on axes that cannot assert the horizon reading.
+
+    fig4 plots TV against "decoding step relative to first eviction". At a fixed
+    budget the realized compression ratio is a deterministic function of that
+    axis, so a single rising curve there asserts a horizon reading visually
+    whatever the caption says -- the figure plots the confound as its x-axis.
+    This figure is the control, on the paired above-floor window M.3 actually
+    used, and it is DRIFT-relative on purpose: each trace is divided by its own
+    first-quarter mean before averaging, so 1.0 means "no change across the
+    window" and the plotted quantity is the one the verdict reports.
+
+    Levels are deliberately NOT comparable between the two arms -- over this
+    window the ratio-matched press has been compressing far harder than the
+    fixed-budget press -- and normalising is what keeps a reader from making
+    that comparison by eye.
+    """
+    if not curves:
+        print("Figure 7 [SKIPPED: no curve artifact]")
+        return
+    print("Figure 7 [DATA]")
+    presses = [p for p in ("random", "streamingllm") if p in curves["per_press"]]
+    label = {"random": "Random", "streamingllm": "StreamingLLM"}
+    fig, axes = plt.subplots(1, len(presses), figsize=(6.6, 2.7), sharey=True)
+    if len(presses) == 1:
+        axes = [axes]
+    for ax, press in zip(axes, presses, strict=True):
+        entry = curves["per_press"][press]
+        hue = MC[label[press]]
+        n = curves["n_bins"]
+        xs = [(b + 0.5) / n for b in range(n)]
+        ax.axhline(1.0, color=INK2, ls=(0, (3, 3)), lw=0.9)
+        ax.plot(
+            xs,
+            entry["fixed"]["mean_curve"],
+            color=hue,
+            lw=1.6,
+            label="fixed budget 256",
+        )
+        ax.plot(
+            xs,
+            entry["matched"]["mean_curve"],
+            color=hue,
+            lw=1.6,
+            ls=(0, (5, 2)),
+            alpha=0.75,
+            label="ratio-matched",
+        )
+        ax.set_title(
+            f"{label[press]}  (n={entry['fixed']['n_traces']} paired traces)",
+            fontsize=8.5,
+        )
+        ax.set_xlabel("position in retained above-floor window")
+        _ygrid(ax)
+    axes[0].set_ylabel("per-step TV\n(relative to own first quarter)")
+    axes[0].legend(frameon=False, fontsize=7.5, loc="upper left")
+    fig.tight_layout()
+    _save(fig, out_dir, "fig7_ratiomatched")
+
+
 # ---------------------------------------------------------------- Figure 5
 def fig5_twofc(out_dir: Path, twofc_report: dict | None):
     vals = _twofc_values(twofc_report) if twofc_report else None
@@ -1038,6 +1099,11 @@ def main():
         help="one or more report_m4 summary.json files (Fig 2; cells are merged)",
     )
     ap.add_argument("--profiles-dir", default=None, help="replay profiles (Fig 4)")
+    ap.add_argument(
+        "--m3-curves",
+        default="results/diag/amendment-p/m3_drift_curves.json",
+        help="M.3 drift-normalized curve artifact (Fig 7)",
+    )
     ap.add_argument("--twofc-report", default=None, help="two-FC report json (Fig 5)")
     ap.add_argument(
         "--print-windows",
@@ -1062,6 +1128,7 @@ def main():
     fig3_add(out)
     fig4_tvprofile(out, Path(args.profiles_dir) if args.profiles_dir else None)
     fig5_twofc(out, _load_json(args.twofc_report))
+    fig7_ratiomatched(out, _load_json(args.m3_curves))
     print(f"\nAll figures written to {out}/")
 
 

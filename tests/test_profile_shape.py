@@ -1,5 +1,6 @@
 """Hand-constructed checks for the profile shape statistics (Amendment P.2)."""
 
+import statistics
 import sys as _sys
 from pathlib import Path as _Path
 
@@ -262,3 +263,34 @@ def test_restriction_preserves_phase_alignment_to_the_prune_step(floor_exit):
         f"trim at {floor_exit} rotated the phase profile: peak={peak}, "
         f"expected 0 (the prune step)"
     )
+
+
+def test_drift_normalized_curve_hand_computed():
+    """8 values, 4 bins: each bin is a pair-mean divided by the first-quarter mean."""
+    from kvcache.metrics.profile_shape import drift_normalized_curve
+
+    series = [1.0, 3.0, 4.0, 4.0, 6.0, 6.0, 8.0, 8.0]
+    # first quarter = series[:2] = [1,3] -> base 2.0
+    # bins of 2: [1,3]=2, [4,4]=4, [6,6]=6, [8,8]=8 -> /2 -> 1,2,3,4
+    curve = drift_normalized_curve(series, n_bins=4)
+    assert curve == pytest.approx([1.0, 2.0, 3.0, 4.0])
+
+
+def test_drift_normalized_curve_final_bin_matches_drift_ratio():
+    """With n_bins=4 the last bin IS the drift ratio, which is the claim plotted."""
+    from kvcache.metrics.profile_shape import drift_normalized_curve
+
+    series = [2.0, 2.0, 5.0, 5.0, 5.0, 5.0, 3.0, 1.0]
+    q = len(series) // 4
+    expected = statistics.fmean(series[-q:]) / statistics.fmean(series[:q])
+    curve = drift_normalized_curve(series, n_bins=4)
+    assert curve is not None
+    assert curve[-1] == pytest.approx(expected)
+
+
+def test_drift_normalized_curve_degenerate_returns_none():
+    from kvcache.metrics.profile_shape import drift_normalized_curve
+
+    assert drift_normalized_curve([], n_bins=4) is None
+    assert drift_normalized_curve([1.0, 2.0], n_bins=4) is None  # q < 1
+    assert drift_normalized_curve([0.0, 0.0, 0.0, 0.0], n_bins=2) is None  # base <= 0

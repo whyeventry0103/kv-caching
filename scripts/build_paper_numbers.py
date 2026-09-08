@@ -1277,6 +1277,45 @@ def build_catalogue() -> list[Entry]:
                     f"phase-excess CI bound ({_press}, {_tag} window)",
                 )
 
+    # M.3 drift, both arms. Uncatalogued until 2026-09-08 because the paper
+    # stated the verdict in words; fig:ratiomatched now prints the numbers, and
+    # a printed number must be sourced.
+    _m3 = _load(P / "m3_verdict.json")
+    _m3rel = (P / "m3_verdict.json").relative_to(PROJECT_ROOT)
+    for _press in ("random", "streamingllm"):
+        _c = _m3["per_press"][_press]
+        for _arm in ("fixed", "matched"):
+            _stat = _c[f"drift_{_arm}"]
+            add(
+                f"m3.{_press}.{_arm}.drift",
+                _stat["mean"],
+                f"{_m3rel} :: per_press.{_press}.drift_{_arm}.mean",
+                f"drift (last-quarter/first-quarter mean), {_arm} arm ({_press})",
+            )
+            for _i, _b in enumerate(_stat["ci95"]):
+                add(
+                    f"m3.{_press}.{_arm}.ci{'lo' if _i == 0 else 'hi'}",
+                    _b,
+                    f"{_m3rel} :: per_press.{_press}.drift_{_arm}.ci95[{_i}]",
+                    f"drift CI bound, {_arm} arm ({_press})",
+                )
+    _m3cov = _load(P / "m3v2_coverage.json")
+    _m3covrel = (P / "m3v2_coverage.json").relative_to(PROJECT_ROOT)
+    add(
+        "m3.max_target",
+        _m3cov["max_target"],
+        f"{_m3covrel} :: max_target",
+        "largest per-layer cache target the ratio-matched press reached",
+    )
+    _m3c = _load(P / "m3_drift_curves.json")
+    _m3crel = (P / "m3_drift_curves.json").relative_to(PROJECT_ROOT)
+    add(
+        "m3.paired_traces_per_press",
+        _m3c["per_press"]["random"]["fixed"]["n_traces"],
+        f"{_m3crel} :: per_press.random.fixed.n_traces",
+        "paired traces per policy on the M.3 above-floor window",
+    )
+
     # Task 4 onset localisation, and the two supporting diagnostics that had no
     # artifact until they were re-derived from the stored profiles on
     # 2026-08-30. Cataloguing them is what lets the paper state them at all.

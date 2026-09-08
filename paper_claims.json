@@ -526,6 +526,71 @@
       "context": "($\\accfc^{\\,\\mathrm{rev}} = 0.919$ / $0.887$ / $0.897$ / $0.913$",
       "literal": "0.913",
       "key": "rkv256.rkv.reverse_ref"
+    },
+    {
+      "context": "drift $1.201$",
+      "literal": "1.201",
+      "key": "m3.random.fixed.drift"
+    },
+    {
+      "context": "$1.201$ $[1.061, 1.339]$ for Random",
+      "literal": "1.061",
+      "key": "m3.random.fixed.cilo"
+    },
+    {
+      "context": "$[1.061, 1.339]$ for Random",
+      "literal": "1.339",
+      "key": "m3.random.fixed.cihi"
+    },
+    {
+      "context": "and $1.299$ $[1.100, 1.520]$ for StreamingLLM",
+      "literal": "1.299",
+      "key": "m3.streamingllm.fixed.drift"
+    },
+    {
+      "context": "$1.299$ $[1.100, 1.520]$ for StreamingLLM",
+      "literal": "1.100",
+      "key": "m3.streamingllm.fixed.cilo"
+    },
+    {
+      "context": "$[1.100, 1.520]$ for StreamingLLM",
+      "literal": "1.520",
+      "key": "m3.streamingllm.fixed.cihi"
+    },
+    {
+      "context": "reverses --- $0.662$",
+      "literal": "0.662",
+      "key": "m3.random.matched.drift"
+    },
+    {
+      "context": "$0.662$ $[0.614, 0.709]$",
+      "literal": "0.614",
+      "key": "m3.random.matched.cilo"
+    },
+    {
+      "context": "$0.662$ $[0.614, 0.709]$",
+      "literal": "0.709",
+      "key": "m3.random.matched.cihi"
+    },
+    {
+      "context": "and $0.739$ $[0.680, 0.805]$",
+      "literal": "0.739",
+      "key": "m3.streamingllm.matched.drift"
+    },
+    {
+      "context": "$0.739$ $[0.680, 0.805]$",
+      "literal": "0.680",
+      "key": "m3.streamingllm.matched.cilo"
+    },
+    {
+      "context": "$0.739$ $[0.680, 0.805]$",
+      "literal": "0.805",
+      "key": "m3.streamingllm.matched.cihi"
+    },
+    {
+      "context": "$32 \\to 626$ tokens observed",
+      "literal": "626",
+      "key": "m3.max_target"
     }
   ]
 }

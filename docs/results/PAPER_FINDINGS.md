@@ -1066,6 +1066,69 @@ Overfull (lines 309–310) predates them. Gates bare: lint clean, 313 passed / 1
 skipped, dryrun clean, `audit --strict` clean on both the numbers gate and the
 claims gate. No artifact, no protocol, and no number changed — prose only.
 
+### 4y. The M.3 figure, and a caption that described a figure the paper never printed (2026-09-08)
+
+Same day as §4x, after the remote came back. No new computation on the GPUs; the
+raw rows are untouched. Two defects found and fixed, one new figure added.
+
+**1. `fig4_tvprofile`'s caption described a curve the figure does not show.** The
+committed figure is the three-window SUMMARY bar chart (before / first-50 /
+later; 0.0000 / 0.0018 / 0.0884), because `make_paper_figures.py` only renders
+the onset-aligned curve when `--profiles-dir` is given and the profiles live on
+the remote. The caption nonetheless described "a compounding staircase whose
+steps align with eviction events" and stated "the curve is shown to $+400$ steps
+of onset." Verified by reading the PNG and by extracting text from the embedded
+PDF (axis label: "Window rel. to first eviction (onset step 65.0)"). The
+mismatch predates the M.3 restatement. The caption now describes the three
+windows it plots, and labels the 0.0000 bar as the self-control it is.
+
+This also retires a premise carried in `MECHANISM_CLAUSE_CANDIDATES.md`: the
+"figure asserts the horizon reading through its x-axis" problem applied to a
+DATA-mode rendering nobody had looked at, never to the paper as printed.
+
+**2. The planned ratio-matched overlay was rejected on measurement, not taste.**
+The two arms are perfectly paired — 200 profiles each, all 200
+`(press, seed, pid)` keys shared — but they sit ~2 orders of magnitude apart in
+level: first-50 window mean TV `0.0036` fixed vs `0.1972` ratio-matched; at
+onset offset 0, `0.0008` vs `0.3289`. The ratio-matched press spends the early
+trace pinned at `min_budget` 32 against the fixed arm's 256. M.3's verdict is a
+drift statement *within* each arm and never a level comparison *between* them, so
+a shared-axis overlay would have invited precisely the unlicensed reading the
+figure exists to prevent.
+
+**3. New figure `fig:ratiomatched`** (`figures/fig7_ratiomatched.pdf`): the
+paired above-floor window the verdict uses (92 paired traces per policy; 8 never
+left the floor, 8 windows under 200 steps, excluded and counted), with each
+trace divided by its own first-quarter mean before averaging. 1.0 is "no drift,"
+so the plotted quantity is the verdict itself: fixed rises
+(`1.201` / `1.299`), ratio-matched reverses (`0.662` / `0.739`). Levels are
+normalized away, with the reason stated in the caption.
+
+Artifact: `results/diag/amendment-p/m3_drift_curves.json`, emitted by
+`report_m3_verdict.py --curves-out`. **Additive by construction** — the flag adds
+a second file and `m3_verdict.json` is byte-identical with or without it,
+confirmed by sha256 against the committed artifact on the remote. That match is
+also a free re-derivation check: the committed verdict reproduces from the raw
+rows.
+
+**4. Thirteen numbers moved from uncited to pinned.** The drift figures had never
+appeared as literals in the paper, so they were not in `paper_numbers.json`;
+printing them in the caption made `audit --strict` fail with 11 unsourced
+literals, which is the gate working. Both drift means, all eight CI bounds, the
+paired-trace count and `max_target` 626 are now catalogued from their artifacts
+and **pinned** in `paper_claims.json` (102 → 115 claims), so each asserts its
+specific quantity rather than merely matching some value.
+
+**The candidate-C reopening condition recorded in §4x was evaluated and is now
+closed, not pending.** C's case rested on a figure showing *both* levels on
+shared axes; `fig:ratiomatched` shows one — the across-cycle envelope and its
+control. The within-cycle phase result is still unplotted. Candidate A stands.
+
+**Verification.** PDF ×2: 0 errors, 1 Overfull, 9 Underfull, 29 pages (the new
+figure did not add one). Gates bare: lint clean, 318 passed / 14 skipped, dryrun
+clean, `audit --strict` clean on both gates. `make parity` **OK** — commit,
+source tree, and all 98 result artifacts agree after sync.
+
 <!-- AUDIT:ARCHIVAL-END -->
 
 ## 5. Framing discipline (non-negotiable — apply throughout)

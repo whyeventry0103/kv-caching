@@ -305,3 +305,80 @@ dryrun clean, `audit --strict` clean on both the numbers and the claims gate.
 - The `fig4_tvprofile` overlay (blocked on the remote). Until it is plotted, the
   caption disclaims what the picture shows — correct, but not the end state.
 - Page budget: unchanged at 29 against ICLR's 9.
+
+---
+
+# Revisit of the C condition — 2026-09-08, later the same day
+
+The decision above set an explicit reopening condition: *"If the overlay is ever
+plotted, revisit this decision — C becomes correct at that point."* The remote
+came back the same session, the figure work was done, and the condition was
+therefore evaluated rather than left to lapse.
+
+**Outcome: the condition is NOT met. Candidate A stands.** Two findings, both
+from doing the work rather than from re-reading this file.
+
+## 1. The premise about fig4 was wrong
+
+This file states that `fig4_tvprofile` "plots mean per-step TV against *decoding
+step relative to first eviction*" and therefore "plots the confound as its
+x-axis." **The committed figure does no such thing.** It is the three-window
+SUMMARY bar chart — before eviction / first 50 after / later — because
+`make_paper_figures.py` only draws the onset-aligned curve when `--profiles-dir`
+is supplied, and the profiles are on the remote. Verified by reading
+`figures/fig4_tvprofile.png` and by extracting the text of the embedded
+`.pdf`: the axis label is "Window rel. to first eviction (onset step 65.0)" and
+the three bars are 0.0000 / 0.0018 / 0.0884.
+
+So the visual-assertion problem that motivated C **never applied to the paper as
+printed**. It applied to a DATA-mode rendering that no one had looked at.
+
+A separate, real defect came out of the same check: the caption described "a
+compounding staircase whose steps align with eviction events" and said "the
+curve is shown to +400 steps of onset" — a *curve the figure has never shown*.
+That mismatch predates this whole restatement and is now fixed; the caption
+describes the three windows it actually plots.
+
+## 2. The proposed overlay would have been misleading, and was rejected on data
+
+The plan was to overlay the ratio-matched arm on shared axes. Measured on the
+paired traces (200 profiles, all 200 (press, seed, pid) keys shared between the
+two runs), the two arms differ by roughly **two orders of magnitude in level**:
+first-50 window mean TV is `0.0036` fixed against `0.1972` ratio-matched, and at
+onset offset 0 it is `0.0008` against `0.3289`. The ratio-matched press spends
+the early trace pinned at `min_budget` 32 against the fixed arm's 256, so it is
+simply compressing much harder.
+
+M.3's verdict is a **drift** statement *within* each arm — last-quarter mean over
+first-quarter mean — and never a level comparison *between* them. A shared-axis
+overlay would have invited exactly the level reading no measurement here
+licenses, in a figure whose whole purpose is to stop an unlicensed reading.
+
+## What was built instead
+
+`fig:ratiomatched` (`figures/fig7_ratiomatched.pdf`): the paired above-floor
+window M.3 actually uses, with each trace divided by its own first-quarter mean
+before averaging, so 1.0 is "no drift" and the plotted quantity *is* the verdict.
+Fixed arm rises, ratio-matched arm falls, both policies, levels normalized away
+with the reason stated in the caption.
+
+Data comes from `results/diag/amendment-p/m3_drift_curves.json`, emitted by
+`report_m3_verdict.py --curves-out` — the same pairing and windowing code as the
+verdict, so the figure and the number cannot drift apart. The same run
+re-derived `m3_verdict.json` **byte-identically** (sha256 match against the
+committed artifact), which doubles as a re-derivation check.
+
+## Why this still does not earn C
+
+C's case in this file rests on a specific figure: *"Two curves — one rising, one
+flat-to-falling, same x-axis, same estimator — make the two-level structure
+visible."* `fig:ratiomatched` is not that figure. It makes **one** of C's two
+levels visible — the across-cycle envelope and its control. The within-cycle
+eviction-locking, C's other level, is a phase statistic and is still not
+plotted anywhere.
+
+C's thesis sentence asks the reader to hold a two-level structure of which the
+paper now shows one level. That is a weaker position than A, which claims only
+what every figure in the paper supports. **A stands, and the reopening condition
+is now closed rather than pending** — if anyone later plots the phase profile
+alongside the envelope, reopen it again on that evidence.

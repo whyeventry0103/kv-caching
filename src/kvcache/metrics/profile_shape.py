@@ -349,3 +349,42 @@ def restrict_to_floor_exit(
     interval = int(compression_interval)
     new_onset = ((int(onset) if onset is not None else 0) - start) % interval
     return trimmed, new_onset, ""
+
+
+def drift_normalized_curve(
+    estimate: Sequence[float], n_bins: int = 40
+) -> list[float] | None:
+    """Bin a retained window into ``n_bins`` and divide by its first-quarter mean.
+
+    The M.3 verdict is a statement about **drift** -- last-quarter mean over
+    first-quarter mean, within one arm -- and deliberately not about level. The
+    two arms sit at very different levels: over the retained window the
+    ratio-matched press has been compressing far harder than the fixed-budget
+    press (its floor is ``min_budget`` 32 against a budget of 256), so plotting
+    the two raw profiles on shared axes invites a level reading that no
+    measurement in this project supports.
+
+    Normalising each trace by its own first-quarter mean before averaging makes
+    the plotted quantity the same one the verdict reports: a curve that ends
+    above 1.0 rose across its window, one that ends below 1.0 fell. It also
+    keeps the per-trace weighting the drift statistic uses -- each trace
+    contributes its own shape once, rather than long or high-divergence traces
+    dominating a pooled mean.
+
+    Returns ``None`` when the first quarter is degenerate (empty, or mean <= 0),
+    which is the same guard the drift ratio itself applies.
+    """
+    series = list(estimate)
+    q = len(series) // 4
+    if q < 1 or n_bins < 1:
+        return None
+    base = statistics.fmean(series[:q])
+    if base <= 0:
+        return None
+    n = len(series)
+    out: list[float] = []
+    for b in range(n_bins):
+        lo = int(b * n / n_bins)
+        hi = max(int((b + 1) * n / n_bins), lo + 1)
+        out.append(statistics.fmean(series[lo:hi]) / base)
+    return out
