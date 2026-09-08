@@ -1003,12 +1003,84 @@ a measured, constant 63 buckets across all 96 traces. The excesses barely moved
 is exactly what the branch turns on. Amendment M.3's drift verdict does not use
 the onset re-basing and reproduces bit-identically.
 
+### 4x. The mechanism clause is decided and propagated: candidate A, sharpened (2026-09-08)
+
+No new computation. This entry records a **wording decision** that M.3 (§4v) and
+P.2-v2 (§4w) made necessary, and its propagation into the paper. Rationale and
+the rejected candidates: `docs/project/MECHANISM_CLAUSE_CANDIDATES.md`.
+
+**Chosen: candidate A (regime-anchored), anchored on the measured `0.0018`
+rather than the constructed `0.0000`.** The thesis previously said the residual
+"arises from a divergence that is approximately zero at the moment of eviction
+and *compounds* over the generated trajectory." Both halves were problems: the
+compounding is the reading M.3 delicensed, and the zero is an **instrument
+property**, not a finding — under teacher forcing with identical token IDs the
+two models see identical input until the first prune, so pre-eviction TV *must*
+be `0.0000`, and §4.4 already spends that fact as the replay harness's
+self-control. The thesis now reads:
+
+> The gap is the trajectory residual: under the fixed cache budgets deployments
+> actually use, the divergence behind it is small in the steps immediately
+> following an eviction and far larger later in generation, so held-fixed-trace
+> protocols sample it exactly where it is smallest.
+
+`sec:mechanism` retitled to **"Where the divergence is, and where readout
+evaluation looks"**. The clause carries no numeral by design — landmine 11 (a
+prose quantity is invisible to `audit --strict`) means a numeric thesis claim
+would be unchecked; the numbers stay in §4.4 and `tab:tv`, where the audit sees
+them.
+
+**Candidate C was ruled out by a blocked dependency, not by argument**, and this
+is reversible. C is the better fit *if* `fig4_tvprofile` gets the ratio-matched
+overlay; the overlay could not be plotted because neither `replay-ext-diss256`
+nor `replay-ratio-matched-m3-v2` exists locally and the remote was refusing
+connections. **If that figure is ever re-plotted, revisit this decision** — the
+site-4 comment in the `.tex` carries the instructions and the blocker.
+
+**The `TODO(M.3-RESTATEMENT)` marker set was incomplete, and this is the finding
+worth carrying forward.** Propagating the seven markers and then sweeping for
+the delicensed vocabulary found three further sites, one serious:
+
+- the **abstract** claimed the profiles "show it grows with horizon" and that
+  short-horizon evaluation "measures the pre-compounding regime" — the strongest
+  unlicensed claim in the paper, in its most-read paragraph, and unmarked;
+- **Summary of findings** said "near-zero immediate effect and strong compounding";
+- the **trajectory-audit protocol** told future users to check the divergence
+  profile "for compounding"; it now tells them to hold the intervention's dose
+  fixed before reading growth as a horizon effect, which folds our own M.3
+  correction into the reusable protocol.
+
+A find-and-replace over the seven markers would have shipped a paper whose
+abstract still asserted what its own §4.4 had withdrawn. **A marker set is a
+starting point for a sweep, not a substitute for one.**
+
+**Site 6 was visited and deliberately left unchanged** — it already pairs both
+findings and attributes the rise to nothing, which is what candidate A asks of a
+mechanism site. Recorded because "unchanged" here is a decision, not an
+oversight.
+
+**Verification.** PDF rebuilt ×2: 0 LaTeX errors, 1 Overfull, 9 Underfull, **29
+pages** — identical to a baseline build of `HEAD`'s `.tex` in a scratch
+directory, so the edits introduced no new typesetting problems and the surviving
+Overfull (lines 309–310) predates them. Gates bare: lint clean, 313 passed / 14
+skipped, dryrun clean, `audit --strict` clean on both the numbers gate and the
+claims gate. No artifact, no protocol, and no number changed — prose only.
+
 <!-- AUDIT:ARCHIVAL-END -->
 
 ## 5. Framing discipline (non-negotiable — apply throughout)
 - **Divergence ≠ damage.** ADD / TV / residual are "behavioral-fidelity loss," never "damage."
   Correctness is the only quality arbiter. Carry the **signed flip-mass** (gained vs lost correct
   answers) with every divergence quantity.
+- **The divergence profile is a localization, not a mechanism for the rise** (pinned 2026-09-08,
+  §4x). Say "small in the steps immediately following an eviction and far larger later," or
+  "readout-shaped protocols sample it where it is smallest." **Never** "compounds," "slow drift,"
+  "grows with horizon," or "pre-compounding regime" — M.3 showed the rise does not survive
+  ratio-matching, so every one of those attributes the growth to a horizon the evidence cannot
+  carry. Two further rules travel with this: (a) the exactly-zero pre-eviction TV is an
+  **instrument property** (true by construction under teacher forcing) and is spent as the
+  replay harness's self-control — never promote it to a finding or into the thesis; (b) the
+  within-cycle eviction-locking (§4w) and the ratio-effect envelope (§4v) never travel alone.
 - **Residual is a definition, not a cause.** "Accuracy change unexplained by on-reference
   readout." The reverse-replay *bracket* is what licenses the (bounded) causal reading; state the
   off-policy/covariate-shift caveat up front, not in rebuttal.

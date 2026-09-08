@@ -1,9 +1,12 @@
 # Mechanism clause — candidate wordings for review
 
-**Status: DRAFT FOR DECISION. Nothing here is in the paper.** All 7
-`TODO(M.3-RESTATEMENT)` markers remain in `kv_readout_vs_trajectory_paper.tex`;
-this file exists so the clause can be decided once, on paper, rather than
-settled by whoever edits the `.tex` next.
+**Status: DECIDED 2026-09-08 — candidate A, sharpened. Propagated to all seven
+marked sites plus three the markers missed.** Zero `TODO(M.3-RESTATEMENT)`
+markers remain in `kv_readout_vs_trajectory_paper.tex`; each is replaced by a
+`RESOLVED(M.3-RESTATEMENT)` comment naming its site number and what changed
+there. The analysis below is kept as written, pre-decision, because the rejected
+candidates and their attacks are the record of why A was chosen. **See "Decision"
+at the foot of this file for what was actually done.**
 
 ## What is being replaced
 
@@ -196,3 +199,109 @@ propagation cost was assessed by reading the seven sites, but sites 5 and 7 carr
 argumentative load that a clause swap can damage in ways only a full read will
 show. Whichever is chosen, the next step is a full read of §4.4 and the
 conclusion under the new clause, not a find-and-replace.
+
+---
+
+# Decision — 2026-09-08
+
+**Chosen: candidate A (regime-anchored), with one substantive sharpening taken
+from flag 3 above.** Propagated the same session; the paper no longer contains
+an unlicensed horizon attribution.
+
+## Why A, and why not the others
+
+**C was ruled out by a blocked dependency, not by argument.** The recommendation
+above makes C conditional on `fig4_tvprofile` being re-plotted with the
+ratio-matched overlay, and this file's own verdict is that "C without that
+figure asserts a two-level structure the reader cannot see." The re-plot could
+not be done: `_onset_aligned_curve` needs `--profiles-dir`, and neither
+`replay-ext-diss256` nor `replay-ratio-matched-m3-v2` exists locally — only
+pilots and smokes are under `results/runs/`. The profiles are on the remote,
+which was refusing connections on port 22 all session. So C's precondition is
+unmet and C would have overclaimed. **If the overlay is ever plotted, revisit
+this decision — C becomes correct at that point, and the site-4 comment in the
+`.tex` carries the instructions.**
+
+**B stands rejected on its own merits**, per the attack recorded above: it leads
+with a phase statistic while the 34-point headline loss keeps no attached
+mechanism, and its thesis wording is exact for Random and one step off for
+StreamingLLM (peak phase 1, not 0). A thesis sentence cannot carry that caveat.
+
+**Pure cutting (flag 3) was rejected, but its argument was accepted and is what
+sharpened A.** Flag 3 is right that "approximately zero at the moment of
+eviction" is an instrument property — under teacher forcing the two models see
+identical token IDs until the first prune, so pre-eviction TV *must* be
+`0.0000`, and `sec:mechanism` already spends that fact as the replay harness's
+self-control. Putting it in the thesis gave a validity control the standing of a
+discovery, and a sharp reviewer would say so.
+
+The fix was not to cut the clause but to **move it onto the measured number**.
+The thesis now cites `0.0018` — the mean per-step TV over the 50 steps after the
+eviction, which is small *by measurement*, not by construction — instead of the
+constructed `0.0000`. That single change does two things at once:
+
+1. It restores the clause's status as a finding rather than a control.
+2. It defeats A's strongest recorded attack ("you describe a curve and decline
+   to explain it"). Anchored on the measured value, the claim stops being *why
+   the curve grows* and becomes **where the standard protocol samples it** —
+   readout-shaped evaluation measures at the point where the effect is smallest.
+   That is an evaluation-protocol claim, which is the paper's actual
+   contribution, and it is entirely untouched by M.3 delicensing the horizon
+   reading of the rise.
+
+## The clause, as it now stands (site 1)
+
+> The gap is the trajectory residual: under the fixed cache budgets deployments
+> actually use, the divergence behind it is small in the steps immediately
+> following an eviction and far larger later in generation, so held-fixed-trace
+> protocols sample it exactly where it is smallest.
+
+Section title (site 3): **"Where the divergence is, and where readout evaluation
+looks"**.
+
+Note the clause carries no numeral. That is deliberate: landmine 11 (a prose
+quantity is invisible to `audit --strict`) means any numeric phrasing in the
+thesis would be an unchecked claim. The numbers live in `sec:mechanism` and
+`tab:tv`, where the audit sees them.
+
+## The seven marked sites, and three the markers missed
+
+| site | location | what changed |
+|---|---|---|
+| 1 | thesis clause | replaced, per above |
+| 2 | contributions bullet | retitled "The mechanism" → "Where the divergence lives"; `0.0000` relabelled inline as the self-control; "compounding to"/"slow-compounding drift" removed. All numbers unchanged. |
+| 3 | `sec:mechanism` title | retitled |
+| 4 | `fig:tvprofile` caption | rewritten to disclaim the horizon reading and name the ratio confound explicitly. **Partial — the rest is a plotting task.** |
+| 5 | "three readings" | re-read whole, not swapped. The a-fortiori argument is kept (it survives M.3 — free-running adds a second divergence source whatever drives the rise); "slow-compounding drift" and "pre-compounding regime" removed; the licensed within-cycle result paired in per the §4w never-alone rule. |
+| 6 | Phase-3 windowing paragraph | **visited and deliberately left unchanged** — it already pairs both findings and attributes the rise to nothing, which is exactly what A asks. Editing it would be churn. |
+| 7 | conclusion | two edits, not one: the causal "because … compounds over the trajectory that follows" restated, **and** the list item "the TV profile supplies the compounding mechanism" four sentences later, which no marker pointed at but asserted the same delicensed cause. |
+
+**The marker set was incomplete.** A sweep for the delicensed vocabulary after
+propagating the seven found three more sites, one of them serious:
+
+- **The abstract** said the profiles "show it grows with horizon" and that short-horizon
+  evaluation "measures the pre-compounding regime" — the strongest unlicensed
+  claim in the paper, in the most-read paragraph, and unmarked. Restated.
+- **Summary of findings** said "near-zero immediate effect and strong compounding". Restated.
+- **The trajectory-audit protocol** (step 4) told future users to "check the per-step
+  divergence profile for compounding". It now tells them to hold the
+  intervention's dose fixed before reading growth as a horizon effect — which
+  generalizes our own M.3 correction into the protocol, where it belongs.
+
+This is the concrete vindication of flag 4 above: a find-and-replace over the
+markers would have shipped a paper whose abstract still made the claim its own
+§4.4 had withdrawn.
+
+## Verification
+
+PDF rebuilt ×2: **0 LaTeX errors, 1 Overfull, 9 Underfull, 29 pages** — byte-for-byte
+the same counts as a baseline build of `HEAD`'s `.tex` in a scratch directory,
+so these edits introduced no new typesetting problems and the one Overfull
+(lines 309–310) predates them. Gates bare: lint clean, 313 passed / 14 skipped,
+dryrun clean, `audit --strict` clean on both the numbers and the claims gate.
+
+## Still open after this
+
+- The `fig4_tvprofile` overlay (blocked on the remote). Until it is plotted, the
+  caption disclaims what the picture shows — correct, but not the end state.
+- Page budget: unchanged at 29 against ICLR's 9.

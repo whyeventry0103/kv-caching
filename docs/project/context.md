@@ -2,7 +2,7 @@
 
 **Purpose of this file:** a complete, self-contained handoff. An LLM with zero prior
 context should be able to read this and resume exactly where we are. Last updated
-2026-08-28. Repo: `/Users/apple/dev/kv-caching` (moved off `~/Desktop` 2026-06-14 to
+2026-09-08. Repo: `/Users/apple/dev/kv-caching` (moved off `~/Desktop` 2026-06-14 to
 escape a recurring macOS TCC lockout; `~/Desktop/kv-caching` is a **symlink** to this
 path, not a second copy — verified 2026-07-27), branch `main`, GitHub
 `whyeventry0103/kv-caching`. For the current commit run `git rev-parse --short
@@ -23,6 +23,63 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 ---
 
 ## 0. TL;DR — where we are right now
+
+  **★★★★★ 2026-09-08 — MECHANISM CLAUSE DECIDED AND PROPAGATED. Candidate A,
+  sharpened. Zero TODO(M.3-RESTATEMENT) markers left in the .tex. Paper still 29
+  pages. No runs pending; GPUs idle; remote UNREACHABLE all session.**
+
+  **(1) The decision.** Candidate A (regime-anchored) over B and C, but anchored
+  on the MEASURED 0.0018 rather than the CONSTRUCTED 0.0000. The old thesis said
+  the residual "arises from a divergence that is approximately zero at the moment
+  of eviction and *compounds*" — the compounding is what M.3 delicensed, and the
+  zero is an instrument property (teacher forcing makes pre-eviction TV exactly
+  0.0000 by construction) already spent as §4.4's self-control. New clause:
+  "...the divergence behind it is small in the steps immediately following an
+  eviction and far larger later in generation, so held-fixed-trace protocols
+  sample it exactly where it is smallest." §4.4 retitled "Where the divergence
+  is, and where readout evaluation looks." Full rationale + rejected candidates:
+  docs/project/MECHANISM_CLAUSE_CANDIDATES.md (Decision section at foot);
+  dated record: PAPER_FINDINGS §4x; binding wording rule now in §5.
+
+  **(2) C was ruled out by a BLOCKED DEPENDENCY, not by argument — this is
+  reversible.** C is the better candidate IF fig4_tvprofile gets the
+  ratio-matched overlay. The overlay needs make_paper_figures.py --profiles-dir,
+  and neither replay-ext-diss256 nor replay-ratio-matched-m3-v2 exists locally
+  (results/runs/ holds only pilots/smokes). The profiles are on the remote, which
+  refused connections on port 22 all session. **If that figure is ever plotted,
+  REVISIT the clause decision** — the site-4 comment in the .tex carries the
+  instructions and the blocker.
+
+  **(3) The marker set was INCOMPLETE — carry this forward.** After propagating
+  the 7 markers, a sweep for the delicensed vocabulary found 3 more sites: the
+  ABSTRACT ("show it grows with horizon", "pre-compounding regime" — the
+  strongest unlicensed claim in the paper, unmarked), Summary of findings
+  ("strong compounding"), and the trajectory-audit protocol step 4 (told future
+  users to check "for compounding"; now tells them to hold dose fixed first,
+  folding our own M.3 correction into the reusable protocol). A find-and-replace
+  over the markers would have shipped an abstract asserting what §4.4 withdrew.
+
+  **(4) Verification.** PDF ×2: 0 errors, 1 Overfull, 9 Underfull, 29 pages —
+  identical to a baseline build of HEAD's .tex in a scratch dir, so no new
+  typesetting problems and the surviving Overfull (L309-310) predates the edits.
+  Gates bare: lint clean, 313 passed/14 skipped, dryrun clean, audit --strict
+  clean (numbers + claims). make parity COULD NOT RUN — ssh connection refused.
+  No artifact, protocol, or number changed; prose only.
+
+  **(5) Also this session.** Retracted the false "personal email embedded in
+  scripts/nightly_report.py" claim at CLAUDE.md:98 (verified: zero address
+  literals, recipient from KVCACHE_REPORT_TO/_MX) — PRE_RELEASE_SCRUB had
+  recorded the retraction twice and asked for an opportunistic fix that never
+  landed. Corrected scrub item 2: it pointed at .tex line 493 (URL is at 634)
+  and called the anonymized-mirror promise one footnote when the paragraph
+  asserts it twice. Hardened make_paper_figures.py's two profile readers with
+  kvcache.replay.is_profile_file (landmine 13) — not a live bug, but the
+  readers were safe only because sidecars happen to lack an "estimate" key, and
+  the fig4 overlay would point them at a run that HAS sidecars.
+
+  **NEXT:** (a) fig4_tvprofile overlay when the remote returns, then reconsider
+  candidate C; (b) page budget, 29 vs ICLR's 9 — now unblocked, the clause work
+  is done; (c) 4 commits unpushed, push authorization NOT granted.
 
   **★★★★★ 2026-08-27 — LAST Meeting-#2 item CLOSED. Amendment P.2-v2: Random's
   eviction-locking SURVIVES ratio-matching (branch A). All four tasks plus both
