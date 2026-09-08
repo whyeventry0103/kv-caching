@@ -95,8 +95,12 @@ budget 256; abstract stays 256-led. Endgame after the queue drains: venue
 conversion per `docs/strategy/SUBMISSION_STRATEGY.md` §6 +
 `docs/strategy/BEST_POSSIBLE_PAPER.md` Phase 8 (strategy/review docs moved to
 `docs/strategy/` 2026-07-18; `complete_setup.md` moved to `docs/`),
-anonymization scrub (a personal email is embedded in
-`scripts/nightly_report.py`; internal strategy docs stay out of the artifact),
+anonymization scrub per `docs/operations/PRE_RELEASE_SCRUB.md` (author block,
+the repo-URL/anonymized-mirror promise, `docs/strategy/` visibility; internal
+strategy docs stay out of the artifact — note that this line previously claimed
+a personal email is embedded in `scripts/nightly_report.py`, which is FALSE:
+that file has zero address literals and reads its recipient from
+`KVCACHE_REPORT_TO`/`KVCACHE_REPORT_MX`, refusing to send without them),
 arXiv (target was ~mid-August; now gated on the paper edits above, not on runs).
 
 **Terminology discipline (binding; full list in PAPER_FINDINGS §5):** the

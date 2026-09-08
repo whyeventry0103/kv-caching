@@ -26,12 +26,30 @@ decide which release this is before touching it.
 
 ## 2. Repository URL / anonymized mirror — same file
 
-- **Line 493** hard-codes `https://github.com/whyeventry0103/kv-caching`, with a
-  footnote stating the double-blind submission carries an anonymized mirror.
+Find it with `grep -n 'github.com/whyeventry0103' kv_readout_vs_trajectory_paper.tex`
+— do not trust a line number here, one already went stale (this item read "line
+493" while the text sat at 634).
+
+The `\paragraph{Reproducibility.}` line hard-codes
+`https://github.com/whyeventry0103/kv-caching` and asserts the anonymized mirror
+**twice**, not once — both must be resolved together:
+
+1. the `\footnote{...}`: *"the double-blind submission carries an anonymized
+   mirror"*;
+2. the paragraph's closing sentence: *"The double-blind submission carries the
+   same file through the anonymized mirror."*
 
 If releasing double-blind, the mirror must actually exist and the URL must point
-at it. The footnote currently promises something that has not been created.
+at it. Both sentences currently promise something that has not been created.
 Verify before submission rather than at submission.
+
+**Do not build the mirror reflexively.** This has two mutually exclusive correct
+resolutions and they turn on a decision that has not been made: whether
+double-blind anonymization is in scope for the ICLR submission copy at all. The
+owner has stated they do not want the work anonymous in general; whether that
+extends to the submission copy specifically is a separate, unconfirmed question.
+Resolve the scope question first — then either build the mirror, or delete both
+assertions.
 
 ## 3. `docs/strategy/` — four tracked, two gitignored
 
@@ -76,8 +94,13 @@ refuses to send without them.
 
 Do not act on that CLAUDE.md line. It is recorded here so the stale claim is not
 re-derived by a future reader, chased, and "fixed" by editing a file that is
-already correct. The CLAUDE.md line itself should be corrected the next time that
-file is touched for another reason.
+already correct.
+
+**Corrected 2026-09-08.** `CLAUDE.md` no longer asserts the embedded email; it
+now points at this checklist and records the retraction inline, so a reader who
+encounters the old claim in git history can resolve it. This item is retained
+(not deleted) because the retraction is the useful record, not the original
+error.
 
 ---
 
