@@ -205,6 +205,51 @@
       "hours": 9.811828904352991,
       "included": false
     },
+    "replay-ext-diss256": {
+      "generations": 800,
+      "hours": 25.33383260869796,
+      "included": false
+    },
+    "replay-ext-smoke": {
+      "generations": 6,
+      "hours": 0.11365122258834567,
+      "included": false
+    },
+    "replay-ratio-matched-m3": {
+      "generations": 200,
+      "hours": 6.33345815217449,
+      "included": false
+    },
+    "replay-ratio-matched-m3-v2": {
+      "generations": 200,
+      "hours": 6.33345815217449,
+      "included": false
+    },
+    "restoration-diss256": {
+      "generations": 800,
+      "hours": 25.33383260869796,
+      "included": false
+    },
+    "restoration-diss256-v2": {
+      "generations": 800,
+      "hours": 25.33383260869796,
+      "included": false
+    },
+    "restoration-smoke": {
+      "generations": 24,
+      "hours": 0.4546048903533827,
+      "included": false
+    },
+    "rext-g0": {
+      "generations": 9,
+      "hours": 0.09108699617139387,
+      "included": false
+    },
+    "rext-g1": {
+      "generations": 7,
+      "hours": 0.09289247587475176,
+      "included": false
+    },
     "rkvpub-g0": {
       "generations": 60,
       "hours": 8.724494578784928,
@@ -226,10 +271,10 @@
       "included": false
     }
   },
-  "excluded_hours": 130.0007215387235,
+  "excluded_hours": 219.42137125415425,
   "generations": 10007,
   "gpu_hours": 374.9581077171822,
-  "n_directories_excluded": 22,
+  "n_directories_excluded": 31,
   "n_directories_included": 23,
   "note": "Summed wall-clock over free-running/bank generation rows. Excludes teacher-forced work (readout, reverse readout, replay), the two shards superseded by the merged bank, and superseded pilots. Every directory is listed with its hours and an 'included' flag, so any exclusion can be re-added and its effect seen."
 }

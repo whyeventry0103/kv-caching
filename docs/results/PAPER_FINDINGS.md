@@ -1128,6 +1128,34 @@ control. The within-cycle phase result is still unplotted. Candidate A stands.
 figure did not add one). Gates bare: lint clean, 318 passed / 14 skipped, dryrun
 clean, `audit --strict` clean on both gates. `make parity` **OK** — commit,
 source tree, and all 98 result artifacts agree after sync.
+**Addendum (same day): `rederive_artifacts.py` ran for the first time this
+session and caught a stale artifact.** 28/29 identical on the first pass; the
+miss was `amendment-k/classb/compute.json`, whose per-directory ledger predates
+the Meeting-#2 runs. Nine directories were absent from it -- `replay-ext-diss256`,
+`replay-ext-smoke`, `replay-ratio-matched-m3`, `replay-ratio-matched-m3-v2`,
+`restoration-diss256`, `restoration-diss256-v2`, `restoration-smoke`, `rext-g0`,
+`rext-g1` -- so `excluded_hours` read `130.00` against a true `219.42` and
+`n_directories_excluded` `22` against `31`.
+
+**The paper's cited compute numbers were not affected and did not move:**
+`gpu_hours` `374.958` (printed as $375$) and `generations` `10007` are
+byte-identical before and after, because all nine missing directories are
+teacher-forced replay/restoration work that the artifact's own inclusion rule
+excludes (verified: `included=False` on all nine, and `n_directories_included`
+unchanged at 23). Rebuilding `paper_numbers.json` produced no diff at all,
+which is the check that proves it.
+
+What was actually broken was the artifact's stated promise -- "every directory
+is listed with its hours and an 'included' flag, so any exclusion can be re-added
+and its effect seen" -- which cannot hold while nine directories are missing from
+the ledger. Regenerated in place from the rows (a derived report over valid rows,
+the Amendment H pattern, not a data patch). Re-run after the fix: **29/29
+identical, exit 0.**
+
+This is the second time this artifact's exclusion list has gone stale as new runs
+landed, so the pattern is worth naming: `compute.json` does not self-update, and
+any cell that adds a run directory leaves it stale until it is regenerated.
+
 
 <!-- AUDIT:ARCHIVAL-END -->
 
