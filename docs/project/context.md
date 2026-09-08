@@ -77,9 +77,20 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
   readers were safe only because sidecars happen to lack an "estimate" key, and
   the fig4 overlay would point them at a run that HAS sidecars.
 
+  **(6) The "29 pages vs ICLR's 9" framing is NOT like-for-like — do not cut
+  content against it.** Checked 2026-09-08: the .tex is `\documentclass[11pt]
+  {article}`, not the ICLR class, and no .sty/.cls exists in the repo. A page
+  count under `article` 11pt is not comparable to a limit defined by
+  `iclr20XX_conference.sty`, so the real sequence is: do the venue conversion
+  first (SUBMISSION_STRATEGY Phases 4–6 — note Phase 6's intro rewrite is
+  paste-ready and marked DO NOT APPLY TWICE), THEN re-measure, THEN decide what
+  moves to an appendix. Deciding the body/appendix split from the current 29 is
+  optimizing against a number that will change. Where the 29 currently sit:
+  §1 p1–3, §2 p4–5, §3 p6–9, §4 p10–20, §5 (threats) p21–25, §6 p26–29.
+
   **NEXT:** (a) fig4_tvprofile overlay when the remote returns, then reconsider
-  candidate C; (b) page budget, 29 vs ICLR's 9 — now unblocked, the clause work
-  is done; (c) 4 commits unpushed, push authorization NOT granted.
+  candidate C; (b) venue conversion, then the page budget — in that order, per
+  (6); (c) 6 commits unpushed, push authorization NOT granted.
 
   **★★★★★ 2026-08-27 — LAST Meeting-#2 item CLOSED. Amendment P.2-v2: Random's
   eviction-locking SURVIVES ratio-matching (branch A). All four tasks plus both
