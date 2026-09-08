@@ -31,6 +31,7 @@ import argparse
 import glob
 import json
 import statistics
+import sys
 from pathlib import Path
 
 import matplotlib
@@ -39,6 +40,17 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(PROJECT_ROOT / "src"))
+
+# Every profile reader in the repo shares one predicate so that a new sidecar
+# cannot reintroduce the double-count/KeyError class of bug. The four report
+# scripts adopted it when it was written; these two figure readers were missed.
+# They survive today only because .restoration.json / .ratio_trace.json happen
+# to carry no "estimate" key, so the `continue` guard below skips them -- safe
+# by accident, not by design. That accident expires the moment fig4 is pointed
+# at replay-ratio-matched-m3-v2 for the ratio-matched overlay, which is a run
+# that DOES write sidecars beside every profile.
+from kvcache.replay import is_profile_file  # noqa: E402
 
 # ---- headline constants, loaded from the number catalogue -------------------
 # These were hardcoded until 2026-07-27, and that was the last surface in the
@@ -927,6 +939,8 @@ def _onset_aligned_curve(profiles_dir: Path, half=400):
     try:
         acc = {}
         for f in glob.glob(str(profiles_dir / "**/*.json"), recursive=True):
+            if not is_profile_file(f):
+                continue  # sidecar (.restoration.json / .ratio_trace.json)
             d = json.load(open(f))
             est, onset = d.get("estimate"), d.get("onset_step")
             if not est or onset is None:
@@ -959,6 +973,8 @@ def print_windowed_tv(profiles_dir: Path):
     per_profile = {"before": [], "first50": [], "later": []}
     n_profiles = 0
     for f in glob.glob(str(profiles_dir / "**/*.json"), recursive=True):
+        if not is_profile_file(f):
+            continue  # sidecar (.restoration.json / .ratio_trace.json)
         d = json.load(open(f))
         est, onset = d.get("estimate"), d.get("onset_step")
         if not est or onset is None:
