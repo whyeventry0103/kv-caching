@@ -196,12 +196,47 @@ def _enabled_decoding_press_cls(kvpress_module: Any) -> type:
             self.enabled = False
             self.profile_step: int | None = None
             self.onset_step: int | None = None
+            # Amendment Q.2 (onset-staggered replay). DISTINCT from onset_step:
+            # onset_step is an OUTPUT, recording the step at which the first
+            # prune first affected the distribution. This is an INPUT, the step
+            # before which compression does not run at all. Conflating them
+            # would make the gate overwrite its own measurement.
+            self.compression_start_step: int | None = None
             self.compressions: list[dict[str, int]] = []
 
         def forward_hook(self, module, input, kwargs, output):
             if not self.enabled:
                 return output
+            if not self.compression_active():
+                return output
             return super().forward_hook(module, input, kwargs, output)
+
+        def compression_active(self) -> bool:
+            """Whether compression may run at the replay loop's current step.
+
+            Exposure staggering (Amendment Q.2) holds the realised ratio
+            ``r = B/t`` fixed while varying how long compression has been
+            running, which is the one manipulation ``r = B/t`` otherwise
+            forbids. ``compression_start_step`` of None is the deployed
+            always-on behaviour, so existing cells are bit-identical.
+
+            A start step with no ``profile_step`` to compare against is a
+            configuration error, not a reason to compress: the replay loop
+            writes ``profile_step`` every step, so its absence means this press
+            was built or driven wrongly. Refusing here makes that loud instead
+            of silently running an always-on cell under a staggered label.
+            """
+            if self.compression_start_step is None:
+                return True
+            if self.profile_step is None:
+                raise RuntimeError(
+                    "compression_start_step is set but profile_step is None: "
+                    "the press is not being driven by the replay loop, so the "
+                    "onset gate cannot be evaluated. Build it with "
+                    "build_press(..., instrumented=True) and drive it from "
+                    "replay, or leave compression_start_step None."
+                )
+            return int(self.profile_step) >= int(self.compression_start_step)
 
         def compress(self, module, hidden_states, keys, values, attentions, kwargs):
             before = int(keys.shape[2])
@@ -350,6 +385,28 @@ def build_ratio_matched_press(
     return base
 
 
+def _stash_candidates_by_age(base: Any, step: int) -> list[int]:
+    """Stash indices to draw the reinsertion from, ordered oldest-to-newest.
+
+    With ``reinsert_lag`` unset this is simply every stashed index, which is what
+    the P.5 cells ran, so those remain bit-identical. With a lag set, entries are
+    ranked by how close their age (``step - evicted_at``) is to the requested
+    lag, and the closest ``n_reinsert * 2`` are offered to the planner.
+
+    Selecting by age rather than by moving the trigger is deliberate: moving the
+    trigger would vary staleness and position in the trace together, and the
+    sweep is meant to isolate staleness.
+    """
+    total = int(base.stash_keys.shape[2])
+    lag = getattr(base, "reinsert_lag", None)
+    steps = list(getattr(base, "stash_steps", []) or [])
+    if lag is None or len(steps) != total:
+        return list(range(total))
+    want = max(1, int(base.n_reinsert) * 2)
+    ranked = sorted(range(total), key=lambda i: (abs((step - steps[i]) - int(lag)), i))
+    return sorted(ranked[:want])
+
+
 def build_restoration_press(
     name: str,
     *,
@@ -359,6 +416,7 @@ def build_restoration_press(
     reinsert_fraction: float = 0.25,
     compression_interval: int = 64,
     seed: int | None = None,
+    reinsert_lag: int | None = None,
     kvpress_module: Any | None = None,
 ) -> Any:
     """A press that stashes evicted K/V and reinserts them once, at a fixed step.
@@ -413,6 +471,13 @@ def build_restoration_press(
     base.n_reinsert = max(1, int(round(reinsert_fraction * budget)))
     base.stash_keys = None
     base.stash_values = None
+    # Amendment Q.5: eviction step per stashed entry, parallel to stash_keys
+    # along dim 2. Needed because the latency sweep varies the AGE of what is
+    # reinserted while holding the trace position fixed; without per-entry ages
+    # "lag" would have to be varied by moving the trigger, which would confound
+    # staleness with position in the trace.
+    base.stash_steps: list[int] = []
+    base.reinsert_lag = reinsert_lag if reinsert_lag is None else int(reinsert_lag)
     base.restoration_report = None
     base.intervened = False
 
@@ -435,9 +500,12 @@ def build_restoration_press(
             else:
                 base.stash_keys = torch.cat([base.stash_keys, tail_k], dim=2)
                 base.stash_values = torch.cat([base.stash_values, tail_v], dim=2)
+            at = getattr(base, "profile_step", None)
+            base.stash_steps.extend([-1 if at is None else int(at)] * dropped)
             keep = min(base.stash_keys.shape[2], base.n_reinsert * 4)
             base.stash_keys = base.stash_keys[:, :, -keep:, :]
             base.stash_values = base.stash_values[:, :, -keep:, :]
+            base.stash_steps = base.stash_steps[-keep:]
 
         step = getattr(base, "profile_step", None)
         if (
@@ -448,8 +516,13 @@ def build_restoration_press(
             and base.stash_keys is not None
             and base.stash_keys.shape[2] >= base.n_reinsert
         ):
+            # Amendment Q.5: with a lag set, reinsert the entries whose age is
+            # closest to it, holding the trigger (and so the trace position)
+            # fixed. lag=None keeps the deployed behaviour -- the whole stash in
+            # eviction order -- so the P.5 cells are bit-identical.
+            candidates = _stash_candidates_by_age(base, int(step))
             plan = plan_reinsertion(
-                evicted_order=list(range(base.stash_keys.shape[2])),
+                evicted_order=candidates,
                 retained=list(range(int(new_keys.shape[2]))),
                 n_reinsert=base.n_reinsert,
                 arm=base.arm,

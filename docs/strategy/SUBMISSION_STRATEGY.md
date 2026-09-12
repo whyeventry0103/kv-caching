@@ -85,7 +85,16 @@ correct reconciliation (sentence 2) → instrument → bracket-with-robustness �
 control → one-sentence implication. ~230 words. See tex; the previous version survives
 in git history.
 
-## Phase 6 — Intro rewrite (paste-ready for venue conversion; do not apply twice)
+## Phase 6 — Intro rewrite — **APPLIED 2026-09-12 at the ICLR conversion. DO NOT APPLY AGAIN.**
+
+**Applied with one correction the draft below could not have known about.** The
+draft says $0.765$ readout is "within sight of the 0.882 full-cache reference".
+`0.882` is the full-cache BANK accuracy over 2000 rows, which Amendment K
+explicitly designates NOT the cell comparator: each rung carries its own matched
+reference, so readout $0.765$ is measured against $0.903$ and free-run $0.422$
+against $0.885$. The applied text uses the matched references; quoting `0.882`
+there would have reintroduced the population mismatch Amendment K exists to fix.
+
 
 Paragraph plan (replaces current ¶1–2; ¶3+ survive with trims):
 

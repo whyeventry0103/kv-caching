@@ -1,0 +1,43 @@
+name: replay_sawtooth_i16_q1
+stage: replay
+mode: compression_replay
+# Amendment Q.1 -- SAWTOOTH CONTROL, arm interval=16.
+#
+# Does the phase-0 locking reported by P.2-v2 branch A survive when the
+# per-event eviction amplitude is small? The cache is a sawtooth, not a ceiling:
+# it is target_size right after a prune and target_size + compression_interval
+# right before the next, so the interval IS the amplitude.
+#
+# WHY FIXED FLOOR AND NOT FIXED MEAN. Mean cache is B + I/2, so holding the mean
+# at 288 would force B = 288 - I/2 and lock amplitude to floor: the small-
+# amplitude arm would also never fall below 284, and a collapse there would be
+# equally consistent with "the discontinuity was too small to lock to" and with
+# "the cache never fell far enough to do damage". The floor is therefore held at
+# 256 -- the published cell's floor -- and the mean is allowed to vary.
+#
+# The resulting dose difference is ONE-SIDED and that is the point: interval 16
+# has the LOWEST mean cache (264) and is the harshest arm overall, so a collapse
+# of phase excess there cannot be attributed to that arm being gentler.
+#
+# ANALYSIS CONSTRAINT: phase_amplitude_excess refuses mixed intervals, so each
+# arm is read separately against its own sham at its own bucket count. Raw phase
+# amplitude scales with bucket count, so the read is whether EACH arm's excess
+# excludes zero -- never the ordering of magnitudes across arms.
+#
+# READ (pre-registered, Amendment Q.1): AMPLITUDE-INDEPENDENT / AMPLITUDE-
+# DEPENDENT / INDETERMINATE. If interval 16 does not exclude zero while 256
+# does, P.2 branch A is not refuted but must be QUALIFIED in the paper.
+reference_run_name: math500-fc-powered-merged
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+subset:
+  math500: 25
+presses: [random, streamingllm]
+budgets: [256]
+seeds: [11, 23, 47, 89]
+compression_interval: 16
+extended_measures: true
+estimated_generation_count: 0
+estimated_replay_count: 200
+scale_authorized: true
+remote_only: true

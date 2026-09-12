@@ -557,3 +557,133 @@ def test_every_replay_press_carries_the_replay_instrumentation(builder, kwargs):
     assert hasattr(press, "profile_step"), f"{builder} lacks profile_step"
     assert press.enabled is False, "a replay press must start disabled"
     assert isinstance(press.compressions, list)
+
+
+# --------------------------------------------------------------------------
+# Amendment Q.2: onset-staggered replay. The gate that makes exposure a
+# manipulable variable at fixed realised ratio.
+#
+# Landmine 12 is why these tests are written the way they are: two builders were
+# once put on a bare DecodingPress that lacked `enabled`/`profile_step`, so the
+# restoration trigger silently never fired and every arm degenerated to the
+# null. That invalidated a powered cell. A gate that silently does not gate is
+# worse than no gate, so each test below asserts the attribute EXISTS before
+# asserting it works.
+
+
+class _OnsetReplayDecoding:
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+        self.__post_init__()
+
+    def __post_init__(self):
+        self.parent_calls = 0
+
+    def forward_hook(self, module, input, kwargs, output):
+        self.parent_calls += 1
+        return "compressed"
+
+
+class _OnsetKVPress(_FakeKVPress):
+    DecodingPress = _OnsetReplayDecoding
+
+
+def _onset_press():
+    return build_replay_press("streamingllm", budget=256, kvpress_module=_OnsetKVPress)
+
+
+def test_instrumented_press_exposes_the_gate_attributes():
+    """Landmine 12: assert the attributes exist, not merely that nothing crashed.
+
+    A bare DecodingPress has no `enabled`, so `press.enabled = True` would just
+    create the attribute and the gate would never have run. Absence must fail
+    loudly here rather than silently at cell time.
+    """
+    press = _onset_press()
+    for attr in ("enabled", "profile_step", "onset_step", "compression_start_step"):
+        assert hasattr(press, attr), (
+            f"instrumented press is missing {attr!r}; it was probably built on a "
+            "bare DecodingPress (landmine 12) and the onset gate would silently "
+            "never fire"
+        )
+    assert press.compression_start_step is None, "default must be deployed behaviour"
+
+
+def test_onset_gate_none_is_bit_identical_to_always_on():
+    """The default must not perturb any existing cell."""
+    press = _onset_press()
+    press.enabled = True
+    press.profile_step = 0
+    assert press.compression_active() is True
+    assert press.forward_hook(None, None, None, "full") == "compressed"
+
+
+def test_onset_gate_suppresses_compression_before_the_start_step():
+    press = _onset_press()
+    press.enabled = True
+    press.compression_start_step = 100
+    for step in (0, 1, 99):
+        press.profile_step = step
+        assert press.compression_active() is False
+        assert press.forward_hook(None, None, None, "full") == "full"
+    assert press.parent_calls == 0, "compression ran before its onset"
+
+
+def test_onset_gate_admits_compression_from_the_start_step_onward():
+    press = _onset_press()
+    press.enabled = True
+    press.compression_start_step = 100
+    for step in (100, 101, 5000):
+        press.profile_step = step
+        assert press.compression_active() is True
+        assert press.forward_hook(None, None, None, "full") == "compressed"
+    assert press.parent_calls == 3
+
+
+def test_onset_gate_is_subordinate_to_enabled():
+    """`enabled` still wins: the full-cache reference must never compress."""
+    press = _onset_press()
+    press.enabled = False
+    press.compression_start_step = 0
+    press.profile_step = 10_000
+    assert press.forward_hook(None, None, None, "full") == "full"
+    assert press.parent_calls == 0
+
+
+def test_onset_gate_without_profile_step_refuses_rather_than_compressing():
+    """A staggered cell that silently ran always-on would be undetectable later."""
+    press = _onset_press()
+    press.enabled = True
+    press.compression_start_step = 100
+    press.profile_step = None
+    with pytest.raises(RuntimeError, match="onset gate cannot be evaluated"):
+        press.compression_active()
+
+
+def test_onset_gate_does_not_collide_with_measured_onset_step():
+    """compression_start_step is an INPUT; onset_step is a MEASURED OUTPUT.
+
+    Conflating them would make the gate overwrite its own measurement, which is
+    the bug this separation exists to prevent.
+    """
+
+    class _CompressingDecoding(_OnsetReplayDecoding):
+        def compress(self, module, hidden_states, keys, values, attentions, kwargs):
+            return keys, values
+
+    class _KV(_FakeKVPress):
+        DecodingPress = _CompressingDecoding
+
+    class _Keys:
+        shape = (1, 1, 320, 1)
+
+    class _Module:
+        layer_idx = 0
+
+    press = build_replay_press("streamingllm", budget=256, kvpress_module=_KV)
+    press.enabled = True
+    press.compression_start_step = 128
+    press.profile_step = 128
+    press.compress(_Module(), None, _Keys(), _Keys(), None, {})
+    assert press.compression_start_step == 128, "the gate input was overwritten"
+    assert press.onset_step == 129, "the measured onset must still be recorded"

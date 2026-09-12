@@ -98,6 +98,12 @@ def _build_condition_press(
             ),
             compression_interval=interval,
             seed=seed,
+            # Amendment Q.5. Absent -> P.5 behaviour, bit-identical.
+            reinsert_lag=(
+                None
+                if restoration.get("reinsert_lag") is None
+                else int(restoration["reinsert_lag"])
+            ),
         )
     matched_ratio = config.get("matched_ratio")
     if matched_ratio is not None:
@@ -108,12 +114,28 @@ def _build_condition_press(
             compression_interval=interval,
             seed=seed,
         )
-    return build_replay_press(
+    press = build_replay_press(
         press_name,
         budget=effective_budget,
         compression_interval=interval,
         seed=seed,
     )
+    # Amendment Q.2: onset-staggered replay. Compression is inactive until this
+    # decode step, which varies exposure while r = B/t holds the realised ratio
+    # fixed -- the manipulation the identity otherwise forbids. Absent from a
+    # config, the press keeps its deployed always-on behaviour and the cell is
+    # bit-identical to every existing one.
+    start = config.get("compression_start_step")
+    if start is not None:
+        if not hasattr(press, "compression_start_step"):
+            raise SystemExit(
+                "compression_start_step is configured but this press has no such "
+                "attribute: it was not built instrumented (landmine 12), so the "
+                "onset gate would silently never fire and the cell would run "
+                "always-on under a staggered label"
+            )
+        press.compression_start_step = int(start)
+    return press
 
 
 def _parser() -> argparse.ArgumentParser:

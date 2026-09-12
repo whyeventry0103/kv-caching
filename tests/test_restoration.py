@@ -328,3 +328,63 @@ def test_arms_sharing_a_seed_evict_the_same_entries():
     matched, chance = plan("matched"), plan("random")
     assert matched["evict"] == chance["evict"], "arms must evict the same entries"
     assert matched["reinsert"] != chance["reinsert"], "and reinsert different ones"
+
+
+# --------------------------------------------------------------------------
+# Amendment Q.5: latency-swept restoration. The lag selects WHICH stashed
+# entries come back, holding the trigger fixed, so staleness varies without
+# varying position in the trace.
+
+
+class _StashBase:
+    """Minimal stand-in carrying only what _stash_candidates_by_age reads."""
+
+    def __init__(self, steps, n_reinsert=2, lag=None):
+        class _K:
+            shape = (1, 1, len(steps), 1)
+
+        self.stash_keys = _K()
+        self.stash_steps = list(steps)
+        self.n_reinsert = n_reinsert
+        self.reinsert_lag = lag
+
+
+def test_lag_none_offers_the_whole_stash_so_p5_stays_bit_identical():
+    from kvcache.presses import _stash_candidates_by_age
+
+    base = _StashBase([10, 20, 30, 40], lag=None)
+    assert _stash_candidates_by_age(base, step=100) == [0, 1, 2, 3]
+
+
+def test_lag_selects_entries_whose_age_is_closest_to_it():
+    from kvcache.presses import _stash_candidates_by_age
+
+    # ages at step 100 are 90, 60, 20, 4 for entries 0..3
+    base = _StashBase([10, 40, 80, 96], n_reinsert=1, lag=20)
+    # want = 2 closest to age 20 -> entry 2 (age 20) and entry 3 (age 4)
+    assert _stash_candidates_by_age(base, step=100) == [2, 3]
+
+
+def test_a_large_lag_selects_the_stalest_entries():
+    from kvcache.presses import _stash_candidates_by_age
+
+    base = _StashBase([10, 40, 80, 96], n_reinsert=1, lag=256)
+    assert _stash_candidates_by_age(base, step=100) == [0, 1]
+
+
+def test_candidates_are_returned_in_stash_order_not_rank_order():
+    """apply_reinsertion indexes the stash, so order must stay index order."""
+    from kvcache.presses import _stash_candidates_by_age
+
+    base = _StashBase([10, 40, 80, 96], n_reinsert=2, lag=20)
+    got = _stash_candidates_by_age(base, step=100)
+    assert got == sorted(got)
+
+
+def test_desynchronised_age_list_falls_back_rather_than_misindexing():
+    """A length mismatch means the ages are untrustworthy; never guess."""
+    from kvcache.presses import _stash_candidates_by_age
+
+    base = _StashBase([10, 40], lag=20)
+    base.stash_keys.shape = (1, 1, 4, 1)
+    assert _stash_candidates_by_age(base, step=100) == [0, 1, 2, 3]

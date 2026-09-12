@@ -62,6 +62,83 @@ class Job:
     bench: str = "math500"  # subtree counted for kind 'grid' (e.g. aime24 banks)
     marker: str | None = None  # kind 'marker': done when <runs_root>/<marker> exists
     extra_args: tuple[str, ...] = ()  # appended to launch.sh argv (e.g. download flags)
+    # Amendment Q: projected on-disk output of this cell, in GB. The personal
+    # budget is ~70GB and 68 of it is already spent, so a cell that quietly
+    # overruns does not fail at write time -- it fills the shared filesystem and
+    # takes every other job with it. Declared per job and checked before launch.
+    est_output_gb: float = 0.0
+
+
+# Amendment Q storage guard. Disk, not GPU memory: min_free_gb is a VRAM
+# threshold and says nothing about the personal storage budget.
+# 1 GB, not more: the personal budget is already ~68/70 spent, and a margin as
+# large as the remaining headroom would refuse every job unconditionally, which
+# is indistinguishable from the guard being broken.
+DISK_SAFETY_MARGIN_GB = 1.0
+
+
+def disk_headroom_gb(used_gb: float, budget_gb: float) -> float:
+    """Personal headroom. df is meaningless here -- the filesystem is shared."""
+    return float(budget_gb) - float(used_gb)
+
+
+def check_disk_budget(job: Job, used_gb: float, budget_gb: float) -> None:
+    """Refuse a launch whose projected output would exhaust the personal budget.
+
+    Loud on purpose. The failure mode being prevented is not a crash but a
+    silent one: a cell that overruns fills a filesystem shared with other users,
+    and the first symptom is somebody else's job dying. A job that declares no
+    estimate is allowed through, because retrofitting estimates onto the drained
+    historical queue would be a fiction -- but any job that declares one is held
+    to it.
+    """
+    if job.est_output_gb <= 0:
+        return
+    headroom = disk_headroom_gb(used_gb, budget_gb)
+    if job.est_output_gb + DISK_SAFETY_MARGIN_GB > headroom:
+        raise SystemExit(
+            f"REFUSING TO LAUNCH {job.name}: it projects {job.est_output_gb:.2f} GB "
+            f"of output, but only {headroom:.2f} GB of the {budget_gb:.0f} GB "
+            f"personal budget remains (used {used_gb:.2f} GB), and a "
+            f"{DISK_SAFETY_MARGIN_GB:.0f} GB margin is held back. Free space "
+            f"first -- from the model/uv cache, never from results/ -- or lower "
+            f"the cell's scope. Do not raise est_output_gb to get past this."
+        )
+
+
+def storage_used_gb(root: Path | None = None) -> float:
+    """Personal storage consumed, in GB. Walks the tree; df would be wrong.
+
+    The filesystem is shared, so a global df reports other users' usage and the
+    machine's total capacity, neither of which bounds what this project may
+    consume. The personal budget is a declared number and this is measured
+    against it.
+    """
+    base = Path(root) if root is not None else REMOTE_STORAGE
+    if not base.exists():
+        return 0.0
+    # `du` in C rather than rglob in Python: this runs on every orchestrator
+    # tick against a ~68 GB tree, and a Python walk of the model cache costs
+    # seconds each time for a number that barely moves.
+    try:
+        out = subprocess.run(
+            ["du", "-s", "-k", str(base)],
+            capture_output=True,
+            text=True,
+            timeout=120,
+        )
+        if out.returncode == 0:
+            return int(out.stdout.split()[0]) * 1024 / 1e9
+    except (OSError, ValueError, IndexError, subprocess.TimeoutExpired):
+        pass
+    total = 0
+    for f in base.rglob("*"):
+        try:
+            if f.is_file() and not f.is_symlink():
+                total += f.stat().st_size
+        except OSError:
+            continue
+    return total / 1e9
 
 
 @dataclass(frozen=True)
@@ -108,6 +185,7 @@ def load_queue(path: Path) -> tuple[bool, list[Job]]:
             bench=j.get("bench", "math500"),
             marker=j.get("marker"),
             extra_args=tuple(j.get("extra_args") or ()),
+            est_output_gb=float(j.get("est_output_gb") or 0.0),
         )
         for j in data["jobs"]
     ]
@@ -549,6 +627,13 @@ def main() -> int:
             )
             continue
         done = count_progress(runs_root, job)
+        # Amendment Q storage guard, before anything is written. Raises rather
+        # than skipping: a cell that cannot fit is a queue error to fix, not a
+        # condition to quietly route around, and routing around it would launch
+        # the NEXT job into the same shortage.
+        check_disk_budget(
+            job, storage_used_gb(), float(BASE_ENV["KVCACHE_PERSONAL_FREE_GB"])
+        )
         log(
             f"selected: {job.name} {done}/{job.total} "
             f"(min_free_gb={job.min_free_gb}); needy seeds {needy}; "

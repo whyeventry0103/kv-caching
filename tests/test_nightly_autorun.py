@@ -4,6 +4,8 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[1]
 SPEC = importlib.util.spec_from_file_location(
     "nightly_autorun", ROOT / "scripts" / "nightly_autorun.py"
@@ -380,3 +382,72 @@ def test_a_completed_job_is_never_reported_stuck(tmp_path):
     assert (
         "really-stuck" in stuck
     ), "a job that really did fail and is incomplete must still be reported"
+
+
+# --------------------------------------------------------------------------
+# Amendment Q storage guard. min_free_gb is a VRAM threshold and says nothing
+# about the personal disk budget; 68 of ~70 GB is already spent, so a cell that
+# overruns fills a SHARED filesystem and the first symptom is another user's
+# job dying.
+
+
+def _q_job(est_gb=0.0):
+    from nightly_autorun import Job
+
+    return Job(
+        name="q-cell",
+        command="replay",
+        config="configs/experiments/replay_sawtooth_i16_q1.yaml",
+        run_name="q-cell",
+        total=200,
+        seeds=[11],
+        min_free_gb=24,
+        progress_kind="replay",
+        requires=None,
+        est_output_gb=est_gb,
+    )
+
+
+def test_disk_headroom_is_budget_minus_used():
+    from nightly_autorun import disk_headroom_gb
+
+    assert disk_headroom_gb(68.0, 70.0) == pytest.approx(2.0)
+
+
+def test_job_with_no_estimate_is_allowed_through():
+    """The drained historical queue declares none; inventing them would be fiction."""
+    from nightly_autorun import check_disk_budget
+
+    check_disk_budget(_q_job(0.0), used_gb=69.9, budget_gb=70.0)
+
+
+def test_a_cell_that_fits_within_the_margin_launches():
+    from nightly_autorun import check_disk_budget
+
+    # 10 GB headroom, cell wants 5, margin 2 -> 7 <= 10, fine
+    check_disk_budget(_q_job(5.0), used_gb=60.0, budget_gb=70.0)
+
+
+def test_a_cell_that_would_exhaust_the_budget_is_refused_loudly():
+    from nightly_autorun import check_disk_budget
+
+    with pytest.raises(SystemExit, match="REFUSING TO LAUNCH"):
+        check_disk_budget(_q_job(5.0), used_gb=68.0, budget_gb=70.0)
+
+
+def test_the_safety_margin_is_held_back_not_spent():
+    """A cell that exactly fills the headroom still refuses."""
+    from nightly_autorun import check_disk_budget
+
+    with pytest.raises(SystemExit, match="margin"):
+        check_disk_budget(_q_job(2.0), used_gb=68.0, budget_gb=70.0)
+
+
+def test_refusal_names_the_reclaim_rule_and_forbids_raising_the_estimate():
+    from nightly_autorun import check_disk_budget
+
+    with pytest.raises(SystemExit) as e:
+        check_disk_budget(_q_job(50.0), used_gb=68.0, budget_gb=70.0)
+    msg = str(e.value)
+    assert "never from results/" in msg
+    assert "Do not raise est_output_gb" in msg

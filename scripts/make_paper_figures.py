@@ -545,6 +545,19 @@ def fig2_bracket(out_dir: Path, m4_summary: dict | None):
         ax.set_axisbelow(True)
         # Faint reference vertical at Acc_FC so every rung reads against it.
         ax.axvline(FC, color=GREY, lw=0.7, ls=(0, (1, 2)), alpha=0.75, zorder=0)
+        # SUBMISSION_STRATEGY Phase 4, applied at the venue conversion: draw the
+        # residual bracket as a shaded band so it is visible GEOMETRY rather than
+        # an annotation the reader has to assemble from two numbers. The bracket
+        # is [min, max] of the forward and reverse residual estimates, and its
+        # excluding zero is the paper's central robustness claim -- a claim that
+        # should be seeable before it is read.
+        # The band spans the REVERSE and FORWARD readout rungs, which is where
+        # the bracket actually lives on this axis: the two estimates are biased
+        # in opposite directions, so the truth is bounded between them. An
+        # earlier version shaded FC + bracket, which plots a correct pair of
+        # numbers at a position that corresponds to nothing on the axis.
+        lo, hi = sorted((float(d["reverse"]), float(d["readout"])))
+        ax.axvspan(lo, hi, color=MC[m], alpha=0.10, lw=0, zorder=0)
         ci = d.get("readout_ci")
         for y, v in zip(ys, vals, strict=True):
             color = GREY if y == 3 else MC[m]

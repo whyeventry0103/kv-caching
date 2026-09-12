@@ -574,3 +574,155 @@ jobs:
     progress_kind: marker
     marker: shape-p2v2-restricted/shape_m3v2_RESTRICTED.json
     requires: replay-ratio-matched-m3-v2
+
+  # ======================================================================
+  # MEETING #3 / AMENDMENT Q (queued 2026-09-12).
+  #
+  # Ordered by defensibility per GPU-hour, not by the order the tasks were
+  # given. Every read below was pre-committed in PREREGISTRATION Amendment Q
+  # BEFORE any of these were queued; do not re-cut a verdict after seeing
+  # output.
+  #
+  # est_output_gb is the Amendment Q storage guard. ~68 of a ~70 GB personal
+  # budget is already spent, so the orchestrator refuses to launch a declared
+  # cell that would not fit, holding back a 2 GB margin. min_free_gb is VRAM
+  # and says nothing about disk.
+  # ======================================================================
+
+  # --- Q.1 sawtooth control. FIRST because it threatens a PUBLISHED result:
+  # P.2-v2 branch A's phase-0 eviction locking. Run before anything is built on
+  # top of that. Fixed floor 256 across all three arms (NOT fixed mean, which
+  # would lock amplitude to floor via mean = B + I/2); the resulting dose
+  # difference is one-sided, since interval 16 is the HARSHEST arm, so a
+  # collapse there cannot be blamed on that arm being gentler.
+  # Each arm is read separately: phase_amplitude_excess refuses mixed intervals.
+  - name: replay-sawtooth-i16
+    command: replay
+    config: configs/experiments/replay_sawtooth_i16_q1.yaml
+    run_name: replay-sawtooth-i16
+    total: 200
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 28
+    progress_kind: replay
+    est_output_gb: 0.08
+    requires: null
+
+  - name: replay-sawtooth-i64
+    command: replay
+    config: configs/experiments/replay_sawtooth_i64_q1.yaml
+    run_name: replay-sawtooth-i64
+    total: 200
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 28
+    progress_kind: replay
+    est_output_gb: 0.08
+    requires: replay-sawtooth-i16
+
+  - name: replay-sawtooth-i256
+    command: replay
+    config: configs/experiments/replay_sawtooth_i256_q1.yaml
+    run_name: replay-sawtooth-i256
+    total: 200
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 28
+    progress_kind: replay
+    est_output_gb: 0.08
+    requires: replay-sawtooth-i64
+
+  # --- Q.2 onset-staggered replay, D_tv half. The experiment M.3 pointed at and
+  # could not reach: t0 is a genuine third variable, because r = B/t says
+  # nothing about how long compression has been running. Teacher-forced, cheap.
+  # t0=0 is the always-on reference arm and must reproduce existing behaviour.
+  - name: replay-onset-t0
+    command: replay
+    config: configs/experiments/replay_onset_t0_q2.yaml
+    run_name: replay-onset-t0
+    total: 400
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 28
+    progress_kind: replay
+    est_output_gb: 0.16
+    requires: replay-sawtooth-i256
+
+  - name: replay-onset-t512
+    command: replay
+    config: configs/experiments/replay_onset_t512_q2.yaml
+    run_name: replay-onset-t512
+    total: 400
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 28
+    progress_kind: replay
+    est_output_gb: 0.16
+    requires: replay-onset-t0
+
+  - name: replay-onset-t2048
+    command: replay
+    config: configs/experiments/replay_onset_t2048_q2.yaml
+    run_name: replay-onset-t2048
+    total: 400
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 28
+    progress_kind: replay
+    est_output_gb: 0.16
+    requires: replay-onset-t512
+
+  # --- Q.5 latency-swept restoration. Converts the P.5 flat null into a
+  # timescale, if the query-drift account is right. The lag selects WHICH
+  # stashed entries return, by eviction age, holding the trigger fixed --
+  # moving the trigger would confound staleness with position in the trace.
+  # lag=1 first: it is the arm where DECAY predicts the largest effect, so it
+  # is the one that can falsify the account soonest.
+  - name: restoration-lag1
+    command: replay
+    config: configs/experiments/restoration_lag1_q5.yaml
+    run_name: restoration-lag1
+    total: 800
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 28
+    progress_kind: replay
+    est_output_gb: 0.32
+    requires: replay-onset-t2048
+
+  - name: restoration-lag4
+    command: replay
+    config: configs/experiments/restoration_lag4_q5.yaml
+    run_name: restoration-lag4
+    total: 800
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 28
+    progress_kind: replay
+    est_output_gb: 0.32
+    requires: restoration-lag1
+
+  - name: restoration-lag16
+    command: replay
+    config: configs/experiments/restoration_lag16_q5.yaml
+    run_name: restoration-lag16
+    total: 800
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 28
+    progress_kind: replay
+    est_output_gb: 0.32
+    requires: restoration-lag4
+
+  - name: restoration-lag64
+    command: replay
+    config: configs/experiments/restoration_lag64_q5.yaml
+    run_name: restoration-lag64
+    total: 800
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 28
+    progress_kind: replay
+    est_output_gb: 0.32
+    requires: restoration-lag16
+
+  - name: restoration-lag256
+    command: replay
+    config: configs/experiments/restoration_lag256_q5.yaml
+    run_name: restoration-lag256
+    total: 800
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 28
+    progress_kind: replay
+    est_output_gb: 0.32
+    requires: restoration-lag64

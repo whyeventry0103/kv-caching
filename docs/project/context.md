@@ -2,7 +2,7 @@
 
 **Purpose of this file:** a complete, self-contained handoff. An LLM with zero prior
 context should be able to read this and resume exactly where we are. Last updated
-2026-09-08. Repo: `/Users/apple/dev/kv-caching` (moved off `~/Desktop` 2026-06-14 to
+2026-09-13. Repo: `/Users/apple/dev/kv-caching` (moved off `~/Desktop` 2026-06-14 to
 escape a recurring macOS TCC lockout; `~/Desktop/kv-caching` is a **symlink** to this
 path, not a second copy — verified 2026-07-27), branch `main`, GitHub
 `whyeventry0103/kv-caching`. For the current commit run `git rev-parse --short
@@ -23,6 +23,103 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 ---
 
 ## 0. TL;DR — where we are right now
+
+  **★★★★★ 2026-09-12/13 — MEETING #3 PRE-REGISTERED (Amendment Q) AND QUEUED;
+  ICLR 2027 CONVERSION DONE. Paper is 26 pages under the venue style, ~24 of it
+  main text against a 9-page limit. 11 cells queued. Abstract due 2026-09-18,
+  full paper 2026-09-25.**
+
+  **(1) Amendment Q written, every read pre-committed before queueing.** Six
+  cells: Q.1 sawtooth control, Q.2 onset-staggered D_tv, Q.3 attention channels
+  + GQA collateral, Q.4 attn-profile-v1 schema, Q.5 latency-swept restoration,
+  Q.6 on-manifold split. Q.0 explicitly WIDENS P.4's "latent-state divergence is
+  out of scope", dated, under three standing limits (structural claims only;
+  exploratory by construction; basis fitted on full-cache only and frozen, with
+  circularity a STOP condition).
+
+  **(2) The Q.1 control was REDESIGNED before queueing, because the original was
+  confounded.** Holding mean cache at 288 forces B = 288 - I/2, so amplitude and
+  floor move together and a collapse at small amplitude would be equally
+  consistent with "the cache never fell far". Run instead at FIXED FLOOR 256
+  (the published cell's floor) with I in {16, 64, 256}. Mean cache then varies,
+  and the direction closes the confound: I=16 has the LOWEST mean cache (264)
+  and is the HARSHEST arm, so a collapse there cannot be blamed on gentleness.
+  Analysis constraint from the code: phase_amplitude_excess refuses mixed
+  intervals, so each arm is read separately and the verdict is whether EACH
+  excess excludes zero, never the ordering of magnitudes across arms.
+  **This cell can go against us: if I=16 does not exclude zero while I=256 does,
+  P.2 branch A is not refuted but must be QUALIFIED in the paper.** The
+  qualifying wording is drafted in Amendment Q before the read.
+
+  **(3) Two errors in the design spec were fixed.** Task B storage was stated as
+  "~4.6k scalars for an 8k trace"; 4,592 is the RECORD count at the MEDIAN trace
+  (2652 steps). At the 8192 cap it is 14,336 records / 57,344 scalars -- ~12x
+  low, in the direction that decides whether the cell fits. Measured: 1.03 GB
+  for 800 traces as per-record dicts vs ~1.6 GB headroom, 0.41 GB columnar, so
+  attn-profile-v1 is COLUMNAR and that is mandatory not stylistic. Also replaced
+  "roughly six times baseline harm" with both measured ratios, 6.49x (Random)
+  and 5.49x (StreamingLLM), per landmine 11.
+
+  **(4) Infrastructure landed BEFORE queueing.** Onset gating is a NEW press
+  field `compression_start_step` -- deliberately not the existing `onset_step`,
+  which is a measured OUTPUT (when the first prune affected the distribution);
+  reusing it would make the gate overwrite its own measurement. Seven regression
+  tests, including one that asserts the gate ATTRIBUTES EXIST (landmine 12: a
+  bare DecodingPress has none, and a gate that silently does not gate is what
+  invalidated restoration v1 -- verified the test fails on a bare press).
+  attn-profile-v1 columnar schema with a refuse-unknown-column rule; latent
+  split with an immutable FrozenBasis that refuses a non-fullcache condition.
+  New metric modules are in the package, not in scripts/, per scripts/CLAUDE.md.
+
+  **(5) 11 cells queued, and the storage guard already bites.** Q.1 x3, Q.2 x3,
+  Q.5 x5, chained by `requires`, 2.32 GB projected. New per-job `est_output_gb`
+  + `check_disk_budget` refuses a launch that would exhaust the ~70 GB personal
+  budget (1 GB margin). Simulated from 68 GB used: the six Q.1/Q.2 cells launch,
+  then **restoration-lag1 is REFUSED at 1.28 GB headroom.** The Q.5 sweep needs
+  ~2 GB freed first, and the only real reclaim path is dropping a model (~28 GB
+  for the 14B) -- a decision, not routine cleanup. Q.3 and Q.6 are NOT queued:
+  their metrics and schemas are landed and tested but their runners do not
+  exist, and queueing a cell whose runner is missing dies rc=2 and is marked
+  stuck (landmine 1).
+
+  **(6) ICLR 2027 conversion done, and the page framing was wrong.** Official
+  style files from media.iclr.cc are in-tree. 29 pages under article/11pt was
+  never comparable to a limit defined by the venue style: under
+  iclr2027_conference the paper is **26 pages, ~24 of it main text**, against 9.
+  Appendices after the bibliography are unlimited, so this is RELOCATION not
+  deletion; proposal in docs/strategy/ICLR2027_PAGE_BUDGET.md moves ~13 pages,
+  mostly out of section 4 (9pp) and section 5 (5pp). Anonymity is STRUCTURAL:
+  \iclrfinalcopy commented out makes the style file substitute "Anonymous
+  authors"; verified in the built PDF that no identity string appears on any
+  page. Repo URL replaced by an anonymized placeholder and BOTH mirror
+  assertions removed -- **the placeholder URL is still a promise of an artifact
+  that does not exist and must be replaced before submission.** Required AI use
+  statement added (page-limit exempt), written to be accurate rather than
+  minimal. SUBMISSION_STRATEGY Phase 6 intro rewrite APPLIED and marked applied,
+  with one correction: its draft quoted 0.882 as the full-cache reference, which
+  is the BANK number Amendment K designates NOT the cell comparator -- the
+  applied text uses the matched references 0.903 (readout) and 0.885 (free-run).
+  Phase 4's ladder band applied, then CORRECTED: the first version shaded
+  FC+bracket, a position that corresponds to nothing on the axis; it now spans
+  the reverse and forward rungs, which is where the bracket lives.
+
+  **(7) SCOOP WATCH VERDICT CHANGED -- partial foreclosure.** arXiv:2608.01631
+  ("Does Accuracy Equal Evidence?", Ai/He/Guo) runs a fixed-trace replay
+  protocol -- structurally our forward readout -- and its Table 2 reports
+  end-to-end AND fixed-trace accuracy for the same methods: AdaKV 0.233 vs
+  0.400, SnapKV 0.267 vs 0.400. **Those differences ARE our residual, and the
+  paper never names or computes them**; its estimand is the answer-evidence gap.
+  The standing claim "the replay-decomposition instrument remains unclaimed" is
+  RETRACTED. What remains unclaimed is narrower: the residual as a defined
+  estimand with clustered intervals, the reverse-replay bracket, and using the
+  decomposition to reconcile two literatures. Cited with a differentiating
+  paragraph that states the overlap BEFORE the difference. CASK (2604.10900) and
+  VeriCache (2605.17613) cited as relevant non-scoops.
+
+  **NEXT:** (a) replace the anonymized-repo placeholder; (b) execute the
+  body/appendix split against 9 pages; (c) free ~2 GB before the Q.5 sweep;
+  (d) build Q.3/Q.6 runners if those cells are wanted. 10 commits unpushed;
+  push authorization NOT granted.
 
   **★★★★★ 2026-09-08 (later) — REMOTE BACK. parity OK for the first time this
   session, the M.3 figure BUILT, and fig4's caption found to describe a figure

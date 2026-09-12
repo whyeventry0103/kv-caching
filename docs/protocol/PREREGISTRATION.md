@@ -2422,3 +2422,264 @@ doing any work and the orchestrator marked the job stuck, leaving an empty run
 directory. Hand dry-running the runner did not catch it, because the hand
 invocation omits exactly the flags the orchestrator adds. A regression test now
 asserts that contract for every command the queue can dispatch.
+
+---
+
+## Amendment Q (2026-09-12): Meeting #3 instrumentation — pre-registered reads
+
+Six cells, every read written before any computation runs, following the
+Amendment P precedent. Design rationale and the arithmetic behind the numbers
+here: `docs/design/MEETING3_DESIGN.md`.
+
+**The constraint that shapes all six.** Amendment P.3 established that within a
+fixed budget, divergence magnitude does not predict accuracy loss (ρ = −0.200,
+CI [−0.400, +0.800], n = 4 cells — "not established at this n", not refuted). A
+seventh instrument producing another magnitude scalar would license nothing.
+Every cell below is therefore required to produce **structure**, and each carries
+a falsifiable prediction against a quantity it was not fitted to. A fine-scale
+quantity connected to accuracy by adjacency licenses nothing; Definition 6 applies
+unchanged throughout.
+
+**Storage discipline.** Measured on the remote 2026-09-12: 68 GB used of the ~70 GB
+personal budget, ~1.6 GB headroom. KV caches, attention maps and hidden states
+never reach disk; every cell reduces to scalars in the same pass. Every new schema
+below is **columnar** for this reason, and the launcher fails loudly rather than
+silently if a cell's projected footprint would exceed the remaining headroom.
+
+### Q.0 Scope widening: latent-state divergence enters scope, with limits
+
+Amendment P.4 states "Latent-state divergence is out of scope." **That scope is
+widened here, on 2026-09-12, and the widening is deliberate and dated rather than
+silent.** Latent-state quantities are admitted for Q.6 only, and under three
+standing limits that do not expire:
+
+1. Latent quantities support **structural** claims only. They may never be
+   converted to an accuracy-scale claim by adjacency (Definition 6).
+2. Every latent result is **exploratory by construction** and is labelled so in
+   any document that reports it. The paper must not present it as the mechanism.
+3. The whitening statistics and the principal basis are fitted on the
+   **full-cache condition only** and frozen before any compressed trace is
+   projected. A basis fitted on both conditions makes the comparison circular,
+   and that is a stop condition, not a caveat.
+
+### Q.1 Sawtooth control: does phase-0 locking survive small eviction amplitude?
+
+**Why this cell exists.** P.2-v2 branch A reports divergence peaking at phase 0,
+the prune step, and reads it as eviction-locking. At phase 0 the cache has just
+fallen from 320 to 256. This cell asks whether the locking survives when the
+per-event amplitude is small.
+
+**The control originally proposed was confounded and is not run.** Holding mean
+cache at 288 while varying amplitude forces `B = 288 − I/2`, because mean cache is
+`B + I/2`. Amplitude and floor are then locked together: the small-amplitude arm
+also never falls below 284. A collapse there would be equally consistent with
+"the discontinuity was too small to lock to" and with "the cache never fell far
+enough to do damage." The parameterisation is genuinely two-dimensional in
+`(B, I)`, so there is no third knob inside the eviction schedule.
+
+**Run instead — fixed floor, swept amplitude.** All arms at `target_size` 256,
+the published cell's floor:
+
+| Arm | `target_size` | `compression_interval` | floor | amplitude | mean cache |
+|---|---|---|---|---|---|
+| T1 | 256 | 16 | 256 | 16 | 264 |
+| T2 | 256 | 64 | 256 | 64 | 288 (= the published P.2 cell) |
+| T3 | 256 | 256 | 256 | 256 | 384 |
+
+Mean cache varies, and **the direction of that variation closes the confound
+instead of opening it: T1 has the lowest mean cache and is the harshest arm
+overall.** A collapse of phase excess at T1 therefore cannot be attributed to T1
+being gentler than the deployed configuration; it compresses more on average.
+
+**Analysis constraint, binding.** `phase_amplitude_excess` refuses profiles that
+mix compression intervals. Each arm is analysed separately against its own sham at
+its own bucket count. Raw phase amplitude scales with bucket count, so **the read
+is on whether each arm's excess excludes zero, and never on the ordering of excess
+magnitudes across arms.** Raw and sham amplitudes are reported per arm.
+
+**Pre-committed read.**
+- **AMPLITUDE-INDEPENDENT.** T1's excess excludes zero with peak phase 0. Locking
+  is not an artifact of large per-event amplitude. **P.2 branch A stands as
+  written**, strengthened.
+- **AMPLITUDE-DEPENDENT.** T1's excess does not exclude zero while T3's does.
+  Branch A is **not refuted but must be qualified in the paper**: the claim
+  becomes "divergence is locked to eviction events at the deployed amplitude
+  (64), and does not detectably lock at amplitude 16," and §4.4 plus the threats
+  section state the threshold and that below-64 behaviour is untested. The
+  mechanism-clause wording (candidate A) is unaffected, since it makes no phase
+  claim.
+- **INDETERMINATE.** Neither T1 nor T3 excludes zero. The cell is underpowered at
+  this n and reports no verdict; branch A stands on its own evidence and this
+  cell is reported as inconclusive rather than supportive.
+
+**Negative control on the instrument, same cell.** Split the prune into
+**selection** (tokens become unattendable at step `s`) and **removal** (the tensor
+shrinks at step `s + d`, `d = 32`). RoPE is applied at cache-write time, and
+softmax over 320 keys with 64 masked is arithmetically identical to softmax over
+the remaining 256, so the removal step is a functional no-op **by construction**.
+**Pre-commit: phase excess anchored on the removal step must not exclude zero.**
+If it does, the phase instrument is responding to something with no functional
+content, and every phase result including branch A is suspect — **STOP, and make
+no paper edit from any phase result until it is explained.**
+
+### Q.2 Onset-staggered replay, `D_tv`
+
+**Construction.** Compression is inactive until decode step `t0`, active with
+budget `B` thereafter. Exposure `h = t − t0`. Because `r = B/t` is untouched by
+`t0`, two cells can sit at identical position, budget and realised ratio while
+differing in exposure — which is the manipulation `r = B/t` otherwise forbids.
+
+**Grid.** `B ∈ {256, 2048}` × `t0 ∈ {0, 512, 2048}`, MATH-500, 25 problems × 4
+seeds, teacher-forced replay. Divergence read at matched absolute positions only.
+
+**Implementation constraint.** The gate is a new press field,
+`compression_start_step`, and deliberately **not** the existing `onset_step`:
+`onset_step` is a measured output recording when the first prune affected the
+distribution, so reusing it would make the gate overwrite its own measurement.
+`compression_start_step = None` is the deployed always-on behaviour, so every
+existing cell is bit-identical. A start step set without a `profile_step` raises
+rather than compressing, so a staggered cell can never silently run always-on.
+
+**Pre-committed read**, on `∂D/∂h` at matched `r`, problem-clustered CI:
+- **RATIO-ONLY.** The CI includes zero at every `r` level tested. Divergence is a
+  function of dose alone. This strengthens M.3 from "the rise is consistent with a
+  ratio effect" to "exposure contributes nothing measurable at fixed dose."
+- **HORIZON-PRESENT.** The CI excludes zero with consistent sign across `r`
+  levels. An exposure mechanism exists and is separable from dose. **This would
+  partially relicense what M.3 delicensed**, and the mechanism-clause decision
+  (candidate A, 2026-09-08) is reopened and re-argued in writing before any
+  wording changes.
+- **MIXED.** Sign or significance varies across `r` levels. Report the interaction
+  surface; claim neither main effect.
+
+**Naming constraint, binding.** The manipulated quantity is **exposure to the
+compression process**, never "horizon" in the plain temporal sense. In the
+staggered arm the early entries were never subject to eviction, so the retained
+set is drawn from a different history; that is what exposure means. Writing it as
+"horizon" repeats the error M.3 caught.
+
+### Q.3 Attention channel decomposition, with GQA collateral
+
+**Quantities**, per query step `s`, per layer, per KV group, at prune events:
+
+```
+a_full|S(j) = a_full(j) / Σ_{k∈S} a_full(k)     j ∈ S
+M           = 1 − Σ_{k∈S} a_full(k)              lost mass — SELECTION failure
+Δ           = TV(a_comp, a_full|S)               shape distortion — STATE drift
+```
+
+`M` is an on-reference quantity: computable from the full model plus the eviction
+decision. `Δ` is a trajectory quantity: it depends on the compressed model's own
+accumulated state. This is the paper's readout-vs-trajectory split one scale down,
+and that correspondence is the reason the cell is worth running.
+
+**Instrument self-control, gated.** At the first prune under teacher-forced replay
+both models have consumed identical token IDs, so `q_s` is identical and **`Δ`
+must be exactly 0.0000**. If it is not, STOP — harness defect, not result. Same
+standing as the exactly-zero pre-eviction TV control.
+
+**GQA collateral.** `num_attention_heads` 28 against `num_key_value_heads` 4
+(verified from the model config, 2026-09-12): one eviction decision is shared
+across the 7 query heads in a group. Per prune event and KV group `g`:
+
+```
+collateral(g) = fraction of evicted positions j such that at least one query head
+                in g placed mass > τ on j, while the group aggregate ranked j
+                below the cut.        τ = 0.01, fixed here, not tuned later.
+```
+
+**Pre-committed ordering.** R-KV's redundancy term spreads its budget over
+distinct content, so R-KV shows **lower** collateral than the heavy-hitter policy
+(ObservedAttentionPress, no recency reservation). Reported as a per-policy
+ordering with problem-clustered CIs on the pairwise contrast, not as a
+correlation.
+
+**Cross-instrument prediction, pre-committed.** If `Δ` is large relative to `M` at
+the Q.5 reinsertion trigger, the P.5 restoration null is explained: reinsertion
+repairs `K` and cannot repair `q`. Stated as a directional prediction on the ratio
+`Δ/M` at the trigger step, with its CI.
+
+### Q.4 `attn-profile-v1` schema — fixed before any cell runs
+
+Defined separately from `tv-profile-v1`. The Task 4 lesson is that a stored
+profile lacking a field a later question needs costs a full re-run, so the field
+set is fixed here, against every question in the design spec, before the cell is
+queued.
+
+**Columnar, not per-record objects.** At the 8192 generation cap a trace holds
+`28 layers × 4 KV groups × 128 events = 14,336` records. As per-record JSON dicts
+that is 1.29 MB per trace and **1.03 GB for 800 traces**, against ~1.6 GB of
+headroom and a `runs/` tree that is 2.5 GB in total. Columnar float arrays carry
+the same information in 0.41 GB, because the repeated key names are most of the
+cost. Columnar is therefore mandatory, not a preference.
+
+```
+schema_version : "attn-profile-v1"
+n_layers, n_kv_groups, compression_interval, tau : int / float
+event_steps    : int[n_events]                      decode step of each prune
+index order    : record i = (layer, group, event) flattened C-order
+mass_loss      : float[n_layers*n_kv_groups*n_events]     M
+shape_tv       : float[n_layers*n_kv_groups*n_events]     Delta
+collateral     : float[n_layers*n_kv_groups*n_events]
+n_evicted      : int[n_layers*n_kv_groups*n_events]
+first_prune_delta_max : float      the self-control; MUST be 0.0 exactly
+```
+
+### Q.5 Latency-swept restoration
+
+P.5 reinserted at a single trigger with a 200-step read window and therefore
+measured only the far regime. Sweep the lag `ℓ ∈ {1, 4, 16, 64, 256}` decode steps
+between eviction and reinsertion, keeping the four P.5 arms (matched, random,
+relaxed, none) and the P.5 instrument gate unchanged.
+
+**Pre-committed read**, on the matched-arm effect as a function of `ℓ`:
+- **DECAY.** The effect is positive with a CI excluding zero at small `ℓ`, and
+  decays monotonically to the measured null. Reinsertion works briefly, and the
+  P.5 null is correctly scoped to the far regime. This converts a flat null into a
+  mechanism with a timescale.
+- **FLAT-NULL.** No help at any `ℓ`, including `ℓ = 1`. The query-drift account is
+  wrong, and the finding becomes that the cache's **composition** matters more
+  than its contents — consistent with the specificity control's harm.
+- **NON-MONOTONE.** Effect varies with `ℓ` without a consistent trend. Report the
+  profile; claim no timescale.
+
+**Framing constraint.** The P.5 specificity control costs **6.49× baseline
+(Random)** and **5.49× baseline (StreamingLLM)**. Both ratios are always stated
+explicitly; neither stands in for the other and no range spanning them is used.
+Landmine 11: "five to six times the baseline" once passed `audit --strict` while
+being false, because the gate checks literals and not English.
+
+### Q.6 On-manifold split — exploratory, estimand fixed in advance
+
+Admitted by the Q.0 scope widening, under its three limits.
+
+**Construction.** Fit a principal subspace `U_k` (k = 64) from full-cache
+trajectories only, on whitened hidden states, whitening and basis frozen before
+any compressed trace is projected. For each compressed trajectory under teacher
+forcing, `δ_s = h_comp(s) − h_full(s)`, split into `δ∥ = U_k U_kᵀ δ` and
+`δ⊥ = δ − δ∥`, with `ω = ‖δ⊥‖ / ‖δ∥‖`.
+
+**The estimand is fixed here and is not to be substituted later.** There are four
+policies. A rank correlation over four points is not a test, and the temptation to
+report one if the ordering looks favourable is exactly what pre-registration
+exists to remove. **The pre-committed estimand is the pairwise contrast
+`ω(Random) − ω(StreamingLLM)` with a problem-clustered bootstrap CI**, chosen
+because the ADD channel split already separates those two policies most sharply
+(Random: within-answered 0.504, termination shift 0.224; StreamingLLM: 0.749 and
+0.081). The four-policy ordering is reported descriptively alongside it, without
+an interval and without a correlation coefficient.
+
+**Pre-committed read.**
+- **PREDICTED.** `ω(Random) − ω(StreamingLLM)` is positive with a CI excluding
+  zero: off-manifold drift accompanies non-termination, on-manifold drift
+  accompanies confident wrong answers. Reported as exploratory support for a
+  geometric account of why policies with statistically indistinguishable residuals
+  (spread 0.008) fail in different ways.
+- **NULL.** The CI includes zero. A natural and appealing hypothesis is dead, and
+  it is reported plainly as dead.
+- **REVERSED.** The contrast excludes zero with the opposite sign. Reported as
+  such, with no post-hoc reinterpretation of which direction the geometry
+  predicted.
+
+**Standing limit.** No result from Q.6 may be used to support an accuracy-scale
+claim, and none may be described as the mechanism.

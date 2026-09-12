@@ -1,0 +1,43 @@
+name: replay_onset_t2048_q2
+stage: replay
+mode: compression_replay
+# Amendment Q.2 -- ONSET-STAGGERED REPLAY, arm t0=2048. D_tv half.
+#
+# r = B/t couples the realised ratio to context length, so no slice of (B, t)
+# isolates exposure: iso-B confounds it with dose, iso-r confounds it with
+# absolute cache, iso-t cannot address it. The identity says nothing about HOW
+# LONG compression has been running, so onset t0 is a genuine third variable.
+# Compression is inactive until decode step 2048, active with budget B after.
+# Two arms can then sit at the same position, budget and realised ratio while
+# differing by an order of magnitude in exposure h = t - t0.
+#
+# IMPLEMENTATION: compression_start_step drives a NEW press field of that name,
+# deliberately not the existing onset_step, which is a measured OUTPUT recording
+# when the first prune affected the distribution. Reusing it would make the gate
+# overwrite its own measurement. The press must be instrumented or the runner
+# refuses (landmine 12 -- a gate that silently does not gate invalidated
+# restoration v1).
+#
+# NAMING (binding): the manipulated quantity is EXPOSURE TO THE COMPRESSION
+# PROCESS, never "horizon" in the plain temporal sense. In a staggered arm the
+# early entries were never subject to eviction, so the retained set is drawn
+# from a different history. Writing it as horizon repeats the M.3 error.
+#
+# READ (pre-registered, Amendment Q.2): RATIO-ONLY / HORIZON-PRESENT / MIXED,
+# on dD/dh at matched r with a problem-clustered CI. HORIZON-PRESENT would
+# partially relicense what M.3 delicensed and reopens the mechanism clause.
+reference_run_name: math500-fc-powered-merged
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+subset:
+  math500: 25
+presses: [random, streamingllm]
+budgets: [256, 2048]
+seeds: [11, 23, 47, 89]
+compression_interval: 64
+compression_start_step: 2048
+extended_measures: true
+estimated_generation_count: 0
+estimated_replay_count: 400
+scale_authorized: true
+remote_only: true

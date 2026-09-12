@@ -1086,6 +1086,25 @@ def build_catalogue() -> list[Entry]:
             "published 14B MATH-500 pass@1; the 14B bank gate band was set from "
             "it. VERIFIED 2026-07-28: row DeepSeek-R1-Distill-Qwen-14B reads 93.9.",
         ),
+        (
+            "evidence2026.adakv_gap",
+            -0.167,
+            "evidence2026",
+            "Table 2 (AIME26, Qwen3-8B, budget 256): end-to-end 23.3% minus "
+            "fixed-trace 40.0%",
+            "the residual implicit in the nearest neighbour's own table, for "
+            "AdaKV. DERIVED by us from two of their reported accuracies; they "
+            "never form this difference. VERIFIED 2026-09-12 against the paper.",
+        ),
+        (
+            "evidence2026.snapkv_gap",
+            -0.133,
+            "evidence2026",
+            "Table 2 (AIME26, Qwen3-8B, budget 256): end-to-end 26.7% minus "
+            "fixed-trace 40.0%",
+            "the same implicit residual for SnapKV. DERIVED by us from two of "
+            "their reported accuracies. VERIFIED 2026-09-12 against the paper.",
+        ),
     ):
         external(key, value, cite, locator, desc)
 

@@ -1156,6 +1156,77 @@ This is the second time this artifact's exclusion list has gone stale as new run
 landed, so the pattern is worth naming: `compute.json` does not self-update, and
 any cell that adds a run directory leaves it stale until it is regenerated.
 
+### 4z. Meeting #3 pre-registration, the ICLR conversion, and a scoop-watch verdict that changed (2026-09-12/13)
+
+No new measurements. Three things that bear on how results are read.
+
+**1. Amendment Q pre-registers six Meeting-#3 cells, and widens P.4's latent
+scope.** Every read is written before any cell was queued. Q.0 replaces
+P.4's "Latent-state divergence is out of scope" with a dated, limited admission:
+structural claims only, exploratory by construction, and the basis fitted on the
+full-cache condition only and frozen, with circularity a STOP condition rather
+than a caveat. Task C's estimand is **fixed in the amendment rather than after
+the fact**: four policies is four points and a rank correlation over them is not
+a test, so the pre-committed quantity is the pairwise contrast
+`ω(Random) − ω(StreamingLLM)` with a problem-clustered CI, with the four-policy
+ordering reported descriptively and no correlation coefficient.
+
+**2. The Q.1 sawtooth control was redesigned before it was queued, and it can go
+against us.** The proposed control held mean cache at 288 while varying
+amplitude. Mean cache is `B + I/2`, so that forces `B = 288 − I/2` and locks
+amplitude to floor — the small-amplitude arm also never falls below 284, and a
+collapse there would be equally consistent with the hypothesis and with "the
+cache never fell far enough to do damage." The parameterisation is genuinely
+two-dimensional, so the identity is broken the other way: **fixed floor 256, the
+published cell's own floor, with the interval swept.** Mean cache then varies,
+and the direction closes the confound rather than opening it — interval 16 has
+the lowest mean cache and is the harshest arm, so a collapse there cannot be
+attributed to that arm being gentler.
+
+**This cell is aimed at P.2 branch A, which is already written into the paper.**
+If interval 16's phase excess does not exclude zero while interval 256's does,
+branch A is not refuted but must be **qualified**: "locked to eviction events at
+the deployed amplitude (64), and not detectably at amplitude 16," with the
+threshold and the untested region stated in §4.4 and the threats section. That
+wording exists in Amendment Q before the read, which is the point.
+
+**3. The scoop-watch verdict changed, and the novelty claim narrows.**
+arXiv:2608.01631 (Ai, He, Guo) runs a "controlled fixed-trace replay protocol" —
+structurally our forward readout — and its Table 2 (AIME26, Qwen3-8B, budget
+256) reports end-to-end **and** fixed-trace accuracy for the same methods: AdaKV
+`0.233` against `0.400`, SnapKV `0.267` against `0.400`. **Those differences,
+`−0.167` and `−0.133`, are the quantity this project is about, and the paper
+never names or computes them** — its estimand is the answer–evidence gap and the
+two accuracies sit in different tables serving a different claim.
+
+The standing claim that "the replay-decomposition instrument remains unclaimed"
+is **retracted**. What remains unclaimed is narrower and should be stated that
+way from here: the residual as a *defined estimand* with problem-clustered
+intervals, the reverse-replay bracket that corrects its off-policy bias, and the
+use of the decomposition to reconcile two literatures. Related Work now states
+the overlap **before** the difference and quotes their numbers as containing our
+residual, and also reads the overlap as corroboration — an independent group, on
+a different model and benchmark, measured a large free-running-minus-fixed-trace
+gap for eviction methods.
+
+**Framing rule added.** Two design-spec errors were corrected before they could
+propagate: an attention-profile storage estimate low by ~12x (4,592 records at
+the median trace length restated as 14,336 records / 57,344 scalars at the 8192
+cap, which is what made the schema columnar), and a single "roughly six times
+baseline harm" standing in for two different ratios. The specificity control is
+**6.49× baseline (Random)** and **5.49× baseline (StreamingLLM)**, always both,
+per landmine 11.
+
+**Venue conversion.** The paper now builds under `iclr2027_conference` at **26
+pages, ~24 of it main text** against a 9-page limit — the previous "29 against
+9" was measured under `article` at 11pt and was never comparable. Appendices are
+unlimited after the bibliography, so the remaining work is relocation, proposed
+in `docs/strategy/ICLR2027_PAGE_BUDGET.md`. Anonymity is structural via
+`\iclrfinalcopy` and was verified in the built PDF rather than assumed. The
+`0.882` in SUBMISSION_STRATEGY's Phase-6 intro draft was **not** used: it is the
+full-cache bank accuracy, which Amendment K designates not the cell comparator,
+so the applied text uses the matched references `0.903` and `0.885`.
+
 
 <!-- AUDIT:ARCHIVAL-END -->
 

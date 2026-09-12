@@ -1,6 +1,7 @@
 # Pre-release scrub — one deliberate step, run only if the repo is made public
 
-**Status: NOT RUN. Nothing here is executed as routine maintenance.**
+**Status: items 1 and 2 RESOLVED 2026-09-12 by the ICLR 2027 venue conversion.
+Items 3-5 still NOT RUN.** Nothing here is executed as routine maintenance.
 
 Both remotes are **private** (verified 2026-08-29 via `gh repo view`:
 `whyeventry0103/kv-caching` and `-backup`, both `"visibility":"PRIVATE"`).
@@ -16,40 +17,36 @@ moment rather than against this file's snapshot.
 
 ## 1. Author block — `kv_readout_vs_trajectory_paper.tex`
 
-- **Line 42** carries the real name: `\author{Muhammad Ali Shah\\ ...}`.
-- **Line 41** already records the requirement in a comment: *"venue conversion
-  must restore 'Anonymous Authors' and re-anonymize the repo URL."*
+**RESOLVED 2026-09-12, structurally rather than by editing.** The paper now
+builds under `iclr2027_conference.sty` with `\iclrfinalcopy` commented out, and
+the style file substitutes "Anonymous authors / Paper under double-blind review"
+for the author block and prints the "Under review" running head. The real
+`\author{...}` stays in the source but is **not rendered**.
 
-For a double-blind submission, restore the anonymous author block. For a
-non-anonymous arXiv posting the real name is correct and this item is a no-op —
-decide which release this is before touching it.
+Verified against the built PDF rather than assumed: `Anonymous authors` and
+`Under review` appear on page 1, and none of `Muhammad Ali Shah`, `LUMS`,
+`lums.edu.pk` or `whyeventry0103` appears anywhere in the extracted text of any
+of the 26 pages.
+
+At camera-ready, uncomment the single `\iclrfinalcopy` line; nothing else needs
+re-editing. The same one-line change serves a non-anonymous arXiv posting.
 
 ## 2. Repository URL / anonymized mirror — same file
 
-Find it with `grep -n 'github.com/whyeventry0103' kv_readout_vs_trajectory_paper.tex`
-— do not trust a line number here, one already went stale (this item read "line
-493" while the text sat at 634).
+**RESOLVED 2026-09-12.** The named URL `github.com/whyeventry0103/kv-caching`
+identified the author and is gone from the rendered paper. Both assertions of an
+anonymized mirror — the footnote and the paragraph's closing sentence, which
+this item correctly flagged as one promise made twice for something that did not
+exist — are removed. The Reproducibility paragraph now promises exactly one
+artifact, an anonymized repository, behind a single placeholder URL.
 
-The `\paragraph{Reproducibility.}` line hard-codes
-`https://github.com/whyeventry0103/kv-caching` and asserts the anonymized mirror
-**twice**, not once — both must be resolved together:
+**One action remains before submission and it is not optional:** the placeholder
+`https://anonymous.4open.science/r/kv-readout-vs-trajectory` must be replaced
+with a real anonymized repository link. The paper currently promises an artifact
+that has not been created — the same class of defect this item was opened for —
+so it stays open in that narrower form rather than being ticked off.
 
-1. the `\footnote{...}`: *"the double-blind submission carries an anonymized
-   mirror"*;
-2. the paragraph's closing sentence: *"The double-blind submission carries the
-   same file through the anonymized mirror."*
-
-If releasing double-blind, the mirror must actually exist and the URL must point
-at it. Both sentences currently promise something that has not been created.
-Verify before submission rather than at submission.
-
-**Do not build the mirror reflexively.** This has two mutually exclusive correct
-resolutions and they turn on a decision that has not been made: whether
-double-blind anonymization is in scope for the ICLR submission copy at all. The
-owner has stated they do not want the work anonymous in general; whether that
-extends to the submission copy specifically is a separate, unconfirmed question.
-Resolve the scope question first — then either build the mirror, or delete both
-assertions.
+At camera-ready, restore the named URL alongside `\iclrfinalcopy`.
 
 ## 3. `docs/strategy/` — four tracked, two gitignored
 

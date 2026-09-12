@@ -1,0 +1,42 @@
+name: restoration_lag16_q5
+stage: replay
+mode: compression_replay
+# Amendment Q.5 -- LATENCY-SWEPT RESTORATION, arm lag=16.
+#
+# P.5 reinserted at a single trigger with a 200-step read window and therefore
+# measured only the FAR regime, returning a null: matched arm -0.0013 against
+# baseline 0.0383, ~3% of baseline, indistinguishable from no help.
+#
+# The proposed account is that the damage is in the QUERY stream, not the key
+# store: attention is q.K, reinsertion repairs K, and by the trigger q was
+# computed from an already-perturbed hidden state. If that holds, efficacy
+# should decay with the lag between eviction and reinsertion.
+#
+# The lag selects WHICH stashed entries return, by eviction age, holding the
+# trigger fixed. Moving the trigger instead would vary staleness and position in
+# the trace together, and the sweep is meant to isolate staleness.
+#
+# FRAMING (binding): the P.5 specificity control costs 6.49x baseline (Random)
+# and 5.49x baseline (StreamingLLM). Both ratios are always stated; neither
+# stands in for the other and no range spanning them is used (landmine 11).
+#
+# READ (pre-registered, Amendment Q.5): DECAY / FLAT-NULL / NON-MONOTONE.
+reference_run_name: math500-fc-powered-merged
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+subset:
+  math500: 25
+presses: [random, streamingllm]
+budgets: [256]
+seeds: [11, 23, 47, 89]
+compression_interval: 64
+restoration:
+  arms: [none, matched, random, relaxed]
+  trigger_step: 130
+  reinsert_fraction: 0.25
+  reinsert_lag: 16
+extended_measures: true
+estimated_generation_count: 0
+estimated_replay_count: 800
+scale_authorized: true
+remote_only: true
