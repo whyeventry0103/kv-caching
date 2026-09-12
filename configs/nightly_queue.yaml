@@ -603,7 +603,7 @@ jobs:
     total: 200
     seeds: [11, 23, 47, 89]
     min_free_gb: 28
-    progress_kind: replay
+    progress_kind: grid      # counts runs/<run_name>/math500/**/*.jsonl, like every other replay cell
     est_output_gb: 0.08
     requires: null
 
@@ -614,7 +614,7 @@ jobs:
     total: 200
     seeds: [11, 23, 47, 89]
     min_free_gb: 28
-    progress_kind: replay
+    progress_kind: grid      # counts runs/<run_name>/math500/**/*.jsonl, like every other replay cell
     est_output_gb: 0.08
     requires: replay-sawtooth-i16
 
@@ -625,7 +625,7 @@ jobs:
     total: 200
     seeds: [11, 23, 47, 89]
     min_free_gb: 28
-    progress_kind: replay
+    progress_kind: grid      # counts runs/<run_name>/math500/**/*.jsonl, like every other replay cell
     est_output_gb: 0.08
     requires: replay-sawtooth-i64
 
@@ -640,7 +640,7 @@ jobs:
     total: 400
     seeds: [11, 23, 47, 89]
     min_free_gb: 28
-    progress_kind: replay
+    progress_kind: grid      # counts runs/<run_name>/math500/**/*.jsonl, like every other replay cell
     est_output_gb: 0.16
     requires: replay-sawtooth-i256
 
@@ -651,7 +651,7 @@ jobs:
     total: 400
     seeds: [11, 23, 47, 89]
     min_free_gb: 28
-    progress_kind: replay
+    progress_kind: grid      # counts runs/<run_name>/math500/**/*.jsonl, like every other replay cell
     est_output_gb: 0.16
     requires: replay-onset-t0
 
@@ -662,7 +662,7 @@ jobs:
     total: 400
     seeds: [11, 23, 47, 89]
     min_free_gb: 28
-    progress_kind: replay
+    progress_kind: grid      # counts runs/<run_name>/math500/**/*.jsonl, like every other replay cell
     est_output_gb: 0.16
     requires: replay-onset-t512
 
@@ -679,7 +679,7 @@ jobs:
     total: 800
     seeds: [11, 23, 47, 89]
     min_free_gb: 28
-    progress_kind: replay
+    progress_kind: grid      # counts runs/<run_name>/math500/**/*.jsonl, like every other replay cell
     est_output_gb: 0.32
     requires: replay-onset-t2048
 
@@ -690,7 +690,7 @@ jobs:
     total: 800
     seeds: [11, 23, 47, 89]
     min_free_gb: 28
-    progress_kind: replay
+    progress_kind: grid      # counts runs/<run_name>/math500/**/*.jsonl, like every other replay cell
     est_output_gb: 0.32
     requires: restoration-lag1
 
@@ -701,7 +701,7 @@ jobs:
     total: 800
     seeds: [11, 23, 47, 89]
     min_free_gb: 28
-    progress_kind: replay
+    progress_kind: grid      # counts runs/<run_name>/math500/**/*.jsonl, like every other replay cell
     est_output_gb: 0.32
     requires: restoration-lag4
 
@@ -712,7 +712,7 @@ jobs:
     total: 800
     seeds: [11, 23, 47, 89]
     min_free_gb: 28
-    progress_kind: replay
+    progress_kind: grid      # counts runs/<run_name>/math500/**/*.jsonl, like every other replay cell
     est_output_gb: 0.32
     requires: restoration-lag16
 
@@ -723,6 +723,6 @@ jobs:
     total: 800
     seeds: [11, 23, 47, 89]
     min_free_gb: 28
-    progress_kind: replay
+    progress_kind: grid      # counts runs/<run_name>/math500/**/*.jsonl, like every other replay cell
     est_output_gb: 0.32
     requires: restoration-lag64

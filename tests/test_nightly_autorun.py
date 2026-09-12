@@ -451,3 +451,101 @@ def test_refusal_names_the_reclaim_rule_and_forbids_raising_the_estimate():
     msg = str(e.value)
     assert "never from results/" in msg
     assert "Do not raise est_output_gb" in msg
+
+
+# --------------------------------------------------------------------------
+# A queued job whose progress_kind the orchestrator does not recognise raises
+# at launch_candidates, i.e. BEFORE any cell runs and after the window has
+# opened -- so the whole night is lost and every job behind it is blocked. This
+# actually happened when the Amendment Q cells were first queued with
+# progress_kind "replay", which is not one of the three kinds count_progress
+# implements. Caught by a remote dry-run; this test moves the catch into the
+# local gate, which is where it belongs.
+
+
+def test_every_queued_progress_kind_is_one_the_orchestrator_implements():
+    import yaml
+
+    queue = yaml.safe_load(
+        (ROOT / "configs" / "nightly_queue.yaml").read_text(encoding="utf-8")
+    )
+    known = {"grid", "readout", "marker"}
+    bad = {
+        j["name"]: j["progress_kind"]
+        for j in queue["jobs"]
+        if j["progress_kind"] not in known
+    }
+    assert not bad, (
+        f"queued jobs use progress_kind values count_progress does not implement: "
+        f"{bad}. Known kinds are {sorted(known)}. A job with an unknown kind "
+        f"raises in launch_candidates before anything launches and blocks every "
+        f"job behind it."
+    )
+
+
+def test_marker_jobs_declare_a_marker_and_others_do_not_need_one():
+    import yaml
+
+    queue = yaml.safe_load(
+        (ROOT / "configs" / "nightly_queue.yaml").read_text(encoding="utf-8")
+    )
+    missing = [
+        j["name"]
+        for j in queue["jobs"]
+        if j["progress_kind"] == "marker" and not j.get("marker")
+    ]
+    assert not missing, f"marker jobs with no marker path: {missing}"
+
+
+def test_every_queued_requires_names_a_job_that_exists():
+    """A typo in `requires` silently blocks a cell forever."""
+    import yaml
+
+    queue = yaml.safe_load(
+        (ROOT / "configs" / "nightly_queue.yaml").read_text(encoding="utf-8")
+    )
+    names = {j["name"] for j in queue["jobs"]}
+    dangling = {
+        j["name"]: j["requires"]
+        for j in queue["jobs"]
+        if j.get("requires") and j["requires"] not in names
+    }
+    assert (
+        not dangling
+    ), f"jobs depending on names that are not in the queue: {dangling}"
+
+
+def test_every_queued_config_file_exists():
+    import yaml
+
+    queue = yaml.safe_load(
+        (ROOT / "configs" / "nightly_queue.yaml").read_text(encoding="utf-8")
+    )
+    missing = [j["name"] for j in queue["jobs"] if not (ROOT / j["config"]).exists()]
+    assert not missing, f"queued jobs whose config file is absent: {missing}"
+
+
+def test_storage_is_measured_in_the_same_units_the_budget_is_declared_in(tmp_path):
+    """GiB, matching `du -h` and every usage figure in the project's docs.
+
+    Measuring in decimal GB against a GiB budget reported 73.01 against a budget
+    of 70 and refused every job unconditionally. A guard that is always on is
+    indistinguishable from a broken one, and this is how that was caught.
+
+    The tolerance is deliberately tight enough to separate the two units: GiB
+    and decimal GB differ by 7.4%, so a 2% band cannot pass both. The file is
+    large enough that `du`'s block rounding is well inside that band.
+    """
+    from nightly_autorun import storage_used_gb
+
+    n_bytes = 64 * 1024 * 1024
+    (tmp_path / "blob.bin").write_bytes(b"\0" * n_bytes)
+
+    used = storage_used_gb(tmp_path)
+    gib = n_bytes / (1024**3)
+    decimal_gb = n_bytes / 1e9
+
+    assert used == pytest.approx(
+        gib, rel=0.02
+    ), f"expected GiB ({gib:.6f}); decimal GB would be {decimal_gb:.6f}"
+    assert used != pytest.approx(decimal_gb, rel=0.02)

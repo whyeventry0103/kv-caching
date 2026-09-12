@@ -128,7 +128,13 @@ def storage_used_gb(root: Path | None = None) -> float:
             timeout=120,
         )
         if out.returncode == 0:
-            return int(out.stdout.split()[0]) * 1024 / 1e9
+            # GiB, not decimal GB. KVCACHE_PERSONAL_FREE_GB is declared in the
+            # same units `du -h` prints, which is how every usage figure in this
+            # project's docs was measured ("68 GB used of ~70"). Converting to
+            # decimal GB instead reports 73.01 against a budget of 70 and
+            # refuses every job unconditionally -- a guard that is always on is
+            # indistinguishable from a broken one.
+            return int(out.stdout.split()[0]) / (1024 * 1024)
     except (OSError, ValueError, IndexError, subprocess.TimeoutExpired):
         pass
     total = 0
@@ -138,7 +144,7 @@ def storage_used_gb(root: Path | None = None) -> float:
                 total += f.stat().st_size
         except OSError:
             continue
-    return total / 1e9
+    return total / (1024**3)
 
 
 @dataclass(frozen=True)
