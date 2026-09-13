@@ -2,7 +2,7 @@
 
 **Purpose of this file:** a complete, self-contained handoff. An LLM with zero prior
 context should be able to read this and resume exactly where we are. Last updated
-2026-09-13. Repo: `/Users/apple/dev/kv-caching` (moved off `~/Desktop` 2026-06-14 to
+2026-09-14. Repo: `/Users/apple/dev/kv-caching` (moved off `~/Desktop` 2026-06-14 to
 escape a recurring macOS TCC lockout; `~/Desktop/kv-caching` is a **symlink** to this
 path, not a second copy — verified 2026-07-27), branch `main`, GitHub
 `whyeventry0103/kv-caching`. For the current commit run `git rev-parse --short
@@ -23,6 +23,61 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 ---
 
 ## 0. TL;DR — where we are right now
+
+  **★★★★★ 2026-09-14 — RUNS ARE LIVE. Q.1 arm i16 COMPLETE (200/200); i64 in
+  flight on both GPUs. Q.1 READS were missing from the queue and are now added.
+  Q.5 will halt on storage. Abstract due 2026-09-18, full paper 2026-09-25.**
+
+  **(1) What has actually run.** The cron window (01:45-10:45 Dubai) fired on
+  2026-09-13 and drained as far as it could:
+  - `replay-sawtooth-i16` **200/200 COMPLETE**, 200 profiles.
+  - `replay-sawtooth-i64` **~87/200**, relaunched 2026-09-14 00:33 across both
+    GPUs (sessions `replay-sawtooth-i64-g0/g1`, ~15.5 GB and ~86% util each).
+    Rate measured at ~1 profile/min over both GPUs, so ~2h to finish.
+  - Everything after it: not started, no run dir.
+  Nothing was stuck; the window simply closed at 10:45 mid-cell.
+
+  **(2) A REAL GAP, now closed: the Q.1 reads had no cell.** The three sawtooth
+  GENERATION cells were queued, but nothing computed the phase excess the
+  pre-registered read turns on. The arms would have produced 600 profiles and
+  stopped, with the verdict uncomputed and nobody notified, because a queue that
+  drains looks finished. Three CPU-only `shape` cells added, each gated on its
+  OWN generation cell. **One per arm, forced by the code**: phase_amplitude_excess
+  raises on mixed intervals, which is also why Q.1 pre-commits to "does EACH
+  arm's excess exclude zero", never the ordering across arms.
+
+  **(3) The floor-exit guard was too broad and is now conditional on something
+  detectable.** `run_shape_analysis` refused `restrict_to_floor_exit: false`
+  outright. That reasoning is P.2-v2-specific: the Q.1 arms are FIXED-budget,
+  have no min_budget floor and no `ratio_trace` sidecar, so the restriction is
+  undefined for them and the whole-trace profile IS the pre-registered test. The
+  guard now keys on whether the source writes ratio_trace sidecars, so the
+  P.2-v2 refusal survives exactly where it applies. Unrestricted configs must
+  state an `unrestricted_rationale` -- which window a verdict is read on is not
+  allowed to be chosen by omission.
+
+  **(4) Storage will stop the queue partway, and exactly where is known.**
+  Measured 2026-09-14: **68.14 GiB of the ~70 GiB budget, 1.86 GiB headroom**.
+  Projected against the chain with the 1 GiB margin: i256 OK -> onset-t0 OK ->
+  onset-t512 OK -> onset-t2048 OK -> **restoration-lag1 REFUSED at 1.30 GiB**.
+  So **Q.1 and Q.2 will complete and Q.5 will not start.** Freeing ~2 GiB is the
+  precondition, and the only real reclaim path is dropping a model (~28 GB for
+  the 14B) -- a decision, not routine cleanup. Do NOT delete from results/, and
+  do not raise `est_output_gb` to get past the guard.
+
+  **(5) No double-launch risk, verified rather than assumed.** `--dry-run` sets
+  `session_names = []` and so ignores tmux entirely (landmine 20), which is why
+  its "would launch" line is not evidence of anything. A real tick calls
+  `tmux_session_names()`; `live_map` matched the two live sessions to GPUs {0,1}
+  and `eligible_gpus` then returns [] for the next job. Checked by running those
+  functions against the actual session names.
+
+  **NEXT:** (a) let the window drain Q.1/Q.2 and read the three shape artifacts
+  into PAPER_FINDINGS per the Q.1 branches; (b) free ~2 GiB before Q.5; (c) the
+  paper's anonymized-repo URL is still a placeholder for an artifact that does
+  not exist; (d) body/appendix split proposed but NOT executed (~24 main-text
+  pages against 9); (e) Q.3/Q.6 runners still unbuilt, so those cells remain
+  deliberately unqueued. 12 commits unpushed; push authorization NOT granted.
 
   **★★★★★ 2026-09-12/13 — MEETING #3 PRE-REGISTERED (Amendment Q) AND QUEUED;
   ICLR 2027 CONVERSION DONE. Paper is 26 pages under the venue style, ~24 of it
