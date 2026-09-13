@@ -629,6 +629,51 @@ jobs:
     est_output_gb: 0.08
     requires: replay-sawtooth-i64
 
+  # --- Q.1 READS. CPU-only re-analysis of profiles that already exist; no model,
+  # no GPU (min_free_gb 1 because the schema requires a number). Queued rather
+  # than run by hand so they execute unattended in the same window as everything
+  # else and their provenance sits in the same place -- the P.2-v2 precedent.
+  #
+  # ONE PER ARM, forced by the code: phase_amplitude_excess refuses profiles that
+  # mix compression intervals. The pre-registered Q.1 read is whether EACH arm's
+  # excess excludes zero, never the ordering of magnitudes across arms, because
+  # raw phase amplitude scales with bucket count.
+  #
+  # Each gated on ITS OWN generation cell, so a read can never run against a
+  # partially written profile tree.
+  - name: shape-sawtooth-i16
+    command: shape
+    config: configs/experiments/shape_sawtooth_i16_q1.yaml
+    run_name: shape-sawtooth-i16
+    total: 1
+    seeds: [11]
+    min_free_gb: 1
+    progress_kind: marker
+    marker: shape-sawtooth-i16/shape_sawtooth_i16.json
+    requires: replay-sawtooth-i16
+
+  - name: shape-sawtooth-i64
+    command: shape
+    config: configs/experiments/shape_sawtooth_i64_q1.yaml
+    run_name: shape-sawtooth-i64
+    total: 1
+    seeds: [11]
+    min_free_gb: 1
+    progress_kind: marker
+    marker: shape-sawtooth-i64/shape_sawtooth_i64.json
+    requires: replay-sawtooth-i64
+
+  - name: shape-sawtooth-i256
+    command: shape
+    config: configs/experiments/shape_sawtooth_i256_q1.yaml
+    run_name: shape-sawtooth-i256
+    total: 1
+    seeds: [11]
+    min_free_gb: 1
+    progress_kind: marker
+    marker: shape-sawtooth-i256/shape_sawtooth_i256.json
+    requires: replay-sawtooth-i256
+
   # --- Q.2 onset-staggered replay, D_tv half. The experiment M.3 pointed at and
   # could not reach: t0 is a genuine third variable, because r = B/t says
   # nothing about how long compression has been running. Teacher-forced, cheap.

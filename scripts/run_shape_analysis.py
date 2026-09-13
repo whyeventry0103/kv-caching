@@ -65,14 +65,35 @@ def main() -> int:
     for key in ("source_run", "run_artifact", "out_artifact", "restrict_to_floor_exit"):
         if key not in config:
             raise SystemExit(f"config missing required key: {key}")
-    if not config["restrict_to_floor_exit"]:
-        raise SystemExit(
-            "restrict_to_floor_exit must be true: the unrestricted numbers "
-            "already exist and are not the pre-registered test"
-        )
-
     runs_root = Path(os.environ.get("REMOTE_RUNS_ROOT", PROJECT_ROOT / "runs"))
     profiles = runs_root / config["source_run"] / "profiles"
+
+    # The floor-exit restriction is mandatory for a RATIO-MATCHED source and
+    # optional elsewhere, and the difference is detectable rather than declared:
+    # only a ratio-matched press writes .ratio_trace.json sidecars, and only
+    # such a run HAS a budget floor to exit. The original guard was written for
+    # Amendment P.2-v2, where the unrestricted numbers already existed and were
+    # not the pre-registered test. That reasoning is specific to that cell, not
+    # a general truth: the Amendment Q.1 sawtooth arms are fixed-budget, have no
+    # floor, and their unrestricted phase profile IS the pre-registered test.
+    is_ratio_matched = any(profiles.rglob("*.ratio_trace.json"))
+    if not config["restrict_to_floor_exit"]:
+        if is_ratio_matched:
+            raise SystemExit(
+                f"{config['source_run']} is a ratio-matched run (it writes "
+                "ratio_trace sidecars), so restrict_to_floor_exit must be true: "
+                "its floor-bound early trace is the harshest compression in the "
+                "run and would dominate any whole-trace statistic. The "
+                "unrestricted numbers already exist and are not the "
+                "pre-registered test."
+            )
+        if not config.get("unrestricted_rationale"):
+            raise SystemExit(
+                "restrict_to_floor_exit is false, so the config must state an "
+                "`unrestricted_rationale`. Running unrestricted is a real "
+                "choice about which window a verdict is read on, and it is not "
+                "allowed to be made silently by omission."
+            )
     out = runs_root / config["run_artifact"]
     archive = PROJECT_ROOT / config["out_artifact"]
     cmd = [
@@ -84,13 +105,15 @@ def main() -> int:
         config["name"],
         "--out",
         str(out),
-        "--restrict-to-floor-exit",
     ]
+    if config["restrict_to_floor_exit"]:
+        cmd.append("--restrict-to-floor-exit")
     if config.get("budget"):
         cmd += ["--budget", str(config["budget"])]
 
     plan = {
-        "amendment": "P.2-v2",
+        "amendment": config.get("amendment", "P.2-v2"),
+        "restrict_to_floor_exit": bool(config["restrict_to_floor_exit"]),
         "command": "shape",
         "config": str(args.config),
         "name": config["name"],

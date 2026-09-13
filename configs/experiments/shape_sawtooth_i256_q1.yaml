@@ -1,0 +1,30 @@
+name: shape_sawtooth_i256_q1
+stage: analysis
+mode: shape_unrestricted
+amendment: Q.1
+# Amendment Q.1 READ for the interval=256 sawtooth arm.
+#
+# CPU-ONLY re-analysis of profiles that already exist. No generation, no model,
+# no GPU.
+#
+# ONE ARM PER CONFIG, AND THAT IS FORCED BY THE CODE, NOT A PREFERENCE.
+# kvcache.metrics.profile_shape.phase_amplitude_excess raises
+# ValueError("profiles mix compression intervals"), so each arm must be read
+# separately against its own sham at its own bucket count. Raw phase amplitude
+# scales with bucket count, which is exactly why Amendment Q.1 pre-commits the
+# read to "does EACH arm's excess exclude zero" and explicitly NOT to the
+# ordering of excess magnitudes across arms.
+#
+# WHY UNRESTRICTED. restrict_to_floor_exit exists for ratio-matched cells, whose
+# floor-bound early trace is the harshest compression in the run. This arm is
+# FIXED-budget: there is no floor to exit, no ratio_trace sidecar, and the
+# whole-trace phase profile is the pre-registered test rather than a fallback.
+restrict_to_floor_exit: false
+unrestricted_rationale: >-
+  Fixed-budget arm with no min_budget floor and no ratio_trace sidecar, so
+  floor-exit restriction is undefined here. The pre-registered Q.1 read is the
+  whole-trace phase excess against the arm's own sham.
+source_run: replay-sawtooth-i256
+budget: "256"
+run_artifact: shape-sawtooth-i256/shape_sawtooth_i256.json
+out_artifact: results/diag/amendment-q/shape_sawtooth_i256.json
