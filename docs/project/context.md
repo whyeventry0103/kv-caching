@@ -2,7 +2,7 @@
 
 **Purpose of this file:** a complete, self-contained handoff. An LLM with zero prior
 context should be able to read this and resume exactly where we are. Last updated
-2026-09-14. Repo: `/Users/apple/dev/kv-caching` (moved off `~/Desktop` 2026-06-14 to
+2026-09-15. Repo: `/Users/apple/dev/kv-caching` (moved off `~/Desktop` 2026-06-14 to
 escape a recurring macOS TCC lockout; `~/Desktop/kv-caching` is a **symlink** to this
 path, not a second copy — verified 2026-07-27), branch `main`, GitHub
 `whyeventry0103/kv-caching`. For the current commit run `git rev-parse --short
@@ -23,6 +23,55 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 ---
 
 ## 0. TL;DR — where we are right now
+
+  **★★★★★ 2026-09-15 — Q.1 IS READ AND IT QUALIFIES A PUBLISHED RESULT. Three
+  stuck cells fixed (path defect, not data). Q.2 onset-t0 resumed, 341/400.**
+
+  **(1) Q.1 RESULT — AMPLITUDE-DEPENDENT for Random.** All arms at target_size
+  256 with the interval (= per-event amplitude) swept, 100 profiles/press/arm:
+  I=16 +0.0110 [-0.0252,+0.0300] excl0 NO peak 1; I=64 +0.1193 [+0.0446,+0.1410]
+  excl0 YES peak 0; I=256 +0.3183 [+0.1881,+0.3361] excl0 YES peak 0.
+  StreamingLLM excludes zero in NO arm, every peak at phase 9 -> INDETERMINATE,
+  consistent with its withdrawal. **P.2 branch A is NOT refuted but IS qualified**
+  and the paper now says so: locked at the deployed amplitude 64, not detectably
+  at 16, below 64 untested.
+  **TWO BINDING RULES, both pre-committed:** (a) NEVER compare excess magnitudes
+  across arms -- raw amplitude scales with bucket count and the arms have 16/64/
+  256 buckets, so the apparent monotone growth is the artifact the
+  pre-registration forbade reading; (b) write "not detectably locked", never "not
+  locked" -- I=16's interval excludes an I=64-sized effect, not a small one.
+
+  **(2) THE BUG that stuck three cells for two days was a PATH defect, not data.**
+  `run_shape_analysis.py` resolved SOURCE profiles against the launcher-scoped
+  `REMOTE_RUNS_ROOT` (launch.sh re-exports it as `$BASE/$RUN_NAME`) instead of
+  `KVCACHE_BASE_RUNS_ROOT`, giving `runs/shape-sawtooth-i16/replay-sawtooth-i16/
+  profiles` -- run name doubled. **Amendment P.2-v2 masked the same defect**: its
+  artifact was produced out of band, so the cell read complete by marker while
+  its own log recorded rc=2. Fixed for both source and artifact (the marker check
+  resolves against the base too). New tests simulate launch.sh's env; the old
+  ones set only REMOTE_RUNS_ROOT and could not see it. Stuck counters reset.
+
+  **(3) NOT a bug, checked:** replay-onset-t0 exiting rc=124 is the window timer.
+  Resumed 19:24 and its log now reads "RESUME: 341 conditions already complete",
+  so no duplicated work.
+
+  **(4) Generation status.** sawtooth i16/i64/i256 all **200/200 COMPLETE**;
+  onset-t0 341/400 running on both GPUs; onset-t512, onset-t2048 and all five
+  restoration-lag cells not started. Q.5 still blocked on ~2 GiB of storage.
+
+  **(5) TASK A's REQUESTED CURVE IS ONLY HALF AVAILABLE, and this is the gap to
+  close.** Budget vs accuracy/loss: **4 points exist** (256, 512, 1024, 2048) --
+  grid-diss512 and grid-diss1024 each hold 800 rows. Budget vs DIVERGENCE (TV):
+  **only 2 points** (256, 2048), because grid-diss512 and grid-diss1024 have
+  **0 profiles** -- they were generation-only cells. A smooth divergence-vs-budget
+  curve therefore needs teacher-forced replay cells at 512 and 1024. Those are
+  cheap (no generation; the traces already exist) but they are NEW measurements
+  and so need a pre-registered read before being queued.
+
+  **NEXT:** (a) decide whether to pre-register + queue replay-512/1024 for the
+  Task A divergence axis; (b) Q.3/Q.6 runners still unbuilt; (c) free ~2 GiB
+  before Q.5; (d) paper: anonymized-repo URL still a placeholder, body/appendix
+  split proposed not executed (~24 main-text pages vs 9). Abstract due 2026-09-18.
 
   **★★★★★ 2026-09-14 — RUNS ARE LIVE. Q.1 arm i16 COMPLETE (200/200); i64 in
   flight on both GPUs. Q.1 READS were missing from the queue and are now added.
