@@ -1335,6 +1335,31 @@ def build_catalogue() -> list[Entry]:
         "paired traces per policy on the M.3 above-floor window",
     )
 
+    # Amendment Q.1 sawtooth control. One artifact per arm because
+    # phase_amplitude_excess refuses profiles that mix compression intervals.
+    Q = DIAG / "amendment-q"
+    for _iv in (16, 64, 256):
+        _qp = Q / f"shape_sawtooth_i{_iv}.json"
+        if not _qp.exists():
+            continue
+        _qd = _load(_qp)
+        _qr = _qp.relative_to(PROJECT_ROOT)
+        for _press in ("random", "streamingllm"):
+            _ps = _qd["per_policy"][_press]["phase_excess"]
+            add(
+                f"q1.i{_iv}.{_press}.excess",
+                _ps["excess"],
+                f"{_qr} :: per_policy.{_press}.phase_excess.excess",
+                f"phase-amplitude excess over sham ({_press}, interval {_iv})",
+            )
+            for _i, _b in enumerate(_ps["excess_ci95"]):
+                add(
+                    f"q1.i{_iv}.{_press}.ci{'lo' if _i == 0 else 'hi'}",
+                    _b,
+                    f"{_qr} :: per_policy.{_press}.phase_excess.excess_ci95[{_i}]",
+                    f"Q.1 phase-excess CI bound ({_press}, interval {_iv})",
+                )
+
     # Task 4 onset localisation, and the two supporting diagnostics that had no
     # artifact until they were re-derived from the stored profiles on
     # 2026-08-30. Cataloguing them is what lets the paper state them at all.

@@ -591,6 +591,51 @@
       "context": "$32 \\to 626$ tokens observed",
       "literal": "626",
       "key": "m3.max_target"
+    },
+    {
+      "context": "intervals $64$ ($+0.119$",
+      "literal": "0.119",
+      "key": "q1.i64.random.excess"
+    },
+    {
+      "context": "CI $[0.045, 0.141]$",
+      "literal": "0.045",
+      "key": "q1.i64.random.cilo"
+    },
+    {
+      "context": "CI $[0.045, 0.141]$",
+      "literal": "0.141",
+      "key": "q1.i64.random.cihi"
+    },
+    {
+      "context": "$256$\n($+0.318$",
+      "literal": "0.318",
+      "key": "q1.i256.random.excess"
+    },
+    {
+      "context": "CI $[0.188, 0.336]$",
+      "literal": "0.188",
+      "key": "q1.i256.random.cilo"
+    },
+    {
+      "context": "CI $[0.188, 0.336]$",
+      "literal": "0.336",
+      "key": "q1.i256.random.cihi"
+    },
+    {
+      "context": "it does not ($+0.011$",
+      "literal": "0.011",
+      "key": "q1.i16.random.excess"
+    },
+    {
+      "context": "CI $[-0.025, 0.030]$",
+      "literal": "-0.025",
+      "key": "q1.i16.random.cilo"
+    },
+    {
+      "context": "CI $[-0.025, 0.030]$",
+      "literal": "0.030",
+      "key": "q1.i16.random.cihi"
     }
   ]
 }

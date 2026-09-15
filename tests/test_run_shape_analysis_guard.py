@@ -115,3 +115,89 @@ def test_each_sawtooth_arm_has_its_own_config_because_intervals_cannot_mix(tmp_p
         "replay-sawtooth-i64",
         "replay-sawtooth-i256",
     }
+
+
+# --------------------------------------------------------------------------
+# launch.sh re-exports REMOTE_RUNS_ROOT="$BASE_RUNS_ROOT/$RUN_NAME" so a
+# generator writes inside its own run directory, and separately exports
+# KVCACHE_BASE_RUNS_ROOT for the unscoped tree. An analysis job reads ANOTHER
+# run's profiles, so it must use the base. The earlier tests set only
+# REMOTE_RUNS_ROOT and therefore could not see this: they simulated a bare shell,
+# not the launcher. These simulate the launcher.
+
+
+def _run_env(cfg: Path, env_extra: dict) -> subprocess.CompletedProcess:
+    import os
+
+    env = {**os.environ, **env_extra}
+    return subprocess.run(
+        [sys.executable, str(RUNNER), "--config", str(cfg), "--dry-run"],
+        capture_output=True,
+        text=True,
+        env=env,
+        cwd=ROOT,
+    )
+
+
+def test_source_profiles_resolve_against_the_base_root_under_launch_sh(tmp_path):
+    """The real bug: three cells were marked stuck by a doubled run name."""
+    base = tmp_path / "runs"
+    _profiles(base, "replay-sawtooth-i16", ratio_matched=False)
+    cfg = _cfg(tmp_path, source_run="replay-sawtooth-i16")
+    r = _run_env(
+        cfg,
+        {
+            # exactly what launch.sh exports
+            "KVCACHE_BASE_RUNS_ROOT": str(base),
+            "REMOTE_RUNS_ROOT": str(base / "shape-sawtooth-i16"),
+        },
+    )
+    assert r.returncode == 0, r.stdout + r.stderr
+    out = r.stdout + r.stderr
+    assert "replay-sawtooth-i16/profiles" in out
+    assert (
+        "shape-sawtooth-i16/replay-sawtooth-i16" not in out
+    ), "run name appeared twice: the scoped root was used for the source"
+
+
+def test_scoped_root_alone_still_works_when_there_is_no_base(tmp_path):
+    """Run by hand with only REMOTE_RUNS_ROOT set: fall back, do not crash."""
+    base = tmp_path / "runs"
+    _profiles(base, "replay-sawtooth-i16", ratio_matched=False)
+    cfg = _cfg(tmp_path, source_run="replay-sawtooth-i16")
+    import os
+
+    env = {k: v for k, v in os.environ.items() if k != "KVCACHE_BASE_RUNS_ROOT"}
+    env["REMOTE_RUNS_ROOT"] = str(base)
+    r = subprocess.run(
+        [sys.executable, str(RUNNER), "--config", str(cfg), "--dry-run"],
+        capture_output=True,
+        text=True,
+        env=env,
+        cwd=ROOT,
+    )
+    assert r.returncode == 0, r.stdout + r.stderr
+
+
+def test_the_artifact_also_lands_under_the_base_so_the_marker_check_finds_it(tmp_path):
+    """nightly_autorun resolves job.marker against the BASE runs root."""
+    base = tmp_path / "runs"
+    _profiles(base, "replay-sawtooth-i16", ratio_matched=False)
+    cfg = _cfg(
+        tmp_path,
+        source_run="replay-sawtooth-i16",
+        run_artifact="shape-sawtooth-i16/shape_sawtooth_i16.json",
+    )
+    r = _run_env(
+        cfg,
+        {
+            "KVCACHE_BASE_RUNS_ROOT": str(base),
+            "REMOTE_RUNS_ROOT": str(base / "shape-sawtooth-i16"),
+        },
+    )
+    assert r.returncode == 0, r.stdout + r.stderr
+    expected = str(base / "shape-sawtooth-i16" / "shape_sawtooth_i16.json")
+    assert expected in (r.stdout + r.stderr), (
+        f"artifact must land at {expected} or the orchestrator's marker check "
+        "will never see it and the cell is stuck forever"
+    )

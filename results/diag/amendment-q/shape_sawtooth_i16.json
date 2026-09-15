@@ -1,0 +1,203 @@
+{
+  "amendment": "P.2",
+  "budget_filter": "256",
+  "excluded": null,
+  "label": "shape_sawtooth_i16_q1",
+  "n_problems_per_press": {
+    "random": 25,
+    "streamingllm": 25
+  },
+  "n_profile_files": 200,
+  "per_policy": {
+    "random": {
+      "auc_tv_mean": 0.10012127105326002,
+      "median_drift_ratio": 2.7327055057259475,
+      "n_profiles": 100,
+      "phase_amplitude": 0.04101822643726798,
+      "phase_amplitude_sham": 0.038830661836518135,
+      "phase_excess": {
+        "excess": 0.011008622096874074,
+        "excess_ci95": [
+          -0.025207325138302872,
+          0.030040895551249364
+        ],
+        "excess_excludes_zero": false,
+        "n_profiles": 100,
+        "n_resamples": 2000,
+        "phase_amplitude": 0.042003061627083546,
+        "phase_amplitude_sham": 0.030994439530209472,
+        "seed": 0
+      },
+      "phase_peak_index": 1,
+      "phase_profile_mean": [
+        0.10259780367306717,
+        0.10324576251014288,
+        0.10074232187552701,
+        0.10054643861067772,
+        0.10142054184683795,
+        0.09968027747795809,
+        0.10008562602188224,
+        0.09940082434687962,
+        0.1008611682997773,
+        0.1007861456003336,
+        0.09948669196756602,
+        0.10149833894807463,
+        0.10130653420912945,
+        0.09936975950646271,
+        0.09901080444481344,
+        0.10112598105527719
+      ],
+      "phase_profile_sham_mean": [
+        0.09864361838455339,
+        0.10262876110159004,
+        0.10037519094951217,
+        0.10064312386142797,
+        0.10066643135191715,
+        0.10007753322278644,
+        0.10097591599588615,
+        0.09977552073373905,
+        0.1002612887070757,
+        0.10073158567673941,
+        0.1003766169190163,
+        0.10184917889805449,
+        0.10145717490648205,
+        0.09962572607765291,
+        0.10120068917397237,
+        0.10185388649097232
+      ],
+      "running_integral_mean": {
+        "cum_at_100": 0.392622921869755,
+        "cum_at_1600": 135.26877367060115,
+        "cum_at_200": 1.786998775718731,
+        "cum_at_400": 10.299258927092293,
+        "cum_at_50": 0.14548403379045666,
+        "cum_at_800": 41.56471917280951
+      },
+      "running_integral_n": {
+        "cum_at_100": 100,
+        "cum_at_1600": 82,
+        "cum_at_200": 100,
+        "cum_at_400": 98,
+        "cum_at_50": 100,
+        "cum_at_800": 96
+      },
+      "scale_discipline": "TV-scale, descriptive only. Per Definition 6 this cannot license an accuracy-scale claim by adjacency; see Amendment P.3 for the only sanctioned bridge.",
+      "shape_counts": {
+        "flat": 13,
+        "monotone-drift": 87
+      },
+      "shape_fractions": {
+        "flat": 0.13,
+        "monotone-drift": 0.87
+      },
+      "thresholds": {
+        "checkpoints": [
+          50,
+          100,
+          200,
+          400,
+          800,
+          1600
+        ],
+        "drift_ratio": 1.5,
+        "sham_seed": 0
+      }
+    },
+    "streamingllm": {
+      "auc_tv_mean": 0.10046212031184484,
+      "median_drift_ratio": 2.34640233937835,
+      "n_profiles": 100,
+      "phase_amplitude": 0.04264143079141294,
+      "phase_amplitude_sham": 0.042587313370703685,
+      "phase_excess": {
+        "excess": 0.0032153631269357177,
+        "excess_ci95": [
+          -0.02363333672998104,
+          0.018370603883421745
+        ],
+        "excess_excludes_zero": false,
+        "n_profiles": 100,
+        "n_resamples": 2000,
+        "phase_amplitude": 0.03238300943259157,
+        "phase_amplitude_sham": 0.029167646305655853,
+        "seed": 0
+      },
+      "phase_peak_index": 9,
+      "phase_profile_mean": [
+        0.10109425506280155,
+        0.10158334575396856,
+        0.1007746985616086,
+        0.1015916637866304,
+        0.10031156155312486,
+        0.10156076248358971,
+        0.09954995563256337,
+        0.10013404835202844,
+        0.10144174010096402,
+        0.10266320286751265,
+        0.10181679215602724,
+        0.1020626581543417,
+        0.10137247341393009,
+        0.10083535336565844,
+        0.09828549700761283,
+        0.10117138341135926
+      ],
+      "phase_profile_sham_mean": [
+        0.0986870803913691,
+        0.10307684634805771,
+        0.10179559552091297,
+        0.10076927214368948,
+        0.10028981884781629,
+        0.10033333698615847,
+        0.10129178909767501,
+        0.10172491622930167,
+        0.09927014519011398,
+        0.10185504938661356,
+        0.09981837278624064,
+        0.10134847196406332,
+        0.10192728161697373,
+        0.1003435533001853,
+        0.10175998170397889,
+        0.10189280871499452
+      ],
+      "running_integral_mean": {
+        "cum_at_100": 0.48184376508478166,
+        "cum_at_1600": 131.54941517044233,
+        "cum_at_200": 1.9453923562575517,
+        "cum_at_400": 11.85168305868423,
+        "cum_at_50": 0.26444200387902955,
+        "cum_at_800": 47.94300678983214
+      },
+      "running_integral_n": {
+        "cum_at_100": 100,
+        "cum_at_1600": 82,
+        "cum_at_200": 100,
+        "cum_at_400": 98,
+        "cum_at_50": 100,
+        "cum_at_800": 96
+      },
+      "scale_discipline": "TV-scale, descriptive only. Per Definition 6 this cannot license an accuracy-scale claim by adjacency; see Amendment P.3 for the only sanctioned bridge.",
+      "shape_counts": {
+        "flat": 9,
+        "monotone-drift": 91
+      },
+      "shape_fractions": {
+        "flat": 0.09,
+        "monotone-drift": 0.91
+      },
+      "thresholds": {
+        "checkpoints": [
+          50,
+          100,
+          200,
+          400,
+          800,
+          1600
+        ],
+        "drift_ratio": 1.5,
+        "sham_seed": 0
+      }
+    }
+  },
+  "retained_fraction_of_trace_median": null,
+  "window": "WHOLE TRACE (unrestricted)"
+}

@@ -2683,3 +2683,70 @@ an interval and without a correlation coefficient.
 
 **Standing limit.** No result from Q.6 may be used to support an accuracy-scale
 claim, and none may be described as the mechanism.
+
+---
+
+## Amendment Q.1, result (2026-09-15): AMPLITUDE-DEPENDENT for Random; branch A is qualified
+
+Read applied exactly as pre-registered on 2026-09-12, before any of these
+profiles existed. Artifacts: `results/diag/amendment-q/shape_sawtooth_i{16,64,256}.json`.
+
+All three arms at `target_size` 256 — the published cell's own floor — with the
+compression interval swept. 100 profiles per press per arm, whole-trace phase
+profile against each arm's own shuffled sham at its own bucket count.
+
+| arm | press | excess | 95% CI | excludes 0 | peak phase |
+|---|---|---|---|---|---|
+| I=16 | Random | +0.0110 | [−0.0252, +0.0300] | **no** | 1 |
+| I=16 | StreamingLLM | +0.0032 | [−0.0236, +0.0184] | no | 9 |
+| I=64 | Random | +0.1193 | [+0.0446, +0.1410] | **yes** | **0** |
+| I=64 | StreamingLLM | +0.0431 | [−0.0142, +0.0617] | no | 9 |
+| I=256 | Random | +0.3183 | [+0.1881, +0.3361] | **yes** | **0** |
+| I=256 | StreamingLLM | +0.0309 | [−0.0357, +0.0860] | no | 9 |
+
+**Random takes the AMPLITUDE-DEPENDENT branch.** T1 (I=16) does not exclude
+zero; T3 (I=256) does. Per the branch as written, P.2 branch A is **not refuted
+but must be qualified**: the claim becomes "divergence is locked to the eviction
+event at the deployed amplitude (64), and does not detectably lock at amplitude
+16," with the threshold and the untested region stated in the paper.
+
+**StreamingLLM takes INDETERMINATE.** Neither T1 nor T3 excludes zero, and its
+peak sits at phase 9 in every arm rather than at the prune step. This is
+consistent with its P.2 withdrawal and adds nothing to it; it is reported, and
+no phase claim is made for StreamingLLM in any arm.
+
+**The magnitudes are NOT compared across arms, and that restriction was
+pre-committed rather than adopted after seeing them.** Raw phase amplitude
+scales with bucket count, and the arms have 16, 64 and 256 buckets, so the
+apparent monotone growth of the excess across arms is exactly the artifact the
+pre-registration forbade reading. The licensed statement is per-arm exclusion of
+zero and nothing more. Raw and sham amplitudes are in the artifacts for anyone
+who wants to see the bucket-count effect directly.
+
+**The deployed arm reproduces the published result's shape.** I=64 is the
+configuration every other cell in this paper uses, and Random there excludes
+zero with its peak at phase 0, the prune step. That is a consistency check on
+the instrument, not new evidence: it is the same quantity P.2 measured, on a
+different cell.
+
+**What this does and does not license.** It licenses a statement about whether
+phase-0 locking survives at small per-event amplitude, at a floor matched to the
+published cell. It does **not** license any claim about horizon, about behaviour
+at fixed mean cache (mean cache varies across these arms by construction), or
+about the delicensed staircase, and it relicenses nothing M.3 removed.
+
+**Power, stated rather than left implicit.** T1's interval is [−0.0252, +0.0300]
+and is not a tight null: it excludes an effect of the size seen at I=64 but
+cannot exclude a small one. "Does not detectably lock at amplitude 16" is
+therefore the honest wording, and "does not lock" is not available. n is 100
+profiles per press per arm, equal across arms.
+
+**Instrument note.** The three read cells were marked stuck for two days by a
+path defect in `run_shape_analysis.py`, not by anything in the data: it resolved
+the SOURCE profiles against the launcher-scoped `REMOTE_RUNS_ROOT` instead of
+`KVCACHE_BASE_RUNS_ROOT`, producing `runs/shape-sawtooth-i16/replay-sawtooth-i16/profiles`
+with the run name doubled. Amendment P.2-v2 masked the same defect because its
+artifact had been produced out of band, so that cell read "complete" by marker
+while its own launch log recorded rc=2. Fixed, with regression tests that
+simulate the launcher's environment rather than a bare shell — the earlier tests
+set only `REMOTE_RUNS_ROOT` and therefore could not see it.

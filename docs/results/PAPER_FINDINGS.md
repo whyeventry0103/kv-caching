@@ -1227,6 +1227,59 @@ in `docs/strategy/ICLR2027_PAGE_BUDGET.md`. Anonymity is structural via
 full-cache bank accuracy, which Amendment K designates not the cell comparator,
 so the applied text uses the matched references `0.903` and `0.885`.
 
+### 5a. Amendment Q.1 result: eviction-locking is AMPLITUDE-DEPENDENT, and branch A is qualified (2026-09-15)
+
+The first Meeting-#3 read, and it constrains a result already in the paper. Read
+applied exactly as pre-registered on 2026-09-12, before any of these profiles
+existed. Artifacts `results/diag/amendment-q/shape_sawtooth_i{16,64,256}.json`.
+
+All arms at `target_size` 256 — the published cell's own floor — with the
+compression interval, and therefore the per-event eviction amplitude, swept.
+100 profiles per press per arm.
+
+| arm | Random excess | excl. 0 | peak | StreamingLLM excess | excl. 0 | peak |
+|---|---|---|---|---|---|---|
+| I=16 | +0.0110 [−0.0252, +0.0300] | **no** | 1 | +0.0032 [−0.0236, +0.0184] | no | 9 |
+| I=64 | +0.1193 [+0.0446, +0.1410] | **yes** | **0** | +0.0431 [−0.0142, +0.0617] | no | 9 |
+| I=256 | +0.3183 [+0.1881, +0.3361] | **yes** | **0** | +0.0309 [−0.0357, +0.0860] | no | 9 |
+
+**Random → AMPLITUDE-DEPENDENT.** T1 does not exclude zero, T3 does. Per the
+branch as written, **P.2 branch A is not refuted but is qualified**: locking is
+established at the deployed amplitude (64) and is not detectable at amplitude
+16, with amplitudes below 64 otherwise untested. The paper's threats section now
+says exactly that.
+
+**StreamingLLM → INDETERMINATE.** No arm excludes zero and every peak sits at
+phase 9, away from the prune step. Consistent with its P.2 withdrawal, adds
+nothing to it, and no phase claim is made for it in any arm.
+
+**Binding framing rule, pre-committed and not adopted after the fact: do NOT
+compare excess magnitudes across arms.** Raw phase amplitude scales with the
+number of phase buckets, and the arms have 16, 64 and 256 buckets. The apparent
+monotone growth +0.011 → +0.119 → +0.318 is exactly the artifact the
+pre-registration forbade reading, and it is not evidence that the effect grows
+with amplitude. The licensed statement is per-arm exclusion of zero, nothing
+more.
+
+**Write "not detectably locked", never "not locked".** T1's interval
+[−0.0252, +0.0300] excludes an effect of the size seen at I=64 but cannot
+exclude a small one. The distinction is the difference between an honest null
+and an overclaim.
+
+**The deployed arm reproduces the published shape**, which is a consistency
+check on the instrument rather than new evidence: I=64 is the configuration
+every other cell uses, and Random there excludes zero peaking at phase 0.
+
+**Instrument note — the reads were stuck for two days on a path defect, not on
+data.** `run_shape_analysis.py` resolved the SOURCE profiles against the
+launcher-scoped `REMOTE_RUNS_ROOT` rather than `KVCACHE_BASE_RUNS_ROOT`, giving
+`runs/shape-sawtooth-i16/replay-sawtooth-i16/profiles` with the run name
+doubled, so all three cells failed and were marked stuck. **Amendment P.2-v2
+masked the same defect**: its artifact had been produced out of band, so the
+cell read "complete" by marker while its own launch log recorded rc=2. Fixed,
+with regression tests that simulate the launcher's environment — the earlier
+tests set only `REMOTE_RUNS_ROOT` and so could not see it.
+
 
 <!-- AUDIT:ARCHIVAL-END -->
 
@@ -1234,6 +1287,12 @@ so the applied text uses the matched references `0.903` and `0.885`.
 - **Divergence ≠ damage.** ADD / TV / residual are "behavioral-fidelity loss," never "damage."
   Correctness is the only quality arbiter. Carry the **signed flip-mass** (gained vs lost correct
   answers) with every divergence quantity.
+- **Q.1 phase excess: per-arm exclusion of zero only** (pinned 2026-09-15). Raw phase amplitude
+  scales with the number of phase buckets, so excess magnitudes from arms with different
+  compression intervals are NOT comparable. Never write that the excess grows with amplitude.
+  Locking is "established at the deployed amplitude (64), not detectable at 16, untested below
+  64" — and "not detectably locked", never "not locked", because the I=16 interval excludes an
+  I=64-sized effect but not a small one.
 - **The divergence profile is a localization, not a mechanism for the rise** (pinned 2026-09-08,
   §4x). Say "small in the steps immediately following an eviction and far larger later," or
   "readout-shaped protocols sample it where it is smallest." **Never** "compounds," "slow drift,"

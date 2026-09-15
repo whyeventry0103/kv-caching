@@ -65,7 +65,23 @@ def main() -> int:
     for key in ("source_run", "run_artifact", "out_artifact", "restrict_to_floor_exit"):
         if key not in config:
             raise SystemExit(f"config missing required key: {key}")
-    runs_root = Path(os.environ.get("REMOTE_RUNS_ROOT", PROJECT_ROOT / "runs"))
+    # BASE runs root, not the scoped one. launch.sh re-exports
+    # REMOTE_RUNS_ROOT="$BASE_RUNS_ROOT/$RUN_NAME" so a generator writes inside
+    # its own run directory, and separately exports KVCACHE_BASE_RUNS_ROOT for
+    # the unscoped tree. An ANALYSIS job reads ANOTHER run's profiles and its
+    # artifact is found by the orchestrator's marker check, which is resolved
+    # against the base -- so both of its paths belong to the base root.
+    #
+    # Using the scoped root produced
+    # runs/shape-sawtooth-i16/replay-sawtooth-i16/profiles: the run name
+    # appears twice and the source can never be found. Amendment P.2-v2 masked
+    # this because its artifact was produced out of band, so the cell was
+    # "complete" by marker while its own launch log recorded rc=2.
+    runs_root = Path(
+        os.environ.get("KVCACHE_BASE_RUNS_ROOT")
+        or os.environ.get("REMOTE_RUNS_ROOT")
+        or (PROJECT_ROOT / "runs")
+    )
     profiles = runs_root / config["source_run"] / "profiles"
 
     # The floor-exit restriction is mandatory for a RATIO-MATCHED source and
@@ -132,7 +148,14 @@ def main() -> int:
     if not args.i_understand:
         raise SystemExit("REFUSED: run requires --i-understand")
     if not profiles.exists():
-        raise SystemExit(f"missing profiles dir: {profiles}")
+        raise SystemExit(
+            f"missing profiles dir: {profiles}\n"
+            f"source_run={config['source_run']!r}, runs_root={runs_root}\n"
+            "If the run name appears twice in that path, the scoped "
+            "REMOTE_RUNS_ROOT was used instead of KVCACHE_BASE_RUNS_ROOT: "
+            "launch.sh scopes the former to the job's own run directory, and an "
+            "analysis job reads another run's tree."
+        )
 
     out.parent.mkdir(parents=True, exist_ok=True)
     rc = subprocess.call(cmd)

@@ -645,10 +645,32 @@ zero, failing on the old re-basing and passing on the new; and a rotation
 constant across all $96$ traces is not what a judgement call produces. The two
 measured results this cell yields are reported together throughout, since
 neither is interpretable alone. Within a prune cycle the divergence is locked to
-the eviction event. Across cycles the envelope rises in the fixed-budget arm,
-where the realized compression ratio worsens monotonically, and does not in the
-ratio-matched arm. Both are measurements; this paragraph does not say what
-produces the rise.
+the eviction event \emph{at the compression interval this paper deploys}. Across
+cycles the envelope rises in the fixed-budget arm, where the realized
+compression ratio worsens monotonically, and does not in the ratio-matched arm.
+Both are measurements; this paragraph does not say what produces the rise.
+
+\textbf{The locking is amplitude-dependent, and we qualified it because a
+pre-registered control said to.} The cache is a sawtooth rather than a ceiling:
+it holds $256$ entries just after a prune and $256$ plus the compression
+interval just before the next, so the interval is also the per-event eviction
+amplitude. Sweeping it at a fixed floor of $256$ --- the same floor as every
+other cell here --- the phase-amplitude excess over the shuffled sham excludes
+zero for Random at intervals $64$ ($+0.119$, CI $[0.045, 0.141]$) and $256$
+($+0.318$, CI $[0.188, 0.336]$), peaking at phase $0$, the prune step, in both.
+At interval $16$ it does not ($+0.011$, CI $[-0.025, 0.030]$). The read condition
+and its three branches were fixed in writing before these profiles existed
+(Amendment Q.1), and the outcome is the branch that constrains us: **locking is
+established at the deployed amplitude and is not detectable at amplitude $16$,
+and amplitudes below $64$ are otherwise untested.** The interval-$16$ interval is
+not a tight null --- it excludes an effect of the size seen at $64$, not a small
+one --- so we write \emph{not detectably locked}, not \emph{not locked}. We do
+not compare the excess magnitudes across intervals: raw phase amplitude scales
+with the number of phase buckets, which differs by construction between these
+arms, and that restriction was pre-committed rather than adopted after seeing
+the numbers. For StreamingLLM no arm excludes zero and every peak sits away from
+the prune step, consistent with its earlier withdrawal; we make no phase claim
+for it.
 
 %% ADDED 2026-09-08 with the M.3 restatement. This is the figure the mechanism
 %% clause work concluded the paper needed, and it replaces the "overlay the
