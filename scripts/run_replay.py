@@ -522,10 +522,24 @@ def main() -> int:
                         # the cache reaches budget+n_reinsert and then accrues a
                         # further interval before the next prune. The smoke gate
                         # caught this bound being applied to only half the check.
+                        # Amendment Q.2: with a compression onset, the press is
+                        # INACTIVE until decode step t0, so the cache legitimately
+                        # holds prompt + t0 entries before the first prune can
+                        # happen, and then accrues one interval before it does.
+                        # The bound must carry t0 or a staggered cell fails this
+                        # check for behaving exactly as designed -- which is what
+                        # killed replay-onset-t512 on its first launch.
+                        #
+                        # This does NOT weaken the check for any existing cell:
+                        # t0 defaults to 0, leaving the bound byte-identical. The
+                        # post-prune bound above is untouched and is what actually
+                        # proves the press prunes to budget once it is active.
+                        onset = int(config.get("compression_start_step") or 0)
                         prune_bound = (
                             max(len(prompt_ids), int(budget))
                             + int(config["compression_interval"])
                             + allowance
+                            + onset
                         )
                         if (
                             profile.max_before_prune is None

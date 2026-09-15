@@ -583,7 +583,11 @@ jobs:
   # BEFORE any of these were queued; do not re-cut a verdict after seeing
   # output.
   #
-  # est_output_gb is the Amendment Q storage guard. ~68 of a ~70 GB personal
+  # est_output_gb is the Amendment Q storage guard. The values were MEASURED on
+  # 2026-09-15 from completed runs of the same shape and rounded up, replacing
+  # the original guesses -- which were low by 20-33% on every cell, the one
+  # direction that matters, because a low estimate lets a cell through that does
+  # not fit. Recalibrate the same way if a cell's shape changes. ~68 of a ~70 GB personal
   # budget is already spent, so the orchestrator refuses to launch a declared
   # cell that would not fit, holding back a 2 GB margin. min_free_gb is VRAM
   # and says nothing about disk.
@@ -604,7 +608,7 @@ jobs:
     seeds: [11, 23, 47, 89]
     min_free_gb: 28
     progress_kind: grid      # counts runs/<run_name>/math500/**/*.jsonl, like every other replay cell
-    est_output_gb: 0.08
+    est_output_gb: 0.11   # measured: replay-sawtooth-i16/64/256 are 0.105 GiB each
     requires: null
 
   - name: replay-sawtooth-i64
@@ -615,7 +619,7 @@ jobs:
     seeds: [11, 23, 47, 89]
     min_free_gb: 28
     progress_kind: grid      # counts runs/<run_name>/math500/**/*.jsonl, like every other replay cell
-    est_output_gb: 0.08
+    est_output_gb: 0.11   # measured: replay-sawtooth-i16/64/256 are 0.105 GiB each
     requires: replay-sawtooth-i16
 
   - name: replay-sawtooth-i256
@@ -626,7 +630,7 @@ jobs:
     seeds: [11, 23, 47, 89]
     min_free_gb: 28
     progress_kind: grid      # counts runs/<run_name>/math500/**/*.jsonl, like every other replay cell
-    est_output_gb: 0.08
+    est_output_gb: 0.11   # measured: replay-sawtooth-i16/64/256 are 0.105 GiB each
     requires: replay-sawtooth-i64
 
   # --- Q.1 READS. CPU-only re-analysis of profiles that already exist; no model,
@@ -686,7 +690,7 @@ jobs:
     seeds: [11, 23, 47, 89]
     min_free_gb: 28
     progress_kind: grid      # counts runs/<run_name>/math500/**/*.jsonl, like every other replay cell
-    est_output_gb: 0.16
+    est_output_gb: 0.20   # measured: replay-onset-t0 is 0.192 GiB
     requires: replay-sawtooth-i256
 
   - name: replay-onset-t512
@@ -697,7 +701,7 @@ jobs:
     seeds: [11, 23, 47, 89]
     min_free_gb: 28
     progress_kind: grid      # counts runs/<run_name>/math500/**/*.jsonl, like every other replay cell
-    est_output_gb: 0.16
+    est_output_gb: 0.20   # measured: replay-onset-t0 is 0.192 GiB
     requires: replay-onset-t0
 
   - name: replay-onset-t2048
@@ -708,7 +712,7 @@ jobs:
     seeds: [11, 23, 47, 89]
     min_free_gb: 28
     progress_kind: grid      # counts runs/<run_name>/math500/**/*.jsonl, like every other replay cell
-    est_output_gb: 0.16
+    est_output_gb: 0.20   # measured: replay-onset-t0 is 0.192 GiB
     requires: replay-onset-t512
 
   # --- Q.5 latency-swept restoration. Converts the P.5 flat null into a
@@ -725,7 +729,7 @@ jobs:
     seeds: [11, 23, 47, 89]
     min_free_gb: 28
     progress_kind: grid      # counts runs/<run_name>/math500/**/*.jsonl, like every other replay cell
-    est_output_gb: 0.32
+    est_output_gb: 0.45   # measured: restoration-diss256-v2 (same shape) is 0.425 GiB
     requires: replay-onset-t2048
 
   - name: restoration-lag4
@@ -736,7 +740,7 @@ jobs:
     seeds: [11, 23, 47, 89]
     min_free_gb: 28
     progress_kind: grid      # counts runs/<run_name>/math500/**/*.jsonl, like every other replay cell
-    est_output_gb: 0.32
+    est_output_gb: 0.45   # measured: restoration-diss256-v2 (same shape) is 0.425 GiB
     requires: restoration-lag1
 
   - name: restoration-lag16
@@ -747,7 +751,7 @@ jobs:
     seeds: [11, 23, 47, 89]
     min_free_gb: 28
     progress_kind: grid      # counts runs/<run_name>/math500/**/*.jsonl, like every other replay cell
-    est_output_gb: 0.32
+    est_output_gb: 0.45   # measured: restoration-diss256-v2 (same shape) is 0.425 GiB
     requires: restoration-lag4
 
   - name: restoration-lag64
@@ -758,7 +762,7 @@ jobs:
     seeds: [11, 23, 47, 89]
     min_free_gb: 28
     progress_kind: grid      # counts runs/<run_name>/math500/**/*.jsonl, like every other replay cell
-    est_output_gb: 0.32
+    est_output_gb: 0.45   # measured: restoration-diss256-v2 (same shape) is 0.425 GiB
     requires: restoration-lag16
 
   - name: restoration-lag256
@@ -769,5 +773,5 @@ jobs:
     seeds: [11, 23, 47, 89]
     min_free_gb: 28
     progress_kind: grid      # counts runs/<run_name>/math500/**/*.jsonl, like every other replay cell
-    est_output_gb: 0.32
+    est_output_gb: 0.45   # measured: restoration-diss256-v2 (same shape) is 0.425 GiB
     requires: restoration-lag64
