@@ -91,6 +91,7 @@ dryrun:
 	$(PYTHON) scripts/run_shape_analysis.py --config configs/experiments/shape_sawtooth_i16_q1.yaml --dry-run
 	$(PYTHON) scripts/run_shape_analysis.py --config configs/experiments/shape_sawtooth_i64_q1.yaml --dry-run
 	$(PYTHON) scripts/run_shape_analysis.py --config configs/experiments/shape_sawtooth_i256_q1.yaml --dry-run
+	$(PYTHON) scripts/run_onset_surface.py --config configs/experiments/onset_surface_q2.yaml --dry-run
 	$(PYTHON) scripts/run_replay.py --config configs/experiments/restoration_smoke.yaml --dry-run
 	$(PYTHON) scripts/run_replay.py --config configs/experiments/restoration_diss256.yaml --dry-run
 	$(PYTHON) scripts/run_shape_analysis.py --config configs/experiments/shape_p2v2_restricted.yaml --dry-run

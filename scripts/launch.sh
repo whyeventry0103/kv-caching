@@ -38,6 +38,7 @@ case "$COMMAND" in
   mechanism) PY_SCRIPT="scripts/run_mechanism.py" ;;
   figures) PY_SCRIPT="scripts/make_figures.py" ;;
   shape) PY_SCRIPT="scripts/run_shape_analysis.py" ;;
+  onset-surface) PY_SCRIPT="scripts/run_onset_surface.py" ;;
   probe-decoding) PY_SCRIPT="scripts/probe_decoding.py" ;;
   *) echo "unknown command: $COMMAND" >&2; exit 2 ;;
 esac

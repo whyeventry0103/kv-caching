@@ -82,7 +82,27 @@ def disk_headroom_gb(used_gb: float, budget_gb: float) -> float:
     return float(budget_gb) - float(used_gb)
 
 
-def check_disk_budget(job: Job, used_gb: float, budget_gb: float) -> None:
+def remaining_output_gb(job: Job, done: int) -> float:
+    """Output still to be WRITTEN, not the cell's total.
+
+    A resuming cell has already spent part of its estimate, so what matters for
+    a launch decision is how much more it will write. Charging the full estimate
+    to a nearly finished cell blocks it over space it is not going to use --
+    exactly what happened to replay-onset-t2048 at 347/400, refused over 0.20 GB
+    when its real remainder was about 0.03 GB.
+
+    An unstarted cell has done == 0 and gets the full estimate, so the guard is
+    unchanged for every cell that has not run yet.
+    """
+    if job.est_output_gb <= 0 or job.total <= 0:
+        return max(0.0, float(job.est_output_gb))
+    remaining = max(0, int(job.total) - max(0, int(done)))
+    return float(job.est_output_gb) * (remaining / float(job.total))
+
+
+def check_disk_budget(
+    job: Job, used_gb: float, budget_gb: float, done: int = 0
+) -> None:
     """Refuse a launch whose projected output would exhaust the personal budget.
 
     Loud on purpose. The failure mode being prevented is not a crash but a
@@ -91,13 +111,17 @@ def check_disk_budget(job: Job, used_gb: float, budget_gb: float) -> None:
     estimate is allowed through, because retrofitting estimates onto the drained
     historical queue would be a fiction -- but any job that declares one is held
     to it.
+
+    ``done`` scales the estimate to what is left to write (see
+    ``remaining_output_gb``); it defaults to 0, the unstarted case.
     """
     if job.est_output_gb <= 0:
         return
+    projected = remaining_output_gb(job, done)
     headroom = disk_headroom_gb(used_gb, budget_gb)
-    if job.est_output_gb + DISK_SAFETY_MARGIN_GB > headroom:
+    if projected + DISK_SAFETY_MARGIN_GB > headroom:
         raise SystemExit(
-            f"REFUSING TO LAUNCH {job.name}: it projects {job.est_output_gb:.2f} GB "
+            f"REFUSING TO LAUNCH {job.name}: it projects {projected:.2f} GB "
             f"of output, but only {headroom:.2f} GB of the {budget_gb:.0f} GB "
             f"personal budget remains (used {used_gb:.2f} GB), and a "
             f"{DISK_SAFETY_MARGIN_GB:.0f} GB margin is held back. Free space "
@@ -638,7 +662,10 @@ def main() -> int:
         # condition to quietly route around, and routing around it would launch
         # the NEXT job into the same shortage.
         check_disk_budget(
-            job, storage_used_gb(), float(BASE_ENV["KVCACHE_PERSONAL_FREE_GB"])
+            job,
+            storage_used_gb(),
+            float(BASE_ENV["KVCACHE_PERSONAL_FREE_GB"]),
+            done=done,
         )
         log(
             f"selected: {job.name} {done}/{job.total} "

@@ -2,7 +2,7 @@
 
 **Purpose of this file:** a complete, self-contained handoff. An LLM with zero prior
 context should be able to read this and resume exactly where we are. Last updated
-2026-09-15. Repo: `/Users/apple/dev/kv-caching` (moved off `~/Desktop` 2026-06-14 to
+2026-09-20. Repo: `/Users/apple/dev/kv-caching` (moved off `~/Desktop` 2026-06-14 to
 escape a recurring macOS TCC lockout; `~/Desktop/kv-caching` is a **symlink** to this
 path, not a second copy — verified 2026-07-27), branch `main`, GitHub
 `whyeventry0103/kv-caching`. For the current commit run `git rev-parse --short
@@ -23,6 +23,52 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 ---
 
 ## 0. TL;DR — where we are right now
+
+  **★★★★★ 2026-09-20 — Q.1 FULLY DONE (runs + all 3 reads). Q.2 generation
+  nearly done: t0 and t512 COMPLETE, t2048 347/400 and running. The Q.2 READ
+  was missing and is now built and queued. ICLR abstract deadline 2026-09-18
+  HAS PASSED; full paper 2026-09-25.**
+
+  **(1) Status.** sawtooth i16/i64/i256 200/200 COMPLETE and all three
+  `shape-sawtooth` reads COMPLETE (markers present). onset-t0 400/400,
+  onset-t512 400/400, onset-t2048 347/400 relaunched 14:21 and running at ~93%
+  on both GPUs. restoration-lag x5 not started. Nothing is stuck: t2048's
+  rc=124 is the window timer and its `fails` is 0.
+
+  **(2) THE SAME GAP AS Q.1, CAUGHT AGAIN: Q.2 had no read cell.** Generation
+  was queued and nothing computed the verdict, so a drained queue would have
+  looked finished with the question unanswered. Built:
+  `kvcache.metrics.onset_surface` (window divergence, matched positions, OLS
+  exposure slope), `scripts/report_onset_surface.py`, thin runner
+  `scripts/run_onset_surface.py`, `onset-surface` dispatch entry, config, and a
+  queue cell gated on ALL THREE arms. **Q.5 still has no read cell** -- lower
+  priority only because its data does not exist yet.
+
+  **(3) Design notes that matter for the Q.2 read.** Slopes are computed WITHIN
+  one (budget, read position) cell and never pooled: r = B/t is matched only at
+  equal t. Read positions start a full window (256 steps) after the LATEST onset
+  so no arm is read across its own onset. Traces missing from any arm are
+  dropped, or problem identity leaks into a quantity meant to carry exposure
+  alone. A degenerate design (identical exposures) returns None, never 0.0.
+
+  **(4) The onset gate is confirmed working from the data**, not just the tests:
+  a t512-arm profile has `onset_step: 576` = 512 + one 64-step interval, exactly
+  as designed.
+
+  **(5) STORAGE GUARD BUG, fixed.** It charged a cell its FULL estimate
+  regardless of progress, so t2048 at 347/400 was refused over 0.20 GB when its
+  real remainder was ~0.03 GB -- a nearly finished run blocked over space it
+  would never use. Now scaled by remaining work (`remaining_output_gb`). An
+  unstarted cell has done==0 and is charged in full, so the guard is NOT
+  weakened for anything that has not run; a test pins that, and another pins
+  that an unstarted oversized cell is still refused.
+
+  **NEXT:** (a) t2048 finishes -> `onset-surface-q2` fires automatically and
+  gives the Q.2 verdict; (b) Q.5 needs ~0.35 GiB freed AND a read cell built;
+  (c) **ICLR: abstract deadline passed 09-18, full paper 09-25 (5 days), paper
+  is 26pp with ~24 main text against a 9-page limit and the body/appendix split
+  is proposed but NOT executed**; (d) anonymized-repo URL still a placeholder.
+  17 commits unpushed; push authorization NOT granted.
 
   **★★★★★ 2026-09-15 — Q.1 IS READ AND IT QUALIFIES A PUBLISHED RESULT. Three
   stuck cells fixed (path defect, not data). Q.2 onset-t0 resumed, 341/400.**

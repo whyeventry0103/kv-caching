@@ -549,3 +549,58 @@ def test_storage_is_measured_in_the_same_units_the_budget_is_declared_in(tmp_pat
         gib, rel=0.02
     ), f"expected GiB ({gib:.6f}); decimal GB would be {decimal_gb:.6f}"
     assert used != pytest.approx(decimal_gb, rel=0.02)
+
+
+# --------------------------------------------------------------------------
+# The guard must charge a cell for what it will still WRITE, not for its total.
+# replay-onset-t2048 was refused at 347/400 over a 0.20 GB estimate whose real
+# remainder was about 0.03 GB: a nearly finished run blocked over space it was
+# never going to use. An unstarted cell must be unaffected, or the fix would
+# quietly weaken the guard for every cell that has not run.
+
+
+def test_unstarted_cell_is_charged_its_full_estimate():
+    from nightly_autorun import remaining_output_gb
+
+    assert remaining_output_gb(_q_job(0.20), done=0) == pytest.approx(0.20)
+
+
+def test_a_nearly_finished_cell_is_charged_only_its_remainder():
+    from nightly_autorun import remaining_output_gb
+
+    job = _q_job(0.20)
+    object.__setattr__(job, "total", 400)
+    # 347/400 done -> 13.25% left
+    assert remaining_output_gb(job, done=347) == pytest.approx(0.20 * 53 / 400)
+
+
+def test_a_complete_cell_projects_nothing():
+    from nightly_autorun import remaining_output_gb
+
+    job = _q_job(0.20)
+    object.__setattr__(job, "total", 400)
+    assert remaining_output_gb(job, done=400) == pytest.approx(0.0)
+    assert remaining_output_gb(job, done=999) == pytest.approx(0.0)
+
+
+def test_the_real_t2048_case_now_launches_and_would_not_have_before():
+    from nightly_autorun import DISK_SAFETY_MARGIN_GB, check_disk_budget
+
+    job = _q_job(0.20)
+    object.__setattr__(job, "total", 400)
+    used, budget = 68.83, 70.0
+    headroom = budget - used  # 1.17
+    # before: full estimate + margin exceeded headroom
+    assert 0.20 + DISK_SAFETY_MARGIN_GB > headroom
+    # after: the remainder fits
+    check_disk_budget(job, used, budget, done=347)
+
+
+def test_an_unstarted_cell_that_does_not_fit_is_still_refused():
+    """The fix must not make the guard permissive for fresh cells."""
+    from nightly_autorun import check_disk_budget
+
+    job = _q_job(0.45)
+    object.__setattr__(job, "total", 800)
+    with pytest.raises(SystemExit, match="REFUSING TO LAUNCH"):
+        check_disk_budget(job, used_gb=68.83, budget_gb=70.0, done=0)

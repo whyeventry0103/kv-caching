@@ -715,6 +715,23 @@ jobs:
     est_output_gb: 0.20   # measured: replay-onset-t0 is 0.192 GiB
     requires: replay-onset-t512
 
+  # --- Q.2 READ. The Q.1 reads were nearly forgotten the same way: generation
+  # cells were queued and nothing computed the verdict, so a drained queue would
+  # have looked finished with the question unanswered. Gated on ALL THREE onset
+  # arms, because the slope needs every arm on the same traces -- a read against
+  # a partially written arm would silently drop traces and put problem identity
+  # into a quantity that is supposed to carry exposure alone.
+  - name: onset-surface-q2
+    command: onset-surface
+    config: configs/experiments/onset_surface_q2.yaml
+    run_name: onset-surface-q2
+    total: 1
+    seeds: [11]
+    min_free_gb: 1
+    progress_kind: marker
+    marker: onset-surface-q2/onset_surface_q2.json
+    requires: replay-onset-t2048
+
   # --- Q.5 latency-swept restoration. Converts the P.5 flat null into a
   # timescale, if the query-drift account is right. The lag selects WHICH
   # stashed entries return, by eviction age, holding the trigger fixed --

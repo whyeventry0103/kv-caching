@@ -1,0 +1,32 @@
+name: onset_surface_q2
+stage: analysis
+mode: onset_surface
+amendment: Q.2
+# Amendment Q.2 READ -- the exposure-vs-dose surface.
+#
+# CPU-ONLY re-analysis of profiles that already exist. No generation, no model,
+# no GPU.
+#
+# r = B/t couples the realised ratio to context length, so no slice of (B, t)
+# isolates exposure. Compression onset is not in that identity: at a matched
+# absolute position t and budget B, every arm has the SAME realised ratio while
+# exposure h = t - t0 differs. The slope of divergence on exposure at matched r
+# is therefore the quantity the identity otherwise forbids.
+#
+# Slopes are computed WITHIN one (budget, read position) cell and never pooled
+# across them, because the ratio is matched only at equal t. Read positions
+# start a full window after the LATEST onset so no arm is read across its own
+# onset.
+#
+# READ (pre-registered, Amendment Q.2): RATIO-ONLY / HORIZON-PRESENT / MIXED.
+# HORIZON-PRESENT would partially relicense what M.3 delicensed and reopens the
+# mechanism-clause decision -- it does not settle it.
+#
+# NAMING (binding): the manipulated quantity is EXPOSURE TO THE COMPRESSION
+# PROCESS, never "horizon" in the plain temporal sense.
+arms:
+  0: replay-onset-t0
+  512: replay-onset-t512
+  2048: replay-onset-t2048
+run_artifact: onset-surface-q2/onset_surface_q2.json
+out_artifact: results/diag/amendment-q/onset_surface_q2.json
