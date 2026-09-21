@@ -114,8 +114,36 @@ def main() -> int:
     # identity into a slope that is supposed to carry exposure alone.
     shared = set.intersection(*(set(v) for v in loaded.values()))
     onsets = sorted(arms)
+
+    # Balanced panel. Read positions get deeper into the trace, so later
+    # positions retain only the LONGER traces: the full panel compares slopes at
+    # different positions on different problem populations, and a sign change
+    # across positions could be attrition rather than an interaction. The
+    # balanced panel is the subset of traces long enough to be read at EVERY
+    # position, so the cross-position comparison holds the population fixed.
+    #
+    # It is a DIAGNOSTIC, not a re-cut of the verdict: the pre-registered read
+    # is taken on the full panel, and this only says whether the cross-position
+    # variation driving that verdict survives a fixed population.
+    balanced = {
+        key
+        for key in shared
+        if len(
+            matched_positions(
+                onsets,
+                WINDOW,
+                min(len(loaded[t0][key]["estimate"]) for t0 in onsets),
+                step=STEP,
+                count=N_POSITIONS,
+            )
+        )
+        == N_POSITIONS
+    }
     # slopes[(budget, position)][pid] -> list of per-(press, seed) slopes
     slopes: dict[tuple[str, int], dict[str, list[float]]] = defaultdict(
+        lambda: defaultdict(list)
+    )
+    bal_slopes: dict[tuple[str, int], dict[str, list[float]]] = defaultdict(
         lambda: defaultdict(list)
     )
     skipped_short = 0
@@ -140,6 +168,8 @@ def main() -> int:
                 s = exposure_slope(xs, ys)
                 if s is not None:
                     slopes[(budget, pos)][pid].append(s)
+                    if key in balanced:
+                        bal_slopes[(budget, pos)][pid].append(s)
 
     out: dict[str, Any] = {
         "amendment": "Q.2",
@@ -170,6 +200,40 @@ def main() -> int:
             "sign": "positive" if stat["mean"] > 0 else "negative",
         }
 
+    out["balanced_panel"] = {
+        "n_traces": len(balanced),
+        "note": (
+            "traces long enough to be read at EVERY position, so the "
+            "cross-position comparison holds the problem population fixed. "
+            "DIAGNOSTIC ONLY -- the pre-registered verdict is taken on the full "
+            "panel; this says whether the variation driving it survives a fixed "
+            "population."
+        ),
+        "per_cell": {},
+    }
+    for (budget, pos), by_pid in sorted(bal_slopes.items()):
+        if not by_pid:
+            continue
+        stat = cluster_bootstrap_mean(by_pid, n_resamples=a.n_resamples, seed=a.seed)
+        lo, hi = stat["ci95"]
+        out["balanced_panel"]["per_cell"][f"b{budget}@{pos}"] = {
+            "budget": int(budget),
+            "position": int(pos),
+            "n_problems": len(by_pid),
+            "slope": stat,
+            "excludes_zero": bool(lo > 0 or hi < 0),
+            "sign": "positive" if stat["mean"] > 0 else "negative",
+        }
+    bal = out["balanced_panel"]["per_cell"]
+    signs = {c["sign"] for c in bal.values() if c["excludes_zero"]}
+    out["balanced_panel"]["sign_varies_on_fixed_population"] = len(signs) > 1
+    out["balanced_panel"]["interpretation"] = (
+        "cross-position sign change SURVIVES a fixed population"
+        if len(signs) > 1
+        else "cross-position sign change does NOT survive a fixed population; "
+        "the full-panel variation is consistent with trace-length attrition"
+    )
+
     cells = out["per_cell"]
     if not cells:
         out["verdict"] = "NO READABLE CELL"
@@ -191,7 +255,15 @@ def main() -> int:
             f"slope={s['mean']:+.3e} {[f'{x:+.2e}' for x in s['ci95']]} "
             f"excl0={c['excludes_zero']}"
         )
-    print(f"VERDICT: {out['verdict']}")
+    print(f"VERDICT (full panel, pre-registered): {out['verdict']}")
+    interp = out["balanced_panel"]["interpretation"]
+    print(f"balanced panel ({len(balanced)} traces): {interp}")
+    for name, c in bal.items():
+        s2 = c["slope"]
+        print(
+            f"  {name:>14}  pids={c['n_problems']:<3} slope={s2['mean']:+.3e} "
+            f"{[f'{x:+.2e}' for x in s2['ci95']]} excl0={c['excludes_zero']}"
+        )
     print(f"wrote {a.out}")
     return 0
 

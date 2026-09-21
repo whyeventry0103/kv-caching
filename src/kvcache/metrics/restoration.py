@@ -311,3 +311,53 @@ def retained_set_report(
             "changed the values it claimed only to move."
         ),
     }
+
+
+def classify_latency_sweep(
+    points: list[tuple[int, float, tuple[float, float]]],
+) -> dict[str, object]:
+    """Amendment Q.5 verdict over (lag, matched-arm effect, CI) points.
+
+    Effects are ``none`` minus arm, so a POSITIVE effect means divergence was
+    reduced -- reinsertion helped. Amendment P.5 measured the far regime only
+    (single trigger, 200-step read window) and found no help; the sweep asks
+    whether help exists at short lag and decays, which would turn a flat null
+    into a mechanism with a timescale.
+
+    The three branches are pre-registered and are applied here rather than
+    chosen after the fact:
+
+    * ``DECAY`` -- the smallest lag helps (effect positive, CI excluding zero)
+      and the effects fall monotonically as lag grows. The null is then correctly
+      scoped to the far regime.
+    * ``FLAT-NULL`` -- no lag helps, including the smallest. The query-drift
+      account is wrong and cache COMPOSITION matters more than contents.
+    * ``NON-MONOTONE`` -- some lag helps but the trend is not monotone. Report
+      the profile; claim no timescale.
+
+    A monotone check is only meaningful over the lags actually measured, so a
+    sweep with fewer than two points returns ``INSUFFICIENT`` rather than a
+    verdict it cannot support.
+    """
+    ordered = sorted(points, key=lambda p: p[0])
+    if len(ordered) < 2:
+        return {"verdict": "INSUFFICIENT", "n_points": len(ordered)}
+    helps = [(lag, eff, ci[0] > 0.0) for lag, eff, ci in ordered]
+    any_help = any(h for _, _, h in helps)
+    smallest_helps = helps[0][2]
+    effects = [eff for _, eff, _ in helps]
+    monotone = all(a >= b for a, b in zip(effects[:-1], effects[1:], strict=True))
+    if not any_help:
+        verdict = "FLAT-NULL"
+    elif smallest_helps and monotone:
+        verdict = "DECAY"
+    else:
+        verdict = "NON-MONOTONE"
+    return {
+        "verdict": verdict,
+        "n_points": len(ordered),
+        "lags": [lag for lag, _, _ in ordered],
+        "effects": effects,
+        "helps_at_lag": {str(lag): h for lag, _, h in helps},
+        "monotone_decreasing": monotone,
+    }

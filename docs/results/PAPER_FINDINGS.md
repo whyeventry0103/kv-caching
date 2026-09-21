@@ -1280,6 +1280,47 @@ cell read "complete" by marker while its own launch log recorded rc=2. Fixed,
 with regression tests that simulate the launcher's environment — the earlier
 tests set only `REMOTE_RUNS_ROOT` and so could not see it.
 
+### 5b. Amendment Q.2 result: MIXED, and the mechanism clause stays as decided (2026-09-21)
+
+The second Meeting-#3 read. Applied exactly as pre-registered on 2026-09-12,
+before any onset profile existed. Artifact
+`results/diag/amendment-q/onset_surface_q2.json`.
+
+**Verdict: MIXED.** At budget 256 the slope of divergence on exposure excludes
+zero at all three read positions but **changes sign** — `+4.15e-06` at position
+2304, `−8.88e-07` at 3328, `−1.35e-06` at 4352. At budget 2048 no cell excludes
+zero. Not RATIO-ONLY (cells exclude zero), not HORIZON-PRESENT (sign is not
+consistent). Per the branch: report the interaction, claim neither main effect.
+
+**The headline consequence is a non-event, and that is worth stating plainly:
+the mechanism clause is NOT reopened.** Amendment Q.2 pre-committed that a
+HORIZON-PRESENT outcome would partially relicense what M.3 delicensed and reopen
+the candidate-A decision of 2026-09-08. MIXED does not, so candidate A stands
+unchanged and for its original reasons. This is the outcome that required no
+paper edit, and no paper edit was made.
+
+**The obvious confound was checked and did not explain it.** Deeper read
+positions retain only longer traces, so pids fall 19 → 14 → 10 and 192 of 400
+traces never reach the deepest position — meaning the full panel compares
+positions on *different problem populations*. A balanced panel (the 116 traces
+readable at every position; 10 problems throughout) was computed as a
+diagnostic, and the **sign change survives on the fixed population**
+(`+4.47e-06` → `−9.78e-07` → `−1.35e-06` at budget 256, all excluding zero). So
+MIXED is a real interaction, not trace-length attrition.
+
+The balanced panel is a **diagnostic, never a re-cut**: the verdict is taken on
+the full panel as pre-registered. It exists only to say whether the variation
+driving that verdict is a population artifact. It is not.
+
+**Binding scope.** MIXED claims no main effect, so nothing here supports either
+"exposure contributes nothing at fixed dose" or "exposure is separable from
+dose." Slopes are per-step TV per decode step (~1e-6 at budget 256), not
+accuracy-scale; Definition 6 applies. The manipulated quantity is **exposure to
+the compression process**, never "horizon" — in a staggered arm the early
+entries were never subject to eviction, so the retained set is drawn from a
+different history. Scope: one model, MATH-500, two budgets, three read
+positions, 10–19 problems per cell.
+
 
 <!-- AUDIT:ARCHIVAL-END -->
 

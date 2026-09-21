@@ -1,0 +1,252 @@
+{
+  "amendment": "Q.2",
+  "arms": {
+    "0": "replay-onset-t0",
+    "2048": "replay-onset-t2048",
+    "512": "replay-onset-t512"
+  },
+  "balanced_panel": {
+    "interpretation": "cross-position sign change SURVIVES a fixed population",
+    "n_traces": 116,
+    "note": "traces long enough to be read at EVERY position, so the cross-position comparison holds the problem population fixed. DIAGNOSTIC ONLY -- the pre-registered verdict is taken on the full panel; this says whether the variation driving it survives a fixed population.",
+    "per_cell": {
+      "b2048@2304": {
+        "budget": 2048,
+        "excludes_zero": true,
+        "n_problems": 10,
+        "position": 2304,
+        "sign": "positive",
+        "slope": {
+          "ci95": [
+            1.1856683404976811e-07,
+            7.480120958059457e-07
+          ],
+          "mean": 4.195571846857364e-07,
+          "n_clusters": 10,
+          "n_observations": 58,
+          "n_resamples": 2000,
+          "seed": 0
+        }
+      },
+      "b2048@3328": {
+        "budget": 2048,
+        "excludes_zero": false,
+        "n_problems": 10,
+        "position": 3328,
+        "sign": "negative",
+        "slope": {
+          "ci95": [
+            -5.875096280583924e-07,
+            3.713392719264599e-07
+          ],
+          "mean": -9.188254993274623e-08,
+          "n_clusters": 10,
+          "n_observations": 58,
+          "n_resamples": 2000,
+          "seed": 0
+        }
+      },
+      "b2048@4352": {
+        "budget": 2048,
+        "excludes_zero": false,
+        "n_problems": 10,
+        "position": 4352,
+        "sign": "negative",
+        "slope": {
+          "ci95": [
+            -4.910346295172506e-07,
+            3.622872768902316e-07
+          ],
+          "mean": -7.266196395886168e-08,
+          "n_clusters": 10,
+          "n_observations": 58,
+          "n_resamples": 2000,
+          "seed": 0
+        }
+      },
+      "b256@2304": {
+        "budget": 256,
+        "excludes_zero": true,
+        "n_problems": 10,
+        "position": 2304,
+        "sign": "positive",
+        "slope": {
+          "ci95": [
+            1.9948334035088225e-06,
+            6.642304348086838e-06
+          ],
+          "mean": 4.466174278811974e-06,
+          "n_clusters": 10,
+          "n_observations": 58,
+          "n_resamples": 2000,
+          "seed": 0
+        }
+      },
+      "b256@3328": {
+        "budget": 256,
+        "excludes_zero": true,
+        "n_problems": 10,
+        "position": 3328,
+        "sign": "negative",
+        "slope": {
+          "ci95": [
+            -1.552899869854475e-06,
+            -3.1938710245091214e-07
+          ],
+          "mean": -9.777656367098062e-07,
+          "n_clusters": 10,
+          "n_observations": 58,
+          "n_resamples": 2000,
+          "seed": 0
+        }
+      },
+      "b256@4352": {
+        "budget": 256,
+        "excludes_zero": true,
+        "n_problems": 10,
+        "position": 4352,
+        "sign": "negative",
+        "slope": {
+          "ci95": [
+            -2.420936459135793e-06,
+            -5.932577884200853e-07
+          ],
+          "mean": -1.3516886977004686e-06,
+          "n_clusters": 10,
+          "n_observations": 58,
+          "n_resamples": 2000,
+          "seed": 0
+        }
+      }
+    },
+    "sign_varies_on_fixed_population": true
+  },
+  "n_shared_traces": 400,
+  "per_cell": {
+    "b2048@2304": {
+      "budget": 2048,
+      "excludes_zero": false,
+      "n_observations": 104,
+      "n_problems": 19,
+      "position": 2304,
+      "realized_ratio": 0.8888888888888888,
+      "sign": "positive",
+      "slope": {
+        "ci95": [
+          -2.418393380667671e-08,
+          5.097725283538342e-07
+        ],
+        "mean": 2.3493982139269292e-07,
+        "n_clusters": 19,
+        "n_observations": 104,
+        "n_resamples": 2000,
+        "seed": 0
+      }
+    },
+    "b2048@3328": {
+      "budget": 2048,
+      "excludes_zero": false,
+      "n_observations": 80,
+      "n_problems": 14,
+      "position": 3328,
+      "realized_ratio": 0.6153846153846154,
+      "sign": "negative",
+      "slope": {
+        "ci95": [
+          -4.848745240736082e-07,
+          2.4388753701942046e-07
+        ],
+        "mean": -1.1999027872657505e-07,
+        "n_clusters": 14,
+        "n_observations": 80,
+        "n_resamples": 2000,
+        "seed": 0
+      }
+    },
+    "b2048@4352": {
+      "budget": 2048,
+      "excludes_zero": false,
+      "n_observations": 58,
+      "n_problems": 10,
+      "position": 4352,
+      "realized_ratio": 0.47058823529411764,
+      "sign": "negative",
+      "slope": {
+        "ci95": [
+          -4.910346295172506e-07,
+          3.622872768902316e-07
+        ],
+        "mean": -7.266196395886168e-08,
+        "n_clusters": 10,
+        "n_observations": 58,
+        "n_resamples": 2000,
+        "seed": 0
+      }
+    },
+    "b256@2304": {
+      "budget": 256,
+      "excludes_zero": true,
+      "n_observations": 104,
+      "n_problems": 19,
+      "position": 2304,
+      "realized_ratio": 0.1111111111111111,
+      "sign": "positive",
+      "slope": {
+        "ci95": [
+          2.645823759373496e-06,
+          5.640801360490957e-06
+        ],
+        "mean": 4.146599092540366e-06,
+        "n_clusters": 19,
+        "n_observations": 104,
+        "n_resamples": 2000,
+        "seed": 0
+      }
+    },
+    "b256@3328": {
+      "budget": 256,
+      "excludes_zero": true,
+      "n_observations": 80,
+      "n_problems": 14,
+      "position": 3328,
+      "realized_ratio": 0.07692307692307693,
+      "sign": "negative",
+      "slope": {
+        "ci95": [
+          -1.4592997179814146e-06,
+          -3.2096993915862236e-07
+        ],
+        "mean": -8.875572254796673e-07,
+        "n_clusters": 14,
+        "n_observations": 80,
+        "n_resamples": 2000,
+        "seed": 0
+      }
+    },
+    "b256@4352": {
+      "budget": 256,
+      "excludes_zero": true,
+      "n_observations": 58,
+      "n_problems": 10,
+      "position": 4352,
+      "realized_ratio": 0.058823529411764705,
+      "sign": "negative",
+      "slope": {
+        "ci95": [
+          -2.420936459135793e-06,
+          -5.932577884200853e-07
+        ],
+        "mean": -1.3516886977004686e-06,
+        "n_clusters": 10,
+        "n_observations": 58,
+        "n_resamples": 2000,
+        "seed": 0
+      }
+    }
+  },
+  "position_step": 1024,
+  "quantity": "OLS slope of window-mean per-step TV on exposure h = t - t0, within one (budget, read position) cell so the realised ratio r = B/t is matched by construction. Slopes are NOT pooled across positions or budgets.",
+  "skipped_trace_too_short": 192,
+  "verdict": "MIXED -> report the interaction, claim no main effect",
+  "window": 256
+}

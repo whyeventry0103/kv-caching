@@ -2750,3 +2750,68 @@ artifact had been produced out of band, so that cell read "complete" by marker
 while its own launch log recorded rc=2. Fixed, with regression tests that
 simulate the launcher's environment rather than a bare shell — the earlier tests
 set only `REMOTE_RUNS_ROOT` and therefore could not see it.
+
+---
+
+## Amendment Q.2, result (2026-09-21): MIXED — the mechanism clause is NOT reopened
+
+Read applied exactly as pre-registered on 2026-09-12, before any onset profiles
+existed. Artifact `results/diag/amendment-q/onset_surface_q2.json`.
+
+Three onset arms (`t0` = 0, 512, 2048), 400/400 profiles each, 400 traces shared
+across all three. Slope of window-mean per-step TV on exposure `h = t - t0`,
+computed within one `(budget, read position)` cell so the realised ratio
+`r = B/t` is matched by construction, and never pooled across cells.
+
+| cell | r | pids | slope | 95% CI | excludes 0 |
+|---|---|---|---|---|---|
+| b2048@2304 | 0.889 | 19 | +2.35e-07 | [−2.42e-08, +5.10e-07] | no |
+| b2048@3328 | 0.615 | 14 | −1.20e-07 | [−4.85e-07, +2.44e-07] | no |
+| b2048@4352 | 0.471 | 10 | −7.27e-08 | [−4.91e-07, +3.62e-07] | no |
+| b256@2304 | 0.111 | 19 | **+4.15e-06** | [+2.65e-06, +5.64e-06] | **yes** |
+| b256@3328 | 0.077 | 14 | **−8.88e-07** | [−1.46e-06, −3.21e-07] | **yes** |
+| b256@4352 | 0.059 | 10 | **−1.35e-06** | [−2.42e-06, −5.93e-07] | **yes** |
+
+**Verdict: MIXED.** Not RATIO-ONLY — three cells exclude zero. Not
+HORIZON-PRESENT — the sign is not consistent: at budget 256 the slope is
+positive at the earliest read position and negative at both later ones. Per the
+branch as written: report the interaction surface and claim neither main effect.
+
+**Consequence for the mechanism clause: it is NOT reopened.** Amendment Q.2
+stated that a HORIZON-PRESENT outcome would partially relicense what M.3
+delicensed and reopen the candidate-A decision of 2026-09-08. MIXED does not.
+Candidate A stands, unchanged and for the same reasons.
+
+**A confound was checked rather than assumed, and it did not explain the
+result.** Read positions get deeper into the trace, so later positions retain
+only longer traces: pids fall 19 → 14 → 10 and 192 of 400 traces are too short
+to reach the deepest position. The cross-position sign change that drives the
+MIXED verdict is therefore confounded, in the full panel, with a changing
+problem population. A **balanced panel** — the 116 traces readable at *every*
+position, 10 problems throughout — was computed as a diagnostic:
+
+| cell | pids | slope | 95% CI | excludes 0 |
+|---|---|---|---|---|
+| b2048@2304 | 10 | +4.20e-07 | [+1.19e-07, +7.48e-07] | yes |
+| b2048@3328 | 10 | −9.19e-08 | [−5.88e-07, +3.71e-07] | no |
+| b2048@4352 | 10 | −7.27e-08 | [−4.91e-07, +3.62e-07] | no |
+| b256@2304 | 10 | +4.47e-06 | [+1.99e-06, +6.64e-06] | yes |
+| b256@3328 | 10 | −9.78e-07 | [−1.55e-06, −3.19e-07] | yes |
+| b256@4352 | 10 | −1.35e-06 | [−2.42e-06, −5.93e-07] | yes |
+
+**The sign change survives a fixed population**, so MIXED reflects a real
+interaction rather than trace-length attrition. The balanced panel is a
+**diagnostic and not a re-cut**: the verdict is taken on the full panel as
+pre-registered, and this only establishes that the variation driving it is not a
+population artifact.
+
+**What this does not license.** MIXED claims no main effect, so it supports
+neither "exposure contributes nothing at fixed dose" nor "exposure is separable
+from dose." The interaction is reported as an observation at this scope: one
+model, MATH-500, two budgets, three read positions, 10–19 problems per cell. The
+manipulated quantity remains **exposure to the compression process**, never
+"horizon" in the plain temporal sense — in a staggered arm the early entries were
+never subject to eviction, so the retained set is drawn from a different history.
+
+**Slopes are per-step TV per decode step** and are ~1e-6 at budget 256; they are
+not accuracy-scale and Definition 6 applies unchanged.

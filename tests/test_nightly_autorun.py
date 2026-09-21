@@ -604,3 +604,67 @@ def test_an_unstarted_cell_that_does_not_fit_is_still_refused():
     object.__setattr__(job, "total", 800)
     with pytest.raises(SystemExit, match="REFUSING TO LAUNCH"):
         check_disk_budget(job, used_gb=68.83, budget_gb=70.0, done=0)
+
+
+# --------------------------------------------------------------------------
+# The nightly report must use the orchestrator's stuck filter, not a raw
+# fails>=MAX_FAILS scan. shape-p2v2-restricted failed three launches and was
+# later completed by other means; because the report lacked the filter, every
+# nightly email was flagged ATTENTION for a job that had finished weeks ago.
+# A standing false alarm is indistinguishable from a real one, so a genuinely
+# stuck job would have raised the same flag and been ignored.
+
+
+def test_stuck_filter_excludes_a_job_that_completed_after_failing(tmp_path):
+    from nightly_autorun import Job, stuck_jobs
+
+    runs = tmp_path / "runs"
+    marker = runs / "shape-x" / "out.json"
+    marker.parent.mkdir(parents=True)
+    marker.write_text("{}")
+    job = Job(
+        name="shape-x",
+        command="shape",
+        config="c.yaml",
+        run_name="shape-x",
+        total=1,
+        seeds=[11],
+        min_free_gb=1,
+        progress_kind="marker",
+        requires=None,
+        marker="shape-x/out.json",
+    )
+    state = {"shape-x": {"fails": 99}}
+    assert (
+        stuck_jobs(runs, [job], state) == set()
+    ), "a completed job must never be reported stuck, however many launches failed"
+
+
+def test_stuck_filter_still_reports_a_job_that_failed_and_is_incomplete(tmp_path):
+    from nightly_autorun import Job, stuck_jobs
+
+    runs = tmp_path / "runs"
+    runs.mkdir()
+    job = Job(
+        name="shape-y",
+        command="shape",
+        config="c.yaml",
+        run_name="shape-y",
+        total=1,
+        seeds=[11],
+        min_free_gb=1,
+        progress_kind="marker",
+        requires=None,
+        marker="shape-y/out.json",
+    )
+    assert stuck_jobs(runs, [job], {"shape-y": {"fails": 99}}) == {"shape-y"}
+
+
+def test_the_report_does_not_hand_roll_its_own_stuck_scan():
+    """One source of truth: the raw comprehension is what drifted."""
+    src = (ROOT / "scripts" / "nightly_report.py").read_text(encoding="utf-8")
+    assert "na.stuck_jobs(" in src
+    assert 's.get("fails", 0) >= na.MAX_FAILS' not in src, (
+        "report re-implemented the stuck scan; it must call na.stuck_jobs so the "
+        "completeness filter cannot drift out of it again"
+    )

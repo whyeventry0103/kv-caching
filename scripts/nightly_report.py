@@ -98,7 +98,15 @@ def generate_report(write_snapshot: bool = True) -> tuple[str, str]:
 
     # crash/stuck detection + what launched, from state and today's watcher log
     state = na.load_state()
-    stuck = [n for n, s in state.items() if s.get("fails", 0) >= na.MAX_FAILS]
+    # Use the orchestrator's OWN filter, not a raw fails>=MAX_FAILS scan.
+    # Completeness outranks the failure counter: a job can fail its launches,
+    # be marked stuck, and later be completed by other means.
+    # shape-p2v2-restricted did exactly that, and because this report never got
+    # the filter the orchestrator has, EVERY nightly email has been flagged
+    # ATTENTION for a job that finished weeks ago. That is worse than cosmetic:
+    # a standing false alarm is indistinguishable from a real one, so a job that
+    # genuinely got stuck would have raised the same flag and been ignored.
+    stuck = sorted(na.stuck_jobs(runs_root, jobs, state))
     autorun_log = PROJECT_ROOT / "logs" / "nightly_autorun.log"
     stuck_today: list[str] = []
     launched_today: list[str] = []
