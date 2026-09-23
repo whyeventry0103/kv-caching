@@ -157,6 +157,7 @@ def generate_report(write_snapshot: bool = True) -> tuple[str, str]:
 
     # Tonight's plan: what the watcher will pick at 01:45 (no sessions run at report
     # time, so live is read fresh; per-seed detail doubles as a looping-shard flag).
+    storage_block: str | None = None
     try:
         live = na.live_map([j.run_name for j in jobs], na.tmux_session_names())
         candidates, _ = na.launch_candidates(
@@ -169,6 +170,27 @@ def generate_report(write_snapshot: bool = True) -> tuple[str, str]:
                     f"  next: {job.name} (min_free {job.min_free_gb}GB), "
                     f"needy seeds {needy}"
                 )
+            # Say whether the next job will actually launch. The orchestrator's
+            # storage guard refuses before anything is written, and without this
+            # the email listed restoration-lag1 as "next" every night while the
+            # guard refused it every tick -- a blocked queue that read exactly
+            # like runs silently failing.
+            head = candidates[0][0]
+            try:
+                na.check_disk_budget(
+                    head,
+                    na.storage_used_gb(),
+                    float(na.BASE_ENV["KVCACHE_PERSONAL_FREE_GB"]),
+                    done=progress.get(head.name, 0),
+                )
+            except SystemExit as refusal:
+                storage_block = head.name
+                lines.append(
+                    f"  *** WILL NOT LAUNCH: {head.name} is refused by the storage "
+                    "guard. Nothing further in the queue can run until space is "
+                    "freed (a human decision -- see the guard's message):"
+                )
+                lines.append(f"      {refusal}")
             per_seed = na.count_per_seed(runs_root, candidates[0][0])
             if per_seed:
                 seed_total = max(
@@ -223,6 +245,13 @@ def generate_report(write_snapshot: bool = True) -> tuple[str, str]:
         PREV_SNAPSHOT.parent.mkdir(parents=True, exist_ok=True)
         PREV_SNAPSHOT.write_text(
             json.dumps({"total_done": total_done, "date": today, "progress": progress})
+        )
+    if storage_block:
+        # A queue that cannot advance without a human decision is the one state
+        # the subject line most needs to show; CORE DONE hid it.
+        subject = (
+            f"[kvcache] {today} | +{delta} last night | {pct:.0f}% queue | "
+            f"BLOCKED (storage: {storage_block})"
         )
     return subject, "\n".join(lines)
 

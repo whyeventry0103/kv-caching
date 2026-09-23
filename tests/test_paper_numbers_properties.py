@@ -211,7 +211,18 @@ def test_the_real_catalogue_has_no_two_entries_sharing_an_exact_value_and_rule()
     # Recorded rather than forbidden: derived entries legitimately coincide with
     # their inputs (a bracket endpoint equals the residual it was built from).
     # The assertion is that the count does not silently grow.
-    assert len(collisions) <= 120, (
+    #
+    # 120 -> 127 on 2026-09-23, examined rather than waved through. Cataloguing
+    # the budget-512 and budget-1024 cells (Meeting-#3 Task 1) added 14 new
+    # collision groups: 3 are within-cell identities by construction (e.g.
+    # b512.random.primary_residual0 == b512.random.total_change -- the kind this
+    # comment already calls legitimate) and 11 are coincidences between
+    # unrelated quantities on the coarse k/400, k/392 accuracy lattice (e.g.
+    # b1024.streamingllm.free == q15b.rkv.readout == 0.6875). None of those keys
+    # is cited in the .tex, so none makes a sentence ambiguous; the claims gate
+    # pins any that are cited later. Set to the exact new count, with no slack,
+    # so the next growth trips this again and gets the same examination.
+    assert len(collisions) <= 127, (
         f"{len(collisions)} exact-value collisions in the catalogue; if this "
         "grew, a new derived quantity is duplicating an existing one"
     )

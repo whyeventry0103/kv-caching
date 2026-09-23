@@ -29,6 +29,8 @@ UNITS = {
     "diss256": K / "m4-powered-diss256-summary.json",
     "h2o256": K / "m4-h2o256-full-summary.json",
     "rkv256": K / "m4-rkv-256-summary.json",
+    "b512": K / "m4-512-summary.json",
+    "b1024": K / "m4-1024-summary.json",
     "b2048": K / "m4-2048-summary.json",
     "b2048h2o": K / "m4-2048-h2o-summary.json",
     "aime": K / "m4-aime-2048-summary.json",

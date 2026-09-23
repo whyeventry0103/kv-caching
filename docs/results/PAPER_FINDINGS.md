@@ -1321,6 +1321,61 @@ entries were never subject to eviction, so the retained set is drawn from a
 different history. Scope: one model, MATH-500, two budgets, three read
 positions, 10–19 problems per cell.
 
+### 5c. Meeting-#3 Task 1: the damage-vs-cache-size curve, built from rows already on disk (2026-09-23)
+
+**The graph the original Task 1 asked for had never been drawn.** Its ingredients
+existed — the budget-512 and budget-1024 grid and readout cells ran in July — but
+their committed artifacts held only resolution spreads, not per-press accuracy.
+`report_m4.py` was re-run over those existing rows (a derived report over valid
+rows, not new measurement) and archived as
+`results/diag/amendment-k/m4-512-summary.json` and `m4-1024-summary.json`. Both
+re-derive **IDENTICAL** from the raw rows under `rederive_artifacts.py`, and both
+use the same Amendment-K cell reference as every other unit (FC 0.885, readout
+reference 0.903). Figure: `figures/fig8_budget_curve.{pdf,png}` (not in the paper).
+
+| budget | press | free-run | total damage | readout loss | trajectory residual [95% CI] |
+|---|---|---|---|---|---|
+| 256 | Random | 0.422 | 0.463 | 0.138 | −0.337 [−0.404, −0.262] |
+| 512 | Random | 0.680 | 0.205 | 0.020 | −0.189 [−0.252, −0.129] |
+| 1024 | Random | 0.800 | 0.085 | 0.000 | −0.087 [−0.133, −0.048] |
+| 2048 | Random | 0.850 | 0.035 | 0.003 | −0.033 [−0.065, −0.010] |
+| 256 | StreamingLLM | 0.237 | 0.647 | 0.319 | −0.344 [−0.405, −0.270] |
+| 512 | StreamingLLM | 0.477 | 0.408 | 0.082 | −0.334 [−0.394, −0.263] |
+| 1024 | StreamingLLM | 0.688 | 0.198 | 0.005 | −0.196 [−0.263, −0.135] |
+| 2048 | StreamingLLM | 0.807 | 0.078 | 0.000 | −0.079 [−0.125, −0.042] |
+
+**1. The requested negative correlation holds, monotonically, for both policies.**
+Damage falls at every step from 256 to 2048. The full cache is zero **by
+construction** (full cache against itself), drawn as a hollow anchor and not
+claimed as a measurement.
+
+**2. The curve hides the finding, and the decomposition exposes it: readout
+damage closes by 512–1024 while trajectory damage persists.** Readout loss is
+already ≤0.02 for Random at 512 and ≤0.005 for both at 1024 — held-trace
+evaluation reports essentially lossless compression from budget 1024 up. The
+residual is still −0.087 (Random) and −0.196 (StreamingLLM) at 1024, with CIs
+excluding zero. **StreamingLLM's residual barely moves from 256 to 512
+(−0.344 → −0.334) while its readout loss collapses (0.319 → 0.082).** So in the
+256–1024 range the readout-style evaluation the method papers use has already
+declared near-losslessness while the free-running loss is still large — the
+paper's thesis, now visible as a function of budget rather than at one budget.
+
+**3. Divergence is not on this curve, and cannot be yet.** Per-step TV exists at
+budgets 256 and 2048 only (AUC-TV Random 0.108 → 0.013, StreamingLLM 0.103 →
+0.019); the 512 and 1024 cells were generation-only and have no replay profiles.
+Panel (c) of the figure shows the two measured points and draws no curve
+between them. A divergence-vs-budget curve needs teacher-forced replay at 512
+and 1024 — cheap (no generation, traces exist) but a new measurement, so it
+needs a pre-registered read first.
+
+**Scope and what this is not.** Two policies, MATH-500, one model, four budgets.
+Budget and compression ratio move together here (`r = B/t`), so this is a
+dose curve: it cannot by itself separate "more cache" from "less compression
+over the trace", which is exactly why Amendments Q.1/Q.2 exist. The residual is
+"accuracy change unexplained by on-reference readout", never a measured causal
+effect; these are forward-readout residuals without the reverse bracket, which
+exists at 256 only.
+
 
 <!-- AUDIT:ARCHIVAL-END -->
 

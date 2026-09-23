@@ -2,7 +2,7 @@
 
 **Purpose of this file:** a complete, self-contained handoff. An LLM with zero prior
 context should be able to read this and resume exactly where we are. Last updated
-2026-09-20. Repo: `/Users/apple/dev/kv-caching` (moved off `~/Desktop` 2026-06-14 to
+2026-09-23. Repo: `/Users/apple/dev/kv-caching` (moved off `~/Desktop` 2026-06-14 to
 escape a recurring macOS TCC lockout; `~/Desktop/kv-caching` is a **symlink** to this
 path, not a second copy — verified 2026-07-27), branch `main`, GitHub
 `whyeventry0103/kv-caching`. For the current commit run `git rev-parse --short
@@ -23,6 +23,44 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 ---
 
 ## 0. TL;DR — where we are right now
+
+  **★★★★★ 2026-09-23 — STATUS vs. THE THREE ORIGINAL MEETING-#3 TASKS. Task 1:
+  answered (curve built today). Task 2 (attention TV): designed + coded, NEVER
+  RUN. Task 3 (SVD/PCA direction): designed + coded, NEVER RUN. Queue BLOCKED on
+  storage since 2026-09-21. Email now says so.**
+
+  **(1) Task 1 — damage vs cache size: DONE.** fig8_budget_curve built from rows
+  already on disk (512/1024 were never summarised per-press); m4-512/1024
+  summaries archived, re-derive IDENTICAL, catalogued (922 entries). Damage
+  falls monotonically 256 -> 2048 for both policies. Key finding: readout loss
+  closes by 512-1024 (<=0.02 Random at 512) while the trajectory residual
+  persists (-0.087 Random / -0.196 SLM at 1024, CIs exclude 0); SLM residual
+  barely moves 256->512 (-0.344 -> -0.334) as its readout loss collapses. TV
+  exists at 256/2048 only. Horizon side: Q.1 = locking AMPLITUDE-DEPENDENT
+  (branch A qualified); Q.2 = MIXED (clause not reopened). PAPER_FINDINGS 5a/5b/5c.
+
+  **(2) Task 2 — attention-map comparison: NOT RUN.** Metric (M lost mass /
+  Delta shape-TV / GQA collateral), attn-profile-v1 columnar schema and tests
+  landed 2026-09-12. No runner exists, so Q.3 was never queued. Eager attention
+  required (slow path).
+
+  **(3) Task 3 — trajectory direction: NOT RUN.** On/off-manifold split, frozen
+  full-cache basis, tests landed; P.4 scope widened in Q.0. No runner, never
+  queued. Estimand fixed: omega(Random) - omega(SLM) with clustered CI.
+
+  **(4) Blocked.** restoration-lag1 (Q.5) refused every tick since 09-21: 1.14
+  GiB headroom vs 1.45 needed. Smallest sufficient reclaim is the 1.5B model
+  (3.32 GiB; q15b cells complete) -- a human decision, not taken.
+
+  **(5) Fixed today.** nightly report flagged "CORE DONE" and listed
+  restoration-lag1 as "next" while the guard refused it every tick; it now
+  evaluates the guard and flags BLOCKED (verified on the remote, test proven to
+  fail against the old report). Catalogue collision tripwire 120 -> 127 after
+  examining all 14 new groups (3 structural, 11 k/400-lattice coincidences).
+
+  **NEXT (human decisions):** free storage for Q.5; decide whether Q.3/Q.6
+  runners get built; pre-register replay-512/1024 if a divergence-vs-budget
+  curve is wanted. ICLR full paper due 2026-09-25. 19 commits unpushed.
 
   **★★★★★ 2026-09-20 — Q.1 FULLY DONE (runs + all 3 reads). Q.2 generation
   nearly done: t0 and t512 COMPLETE, t2048 347/400 and running. The Q.2 READ
