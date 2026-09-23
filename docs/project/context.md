@@ -2,7 +2,7 @@
 
 **Purpose of this file:** a complete, self-contained handoff. An LLM with zero prior
 context should be able to read this and resume exactly where we are. Last updated
-2026-09-23. Repo: `/Users/apple/dev/kv-caching` (moved off `~/Desktop` 2026-06-14 to
+2026-09-24. Repo: `/Users/apple/dev/kv-caching` (moved off `~/Desktop` 2026-06-14 to
 escape a recurring macOS TCC lockout; `~/Desktop/kv-caching` is a **symlink** to this
 path, not a second copy — verified 2026-07-27), branch `main`, GitHub
 `whyeventry0103/kv-caching`. For the current commit run `git rev-parse --short
@@ -23,6 +23,15 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 ---
 
 ## 0. TL;DR — where we are right now
+
+  **★★★★★ 2026-09-24 — CORRECTION: Q.1 is NOT fully done.** Its pre-registered
+  negative control (deferred removal at s+32, removal step must show no phase
+  excess; a STOP gate for paper edits) was never implemented, queued or run,
+  and the 09-15 / 09-20 notes calling Q.1 "fully done" were wrong. The paper's
+  branch-A qualification rests on the three interval arms without that check.
+  Recorded as PREREGISTRATION "Amendment Q.1, correction (2026-09-24)". Also
+  never built: the D_acc half of Q.2 (not queued, no config) and a queued read
+  cell for Q.5 (only the classifier exists).
 
   **★★★★★ 2026-09-23 — STATUS vs. THE THREE ORIGINAL MEETING-#3 TASKS. Task 1:
   answered (curve built today). Task 2 (attention TV): designed + coded, NEVER

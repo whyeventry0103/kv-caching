@@ -2815,3 +2815,33 @@ never subject to eviction, so the retained set is drawn from a different history
 
 **Slopes are per-step TV per decode step** and are ~1e-6 at budget 256; they are
 not accuracy-scale and Definition 6 applies unchanged.
+
+---
+
+## Amendment Q.1, correction (2026-09-24): the pre-registered negative control was never built or run
+
+Amendment Q.1 pre-registered, **in the same cell**, a negative control on the
+phase instrument: split each prune into selection (tokens become unattendable at
+step `s`) and physical removal (the tensor shrinks at `s + 32`). Removal is a
+functional no-op by construction, so phase excess anchored on the removal step
+must not exclude zero. The amendment made that a STOP condition for any paper
+edit resting on a phase result.
+
+**That control was never implemented, never queued and never run.** No press
+supports deferred removal, no config exists, and the queue holds only the three
+interval arms and their three reads. The omission was not reported when it
+happened: the 2026-09-15 and 2026-09-20 status notes called Q.1 "fully done",
+which was **incorrect**. Q.1's three arms and reads are complete, but its
+instrument check is not.
+
+**What this changes.** The Q.1 result (AMPLITUDE-DEPENDENT, 2026-09-15) and the
+paper sentence qualifying P.2 branch A rest on the three interval arms **without**
+the instrument check that was meant to accompany them. The paper makes no claim
+that the check was run; its "negative control" wording refers to the separate
+two-full-cache ADD control. The qualification stands as a statement about
+measured phase excess, but it has not passed the gate the amendment set for it.
+
+**Owed:** implement deferred removal in the instrumented press, a real-generation
+smoke on it, then the cell and its read. If the removal-anchored excess excludes
+zero, every phase result is suspect, and the Q.1 qualification and the P.2-v2
+phase statement must both be reopened before submission.
