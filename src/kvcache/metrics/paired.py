@@ -24,7 +24,7 @@ from typing import Any
 
 from kvcache.stats import cluster_bootstrap_mean
 
-__all__ = ["paired_flip_contrast"]
+__all__ = ["paired_flip_contrast", "trace_identity"]
 
 
 def paired_flip_contrast(
@@ -60,4 +60,36 @@ def paired_flip_contrast(
         "n_only_fc": len(set(fc) - set(comp)),
         "n_only_comp": len(set(comp) - set(fc)),
         "note": "net flip mass == total_change on the matched population",
+    }
+
+
+def trace_identity(
+    a: Mapping[Hashable, tuple[int, ...] | list[int]],
+    b: Mapping[Hashable, tuple[int, ...] | list[int]],
+) -> dict[str, Any]:
+    """Token-for-token agreement of two generation sets on their shared keys.
+
+    A determinism control, not an estimand (Amendment R.8.3): two runs that
+    should be the same computation are compared trace by trace. For each
+    differing trace the first differing token index is kept, because "differs
+    at token 3" (a setup error) and "differs at token 9000" (accumulated
+    floating-point drift) call for different responses.
+    """
+    shared = sorted(set(a) & set(b), key=repr)
+    first_diff: dict[str, int] = {}
+    for key in shared:
+        x, y = list(a[key]), list(b[key])
+        if x == y:
+            continue
+        idx = next(
+            (i for i, (p, q) in enumerate(zip(x, y, strict=False)) if p != q),
+            min(len(x), len(y)),
+        )
+        first_diff[repr(key)] = idx
+    return {
+        "n_shared": len(shared),
+        "n_identical": len(shared) - len(first_diff),
+        "n_only_a": len(set(a) - set(b)),
+        "n_only_b": len(set(b) - set(a)),
+        "first_difference": first_diff,
     }

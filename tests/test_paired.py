@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from kvcache.metrics.paired import paired_flip_contrast
+from kvcache.metrics.paired import paired_flip_contrast, trace_identity
 
 
 def test_hand_computed_flips_and_total():
@@ -47,3 +47,14 @@ def test_resampling_unit_is_the_problem():
     out = paired_flip_contrast(fc, comp, n_resamples=200)
     assert out["total_change"]["n_clusters"] == 5
     assert out["total_change"]["n_observations"] == 20
+
+
+def test_trace_identity_counts_and_locates_the_first_difference():
+    a = {("p", 1): [1, 2, 3], ("p", 2): [1, 2, 3], ("q", 1): [5], ("r", 1): [7]}
+    b = {("p", 1): [1, 2, 3], ("p", 2): [1, 9, 3], ("q", 1): [5, 6], ("s", 1): [0]}
+    out = trace_identity(a, b)
+    assert out["n_shared"] == 3
+    assert out["n_identical"] == 1
+    assert out["n_only_a"] == 1 and out["n_only_b"] == 1
+    # a strict prefix differs at the end of the shorter trace
+    assert out["first_difference"] == {"('p', 2)": 1, "('q', 1)": 1}
