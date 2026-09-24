@@ -27,6 +27,22 @@ torch 2.7.1 / transformers 4.56.2 / kvpress 0.5.3 on the remote host. It does
 **not** mean validated on the 7B model: that is what the queued smoke gates
 (`dacc-gate-smoke`, `capture-smoke`) do, and none of them has run yet.
 
+## Repair pass for the external review of 4e38224 (2026-09-25)
+
+| Finding | Fix | Commit | Regression tests |
+|---|---|---|---|
+| 1. Row-count completion | exact coverage vs the frozen design (`kvcache.coverage`), one identity, controls, eligibility separate; FINAL-only verdicts, `--final` exit 3; all four new readers | 391e8fd | `tests/test_report_capture.py`, `test_report_dacc.py`, `test_exact_lag.py`, `test_fork_control.py` |
+| 2. Observation-weighted means | `equal_problem_bootstrap` / `paired_equal_problem` (4-vs-1 seed → 0.5) | 391e8fd | same, plus balanced parity with the old helper |
+| 3. Restart/gate provenance | R.13 identity on rows, basis and gates; atomic gates retire stale PASS; smoke rebuilt from persisted rows; verified basis | ad30309 | `tests/test_provenance.py`, `tests/test_capture_scripts.py` (restart after each condition / after last row / old PASS then FAIL / changed config / corrupt basis) |
+| 4. Fork PASS on logits only | `logit_gate` (R.11 unchanged) + `selection_gate` + coverage → `overall` | 391e8fd | `test_selection_disagreement_fails_even_within_logit_tolerance` |
+| 5. No automatic analysis | `cpu_only` postprocess stages in the queue (reader → figures → manifest → terminal marker), evidence-derived ledger status; T1 units 200 | 391e8fd | `tests/test_postprocess.py`, scheduler stage tests |
+| Scope: Δ/M at Q.5 states | kept OUTSTANDING; no query-drift causal claim | R.14 §5 | reader note |
+| Restoration identity values | K and V checked across layers; reinserted values gated; gate reports recorded | 391e8fd | deep-layer and reinsert-value mutation tests |
+| Storage facts | measured both scopes; correction of the 11.2 GiB figure | this commit | `storage.md` |
+
+"Tested" is still CPU (tiny model, pinned stack). No real-model gate has run as
+of this commit; the first window is 2026-09-25 01:45 Dubai.
+
 ## Files in this directory
 
 | File | What it shows |
@@ -34,6 +50,7 @@ torch 2.7.1 / transformers 4.56.2 / kvpress 0.5.3 on the remote host. It does
 | `local_lint.txt`, `local_test.txt`, `local_dryrun.txt` | `make lint` / `make test` / `make dryrun`, each run bare, exit 0. Locally torch is absent, so the torch tests skip here. |
 | `remote_pytest.txt` | The same tree on the remote, pinned stack: every Meeting #3 torch test by name (37 PASSED, 0 FAILED), then the full suite (504 passed, 0 skipped). |
 | `parity.txt` | `make parity`: commit, source tree and all 111 `results/diag` artifacts agree between local and remote. |
+| `storage.md` | Measured footprint under both storage scopes, queued outputs, and the correction of the 11.2 GiB figure. |
 | `queue_dryrun_tick.txt` | Dry run of the 2026-09-25 01:45 orchestrator tick: the old Q.5 cells are reported BLOCKED with their reason, and `dacc-gate-smoke` is selected. |
 
 ## Mutation checks

@@ -131,7 +131,9 @@ The zero-amplitude `excess` bug is fixed (`phase-excess-v2`).
   press is invalid (R.5). The exact-lag replacement (R.10) is queued as
   `exact-lag-r5`.
 - **Storage definition.** R.8.5: the guard measures `~/kvcache-storage`
-  only. Counting `~/kv-caching` (11.2 GiB, mostly `.venv`) would leave 0.81 GiB
+  only. Counting `~/kv-caching` (5.85 GiB alone, but mostly hardlinks into the uv
+  cache, so +0.33 GiB when hardlinks are counted once; corrected 2026-09-25,
+  see `meeting3_evidence/storage.md`) would leave 0.81 GiB
   of headroom, below the 1 GiB margin, and block everything. The owner should
   confirm which trees the 70 GiB covers.
 

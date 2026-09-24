@@ -3386,3 +3386,11 @@ weighting and gate status are decided, fixed before any new outcome is read.
    queue. The capture cells are split by budget (400 rows each). Committing
    stage outputs to the repository remains a separate, logged step: the GPU host
    has no repository credentials.
+
+**R.14 correction to R.8.5 (2026-09-25).** R.8.5 gave `~/kv-caching` as
+"11.2 GiB". That figure counted hardlinks more than once (`du --count-links`).
+Measured with `du -sk` the tree is 5.851 GiB, of which `.venv` is 5.635 GiB and
+mostly hardlinked into the uv cache under `~/kvcache-storage`. The combined
+footprint with hardlinks counted once was, and is, 69.19 GiB (68.858 GiB
+storage-only), so the headroom figures and the conclusion of R.8.5 stand.
+Details: `docs/results/meeting3_evidence/storage.md`.

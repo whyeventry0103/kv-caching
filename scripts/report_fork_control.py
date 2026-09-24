@@ -18,6 +18,7 @@ and labelled NOT VALID FOR IDENTIFICATION whatever it shows.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 from collections import defaultdict
@@ -171,6 +172,36 @@ def main() -> int:
             expected |= expected_keys(pids, seeds, presses, intervals)
     res = {"amendment": "R.2 / R.11 / R.14", "runs": a.run}
     res.update(read(rows, n_resamples=a.n_resamples, seed=a.seed, expected=expected))
+    cols = (
+        "pid seed press interval n_forks max_abs_logit max_tv "
+        "n_compared n_disagree det_max"
+    )
+    lines = ["\t".join(cols.split())]
+    for r in sorted(rows, key=lambda r: (r["press"], int(r["interval"]), r["pid"])):
+        ag = [f["selection_agrees"] for f in r["forks"]]
+        lines.append(
+            "\t".join(
+                str(x)
+                for x in (
+                    r["pid"],
+                    r["seed"],
+                    r["press"],
+                    r["interval"],
+                    len(r["forks"]),
+                    max((f["max_abs_logit"] for f in r["forks"]), default=""),
+                    max((f["max_tv"] for f in r["forks"]), default=""),
+                    sum(x is not None for x in ag),
+                    sum(x is False for x in ag),
+                    r["deterministic_control_max_abs_logit"],
+                )
+            )
+        )
+    data = ("\n".join(lines) + "\n").encode()
+    tsv = a.out.with_suffix(".conditions.tsv")
+    tsv.parent.mkdir(parents=True, exist_ok=True)
+    tsv.write_bytes(data)
+    res["sufficient_statistics_tsv"] = tsv.name
+    res["sufficient_statistics_sha256"] = hashlib.sha256(data).hexdigest()
     a.out.parent.mkdir(parents=True, exist_ok=True)
     a.out.write_text(json.dumps(res, indent=2, sort_keys=True) + "\n", "utf-8")
     print(f"tolerance {res['tolerance']}; overall {res['overall']}")

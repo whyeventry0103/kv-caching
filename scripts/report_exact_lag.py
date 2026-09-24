@@ -14,6 +14,7 @@ achieved lags and ineligible counts are reported alongside.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 from pathlib import Path
@@ -110,6 +111,36 @@ def main() -> int:
     if res["status"] != "FINAL":
         for v in res["policies"].values():
             v["sweep"] = {**v["sweep"], "verdict_withheld": True}
+    lines = ["pid\tseed\tpress\tstatus\tlag\tnone\tmatched\trandom\trelaxed"]
+    for r in sorted(rows, key=lambda r: (r["press"], r["pid"], r["seed"])):
+        for lag, v in sorted((r.get("lags") or {}).items(), key=lambda kv: int(kv[0])):
+            if v.get("eligible"):
+                lines.append(
+                    "\t".join(
+                        str(x)
+                        for x in (
+                            r["pid"],
+                            r["seed"],
+                            r["press"],
+                            r.get("status"),
+                            lag,
+                            v["none"],
+                            v["matched"],
+                            v["random"],
+                            v["relaxed"],
+                        )
+                    )
+                )
+    data = ("\n".join(lines) + "\n").encode()
+    tsv = a.out.with_suffix(".conditions.tsv")
+    tsv.parent.mkdir(parents=True, exist_ok=True)
+    tsv.write_bytes(data)
+    res["sufficient_statistics_tsv"] = tsv.name
+    res["sufficient_statistics_sha256"] = hashlib.sha256(data).hexdigest()
+    res["reproduce"] = (
+        f"python scripts/report_exact_lag.py --runs-root <runs> --run {a.run} "
+        f"--design {a.design} --out {a.out} --final"
+    )
     a.out.parent.mkdir(parents=True, exist_ok=True)
     a.out.write_text(json.dumps(res, indent=2, sort_keys=True) + "\n", "utf-8")
     for press, v in res["policies"].items():
