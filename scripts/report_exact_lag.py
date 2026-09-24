@@ -22,6 +22,7 @@ from typing import Any
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
+from kvcache.coverage import COMPLETE, check_coverage, expected_keys, design
 from kvcache.metrics.restoration import (
     classify_latency_sweep,
     classify_restoration,
@@ -34,6 +35,8 @@ def _parser() -> argparse.ArgumentParser:
     p.add_argument("--runs-root", required=True, type=Path)
     p.add_argument("--run", required=True)
     p.add_argument("--out", required=True, type=Path)
+    p.add_argument("--design", type=Path, default=None)
+    p.add_argument("--final", action="store_true")
     p.add_argument("--n-resamples", type=int, default=2000)
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--resume", action="store_true")
@@ -98,18 +101,64 @@ def main() -> int:
         if line.strip()
     ]
     res = {
-        "amendment": "R.5",
+        "amendment": "R.5 / R.10 / R.14",
         "run": a.run,
         "note": "recovery-after-delay; does not isolate staleness from position",
+        **validate(rows, a.design),
         "policies": read_rows(rows, n_resamples=a.n_resamples, seed=a.seed),
     }
+    if res["status"] != "FINAL":
+        for v in res["policies"].values():
+            v["sweep"] = {**v["sweep"], "verdict_withheld": True}
     a.out.parent.mkdir(parents=True, exist_ok=True)
     a.out.write_text(json.dumps(res, indent=2, sort_keys=True) + "\n", "utf-8")
     for press, v in res["policies"].items():
         print(press, v["sweep"])
+    print(f"status {res['status']}; coverage {res['coverage']['status']}")
     print(f"wrote {a.out}")
+    if a.final and res["status"] != "FINAL":
+        return 3
     return 0
 
 
-if __name__ == "__main__":
-    raise SystemExit(main())
+def validate(rows: list[dict[str, Any]], design: Path | None) -> dict[str, Any]:
+    """R.14: exact (problem, seed, policy) coverage and one experiment identity.
+
+    INELIGIBLE rows (no cohort, small stash, short trace) are legitimate
+    registered outcomes and count as covered; they are listed, not hidden.
+    """
+    if design is None:
+        return {"status": "PARTIAL", "coverage": {"status": "UNCHECKED"}}
+    pids, seeds, presses = _design(design)
+    cov = check_coverage(
+        rows,
+        lambda r: (r["pid"], int(r["seed"]), r["press"]),
+        expected_keys(pids, seeds, presses),
+    )
+    ids = {
+        json.dumps(
+            {
+                k: v
+                for k, v in (r.get("provenance") or {}).items()
+                if k != "inputs_sha256"
+            },
+            sort_keys=True,
+        )
+        for r in rows
+    }
+    ident_ok = len(ids) == 1 and "{}" not in ids
+    return {
+        "status": "FINAL" if cov["status"] == COMPLETE and ident_ok else "PARTIAL",
+        "coverage": cov,
+        "identity_consistent": ident_ok,
+        "ineligible_rows": [
+            [r["pid"], r["seed"], r["press"], r.get("status")]
+            for r in rows
+            if r.get("status") != "READ"
+        ],
+    }
+
+
+def _design(config: Path) -> tuple[list[str], list[int], list[str]]:
+    d = design(config)
+    return d["pids"], d["seeds"], d["presses"]

@@ -973,3 +973,86 @@ jobs:
     progress_kind: grid
     est_output_gb: 0.01
     requires: null
+
+  # ======================================================================
+  # R.14 postprocessing: CPU stages run inline by every orchestrator tick
+  # (never given a GPU; also at the 10:50 tick). Each runs its registered
+  # reader with --final, draws figures only for a FINAL read, refreshes the
+  # manifest, and writes postprocess/<stage>.json -- terminal on FINAL or
+  # INVALID, retried next tick while PARTIAL. Capture budget 256 reports
+  # without waiting for 2048; D_acc waits for all three onset arms.
+
+  - name: post-capture-b256
+    command: postprocess
+    config: capture-b256
+    run_name: post-capture-b256
+    total: 1
+    seeds: [11]
+    min_free_gb: 0
+    progress_kind: postprocess
+    marker: postprocess/capture-b256.json
+    cpu_only: true
+    requires: capture-b256
+
+  - name: post-capture-b2048
+    command: postprocess
+    config: capture-b2048
+    run_name: post-capture-b2048
+    total: 1
+    seeds: [11]
+    min_free_gb: 0
+    progress_kind: postprocess
+    marker: postprocess/capture-b2048.json
+    cpu_only: true
+    requires: capture-b2048
+
+  - name: post-dacc
+    command: postprocess
+    config: dacc
+    run_name: post-dacc
+    total: 1
+    seeds: [11]
+    min_free_gb: 0
+    progress_kind: postprocess
+    marker: postprocess/dacc.json
+    cpu_only: true
+    requires: null
+    requires_all: [dacc-t0, dacc-t512, dacc-t2048]
+
+  - name: post-exact-lag
+    command: postprocess
+    config: exact-lag
+    run_name: post-exact-lag
+    total: 1
+    seeds: [11]
+    min_free_gb: 0
+    progress_kind: postprocess
+    marker: postprocess/exact-lag.json
+    cpu_only: true
+    requires: exact-lag-r5
+
+  - name: post-fork-control
+    command: postprocess
+    config: fork-control
+    run_name: post-fork-control
+    total: 1
+    seeds: [11]
+    min_free_gb: 0
+    progress_kind: postprocess
+    marker: postprocess/fork-control.json
+    cpu_only: true
+    requires: null
+    requires_all: [fork-control-random, fork-control-slm]
+
+  - name: post-t1-tv
+    command: postprocess
+    config: t1-tv
+    run_name: post-t1-tv
+    total: 1
+    seeds: [11]
+    min_free_gb: 0
+    progress_kind: postprocess
+    marker: postprocess/t1-tv.json
+    cpu_only: true
+    requires: null
+    requires_all: [t1-tv512, t1-tv1024]

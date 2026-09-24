@@ -50,6 +50,30 @@ def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def _evidence_status(cell: dict, outputs: dict) -> tuple[str | None, str]:
+    """R.14: a cell with a ``stage`` takes its status from that stage's record.
+
+    FINAL -> ANALYZED, or COMPLETE when every declared output also exists;
+    INVALID -> INVALID; PARTIAL -> GENERATED (the stage runs only after its
+    generation jobs completed, so PARTIAL means rows exist but coverage or
+    identity is not yet exact). No record -> the declared status stands.
+    """
+    stage = cell.get("stage")
+    if not stage:
+        return None, "declared (no stage)"
+    rec = PROJECT_ROOT / "results/diag/meeting3/stages" / f"{stage}.json"
+    if not rec.exists():
+        return None, f"no record for stage {stage} yet"
+    d = json.loads(rec.read_text(encoding="utf-8"))
+    st = d.get("status")
+    if st == "FINAL":
+        full = all(h is not None for h in outputs.values())
+        return ("COMPLETE" if full else "ANALYZED"), f"stage {stage} FINAL"
+    if st == "INVALID":
+        return "INVALID", f"stage {stage} INVALID"
+    return "GENERATED", f"stage {stage} {st}"
+
+
 def build(cells_path: Path) -> tuple[dict, list[str]]:
     spec = yaml.safe_load(cells_path.read_text(encoding="utf-8"))
     problems: list[str] = []
@@ -82,10 +106,23 @@ def build(cells_path: Path) -> tuple[dict, list[str]]:
                 problems.append(
                     f"{cid}: status {status} but outputs missing: {missing}"
                 )
+        derived, why = _evidence_status(cell, outputs)
+        ladder = STATUSES[: STATUSES.index("COMPLETE") + 1]
+        if derived is not None and derived != status:
+            if (
+                status in ladder
+                and derived in ladder
+                and ladder.index(status) > ladder.index(derived)
+            ):
+                problems.append(
+                    f"{cid}: declared {status} exceeds evidence ({derived}: {why})"
+                )
         out_cells.append(
             {
                 **cell,
-                "status": status,
+                "declared_status": status,
+                "evidence": why,
+                "status": derived or status,
                 "config_sha256": configs,
                 "output_sha256": outputs,
             }

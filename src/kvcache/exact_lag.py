@@ -7,10 +7,11 @@ layers, and could not realize most requested lags.
 **Identity repair.** ``kvcache.capture.EventTap`` (``stash_kv=True``) keeps, per
 layer, the true evicted complement of K and V at every effective prune, taken
 from the pre-compression tensors at the indices the policy actually selected
-(topk re-applied and verified by gather equality), in eviction order. Layer-0
-entries are additionally checked bitwise against the full cache's layer-0 keys
-at the same absolute positions (layer-0 keys depend only on token and
-position).
+(topk re-applied and verified by gather equality), in eviction order.
+``verify_stash`` then checks K AND V bitwise against the full cache: every
+layer-0 entry (layer-0 K/V depend only on token and position), and in every
+layer every entry computed before the first effective prune. Reinsertion is
+gated on keys AND values, and each arm's gate report is recorded in the row.
 
 **Exact lag.** The cohort is the first effective prune at or after decode step
 ``trigger_step`` (it is the same forward in every layer; checked). One paired
@@ -112,13 +113,65 @@ def reinsert(
             gate = retained_set_report(
                 k_h, ek[h].index_select(0, idx)[None, None], n_reinserted=n_reinsert
             )
-            passed = passed and bool(gate["passed"])
+            # values too: a surgery that moved the right keys but corrupted
+            # their values would otherwise pass (review of 4e38224)
+            vgate = retained_set_report(
+                v_h, ev[h].index_select(0, idx)[None, None], n_reinserted=n_reinsert
+            )
+            passed = passed and bool(gate["passed"]) and bool(vgate["passed"])
             new_k.append(k_h)
             new_v.append(v_h)
         cache.layers[layer].keys = torch.cat(new_k, dim=1)
         cache.layers[layer].values = torch.cat(new_v, dim=1)
         n_layers += 1
-    return {"passed": passed, "n_layers": n_layers}
+    return {
+        "passed": passed,
+        "n_layers": n_layers,
+        "n_heads_checked": n_layers * int(keys.shape[1]),
+        "checked": "reinserted keys AND values bitwise equal the stash, per head",
+    }
+
+
+def verify_stash(
+    stash: dict[int, list[tuple[int, Any, Any, Any]]],
+    full_cache: Any,
+    clean_before: int,
+) -> dict[str, int]:
+    """Check the stashed K AND V against the full cache, in every layer.
+
+    Layer 0's keys and values depend only on token and position, so every
+    layer-0 stash entry must equal the full cache bitwise. In EVERY layer, an
+    entry whose absolute position precedes ``clean_before`` (prompt + the first
+    effective prune: computed before any eviction could alter a hidden state)
+    must also equal the full cache bitwise, K and V. A corrupted value at a deep
+    layer is therefore caught, not only a wrong layer-0 key.
+    """
+    import torch
+
+    n_checked = 0
+    for layer, entries in stash.items():
+        fk = full_cache.layers[layer].keys[0]
+        fv = full_cache.layers[layer].values[0]
+        d = fk.shape[-1]
+        for _s, pos, k_ev, v_ev in entries:
+            sel = (
+                pos < clean_before if layer else torch.ones_like(pos, dtype=torch.bool)
+            )
+            if not bool(sel.any()):
+                continue
+            idx = pos.unsqueeze(-1).expand(-1, -1, d)
+            gk, gv = fk.gather(1, idx), fv.gather(1, idx)
+            m = sel.unsqueeze(-1).expand_as(gk)
+            if not torch.equal(gk[m], k_ev[m]):
+                raise RuntimeError(
+                    f"stashed keys differ from full keys (layer {layer})"
+                )
+            if not torch.equal(gv[m], v_ev[m]):
+                raise RuntimeError(
+                    f"stashed values differ from full values (layer {layer})"
+                )
+            n_checked += int(sel.sum())
+    return {"n_entries_checked": n_checked, "clean_before_position": clean_before}
 
 
 def run_exact_lag(
@@ -155,6 +208,7 @@ def run_exact_lag(
     snaps: dict[int, Any] = {}
     horizon = n_fwd - 1
     first_effective = None
+    identity_checks: dict[str, int] | None = None
     with torch.inference_mode(), press(model):
         for j in range(n_fwd):
             ids = list(prompt_ids) if j == 0 else [int(trace_ids[j - 1])]
@@ -186,13 +240,9 @@ def run_exact_lag(
                 steps = {s for layer in tap.stash.values() for s, *_ in layer[-1:]}
                 if len(tap.stash) != len(model.model.layers) or steps != {e}:
                     raise RuntimeError("cohort event is not present in every layer")
-                # identity repair check: stashed layer-0 keys ARE the full keys
-                ref = full_cache.layers[0].keys[0]
-                d = ref.shape[-1]
-                for _s, pos_ev, k_ev, _v in tap.stash[0]:
-                    got = ref.gather(1, pos_ev.unsqueeze(-1).expand(-1, -1, d))
-                    if not torch.equal(got, k_ev):
-                        raise RuntimeError("stashed layer-0 keys differ from full keys")
+                identity_checks = verify_stash(
+                    tap.stash, full_cache, len(prompt_ids) + first_effective
+                )
                 press.event_tap = None  # the stash is frozen at the cohort
                 horizon = min(n_fwd - 1, e + max(lags) + window - 1)
             if e is not None and j > e:
@@ -201,6 +251,7 @@ def run_exact_lag(
                 break
         e = cohort["step"]
         out: dict[str, Any] = {
+            "stash_identity_checks": identity_checks if e is not None else None,
             "cohort_step": e,
             "first_effective_prune": first_effective,
             "n_trace_tokens": n_fwd,
@@ -237,6 +288,7 @@ def run_exact_lag(
                 )
                 if not gate["passed"]:
                     raise RuntimeError(f"retained-set gate failed: {arm} lag {lag}")
+                res.setdefault("gates", {})[arm] = gate
                 tvs = []
                 for j in range(start, start + window):
                     press.profile_step = j

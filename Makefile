@@ -108,6 +108,12 @@ dryrun:
 	$(PYTHON) scripts/report_fork_control.py --runs-root runs --run fork-control-random --run fork-control-slm --out /dev/null --dry-run
 	$(PYTHON) scripts/run_replay.py --config configs/experiments/replay_ext_math500_b512_r1.yaml --dry-run
 	$(PYTHON) scripts/run_replay.py --config configs/experiments/replay_ext_math500_b1024_r1.yaml --dry-run
+	$(PYTHON) scripts/postprocess_meeting3.py --stage capture-b256 --dry-run
+	$(PYTHON) scripts/postprocess_meeting3.py --stage capture-b2048 --dry-run
+	$(PYTHON) scripts/postprocess_meeting3.py --stage dacc --dry-run
+	$(PYTHON) scripts/postprocess_meeting3.py --stage exact-lag --dry-run
+	$(PYTHON) scripts/postprocess_meeting3.py --stage fork-control --dry-run
+	$(PYTHON) scripts/postprocess_meeting3.py --stage t1-tv --dry-run
 	$(PYTHON) scripts/report_dacc.py --runs-root runs --arms 0=dacc-t0 512=dacc-t512 2048=dacc-t2048 --legacy 256=grid-diss256-tok 2048=grid-diss2048-tok --out /dev/null --dry-run
 	$(PYTHON) scripts/report_onset_grid.py --runs-root runs --arms 0=replay-onset-t0 512=replay-onset-t512 2048=replay-onset-t2048 --out /dev/null --dry-run
 	$(PYTHON) scripts/run_replay.py --config configs/experiments/restoration_smoke.yaml --dry-run

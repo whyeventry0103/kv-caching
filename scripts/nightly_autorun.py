@@ -25,6 +25,7 @@ import sys
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
@@ -67,6 +68,11 @@ class Job:
     # overruns does not fail at write time -- it fills the shared filesystem and
     # takes every other job with it. Declared per job and checked before launch.
     est_output_gb: float = 0.0
+    # R.14: a CPU postprocessing stage (reader -> figures -> manifest). Run
+    # inline by every tick, never given a GPU; complete when its marker is
+    # terminal (FINAL or INVALID). requires_all: every listed job complete.
+    cpu_only: bool = False
+    requires_all: tuple[str, ...] = ()
     # Amendment R.7: a held cell. Never launched while set; logged as BLOCKED
     # with this reason every tick, so a hold is visible rather than silent.
     blocked: str | None = None
@@ -286,6 +292,8 @@ def load_queue(path: Path) -> tuple[bool, list[Job]]:
             extra_args=tuple(j.get("extra_args") or ()),
             est_output_gb=float(j.get("est_output_gb") or 0.0),
             blocked=j.get("blocked"),
+            cpu_only=bool(j.get("cpu_only", False)),
+            requires_all=tuple(j.get("requires_all") or ()),
         )
         for j in data["jobs"]
     ]
@@ -351,6 +359,88 @@ def compute_max_hours(
     return math.floor(hours * 100) / 100
 
 
+def _postprocess_done(path: Path) -> bool:
+    """A postprocess stage is done only when its marker says terminal."""
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return False
+    return isinstance(data, dict) and data.get("terminal") is True
+
+
+def _deps_complete(runs_root: Path, job: Job, by_name: dict[str, Job]) -> list[str]:
+    """Names of this job's dependencies that are not complete (empty = ready)."""
+    names = ([job.requires] if job.requires else []) + list(job.requires_all)
+    out = []
+    for n in names:
+        dep = by_name.get(n)
+        if dep is None or count_progress(runs_root, dep) < dep.total:
+            out.append(n)
+    return out
+
+
+def run_cpu_stages(
+    runs_root: Path,
+    jobs: list[Job],
+    log: Any,
+    *,
+    dry_run: bool = False,
+    runner: Any = None,
+    timeout_s: int = 1800,
+) -> list[tuple[str, str]]:
+    """Run every ready, unfinished CPU stage inline; return (name, outcome).
+
+    Idempotent: a stage whose marker is terminal is skipped, a stage whose
+    dependencies are incomplete waits, and a stage that exits nonzero or leaves
+    a non-terminal marker is simply retried on the next tick. Generation that
+    finished before the orchestrator (re)started is picked up on the first tick.
+    """
+    import subprocess
+
+    runner = runner or subprocess.run
+    by_name = {j.name: j for j in jobs}
+    outcomes = []
+    for job in jobs:
+        if not job.cpu_only:
+            continue
+        if count_progress(runs_root, job) >= job.total:
+            continue
+        waiting = _deps_complete(runs_root, job, by_name)
+        if waiting:
+            outcomes.append((job.name, f"waiting on {waiting}"))
+            continue
+        argv = [
+            str(PROJECT_ROOT / BASE_ENV["ENVIRONMENT_NAME"] / "bin" / "python"),
+            str(PROJECT_ROOT / "scripts" / "postprocess_meeting3.py"),
+            "--stage",
+            job.config,
+        ]
+        if dry_run:
+            outcomes.append((job.name, f"would run {' '.join(argv)}"))
+            continue
+        env = {**os.environ, **BASE_ENV, "KVCACHE_BASE_RUNS_ROOT": str(runs_root)}
+        try:
+            res = runner(
+                argv,
+                cwd=str(PROJECT_ROOT),
+                env=env,
+                capture_output=True,
+                text=True,
+                timeout=timeout_s,
+            )
+            rc = res.returncode
+            tail = (res.stdout or "").strip().splitlines()[-3:]
+        except subprocess.TimeoutExpired:
+            rc, tail = -1, ["timeout"]
+        done = count_progress(runs_root, job) >= job.total
+        outcomes.append(
+            (job.name, f"rc={rc} {'DONE' if done else 'retry next tick'}: {tail}")
+        )
+    for name, what in outcomes:
+        log(f"cpu stage {name}: {what}")
+    return outcomes
+
+
 def _marker_ok(path: Path) -> bool:
     if not path.exists():
         return False
@@ -376,6 +466,8 @@ def count_progress(runs_root: Path, job: Job) -> int:
             if base.exists()
             else []
         )
+    elif job.progress_kind == "postprocess":
+        return 1 if _postprocess_done(runs_root / (job.marker or "")) else 0
     elif job.progress_kind == "readout":
         base = run_dir / "readout"
         paths = list(base.rglob("*.jsonl")) if base.exists() else []
@@ -461,7 +553,7 @@ def launch_candidates(
     state = load_state() if state is None else state
     candidates: list[tuple[Job, list[int]]] = []
     for job in jobs:
-        if job.name in skip:
+        if job.name in skip or job.cpu_only:
             continue
         if count_progress(runs_root, job) >= job.total:
             continue
@@ -524,8 +616,8 @@ def select_job(
         # even though its artifact existed, so the log contradicted the disk.
         if count_progress(runs_root, job) >= job.total:
             continue
-        if job.name in skip:
-            continue  # marked stuck (repeated no-progress failures) -> don't reselect
+        if job.name in skip or job.cpu_only:
+            continue  # stuck (repeated no-progress) or a CPU stage
         if job.requires is not None:
             req = by_name.get(job.requires)
             if req is None:
@@ -692,6 +784,8 @@ def main() -> int:
         return 0
 
     runs_root = Path(BASE_ENV["REMOTE_RUNS_ROOT"])
+    # R.14: analysis stages first, every tick, independent of the GPU window.
+    run_cpu_stages(runs_root, jobs, log, dry_run=args.dry_run)
     state = load_state()
     stuck = stuck_jobs(runs_root, jobs, state)
     if stuck:

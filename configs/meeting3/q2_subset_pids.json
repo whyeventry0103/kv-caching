@@ -1,0 +1,32 @@
+{
+ "benchmark": "math500",
+ "subset": 25,
+ "source": "kvcache.datasets.load_benchmark(math500, subset=25); identical to the pids of replay-onset-t0 profiles (checked 2026-09-25)",
+ "pids": [
+  "test/precalculus/807.json",
+  "test/intermediate_algebra/1994.json",
+  "test/algebra/2584.json",
+  "test/number_theory/572.json",
+  "test/algebra/1349.json",
+  "test/prealgebra/1622.json",
+  "test/number_theory/515.json",
+  "test/precalculus/927.json",
+  "test/algebra/2036.json",
+  "test/prealgebra/1139.json",
+  "test/number_theory/1032.json",
+  "test/intermediate_algebra/1197.json",
+  "test/number_theory/737.json",
+  "test/geometry/248.json",
+  "test/precalculus/1303.json",
+  "test/precalculus/990.json",
+  "test/intermediate_algebra/134.json",
+  "test/precalculus/1199.json",
+  "test/geometry/434.json",
+  "test/intermediate_algebra/1000.json",
+  "test/algebra/1098.json",
+  "test/intermediate_algebra/607.json",
+  "test/algebra/1837.json",
+  "test/algebra/2193.json",
+  "test/algebra/2427.json"
+ ]
+}

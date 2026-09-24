@@ -136,5 +136,72 @@ def test_the_old_tail_stash_bug_is_refused(monkeypatch):
             entries[-1] = (s, pos, keys_before[0][:, -dropped:], v)
 
     monkeypatch.setattr(capture.EventTap, "end", tail_end)
-    with pytest.raises(RuntimeError, match="stashed layer-0 keys differ"):
+    with pytest.raises(RuntimeError, match=r"stashed keys differ .*\(layer 0\)"):
         _run(model, prompt, trace)
+
+
+def test_exact_lag_validation_requires_exact_coverage_and_one_identity(monkeypatch):
+    import report_exact_lag as rel
+
+    monkeypatch.setattr(rel, "_design", lambda _c: (["a", "b"], [1], ["random"]))
+    ok = [
+        {
+            "pid": p,
+            "seed": 1,
+            "press": "random",
+            "status": "READ",
+            "provenance": {"config_sha256": "x"},
+        }
+        for p in "ab"
+    ]
+    assert rel.validate(ok, Path("d.yaml"))["status"] == "FINAL"
+    assert rel.validate(ok[:1], Path("d.yaml"))["status"] == "PARTIAL"
+    dup = ok[:1] + ok[:1]
+    assert rel.validate(dup, Path("d.yaml"))["coverage"]["status"] == "INVALID"
+    mixed = [ok[0], {**ok[1], "provenance": {"config_sha256": "y"}}]
+    assert rel.validate(mixed, Path("d.yaml"))["status"] == "PARTIAL"
+    inel = [ok[0], {**ok[1], "status": "INELIGIBLE: no eviction"}]
+    v = rel.validate(inel, Path("d.yaml"))
+    assert v["status"] == "FINAL" and v["ineligible_rows"]
+
+
+def test_a_corrupted_deep_layer_stash_value_is_refused(monkeypatch):
+    """Mutation (review of 4e38224): values, not only keys, and beyond layer 0."""
+    model, prompt, trace = _tiny()
+    from kvcache import capture
+
+    real_end = capture.EventTap.end
+
+    def corrupt(self, module, keys_before, keys_after, step, values_before=None):
+        real_end(self, module, keys_before, keys_after, step, values_before)
+        entries = self.stash.get(int(module.layer_idx))
+        if int(module.layer_idx) == 1 and entries and entries[-1][0] == step:
+            s, pos, k, v = entries[-1]
+            entries[-1] = (s, pos, k, v + 1.0)
+
+    monkeypatch.setattr(capture.EventTap, "end", corrupt)
+    with pytest.raises(RuntimeError, match=r"values differ .*layer 1"):
+        _run(model, prompt, trace)
+
+
+def test_corrupted_reinserted_values_fail_the_retained_set_gate(monkeypatch):
+    model, prompt, trace = _tiny()
+    from kvcache.metrics import restoration
+
+    real = restoration.apply_reinsertion
+
+    def bad(*a, **k):
+        kk, vv = real(*a, **k)
+        return kk, vv + 1.0
+
+    monkeypatch.setattr(restoration, "apply_reinsertion", bad)
+    with pytest.raises(RuntimeError, match="retained-set gate failed"):
+        _run(model, prompt, trace)
+
+
+def test_gate_evidence_and_identity_checks_are_recorded():
+    model, prompt, trace = _tiny()
+    out = _run(model, prompt, trace)
+    assert out["stash_identity_checks"]["n_entries_checked"] > 0
+    g = out["lags"]["1"]["gates"]["matched"]
+    assert g["passed"] and "VALUES" in g["checked"].upper()

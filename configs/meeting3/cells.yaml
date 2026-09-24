@@ -50,10 +50,13 @@ cells:
   - id: T1.tv512
     task: 1
     protocol: "R.1"
+    stage: t1-tv
+    outputs: [results/diag/meeting3/t1_budget_curve.json,
+              figures/fig8_budget_curve.pdf]
     question: "per-step TV at budget 512 (missing intermediate point)"
     configs: [configs/experiments/replay_ext_math500_b512_r1.yaml]
     depends_on: []
-    expected_units: 400
+    expected_units: 200     # trace-policy rows: 25 problems x 4 seeds x 2 policies (= queue total)
     status: QUEUED
     note: "was BLOCKED on storage (~98 MiB/cell full profiles vs ~167 MiB
       deficit); R.12 runs it as registered with summary profiles (~3 KB/trace).
@@ -61,9 +64,12 @@ cells:
   - id: T1.tv1024
     task: 1
     protocol: "R.1"
+    stage: t1-tv
+    outputs: [results/diag/meeting3/t1_budget_curve.json,
+              figures/fig8_budget_curve.pdf]
     question: "per-step TV at budget 1024 (missing intermediate point)"
     configs: [configs/experiments/replay_ext_math500_b1024_r1.yaml]
-    expected_units: 400
+    expected_units: 200     # trace-policy rows: 25 problems x 4 seeds x 2 policies (= queue total)
     status: QUEUED
     note: "was BLOCKED on storage (~98 MiB/cell full profiles vs ~167 MiB
       deficit); R.12 runs it as registered with summary profiles (~3 KB/trace).
@@ -86,6 +92,8 @@ cells:
   - id: Q1.legacy_control
     task: 1
     protocol: "Q.1"
+    stage: fork-control
+    outputs: [results/diag/meeting3/fork_control.json]
     question: "removal-anchored phase excess must not exclude zero (as registered)"
     configs: [configs/experiments/fork_control_random_r11.yaml,
               configs/experiments/fork_control_slm_r11.yaml]
@@ -96,6 +104,8 @@ cells:
   - id: Q1.direct_control
     task: 1
     protocol: "R.2"
+    stage: fork-control
+    outputs: [results/diag/meeting3/fork_control.json]
     question: "does physical compaction of already-masked keys change outputs?"
     configs: [configs/experiments/fork_control_random_r11.yaml,
               configs/experiments/fork_control_slm_r11.yaml]
@@ -130,6 +140,9 @@ cells:
   - id: Q2.dacc
     task: 1
     protocol: "R.3"
+    stage: dacc
+    outputs: [results/diag/meeting3/dacc.json,
+              figures/meeting3_dacc.pdf]
     question: "free-running accuracy on the (budget, compression_start_step) grid"
     configs: [configs/experiments/dacc_gate_smoke_r3.yaml,
               configs/experiments/grid_math500_dacc_t2048_r3.yaml,
@@ -147,6 +160,8 @@ cells:
   - id: Q3.algebra_control
     task: 2
     protocol: "R.4"
+    stage: capture-b256
+    outputs: [results/diag/meeting3/capture_b256.json]
     question: "same-q/K restriction identity, float64 + production dtype"
     configs: [configs/experiments/capture_math500_smoke_r9.yaml]
     status: QUEUED
@@ -157,10 +172,28 @@ cells:
   - id: Q3.capture
     task: 2
     protocol: "Q.3/R.4"
+    stage: capture-b256
+    outputs: [results/diag/meeting3/capture_b256.json,
+              figures/meeting3_capture_b256.pdf]
     question: "M, Delta, collateral per layer/group/event"
     configs: [configs/experiments/capture_math500_b256_r9.yaml,
               configs/experiments/capture_math500_b2048_r9.yaml]
-    expected_units: 800
+    expected_units: 400     # 25 problems x 4 seeds x 4 policies, budget 256 (primary)
+    status: QUEUED
+    note: "R.9 combined capture with Q.6; CPU-validated on tiny Qwen2 for all 4
+      policies (live gather/position-map/pre-eviction checks, mutation-tested);
+      queue q6-basis-fit -> capture-smoke -> capture-b256 (primary) ... b2048
+      last."
+  - id: Q3.capture_b2048
+    task: 2
+    protocol: "Q.3/R.4"
+    stage: capture-b2048
+    outputs: [results/diag/meeting3/capture_b2048.json,
+              figures/meeting3_capture_b2048.pdf]
+    question: "M, Delta, collateral per layer/group/event"
+    configs: [configs/experiments/capture_math500_b256_r9.yaml,
+              configs/experiments/capture_math500_b2048_r9.yaml]
+    expected_units: 400     # 25 problems x 4 seeds x 4 policies, budget 2048 (secondary)
     status: QUEUED
     note: "R.9 combined capture with Q.6; CPU-validated on tiny Qwen2 for all 4
       policies (live gather/position-map/pre-eviction checks, mutation-tested);
@@ -178,6 +211,9 @@ cells:
   - id: Q5.exact_lag
     task: 2
     protocol: "R.5"
+    stage: exact-lag
+    outputs: [results/diag/meeting3/exact_lag.json,
+              figures/meeting3_exact_lag.pdf]
     question: "recovery after exact delay 1/4/16/64/256"
     configs: [configs/experiments/exact_lag_math500_r5.yaml]
     expected_units: 4000     # 200 (trace, policy) rows x 5 lags x 4 arms
@@ -199,9 +235,25 @@ cells:
   - id: Q6.project
     task: 3
     protocol: "Q.6/R.6"
+    stage: capture-b256
+    outputs: [results/diag/meeting3/capture_b256.json,
+              figures/meeting3_capture_b256.pdf]
     question: "omega(Random) - omega(StreamingLLM), budget 256 primary"
     configs: [configs/experiments/capture_math500_b256_r9.yaml,
               configs/experiments/capture_math500_b2048_r9.yaml]
-    expected_units: 800
+    expected_units: 400     # 25 problems x 4 seeds x 4 policies, budget 256 (primary)
+    status: QUEUED
+    note: "same capture cells as Q3.capture (R.9)."
+
+  - id: Q6.project_b2048
+    task: 3
+    protocol: "Q.6/R.6"
+    stage: capture-b2048
+    outputs: [results/diag/meeting3/capture_b2048.json,
+              figures/meeting3_capture_b2048.pdf]
+    question: "omega(Random) - omega(StreamingLLM), budget 256 primary"
+    configs: [configs/experiments/capture_math500_b256_r9.yaml,
+              configs/experiments/capture_math500_b2048_r9.yaml]
+    expected_units: 400     # 25 problems x 4 seeds x 4 policies, budget 2048 (secondary)
     status: QUEUED
     note: "same capture cells as Q3.capture (R.9)."

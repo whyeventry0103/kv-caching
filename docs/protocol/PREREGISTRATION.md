@@ -3308,3 +3308,81 @@ Verified at the persistence layer without a GPU (`tests/test_provenance.py`,
 `tests/test_capture_scripts.py`): restart after each persisted condition, after
 the last row but before the marker, old PASS followed by failure, a changed
 config resumed into old rows, and a missing or corrupt basis npz.
+
+### R.14 Readers, estimators, gates and postprocessing (2026-09-25, from the external review of 4e38224, before any Meeting #3 outcome is read)
+
+No registered estimand or design changes. What changes is how completeness,
+weighting and gate status are decided, fixed before any new outcome is read.
+
+1. **Exact coverage, not row counts** (`kvcache.coverage.check_coverage`). Every
+   reader derives the expected key set from the frozen design:
+   - problems from `configs/meeting3/q2_subset_pids.json`, verified identical to
+     the dataset loader's 25-problem subset and to the Q.2 replay pids;
+   - seeds, policies, budget, onset and interval from the config.
+
+   Missing keys make a read PARTIAL; duplicated or unexpected keys make it
+   INVALID. Rows must share one R.13 identity. Rows failing a recorded control
+   (non-finite, layer-0 Δ > 1e-5) make it INVALID and are listed.
+
+   Estimand eligibility is reported separately. An undefined or unbounded latent
+   direction, or an event with nothing eligible, is an excluded value with its
+   reason, not a failed instrument. Registered verdicts appear only on a FINAL
+   read, and `--final` exits nonzero otherwise. Capture reads declare exactly one
+   budget.
+2. **Equal-problem estimator** (`kvcache.coverage.equal_problem_bootstrap`,
+   `paired_equal_problem`). For each (problem, seed) eligible in both arms, take
+   the paired difference. Average seeds within problem, then take an unweighted
+   mean over problems. Bootstrap problems with replacement and compute the same
+   estimator in every replicate.
+
+   This is exactly the registered seed-then-problem rule. The historical
+   `cluster_bootstrap_mean` (observation-weighted within resampled problems) is
+   unchanged, so no previously reported number moves. On balanced grids the two
+   coincide (tested); on a 4-versus-1-seed grid they differ (0.5 vs 0.8, tested).
+   Applies to the capture and D_acc reads. The P.5 restoration read keeps its
+   registered trace-level `restoration_read`.
+3. **Fork control gates.** R.11's numerical rule is unchanged and is reported
+   as `logit_gate` (PASS / FAIL / EXACT / TOLERANCE-DEGENERATE). Two gates are
+   added:
+   - `selection_gate`: FAIL on any disagreement, NO-COMPARISONS when nothing was
+     compared.
+   - Coverage. The only prespecified reason a fork lacks a comparison is that
+     the trace ended before arm B's next selection.
+
+   **Overall** is PASS only if the logit gate is PASS or EXACT, the selection
+   gate is PASS, and coverage is exact. Any FAIL is FAIL. Everything else is
+   INCONCLUSIVE, so a selection disagreement fails the control even inside the
+   logit tolerance.
+4. **Restoration identity** (R.10 strengthened). The stash is checked for K and
+   V bitwise against the full cache:
+   - every layer-0 entry;
+   - in every layer, every entry computed before the first effective prune.
+
+   Reinsertion is gated on keys and values, and each arm's gate report is
+   recorded in the row. Mutations of a deep-layer stash value and of reinserted
+   values are refused (tests).
+5. **Scope of the Q.3 cross-instrument ratio.** The capture's Δ/M is
+   descriptive, at the first forward after the first eviction at or after step
+   130. It is **not** measured at the Q.5 reinsertion states. The Q.3
+   cross-instrument prediction ("reinsertion repairs K and cannot repair q")
+   therefore stays **outstanding**, and no query-drift causal claim is made from
+   the trigger ratio. Testing it at the restoration lags would need a new
+   prospective capture at the matching states. That is not registered here.
+6. **Postprocessing.** Each generation family flows through CPU stages
+   (`scripts/postprocess_meeting3.py`: validated read, then figures only for a
+   FINAL read, then a manifest refresh, then a terminal/retry marker). The
+   stages run inline on every orchestrator tick, never on a GPU, idempotently,
+   including when generation finished before the orchestrator started.
+   - Capture budget 256 reports without waiting for 2048.
+   - D_acc waits for all three onset arms.
+   - T1 TV waits for both budgets.
+
+   Ledger statuses with a `stage` are derived from the stage record: FINAL →
+   ANALYZED, or COMPLETE when every declared output exists; INVALID → INVALID;
+   PARTIAL → GENERATED. A declared status above the evidence is a manifest
+   problem.
+
+   The T1 TV cells count 200 trace-policy rows each (25 × 4 × 2), matching the
+   queue. The capture cells are split by budget (400 rows each). Committing
+   stage outputs to the repository remains a separate, logged step: the GPU host
+   has no repository credentials.

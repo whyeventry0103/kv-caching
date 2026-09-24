@@ -469,7 +469,7 @@ def test_every_queued_progress_kind_is_one_the_orchestrator_implements():
     queue = yaml.safe_load(
         (ROOT / "configs" / "nightly_queue.yaml").read_text(encoding="utf-8")
     )
-    known = {"grid", "readout", "marker"}
+    known = {"grid", "readout", "marker", "postprocess"}
     bad = {
         j["name"]: j["progress_kind"]
         for j in queue["jobs"]
@@ -521,8 +521,39 @@ def test_every_queued_config_file_exists():
     queue = yaml.safe_load(
         (ROOT / "configs" / "nightly_queue.yaml").read_text(encoding="utf-8")
     )
-    missing = [j["name"] for j in queue["jobs"] if not (ROOT / j["config"]).exists()]
+    sys.path.insert(0, str(ROOT / "scripts"))
+    from postprocess_meeting3 import STAGES
+
+    missing = [
+        j["name"]
+        for j in queue["jobs"]
+        if not j.get("cpu_only") and not (ROOT / j["config"]).exists()
+    ]
     assert not missing, f"queued jobs whose config file is absent: {missing}"
+    # CPU stages name a postprocessing stage instead of a config file; it must
+    # exist, and every config its reader reads must exist too.
+    stages = [j for j in queue["jobs"] if j.get("cpu_only")]
+    unknown = [j["name"] for j in stages if j["config"] not in STAGES]
+    assert not unknown, f"cpu stages naming no postprocessing stage: {unknown}"
+    for j in stages:
+        args = STAGES[j["config"]]["reader"]
+        cfgs = [a for a in args if a.startswith("configs/")]
+        assert all((ROOT / c).exists() for c in cfgs), (j["name"], cfgs)
+        assert j.get("progress_kind") == "postprocess" and j.get("marker"), j["name"]
+
+
+def test_every_requires_all_names_a_job_that_exists():
+    import yaml
+
+    queue = yaml.safe_load(
+        (ROOT / "configs" / "nightly_queue.yaml").read_text(encoding="utf-8")
+    )
+    names = {j["name"] for j in queue["jobs"]}
+    dangling = {
+        j["name"]: [r for r in j.get("requires_all") or [] if r not in names]
+        for j in queue["jobs"]
+    }
+    assert not {k: v for k, v in dangling.items() if v}, dangling
 
 
 def test_storage_is_measured_in_the_same_units_the_budget_is_declared_in(tmp_path):
@@ -754,3 +785,97 @@ def test_a_tail_filled_cell_is_not_charged_twice(tmp_path):
     running = _gb_job("run", 0.10, total=400)
     _write(tmp_path / "run" / "math500" / "m" / "a-256-s11.jsonl", 100)
     assert M.reserved_output_gb(tmp_path, [running], {"run": {0}}, exclude="run") == 0.0
+
+
+# --------------------------------------------------------------------------
+# R.14: postprocessing stages run inline, idempotently, with retry.
+
+
+def _gen(name, total=2):
+    return M.Job(
+        name=name,
+        command="grid",
+        config="c.yaml",
+        run_name=name,
+        total=total,
+        seeds=[11],
+        min_free_gb=24,
+        progress_kind="grid",
+        requires=None,
+    )
+
+
+def _post(name, *, requires=None, requires_all=()):
+    return M.Job(
+        name=name,
+        command="postprocess",
+        config=name,
+        run_name=name,
+        total=1,
+        seeds=[11],
+        min_free_gb=0,
+        progress_kind="postprocess",
+        requires=requires,
+        marker=f"postprocess/{name}.json",
+        cpu_only=True,
+        requires_all=requires_all,
+    )
+
+
+class _Res:
+    def __init__(self, rc):
+        self.returncode, self.stdout = rc, "line\n"
+
+
+def _runner(tmp_path, *, terminal=True, rc=0, calls=None):
+    def run(argv, **kw):
+        if calls is not None:
+            calls.append(argv[-1])
+        m = tmp_path / "postprocess" / f"{argv[-1]}.json"
+        m.parent.mkdir(parents=True, exist_ok=True)
+        m.write_text(json.dumps({"terminal": terminal, "passed": terminal}))
+        return _Res(rc)
+
+    return run
+
+
+def test_cpu_stage_waits_for_every_dependency(tmp_path):
+    jobs = [_gen("a"), _gen("b"), _post("p", requires_all=("a", "b"))]
+    _write(tmp_path / "a" / "math500" / "m" / "x-256-s11.jsonl", 2)  # a done
+    out = M.run_cpu_stages(tmp_path, jobs, lambda m: None, runner=_runner(tmp_path))
+    assert out == [("p", "waiting on ['b']")]
+    assert not (tmp_path / "postprocess" / "p.json").exists()
+
+
+def test_generation_complete_before_start_runs_on_the_first_tick(tmp_path):
+    jobs = [_gen("a"), _post("p", requires="a")]
+    _write(tmp_path / "a" / "math500" / "m" / "x-256-s11.jsonl", 2)
+    calls = []
+    out = M.run_cpu_stages(
+        tmp_path, jobs, lambda m: None, runner=_runner(tmp_path, calls=calls)
+    )
+    assert calls == ["p"] and "DONE" in out[0][1]
+    # done stages are skipped on later ticks
+    M.run_cpu_stages(
+        tmp_path, jobs, lambda m: None, runner=_runner(tmp_path, calls=calls)
+    )
+    assert calls == ["p"]
+
+
+def test_a_failed_or_partial_stage_is_retried_next_tick(tmp_path):
+    jobs = [_gen("a"), _post("p", requires="a")]
+    _write(tmp_path / "a" / "math500" / "m" / "x-256-s11.jsonl", 2)
+    out = M.run_cpu_stages(
+        tmp_path, jobs, lambda m: None, runner=_runner(tmp_path, terminal=False, rc=3)
+    )
+    assert "retry next tick" in out[0][1] and "rc=3" in out[0][1]
+    out = M.run_cpu_stages(tmp_path, jobs, lambda m: None, runner=_runner(tmp_path))
+    assert "DONE" in out[0][1]
+
+
+def test_cpu_stages_never_take_a_gpu(tmp_path):
+    jobs = [_post("p")]
+    candidates, _ = M.launch_candidates(tmp_path, jobs, skip=set(), live={}, state={})
+    assert candidates == []
+    job, _ = M.select_job(tmp_path, jobs)
+    assert job is None

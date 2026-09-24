@@ -1,34 +1,51 @@
 #!/usr/bin/env python3
-"""Amendment R.9 read of the capture cells: Q.3 (Task 2) and Q.6 (Task 3).
+"""Amendment R.9 / R.14 read of one capture cell: Q.3 (Task 2) and Q.6 (Task 3).
 
-Registered estimands (R.4, R.6, arithmetic fixed in R.9):
+Requirements before any registered verdict is produced (R.14):
 
-* Q.3: pooled GQA collateral per condition (sum n_collateral / sum n_eligible
-  over every (layer, group, event)); paired difference R-KV minus
-  ObservedAttentionPress ("h2o") per (problem, seed); problem-clustered 95% CI.
-  Negative excluding zero supports the Q.3 ordering; including zero is
-  inconclusive; positive excluding zero reverses it.
-* Q.6: omega(Random) - omega(StreamingLLM), paired per (problem, seed);
-  PREDICTED (positive, CI excludes 0) / NULL / REVERSED. Exploratory.
+* **Coverage** -- rows match the EXACT expected key set (problem x seed x
+  policy for the cell's single declared budget); duplicated, missing and
+  unexpected keys are listed (``kvcache.coverage.check_coverage``).
+* **Identity** -- every row carries the same R.13 provenance (implementation,
+  config, model revision, reference run, basis bytes).
+* **Controls** -- every row's recorded controls are finite and within
+  tolerance (layer-0 Delta <= 1e-5, no non-finite value). Failing rows are
+  listed and make the read INVALID, never silently dropped.
+* **Eligibility** is separate: an undefined or unbounded latent direction or
+  an event with nothing eligible is an excluded VALUE with its reason, not a
+  failed instrument.
 
-Descriptive (no test): per-policy M, M_event, Delta, wanted_any_head,
-collateral, and the Delta/M ratio at the trigger event (Q.3 cross-instrument
-prediction). Rows failing a recorded control (layer-0 Delta above 1e-5,
-non-finite values) are counted and excluded; if any exist the output says so
-first. A cell with fewer rows than expected is PARTIAL and its contrasts are
-reported with their n, never silently.
+Registered estimands, equal-problem estimator (seeds within problem, then
+problems; the same estimator on every problem-cluster bootstrap replicate):
 
-    python scripts/report_capture.py --runs-root <runs> \\
-        --run capture-b256 --out capture_b256.json
+* Q.3: pooled collateral, R-KV minus ObservedAttentionPress ("h2o"), paired by
+  (problem, seed). Negative excluding 0 supports the Q.3 ordering; including 0
+  INCONCLUSIVE; positive excluding 0 REVERSED.
+* Q.6: omega(Random) - omega(StreamingLLM), paired; PREDICTED / NULL / REVERSED.
+  Exploratory; no accuracy-scale claim.
+
+Descriptive only: per-policy M, M_event, Delta, wanted_any_head, collateral,
+omega, and Delta/M over the trigger event's slice. The trigger ratio is read at
+the first forward after the first eviction at or after step 130; it is NOT a
+measurement at the Q.5 reinsertion states, and supports no query-drift causal
+claim (R.14).
+
+Also writes a per-condition sufficient-statistics table (TSV) and its sha256,
+from which every reported mean and CI can be recomputed.
+
+    python scripts/report_capture.py --runs-root <runs> --run capture-b256 \\
+        --config configs/experiments/capture_math500_b256_r9.yaml \\
+        --out results/diag/meeting3/capture_b256.json --final
 """
 
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import math
 import statistics
 import sys
-from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
@@ -36,17 +53,34 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
 from kvcache.capture import LAYER0_DELTA_TOL
-from kvcache.stats import cluster_bootstrap_mean
+from kvcache.coverage import (
+    design,
+    COMPLETE,
+    check_coverage,
+    equal_problem_bootstrap,
+    expected_keys,
+    paired_equal_problem,
+)
 
 POLICIES = ("random", "streamingllm", "h2o", "rkv")
+METRICS = (
+    "collateral",
+    "wanted_any_head",
+    "M",
+    "M_event",
+    "Delta",
+    "trigger_delta_over_M",
+    "omega",
+)
 
 
 def _parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--runs-root", required=True, type=Path)
     p.add_argument("--run", required=True)
+    p.add_argument("--config", type=Path, default=None)
     p.add_argument("--out", required=True, type=Path)
-    p.add_argument("--expected-per-policy", type=int, default=100)
+    p.add_argument("--final", action="store_true")
     p.add_argument("--n-resamples", type=int, default=2000)
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--resume", action="store_true")
@@ -77,30 +111,185 @@ def trigger_ratio(row: dict[str, Any]) -> float | None:
     return statistics.fmean(ds) / statistics.fmean(ms)
 
 
-def paired_contrast(
-    by_policy: dict[str, dict[tuple[str, int], float]],
-    a: str,
-    b: str,
-    *,
-    n_resamples: int,
-    seed: int,
-) -> dict[str, Any]:
-    """Mean of (a - b) over shared (problem, seed), clustered by problem."""
-    shared = sorted(set(by_policy.get(a, {})) & set(by_policy.get(b, {})))
-    per_pid: dict[str, list[float]] = defaultdict(list)
-    for key in shared:
-        per_pid[key[0]].append(by_policy[a][key] - by_policy[b][key])
-    if not per_pid:
-        return {"n_pairs": 0, "status": "NO SHARED CONDITIONS"}
-    stat = cluster_bootstrap_mean(per_pid, n_resamples=n_resamples, seed=seed)
-    lo, hi = stat["ci95"]
-    return {
-        "contrast": f"{a} - {b}",
-        "n_pairs": len(shared),
-        "n_problems": len(per_pid),
-        **stat,
-        "excludes_zero": bool(lo > 0 or hi < 0),
+def control_failures(row: dict[str, Any]) -> list[str]:
+    c = row.get("checks") or {}
+    out = []
+    l0 = c.get("layer0_delta_max")
+    if not isinstance(l0, (int, float)) or not math.isfinite(l0):
+        out.append("layer0_delta_max missing or non-finite")
+    elif l0 > LAYER0_DELTA_TOL:
+        out.append(f"layer0_delta_max {l0} > {LAYER0_DELTA_TOL}")
+    if c.get("n_nonfinite") != 0:
+        out.append(f"n_nonfinite = {c.get('n_nonfinite')}")
+    return out
+
+
+def metric_values(row: dict[str, Any]) -> dict[str, tuple[float | None, str | None]]:
+    """(value, exclusion reason) per metric; reason None when eligible."""
+    lat = row.get("latent") or {}
+    raw = {
+        "collateral": (row.get("collateral_pooled"), "no eligible evicted position"),
+        "wanted_any_head": (
+            row.get("wanted_any_head_pooled"),
+            "no eligible evicted position",
+        ),
+        "M": (row.get("M_mean"), "no measured event"),
+        "M_event": (row.get("M_event_mean"), "no measured event"),
+        "Delta": (row.get("Delta_mean"), "no measured event"),
+        "trigger_delta_over_M": (trigger_ratio(row), "no trigger event or M = 0"),
+        "omega": (
+            lat.get("omega_trace"),
+            "no finite direction (undefined/unbounded only, R.6)",
+        ),
     }
+    return {
+        k: ((float(v), None) if v is not None and math.isfinite(v) else (None, why))
+        for k, (v, why) in raw.items()
+    }
+
+
+def read_capture(
+    rows: list[dict[str, Any]],
+    *,
+    pids: list[str],
+    seeds: list[int],
+    budget: int,
+    n_resamples: int = 2000,
+    seed: int = 0,
+) -> dict[str, Any]:
+    expected = expected_keys(pids, seeds, POLICIES, [str(budget)])
+    cov = check_coverage(
+        rows,
+        lambda r: (r["pid"], int(r["seed"]), r["press"], str(r["budget"])),
+        expected,
+    )
+    idents = {
+        json.dumps(
+            {
+                k: v
+                for k, v in (r.get("provenance") or {}).items()
+                if k != "inputs_sha256"
+            },
+            sort_keys=True,
+        )
+        for r in rows
+    }
+    identity_ok = len(idents) == 1 and "{}" not in idents
+    bad = {
+        (r["pid"], int(r["seed"]), r["press"]): f
+        for r in rows
+        if (f := control_failures(r))
+    }
+    controls = "VALID" if not bad else "INVALID"
+    table: list[dict[str, Any]] = []
+    values: dict[str, dict[str, dict[tuple[str, int], float]]] = {
+        m: {p: {} for p in POLICIES} for m in METRICS
+    }
+    exclusions: dict[str, dict[str, dict[str, int]]] = {
+        m: {p: {} for p in POLICIES} for m in METRICS
+    }
+    for r in rows:
+        k3 = (r["pid"], int(r["seed"]), r["press"])
+        if k3 in bad or r["press"] not in POLICIES or str(r["budget"]) != str(budget):
+            continue
+        mv = metric_values(r)
+        entry = {"pid": r["pid"], "seed": int(r["seed"]), "press": r["press"]}
+        for m, (v, why) in mv.items():
+            entry[m] = v
+            if v is None:
+                ex = exclusions[m][r["press"]]
+                ex[why] = ex.get(why, 0) + 1
+            else:
+                values[m][r["press"]][(r["pid"], int(r["seed"]))] = v
+        table.append(entry)
+    final_ok = cov["status"] == COMPLETE and identity_ok and controls == "VALID"
+    q3 = paired_equal_problem(
+        values["collateral"]["rkv"],
+        values["collateral"]["h2o"],
+        n_resamples=n_resamples,
+        seed=seed,
+    )
+    q6 = paired_equal_problem(
+        values["omega"]["random"],
+        values["omega"]["streamingllm"],
+        n_resamples=n_resamples,
+        seed=seed,
+    )
+    for c, verdicts in (
+        (
+            q3,
+            (
+                "SUPPORTS Q.3 ORDERING (R-KV lower)",
+                "REVERSED (R-KV higher)",
+                "INCONCLUSIVE",
+            ),
+        ),
+        (q6, ("REVERSED", "PREDICTED", "NULL")),
+    ):
+        if not final_ok or c["ci95"] is None:
+            c["verdict"] = None
+            continue
+        lo, hi = c["ci95"]
+        c["verdict"] = verdicts[0] if hi < 0 else verdicts[1] if lo > 0 else verdicts[2]
+    return {
+        "status": (
+            "FINAL"
+            if final_ok
+            else (
+                "INVALID"
+                if (bad or not identity_ok or cov["status"] == "INVALID")
+                else "PARTIAL"
+            )
+        ),
+        "budget": budget,
+        "coverage": cov,
+        "identity_consistent": identity_ok,
+        "n_identities": len(idents),
+        "controls": controls,
+        "control_failures": [
+            {"pid": k[0], "seed": k[1], "press": k[2], "failures": f}
+            for k, f in sorted(bad.items())
+        ],
+        "q3_registered_contrast": {"contrast": "collateral rkv - h2o", **q3},
+        "q6_registered_contrast": {"contrast": "omega random - streamingllm", **q6},
+        "descriptive": {
+            m: {
+                p: equal_problem_bootstrap(
+                    values[m][p], n_resamples=n_resamples, seed=seed
+                )
+                for p in POLICIES
+            }
+            for m in METRICS
+        },
+        "eligibility_exclusions": exclusions,
+        "sufficient_statistics": table,
+        "notes": [
+            "verdicts are withheld unless coverage is COMPLETE, identity is "
+            "consistent and every control is VALID (R.14)",
+            "trigger Delta/M is descriptive at the first eviction >= step 130; it is "
+            "not measured at Q.5 reinsertion states and licenses no query-drift "
+            "causal claim",
+            "Q.6 is exploratory; no accuracy-scale claim",
+        ],
+    }
+
+
+def write_table(path: Path, table: list[dict[str, Any]]) -> str:
+    cols = ["pid", "seed", "press", *METRICS]
+    lines = ["\t".join(cols)]
+    for e in sorted(table, key=lambda x: (x["press"], x["pid"], x["seed"])):
+        lines.append("\t".join("" if e.get(c) is None else f"{e[c]}" for c in cols))
+    data = ("\n".join(lines) + "\n").encode()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(data)
+    return hashlib.sha256(data).hexdigest()
+
+
+def _design(config: Path) -> tuple[list[str], list[int], int]:
+    d = design(config)
+    if len(d["budgets"]) != 1:
+        raise SystemExit("a capture read declares exactly one budget")
+    return d["pids"], d["seeds"], d["budgets"][0]
 
 
 def main() -> int:
@@ -113,102 +302,43 @@ def main() -> int:
             )
         )
         return 0
-    rows = [r for r in _rows(run_dir) if r["press"] in POLICIES]
-    bad = [
-        r
-        for r in rows
-        if r["checks"]["n_nonfinite"]
-        or r["checks"]["layer0_delta_max"] > LAYER0_DELTA_TOL
-    ]
-    good = [r for r in rows if r not in bad]
-    counts = {p: sum(r["press"] == p for r in rows) for p in POLICIES}
-    budgets = sorted({str(r["budget"]) for r in rows})
-
-    metrics: dict[str, dict[str, dict[tuple[str, int], float]]] = defaultdict(
-        lambda: defaultdict(dict)
-    )
-    for r in good:
-        key = (r["pid"], int(r["seed"]))
-        for name, value in (
-            ("collateral", r.get("collateral_pooled")),
-            ("wanted_any_head", r.get("wanted_any_head_pooled")),
-            ("M", r.get("M_mean")),
-            ("M_event", r.get("M_event_mean")),
-            ("Delta", r.get("Delta_mean")),
-            ("trigger_delta_over_M", trigger_ratio(r)),
-            ("omega", (r.get("latent") or {}).get("omega_trace")),
-        ):
-            if value is not None:
-                metrics[name][r["press"]][key] = float(value)
-
-    def summary(name: str, policy: str) -> dict[str, Any] | None:
-        vals = metrics[name].get(policy, {})
-        if not vals:
-            return None
-        per_pid: dict[str, list[float]] = defaultdict(list)
-        for (pid, _s), v in vals.items():
-            per_pid[pid].append(v)
-        return cluster_bootstrap_mean(per_pid, n_resamples=a.n_resamples, seed=a.seed)
-
-    q3 = paired_contrast(
-        metrics["collateral"], "rkv", "h2o", n_resamples=a.n_resamples, seed=a.seed
-    )
-    if q3.get("n_pairs"):
-        lo, hi = q3["ci95"]
-        q3["verdict"] = (
-            "SUPPORTS Q.3 ORDERING (R-KV lower)"
-            if hi < 0
-            else "REVERSED (R-KV higher)" if lo > 0 else "INCONCLUSIVE"
-        )
-    q6 = paired_contrast(
-        metrics["omega"],
-        "random",
-        "streamingllm",
+    if a.config is None:
+        raise SystemExit("--config is required: the expected design comes from it")
+    pids, seeds, budget = _design(a.config)
+    res = read_capture(
+        _rows(run_dir),
+        pids=pids,
+        seeds=seeds,
+        budget=budget,
         n_resamples=a.n_resamples,
         seed=a.seed,
     )
-    if q6.get("n_pairs"):
-        lo, hi = q6["ci95"]
-        q6["verdict"] = "PREDICTED" if lo > 0 else "REVERSED" if hi < 0 else "NULL"
-    out = {
-        "amendment": "R.4 / R.6 / R.9",
-        "run": a.run,
-        "budgets": budgets,
-        "rows_per_policy": counts,
-        "complete": all(counts[p] >= a.expected_per_policy for p in POLICIES),
-        "n_rows_failing_controls": len(bad),
-        "failing_rows": [
-            {"pid": r["pid"], "seed": r["seed"], "press": r["press"], **r["checks"]}
-            for r in bad
-        ],
-        "q3_registered_contrast": q3,
-        "q6_registered_contrast": q6,
-        "descriptive": {
-            name: {p: summary(name, p) for p in POLICIES}
-            for name in (
-                "collateral",
-                "wanted_any_head",
-                "M",
-                "M_event",
-                "Delta",
-                "trigger_delta_over_M",
-                "omega",
-            )
-        },
-        "q6_note": "exploratory; no accuracy-scale claim (Q.6 standing limit)",
-    }
+    table = res.pop("sufficient_statistics")
+    tsv = a.out.with_suffix(".conditions.tsv")
+    res["sufficient_statistics_tsv"] = str(tsv.name)
+    res["sufficient_statistics_sha256"] = write_table(tsv, table)
+    res["reproduce"] = (
+        f"python scripts/report_capture.py --runs-root <runs> --run {a.run} "
+        f"--config {a.config} --out {a.out} --final"
+    )
+    res["run"] = a.run
     a.out.parent.mkdir(parents=True, exist_ok=True)
-    a.out.write_text(json.dumps(out, indent=2, sort_keys=True) + "\n", "utf-8")
-    print(f"rows per policy {counts}; failing controls {len(bad)}")
-    for label, c in (("Q.3 collateral R-KV - H2O", q3), ("Q.6 omega R - SLM", q6)):
-        if c.get("n_pairs"):
-            print(
-                f"{label}: {c['mean']:+.4f} [{c['ci95'][0]:+.4f},{c['ci95'][1]:+.4f}] "
-                f"n={c['n_pairs']} -> {c['verdict']}"
-            )
-        else:
-            print(f"{label}: {c['status']}")
+    a.out.write_text(json.dumps(res, indent=2, sort_keys=True) + "\n", "utf-8")
+    cov = res["coverage"]
+    print(
+        f"status {res['status']}; coverage {cov['status']} "
+        f"({cov['n_unique_expected_present']}/{cov['n_expected']}, "
+        f"dup {len(cov['duplicated'])}, unexpected {len(cov['unexpected'])}); "
+        f"controls {res['controls']}; identity {res['identity_consistent']}"
+    )
+    for name in ("q3_registered_contrast", "q6_registered_contrast"):
+        c = res[name]
+        print(
+            f"{c['contrast']}: mean={c['mean']} ci={c['ci95']} verdict={c['verdict']}"
+        )
     print(f"wrote {a.out}")
+    if a.final and res["status"] != "FINAL":
+        return 3
     return 0
 
 

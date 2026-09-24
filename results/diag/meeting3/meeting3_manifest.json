@@ -3,6 +3,8 @@
     {
       "config_sha256": {},
       "configs": [],
+      "declared_status": "COMPLETE",
+      "evidence": "declared (no stage)",
       "expected_units": 3200,
       "id": "T1.acc_curve",
       "inputs": [
@@ -40,13 +42,23 @@
       "configs": [
         "configs/experiments/replay_ext_math500_b512_r1.yaml"
       ],
+      "declared_status": "QUEUED",
       "depends_on": [],
-      "expected_units": 400,
+      "evidence": "no record for stage t1-tv yet",
+      "expected_units": 200,
       "id": "T1.tv512",
       "note": "was BLOCKED on storage (~98 MiB/cell full profiles vs ~167 MiB deficit); R.12 runs it as registered with summary profiles (~3 KB/trace). Queue t1-tv512, last.",
-      "output_sha256": {},
+      "output_sha256": {
+        "figures/fig8_budget_curve.pdf": "734619f70bd921645962d5ba7f76da21d0cfeaa37d184a61c748a61350b17fb8",
+        "results/diag/meeting3/t1_budget_curve.json": "369efacba876031b7e2df09d51c117be055c0589c272024e9148f0c2016b03dd"
+      },
+      "outputs": [
+        "results/diag/meeting3/t1_budget_curve.json",
+        "figures/fig8_budget_curve.pdf"
+      ],
       "protocol": "R.1",
       "question": "per-step TV at budget 512 (missing intermediate point)",
+      "stage": "t1-tv",
       "status": "QUEUED",
       "task": 1
     },
@@ -57,12 +69,22 @@
       "configs": [
         "configs/experiments/replay_ext_math500_b1024_r1.yaml"
       ],
-      "expected_units": 400,
+      "declared_status": "QUEUED",
+      "evidence": "no record for stage t1-tv yet",
+      "expected_units": 200,
       "id": "T1.tv1024",
       "note": "was BLOCKED on storage (~98 MiB/cell full profiles vs ~167 MiB deficit); R.12 runs it as registered with summary profiles (~3 KB/trace). Queue t1-tv1024, last.",
-      "output_sha256": {},
+      "output_sha256": {
+        "figures/fig8_budget_curve.pdf": "734619f70bd921645962d5ba7f76da21d0cfeaa37d184a61c748a61350b17fb8",
+        "results/diag/meeting3/t1_budget_curve.json": "369efacba876031b7e2df09d51c117be055c0589c272024e9148f0c2016b03dd"
+      },
+      "outputs": [
+        "results/diag/meeting3/t1_budget_curve.json",
+        "figures/fig8_budget_curve.pdf"
+      ],
       "protocol": "R.1",
       "question": "per-step TV at budget 1024 (missing intermediate point)",
+      "stage": "t1-tv",
       "status": "QUEUED",
       "task": 1
     },
@@ -77,6 +99,8 @@
         "configs/experiments/replay_sawtooth_i64_q1.yaml",
         "configs/experiments/replay_sawtooth_i256_q1.yaml"
       ],
+      "declared_status": "ANALYZED",
+      "evidence": "declared (no stage)",
       "expected_units": 600,
       "id": "Q1.arms",
       "note": "legacy read AMPLITUDE-DEPENDENT; instrument check owed (Q1.legacy_control)",
@@ -104,11 +128,19 @@
         "configs/experiments/fork_control_random_r11.yaml",
         "configs/experiments/fork_control_slm_r11.yaml"
       ],
+      "declared_status": "QUEUED",
+      "evidence": "no record for stage fork-control yet",
       "id": "Q1.legacy_control",
       "note": "registered 2026-09-12; R.2: cannot identify physical-removal effects. Computed for the record from arm A of the fork control (R.11), labelled NOT VALID FOR IDENTIFICATION by scripts/report_fork_control.py.",
-      "output_sha256": {},
+      "output_sha256": {
+        "results/diag/meeting3/fork_control.json": null
+      },
+      "outputs": [
+        "results/diag/meeting3/fork_control.json"
+      ],
       "protocol": "Q.1",
       "question": "removal-anchored phase excess must not exclude zero (as registered)",
+      "stage": "fork-control",
       "status": "QUEUED",
       "task": 1
     },
@@ -121,12 +153,20 @@
         "configs/experiments/fork_control_random_r11.yaml",
         "configs/experiments/fork_control_slm_r11.yaml"
       ],
+      "declared_status": "QUEUED",
+      "evidence": "no record for stage fork-control yet",
       "expected_units": 150,
       "id": "Q1.direct_control",
       "note": "kvcache.fork_control; tiny-Qwen2 tests pass (B-vs-B exact, A-B < 1e-4, selections agree, sensitive to disabled masking); R.11 scope + degenerate tolerance rule registered before outcomes.",
-      "output_sha256": {},
+      "output_sha256": {
+        "results/diag/meeting3/fork_control.json": null
+      },
+      "outputs": [
+        "results/diag/meeting3/fork_control.json"
+      ],
       "protocol": "R.2",
       "question": "does physical compaction of already-masked keys change outputs?",
+      "stage": "fork-control",
       "status": "QUEUED",
       "task": 1
     },
@@ -141,6 +181,8 @@
         "configs/experiments/replay_onset_t512_q2.yaml",
         "configs/experiments/replay_onset_t2048_q2.yaml"
       ],
+      "declared_status": "COMPLETE",
+      "evidence": "declared (no stage)",
       "expected_units": 1200,
       "id": "Q2.dtv",
       "note": "MIXED, reproduced byte-identical 2026-09-24. Occupancy audit (Q2.figure) shows the B=2048 row cannot identify exposure: t0=0 and t0=512 have the same actual exposure (cache under budget to ~step 1976).",
@@ -156,6 +198,8 @@
     },
     {
       "config_sha256": {},
+      "declared_status": "COMPLETE",
+      "evidence": "declared (no stage)",
       "id": "Q2.figure",
       "note": "grid + occupancy audit by scripts/report_onset_grid.py; 0 pre-onset divergences; 276 never-diverged (arm, trace) pairs all < 2100 steps, i.e. shorter than the first read window; fig9 viewed.",
       "output_sha256": {
@@ -183,12 +227,22 @@
         "configs/experiments/grid_math500_dacc_t512_r3.yaml",
         "configs/experiments/grid_math500_dacc_t0_r3.yaml"
       ],
+      "declared_status": "QUEUED",
+      "evidence": "no record for stage dacc yet",
       "expected_units": 1200,
       "id": "Q2.dacc",
       "note": "gate implemented + CPU-validated (tests/test_onset_gate.py, tiny Qwen2, logit level, mutation-tested); queue: dacc-gate-smoke (real-model marker) -> dacc-t2048 -> dacc-t512 -> dacc-t0, ~7.2 h per cell on 2 GPUs, first window 2026-09-25 01:45. Comparator: 100 FC-bank rows (pids verified identical to Q.2's 25). R.8 records the B=2048 occupancy caveat.",
-      "output_sha256": {},
+      "output_sha256": {
+        "figures/meeting3_dacc.pdf": null,
+        "results/diag/meeting3/dacc.json": null
+      },
+      "outputs": [
+        "results/diag/meeting3/dacc.json",
+        "figures/meeting3_dacc.pdf"
+      ],
       "protocol": "R.3",
       "question": "free-running accuracy on the (budget, compression_start_step) grid",
+      "stage": "dacc",
       "status": "QUEUED",
       "task": 1
     },
@@ -199,11 +253,19 @@
       "configs": [
         "configs/experiments/capture_math500_smoke_r9.yaml"
       ],
+      "declared_status": "QUEUED",
+      "evidence": "no record for stage capture-b256 yet",
       "id": "Q3.algebra_control",
       "note": "R.9: validated in float64 on synthetic inputs (tests/test_capture.py channel_stats identity) and live at every event as layer-0 Delta <= 1e-5 (same q, same retained keys); full/full control exactly 0. Real-model check = capture-smoke gate.",
-      "output_sha256": {},
+      "output_sha256": {
+        "results/diag/meeting3/capture_b256.json": null
+      },
+      "outputs": [
+        "results/diag/meeting3/capture_b256.json"
+      ],
       "protocol": "R.4",
       "question": "same-q/K restriction identity, float64 + production dtype",
+      "stage": "capture-b256",
       "status": "QUEUED",
       "task": 2
     },
@@ -216,17 +278,57 @@
         "configs/experiments/capture_math500_b256_r9.yaml",
         "configs/experiments/capture_math500_b2048_r9.yaml"
       ],
-      "expected_units": 800,
+      "declared_status": "QUEUED",
+      "evidence": "no record for stage capture-b256 yet",
+      "expected_units": 400,
       "id": "Q3.capture",
       "note": "R.9 combined capture with Q.6; CPU-validated on tiny Qwen2 for all 4 policies (live gather/position-map/pre-eviction checks, mutation-tested); queue q6-basis-fit -> capture-smoke -> capture-b256 (primary) ... b2048 last.",
-      "output_sha256": {},
+      "output_sha256": {
+        "figures/meeting3_capture_b256.pdf": null,
+        "results/diag/meeting3/capture_b256.json": null
+      },
+      "outputs": [
+        "results/diag/meeting3/capture_b256.json",
+        "figures/meeting3_capture_b256.pdf"
+      ],
       "protocol": "Q.3/R.4",
       "question": "M, Delta, collateral per layer/group/event",
+      "stage": "capture-b256",
+      "status": "QUEUED",
+      "task": 2
+    },
+    {
+      "config_sha256": {
+        "configs/experiments/capture_math500_b2048_r9.yaml": "c3d27c35b9a1ee9762d54f28932ec0285918476c096fbf9be3b2df5d6f859280",
+        "configs/experiments/capture_math500_b256_r9.yaml": "2bc44e423118192090610926476e2b7a722d2f2057a2a77295ae873cbfbb1ef1"
+      },
+      "configs": [
+        "configs/experiments/capture_math500_b256_r9.yaml",
+        "configs/experiments/capture_math500_b2048_r9.yaml"
+      ],
+      "declared_status": "QUEUED",
+      "evidence": "no record for stage capture-b2048 yet",
+      "expected_units": 400,
+      "id": "Q3.capture_b2048",
+      "note": "R.9 combined capture with Q.6; CPU-validated on tiny Qwen2 for all 4 policies (live gather/position-map/pre-eviction checks, mutation-tested); queue q6-basis-fit -> capture-smoke -> capture-b256 (primary) ... b2048 last.",
+      "output_sha256": {
+        "figures/meeting3_capture_b2048.pdf": null,
+        "results/diag/meeting3/capture_b2048.json": null
+      },
+      "outputs": [
+        "results/diag/meeting3/capture_b2048.json",
+        "figures/meeting3_capture_b2048.pdf"
+      ],
+      "protocol": "Q.3/R.4",
+      "question": "M, Delta, collateral per layer/group/event",
+      "stage": "capture-b2048",
       "status": "QUEUED",
       "task": 2
     },
     {
       "config_sha256": {},
+      "declared_status": "TESTED",
+      "evidence": "declared (no stage)",
       "id": "Q5.identity_repair",
       "note": "EventTap(stash_kv=True): true evicted complement per layer from the verified selection; layer-0 stash checked bitwise against full keys at every cohort (raises); per-layer state; mutation test: the old tail-stash bug is refused (tests/test_exact_lag.py). Real-model use in exact-lag-r5.",
       "output_sha256": {},
@@ -242,12 +344,22 @@
       "configs": [
         "configs/experiments/exact_lag_math500_r5.yaml"
       ],
+      "declared_status": "QUEUED",
+      "evidence": "no record for stage exact-lag yet",
       "expected_units": 4000,
       "id": "Q5.exact_lag",
       "note": "kvcache.exact_lag + scripts/run_exact_lag.py / report_exact_lag.py; tiny-Qwen2 tests (deterministic snapshots, exact applied step, gate) pass; queue exact-lag-r5 requires capture-smoke; ~5 h on 2 GPUs.",
-      "output_sha256": {},
+      "output_sha256": {
+        "figures/meeting3_exact_lag.pdf": null,
+        "results/diag/meeting3/exact_lag.json": null
+      },
+      "outputs": [
+        "results/diag/meeting3/exact_lag.json",
+        "figures/meeting3_exact_lag.pdf"
+      ],
       "protocol": "R.5",
       "question": "recovery after exact delay 1/4/16/64/256",
+      "stage": "exact-lag",
       "status": "QUEUED",
       "task": 2
     },
@@ -258,6 +370,8 @@
       "configs": [
         "configs/experiments/basis_fit_q6_r9.yaml"
       ],
+      "declared_status": "QUEUED",
+      "evidence": "declared (no stage)",
       "expected_units": 1,
       "id": "Q6.fit",
       "note": "scripts/run_basis_fit.py; header q6_basis.json (npz sha256) is the marker; capture refuses a basis whose bytes differ.",
@@ -276,12 +390,50 @@
         "configs/experiments/capture_math500_b256_r9.yaml",
         "configs/experiments/capture_math500_b2048_r9.yaml"
       ],
-      "expected_units": 800,
+      "declared_status": "QUEUED",
+      "evidence": "no record for stage capture-b256 yet",
+      "expected_units": 400,
       "id": "Q6.project",
       "note": "same capture cells as Q3.capture (R.9).",
-      "output_sha256": {},
+      "output_sha256": {
+        "figures/meeting3_capture_b256.pdf": null,
+        "results/diag/meeting3/capture_b256.json": null
+      },
+      "outputs": [
+        "results/diag/meeting3/capture_b256.json",
+        "figures/meeting3_capture_b256.pdf"
+      ],
       "protocol": "Q.6/R.6",
       "question": "omega(Random) - omega(StreamingLLM), budget 256 primary",
+      "stage": "capture-b256",
+      "status": "QUEUED",
+      "task": 3
+    },
+    {
+      "config_sha256": {
+        "configs/experiments/capture_math500_b2048_r9.yaml": "c3d27c35b9a1ee9762d54f28932ec0285918476c096fbf9be3b2df5d6f859280",
+        "configs/experiments/capture_math500_b256_r9.yaml": "2bc44e423118192090610926476e2b7a722d2f2057a2a77295ae873cbfbb1ef1"
+      },
+      "configs": [
+        "configs/experiments/capture_math500_b256_r9.yaml",
+        "configs/experiments/capture_math500_b2048_r9.yaml"
+      ],
+      "declared_status": "QUEUED",
+      "evidence": "no record for stage capture-b2048 yet",
+      "expected_units": 400,
+      "id": "Q6.project_b2048",
+      "note": "same capture cells as Q3.capture (R.9).",
+      "output_sha256": {
+        "figures/meeting3_capture_b2048.pdf": null,
+        "results/diag/meeting3/capture_b2048.json": null
+      },
+      "outputs": [
+        "results/diag/meeting3/capture_b2048.json",
+        "figures/meeting3_capture_b2048.pdf"
+      ],
+      "protocol": "Q.6/R.6",
+      "question": "omega(Random) - omega(StreamingLLM), budget 256 primary",
+      "stage": "capture-b2048",
       "status": "QUEUED",
       "task": 3
     }
@@ -298,7 +450,7 @@
     "transformers": "4.56.2"
   },
   "schema": "meeting3-manifest-v1",
-  "source_tree_sha256": "61d07fd1eef99ae78ed5986087d6a0a91e2fce4bad5313d6fea38aa3318bda5b",
+  "source_tree_sha256": "8dd3001004e012cb5ed67e037ad71291290f6f337761dc011c2c6c2f46ff9777",
   "status_counts": {
     "ANALYZED": 1,
     "BLOCKED": 0,
@@ -307,7 +459,7 @@
     "IMPLEMENTED": 0,
     "INVALID": 0,
     "NOT_STARTED": 0,
-    "QUEUED": 10,
+    "QUEUED": 12,
     "RUNNING": 0,
     "TESTED": 1,
     "VALIDATED": 0
