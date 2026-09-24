@@ -24,6 +24,27 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-09-24 (later) — Meeting #3 execution, stage checkpoint.**
+  DONE: **Task 1 R.1 read** (fca22f3): paired problem-clustered CIs over raw rows,
+  400 matched conditions per cell, totals equal m4 to 4 dp. Total change
+  Random/SLM: 256 −0.4625 [−0.545,−0.380] / −0.6475 [−0.723,−0.570]; 512 −0.205
+  [−0.273,−0.142] / −0.4075 [−0.485,−0.333]; 1024 −0.085 [−0.128,−0.045] /
+  −0.1975 [−0.268,−0.138]; 2048 −0.035 [−0.062,−0.013] / −0.0775 [−0.125,−0.040];
+  beneficial flip mass ≤ 0.010 everywhere. `results/diag/meeting3/t1_budget_curve.json`,
+  `figures/fig8_budget_curve.{pdf,png}`. **Q.2 figure + occupancy audit** (5e567cf):
+  verdict MIXED reproduced byte-identical; at B=2048 the t0=0 and t0=512 arms have
+  the SAME actual exposure (cache under budget until ~step 1976), so only B=256
+  identifies exposure. `results/diag/meeting3/q2_onset_grid.json`, `figures/fig9_onset_grid.*`.
+  **D_acc** (622023f, reader d00bdbe): gate implemented + CPU-validated
+  (mutation-tested), queued as dacc-gate-smoke (marker) -> dacc-t2048 -> dacc-t512
+  -> dacc-t0, ~7.2 h per cell on 2 GPUs; first window 2026-09-25 01:45. Scheduler
+  now BLOCKs a non-fitting cell instead of exiting (restoration-lag1 would have
+  stranded the queue); Q.5 lag cells held (R.5). Amendment R.8 records all of this
+  before any D_acc outcome, incl. the R.7 storage-wording correction (guard =
+  ~/kvcache-storage only: 68.86 GiB used; 69.19 GiB if ~/kv-caching counted —
+  owner to confirm). NEXT: Q.3 capture (Task 2), Q.6 fit/project (Task 3), Q.1
+  direct control, Q.5 repair; morning: `report_dacc.py` over whatever landed.
+
   **★★★★★ 2026-09-24 — CORRECTION: Q.1 is NOT fully done.** Its pre-registered
   negative control (deferred removal at s+32, removal step must show no phase
   excess; a STOP gate for paper edits) was never implemented, queued or run,
