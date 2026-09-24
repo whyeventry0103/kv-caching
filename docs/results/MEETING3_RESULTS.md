@@ -4,7 +4,9 @@ Last updated 2026-09-24 (Asia/Dubai 23:15). Machine-readable companions:
 `configs/meeting3/cells.yaml` (ledger) → `results/diag/meeting3/meeting3_manifest.json`
 (`python scripts/meeting3_manifest.py --check`). Protocol: PREREGISTRATION
 Amendment R (R.0–R.12). Every number below was recomputed from the named
-artifact when this file was written.
+artifact when this file was written. Review evidence (gate outputs, remote test run,
+parity, queue dry-run, remote-only data list):
+[`meeting3_evidence/`](meeting3_evidence/README.md).
 
 The three Meeting #3 problems, and where each stands:
 

@@ -1,0 +1,21 @@
+# nightly_autorun dry-run of the first 2026-09-25 tick, tree at c92381927fa8c8b032d6f63da492f3ed413b226d
+[2026-09-24 23:33:24] === nightly_autorun start (dry_run=True force=True) ===
+[2026-09-24 23:33:24] BLOCKED restoration-lag1: Amendment R.5 - the restoration press stashes the tail of a score-ordered tensor (not the evicted complement) and shares state across layers; the exact-lag protocol replaces this sweep, so these rows would be invalid -> skip
+[2026-09-24 23:33:24] BLOCKED restoration-lag4: Amendment R.5 - the restoration press stashes the tail of a score-ordered tensor (not the evicted complement) and shares state across layers; the exact-lag protocol replaces this sweep, so these rows would be invalid -> skip
+[2026-09-24 23:33:24] BLOCKED restoration-lag16: Amendment R.5 - the restoration press stashes the tail of a score-ordered tensor (not the evicted complement) and shares state across layers; the exact-lag protocol replaces this sweep, so these rows would be invalid -> skip
+[2026-09-24 23:33:24] BLOCKED restoration-lag64: Amendment R.5 - the restoration press stashes the tail of a score-ordered tensor (not the evicted complement) and shares state across layers; the exact-lag protocol replaces this sweep, so these rows would be invalid -> skip
+[2026-09-24 23:33:24] BLOCKED restoration-lag256: Amendment R.5 - the restoration press stashes the tail of a score-ordered tensor (not the evicted complement) and shares state across layers; the exact-lag protocol replaces this sweep, so these rows would be invalid -> skip
+[2026-09-24 23:33:24] capture-smoke: dependency incomplete -> skip
+[2026-09-24 23:33:24] capture-b256: dependency incomplete -> skip
+[2026-09-24 23:33:24] exact-lag-r5: dependency incomplete -> skip
+[2026-09-24 23:33:24] dacc-t2048: dependency incomplete -> skip
+[2026-09-24 23:33:24] dacc-t512: dependency incomplete -> skip
+[2026-09-24 23:33:24] dacc-t0: dependency incomplete -> skip
+[2026-09-24 23:33:24] capture-b2048: dependency incomplete -> skip
+[2026-09-24 23:33:25]   gpu0: 47.4GB free util=0%
+[2026-09-24 23:33:25]   gpu1: 47.4GB free util=0%
+[2026-09-24 23:33:25] selected: dacc-gate-smoke 0/1 (min_free_gb=24); needy seeds [11]; window->10:45
+[2026-09-24 23:33:25] launch assignment: {0: [11]}
+[2026-09-24 23:33:25] DRY-RUN would launch:
+[2026-09-24 23:33:25]   tmux -s dacc-gate-smoke-g0: bash scripts/launch.sh --i-understand daccsmoke configs/experiments/dacc_gate_smoke_r3.yaml --resume --seeds 11 [CUDA=0, MAX_HOURS=9.0]
+[2026-09-24 23:33:25] DRY-RUN: nothing launched
