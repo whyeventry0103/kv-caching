@@ -24,6 +24,19 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-09-24 23:20 Dubai — every Meeting #3 unit is now measured,
+  queued behind a verified gate, or BLOCKED with a stated reason.** Built today
+  and CPU-verified on the remote with the pinned stack (tiny Qwen2, mutation
+  tests; full suite 501 passed): Tasks 2+3 one-replay capture (2b7a765, R.9;
+  reader d135e49), Q.5 exact-lag restoration with the identity repair (9c51b9c,
+  R.10), Q.1 direct fork control (4478e87, R.11). Queue for the 2026-09-25 01:45
+  window onward: dacc-gate-smoke -> q6-basis-fit -> capture-smoke -> capture-b256
+  -> exact-lag-r5 -> dacc-t2048/t512/t0 -> fork-control-random/slm ->
+  capture-b2048 (~5-6 windows total, est.). BLOCKED: T1 TV at 512/1024 (~167 MiB
+  deficit). Owner decisions open: storage-guard scope (R.8.5), space for T1 TV.
+  Morning: check the three smoke markers in ~/kvcache-storage/runs, then the
+  readers listed in docs/results/MEETING3_RESULTS.md §6.
+
   **★★★★★ 2026-09-24 (later) — Meeting #3 execution, stage checkpoint.**
   DONE: **Task 1 R.1 read** (fca22f3): paired problem-clustered CIs over raw rows,
   400 matched conditions per cell, totals equal m4 to 4 dp. Total change

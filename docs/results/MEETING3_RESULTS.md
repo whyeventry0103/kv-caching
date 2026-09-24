@@ -1,17 +1,17 @@
 # Meeting #3 — results and execution status
 
-Last updated 2026-09-24 (Asia/Dubai 23:30). Machine-readable companions:
+Last updated 2026-09-24 (Asia/Dubai 23:15). Machine-readable companions:
 `configs/meeting3/cells.yaml` (ledger) → `results/diag/meeting3/meeting3_manifest.json`
 (`python scripts/meeting3_manifest.py --check`). Protocol: PREREGISTRATION
-Amendment R (R.0–R.9). Every number below was recomputed from the named
+Amendment R (R.0–R.11). Every number below was recomputed from the named
 artifact when this file was written.
 
 The three Meeting #3 problems, and where each stands:
 
 | Problem | Measured now | Queued (unattended, resumable) | Not yet runnable |
 |---|---|---|---|
-| **1. Divergence/damage vs cache size, exposure/horizon** | Accuracy curve 256→2048 with paired CIs, flips, realized ratios (**COMPLETE**); Q.2 exposure grid + occupancy audit (**COMPLETE**, verdict MIXED) | D_acc free-running (budget, onset) grid, 1,200 generations | TV at 512/1024 (storage, §4); Q.1 direct control (not built) |
-| **2. Attention maps: M/Δ, GQA collateral, restoration** | — | Q.3 capture, 800 conditions (budget 256 first) | Q.5 exact-lag restoration (not built) |
+| **1. Divergence/damage vs cache size, exposure/horizon** | Accuracy curve 256→2048 with paired CIs, flips, realized ratios (**COMPLETE**); Q.2 exposure grid + occupancy audit (**COMPLETE**, verdict MIXED) | D_acc free-running (budget, onset) grid, 1,200 generations; Q.1 direct fork control, 150 conditions | TV at 512/1024 (**BLOCKED**, storage, §5) |
+| **2. Attention maps: M/Δ, GQA collateral, restoration** | — | Q.3 capture, 800 conditions (budget 256 first); Q.5 exact-lag restoration, 200 (trace, policy) × 5 lags × 4 arms | — |
 | **3. SVD/PCA trajectory direction** | — | Q.6 basis fit + projection (same capture) | — |
 
 ---
@@ -99,7 +99,7 @@ and the peak sits at phase 9. Neither instrument check has run:
 - The registered removal-anchored negative control is **NOT VALID FOR
   IDENTIFICATION** (R.2: `phase_amplitude` is rotation-invariant).
 - The R.2 direct functional control (mask, then fork before physical removal)
-  is **not implemented yet** (§6).
+  is **built, CPU-verified and queued** (R.11, §6).
 
 The zero-amplitude `excess` bug is fixed (`phase-excess-v2`).
 
@@ -113,8 +113,9 @@ The zero-amplitude `excess` bug is fixed (`phase-excess-v2`).
 | D_acc gate: gate None ≡ legacy; gated ≡ full cache before onset (logit level) | **PASSED** on tiny Qwen2 with the pinned stack (mutation-tested); real-model `dacc-gate-smoke` **QUEUED** |
 | D_acc determinism control (gated t0 = 0 vs legacy grid rows) | QUEUED (reader built) |
 | Capture: topk gather equality, layer-0 key identity at mapped positions, bitwise pre-eviction, full/full = 0, layer-0 Δ ≤ 1e-5 | **PASSED** on tiny Qwen2 for all four policies (wrong position map caught by mutation); real-model `capture-smoke` **QUEUED** |
-| Q.1 removal-anchored negative control | **INVALID for identification** (R.2), not run |
-| Q.1 direct fork control | NOT IMPLEMENTED |
+| Q.1 removal-anchored negative control | **INVALID for identification** (R.2); computed for the record from the fork control's arm A (QUEUED) |
+| Q.1 direct fork control | tiny Qwen2: B-vs-B exactly 0, A−B < 1e-4, next selections identical, fires when masking is off — **PASSED on CPU**; real run QUEUED |
+| Q.5 identity repair (true evicted K/V per layer) | tiny Qwen2: layer-0 stash equals full keys bitwise; the old tail-stash bug is refused (mutation test) — **PASSED on CPU**; real run QUEUED |
 
 ## 5. Blocked and not-yet-built units
 
@@ -129,9 +130,9 @@ The zero-amplitude `excess` bug is fixed (`phase-excess-v2`).
     results; reclaim would have to come from the model/uv cache and needs the
     owner's instruction), or a prospective amendment runs these cells with
     summary-only profiles.
-- **Q.5 exact-lag restoration (R.5): NOT IMPLEMENTED.** The old lag sweep is
-  held in the queue as `blocked:`, because its press is invalid (R.5).
-- **Q.1 direct fork control (R.2): NOT IMPLEMENTED.**
+- **Old Q.5 lag sweep (`restoration-lag*`): held as `blocked:`** because its
+  press is invalid (R.5). The exact-lag replacement (R.10) is queued as
+  `exact-lag-r5`.
 - **Storage definition.** R.8.5: the guard measures `~/kvcache-storage`
   only. Counting `~/kv-caching` (11.2 GiB, mostly `.venv`) would leave 0.81 GiB
   of headroom, below the 1 GiB margin, and block everything. The owner should
@@ -145,7 +146,9 @@ The zero-amplitude `excess` bug is fixed (`phase-excess-v2`).
 | `q6-basis-fit` | frozen full-only basis, 28 layers, k = 64 | ~15 min (est.) | header `q6_basis.json` (npz sha256) |
 | `capture-smoke` | full/full + 4 policies on 1 trace | ~15–30 min | writes `capture-smoke-PASS.json` |
 | `capture-b256` | **Q.3 + Q.6 primary**, 400 conditions | ~12 h on 2 GPUs (est.) | requires capture-smoke |
+| `exact-lag-r5` | Q.5 exact-lag restoration, 200 (trace, policy) | ~5 h on 2 GPUs (est.) | requires capture-smoke |
 | `dacc-t2048` → `dacc-t512` → `dacc-t0` | D_acc, 400 generations each | ~7.2 h each on 2 GPUs (measured) | require dacc-gate-smoke |
+| `fork-control-random`, `fork-control-slm` | Q.1 direct control, 75 conditions each | ~11 GPU-h each, one GPU each (est.) | none (live checks) |
 | `capture-b2048` | Q.3 + Q.6 secondary | ~12 h (est.) | requires capture-smoke |
 
 Readers (CPU, run after each cell completes; each decides readiness itself):
@@ -157,10 +160,17 @@ ssh kvcache-gpu 'cd ~/kv-caching && R=~/kvcache-storage/runs && \
     --legacy 256=grid-diss256-tok 2048=grid-diss2048-tok \
     --out results/diag/meeting3/dacc.json && \
   .venv/bin/python scripts/report_capture.py --runs-root $R --run capture-b256 \
-    --out results/diag/meeting3/capture_b256.json'
+    --out results/diag/meeting3/capture_b256.json && \
+  .venv/bin/python scripts/report_exact_lag.py --runs-root $R --run exact-lag-r5 \
+    --out results/diag/meeting3/exact_lag.json && \
+  .venv/bin/python scripts/report_fork_control.py --runs-root $R \
+    --run fork-control-random --run fork-control-slm \
+    --out results/diag/meeting3/fork_control.json'
 ```
 
 Registered reads: D_acc per R.3/R.8; Q.3 contrast collateral(R-KV) −
 collateral(ObservedAttentionPress), with a negative CI excluding 0 supporting
 the Q.3 ordering; Q.6 ω(Random) − ω(StreamingLLM), labelled PREDICTED / NULL /
-REVERSED, exploratory (R.9).
+REVERSED, exploratory (R.9); Q.5 per-lag P.5 effects and the DECAY /
+FLAT-NULL / NON-MONOTONE sweep verdict (R.5, R.10); Q.1 fork control PASS /
+FAIL, or EXACT / TOLERANCE-DEGENERATE under R.11.
