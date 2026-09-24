@@ -351,12 +351,24 @@ def compute_max_hours(
     return math.floor(hours * 100) / 100
 
 
+def _marker_ok(path: Path) -> bool:
+    if not path.exists():
+        return False
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return False
+    return not (isinstance(data, dict) and data.get("passed") is False)
+
+
 def count_progress(runs_root: Path, job: Job) -> int:
     run_dir = runs_root / job.run_name
     if job.progress_kind == "marker":
         # Gate jobs (e.g. the rkv generation smoke): done exactly when the PASS
         # marker exists under the base runs root; there are no row files to count.
-        return 1 if job.marker and (runs_root / job.marker).exists() else 0
+        # It must also parse and must not declare itself failed: a torn write
+        # or a report saying passed=false is not completion (R.13).
+        return 1 if job.marker and _marker_ok(runs_root / job.marker) else 0
     if job.progress_kind == "grid":
         base = run_dir / job.bench
         paths = (

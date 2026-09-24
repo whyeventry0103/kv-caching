@@ -29,6 +29,7 @@ sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
 from run_replay import _heal_jsonl, _load_jsonl, _load_token_records, _reference_key
 
 from kvcache.cli import load_config, plan
+from kvcache.provenance import identity, inputs_sha256, same_identity
 from kvcache.datasets import load_benchmark
 from kvcache.runmeta import capture_runmeta
 
@@ -113,10 +114,26 @@ def main() -> int:
     )
     if cfg.get("reference_limit") is not None:
         eligible = eligible[: int(cfg["reference_limit"])]
+    model_rev = str(
+        _yaml(PROJECT_ROOT / "configs/models.yaml")["models"][model_name]["revision"]
+    )
+    ident = identity(
+        "exact_lag",
+        cfg,
+        model_revision=model_rev,
+        reference_run=cfg["reference_run_name"],
+    )
+    if not args.resume and any((out_root / "math500").rglob("*.jsonl")):
+        raise SystemExit("REFUSED: run namespace not empty; pass --resume")
     done = set()
     if args.resume and (out_root / "math500").exists():
         for path in sorted((out_root / "math500").rglob("*.jsonl")):
             for rec in _heal_jsonl(path):
+                if not same_identity(rec.get("provenance") or {}, ident):
+                    raise SystemExit(
+                        f"REFUSED: {path} holds a row from a different experiment "
+                        "identity; start a new run namespace"
+                    )
                 done.add((rec["pid"], int(rec["seed"]), rec["press"]))
     models_cfg = _yaml(PROJECT_ROOT / "configs/models.yaml")["models"]
     model_cfg = models_cfg[model_name]
@@ -156,6 +173,12 @@ def main() -> int:
                 "reference_key": list(_reference_key(r)),
                 "wallclock_s": time.monotonic() - t0,
                 "runmeta": {k: runmeta.get(k) for k in ("commit", "source_tree_hash")},
+                "provenance": {
+                    **ident,
+                    "inputs_sha256": inputs_sha256(
+                        rec["prompt_token_ids"], rec["trace_token_ids"]
+                    ),
+                },
                 **out,
             }
             path = (

@@ -43,6 +43,7 @@ from run_basis_fit import BASIS_HEADER, BASIS_NPZ, sha256_file
 from run_replay import _heal_jsonl, _load_jsonl, _load_token_records, _reference_key
 
 from kvcache.capture import LAYER0_DELTA_TOL
+from kvcache.provenance import identity, inputs_sha256, same_identity, write_gate
 from kvcache.cli import load_config, plan
 from kvcache.datasets import load_benchmark
 from kvcache.runmeta import capture_runmeta
@@ -80,16 +81,28 @@ def _round(x: Any) -> Any:
     return x
 
 
-def _done(out_root: Path) -> set:
-    done = set()
-    for path in (
-        sorted((out_root / "math500").rglob("*.jsonl"))
-        if (out_root / "math500").exists()
-        else []
-    ):
+def _persisted(out_root: Path, ident: dict[str, Any]) -> list[dict[str, Any]]:
+    """Every row already in this run namespace, refusing foreign ones.
+
+    A row whose identity (implementation, config, model, reference, basis)
+    differs from this run's cannot be resumed into it: the run stops and asks
+    for a new namespace instead of silently mixing experiments.
+    """
+    rows: list[dict[str, Any]] = []
+    base = out_root / "math500"
+    for path in sorted(base.rglob("*.jsonl")) if base.exists() else []:
         for rec in _heal_jsonl(path):
-            done.add((rec["pid"], int(rec["seed"]), rec["press"], str(rec["budget"])))
-    return done
+            if not same_identity((rec.get("provenance") or {}), ident):
+                raise SystemExit(
+                    f"REFUSED: {path} holds a row from a different experiment "
+                    f"identity; start a new run namespace (old rows are kept)"
+                )
+            rows.append(rec)
+    return rows
+
+
+def _key(rec: dict[str, Any]) -> tuple[str, int, str, str]:
+    return (rec["pid"], int(rec["seed"]), rec["press"], str(rec["budget"]))
 
 
 def main() -> int:
@@ -131,14 +144,18 @@ def main() -> int:
     # Frozen basis: the bytes must match the hash recorded when it was frozen.
     basis = None
     basis_sha = None
+    basis_header: dict[str, Any] = {}
     if cfg.get("basis_run"):
         bdir = base / cfg["basis_run"] / "basis"
         header = json.loads((bdir / BASIS_HEADER).read_text(encoding="utf-8"))
         basis_sha = sha256_file(bdir / BASIS_NPZ)
         if basis_sha != header["npz_sha256"]:
             raise SystemExit("REFUSED: basis bytes do not match their frozen hash")
+        if header.get("reference_run_name") != cfg["reference_run_name"]:
+            raise SystemExit("REFUSED: basis was fitted on a different reference run")
         arr = np.load(bdir / BASIS_NPZ)
         basis = {"scale": arr["scale"], "basis": arr["basis"]}
+        basis_header = header
 
     ref_root = base / cfg["reference_run_name"]
     rows = _load_jsonl(ref_root)
@@ -168,10 +185,23 @@ def main() -> int:
     )
     if cfg.get("reference_limit") is not None:
         eligible = eligible[: int(cfg["reference_limit"])]
-    done = _done(out_root) if args.resume else set()
-
     models_cfg = _yaml(PROJECT_ROOT / "configs/models.yaml")["models"]
     model_cfg = models_cfg[model_name]
+    if basis is not None and basis_header.get("model_revision") != str(
+        model_cfg["revision"]
+    ):
+        raise SystemExit("REFUSED: basis was fitted on a different model revision")
+    ident = identity(
+        "capture",
+        cfg,
+        model_revision=str(model_cfg["revision"]),
+        reference_run=cfg["reference_run_name"],
+        basis_npz_sha256=basis_sha,
+    )
+    persisted = _persisted(out_root, ident)
+    done = {_key(r) for r in persisted} if args.resume else set()
+    if not args.resume and persisted:
+        raise SystemExit("REFUSED: run namespace not empty; pass --resume")
     model, _tok = load_model_and_tokenizer(
         model_cfg, allow_download=False, attn_implementation="eager"
     )
@@ -251,8 +281,10 @@ def main() -> int:
                 "wallclock_s": time.monotonic() - t1,
                 "full_branch_s": full_s,
                 "runmeta": {
-                    k: runmeta.get(k) for k in ("commit", "source_tree_hash", "gpu")
+                    k: runmeta.get(k)
+                    for k in ("commit", "source_tree_hash", "gpu", "config_hash")
                 },
+                "provenance": {**ident, "inputs_sha256": inputs_sha256(prompt, trace)},
                 **_round(out),
             }
             path = (
@@ -278,33 +310,48 @@ def main() -> int:
         torch.cuda.empty_cache()
 
     if cfg.get("smoke"):
+        # Evidence is rebuilt from EVERY persisted row of this identity, not
+        # only this process's rows: a restart after the last row but before
+        # the marker must still see the whole smoke.
+        rows = _persisted(out_root, ident)
+        expected = {
+            (r["pid"], int(r["decoding"]["seed"]), c[0], str(c[1]))
+            for r in eligible
+            for c in all_conds
+        }
+        got = [_key(x) for x in rows]
         fails = []
-        for s in summaries:
-            c = s["checks"]
-            if s["press"] == "fullcache":
+        missing = sorted(expected - set(got))
+        dup = sorted({k for k in got if got.count(k) > 1})
+        extra = sorted(set(got) - expected)
+        if missing:
+            fails.append(f"missing conditions: {missing}")
+        if dup:
+            fails.append(f"duplicated conditions: {dup}")
+        if extra:
+            fails.append(f"unexpected conditions: {extra}")
+        for s_ in rows:
+            c = s_["checks"]
+            if s_["press"] == "fullcache":
                 if c["fullfull_max"] != 0.0:
                     fails.append(f"full/full logits differ: {c['fullfull_max']}")
                 continue
             if c["n_nonfinite"]:
-                fails.append(f"{s['press']}: {c['n_nonfinite']} non-finite values")
-            if c["layer0_delta_max"] > LAYER0_DELTA_TOL:
-                fails.append(
-                    f"{s['press']}: layer-0 Delta {c['layer0_delta_max']:.3e} "
-                    f"> {LAYER0_DELTA_TOL}"
-                )
-            if s["n_events"] < 1:
-                fails.append(f"{s['press']}: no eviction event")
-        seen = {s["press"] for s in summaries}
-        missing = {p for p, _ in all_conds} - seen
-        if missing:
-            fails.append(f"conditions never ran: {sorted(missing)}")
+                fails.append(f"{s_['press']}: {c['n_nonfinite']} non-finite values")
+            l0 = c.get("layer0_delta_max")
+            if l0 is None or l0 > LAYER0_DELTA_TOL:
+                fails.append(f"{s_['press']}: layer-0 Delta {l0} > {LAYER0_DELTA_TOL}")
+            if s_["n_events"] < 1:
+                fails.append(f"{s_['press']}: no eviction event")
         report = {
             "gate": "R.9 capture smoke",
             "passed": not fails,
             "failures": fails,
+            "identity": ident,
+            "expected_conditions": sorted(map(list, expected)),
             "rows": [
                 {
-                    k: s.get(k)
+                    k: s_.get(k)
                     for k in (
                         "pid",
                         "press",
@@ -319,11 +366,10 @@ def main() -> int:
                         "n_trace_tokens",
                     )
                 }
-                for s in summaries
+                for s_ in rows
             ],
         }
-        target = base / (SMOKE_PASS if not fails else SMOKE_FAIL)
-        target.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", "utf-8")
+        target = write_gate(base, SMOKE_PASS, SMOKE_FAIL, report)
         print(f"{'PASS' if not fails else 'FAIL'}: wrote {target}")
         return 0 if not fails else 1
     return 0

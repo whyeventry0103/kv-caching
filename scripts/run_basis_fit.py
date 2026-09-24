@@ -47,6 +47,7 @@ from kvcache.capture import (
     validate_basis_arrays,
 )
 from kvcache.cli import load_config, plan
+from kvcache.provenance import identity, same_identity, write_json_atomic
 from kvcache.datasets import load_benchmark
 from kvcache.runmeta import capture_runmeta
 
@@ -104,8 +105,30 @@ def main() -> int:
 
     base = Path(os.environ["KVCACHE_BASE_RUNS_ROOT"])
     out_dir = Path(os.environ["REMOTE_RUNS_ROOT"]) / "basis"
+    models_cfg = _yaml(PROJECT_ROOT / "configs/models.yaml")["models"]
+    model_cfg = models_cfg[cfg["models"][0]]
+    ident = identity(
+        "basis",
+        cfg,
+        model_revision=str(model_cfg["revision"]),
+        reference_run=cfg["reference_run_name"],
+    )
     if (out_dir / BASIS_HEADER).exists():
-        print(f"basis already frozen: {out_dir / BASIS_HEADER}")
+        # A header alone is not a finished fit: the bytes it names must exist
+        # and hash to what it recorded, and it must be THIS experiment's fit.
+        head = json.loads((out_dir / BASIS_HEADER).read_text(encoding="utf-8"))
+        npz_path = out_dir / head.get("npz", BASIS_NPZ)
+        if not npz_path.exists() or sha256_file(npz_path) != head.get("npz_sha256"):
+            raise SystemExit(
+                f"REFUSED: {out_dir / BASIS_HEADER} names a missing or altered "
+                "npz; start a new run namespace (nothing is overwritten)"
+            )
+        if not same_identity(head.get("identity"), ident):
+            raise SystemExit(
+                "REFUSED: the frozen basis belongs to a different experiment "
+                "identity; start a new run namespace"
+            )
+        print(f"basis already frozen and verified: {out_dir / BASIS_HEADER}")
         return 0
     ref_root = base / cfg["reference_run_name"]
     rows = _load_jsonl(ref_root)
@@ -139,8 +162,6 @@ def main() -> int:
             f"fit needs {expected} reference traces, found {len(eligible)}"
         )
 
-    models_cfg = _yaml(PROJECT_ROOT / "configs/models.yaml")["models"]
-    model_cfg = models_cfg[model_name]
     model, _tok = load_model_and_tokenizer(model_cfg, allow_download=False)
     layers = model.model.layers
     n_layers, dim = len(layers), int(model.config.hidden_size)
@@ -196,17 +217,22 @@ def main() -> int:
     info = validate_basis_arrays(mean, scale, basis)
     out_dir.mkdir(parents=True, exist_ok=True)
     npz = out_dir / BASIS_NPZ
+    tmp_npz = out_dir / f".{BASIS_NPZ}.tmp-{os.getpid()}.npz"
     np.savez(
-        npz,
+        tmp_npz,
         mean=mean,
         scale=scale,
         basis=basis,
         eigenvalues=fit["eigenvalues"],
         explained_fraction=fit["explained_fraction"],
     )
+    os.replace(tmp_npz, npz)
     runmeta = capture_runmeta(cfg["name"], args.config, 0)
     header = {
         "schema_version": "q6-basis-v1",
+        "passed": True,
+        "status": "FROZEN",
+        "identity": ident,
         "amendment": "R.6 / R.9",
         "npz": BASIS_NPZ,
         "npz_sha256": sha256_file(npz),
@@ -228,9 +254,7 @@ def main() -> int:
         "commit": runmeta.get("commit", ""),
         "wallclock_s": time.monotonic() - started,
     }
-    (out_dir / BASIS_HEADER).write_text(
-        json.dumps(header, indent=2, sort_keys=True) + "\n", "utf-8"
-    )
+    write_json_atomic(out_dir / BASIS_HEADER, header)
     print(json.dumps({k_: header[k_] for k_ in ("npz_sha256", "n_traces")}))
     print(f"FROZEN: {out_dir / BASIS_HEADER}")
     return 0

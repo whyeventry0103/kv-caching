@@ -236,3 +236,115 @@ def test_exact_lag_and_fork_control_runners_end_to_end(tmp_path, monkeypatch):
     assert len(rows) == 4  # 2 problems x 2 intervals
     assert all(r["deterministic_control_max_abs_logit"] == 0.0 for r in rows)
     assert all(r["selection_agreement"] == 1.0 for r in rows)
+
+
+# ---------------------------------------------------------------- R.13 restarts
+def _fit(tmp_path, monkeypatch, run_basis_fit):
+    fit_cfg = _cfg(
+        tmp_path,
+        "fit",
+        COMMON + "name: fit\npresses: [fullcache]\nbudgets: [full]\nk: 4\n"
+        "n_positions: 16\n",
+    )
+    monkeypatch.setenv("REMOTE_RUNS_ROOT", str(tmp_path / "runs" / "fit"))
+    monkeypatch.setattr(sys, "argv", ["x", "--config", str(fit_cfg), "--i-understand"])
+    assert run_basis_fit.main() == 0
+    return fit_cfg
+
+
+SMOKE = COMMON + (
+    "name: smoke\npresses: [random, streamingllm]\nbudgets: [16]\n"
+    "compression_interval: 4\ntau: 0.01\ntrigger_step: 20\nbasis_run: fit\n"
+    "reference_limit: 1\nfullfull_control: true\nsmoke: true\n"
+)
+
+
+def _rows(d):
+    return [
+        json.loads(line)
+        for p in Path(d).rglob("*.jsonl")
+        for line in p.read_text().splitlines()
+    ]
+
+
+def test_restart_after_each_condition_and_after_the_last_row(tmp_path, monkeypatch):
+    run_basis_fit, run_capture = _setup(tmp_path, monkeypatch)
+    _fit(tmp_path, monkeypatch, run_basis_fit)
+    import kvcache.capture as capture
+
+    real = capture.replay_condition
+    calls = {"n": 0}
+
+    def crash_after_one(*a, **k):
+        calls["n"] += 1
+        if calls["n"] > 1:
+            raise RuntimeError("simulated crash")
+        return real(*a, **k)
+
+    smoke = _cfg(tmp_path, "smoke", SMOKE)
+    monkeypatch.setenv("REMOTE_RUNS_ROOT", str(tmp_path / "runs" / "smoke"))
+    argv = ["x", "--config", str(smoke), "--i-understand", "--resume"]
+    monkeypatch.setattr(sys, "argv", argv)
+    monkeypatch.setattr(capture, "replay_condition", crash_after_one)
+    with pytest.raises(RuntimeError, match="simulated"):
+        run_capture.main()
+    assert len(_rows(tmp_path / "runs/smoke/math500")) == 1  # one persisted
+    monkeypatch.setattr(capture, "replay_condition", real)
+    assert run_capture.main() == 0  # resumes, no duplicates, PASS
+    assert len(_rows(tmp_path / "runs/smoke/math500")) == 3
+    # crash after the last row but before the marker: rerun rebuilds the gate
+    pass_path = tmp_path / "runs" / "capture-smoke-PASS.json"
+    pass_path.unlink()
+    assert run_capture.main() == 0
+    rep = json.loads(pass_path.read_text())
+    assert rep["passed"] and len(rep["rows"]) == 3 and rep["identity"]["kind"]
+
+
+def test_old_pass_then_failure_leaves_no_accepted_pass(tmp_path, monkeypatch):
+    run_basis_fit, run_capture = _setup(tmp_path, monkeypatch)
+    _fit(tmp_path, monkeypatch, run_basis_fit)
+    from kvcache.provenance import gate_accepted
+
+    old = tmp_path / "runs" / "capture-smoke-PASS.json"
+    old.write_text(json.dumps({"passed": True}))
+    monkeypatch.setattr(run_capture, "LAYER0_DELTA_TOL", -1.0)  # force a failure
+    smoke = _cfg(tmp_path, "smoke", SMOKE)
+    monkeypatch.setenv("REMOTE_RUNS_ROOT", str(tmp_path / "runs" / "smoke"))
+    monkeypatch.setattr(
+        sys, "argv", ["x", "--config", str(smoke), "--i-understand", "--resume"]
+    )
+    assert run_capture.main() == 1
+    assert not gate_accepted(old)
+    assert (tmp_path / "runs" / "capture-smoke-FAIL.json").exists()
+
+
+def test_a_changed_config_cannot_resume_into_old_rows(tmp_path, monkeypatch):
+    run_basis_fit, run_capture = _setup(tmp_path, monkeypatch)
+    _fit(tmp_path, monkeypatch, run_basis_fit)
+    body = COMMON + (
+        "name: cap\npresses: [random]\nbudgets: [16]\ncompression_interval: 4\n"
+        "tau: 0.01\nbasis_run: fit\nreference_limit: 1\n"
+    )
+    monkeypatch.setenv("REMOTE_RUNS_ROOT", str(tmp_path / "runs" / "cap"))
+    cap = _cfg(tmp_path, "cap", body)
+    argv = ["x", "--config", str(cap), "--i-understand", "--resume"]
+    monkeypatch.setattr(sys, "argv", argv)
+    assert run_capture.main() == 0
+    cap.write_text(body.replace("tau: 0.01", "tau: 0.02"))
+    with pytest.raises(SystemExit, match="different experiment identity"):
+        run_capture.main()
+
+
+def test_basis_header_without_matching_bytes_is_not_a_finished_fit(
+    tmp_path, monkeypatch
+):
+    run_basis_fit, _ = _setup(tmp_path, monkeypatch)
+    fit_cfg = _fit(tmp_path, monkeypatch, run_basis_fit)
+    npz = tmp_path / "runs/fit/basis/q6_basis.npz"
+    npz.write_bytes(npz.read_bytes()[:-10])  # corrupt
+    monkeypatch.setattr(sys, "argv", ["x", "--config", str(fit_cfg), "--i-understand"])
+    with pytest.raises(SystemExit, match="missing or altered"):
+        run_basis_fit.main()
+    npz.unlink()
+    with pytest.raises(SystemExit, match="missing or altered"):
+        run_basis_fit.main()

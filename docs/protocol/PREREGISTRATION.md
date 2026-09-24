@@ -3276,3 +3276,35 @@ in-memory profile. `report_budget_curve.py --tv-runs 512=t1-tv512
 1024=t1-tv1024` adds these AUCs with their CIs to the T1 artifact; the 256/2048
 values keep their Amendment P source (recorded per cell as `auc_tv_source`).
 Queued last (`t1-tv512`, `t1-tv1024`).
+
+### R.13 Experiment identity, gates and restarts (2026-09-25, from the external review of 4e38224, before any Meeting #3 GPU outcome)
+
+An external review of commit `4e38224` found completion, restart and
+gate-provenance gaps. None changes a registered estimand or design. Fixed
+before the first GPU window that runs these cells:
+
+- **Identity.** Every row of the capture, exact-lag, fork-control and gated
+  D_acc runners, the frozen basis header, and every gate report carry
+  `kvcache.provenance.identity`: sha256 over that family's GENERATION source
+  files (reader, figure and documentation edits do not change it), the canonical
+  config hash, the model revision, the reference run and basis bytes, plus the
+  row's reference-input hash. A run namespace holding rows of another identity
+  is refused (start a new namespace; old rows are kept); a non-empty namespace
+  without `--resume` is refused.
+- **Gates.** Markers are written atomically. Writing an outcome renames the
+  opposite marker aside (kept as `*.superseded-<time>`, never deleted), so a
+  FAIL can never leave an accepted stale PASS. The scheduler counts a marker
+  only if it parses and does not say `passed: false`.
+- **Smoke evidence** is rebuilt from every persisted row of the run's identity,
+  against the exact expected condition set (missing, duplicated and unexpected
+  conditions each fail it), so a restart after the last row but before the
+  marker still gates correctly.
+- **Basis.** An existing header counts as a finished fit only if its npz exists,
+  hashes to the recorded value and the header identity matches; otherwise the
+  fit refuses. Capture also refuses a basis from another reference run or model
+  revision.
+
+Verified at the persistence layer without a GPU (`tests/test_provenance.py`,
+`tests/test_capture_scripts.py`): restart after each persisted condition, after
+the last row but before the marker, old PASS followed by failure, a changed
+config resumed into old rows, and a missing or corrupt basis npz.

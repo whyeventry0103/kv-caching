@@ -35,6 +35,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
 from kvcache.cli import load_config
+from kvcache.provenance import identity, write_gate
 
 MARKER = "dacc-gate-smoke-PASS.json"
 FAIL = "dacc-gate-smoke-FAIL.json"
@@ -185,14 +186,16 @@ def main() -> int:
 
     passed = all(c["passed"] for c in checks)
     report = {
+        "identity": identity(
+            "dacc", cfg, model_revision=str(model_cfg["revision"]), reference_run=None
+        ),
         "gate": "Amendment R.3 D_acc onset gate (real model)",
         "pid": problem.pid,
         "passed": passed,
         "checks": checks,
     }
     print(json.dumps(report, indent=2, sort_keys=True))
-    target = Path(base) / (MARKER if passed else FAIL)
-    target.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", "utf-8")
+    target = write_gate(Path(base), MARKER, FAIL, report)
     print(f"{'PASS' if passed else 'FAIL'}: wrote {target}")
     return 0 if passed else 1
 
