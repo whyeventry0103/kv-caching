@@ -1,0 +1,166 @@
+# Meeting #3 — results and execution status
+
+Last updated 2026-09-24 (Asia/Dubai 23:30). Machine-readable companions:
+`configs/meeting3/cells.yaml` (ledger) → `results/diag/meeting3/meeting3_manifest.json`
+(`python scripts/meeting3_manifest.py --check`). Protocol: PREREGISTRATION
+Amendment R (R.0–R.9). Every number below was recomputed from the named
+artifact when this file was written.
+
+The three Meeting #3 problems, and where each stands:
+
+| Problem | Measured now | Queued (unattended, resumable) | Not yet runnable |
+|---|---|---|---|
+| **1. Divergence/damage vs cache size, exposure/horizon** | Accuracy curve 256→2048 with paired CIs, flips, realized ratios (**COMPLETE**); Q.2 exposure grid + occupancy audit (**COMPLETE**, verdict MIXED) | D_acc free-running (budget, onset) grid, 1,200 generations | TV at 512/1024 (storage, §4); Q.1 direct control (not built) |
+| **2. Attention maps: M/Δ, GQA collateral, restoration** | — | Q.3 capture, 800 conditions (budget 256 first) | Q.5 exact-lag restoration (not built) |
+| **3. SVD/PCA trajectory direction** | — | Q.6 basis fit + projection (same capture) | — |
+
+---
+
+## 1. Task 1 — damage against cache size (COMPLETE)
+
+Artifact `results/diag/meeting3/t1_budget_curve.json` (`scripts/report_budget_curve.py`,
+commit fca22f3); figure `figures/fig8_budget_curve.{pdf,png}`. MATH-500,
+R1-Distill-Qwen-7B, 100 problems × 4 seeds = **400 matched conditions per
+cell**, full-cache reference `math500-fc-powered-merged` (matched FC accuracy
+0.8850 in every cell). Paired, problem-clustered 95% CI (2000 resamples, seed
+0), Amendment R.1. Every paired total change equals the m4 summary to 4 dp.
+
+| Policy | Budget | Realized ratio | Free acc | Total change [95% CI] | Lost | Gained | Readout change | Residual [95% CI] | Trunc | AUC-TV |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Random | 256 | 3.16% | 0.4225 | −0.4625 [−0.545, −0.380] | 0.4675 | 0.0050 | −0.1378 | −0.3367 [−0.404, −0.262] | 0.233 | 0.1075 |
+| StreamingLLM | 256 | 4.79% | 0.2375 | −0.6475 [−0.723, −0.570] | 0.6500 | 0.0025 | −0.3189 | −0.3444 [−0.405, −0.270] | 0.070 | 0.1028 |
+| Random | 512 | 10.41% | 0.6800 | −0.2050 [−0.273, −0.142] | 0.2050 | 0.0000 | −0.0204 | −0.1888 [−0.252, −0.129] | 0.085 | — |
+| StreamingLLM | 512 | 9.68% | 0.4775 | −0.4075 [−0.485, −0.333] | 0.4075 | 0.0000 | −0.0816 | −0.3342 [−0.394, −0.263] | 0.087 | — |
+| Random | 1024 | 27.67% | 0.8000 | −0.0850 [−0.128, −0.045] | 0.0875 | 0.0025 | +0.0000 | −0.0867 [−0.133, −0.048] | 0.033 | — |
+| StreamingLLM | 1024 | 24.41% | 0.6875 | −0.1975 [−0.268, −0.138] | 0.2050 | 0.0075 | −0.0051 | −0.1964 [−0.263, −0.135] | 0.045 | — |
+| Random | 2048 | 58.18% | 0.8500 | −0.0350 [−0.062, −0.013] | 0.0375 | 0.0025 | −0.0026 | −0.0332 [−0.065, −0.010] | 0.030 | 0.0128 |
+| StreamingLLM | 2048 | 55.11% | 0.8075 | −0.0775 [−0.125, −0.040] | 0.0875 | 0.0100 | +0.0000 | −0.0791 [−0.125, −0.042] | 0.028 | 0.0186 |
+
+"Residual" = accuracy change unexplained by on-reference readout (never a
+measured causal effect). Realized ratio = budget ÷ (mean prompt + mean
+generated tokens).
+
+**Answer.** Damage falls monotonically with cache size for both policies. The
+CI of total change excludes zero at every budget, including 2048 (~55–58% of
+the trace retained). Damage is almost entirely harmful flips: beneficial flip
+mass is ≤ 0.010 in every cell. The readout part closes by 1024 (|readout
+change| ≤ 0.005), while the residual persists through 2048. Divergence (AUC-TV)
+was measured at 256 and 2048 only. At 256 the two policies' AUC-TV is similar
+(0.108 vs 0.103), but their total damage differs by 0.185. This is consistent
+with P.3: divergence magnitude does not predict damage within a budget.
+
+## 2. Task 1 — exposure at matched dose (Q.2; COMPLETE, verdict MIXED)
+
+Artifacts: `results/diag/amendment-q/onset_surface_q2.json` (pre-registered read,
+re-run 2026-09-24 and **byte-identical**), `results/diag/meeting3/q2_onset_grid.json`
+(`scripts/report_onset_grid.py`, commit 5e567cf); figure `figures/fig9_onset_grid.{pdf,png}`.
+1,200 teacher-forced profiles (3 onset arms × 2 policies × 2 budgets × 25
+problems × 4 seeds); window 256, read positions t = 2304/3328/4352. Slopes
+are ×10³ (TV per 1,000 steps), paired within trace, problem-clustered 95% CI:
+
+| Cell | Realized ratio | Problems / traces | Nominal→actual exposure, t0 = 0 / 512 / 2048 | Slope on nominal exposure (registered) | Slope on actual exposure (diagnostic) |
+|---|---|---|---|---|---|
+| B256 @2304 | 0.106 | 19 / 104 | 2304→2118 / 1792→1728 / 256→192 | **+4.15e−03 [+2.65e−03, +5.64e−03]** | +4.43e−03 [+2.89e−03, +5.95e−03] |
+| B256 @3328 | 0.075 | 14 / 80 | 3328→3140 / 2816→2752 / 1280→1216 | **−8.88e−04 [−1.46e−03, −3.21e−04]** | −9.12e−04 [−1.46e−03, −3.80e−04] |
+| B256 @4352 | 0.057 | 10 / 58 | 4352→4172 / 3840→3776 / 2304→2240 | **−1.35e−03 [−2.42e−03, −5.93e−04]** | −1.36e−03 [−2.46e−03, −5.51e−04] |
+| B2048 @2304 | 0.847 | 19 / 104 | 2304→331 / 1792→332 / 256→192 | +2.35e−04 [−2.42e−05, +5.10e−04] | +3.49e−03 [−9.96e−04, +8.01e−03] |
+| B2048 @3328 | 0.596 | 14 / 80 | 3328→1348 / 2816→1349 / 1280→1216 | −1.20e−04 [−4.85e−04, +2.44e−04] | −1.73e−03 [−6.53e−03, +2.79e−03] |
+| B2048 @4352 | 0.459 | 10 / 58 | 4352→2380 / 3840→2381 / 2304→2240 | −7.27e−05 [−4.91e−04, +3.62e−04] | +1.71e−03 [−3.97e−03, +1.10e−02] |
+
+**Verdict (pre-registered, full panel): MIXED.** Report the interaction and
+claim no main effect. At B = 256 the exposure slope is positive at t = 2304
+and negative at 3328/4352. That sign change survives the balanced
+fixed-population panel (116 traces), so it is not trace-length attrition.
+
+**Occupancy audit (new, R.8.1).** `compression_start_step` only enables the
+press. Eviction starts when prompt + generated tokens first exceed the budget,
+measured as the first step with TV > 0 (the invariant held: 0 traces diverge
+before nominal onset). Mean eviction onset in steps (range):
+
+- **B = 256:** 203 (65–257) for t0 = 0; 576 for t0 = 512; 2112 for t0 = 2048.
+- **B = 2048:** 1976 (1729–2049) for t0 = 0 and 1975 (1728–2048) for t0 = 512, both policies; 2112 for t0 = 2048.
+
+So at **B = 2048 the t0 = 0 and t0 = 512 arms have the same actual exposure.**
+The 2048-step nominal contrast is realized as only ~140 steps, and the B = 2048
+row cannot identify exposure. Only B = 256 does, and there the nominal and
+actual slopes agree. The committed Q.2 artifact's `realized_ratio` omits the
+prompt (B/t); the grid reports both.
+
+**D_acc (free-running accuracy on the same grid): QUEUED.** Details in §6.
+
+## 3. Task 1 — phase locking (Q.1; recorded, control outstanding)
+
+Recorded 2026-09-15 (Amendment Q.1, result): **Random is AMPLITUDE-DEPENDENT**.
+Phase excess at I = 16 is +0.0110 [−0.0252, +0.0300] (does not exclude 0); at
+I = 64, +0.1193 [+0.0446, +0.1410]; at I = 256, +0.3183 [+0.1881, +0.3361],
+both peaking at phase 0. **StreamingLLM is INDETERMINATE**: no arm excludes 0,
+and the peak sits at phase 9. Neither instrument check has run:
+
+- The registered removal-anchored negative control is **NOT VALID FOR
+  IDENTIFICATION** (R.2: `phase_amplitude` is rotation-invariant).
+- The R.2 direct functional control (mask, then fork before physical removal)
+  is **not implemented yet** (§6).
+
+The zero-amplitude `excess` bug is fixed (`phase-excess-v2`).
+
+## 4. Controls
+
+| Control | Status |
+|---|---|
+| T1 paired totals equal the m4 summaries | **PASSED** (4 dp, all 8 cells) |
+| Q.2 pre-registered read reproduces the committed artifact | **PASSED** (byte-identical) |
+| Q.2 no divergence before nominal onset | **PASSED** (0 of 1,200 profiles; 276 never-diverged pairs all < 2,100 steps, below the first read window) |
+| D_acc gate: gate None ≡ legacy; gated ≡ full cache before onset (logit level) | **PASSED** on tiny Qwen2 with the pinned stack (mutation-tested); real-model `dacc-gate-smoke` **QUEUED** |
+| D_acc determinism control (gated t0 = 0 vs legacy grid rows) | QUEUED (reader built) |
+| Capture: topk gather equality, layer-0 key identity at mapped positions, bitwise pre-eviction, full/full = 0, layer-0 Δ ≤ 1e-5 | **PASSED** on tiny Qwen2 for all four policies (wrong position map caught by mutation); real-model `capture-smoke` **QUEUED** |
+| Q.1 removal-anchored negative control | **INVALID for identification** (R.2), not run |
+| Q.1 direct fork control | NOT IMPLEMENTED |
+
+## 5. Blocked and not-yet-built units
+
+- **T1.tv512 / T1.tv1024 (TV at the intermediate budgets): BLOCKED on
+  storage.**
+  - **Need:** ~196 MiB, measured from `replay-ext-diss256` (392 MiB for 800
+    profiles, scaled to 2 × 200 profiles).
+  - **Have:** 146 MiB usable now: 68.857 GiB used of the 70 GiB allocation,
+    minus the 1 GiB margin. About 117 MiB of that is committed to the queued
+    cells, so the projected **deficit is ~167 MiB**.
+  - **To unblock:** either the owner frees space (the guard forbids deleting
+    results; reclaim would have to come from the model/uv cache and needs the
+    owner's instruction), or a prospective amendment runs these cells with
+    summary-only profiles.
+- **Q.5 exact-lag restoration (R.5): NOT IMPLEMENTED.** The old lag sweep is
+  held in the queue as `blocked:`, because its press is invalid (R.5).
+- **Q.1 direct fork control (R.2): NOT IMPLEMENTED.**
+- **Storage definition.** R.8.5: the guard measures `~/kvcache-storage`
+  only. Counting `~/kv-caching` (11.2 GiB, mostly `.venv`) would leave 0.81 GiB
+  of headroom, below the 1 GiB margin, and block everything. The owner should
+  confirm which trees the 70 GiB covers.
+
+## 6. What runs unattended, in order (01:45–10:45 Dubai windows)
+
+| Queue job | Measures | Cost (measured or estimated) | Gate |
+|---|---|---|---|
+| `dacc-gate-smoke` | D_acc parity + onset on the 7B model | ~10 min | writes `dacc-gate-smoke-PASS.json` |
+| `q6-basis-fit` | frozen full-only basis, 28 layers, k = 64 | ~15 min (est.) | header `q6_basis.json` (npz sha256) |
+| `capture-smoke` | full/full + 4 policies on 1 trace | ~15–30 min | writes `capture-smoke-PASS.json` |
+| `capture-b256` | **Q.3 + Q.6 primary**, 400 conditions | ~12 h on 2 GPUs (est.) | requires capture-smoke |
+| `dacc-t2048` → `dacc-t512` → `dacc-t0` | D_acc, 400 generations each | ~7.2 h each on 2 GPUs (measured) | require dacc-gate-smoke |
+| `capture-b2048` | Q.3 + Q.6 secondary | ~12 h (est.) | requires capture-smoke |
+
+Readers (CPU, run after each cell completes; each decides readiness itself):
+
+```bash
+ssh kvcache-gpu 'cd ~/kv-caching && R=~/kvcache-storage/runs && \
+  .venv/bin/python scripts/report_dacc.py --runs-root $R \
+    --arms 0=dacc-t0 512=dacc-t512 2048=dacc-t2048 \
+    --legacy 256=grid-diss256-tok 2048=grid-diss2048-tok \
+    --out results/diag/meeting3/dacc.json && \
+  .venv/bin/python scripts/report_capture.py --runs-root $R --run capture-b256 \
+    --out results/diag/meeting3/capture_b256.json'
+```
+
+Registered reads: D_acc per R.3/R.8; Q.3 contrast collateral(R-KV) −
+collateral(ObservedAttentionPress), with a negative CI excluding 0 supporting
+the Q.3 ordering; Q.6 ω(Random) − ω(StreamingLLM), labelled PREDICTED / NULL /
+REVERSED, exploratory (R.9).
