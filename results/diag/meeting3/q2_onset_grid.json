@@ -1,0 +1,4091 @@
+{
+  "amendment": "Q.2 read-out grid + occupancy audit (Amendment R)",
+  "arms": {
+    "0": "replay-onset-t0",
+    "2048": "replay-onset-t2048",
+    "512": "replay-onset-t512"
+  },
+  "balanced_panel": {
+    "cells": {
+      "b2048@2304": {
+        "actual_exposure_slope": {
+          "ci95": [
+            2.78129509809011e-06,
+            1.2454884230325571e-05
+          ],
+          "mean": 7.886678800045841e-06,
+          "n_clusters": 10,
+          "n_observations": 58,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "actual_exposure_slope_degenerate_traces": 0,
+        "actual_exposure_slope_excludes_zero": true,
+        "arms": {
+          "0": {
+            "actual_exposure": {
+              "max": 447.0,
+              "mean": 332.2413793103448,
+              "min": 255.0
+            },
+            "by_press": {
+              "random": {
+                "ci95": [
+                  0.01758084984563966,
+                  0.026713511945596003
+                ],
+                "mean": 0.022330320633762776,
+                "n_clusters": 10,
+                "n_observations": 29,
+                "n_resamples": 2000,
+                "seed": 0
+              },
+              "streamingllm": {
+                "ci95": [
+                  0.025578140768272615,
+                  0.04448166241032002
+                ],
+                "mean": 0.034904262822258295,
+                "n_clusters": 10,
+                "n_observations": 29,
+                "n_resamples": 2000,
+                "seed": 0
+              }
+            },
+            "nominal_exposure": 2304,
+            "window_tv": {
+              "ci95": [
+                0.022184406778633012,
+                0.03495539941824326
+              ],
+              "mean": 0.028617291728010537,
+              "n_clusters": 10,
+              "n_observations": 58,
+              "n_resamples": 2000,
+              "seed": 0
+            }
+          },
+          "2048": {
+            "actual_exposure": {
+              "max": 192.0,
+              "mean": 192.0,
+              "min": 192.0
+            },
+            "by_press": {
+              "random": {
+                "ci95": [
+                  0.016812442820774817,
+                  0.025577020380139433
+                ],
+                "mean": 0.02154285404629159,
+                "n_clusters": 10,
+                "n_observations": 29,
+                "n_resamples": 2000,
+                "seed": 0
+              },
+              "streamingllm": {
+                "ci95": [
+                  0.025098365115690954,
+                  0.04380759741322432
+                ],
+                "mean": 0.03426071702446678,
+                "n_clusters": 10,
+                "n_observations": 29,
+                "n_resamples": 2000,
+                "seed": 0
+              }
+            },
+            "nominal_exposure": 256,
+            "window_tv": {
+              "ci95": [
+                0.02160438081651407,
+                0.0338272721664586
+              ],
+              "mean": 0.027901785535379184,
+              "n_clusters": 10,
+              "n_observations": 58,
+              "n_resamples": 2000,
+              "seed": 0
+            }
+          },
+          "512": {
+            "actual_exposure": {
+              "max": 448.0,
+              "mean": 333.2413793103448,
+              "min": 256.0
+            },
+            "by_press": {
+              "random": {
+                "ci95": [
+                  0.018397950748257445,
+                  0.026632522092074982
+                ],
+                "mean": 0.02279819645019982,
+                "n_clusters": 10,
+                "n_observations": 29,
+                "n_resamples": 2000,
+                "seed": 0
+              },
+              "streamingllm": {
+                "ci95": [
+                  0.025754879003857416,
+                  0.04451903004899198
+                ],
+                "mean": 0.0350129888999383,
+                "n_clusters": 10,
+                "n_observations": 29,
+                "n_resamples": 2000,
+                "seed": 0
+              }
+            },
+            "nominal_exposure": 1792,
+            "window_tv": {
+              "ci95": [
+                0.022493357520308607,
+                0.03494159168478825
+              ],
+              "mean": 0.02890559267506906,
+              "n_clusters": 10,
+              "n_observations": 58,
+              "n_resamples": 2000,
+              "seed": 0
+            }
+          }
+        },
+        "budget": 2048,
+        "mean_prompt_tokens": 114.6896551724138,
+        "n_problems": 10,
+        "n_traces": 58,
+        "position": 2304,
+        "realized_ratio": 0.8467394713581021,
+        "realized_ratio_decode_only": 0.8888888888888888
+      },
+      "b2048@3328": {
+        "actual_exposure_slope": {
+          "ci95": [
+            -4.757603418444518e-06,
+            3.424557653408006e-06
+          ],
+          "mean": -4.5819409240316627e-07,
+          "n_clusters": 10,
+          "n_observations": 58,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "actual_exposure_slope_degenerate_traces": 0,
+        "actual_exposure_slope_excludes_zero": false,
+        "arms": {
+          "0": {
+            "actual_exposure": {
+              "max": 1471.0,
+              "mean": 1356.2413793103449,
+              "min": 1279.0
+            },
+            "by_press": {
+              "random": {
+                "ci95": [
+                  0.024364469089105993,
+                  0.04183273154024593
+                ],
+                "mean": 0.03325977648003486,
+                "n_clusters": 10,
+                "n_observations": 29,
+                "n_resamples": 2000,
+                "seed": 0
+              },
+              "streamingllm": {
+                "ci95": [
+                  0.028243391228008036,
+                  0.049787124516721286
+                ],
+                "mean": 0.039566958152009175,
+                "n_clusters": 10,
+                "n_observations": 29,
+                "n_resamples": 2000,
+                "seed": 0
+              }
+            },
+            "nominal_exposure": 3328,
+            "window_tv": {
+              "ci95": [
+                0.026595107590831,
+                0.04530008607334519
+              ],
+              "mean": 0.036413367316022016,
+              "n_clusters": 10,
+              "n_observations": 58,
+              "n_resamples": 2000,
+              "seed": 0
+            }
+          },
+          "2048": {
+            "actual_exposure": {
+              "max": 1216.0,
+              "mean": 1216.0,
+              "min": 1216.0
+            },
+            "by_press": {
+              "random": {
+                "ci95": [
+                  0.02425626633284807,
+                  0.04205745585641684
+                ],
+                "mean": 0.033473917313452235,
+                "n_clusters": 10,
+                "n_observations": 29,
+                "n_resamples": 2000,
+                "seed": 0
+              },
+              "streamingllm": {
+                "ci95": [
+                  0.02823176382869998,
+                  0.04968711313295376
+                ],
+                "mean": 0.039457506847592645,
+                "n_clusters": 10,
+                "n_observations": 29,
+                "n_resamples": 2000,
+                "seed": 0
+              }
+            },
+            "nominal_exposure": 1280,
+            "window_tv": {
+              "ci95": [
+                0.026382128011956645,
+                0.045609256442946715
+              ],
+              "mean": 0.03646571208052244,
+              "n_clusters": 10,
+              "n_observations": 58,
+              "n_resamples": 2000,
+              "seed": 0
+            }
+          },
+          "512": {
+            "actual_exposure": {
+              "max": 1472.0,
+              "mean": 1357.2413793103449,
+              "min": 1280.0
+            },
+            "by_press": {
+              "random": {
+                "ci95": [
+                  0.02413055535758988,
+                  0.040587862543687
+                ],
+                "mean": 0.03260615879904069,
+                "n_clusters": 10,
+                "n_observations": 29,
+                "n_resamples": 2000,
+                "seed": 0
+              },
+              "streamingllm": {
+                "ci95": [
+                  0.028132311094303045,
+                  0.049445822954661045
+                ],
+                "mean": 0.03936384867980161,
+                "n_clusters": 10,
+                "n_observations": 29,
+                "n_resamples": 2000,
+                "seed": 0
+              }
+            },
+            "nominal_exposure": 2816,
+            "window_tv": {
+              "ci95": [
+                0.026338086558762915,
+                0.044772971721468775
+              ],
+              "mean": 0.03598500373942115,
+              "n_clusters": 10,
+              "n_observations": 58,
+              "n_resamples": 2000,
+              "seed": 0
+            }
+          }
+        },
+        "budget": 2048,
+        "mean_prompt_tokens": 114.6896551724138,
+        "n_problems": 10,
+        "n_traces": 58,
+        "position": 3328,
+        "realized_ratio": 0.5948837116128127,
+        "realized_ratio_decode_only": 0.6153846153846154
+      },
+      "b2048@4352": {
+        "actual_exposure_slope": {
+          "ci95": [
+            -3.972616033917855e-06,
+            1.0999872608820382e-05
+          ],
+          "mean": 1.70781791974286e-06,
+          "n_clusters": 10,
+          "n_observations": 58,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "actual_exposure_slope_degenerate_traces": 0,
+        "actual_exposure_slope_excludes_zero": false,
+        "arms": {
+          "0": {
+            "actual_exposure": {
+              "max": 2495.0,
+              "mean": 2380.2413793103447,
+              "min": 2303.0
+            },
+            "by_press": {
+              "random": {
+                "ci95": [
+                  0.032925383988797984,
+                  0.052301107850737404
+                ],
+                "mean": 0.0422555161661855,
+                "n_clusters": 10,
+                "n_observations": 29,
+                "n_resamples": 2000,
+                "seed": 0
+              },
+              "streamingllm": {
+                "ci95": [
+                  0.03652520903621304,
+                  0.0622529197313638
+                ],
+                "mean": 0.04683572208828517,
+                "n_clusters": 10,
+                "n_observations": 29,
+                "n_resamples": 2000,
+                "seed": 0
+              }
+            },
+            "nominal_exposure": 4352,
+            "window_tv": {
+              "ci95": [
+                0.035158368950312824,
+                0.056310896084152635
+              ],
+              "mean": 0.044545619127235335,
+              "n_clusters": 10,
+              "n_observations": 58,
+              "n_resamples": 2000,
+              "seed": 0
+            }
+          },
+          "2048": {
+            "actual_exposure": {
+              "max": 2240.0,
+              "mean": 2240.0,
+              "min": 2240.0
+            },
+            "by_press": {
+              "random": {
+                "ci95": [
+                  0.033167424214977995,
+                  0.05223262227011616
+                ],
+                "mean": 0.04254949291554348,
+                "n_clusters": 10,
+                "n_observations": 29,
+                "n_resamples": 2000,
+                "seed": 0
+              },
+              "streamingllm": {
+                "ci95": [
+                  0.03654912929546251,
+                  0.06206229263957002
+                ],
+                "mean": 0.04675885513263055,
+                "n_clusters": 10,
+                "n_observations": 29,
+                "n_resamples": 2000,
+                "seed": 0
+              }
+            },
+            "nominal_exposure": 2304,
+            "window_tv": {
+              "ci95": [
+                0.035241147555936755,
+                0.056042376244587216
+              ],
+              "mean": 0.044654174024087015,
+              "n_clusters": 10,
+              "n_observations": 58,
+              "n_resamples": 2000,
+              "seed": 0
+            }
+          },
+          "512": {
+            "actual_exposure": {
+              "max": 2496.0,
+              "mean": 2381.2413793103447,
+              "min": 2304.0
+            },
+            "by_press": {
+              "random": {
+                "ci95": [
+                  0.03320931765341277,
+                  0.05167951188725727
+                ],
+                "mean": 0.042144783884452995,
+                "n_clusters": 10,
+                "n_observations": 29,
+                "n_resamples": 2000,
+                "seed": 0
+              },
+              "streamingllm": {
+                "ci95": [
+                  0.036493031196187284,
+                  0.06201193138574571
+                ],
+                "mean": 0.04673906258375906,
+                "n_clusters": 10,
+                "n_observations": 29,
+                "n_resamples": 2000,
+                "seed": 0
+              }
+            },
+            "nominal_exposure": 3840,
+            "window_tv": {
+              "ci95": [
+                0.035136690007202195,
+                0.056209734880422864
+              ],
+              "mean": 0.04444192323410603,
+              "n_clusters": 10,
+              "n_observations": 58,
+              "n_resamples": 2000,
+              "seed": 0
+            }
+          }
+        },
+        "budget": 2048,
+        "mean_prompt_tokens": 114.6896551724138,
+        "n_problems": 10,
+        "n_traces": 58,
+        "position": 4352,
+        "realized_ratio": 0.45850510290734475,
+        "realized_ratio_decode_only": 0.47058823529411764
+      },
+      "b256@2304": {
+        "actual_exposure_slope": {
+          "ci95": [
+            2.0337006955056352e-06,
+            7.1511454325199745e-06
+          ],
+          "mean": 4.806783568783862e-06,
+          "n_clusters": 10,
+          "n_observations": 58,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "actual_exposure_slope_degenerate_traces": 0,
+        "actual_exposure_slope_excludes_zero": true,
+        "arms": {
+          "0": {
+            "actual_exposure": {
+              "max": 2239.0,
+              "mean": 2124.2413793103447,
+              "min": 2047.0
+            },
+            "by_press": {
+              "random": {
+                "ci95": [
+                  0.14089634645178314,
+                  0.18428306014673576
+                ],
+                "mean": 0.1657829652383125,
+                "n_clusters": 10,
+                "n_observations": 29,
+                "n_resamples": 2000,
+                "seed": 0
+              },
+              "streamingllm": {
+                "ci95": [
+                  0.12645301204259754,
+                  0.167677235639685
+                ],
+                "mean": 0.14889944041579511,
+                "n_clusters": 10,
+                "n_observations": 29,
+                "n_resamples": 2000,
+                "seed": 0
+              }
+            },
+            "nominal_exposure": 2304,
+            "window_tv": {
+              "ci95": [
+                0.1345818258956157,
+                0.17524269609720758
+              ],
+              "mean": 0.1573412028270538,
+              "n_clusters": 10,
+              "n_observations": 58,
+              "n_resamples": 2000,
+              "seed": 0
+            }
+          },
+          "2048": {
+            "actual_exposure": {
+              "max": 192.0,
+              "mean": 192.0,
+              "min": 192.0
+            },
+            "by_press": {
+              "random": {
+                "ci95": [
+                  0.13004706382459677,
+                  0.16460145878143745
+                ],
+                "mean": 0.14880948677284658,
+                "n_clusters": 10,
+                "n_observations": 29,
+                "n_resamples": 2000,
+                "seed": 0
+              },
+              "streamingllm": {
+                "ci95": [
+                  0.1273323064902294,
+                  0.16972125180801464
+                ],
+                "mean": 0.14998350598035542,
+                "n_clusters": 10,
+                "n_observations": 29,
+                "n_resamples": 2000,
+                "seed": 0
+              }
+            },
+            "nominal_exposure": 256,
+            "window_tv": {
+              "ci95": [
+                0.1291253839293138,
+                0.16677121688897092
+              ],
+              "mean": 0.149396496376601,
+              "n_clusters": 10,
+              "n_observations": 58,
+              "n_resamples": 2000,
+              "seed": 0
+            }
+          },
+          "512": {
+            "actual_exposure": {
+              "max": 1728.0,
+              "mean": 1728.0,
+              "min": 1728.0
+            },
+            "by_press": {
+              "random": {
+                "ci95": [
+                  0.14659214904074322,
+                  0.18476359345277027
+                ],
+                "mean": 0.16922324297609562,
+                "n_clusters": 10,
+                "n_observations": 29,
+                "n_resamples": 2000,
+                "seed": 0
+              },
+              "streamingllm": {
+                "ci95": [
+                  0.12666540552347785,
+                  0.16815960728858934
+                ],
+                "mean": 0.14929992952438742,
+                "n_clusters": 10,
+                "n_observations": 29,
+                "n_resamples": 2000,
+                "seed": 0
+              }
+            },
+            "nominal_exposure": 1792,
+            "window_tv": {
+              "ci95": [
+                0.13746231383774346,
+                0.1761255443413475
+              ],
+              "mean": 0.1592615862502415,
+              "n_clusters": 10,
+              "n_observations": 58,
+              "n_resamples": 2000,
+              "seed": 0
+            }
+          }
+        },
+        "budget": 256,
+        "mean_prompt_tokens": 114.6896551724138,
+        "n_problems": 10,
+        "n_traces": 58,
+        "position": 2304,
+        "realized_ratio": 0.10584243391976277,
+        "realized_ratio_decode_only": 0.1111111111111111
+      },
+      "b256@3328": {
+        "actual_exposure_slope": {
+          "ci95": [
+            -1.6097697722628765e-06,
+            -3.084036526395e-07
+          ],
+          "mean": -9.890841004482112e-07,
+          "n_clusters": 10,
+          "n_observations": 58,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "actual_exposure_slope_degenerate_traces": 0,
+        "actual_exposure_slope_excludes_zero": true,
+        "arms": {
+          "0": {
+            "actual_exposure": {
+              "max": 3263.0,
+              "mean": 3148.2413793103447,
+              "min": 3071.0
+            },
+            "by_press": {
+              "random": {
+                "ci95": [
+                  0.11178413573480546,
+                  0.1664018301416979
+                ],
+                "mean": 0.1402252795865748,
+                "n_clusters": 10,
+                "n_observations": 29,
+                "n_resamples": 2000,
+                "seed": 0
+              },
+              "streamingllm": {
+                "ci95": [
+                  0.10984994330015305,
+                  0.16608702925845614
+                ],
+                "mean": 0.13874723414168388,
+                "n_clusters": 10,
+                "n_observations": 29,
+                "n_resamples": 2000,
+                "seed": 0
+              }
+            },
+            "nominal_exposure": 3328,
+            "window_tv": {
+              "ci95": [
+                0.11059637137757357,
+                0.16623946064137524
+              ],
+              "mean": 0.13948625686412935,
+              "n_clusters": 10,
+              "n_observations": 58,
+              "n_resamples": 2000,
+              "seed": 0
+            }
+          },
+          "2048": {
+            "actual_exposure": {
+              "max": 1216.0,
+              "mean": 1216.0,
+              "min": 1216.0
+            },
+            "by_press": {
+              "random": {
+                "ci95": [
+                  0.11658220080702908,
+                  0.17075846755684612
+                ],
+                "mean": 0.14465923739574235,
+                "n_clusters": 10,
+                "n_observations": 29,
+                "n_resamples": 2000,
+                "seed": 0
+              },
+              "streamingllm": {
+                "ci95": [
+                  0.11026834559208715,
+                  0.16623381987139024
+                ],
+                "mean": 0.1391008011894701,
+                "n_clusters": 10,
+                "n_observations": 29,
+                "n_resamples": 2000,
+                "seed": 0
+              }
+            },
+            "nominal_exposure": 1280,
+            "window_tv": {
+              "ci95": [
+                0.11330627197148939,
+                0.16873193545623477
+              ],
+              "mean": 0.1418800192926062,
+              "n_clusters": 10,
+              "n_observations": 58,
+              "n_resamples": 2000,
+              "seed": 0
+            }
+          },
+          "512": {
+            "actual_exposure": {
+              "max": 2752.0,
+              "mean": 2752.0,
+              "min": 2752.0
+            },
+            "by_press": {
+              "random": {
+                "ci95": [
+                  0.1151157667273032,
+                  0.1699059763368827
+                ],
+                "mean": 0.14375345798911351,
+                "n_clusters": 10,
+                "n_observations": 29,
+                "n_resamples": 2000,
+                "seed": 0
+              },
+              "streamingllm": {
+                "ci95": [
+                  0.11012446653496036,
+                  0.16602527517769525
+                ],
+                "mean": 0.13895937658260243,
+                "n_clusters": 10,
+                "n_observations": 29,
+                "n_resamples": 2000,
+                "seed": 0
+              }
+            },
+            "nominal_exposure": 2816,
+            "window_tv": {
+              "ci95": [
+                0.11285301448423649,
+                0.16795225713248782
+              ],
+              "mean": 0.141356417285858,
+              "n_clusters": 10,
+              "n_observations": 58,
+              "n_resamples": 2000,
+              "seed": 0
+            }
+          }
+        },
+        "budget": 256,
+        "mean_prompt_tokens": 114.6896551724138,
+        "n_problems": 10,
+        "n_traces": 58,
+        "position": 3328,
+        "realized_ratio": 0.07436046395160159,
+        "realized_ratio_decode_only": 0.07692307692307693
+      },
+      "b256@4352": {
+        "actual_exposure_slope": {
+          "ci95": [
+            -2.4617363932058123e-06,
+            -5.507541743509201e-07
+          ],
+          "mean": -1.3574037633507003e-06,
+          "n_clusters": 10,
+          "n_observations": 58,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "actual_exposure_slope_degenerate_traces": 0,
+        "actual_exposure_slope_excludes_zero": true,
+        "arms": {
+          "0": {
+            "actual_exposure": {
+              "max": 4287.0,
+              "mean": 4172.241379310345,
+              "min": 4095.0
+            },
+            "by_press": {
+              "random": {
+                "ci95": [
+                  0.12788987060360693,
+                  0.17770270751550274
+                ],
+                "mean": 0.1523231490375284,
+                "n_clusters": 10,
+                "n_observations": 29,
+                "n_resamples": 2000,
+                "seed": 0
+              },
+              "streamingllm": {
+                "ci95": [
+                  0.11992701610105928,
+                  0.17224589327211826
+                ],
+                "mean": 0.146254564397579,
+                "n_clusters": 10,
+                "n_observations": 29,
+                "n_resamples": 2000,
+                "seed": 0
+              }
+            },
+            "nominal_exposure": 4352,
+            "window_tv": {
+              "ci95": [
+                0.1243256411149286,
+                0.1741772874807769
+              ],
+              "mean": 0.1492888567175537,
+              "n_clusters": 10,
+              "n_observations": 58,
+              "n_resamples": 2000,
+              "seed": 0
+            }
+          },
+          "2048": {
+            "actual_exposure": {
+              "max": 2240.0,
+              "mean": 2240.0,
+              "min": 2240.0
+            },
+            "by_press": {
+              "random": {
+                "ci95": [
+                  0.13431794537253158,
+                  0.18492390709391976
+                ],
+                "mean": 0.15908212069300354,
+                "n_clusters": 10,
+                "n_observations": 29,
+                "n_resamples": 2000,
+                "seed": 0
+              },
+              "streamingllm": {
+                "ci95": [
+                  0.1198063365725141,
+                  0.17213977488878227
+                ],
+                "mean": 0.14617077137707507,
+                "n_clusters": 10,
+                "n_observations": 29,
+                "n_resamples": 2000,
+                "seed": 0
+              }
+            },
+            "nominal_exposure": 2304,
+            "window_tv": {
+              "ci95": [
+                0.12708010466623806,
+                0.1773736866011849
+              ],
+              "mean": 0.1526264460350393,
+              "n_clusters": 10,
+              "n_observations": 58,
+              "n_resamples": 2000,
+              "seed": 0
+            }
+          },
+          "512": {
+            "actual_exposure": {
+              "max": 3776.0,
+              "mean": 3776.0,
+              "min": 3776.0
+            },
+            "by_press": {
+              "random": {
+                "ci95": [
+                  0.13406545801972325,
+                  0.1825886259772592
+                ],
+                "mean": 0.15785354061939608,
+                "n_clusters": 10,
+                "n_observations": 29,
+                "n_resamples": 2000,
+                "seed": 0
+              },
+              "streamingllm": {
+                "ci95": [
+                  0.11974713293533215,
+                  0.17205019626623141
+                ],
+                "mean": 0.1460936180943219,
+                "n_clusters": 10,
+                "n_observations": 29,
+                "n_resamples": 2000,
+                "seed": 0
+              }
+            },
+            "nominal_exposure": 3840,
+            "window_tv": {
+              "ci95": [
+                0.12691503767640985,
+                0.17653280654597187
+              ],
+              "mean": 0.15197357935685898,
+              "n_clusters": 10,
+              "n_observations": 58,
+              "n_resamples": 2000,
+              "seed": 0
+            }
+          }
+        },
+        "budget": 256,
+        "mean_prompt_tokens": 114.6896551724138,
+        "n_problems": 10,
+        "n_traces": 58,
+        "position": 4352,
+        "realized_ratio": 0.057313137863418094,
+        "realized_ratio_decode_only": 0.058823529411764705
+      }
+    },
+    "n_traces": 116,
+    "note": "DIAGNOSTIC ONLY; the pre-registered verdict is the full panel"
+  },
+  "eviction_onset_definition": "first decode step with per-step TV > 0; before any eviction the compressed and reference passes are identical so TV is exactly 0",
+  "full_panel": {
+    "b2048@2304": {
+      "actual_exposure_slope": {
+        "ci95": [
+          -9.961635373589618e-07,
+          8.00830085493266e-06
+        ],
+        "mean": 3.4936756254299824e-06,
+        "n_clusters": 19,
+        "n_observations": 104,
+        "n_resamples": 2000,
+        "seed": 0
+      },
+      "actual_exposure_slope_degenerate_traces": 0,
+      "actual_exposure_slope_excludes_zero": false,
+      "arms": {
+        "0": {
+          "actual_exposure": {
+            "max": 575.0,
+            "mean": 331.3076923076923,
+            "min": 255.0
+          },
+          "by_press": {
+            "random": {
+              "ci95": [
+                0.016509240897345234,
+                0.024312820808110175
+              ],
+              "mean": 0.02043646367248296,
+              "n_clusters": 19,
+              "n_observations": 52,
+              "n_resamples": 2000,
+              "seed": 0
+            },
+            "streamingllm": {
+              "ci95": [
+                0.026769924254572173,
+                0.0399641106342961
+              ],
+              "mean": 0.033297025733820415,
+              "n_clusters": 19,
+              "n_observations": 52,
+              "n_resamples": 2000,
+              "seed": 0
+            }
+          },
+          "nominal_exposure": 2304,
+          "window_tv": {
+            "ci95": [
+              0.02190929434364067,
+              0.03179421158833739
+            ],
+            "mean": 0.026866744703151684,
+            "n_clusters": 19,
+            "n_observations": 104,
+            "n_resamples": 2000,
+            "seed": 0
+          }
+        },
+        "2048": {
+          "actual_exposure": {
+            "max": 192.0,
+            "mean": 192.0,
+            "min": 192.0
+          },
+          "by_press": {
+            "random": {
+              "ci95": [
+                0.01636726508174527,
+                0.02324140255533406
+              ],
+              "mean": 0.01987738033699629,
+              "n_clusters": 19,
+              "n_observations": 52,
+              "n_resamples": 2000,
+              "seed": 0
+            },
+            "streamingllm": {
+              "ci95": [
+                0.02644298764080605,
+                0.039439970704066546
+              ],
+              "mean": 0.03295142453417294,
+              "n_clusters": 19,
+              "n_observations": 52,
+              "n_resamples": 2000,
+              "seed": 0
+            }
+          },
+          "nominal_exposure": 256,
+          "window_tv": {
+            "ci95": [
+              0.02181548965174738,
+              0.030973081346540896
+            ],
+            "mean": 0.026414402435584614,
+            "n_clusters": 19,
+            "n_observations": 104,
+            "n_resamples": 2000,
+            "seed": 0
+          }
+        },
+        "512": {
+          "actual_exposure": {
+            "max": 576.0,
+            "mean": 332.3076923076923,
+            "min": 256.0
+          },
+          "by_press": {
+            "random": {
+              "ci95": [
+                0.016764790004145085,
+                0.023501316747894446
+              ],
+              "mean": 0.020325792560227436,
+              "n_clusters": 19,
+              "n_observations": 52,
+              "n_resamples": 2000,
+              "seed": 0
+            },
+            "streamingllm": {
+              "ci95": [
+                0.026811065189131917,
+                0.0399523929204543
+              ],
+              "mean": 0.03336881987548597,
+              "n_clusters": 19,
+              "n_observations": 52,
+              "n_resamples": 2000,
+              "seed": 0
+            }
+          },
+          "nominal_exposure": 1792,
+          "window_tv": {
+            "ci95": [
+              0.022056333063646356,
+              0.03150930512799503
+            ],
+            "mean": 0.0268473062178567,
+            "n_clusters": 19,
+            "n_observations": 104,
+            "n_resamples": 2000,
+            "seed": 0
+          }
+        }
+      },
+      "budget": 2048,
+      "mean_prompt_tokens": 112.5576923076923,
+      "n_problems": 19,
+      "n_traces": 104,
+      "position": 2304,
+      "realized_ratio": 0.8474864914333007,
+      "realized_ratio_decode_only": 0.8888888888888888
+    },
+    "b2048@3328": {
+      "actual_exposure_slope": {
+        "ci95": [
+          -6.532586552600095e-06,
+          2.7884745531893173e-06
+        ],
+        "mean": -1.7270345011591656e-06,
+        "n_clusters": 14,
+        "n_observations": 80,
+        "n_resamples": 2000,
+        "seed": 0
+      },
+      "actual_exposure_slope_degenerate_traces": 0,
+      "actual_exposure_slope_excludes_zero": false,
+      "arms": {
+        "0": {
+          "actual_exposure": {
+            "max": 1471.0,
+            "mean": 1347.8,
+            "min": 1279.0
+          },
+          "by_press": {
+            "random": {
+              "ci95": [
+                0.02453645747226785,
+                0.03859480951763584
+              ],
+              "mean": 0.031180589940594063,
+              "n_clusters": 14,
+              "n_observations": 40,
+              "n_resamples": 2000,
+              "seed": 0
+            },
+            "streamingllm": {
+              "ci95": [
+                0.03173376486971532,
+                0.04890477582667827
+              ],
+              "mean": 0.04044135232030713,
+              "n_clusters": 14,
+              "n_observations": 40,
+              "n_resamples": 2000,
+              "seed": 0
+            }
+          },
+          "nominal_exposure": 3328,
+          "window_tv": {
+            "ci95": [
+              0.028530411948592176,
+              0.04281605927604886
+            ],
+            "mean": 0.03581097113045059,
+            "n_clusters": 14,
+            "n_observations": 80,
+            "n_resamples": 2000,
+            "seed": 0
+          }
+        },
+        "2048": {
+          "actual_exposure": {
+            "max": 1216.0,
+            "mean": 1216.0,
+            "min": 1216.0
+          },
+          "by_press": {
+            "random": {
+              "ci95": [
+                0.024673773859650767,
+                0.03864064697070514
+              ],
+              "mean": 0.031543295897186366,
+              "n_clusters": 14,
+              "n_observations": 40,
+              "n_resamples": 2000,
+              "seed": 0
+            },
+            "streamingllm": {
+              "ci95": [
+                0.031841730722092405,
+                0.04882885387060096
+              ],
+              "mean": 0.04036653798470523,
+              "n_clusters": 14,
+              "n_observations": 40,
+              "n_resamples": 2000,
+              "seed": 0
+            }
+          },
+          "nominal_exposure": 1280,
+          "window_tv": {
+            "ci95": [
+              0.028536862054792687,
+              0.043279256122176854
+            ],
+            "mean": 0.0359549169409458,
+            "n_clusters": 14,
+            "n_observations": 80,
+            "n_resamples": 2000,
+            "seed": 0
+          }
+        },
+        "512": {
+          "actual_exposure": {
+            "max": 1472.0,
+            "mean": 1348.8,
+            "min": 1280.0
+          },
+          "by_press": {
+            "random": {
+              "ci95": [
+                0.024260815206399857,
+                0.037386139194531334
+              ],
+              "mean": 0.030762178168601956,
+              "n_clusters": 14,
+              "n_observations": 40,
+              "n_resamples": 2000,
+              "seed": 0
+            },
+            "streamingllm": {
+              "ci95": [
+                0.03162763518541605,
+                0.0487276198338034
+              ],
+              "mean": 0.04027007417535748,
+              "n_clusters": 14,
+              "n_observations": 40,
+              "n_resamples": 2000,
+              "seed": 0
+            }
+          },
+          "nominal_exposure": 2816,
+          "window_tv": {
+            "ci95": [
+              0.02830652975624943,
+              0.04271697286188781
+            ],
+            "mean": 0.03551612617197972,
+            "n_clusters": 14,
+            "n_observations": 80,
+            "n_resamples": 2000,
+            "seed": 0
+          }
+        }
+      },
+      "budget": 2048,
+      "mean_prompt_tokens": 106.65,
+      "n_problems": 14,
+      "n_traces": 80,
+      "position": 3328,
+      "realized_ratio": 0.5962761853463963,
+      "realized_ratio_decode_only": 0.6153846153846154
+    },
+    "b2048@4352": {
+      "actual_exposure_slope": {
+        "ci95": [
+          -3.972616033917855e-06,
+          1.0999872608820382e-05
+        ],
+        "mean": 1.70781791974286e-06,
+        "n_clusters": 10,
+        "n_observations": 58,
+        "n_resamples": 2000,
+        "seed": 0
+      },
+      "actual_exposure_slope_degenerate_traces": 0,
+      "actual_exposure_slope_excludes_zero": false,
+      "arms": {
+        "0": {
+          "actual_exposure": {
+            "max": 2495.0,
+            "mean": 2380.2413793103447,
+            "min": 2303.0
+          },
+          "by_press": {
+            "random": {
+              "ci95": [
+                0.032925383988797984,
+                0.052301107850737404
+              ],
+              "mean": 0.0422555161661855,
+              "n_clusters": 10,
+              "n_observations": 29,
+              "n_resamples": 2000,
+              "seed": 0
+            },
+            "streamingllm": {
+              "ci95": [
+                0.03652520903621304,
+                0.0622529197313638
+              ],
+              "mean": 0.04683572208828517,
+              "n_clusters": 10,
+              "n_observations": 29,
+              "n_resamples": 2000,
+              "seed": 0
+            }
+          },
+          "nominal_exposure": 4352,
+          "window_tv": {
+            "ci95": [
+              0.035158368950312824,
+              0.056310896084152635
+            ],
+            "mean": 0.044545619127235335,
+            "n_clusters": 10,
+            "n_observations": 58,
+            "n_resamples": 2000,
+            "seed": 0
+          }
+        },
+        "2048": {
+          "actual_exposure": {
+            "max": 2240.0,
+            "mean": 2240.0,
+            "min": 2240.0
+          },
+          "by_press": {
+            "random": {
+              "ci95": [
+                0.033167424214977995,
+                0.05223262227011616
+              ],
+              "mean": 0.04254949291554348,
+              "n_clusters": 10,
+              "n_observations": 29,
+              "n_resamples": 2000,
+              "seed": 0
+            },
+            "streamingllm": {
+              "ci95": [
+                0.03654912929546251,
+                0.06206229263957002
+              ],
+              "mean": 0.04675885513263055,
+              "n_clusters": 10,
+              "n_observations": 29,
+              "n_resamples": 2000,
+              "seed": 0
+            }
+          },
+          "nominal_exposure": 2304,
+          "window_tv": {
+            "ci95": [
+              0.035241147555936755,
+              0.056042376244587216
+            ],
+            "mean": 0.044654174024087015,
+            "n_clusters": 10,
+            "n_observations": 58,
+            "n_resamples": 2000,
+            "seed": 0
+          }
+        },
+        "512": {
+          "actual_exposure": {
+            "max": 2496.0,
+            "mean": 2381.2413793103447,
+            "min": 2304.0
+          },
+          "by_press": {
+            "random": {
+              "ci95": [
+                0.03320931765341277,
+                0.05167951188725727
+              ],
+              "mean": 0.042144783884452995,
+              "n_clusters": 10,
+              "n_observations": 29,
+              "n_resamples": 2000,
+              "seed": 0
+            },
+            "streamingllm": {
+              "ci95": [
+                0.036493031196187284,
+                0.06201193138574571
+              ],
+              "mean": 0.04673906258375906,
+              "n_clusters": 10,
+              "n_observations": 29,
+              "n_resamples": 2000,
+              "seed": 0
+            }
+          },
+          "nominal_exposure": 3840,
+          "window_tv": {
+            "ci95": [
+              0.035136690007202195,
+              0.056209734880422864
+            ],
+            "mean": 0.04444192323410603,
+            "n_clusters": 10,
+            "n_observations": 58,
+            "n_resamples": 2000,
+            "seed": 0
+          }
+        }
+      },
+      "budget": 2048,
+      "mean_prompt_tokens": 114.6896551724138,
+      "n_problems": 10,
+      "n_traces": 58,
+      "position": 4352,
+      "realized_ratio": 0.45850510290734475,
+      "realized_ratio_decode_only": 0.47058823529411764
+    },
+    "b256@2304": {
+      "actual_exposure_slope": {
+        "ci95": [
+          2.8895703452712248e-06,
+          5.950248075429991e-06
+        ],
+        "mean": 4.427680625448356e-06,
+        "n_clusters": 19,
+        "n_observations": 104,
+        "n_resamples": 2000,
+        "seed": 0
+      },
+      "actual_exposure_slope_degenerate_traces": 0,
+      "actual_exposure_slope_excludes_zero": true,
+      "arms": {
+        "0": {
+          "actual_exposure": {
+            "max": 2239.0,
+            "mean": 2118.3846153846152,
+            "min": 2047.0
+          },
+          "by_press": {
+            "random": {
+              "ci95": [
+                0.13846235079261823,
+                0.1740703808640773
+              ],
+              "mean": 0.15705793718513034,
+              "n_clusters": 19,
+              "n_observations": 52,
+              "n_resamples": 2000,
+              "seed": 0
+            },
+            "streamingllm": {
+              "ci95": [
+                0.1192361910245503,
+                0.1584380216989148
+              ],
+              "mean": 0.13891548670074103,
+              "n_clusters": 19,
+              "n_observations": 52,
+              "n_resamples": 2000,
+              "seed": 0
+            }
+          },
+          "nominal_exposure": 2304,
+          "window_tv": {
+            "ci95": [
+              0.1292504926687549,
+              0.16586095405312798
+            ],
+            "mean": 0.1479867119429357,
+            "n_clusters": 19,
+            "n_observations": 104,
+            "n_resamples": 2000,
+            "seed": 0
+          }
+        },
+        "2048": {
+          "actual_exposure": {
+            "max": 192.0,
+            "mean": 192.0,
+            "min": 192.0
+          },
+          "by_press": {
+            "random": {
+              "ci95": [
+                0.1251347544112658,
+                0.15663142776183797
+              ],
+              "mean": 0.14143128666102173,
+              "n_clusters": 19,
+              "n_observations": 52,
+              "n_resamples": 2000,
+              "seed": 0
+            },
+            "streamingllm": {
+              "ci95": [
+                0.11966692398092994,
+                0.1597432560454614
+              ],
+              "mean": 0.13964881627847592,
+              "n_clusters": 19,
+              "n_observations": 52,
+              "n_resamples": 2000,
+              "seed": 0
+            }
+          },
+          "nominal_exposure": 256,
+          "window_tv": {
+            "ci95": [
+              0.12253393848630528,
+              0.15837407717295526
+            ],
+            "mean": 0.14054005146974882,
+            "n_clusters": 19,
+            "n_observations": 104,
+            "n_resamples": 2000,
+            "seed": 0
+          }
+        },
+        "512": {
+          "actual_exposure": {
+            "max": 1728.0,
+            "mean": 1728.0,
+            "min": 1728.0
+          },
+          "by_press": {
+            "random": {
+              "ci95": [
+                0.14097955653589814,
+                0.17669282956611157
+              ],
+              "mean": 0.15992662409487488,
+              "n_clusters": 19,
+              "n_observations": 52,
+              "n_resamples": 2000,
+              "seed": 0
+            },
+            "streamingllm": {
+              "ci95": [
+                0.11940149637466313,
+                0.1586122148516859
+              ],
+              "mean": 0.13911970359858583,
+              "n_clusters": 19,
+              "n_observations": 52,
+              "n_resamples": 2000,
+              "seed": 0
+            }
+          },
+          "nominal_exposure": 1792,
+          "window_tv": {
+            "ci95": [
+              0.13071637436673114,
+              0.16761062138104765
+            ],
+            "mean": 0.14952316384673037,
+            "n_clusters": 19,
+            "n_observations": 104,
+            "n_resamples": 2000,
+            "seed": 0
+          }
+        }
+      },
+      "budget": 256,
+      "mean_prompt_tokens": 112.5576923076923,
+      "n_problems": 19,
+      "n_traces": 104,
+      "position": 2304,
+      "realized_ratio": 0.10593581142916259,
+      "realized_ratio_decode_only": 0.1111111111111111
+    },
+    "b256@3328": {
+      "actual_exposure_slope": {
+        "ci95": [
+          -1.4649998578840514e-06,
+          -3.79999242713384e-07
+        ],
+        "mean": -9.121352208267713e-07,
+        "n_clusters": 14,
+        "n_observations": 80,
+        "n_resamples": 2000,
+        "seed": 0
+      },
+      "actual_exposure_slope_degenerate_traces": 0,
+      "actual_exposure_slope_excludes_zero": true,
+      "arms": {
+        "0": {
+          "actual_exposure": {
+            "max": 3263.0,
+            "mean": 3139.8,
+            "min": 3071.0
+          },
+          "by_press": {
+            "random": {
+              "ci95": [
+                0.11789650809871023,
+                0.1626562097223153
+              ],
+              "mean": 0.1404637310959513,
+              "n_clusters": 14,
+              "n_observations": 40,
+              "n_resamples": 2000,
+              "seed": 0
+            },
+            "streamingllm": {
+              "ci95": [
+                0.1147399226094264,
+                0.16091221202369443
+              ],
+              "mean": 0.13754744720873488,
+              "n_clusters": 14,
+              "n_observations": 40,
+              "n_resamples": 2000,
+              "seed": 0
+            }
+          },
+          "nominal_exposure": 3328,
+          "window_tv": {
+            "ci95": [
+              0.11631846092610171,
+              0.16157979171738077
+            ],
+            "mean": 0.1390055891523431,
+            "n_clusters": 14,
+            "n_observations": 80,
+            "n_resamples": 2000,
+            "seed": 0
+          }
+        },
+        "2048": {
+          "actual_exposure": {
+            "max": 1216.0,
+            "mean": 1216.0,
+            "min": 1216.0
+          },
+          "by_press": {
+            "random": {
+              "ci95": [
+                0.12164401454973858,
+                0.1673461854136635
+              ],
+              "mean": 0.144340842170069,
+              "n_clusters": 14,
+              "n_observations": 40,
+              "n_resamples": 2000,
+              "seed": 0
+            },
+            "streamingllm": {
+              "ci95": [
+                0.11505826548103643,
+                0.16079547197230432
+              ],
+              "mean": 0.13775523829460815,
+              "n_clusters": 14,
+              "n_observations": 40,
+              "n_resamples": 2000,
+              "seed": 0
+            }
+          },
+          "nominal_exposure": 1280,
+          "window_tv": {
+            "ci95": [
+              0.11834652029687885,
+              0.1639568430362636
+            ],
+            "mean": 0.14104804023233858,
+            "n_clusters": 14,
+            "n_observations": 80,
+            "n_resamples": 2000,
+            "seed": 0
+          }
+        },
+        "512": {
+          "actual_exposure": {
+            "max": 2752.0,
+            "mean": 2752.0,
+            "min": 2752.0
+          },
+          "by_press": {
+            "random": {
+              "ci95": [
+                0.11972346942569113,
+                0.1656572278587607
+              ],
+              "mean": 0.14286230569627567,
+              "n_clusters": 14,
+              "n_observations": 40,
+              "n_resamples": 2000,
+              "seed": 0
+            },
+            "streamingllm": {
+              "ci95": [
+                0.11488623622743947,
+                0.1608693399448185
+              ],
+              "mean": 0.13763086838279354,
+              "n_clusters": 14,
+              "n_observations": 40,
+              "n_resamples": 2000,
+              "seed": 0
+            }
+          },
+          "nominal_exposure": 2816,
+          "window_tv": {
+            "ci95": [
+              0.11733068017409229,
+              0.1631088557815431
+            ],
+            "mean": 0.1402465870395346,
+            "n_clusters": 14,
+            "n_observations": 80,
+            "n_resamples": 2000,
+            "seed": 0
+          }
+        }
+      },
+      "budget": 256,
+      "mean_prompt_tokens": 106.65,
+      "n_problems": 14,
+      "n_traces": 80,
+      "position": 3328,
+      "realized_ratio": 0.07453452316829953,
+      "realized_ratio_decode_only": 0.07692307692307693
+    },
+    "b256@4352": {
+      "actual_exposure_slope": {
+        "ci95": [
+          -2.4617363932058123e-06,
+          -5.507541743509201e-07
+        ],
+        "mean": -1.3574037633507003e-06,
+        "n_clusters": 10,
+        "n_observations": 58,
+        "n_resamples": 2000,
+        "seed": 0
+      },
+      "actual_exposure_slope_degenerate_traces": 0,
+      "actual_exposure_slope_excludes_zero": true,
+      "arms": {
+        "0": {
+          "actual_exposure": {
+            "max": 4287.0,
+            "mean": 4172.241379310345,
+            "min": 4095.0
+          },
+          "by_press": {
+            "random": {
+              "ci95": [
+                0.12788987060360693,
+                0.17770270751550274
+              ],
+              "mean": 0.1523231490375284,
+              "n_clusters": 10,
+              "n_observations": 29,
+              "n_resamples": 2000,
+              "seed": 0
+            },
+            "streamingllm": {
+              "ci95": [
+                0.11992701610105928,
+                0.17224589327211826
+              ],
+              "mean": 0.146254564397579,
+              "n_clusters": 10,
+              "n_observations": 29,
+              "n_resamples": 2000,
+              "seed": 0
+            }
+          },
+          "nominal_exposure": 4352,
+          "window_tv": {
+            "ci95": [
+              0.1243256411149286,
+              0.1741772874807769
+            ],
+            "mean": 0.1492888567175537,
+            "n_clusters": 10,
+            "n_observations": 58,
+            "n_resamples": 2000,
+            "seed": 0
+          }
+        },
+        "2048": {
+          "actual_exposure": {
+            "max": 2240.0,
+            "mean": 2240.0,
+            "min": 2240.0
+          },
+          "by_press": {
+            "random": {
+              "ci95": [
+                0.13431794537253158,
+                0.18492390709391976
+              ],
+              "mean": 0.15908212069300354,
+              "n_clusters": 10,
+              "n_observations": 29,
+              "n_resamples": 2000,
+              "seed": 0
+            },
+            "streamingllm": {
+              "ci95": [
+                0.1198063365725141,
+                0.17213977488878227
+              ],
+              "mean": 0.14617077137707507,
+              "n_clusters": 10,
+              "n_observations": 29,
+              "n_resamples": 2000,
+              "seed": 0
+            }
+          },
+          "nominal_exposure": 2304,
+          "window_tv": {
+            "ci95": [
+              0.12708010466623806,
+              0.1773736866011849
+            ],
+            "mean": 0.1526264460350393,
+            "n_clusters": 10,
+            "n_observations": 58,
+            "n_resamples": 2000,
+            "seed": 0
+          }
+        },
+        "512": {
+          "actual_exposure": {
+            "max": 3776.0,
+            "mean": 3776.0,
+            "min": 3776.0
+          },
+          "by_press": {
+            "random": {
+              "ci95": [
+                0.13406545801972325,
+                0.1825886259772592
+              ],
+              "mean": 0.15785354061939608,
+              "n_clusters": 10,
+              "n_observations": 29,
+              "n_resamples": 2000,
+              "seed": 0
+            },
+            "streamingllm": {
+              "ci95": [
+                0.11974713293533215,
+                0.17205019626623141
+              ],
+              "mean": 0.1460936180943219,
+              "n_clusters": 10,
+              "n_observations": 29,
+              "n_resamples": 2000,
+              "seed": 0
+            }
+          },
+          "nominal_exposure": 3840,
+          "window_tv": {
+            "ci95": [
+              0.12691503767640985,
+              0.17653280654597187
+            ],
+            "mean": 0.15197357935685898,
+            "n_clusters": 10,
+            "n_observations": 58,
+            "n_resamples": 2000,
+            "seed": 0
+          }
+        }
+      },
+      "budget": 256,
+      "mean_prompt_tokens": 114.6896551724138,
+      "n_problems": 10,
+      "n_traces": 58,
+      "position": 4352,
+      "realized_ratio": 0.057313137863418094,
+      "realized_ratio_decode_only": 0.058823529411764705
+    }
+  },
+  "n_shared_traces": 400,
+  "n_usable_traces": 256,
+  "never_diverged": [
+    [
+      0,
+      "random",
+      "2048",
+      "11",
+      "2c9808c3bcd09706"
+    ],
+    [
+      0,
+      "random",
+      "2048",
+      "11",
+      "66935761b1476a8b"
+    ],
+    [
+      0,
+      "random",
+      "2048",
+      "11",
+      "96bdc90dbf2c1082"
+    ],
+    [
+      0,
+      "random",
+      "2048",
+      "11",
+      "a4ba9200542683c8"
+    ],
+    [
+      0,
+      "random",
+      "2048",
+      "11",
+      "d891063e9ff95d64"
+    ],
+    [
+      0,
+      "random",
+      "2048",
+      "11",
+      "e296d1bed4d888e2"
+    ],
+    [
+      0,
+      "random",
+      "2048",
+      "23",
+      "2c9808c3bcd09706"
+    ],
+    [
+      0,
+      "random",
+      "2048",
+      "23",
+      "3e291141d581a3b4"
+    ],
+    [
+      0,
+      "random",
+      "2048",
+      "23",
+      "96bdc90dbf2c1082"
+    ],
+    [
+      0,
+      "random",
+      "2048",
+      "23",
+      "9c39c993b6ebd64b"
+    ],
+    [
+      0,
+      "random",
+      "2048",
+      "23",
+      "a4ba9200542683c8"
+    ],
+    [
+      0,
+      "random",
+      "2048",
+      "23",
+      "c3ffbd80f59179e6"
+    ],
+    [
+      0,
+      "random",
+      "2048",
+      "23",
+      "d891063e9ff95d64"
+    ],
+    [
+      0,
+      "random",
+      "2048",
+      "23",
+      "e296d1bed4d888e2"
+    ],
+    [
+      0,
+      "random",
+      "2048",
+      "47",
+      "2c9808c3bcd09706"
+    ],
+    [
+      0,
+      "random",
+      "2048",
+      "47",
+      "34245c2c6b25cb7f"
+    ],
+    [
+      0,
+      "random",
+      "2048",
+      "47",
+      "3e291141d581a3b4"
+    ],
+    [
+      0,
+      "random",
+      "2048",
+      "47",
+      "96bdc90dbf2c1082"
+    ],
+    [
+      0,
+      "random",
+      "2048",
+      "47",
+      "a4ba9200542683c8"
+    ],
+    [
+      0,
+      "random",
+      "2048",
+      "47",
+      "c3ffbd80f59179e6"
+    ],
+    [
+      0,
+      "random",
+      "2048",
+      "47",
+      "d891063e9ff95d64"
+    ],
+    [
+      0,
+      "random",
+      "2048",
+      "47",
+      "e296d1bed4d888e2"
+    ],
+    [
+      0,
+      "random",
+      "2048",
+      "89",
+      "2c9808c3bcd09706"
+    ],
+    [
+      0,
+      "random",
+      "2048",
+      "89",
+      "34245c2c6b25cb7f"
+    ],
+    [
+      0,
+      "random",
+      "2048",
+      "89",
+      "3e291141d581a3b4"
+    ],
+    [
+      0,
+      "random",
+      "2048",
+      "89",
+      "59151fed8f1ba7bd"
+    ],
+    [
+      0,
+      "random",
+      "2048",
+      "89",
+      "96bdc90dbf2c1082"
+    ],
+    [
+      0,
+      "random",
+      "2048",
+      "89",
+      "9c39c993b6ebd64b"
+    ],
+    [
+      0,
+      "random",
+      "2048",
+      "89",
+      "a4ba9200542683c8"
+    ],
+    [
+      0,
+      "random",
+      "2048",
+      "89",
+      "c3ffbd80f59179e6"
+    ],
+    [
+      0,
+      "random",
+      "2048",
+      "89",
+      "d891063e9ff95d64"
+    ],
+    [
+      0,
+      "streamingllm",
+      "2048",
+      "11",
+      "2c9808c3bcd09706"
+    ],
+    [
+      0,
+      "streamingllm",
+      "2048",
+      "11",
+      "66935761b1476a8b"
+    ],
+    [
+      0,
+      "streamingllm",
+      "2048",
+      "11",
+      "96bdc90dbf2c1082"
+    ],
+    [
+      0,
+      "streamingllm",
+      "2048",
+      "11",
+      "a4ba9200542683c8"
+    ],
+    [
+      0,
+      "streamingllm",
+      "2048",
+      "11",
+      "d891063e9ff95d64"
+    ],
+    [
+      0,
+      "streamingllm",
+      "2048",
+      "11",
+      "e296d1bed4d888e2"
+    ],
+    [
+      0,
+      "streamingllm",
+      "2048",
+      "23",
+      "2c9808c3bcd09706"
+    ],
+    [
+      0,
+      "streamingllm",
+      "2048",
+      "23",
+      "3e291141d581a3b4"
+    ],
+    [
+      0,
+      "streamingllm",
+      "2048",
+      "23",
+      "96bdc90dbf2c1082"
+    ],
+    [
+      0,
+      "streamingllm",
+      "2048",
+      "23",
+      "9c39c993b6ebd64b"
+    ],
+    [
+      0,
+      "streamingllm",
+      "2048",
+      "23",
+      "a4ba9200542683c8"
+    ],
+    [
+      0,
+      "streamingllm",
+      "2048",
+      "23",
+      "c3ffbd80f59179e6"
+    ],
+    [
+      0,
+      "streamingllm",
+      "2048",
+      "23",
+      "d891063e9ff95d64"
+    ],
+    [
+      0,
+      "streamingllm",
+      "2048",
+      "23",
+      "e296d1bed4d888e2"
+    ],
+    [
+      0,
+      "streamingllm",
+      "2048",
+      "47",
+      "2c9808c3bcd09706"
+    ],
+    [
+      0,
+      "streamingllm",
+      "2048",
+      "47",
+      "34245c2c6b25cb7f"
+    ],
+    [
+      0,
+      "streamingllm",
+      "2048",
+      "47",
+      "3e291141d581a3b4"
+    ],
+    [
+      0,
+      "streamingllm",
+      "2048",
+      "47",
+      "96bdc90dbf2c1082"
+    ],
+    [
+      0,
+      "streamingllm",
+      "2048",
+      "47",
+      "a4ba9200542683c8"
+    ],
+    [
+      0,
+      "streamingllm",
+      "2048",
+      "47",
+      "c3ffbd80f59179e6"
+    ],
+    [
+      0,
+      "streamingllm",
+      "2048",
+      "47",
+      "d891063e9ff95d64"
+    ],
+    [
+      0,
+      "streamingllm",
+      "2048",
+      "47",
+      "e296d1bed4d888e2"
+    ],
+    [
+      0,
+      "streamingllm",
+      "2048",
+      "89",
+      "2c9808c3bcd09706"
+    ],
+    [
+      0,
+      "streamingllm",
+      "2048",
+      "89",
+      "34245c2c6b25cb7f"
+    ],
+    [
+      0,
+      "streamingllm",
+      "2048",
+      "89",
+      "3e291141d581a3b4"
+    ],
+    [
+      0,
+      "streamingllm",
+      "2048",
+      "89",
+      "59151fed8f1ba7bd"
+    ],
+    [
+      0,
+      "streamingllm",
+      "2048",
+      "89",
+      "96bdc90dbf2c1082"
+    ],
+    [
+      0,
+      "streamingllm",
+      "2048",
+      "89",
+      "9c39c993b6ebd64b"
+    ],
+    [
+      0,
+      "streamingllm",
+      "2048",
+      "89",
+      "a4ba9200542683c8"
+    ],
+    [
+      0,
+      "streamingllm",
+      "2048",
+      "89",
+      "c3ffbd80f59179e6"
+    ],
+    [
+      0,
+      "streamingllm",
+      "2048",
+      "89",
+      "d891063e9ff95d64"
+    ],
+    [
+      512,
+      "random",
+      "2048",
+      "11",
+      "2c9808c3bcd09706"
+    ],
+    [
+      512,
+      "random",
+      "2048",
+      "11",
+      "66935761b1476a8b"
+    ],
+    [
+      512,
+      "random",
+      "2048",
+      "11",
+      "96bdc90dbf2c1082"
+    ],
+    [
+      512,
+      "random",
+      "2048",
+      "11",
+      "a4ba9200542683c8"
+    ],
+    [
+      512,
+      "random",
+      "2048",
+      "11",
+      "d891063e9ff95d64"
+    ],
+    [
+      512,
+      "random",
+      "2048",
+      "11",
+      "e296d1bed4d888e2"
+    ],
+    [
+      512,
+      "random",
+      "2048",
+      "23",
+      "2c9808c3bcd09706"
+    ],
+    [
+      512,
+      "random",
+      "2048",
+      "23",
+      "3e291141d581a3b4"
+    ],
+    [
+      512,
+      "random",
+      "2048",
+      "23",
+      "96bdc90dbf2c1082"
+    ],
+    [
+      512,
+      "random",
+      "2048",
+      "23",
+      "9c39c993b6ebd64b"
+    ],
+    [
+      512,
+      "random",
+      "2048",
+      "23",
+      "a4ba9200542683c8"
+    ],
+    [
+      512,
+      "random",
+      "2048",
+      "23",
+      "c3ffbd80f59179e6"
+    ],
+    [
+      512,
+      "random",
+      "2048",
+      "23",
+      "d891063e9ff95d64"
+    ],
+    [
+      512,
+      "random",
+      "2048",
+      "23",
+      "e296d1bed4d888e2"
+    ],
+    [
+      512,
+      "random",
+      "2048",
+      "47",
+      "2c9808c3bcd09706"
+    ],
+    [
+      512,
+      "random",
+      "2048",
+      "47",
+      "34245c2c6b25cb7f"
+    ],
+    [
+      512,
+      "random",
+      "2048",
+      "47",
+      "3e291141d581a3b4"
+    ],
+    [
+      512,
+      "random",
+      "2048",
+      "47",
+      "96bdc90dbf2c1082"
+    ],
+    [
+      512,
+      "random",
+      "2048",
+      "47",
+      "a4ba9200542683c8"
+    ],
+    [
+      512,
+      "random",
+      "2048",
+      "47",
+      "c3ffbd80f59179e6"
+    ],
+    [
+      512,
+      "random",
+      "2048",
+      "47",
+      "d891063e9ff95d64"
+    ],
+    [
+      512,
+      "random",
+      "2048",
+      "47",
+      "e296d1bed4d888e2"
+    ],
+    [
+      512,
+      "random",
+      "2048",
+      "89",
+      "2c9808c3bcd09706"
+    ],
+    [
+      512,
+      "random",
+      "2048",
+      "89",
+      "34245c2c6b25cb7f"
+    ],
+    [
+      512,
+      "random",
+      "2048",
+      "89",
+      "3e291141d581a3b4"
+    ],
+    [
+      512,
+      "random",
+      "2048",
+      "89",
+      "59151fed8f1ba7bd"
+    ],
+    [
+      512,
+      "random",
+      "2048",
+      "89",
+      "96bdc90dbf2c1082"
+    ],
+    [
+      512,
+      "random",
+      "2048",
+      "89",
+      "9c39c993b6ebd64b"
+    ],
+    [
+      512,
+      "random",
+      "2048",
+      "89",
+      "a4ba9200542683c8"
+    ],
+    [
+      512,
+      "random",
+      "2048",
+      "89",
+      "c3ffbd80f59179e6"
+    ],
+    [
+      512,
+      "random",
+      "2048",
+      "89",
+      "d891063e9ff95d64"
+    ],
+    [
+      512,
+      "random",
+      "256",
+      "11",
+      "a4ba9200542683c8"
+    ],
+    [
+      512,
+      "random",
+      "256",
+      "23",
+      "a4ba9200542683c8"
+    ],
+    [
+      512,
+      "random",
+      "256",
+      "47",
+      "a4ba9200542683c8"
+    ],
+    [
+      512,
+      "random",
+      "256",
+      "89",
+      "a4ba9200542683c8"
+    ],
+    [
+      512,
+      "streamingllm",
+      "2048",
+      "11",
+      "2c9808c3bcd09706"
+    ],
+    [
+      512,
+      "streamingllm",
+      "2048",
+      "11",
+      "66935761b1476a8b"
+    ],
+    [
+      512,
+      "streamingllm",
+      "2048",
+      "11",
+      "96bdc90dbf2c1082"
+    ],
+    [
+      512,
+      "streamingllm",
+      "2048",
+      "11",
+      "a4ba9200542683c8"
+    ],
+    [
+      512,
+      "streamingllm",
+      "2048",
+      "11",
+      "d891063e9ff95d64"
+    ],
+    [
+      512,
+      "streamingllm",
+      "2048",
+      "11",
+      "e296d1bed4d888e2"
+    ],
+    [
+      512,
+      "streamingllm",
+      "2048",
+      "23",
+      "2c9808c3bcd09706"
+    ],
+    [
+      512,
+      "streamingllm",
+      "2048",
+      "23",
+      "3e291141d581a3b4"
+    ],
+    [
+      512,
+      "streamingllm",
+      "2048",
+      "23",
+      "96bdc90dbf2c1082"
+    ],
+    [
+      512,
+      "streamingllm",
+      "2048",
+      "23",
+      "9c39c993b6ebd64b"
+    ],
+    [
+      512,
+      "streamingllm",
+      "2048",
+      "23",
+      "a4ba9200542683c8"
+    ],
+    [
+      512,
+      "streamingllm",
+      "2048",
+      "23",
+      "c3ffbd80f59179e6"
+    ],
+    [
+      512,
+      "streamingllm",
+      "2048",
+      "23",
+      "d891063e9ff95d64"
+    ],
+    [
+      512,
+      "streamingllm",
+      "2048",
+      "23",
+      "e296d1bed4d888e2"
+    ],
+    [
+      512,
+      "streamingllm",
+      "2048",
+      "47",
+      "2c9808c3bcd09706"
+    ],
+    [
+      512,
+      "streamingllm",
+      "2048",
+      "47",
+      "34245c2c6b25cb7f"
+    ],
+    [
+      512,
+      "streamingllm",
+      "2048",
+      "47",
+      "3e291141d581a3b4"
+    ],
+    [
+      512,
+      "streamingllm",
+      "2048",
+      "47",
+      "96bdc90dbf2c1082"
+    ],
+    [
+      512,
+      "streamingllm",
+      "2048",
+      "47",
+      "a4ba9200542683c8"
+    ],
+    [
+      512,
+      "streamingllm",
+      "2048",
+      "47",
+      "c3ffbd80f59179e6"
+    ],
+    [
+      512,
+      "streamingllm",
+      "2048",
+      "47",
+      "d891063e9ff95d64"
+    ],
+    [
+      512,
+      "streamingllm",
+      "2048",
+      "47",
+      "e296d1bed4d888e2"
+    ],
+    [
+      512,
+      "streamingllm",
+      "2048",
+      "89",
+      "2c9808c3bcd09706"
+    ],
+    [
+      512,
+      "streamingllm",
+      "2048",
+      "89",
+      "34245c2c6b25cb7f"
+    ],
+    [
+      512,
+      "streamingllm",
+      "2048",
+      "89",
+      "3e291141d581a3b4"
+    ],
+    [
+      512,
+      "streamingllm",
+      "2048",
+      "89",
+      "59151fed8f1ba7bd"
+    ],
+    [
+      512,
+      "streamingllm",
+      "2048",
+      "89",
+      "96bdc90dbf2c1082"
+    ],
+    [
+      512,
+      "streamingllm",
+      "2048",
+      "89",
+      "9c39c993b6ebd64b"
+    ],
+    [
+      512,
+      "streamingllm",
+      "2048",
+      "89",
+      "a4ba9200542683c8"
+    ],
+    [
+      512,
+      "streamingllm",
+      "2048",
+      "89",
+      "c3ffbd80f59179e6"
+    ],
+    [
+      512,
+      "streamingllm",
+      "2048",
+      "89",
+      "d891063e9ff95d64"
+    ],
+    [
+      512,
+      "streamingllm",
+      "256",
+      "11",
+      "a4ba9200542683c8"
+    ],
+    [
+      512,
+      "streamingllm",
+      "256",
+      "23",
+      "a4ba9200542683c8"
+    ],
+    [
+      512,
+      "streamingllm",
+      "256",
+      "47",
+      "a4ba9200542683c8"
+    ],
+    [
+      512,
+      "streamingllm",
+      "256",
+      "89",
+      "a4ba9200542683c8"
+    ],
+    [
+      2048,
+      "random",
+      "2048",
+      "11",
+      "2c9808c3bcd09706"
+    ],
+    [
+      2048,
+      "random",
+      "2048",
+      "11",
+      "59151fed8f1ba7bd"
+    ],
+    [
+      2048,
+      "random",
+      "2048",
+      "11",
+      "66935761b1476a8b"
+    ],
+    [
+      2048,
+      "random",
+      "2048",
+      "11",
+      "7d0f806c49c7add0"
+    ],
+    [
+      2048,
+      "random",
+      "2048",
+      "11",
+      "96bdc90dbf2c1082"
+    ],
+    [
+      2048,
+      "random",
+      "2048",
+      "11",
+      "a4ba9200542683c8"
+    ],
+    [
+      2048,
+      "random",
+      "2048",
+      "11",
+      "c3ffbd80f59179e6"
+    ],
+    [
+      2048,
+      "random",
+      "2048",
+      "11",
+      "d891063e9ff95d64"
+    ],
+    [
+      2048,
+      "random",
+      "2048",
+      "11",
+      "e296d1bed4d888e2"
+    ],
+    [
+      2048,
+      "random",
+      "2048",
+      "23",
+      "2c9808c3bcd09706"
+    ],
+    [
+      2048,
+      "random",
+      "2048",
+      "23",
+      "3e291141d581a3b4"
+    ],
+    [
+      2048,
+      "random",
+      "2048",
+      "23",
+      "59151fed8f1ba7bd"
+    ],
+    [
+      2048,
+      "random",
+      "2048",
+      "23",
+      "96bdc90dbf2c1082"
+    ],
+    [
+      2048,
+      "random",
+      "2048",
+      "23",
+      "9c39c993b6ebd64b"
+    ],
+    [
+      2048,
+      "random",
+      "2048",
+      "23",
+      "a4ba9200542683c8"
+    ],
+    [
+      2048,
+      "random",
+      "2048",
+      "23",
+      "c3ffbd80f59179e6"
+    ],
+    [
+      2048,
+      "random",
+      "2048",
+      "23",
+      "d891063e9ff95d64"
+    ],
+    [
+      2048,
+      "random",
+      "2048",
+      "23",
+      "e296d1bed4d888e2"
+    ],
+    [
+      2048,
+      "random",
+      "2048",
+      "47",
+      "2c9808c3bcd09706"
+    ],
+    [
+      2048,
+      "random",
+      "2048",
+      "47",
+      "34245c2c6b25cb7f"
+    ],
+    [
+      2048,
+      "random",
+      "2048",
+      "47",
+      "3e291141d581a3b4"
+    ],
+    [
+      2048,
+      "random",
+      "2048",
+      "47",
+      "59151fed8f1ba7bd"
+    ],
+    [
+      2048,
+      "random",
+      "2048",
+      "47",
+      "96bdc90dbf2c1082"
+    ],
+    [
+      2048,
+      "random",
+      "2048",
+      "47",
+      "a4ba9200542683c8"
+    ],
+    [
+      2048,
+      "random",
+      "2048",
+      "47",
+      "c3ffbd80f59179e6"
+    ],
+    [
+      2048,
+      "random",
+      "2048",
+      "47",
+      "d891063e9ff95d64"
+    ],
+    [
+      2048,
+      "random",
+      "2048",
+      "47",
+      "e296d1bed4d888e2"
+    ],
+    [
+      2048,
+      "random",
+      "2048",
+      "89",
+      "2c9808c3bcd09706"
+    ],
+    [
+      2048,
+      "random",
+      "2048",
+      "89",
+      "34245c2c6b25cb7f"
+    ],
+    [
+      2048,
+      "random",
+      "2048",
+      "89",
+      "3e291141d581a3b4"
+    ],
+    [
+      2048,
+      "random",
+      "2048",
+      "89",
+      "59151fed8f1ba7bd"
+    ],
+    [
+      2048,
+      "random",
+      "2048",
+      "89",
+      "96bdc90dbf2c1082"
+    ],
+    [
+      2048,
+      "random",
+      "2048",
+      "89",
+      "9c39c993b6ebd64b"
+    ],
+    [
+      2048,
+      "random",
+      "2048",
+      "89",
+      "a4ba9200542683c8"
+    ],
+    [
+      2048,
+      "random",
+      "2048",
+      "89",
+      "c3ffbd80f59179e6"
+    ],
+    [
+      2048,
+      "random",
+      "2048",
+      "89",
+      "d891063e9ff95d64"
+    ],
+    [
+      2048,
+      "random",
+      "256",
+      "11",
+      "2c9808c3bcd09706"
+    ],
+    [
+      2048,
+      "random",
+      "256",
+      "11",
+      "59151fed8f1ba7bd"
+    ],
+    [
+      2048,
+      "random",
+      "256",
+      "11",
+      "66935761b1476a8b"
+    ],
+    [
+      2048,
+      "random",
+      "256",
+      "11",
+      "7d0f806c49c7add0"
+    ],
+    [
+      2048,
+      "random",
+      "256",
+      "11",
+      "96bdc90dbf2c1082"
+    ],
+    [
+      2048,
+      "random",
+      "256",
+      "11",
+      "a4ba9200542683c8"
+    ],
+    [
+      2048,
+      "random",
+      "256",
+      "11",
+      "c3ffbd80f59179e6"
+    ],
+    [
+      2048,
+      "random",
+      "256",
+      "11",
+      "d891063e9ff95d64"
+    ],
+    [
+      2048,
+      "random",
+      "256",
+      "11",
+      "e296d1bed4d888e2"
+    ],
+    [
+      2048,
+      "random",
+      "256",
+      "23",
+      "2c9808c3bcd09706"
+    ],
+    [
+      2048,
+      "random",
+      "256",
+      "23",
+      "3e291141d581a3b4"
+    ],
+    [
+      2048,
+      "random",
+      "256",
+      "23",
+      "59151fed8f1ba7bd"
+    ],
+    [
+      2048,
+      "random",
+      "256",
+      "23",
+      "96bdc90dbf2c1082"
+    ],
+    [
+      2048,
+      "random",
+      "256",
+      "23",
+      "9c39c993b6ebd64b"
+    ],
+    [
+      2048,
+      "random",
+      "256",
+      "23",
+      "a4ba9200542683c8"
+    ],
+    [
+      2048,
+      "random",
+      "256",
+      "23",
+      "c3ffbd80f59179e6"
+    ],
+    [
+      2048,
+      "random",
+      "256",
+      "23",
+      "d891063e9ff95d64"
+    ],
+    [
+      2048,
+      "random",
+      "256",
+      "23",
+      "e296d1bed4d888e2"
+    ],
+    [
+      2048,
+      "random",
+      "256",
+      "47",
+      "2c9808c3bcd09706"
+    ],
+    [
+      2048,
+      "random",
+      "256",
+      "47",
+      "34245c2c6b25cb7f"
+    ],
+    [
+      2048,
+      "random",
+      "256",
+      "47",
+      "3e291141d581a3b4"
+    ],
+    [
+      2048,
+      "random",
+      "256",
+      "47",
+      "59151fed8f1ba7bd"
+    ],
+    [
+      2048,
+      "random",
+      "256",
+      "47",
+      "96bdc90dbf2c1082"
+    ],
+    [
+      2048,
+      "random",
+      "256",
+      "47",
+      "a4ba9200542683c8"
+    ],
+    [
+      2048,
+      "random",
+      "256",
+      "47",
+      "c3ffbd80f59179e6"
+    ],
+    [
+      2048,
+      "random",
+      "256",
+      "47",
+      "d891063e9ff95d64"
+    ],
+    [
+      2048,
+      "random",
+      "256",
+      "47",
+      "e296d1bed4d888e2"
+    ],
+    [
+      2048,
+      "random",
+      "256",
+      "89",
+      "2c9808c3bcd09706"
+    ],
+    [
+      2048,
+      "random",
+      "256",
+      "89",
+      "34245c2c6b25cb7f"
+    ],
+    [
+      2048,
+      "random",
+      "256",
+      "89",
+      "3e291141d581a3b4"
+    ],
+    [
+      2048,
+      "random",
+      "256",
+      "89",
+      "59151fed8f1ba7bd"
+    ],
+    [
+      2048,
+      "random",
+      "256",
+      "89",
+      "96bdc90dbf2c1082"
+    ],
+    [
+      2048,
+      "random",
+      "256",
+      "89",
+      "9c39c993b6ebd64b"
+    ],
+    [
+      2048,
+      "random",
+      "256",
+      "89",
+      "a4ba9200542683c8"
+    ],
+    [
+      2048,
+      "random",
+      "256",
+      "89",
+      "c3ffbd80f59179e6"
+    ],
+    [
+      2048,
+      "random",
+      "256",
+      "89",
+      "d891063e9ff95d64"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "2048",
+      "11",
+      "2c9808c3bcd09706"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "2048",
+      "11",
+      "59151fed8f1ba7bd"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "2048",
+      "11",
+      "66935761b1476a8b"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "2048",
+      "11",
+      "7d0f806c49c7add0"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "2048",
+      "11",
+      "96bdc90dbf2c1082"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "2048",
+      "11",
+      "a4ba9200542683c8"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "2048",
+      "11",
+      "c3ffbd80f59179e6"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "2048",
+      "11",
+      "d891063e9ff95d64"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "2048",
+      "11",
+      "e296d1bed4d888e2"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "2048",
+      "23",
+      "2c9808c3bcd09706"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "2048",
+      "23",
+      "3e291141d581a3b4"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "2048",
+      "23",
+      "59151fed8f1ba7bd"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "2048",
+      "23",
+      "96bdc90dbf2c1082"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "2048",
+      "23",
+      "9c39c993b6ebd64b"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "2048",
+      "23",
+      "a4ba9200542683c8"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "2048",
+      "23",
+      "c3ffbd80f59179e6"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "2048",
+      "23",
+      "d891063e9ff95d64"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "2048",
+      "23",
+      "e296d1bed4d888e2"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "2048",
+      "47",
+      "2c9808c3bcd09706"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "2048",
+      "47",
+      "34245c2c6b25cb7f"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "2048",
+      "47",
+      "3e291141d581a3b4"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "2048",
+      "47",
+      "59151fed8f1ba7bd"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "2048",
+      "47",
+      "96bdc90dbf2c1082"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "2048",
+      "47",
+      "a4ba9200542683c8"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "2048",
+      "47",
+      "c3ffbd80f59179e6"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "2048",
+      "47",
+      "d891063e9ff95d64"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "2048",
+      "47",
+      "e296d1bed4d888e2"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "2048",
+      "89",
+      "2c9808c3bcd09706"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "2048",
+      "89",
+      "34245c2c6b25cb7f"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "2048",
+      "89",
+      "3e291141d581a3b4"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "2048",
+      "89",
+      "59151fed8f1ba7bd"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "2048",
+      "89",
+      "96bdc90dbf2c1082"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "2048",
+      "89",
+      "9c39c993b6ebd64b"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "2048",
+      "89",
+      "a4ba9200542683c8"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "2048",
+      "89",
+      "c3ffbd80f59179e6"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "2048",
+      "89",
+      "d891063e9ff95d64"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "256",
+      "11",
+      "2c9808c3bcd09706"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "256",
+      "11",
+      "59151fed8f1ba7bd"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "256",
+      "11",
+      "66935761b1476a8b"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "256",
+      "11",
+      "7d0f806c49c7add0"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "256",
+      "11",
+      "96bdc90dbf2c1082"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "256",
+      "11",
+      "a4ba9200542683c8"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "256",
+      "11",
+      "c3ffbd80f59179e6"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "256",
+      "11",
+      "d891063e9ff95d64"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "256",
+      "11",
+      "e296d1bed4d888e2"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "256",
+      "23",
+      "2c9808c3bcd09706"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "256",
+      "23",
+      "3e291141d581a3b4"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "256",
+      "23",
+      "59151fed8f1ba7bd"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "256",
+      "23",
+      "96bdc90dbf2c1082"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "256",
+      "23",
+      "9c39c993b6ebd64b"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "256",
+      "23",
+      "a4ba9200542683c8"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "256",
+      "23",
+      "c3ffbd80f59179e6"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "256",
+      "23",
+      "d891063e9ff95d64"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "256",
+      "23",
+      "e296d1bed4d888e2"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "256",
+      "47",
+      "2c9808c3bcd09706"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "256",
+      "47",
+      "34245c2c6b25cb7f"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "256",
+      "47",
+      "3e291141d581a3b4"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "256",
+      "47",
+      "59151fed8f1ba7bd"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "256",
+      "47",
+      "96bdc90dbf2c1082"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "256",
+      "47",
+      "a4ba9200542683c8"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "256",
+      "47",
+      "c3ffbd80f59179e6"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "256",
+      "47",
+      "d891063e9ff95d64"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "256",
+      "47",
+      "e296d1bed4d888e2"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "256",
+      "89",
+      "2c9808c3bcd09706"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "256",
+      "89",
+      "34245c2c6b25cb7f"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "256",
+      "89",
+      "3e291141d581a3b4"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "256",
+      "89",
+      "59151fed8f1ba7bd"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "256",
+      "89",
+      "96bdc90dbf2c1082"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "256",
+      "89",
+      "9c39c993b6ebd64b"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "256",
+      "89",
+      "a4ba9200542683c8"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "256",
+      "89",
+      "c3ffbd80f59179e6"
+    ],
+    [
+      2048,
+      "streamingllm",
+      "256",
+      "89",
+      "d891063e9ff95d64"
+    ]
+  ],
+  "occupancy": {
+    "random-2048": {
+      "0": {
+        "decode_step_cache_reaches_budget": {
+          "max": 2031.0,
+          "mean": 1942.0869565217392,
+          "min": 1704.0
+        },
+        "eviction_minus_nominal": {
+          "max": 2049.0,
+          "mean": 1975.7246376811595,
+          "min": 1729.0
+        },
+        "eviction_onset": {
+          "max": 2049.0,
+          "mean": 1975.7246376811595,
+          "min": 1729.0
+        },
+        "n_traces": 69,
+        "nominal_onset": 0,
+        "recorded_onset_step": {
+          "max": 65.0,
+          "mean": 65.0,
+          "min": 65.0
+        }
+      },
+      "2048": {
+        "decode_step_cache_reaches_budget": {
+          "max": 2031.0,
+          "mean": 1940.796875,
+          "min": 1704.0
+        },
+        "eviction_minus_nominal": {
+          "max": 64.0,
+          "mean": 64.0,
+          "min": 64.0
+        },
+        "eviction_onset": {
+          "max": 2112.0,
+          "mean": 2112.0,
+          "min": 2112.0
+        },
+        "n_traces": 64,
+        "nominal_onset": 2048,
+        "recorded_onset_step": {
+          "max": 2112.0,
+          "mean": 2112.0,
+          "min": 2112.0
+        }
+      },
+      "512": {
+        "decode_step_cache_reaches_budget": {
+          "max": 2031.0,
+          "mean": 1942.0869565217392,
+          "min": 1704.0
+        },
+        "eviction_minus_nominal": {
+          "max": 1536.0,
+          "mean": 1462.7246376811595,
+          "min": 1216.0
+        },
+        "eviction_onset": {
+          "max": 2048.0,
+          "mean": 1974.7246376811595,
+          "min": 1728.0
+        },
+        "n_traces": 69,
+        "nominal_onset": 512,
+        "recorded_onset_step": {
+          "max": 576.0,
+          "mean": 576.0,
+          "min": 576.0
+        }
+      }
+    },
+    "random-256": {
+      "0": {
+        "decode_step_cache_reaches_budget": {
+          "max": 239.0,
+          "mean": 162.32,
+          "min": -88.0
+        },
+        "eviction_minus_nominal": {
+          "max": 257.0,
+          "mean": 203.24,
+          "min": 65.0
+        },
+        "eviction_onset": {
+          "max": 257.0,
+          "mean": 203.24,
+          "min": 65.0
+        },
+        "n_traces": 100,
+        "nominal_onset": 0,
+        "recorded_onset_step": {
+          "max": 65.0,
+          "mean": 65.0,
+          "min": 65.0
+        }
+      },
+      "2048": {
+        "decode_step_cache_reaches_budget": {
+          "max": 239.0,
+          "mean": 148.796875,
+          "min": -88.0
+        },
+        "eviction_minus_nominal": {
+          "max": 64.0,
+          "mean": 64.0,
+          "min": 64.0
+        },
+        "eviction_onset": {
+          "max": 2112.0,
+          "mean": 2112.0,
+          "min": 2112.0
+        },
+        "n_traces": 64,
+        "nominal_onset": 2048,
+        "recorded_onset_step": {
+          "max": 2112.0,
+          "mean": 2112.0,
+          "min": 2112.0
+        }
+      },
+      "512": {
+        "decode_step_cache_reaches_budget": {
+          "max": 239.0,
+          "mean": 165.91666666666666,
+          "min": -88.0
+        },
+        "eviction_minus_nominal": {
+          "max": 64.0,
+          "mean": 64.0,
+          "min": 64.0
+        },
+        "eviction_onset": {
+          "max": 576.0,
+          "mean": 576.0,
+          "min": 576.0
+        },
+        "n_traces": 96,
+        "nominal_onset": 512,
+        "recorded_onset_step": {
+          "max": 576.0,
+          "mean": 576.0,
+          "min": 576.0
+        }
+      }
+    },
+    "streamingllm-2048": {
+      "0": {
+        "decode_step_cache_reaches_budget": {
+          "max": 2031.0,
+          "mean": 1942.0869565217392,
+          "min": 1704.0
+        },
+        "eviction_minus_nominal": {
+          "max": 2049.0,
+          "mean": 1975.7246376811595,
+          "min": 1729.0
+        },
+        "eviction_onset": {
+          "max": 2049.0,
+          "mean": 1975.7246376811595,
+          "min": 1729.0
+        },
+        "n_traces": 69,
+        "nominal_onset": 0,
+        "recorded_onset_step": {
+          "max": 65.0,
+          "mean": 65.0,
+          "min": 65.0
+        }
+      },
+      "2048": {
+        "decode_step_cache_reaches_budget": {
+          "max": 2031.0,
+          "mean": 1940.796875,
+          "min": 1704.0
+        },
+        "eviction_minus_nominal": {
+          "max": 64.0,
+          "mean": 64.0,
+          "min": 64.0
+        },
+        "eviction_onset": {
+          "max": 2112.0,
+          "mean": 2112.0,
+          "min": 2112.0
+        },
+        "n_traces": 64,
+        "nominal_onset": 2048,
+        "recorded_onset_step": {
+          "max": 2112.0,
+          "mean": 2112.0,
+          "min": 2112.0
+        }
+      },
+      "512": {
+        "decode_step_cache_reaches_budget": {
+          "max": 2031.0,
+          "mean": 1942.0869565217392,
+          "min": 1704.0
+        },
+        "eviction_minus_nominal": {
+          "max": 1536.0,
+          "mean": 1462.7246376811595,
+          "min": 1216.0
+        },
+        "eviction_onset": {
+          "max": 2048.0,
+          "mean": 1974.7246376811595,
+          "min": 1728.0
+        },
+        "n_traces": 69,
+        "nominal_onset": 512,
+        "recorded_onset_step": {
+          "max": 576.0,
+          "mean": 576.0,
+          "min": 576.0
+        }
+      }
+    },
+    "streamingllm-256": {
+      "0": {
+        "decode_step_cache_reaches_budget": {
+          "max": 239.0,
+          "mean": 162.32,
+          "min": -88.0
+        },
+        "eviction_minus_nominal": {
+          "max": 257.0,
+          "mean": 203.24,
+          "min": 65.0
+        },
+        "eviction_onset": {
+          "max": 257.0,
+          "mean": 203.24,
+          "min": 65.0
+        },
+        "n_traces": 100,
+        "nominal_onset": 0,
+        "recorded_onset_step": {
+          "max": 65.0,
+          "mean": 65.0,
+          "min": 65.0
+        }
+      },
+      "2048": {
+        "decode_step_cache_reaches_budget": {
+          "max": 239.0,
+          "mean": 148.796875,
+          "min": -88.0
+        },
+        "eviction_minus_nominal": {
+          "max": 64.0,
+          "mean": 64.0,
+          "min": 64.0
+        },
+        "eviction_onset": {
+          "max": 2112.0,
+          "mean": 2112.0,
+          "min": 2112.0
+        },
+        "n_traces": 64,
+        "nominal_onset": 2048,
+        "recorded_onset_step": {
+          "max": 2112.0,
+          "mean": 2112.0,
+          "min": 2112.0
+        }
+      },
+      "512": {
+        "decode_step_cache_reaches_budget": {
+          "max": 239.0,
+          "mean": 165.91666666666666,
+          "min": -88.0
+        },
+        "eviction_minus_nominal": {
+          "max": 64.0,
+          "mean": 64.0,
+          "min": 64.0
+        },
+        "eviction_onset": {
+          "max": 576.0,
+          "mean": 576.0,
+          "min": 576.0
+        },
+        "n_traces": 96,
+        "nominal_onset": 512,
+        "recorded_onset_step": {
+          "max": 576.0,
+          "mean": 576.0,
+          "min": 576.0
+        }
+      }
+    }
+  },
+  "position_step": 1024,
+  "pre_onset_violations": 0,
+  "realized_ratio_note": "realized_ratio = budget / (mean prompt + read position), the project convention; realized_ratio_decode_only = budget / position is what onset_surface_q2.json reports",
+  "window": 256
+}

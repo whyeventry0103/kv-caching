@@ -1068,6 +1068,157 @@ def fig8_budget_curve(out_dir: Path):
     _save(fig, out_dir, "fig8_budget_curve")
 
 
+# ---------------------------------------------------------------- Figure 9
+Q2_SURFACE = "results/diag/amendment-q/onset_surface_q2.json"
+Q2_GRID = "results/diag/meeting3/q2_onset_grid.json"
+
+
+def fig9_onset_grid(out_dir: Path):
+    """Amendment Q.2: the onset-staggered exposure grid, with its audit.
+
+    Rows are budgets (256, 2048); every panel holds budget AND read position
+    fixed, so the realized ratio is matched within a cell.
+
+    (a) window-mean per-step TV for each onset arm at each read position, with
+        problem-clustered 95% CIs and the problem/trace counts. Between-problem
+        spread dwarfs the arm differences, which is why the read is a paired
+        within-trace slope and not a comparison of these means.
+    (b) the pre-registered quantity: paired slope of TV on NOMINAL exposure
+        (full panel = the verdict; balanced fixed-population panel =
+        diagnostic), plus the slope on ACTUAL exposure (diagnostic), per 1000
+        steps with 95% CIs.
+    (c) occupancy audit: nominal exposure t - t0 against actual exposure
+        t - (first step with TV > 0). Enabling the press is not eviction: at
+        B = 2048 the cache is under budget until decode step ~1976, so the
+        t0 = 0 and t0 = 512 arms have the SAME actual exposure.
+
+    Every value is read from committed artifacts; nothing is typed in.
+    """
+    surf = json.loads((PROJECT_ROOT / Q2_SURFACE).read_text(encoding="utf-8"))
+    grid = json.loads((PROJECT_ROOT / Q2_GRID).read_text(encoding="utf-8"))
+    print("Figure 9 [DATA]")
+    arm_style = {
+        "0": (INK, "o", "t0 = 0"),
+        "512": (INK2, "s", "t0 = 512"),
+        "2048": (GREY, "^", "t0 = 2048"),
+    }
+    fig, axes = plt.subplots(2, 3, figsize=(11.0, 6.2))
+    for row, budget in enumerate((256, 2048)):
+        cells = {k: c for k, c in grid["full_panel"].items() if c["budget"] == budget}
+        names = sorted(cells, key=lambda k: cells[k]["position"])
+        positions = [cells[k]["position"] for k in names]
+        idx = range(len(names))
+
+        ax = axes[row, 0]
+        for j, (t0, (hue, mk, lab)) in enumerate(arm_style.items()):
+            xs = [i + (j - 1) * 0.18 for i in idx]
+            ms = [cells[k]["arms"][t0]["window_tv"] for k in names]
+            yerr = [
+                [m["mean"] - m["ci95"][0] for m in ms],
+                [m["ci95"][1] - m["mean"] for m in ms],
+            ]
+            ax.errorbar(
+                xs,
+                [m["mean"] for m in ms],
+                yerr=yerr,
+                fmt=mk,
+                color=hue,
+                ms=5,
+                capsize=2.5,
+                elinewidth=0.9,
+                label=lab,
+            )
+        ax.set_xticks(list(idx))
+        ax.set_xticklabels(
+            [
+                f"t={cells[k]['position']}\nr={cells[k]['realized_ratio']:.2f}\n"
+                f"{cells[k]['n_problems']} pids / {cells[k]['n_traces']} tr"
+                for k in names
+            ],
+            fontsize=7,
+        )
+        ax.set_ylabel(f"B = {budget}\nwindow-mean per-step TV")
+        if row == 0:
+            ax.set_title("(a) TV by onset arm (95% CI)", fontsize=9)
+            ax.legend(frameon=False, fontsize=7, loc="lower right", ncol=3)
+        top = max(
+            cells[k]["arms"][t0]["window_tv"]["ci95"][1]
+            for k in names
+            for t0 in arm_style
+        )
+        ax.set_ylim(0, top * 1.12)
+
+        ax = axes[row, 1]
+        series = [
+            ("nominal, full panel (verdict)", INK, "o", "white", None),
+            ("nominal, balanced (diag.)", INK2, "o", "none", "balanced"),
+            ("actual exposure (diag.)", GREY, "D", None, "actual"),
+        ]
+        for j, (lab, hue, mk, mfc, src) in enumerate(series):
+            xs, ys, lo, hi = [], [], [], []
+            for i, k in enumerate(names):
+                if src is None:
+                    st = surf["per_cell"][k]["slope"]
+                elif src == "balanced":
+                    st = surf["balanced_panel"]["per_cell"].get(k, {}).get("slope")
+                else:
+                    st = cells[k]["actual_exposure_slope"]
+                if st is None:
+                    continue
+                xs.append(i + (j - 1) * 0.2)
+                ys.append(st["mean"] * 1e3)
+                lo.append((st["mean"] - st["ci95"][0]) * 1e3)
+                hi.append((st["ci95"][1] - st["mean"]) * 1e3)
+            ax.errorbar(
+                xs,
+                ys,
+                yerr=[lo, hi],
+                fmt=mk,
+                color=hue,
+                mfc=hue if mfc is None or mfc == "white" else mfc,
+                ms=5,
+                capsize=2.5,
+                elinewidth=0.9,
+                label=lab,
+            )
+        ax.axhline(0, color=INK2, lw=0.6)
+        ax.set_xticks(list(idx))
+        ax.set_xticklabels([f"t={p}" for p in positions], fontsize=7.5)
+        ax.set_ylabel("dTV / d(exposure) per 1k steps")
+        if row == 0:
+            ax.set_title(
+                f"(b) paired exposure slope; verdict: {surf['verdict'].split()[0]}",
+                fontsize=9,
+            )
+            ax.legend(frameon=False, fontsize=6.5, loc="upper right")
+
+        ax = axes[row, 2]
+        for t0, (hue, mk, lab) in arm_style.items():
+            nom = [cells[k]["arms"][t0]["nominal_exposure"] for k in names]
+            act = [cells[k]["arms"][t0]["actual_exposure"]["mean"] for k in names]
+            ax.plot(nom, act, mk, color=hue, ms=5, label=lab)
+        lim = max(positions) * 1.05
+        ax.plot([0, lim], [0, lim], ls=(0, (2, 2)), color=GREY, lw=0.8)
+        ax.annotate(
+            "actual = nominal",
+            (lim * 0.62, lim * 0.62),
+            (lim * 0.34, lim * 0.8),
+            fontsize=6.5,
+            color=INK2,
+        )
+        ax.set_xlim(0, lim)
+        ax.set_ylim(0, lim)
+        ax.set_xlabel("nominal exposure t - t0 (steps)")
+        ax.set_ylabel("actual exposure (steps)")
+        if row == 0:
+            ax.set_title("(c) occupancy audit: nominal vs actual", fontsize=9)
+            ax.legend(frameon=False, fontsize=7, loc="lower right")
+        for a_ in axes[row]:
+            _ygrid(a_)
+    fig.tight_layout()
+    _save(fig, out_dir, "fig9_onset_grid")
+
+
 # ---------------------------------------------------------------- Figure 5
 def fig5_twofc(out_dir: Path, twofc_report: dict | None):
     vals = _twofc_values(twofc_report) if twofc_report else None
@@ -1309,6 +1460,7 @@ def main():
     fig5_twofc(out, _load_json(args.twofc_report))
     fig7_ratiomatched(out, _load_json(args.m3_curves))
     fig8_budget_curve(out)
+    fig9_onset_grid(out)
     print(f"\nAll figures written to {out}/")
 
 

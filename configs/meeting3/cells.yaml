@@ -98,13 +98,19 @@ cells:
               configs/experiments/replay_onset_t2048_q2.yaml]
     expected_units: 1200
     outputs: [results/diag/amendment-q/onset_surface_q2.json]
-    status: ANALYZED
-    note: "MIXED; surface figure absent"
+    status: COMPLETE
+    note: "MIXED, reproduced byte-identical 2026-09-24. Occupancy audit
+      (Q2.figure) shows the B=2048 row cannot identify exposure: t0=0 and
+      t0=512 have the same actual exposure (cache under budget to ~step 1976)."
   - id: Q2.figure
     task: 1
     protocol: "Q.2"
-    outputs: [figures/fig9_onset_grid.pdf]
-    status: NOT_STARTED
+    outputs: [figures/fig9_onset_grid.pdf,
+              results/diag/meeting3/q2_onset_grid.json]
+    status: COMPLETE
+    note: "grid + occupancy audit by scripts/report_onset_grid.py; 0 pre-onset
+      divergences; 276 never-diverged (arm, trace) pairs all < 2100 steps, i.e.
+      shorter than the first read window; fig9 viewed."
   - id: Q2.dacc
     task: 1
     protocol: "R.3"

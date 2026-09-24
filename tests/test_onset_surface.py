@@ -5,6 +5,7 @@ from __future__ import annotations
 import pytest
 
 from kvcache.metrics.onset_surface import (
+    eviction_onset,
     exposure_slope,
     matched_positions,
     window_divergence,
@@ -73,3 +74,25 @@ def test_the_q2_geometry_holds_ratio_fixed_while_exposure_varies():
     for _t0 in (0, 512, 2048):
         assert B / t == pytest.approx(0.0625)  # dose identical across arms
     assert [t - t0 for t0 in (0, 512, 2048)] == [4096, 3584, 2048]  # exposure differs
+
+
+def test_eviction_onset_is_the_first_nonzero_step():
+    assert eviction_onset([0.0, 0.0, 0.0, 1e-9, 0.0, 0.2]) == 3
+    assert eviction_onset([0.5]) == 0
+
+
+def test_eviction_onset_is_none_when_nothing_was_ever_evicted():
+    """A cache that never exceeds budget has no exposure, not exposure 0."""
+    assert eviction_onset([0.0, 0.0, 0.0]) is None
+    assert eviction_onset([]) is None
+
+
+def test_enabling_the_press_is_not_eviction():
+    """Q.2 at B=2048: press enabled at step 0, cache full near step 1985.
+
+    Nominal exposure at t=2304 is 2304; actual exposure is 2304 - 1985 = 319.
+    """
+    est = [0.0] * 1985 + [0.01] * 400
+    onset = eviction_onset(est)
+    assert onset == 1985
+    assert 2304 - onset == 319

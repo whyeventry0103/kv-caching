@@ -125,7 +125,7 @@
       ],
       "expected_units": 1200,
       "id": "Q2.dtv",
-      "note": "MIXED; surface figure absent",
+      "note": "MIXED, reproduced byte-identical 2026-09-24. Occupancy audit (Q2.figure) shows the B=2048 row cannot identify exposure: t0=0 and t0=512 have the same actual exposure (cache under budget to ~step 1976).",
       "output_sha256": {
         "results/diag/amendment-q/onset_surface_q2.json": "cc0dbe25354be141db885acff22dbe570af1c265e8536a04976962da7016dd1a"
       },
@@ -133,20 +133,23 @@
         "results/diag/amendment-q/onset_surface_q2.json"
       ],
       "protocol": "Q.2",
-      "status": "ANALYZED",
+      "status": "COMPLETE",
       "task": 1
     },
     {
       "config_sha256": {},
       "id": "Q2.figure",
+      "note": "grid + occupancy audit by scripts/report_onset_grid.py; 0 pre-onset divergences; 276 never-diverged (arm, trace) pairs all < 2100 steps, i.e. shorter than the first read window; fig9 viewed.",
       "output_sha256": {
-        "figures/fig9_onset_grid.pdf": null
+        "figures/fig9_onset_grid.pdf": "172e05f112df7406edddc4321564d33c105a4e27834561ab327a49f2d8cd883f",
+        "results/diag/meeting3/q2_onset_grid.json": "a638b15528c677cdbc9bcc7f5e00fb2a0f0e47754b15f57234958cea73b8eec1"
       },
       "outputs": [
-        "figures/fig9_onset_grid.pdf"
+        "figures/fig9_onset_grid.pdf",
+        "results/diag/meeting3/q2_onset_grid.json"
       ],
       "protocol": "Q.2",
-      "status": "NOT_STARTED",
+      "status": "COMPLETE",
       "task": 1
     },
     {
@@ -230,15 +233,15 @@
     "transformers": "4.56.2"
   },
   "schema": "meeting3-manifest-v1",
-  "source_tree_sha256": "fa4fd129ca8f5ba100fd50e0cf7e8440e4874c531639537cffd401c8175160e8",
+  "source_tree_sha256": "867d9ceb6a7e71a3a6ad86fb82dee912dba5c5d274e6b3b053197e0fcef1d5de",
   "status_counts": {
-    "ANALYZED": 2,
+    "ANALYZED": 1,
     "BLOCKED": 0,
-    "COMPLETE": 1,
+    "COMPLETE": 3,
     "GENERATED": 0,
     "IMPLEMENTED": 0,
     "INVALID": 0,
-    "NOT_STARTED": 12,
+    "NOT_STARTED": 11,
     "QUEUED": 0,
     "RUNNING": 0,
     "TESTED": 0,

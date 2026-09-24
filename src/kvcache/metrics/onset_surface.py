@@ -28,7 +28,12 @@ from __future__ import annotations
 import statistics
 from collections.abc import Sequence
 
-__all__ = ["window_divergence", "exposure_slope", "matched_positions"]
+__all__ = [
+    "window_divergence",
+    "exposure_slope",
+    "matched_positions",
+    "eviction_onset",
+]
 
 
 def window_divergence(
@@ -92,3 +97,24 @@ def exposure_slope(
         return None
     my = statistics.fmean(ys)
     return sum((x - mx) * (y - my) for x, y in zip(xs, ys, strict=True)) / denom
+
+
+def eviction_onset(estimate: Sequence[float]) -> int | None:
+    """First decode step whose per-step divergence is nonzero.
+
+    ``compression_start_step`` only ENABLES the press. Nothing is evicted until
+    the cache (prompt + generated) exceeds the budget at a prune step, and the
+    recorded ``onset_step`` marks the first prune EVENT, which is a no-op while
+    the cache is under budget. Exposure to eviction therefore starts at the
+    first step the distribution actually moves, which is directly observable:
+    before any eviction the compressed and reference forward passes are the
+    same computation and the per-step TV is exactly 0 (the project's standing
+    pre-eviction invariant). Strictly-positive is the right detector for that
+    reason; an epsilon would move the onset by the size of the first effect.
+
+    ``None`` when the trace never diverges (the cache never exceeded budget).
+    """
+    for i, v in enumerate(estimate):
+        if float(v) > 0.0:
+            return i
+    return None
