@@ -1,0 +1,247 @@
+{
+  "cells": [
+    {
+      "config_sha256": {},
+      "configs": [],
+      "expected_units": 3200,
+      "id": "T1.acc_curve",
+      "inputs": [
+        "grid-diss256-tok",
+        "grid-diss512",
+        "grid-diss1024",
+        "grid-diss2048-tok",
+        "readout-diss256",
+        "readout-diss512",
+        "readout-diss1024",
+        "readout-diss2048"
+      ],
+      "note": "curve exists; R.1 adds realized ratios, flip masses and a TV panel",
+      "output_sha256": {
+        "figures/fig8_budget_curve.pdf": "8cfb8884af2f594feadbc9afc7f6e31e112b3ee2aa70024fc6d4ab757e587e45",
+        "results/diag/amendment-k/m4-1024-summary.json": "c720767464da76fbafac3bdf7c24e8b64ff83948209f73654e8c6a07a024d6f7",
+        "results/diag/amendment-k/m4-512-summary.json": "0e7a5305ac516cc308ca60c599822c6212caba3917f435a990d8f21c7ef7fc82",
+        "results/diag/meeting3/t1_budget_curve.json": null
+      },
+      "outputs": [
+        "results/diag/amendment-k/m4-512-summary.json",
+        "results/diag/amendment-k/m4-1024-summary.json",
+        "results/diag/meeting3/t1_budget_curve.json",
+        "figures/fig8_budget_curve.pdf"
+      ],
+      "protocol": "R.1",
+      "question": "accuracy damage / readout / residual vs budget 256-2048",
+      "status": "ANALYZED",
+      "task": 1
+    },
+    {
+      "config_sha256": {
+        "configs/experiments/replay_ext_math500_b512_r1.yaml": null
+      },
+      "configs": [
+        "configs/experiments/replay_ext_math500_b512_r1.yaml"
+      ],
+      "depends_on": [],
+      "expected_units": 400,
+      "id": "T1.tv512",
+      "output_sha256": {},
+      "protocol": "R.1",
+      "question": "per-step TV at budget 512 (missing intermediate point)",
+      "status": "NOT_STARTED",
+      "task": 1
+    },
+    {
+      "config_sha256": {
+        "configs/experiments/replay_ext_math500_b1024_r1.yaml": null
+      },
+      "configs": [
+        "configs/experiments/replay_ext_math500_b1024_r1.yaml"
+      ],
+      "expected_units": 400,
+      "id": "T1.tv1024",
+      "output_sha256": {},
+      "protocol": "R.1",
+      "question": "per-step TV at budget 1024 (missing intermediate point)",
+      "status": "NOT_STARTED",
+      "task": 1
+    },
+    {
+      "config_sha256": {
+        "configs/experiments/replay_sawtooth_i16_q1.yaml": "8b23104a9d9899165000fcc1c83bc9ffe01f30e0eae3db8482b39d87bd8a67c2",
+        "configs/experiments/replay_sawtooth_i256_q1.yaml": "7e42703df098f9d3f32cb705bd26987fb2afd1e5ec8cfe97fe954c7195b67b77",
+        "configs/experiments/replay_sawtooth_i64_q1.yaml": "5c5ec89550f03ae77ee7e25a1e44d8e4421d32b786770d933c5c0ccbb17d72d3"
+      },
+      "configs": [
+        "configs/experiments/replay_sawtooth_i16_q1.yaml",
+        "configs/experiments/replay_sawtooth_i64_q1.yaml",
+        "configs/experiments/replay_sawtooth_i256_q1.yaml"
+      ],
+      "expected_units": 600,
+      "id": "Q1.arms",
+      "note": "legacy read AMPLITUDE-DEPENDENT; instrument check owed (Q1.legacy_control)",
+      "output_sha256": {
+        "results/diag/amendment-q/shape_sawtooth_i16.json": "e3b0dbe3bb721ab90896412a4d57ae2a6e419e567fafdc18946703445fa85bc3",
+        "results/diag/amendment-q/shape_sawtooth_i256.json": "7ad23afb1a294ed60b49e1436fff467096b469780380095a4a44183119b5220a",
+        "results/diag/amendment-q/shape_sawtooth_i64.json": "1820a7e7efb1088d56cb995c71d172785f0750a86d1236fb09639fd92eea3c4b"
+      },
+      "outputs": [
+        "results/diag/amendment-q/shape_sawtooth_i16.json",
+        "results/diag/amendment-q/shape_sawtooth_i64.json",
+        "results/diag/amendment-q/shape_sawtooth_i256.json"
+      ],
+      "protocol": "Q.1",
+      "question": "phase-0 locking at interval 16/64/256, floor 256",
+      "status": "ANALYZED",
+      "task": 1
+    },
+    {
+      "config_sha256": {},
+      "id": "Q1.legacy_control",
+      "note": "registered 2026-09-12, never built; R.2 records why this gate cannot identify physical-removal effects",
+      "output_sha256": {},
+      "protocol": "Q.1",
+      "question": "removal-anchored phase excess must not exclude zero (as registered)",
+      "status": "NOT_STARTED",
+      "task": 1
+    },
+    {
+      "config_sha256": {},
+      "id": "Q1.direct_control",
+      "output_sha256": {},
+      "protocol": "R.2",
+      "question": "does physical compaction of already-masked keys change outputs?",
+      "status": "NOT_STARTED",
+      "task": 1
+    },
+    {
+      "config_sha256": {
+        "configs/experiments/replay_onset_t0_q2.yaml": "0dbf3fad20a63f8e083768be06e7575cf8d0198bba09d02621b5f271760a3492",
+        "configs/experiments/replay_onset_t2048_q2.yaml": "21e0db948e1c127acfaff2a573fb7b62ac3e843593b53dcb533a142f9177a6bf",
+        "configs/experiments/replay_onset_t512_q2.yaml": "f7a62426d2a0a2ca1c01c17fba5d1eb81d2aeebaaa98bb68056b3925b2e8a04c"
+      },
+      "configs": [
+        "configs/experiments/replay_onset_t0_q2.yaml",
+        "configs/experiments/replay_onset_t512_q2.yaml",
+        "configs/experiments/replay_onset_t2048_q2.yaml"
+      ],
+      "expected_units": 1200,
+      "id": "Q2.dtv",
+      "note": "MIXED; surface figure absent",
+      "output_sha256": {
+        "results/diag/amendment-q/onset_surface_q2.json": "cc0dbe25354be141db885acff22dbe570af1c265e8536a04976962da7016dd1a"
+      },
+      "outputs": [
+        "results/diag/amendment-q/onset_surface_q2.json"
+      ],
+      "protocol": "Q.2",
+      "status": "ANALYZED",
+      "task": 1
+    },
+    {
+      "config_sha256": {},
+      "id": "Q2.figure",
+      "output_sha256": {
+        "figures/fig9_onset_grid.pdf": null
+      },
+      "outputs": [
+        "figures/fig9_onset_grid.pdf"
+      ],
+      "protocol": "Q.2",
+      "status": "NOT_STARTED",
+      "task": 1
+    },
+    {
+      "config_sha256": {},
+      "expected_units": 1200,
+      "id": "Q2.dacc",
+      "note": "comparator: 100 matched rows from the FC bank if generation semantics match",
+      "output_sha256": {},
+      "protocol": "R.3",
+      "question": "free-running accuracy on the (budget, compression_start_step) grid",
+      "status": "NOT_STARTED",
+      "task": 1
+    },
+    {
+      "config_sha256": {},
+      "id": "Q3.algebra_control",
+      "output_sha256": {},
+      "protocol": "R.4",
+      "question": "same-q/K restriction identity, float64 + production dtype",
+      "status": "NOT_STARTED",
+      "task": 2
+    },
+    {
+      "config_sha256": {},
+      "expected_units": 800,
+      "id": "Q3.capture",
+      "output_sha256": {},
+      "protocol": "Q.3/R.4",
+      "question": "M, Delta, collateral per layer/group/event",
+      "status": "NOT_STARTED",
+      "task": 2
+    },
+    {
+      "config_sha256": {},
+      "id": "Q5.identity_repair",
+      "output_sha256": {},
+      "protocol": "R.5",
+      "question": "restoration reinserts the TRUE evicted K/V, per layer",
+      "status": "NOT_STARTED",
+      "task": 2
+    },
+    {
+      "config_sha256": {},
+      "expected_units": 4000,
+      "id": "Q5.exact_lag",
+      "output_sha256": {},
+      "protocol": "R.5",
+      "question": "recovery after exact delay 1/4/16/64/256",
+      "status": "NOT_STARTED",
+      "task": 2
+    },
+    {
+      "config_sha256": {},
+      "id": "Q6.fit",
+      "output_sha256": {},
+      "protocol": "Q.6/R.6",
+      "question": "full-only frozen PCA basis per layer, k=64",
+      "status": "NOT_STARTED",
+      "task": 3
+    },
+    {
+      "config_sha256": {},
+      "expected_units": 800,
+      "id": "Q6.project",
+      "output_sha256": {},
+      "protocol": "Q.6/R.6",
+      "question": "omega(Random) - omega(StreamingLLM), budget 256 primary",
+      "status": "NOT_STARTED",
+      "task": 3
+    }
+  ],
+  "model": {
+    "handle": "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B",
+    "key": "r1_distill_qwen_7b",
+    "revision": "916b56a44061fd5cd7d6a8fb632557ed4f724f60"
+  },
+  "reference_bank": "math500-fc-powered-merged",
+  "runtime_pin": {
+    "kvpress": "0.5.3",
+    "torch": "2.7.1",
+    "transformers": "4.56.2"
+  },
+  "schema": "meeting3-manifest-v1",
+  "source_tree_sha256": "f11a97c49f4e55c258e0433d2eb7e7046a60b3eea67fd4cef6beb5f31be3f1d9",
+  "status_counts": {
+    "ANALYZED": 3,
+    "BLOCKED": 0,
+    "COMPLETE": 0,
+    "GENERATED": 0,
+    "IMPLEMENTED": 0,
+    "INVALID": 0,
+    "NOT_STARTED": 12,
+    "QUEUED": 0,
+    "RUNNING": 0,
+    "TESTED": 0,
+    "VALIDATED": 0
+  }
+}

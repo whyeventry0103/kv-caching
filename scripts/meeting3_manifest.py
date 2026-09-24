@@ -2,7 +2,7 @@
 """Build the machine-readable Meeting #3 execution manifest.
 
 Reads the declarative cell list in configs/meeting3/cells.yaml and writes
-results/meeting3/manifest.json with every identity COMPUTED here rather than
+results/diag/meeting3/meeting3_manifest.json with every identity COMPUTED here rather than
 typed by hand: config-file sha256, the source-tree hash, and sha256 of every
 output artifact that exists. A cell whose declared outputs are missing cannot
 claim a status above RUNNING, and an unknown status is refused -- a ledger that
@@ -109,7 +109,9 @@ def main() -> int:
         "--cells", type=Path, default=PROJECT_ROOT / "configs/meeting3/cells.yaml"
     )
     ap.add_argument(
-        "--out", type=Path, default=PROJECT_ROOT / "results/meeting3/manifest.json"
+        "--out",
+        type=Path,
+        default=PROJECT_ROOT / "results/diag/meeting3/meeting3_manifest.json",
     )
     ap.add_argument("--check", action="store_true")
     a = ap.parse_args()

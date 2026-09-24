@@ -1,0 +1,162 @@
+{
+  "by_cell": {
+    "random-1024": {
+      "budget": "1024",
+      "max_prompt_tokens": 353,
+      "mean_prompt_tokens": 66.28,
+      "median_prompt_tokens": 51.5,
+      "min_prompt_tokens": 15,
+      "n": 400,
+      "press": "random"
+    },
+    "random-2048": {
+      "budget": "2048",
+      "max_prompt_tokens": 353,
+      "mean_prompt_tokens": 66.28,
+      "median_prompt_tokens": 51.5,
+      "min_prompt_tokens": 15,
+      "n": 400,
+      "press": "random"
+    },
+    "random-256": {
+      "budget": "256",
+      "max_prompt_tokens": 353,
+      "mean_prompt_tokens": 66.28,
+      "median_prompt_tokens": 51.5,
+      "min_prompt_tokens": 15,
+      "n": 400,
+      "press": "random"
+    },
+    "random-512": {
+      "budget": "512",
+      "max_prompt_tokens": 353,
+      "mean_prompt_tokens": 66.28,
+      "median_prompt_tokens": 51.5,
+      "min_prompt_tokens": 15,
+      "n": 400,
+      "press": "random"
+    },
+    "streamingllm-1024": {
+      "budget": "1024",
+      "max_prompt_tokens": 353,
+      "mean_prompt_tokens": 66.28,
+      "median_prompt_tokens": 51.5,
+      "min_prompt_tokens": 15,
+      "n": 400,
+      "press": "streamingllm"
+    },
+    "streamingllm-2048": {
+      "budget": "2048",
+      "max_prompt_tokens": 353,
+      "mean_prompt_tokens": 66.28,
+      "median_prompt_tokens": 51.5,
+      "min_prompt_tokens": 15,
+      "n": 400,
+      "press": "streamingllm"
+    },
+    "streamingllm-256": {
+      "budget": "256",
+      "max_prompt_tokens": 353,
+      "mean_prompt_tokens": 66.28,
+      "median_prompt_tokens": 51.5,
+      "min_prompt_tokens": 15,
+      "n": 400,
+      "press": "streamingllm"
+    },
+    "streamingllm-512": {
+      "budget": "512",
+      "max_prompt_tokens": 353,
+      "mean_prompt_tokens": 66.28,
+      "median_prompt_tokens": 51.5,
+      "min_prompt_tokens": 15,
+      "n": 400,
+      "press": "streamingllm"
+    }
+  },
+  "note": "Prompt lengths from token-ID sidecars (exact generation-time tokens, decode-encode validated), not re-tokenized. Realized ratios use budget / (prompt + generation); the generation-only figure is reported alongside to show the difference the prompt term makes.",
+  "pooled": {
+    "mean_prompt_tokens": 66.28,
+    "median_prompt_tokens": 51.5,
+    "n": 3200
+  },
+  "realized": {
+    "random-1024": {
+      "budget": 1024,
+      "mean_generated_tokens": 3635.145,
+      "mean_prompt_tokens": 66.28,
+      "mean_trace_tokens": 3701.425,
+      "ratio": 0.27665020904111254,
+      "ratio_generation_only_pct": 28.169440283675065,
+      "ratio_pct": 27.665020904111252
+    },
+    "random-2048": {
+      "budget": 2048,
+      "mean_generated_tokens": 3454.13,
+      "mean_prompt_tokens": 66.28,
+      "mean_trace_tokens": 3520.4100000000003,
+      "ratio": 0.5817504211157223,
+      "ratio_generation_only_pct": 59.291341090231114,
+      "ratio_pct": 58.175042111572225
+    },
+    "random-256": {
+      "budget": 256,
+      "mean_generated_tokens": 8043.7075,
+      "mean_prompt_tokens": 66.28,
+      "mean_trace_tokens": 8109.9875,
+      "ratio": 0.03156601659373704,
+      "ratio_generation_only_pct": 3.182611998260752,
+      "ratio_pct": 3.1566016593737043
+    },
+    "random-512": {
+      "budget": 512,
+      "mean_generated_tokens": 4852.7225,
+      "mean_prompt_tokens": 66.28,
+      "mean_trace_tokens": 4919.0025,
+      "ratio": 0.10408614348132575,
+      "ratio_generation_only_pct": 10.550778454774614,
+      "ratio_pct": 10.408614348132575
+    },
+    "streamingllm-1024": {
+      "budget": 1024,
+      "mean_generated_tokens": 4128.9825,
+      "mean_prompt_tokens": 66.28,
+      "mean_trace_tokens": 4195.2625,
+      "ratio": 0.2440848457039339,
+      "ratio_generation_only_pct": 24.800298862976533,
+      "ratio_pct": 24.40848457039339
+    },
+    "streamingllm-2048": {
+      "budget": 2048,
+      "mean_generated_tokens": 3649.7025,
+      "mean_prompt_tokens": 66.28,
+      "mean_trace_tokens": 3715.9825,
+      "ratio": 0.5511328430637119,
+      "ratio_generation_only_pct": 56.114162729701945,
+      "ratio_pct": 55.11328430637119
+    },
+    "streamingllm-256": {
+      "budget": 256,
+      "mean_generated_tokens": 5273.74,
+      "mean_prompt_tokens": 66.28,
+      "mean_trace_tokens": 5340.0199999999995,
+      "ratio": 0.04793989535619717,
+      "ratio_generation_only_pct": 4.854240064925461,
+      "ratio_pct": 4.793989535619717
+    },
+    "streamingllm-512": {
+      "budget": 512,
+      "mean_generated_tokens": 5220.9925,
+      "mean_prompt_tokens": 66.28,
+      "mean_trace_tokens": 5287.2725,
+      "ratio": 0.09683631778010307,
+      "ratio_generation_only_pct": 9.80656455645167,
+      "ratio_pct": 9.683631778010307
+    }
+  },
+  "runs": [
+    "grid-diss256-tok",
+    "grid-diss512",
+    "grid-diss1024",
+    "grid-diss2048-tok"
+  ]
+}

@@ -2856,7 +2856,7 @@ default below is fixed here before the corresponding computation has run. Where
 an earlier amendment registered something, that registration and its original
 gate outcome stay visible; this amendment adds clarifications with new
 identities, it does not rewrite history. Probe script and outputs:
-`results/meeting3/probe_findings.py`.
+`results/diag/meeting3/probe_findings.py`.
 
 ### R.0 Facts established from the pinned stack (torch 2.7.1, transformers 4.56.2, kvpress 0.5.3), read from installed source
 

@@ -40,7 +40,7 @@ cells:
     expected_units: 3200     # 4 budgets x 2 presses x 400 conditions
     outputs: [results/diag/amendment-k/m4-512-summary.json,
               results/diag/amendment-k/m4-1024-summary.json,
-              results/meeting3/t1_budget_curve.json,
+              results/diag/meeting3/t1_budget_curve.json,
               figures/fig8_budget_curve.pdf]
     status: ANALYZED
     note: "curve exists; R.1 adds realized ratios, flip masses and a TV panel"
