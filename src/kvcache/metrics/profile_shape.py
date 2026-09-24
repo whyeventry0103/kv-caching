@@ -267,7 +267,18 @@ def phase_amplitude_excess(
         "n_profiles": len(obs_sum),
         "phase_amplitude": obs_amp,
         "phase_amplitude_sham": sham_amp,
-        "excess": (obs_amp - sham_amp) if (obs_amp and sham_amp) else None,
+        # Amendment R.2 (phase-excess-v2): `is not None`, not truthiness. The
+        # v1 expression turned a legitimate 0.0 amplitude (a flat profile) into
+        # a missing excess, while the bootstrap draws above already treated 0.0
+        # correctly -- so the point estimate and its own interval disagreed on
+        # what counted as data. Every committed Q.1/P.2 artifact had non-zero
+        # amplitudes, so none of their excesses change.
+        "excess": (
+            (obs_amp - sham_amp)
+            if (obs_amp is not None and sham_amp is not None)
+            else None
+        ),
+        "analysis_version": "phase-excess-v2",
         "excess_ci95": [lo, hi],
         "excess_excludes_zero": (lo > 0.0) or (hi < 0.0),
         "n_resamples": n_resamples,

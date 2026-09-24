@@ -2,11 +2,12 @@
 """Build the machine-readable Meeting #3 execution manifest.
 
 Reads the declarative cell list in configs/meeting3/cells.yaml and writes
-results/diag/meeting3/meeting3_manifest.json with every identity COMPUTED here rather than
-typed by hand: config-file sha256, the source-tree hash, and sha256 of every
-output artifact that exists. A cell whose declared outputs are missing cannot
-claim a status above RUNNING, and an unknown status is refused -- a ledger that
-can say COMPLETE about something that does not exist is worse than none.
+results/diag/meeting3/meeting3_manifest.json with every identity computed
+here rather than typed by hand: config-file sha256, the source-tree hash, and
+sha256 of every output artifact that exists. A cell whose declared outputs are
+missing cannot claim a status above RUNNING, and an unknown status is refused:
+a ledger that can say COMPLETE about something that does not exist is worse
+than none.
 
     python scripts/meeting3_manifest.py [--check]
 

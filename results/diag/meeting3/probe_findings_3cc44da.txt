@@ -1,0 +1,19 @@
+Output of results/diag/meeting3/probe_findings.py against commit 3cc44da
+(the reviewed commit, BEFORE any Amendment R fix), captured 2026-09-24:
+
+== F1 phase amplitude is invariant to circular rotation ==
+  selection-anchored amplitude: 0.9 peak at 0
+  32-shifted amplitude        : 0.9 peak at 32
+== F2 legitimate zero excess reported as None ==
+  constant profiles: amplitude= 0.0 sham= 0.0 excess= None CI= [0.0, 0.0]
+== F3 FrozenBasis accepts a non-orthonormal basis ==
+  basis [[2,0]], displacement [1,0] -> (parallel, perp) = (4.0, 3.0)  (a true projector gives (1, 0))
+  omega(0,0) = None | omega(0,3) = None (same None for two different situations)
+== F4 collateral has no rank/cut condition ==
+  signature: (per_head_attention: 'Sequence[Sequence[float]]', evicted: 'Sequence[int]', *, tau: 'float' = 0.01) -> 'float'
+== F5 requested lag vs selected age (_stash_candidates_by_age) ==
+  requested lag   1 -> selected ages [0]
+  requested lag   4 -> selected ages [0]
+  requested lag  16 -> selected ages [0]
+  requested lag  64 -> selected ages [64]
+  requested lag 256 -> selected ages [128]

@@ -32,7 +32,46 @@ from __future__ import annotations
 import math
 from collections.abc import Sequence
 
-__all__ = ["FrozenBasis", "whiten", "split_displacement", "omega"]
+__all__ = [
+    "FrozenBasis",
+    "whiten",
+    "split_displacement",
+    "omega",
+    "omega_with_reason",
+]
+
+
+# Amendment R.6. A projector is only a projector if its basis is orthonormal:
+# with basis [[2, 0]] and displacement [1, 0] the v1 code returned
+# (parallel, perp) = (4, 3), both wrong, and nothing refused it. The
+# condition="fullcache" string also proved nothing about provenance; the fitter
+# records input hashes for that. These checks make an invalid basis impossible
+# to construct rather than merely documented as unsupported.
+ORTHONORMAL_TOL = 1e-6
+
+
+def _validate_finite(label: str, values: Sequence[float]) -> None:
+    for x in values:
+        if not math.isfinite(float(x)):
+            raise ValueError(f"{label} contains a non-finite value")
+
+
+def _validate_orthonormal(vectors: Sequence[Sequence[float]]) -> None:
+    vs = [[float(x) for x in v] for v in vectors]
+    for i, a in enumerate(vs):
+        norm = math.sqrt(sum(x * x for x in a))
+        if abs(norm - 1.0) > ORTHONORMAL_TOL:
+            raise ValueError(
+                f"basis vector {i} has norm {norm:.6g}; a projector needs unit "
+                "vectors (Amendment R.6)"
+            )
+        for j in range(i):
+            dot = sum(x * y for x, y in zip(a, vs[j], strict=True))
+            if abs(dot) > ORTHONORMAL_TOL:
+                raise ValueError(
+                    f"basis vectors {j} and {i} are not orthogonal (dot {dot:.3g}); "
+                    "rank or orthogonality lost"
+                )
 
 
 class FrozenBasis:
@@ -69,6 +108,13 @@ class FrozenBasis:
         for v in vectors:
             if len(v) != dim:
                 raise ValueError("every basis vector must match the whitening dim")
+        if int(fitted_on_n) <= 0:
+            raise ValueError("fitted_on_n must be positive")
+        _validate_finite("mean", mean)
+        _validate_finite("scale", scale)
+        for v in vectors:
+            _validate_finite("basis vector", v)
+        _validate_orthonormal(vectors)
         object.__setattr__(
             self, "_vectors", tuple(tuple(float(x) for x in v) for v in vectors)
         )
@@ -141,6 +187,26 @@ def split_displacement(
         math.sqrt(sum(x * x for x in parallel)),
         math.sqrt(sum(x * x for x in perp)),
     )
+
+
+OMEGA_FINITE = "finite"
+OMEGA_UNDEFINED = "undefined_direction"  # both norms zero: no displacement
+OMEGA_UNBOUNDED = "unbounded"  # zero parallel, positive perpendicular
+
+
+def omega_with_reason(
+    norm_parallel: float, norm_perp: float
+) -> tuple[float | None, str]:
+    """``omega`` plus WHY it is missing, since two different situations share None.
+
+    Amendment R.6 counts the two separately and excludes both from the
+    finite-omega mean, a rule fixed before any projection data existed.
+    """
+    if norm_parallel > 0.0:
+        return float(norm_perp) / float(norm_parallel), OMEGA_FINITE
+    if norm_perp > 0.0:
+        return None, OMEGA_UNBOUNDED
+    return None, OMEGA_UNDEFINED
 
 
 def omega(norm_parallel: float, norm_perp: float) -> float | None:

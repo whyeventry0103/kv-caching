@@ -294,3 +294,29 @@ def test_drift_normalized_curve_degenerate_returns_none():
     assert drift_normalized_curve([], n_bins=4) is None
     assert drift_normalized_curve([1.0, 2.0], n_bins=4) is None  # q < 1
     assert drift_normalized_curve([0.0, 0.0, 0.0, 0.0], n_bins=2) is None  # base <= 0
+
+
+# ---------------------------------------------------------------------------
+# Amendment R.2: two properties of the phase statistic, pinned.
+
+
+def test_zero_amplitude_gives_a_zero_excess_not_a_missing_one():
+    """v1 used truthiness and returned None here; 0.0 is data."""
+    from kvcache.metrics.profile_shape import phase_amplitude_excess
+
+    flat = [([0.5] * 640, 0, 64) for _ in range(4)]
+    out = phase_amplitude_excess(flat, n_resamples=50, seed=0)
+    assert out["phase_amplitude"] == 0.0
+    assert out["excess"] == 0.0
+    assert out["analysis_version"] == "phase-excess-v2"
+
+
+def test_phase_amplitude_is_invariant_to_rotation_so_it_cannot_locate_an_event():
+    """Why the registered Q.1 removal-anchored gate cannot identify removal
+    effects: re-anchoring a periodic profile moves its peak, not its amplitude."""
+    from kvcache.metrics.profile_shape import phase_amplitude
+
+    prof = [1.0] + [0.1] * 63
+    shifted = prof[-32:] + prof[:-32]
+    assert phase_amplitude(prof) == pytest.approx(phase_amplitude(shifted))
+    assert prof.index(max(prof)) == 0 and shifted.index(max(shifted)) == 32

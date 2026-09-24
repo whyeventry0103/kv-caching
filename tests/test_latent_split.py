@@ -104,3 +104,72 @@ def test_provenance_records_what_must_travel_with_any_number():
     p = _basis().provenance()
     assert p["condition"] == "fullcache"
     assert p["k"] == 1 and p["dim"] == 3 and p["fitted_on_n"] == 100
+
+
+# ---------------------------------------------------------------------------
+# Amendment R.6: the basis must actually be a projector basis.
+
+
+def test_non_orthonormal_basis_is_refused_the_reviewer_counterexample():
+    """[[2,0]] gave (parallel, perp) = (4, 3) for [1,0]; it must not construct."""
+    with pytest.raises(ValueError, match="norm"):
+        FrozenBasis(
+            [(2.0, 0.0)],
+            mean=[0.0, 0.0],
+            scale=[1.0, 1.0],
+            condition="fullcache",
+            fitted_on_n=1,
+        )
+
+
+def test_non_orthogonal_basis_is_refused():
+    s = 2**-0.5
+    with pytest.raises(ValueError, match="not orthogonal"):
+        FrozenBasis(
+            [(1.0, 0.0), (s, s)],
+            mean=[0.0, 0.0],
+            scale=[1.0, 1.0],
+            condition="fullcache",
+            fitted_on_n=1,
+        )
+
+
+def test_non_finite_inputs_and_empty_fit_are_refused():
+    with pytest.raises(ValueError, match="non-finite"):
+        FrozenBasis(
+            [(1.0, 0.0)],
+            mean=[float("nan"), 0.0],
+            scale=[1.0, 1.0],
+            condition="fullcache",
+            fitted_on_n=1,
+        )
+    with pytest.raises(ValueError, match="fitted_on_n"):
+        FrozenBasis(
+            [(1.0, 0.0)],
+            mean=[0.0, 0.0],
+            scale=[1.0, 1.0],
+            condition="fullcache",
+            fitted_on_n=0,
+        )
+
+
+def test_a_valid_basis_gives_a_true_projection():
+    b = FrozenBasis(
+        [(1.0, 0.0)],
+        mean=[0.0, 0.0],
+        scale=[1.0, 1.0],
+        condition="fullcache",
+        fitted_on_n=1,
+    )
+    assert split_displacement([1.0, 0.0], b) == pytest.approx((1.0, 0.0))
+
+
+def test_omega_reasons_distinguish_the_two_missing_cases():
+    from kvcache.metrics.latent_split import omega_with_reason
+
+    assert omega_with_reason(0.0, 0.0) == (None, "undefined_direction")
+    assert omega_with_reason(0.0, 3.0) == (None, "unbounded")
+    val, why = omega_with_reason(3.0, 4.0)
+    assert why == "finite" and val == pytest.approx(4.0 / 3.0)
+    # the legacy API is unchanged
+    assert omega(0.0, 0.0) is None and omega(0.0, 3.0) is None

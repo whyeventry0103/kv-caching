@@ -50,6 +50,9 @@ __all__ = [
     "shape_tv",
     "collateral_fraction",
     "DEFAULT_COLLATERAL_TAU",
+    "align_to_positions",
+    "restricted_from_logits",
+    "collateral_event",
 ]
 
 # Fixed in Amendment Q.3 before the cell runs, so it cannot be tuned afterwards
@@ -148,3 +151,117 @@ def collateral_fraction(
                 wanted += 1
                 break
     return wanted / len(ev)
+
+
+# ---------------------------------------------------------------------------
+# Amendment R.4 reference implementations. The production capture computes on
+# GPU tensors; these pure-Python versions are what it is parity-tested against.
+
+
+def align_to_positions(
+    values: Sequence[float], positions: Sequence[int], target: Sequence[int]
+) -> list[float]:
+    """Reorder ``values`` (aligned with ``positions``) onto ``target`` positions.
+
+    kvpress keeps entries in SCORE order, not position order, and each KV head
+    keeps a different set, so a compressed attention row is never safely
+    assumed to be sorted. Identity is by absolute token position. A target
+    position that is absent, or a duplicated source position, is a mapping
+    error and raises: the permissive helpers above silently drop out-of-range
+    indices, which is acceptable for old callers but not for production data.
+    """
+    if len(values) != len(positions):
+        raise ValueError("values and positions must be the same length")
+    index: dict[int, int] = {}
+    for i, p in enumerate(positions):
+        if int(p) in index:
+            raise ValueError(f"duplicate position {p} in source mapping")
+        index[int(p)] = i
+    missing = [t for t in target if int(t) not in index]
+    if missing:
+        raise ValueError(f"target positions absent from source: {missing[:5]}")
+    return [float(values[index[int(t)]]) for t in target]
+
+
+def restricted_from_logits(
+    logits: Sequence[float], keep: Sequence[int]
+) -> tuple[float, list[float]]:
+    """``(M, a_full|S)`` computed stably from logits by log-sum-exp.
+
+    Computing from probabilities underflows for long contexts: a retained set
+    can hold a real but tiny mass that rounds to zero, which would make the
+    restriction undefined and tempt a caller to call Delta zero. Log-space
+    avoids that. ``keep`` indexes into ``logits``.
+    """
+    import math
+
+    lg = [float(x) for x in logits]
+    if not keep:
+        raise ValueError("empty retained set")
+    lse_all = max(lg) + math.log(sum(math.exp(x - max(lg)) for x in lg))
+    sub = [lg[i] for i in keep]
+    m = max(sub)
+    lse_s = m + math.log(sum(math.exp(x - m) for x in sub))
+    mass_loss_value = -math.expm1(lse_s - lse_all)  # 1 - exp(lse_S - lse_all)
+    return max(0.0, mass_loss_value), [math.exp(x - lse_s) for x in sub]
+
+
+def collateral_event(
+    per_head_attention: Sequence[Sequence[float]],
+    positions: Sequence[int],
+    evicted: Sequence[int],
+    *,
+    budget: int,
+    tau: float = DEFAULT_COLLATERAL_TAU,
+    protected: Sequence[int] = (),
+) -> dict[str, float | int | None]:
+    """Registered GQA collateral for one (layer, KV group, event) -- Amendment R.4.
+
+    A position counts as collateral when BOTH hold: (a) at least one query head
+    of the group placed more than ``tau`` of its full-reference attention on it,
+    and (b) the group's MEAN full-reference attention ranks it outside the top
+    ``budget`` candidates (ties toward the lower position). That second
+    condition is what makes this a GQA cost -- wanted by an individual head but
+    not by the group average -- and it is exactly what ``collateral_fraction``
+    omits. That older statistic is returned here as ``wanted_any_head`` and is
+    never labelled collateral.
+
+    ``per_head_attention`` rows are aligned with ``positions`` (absolute token
+    ids of every candidate at the event). Protected positions are excluded from
+    the denominator. With nothing eligible evicted the fractions are ``None``
+    (unavailable), never 0.
+    """
+    n_heads = len(per_head_attention)
+    if n_heads == 0:
+        raise ValueError("no query heads")
+    for row in per_head_attention:
+        if len(row) != len(positions):
+            raise ValueError("attention rows must align with positions")
+    col = {int(p): i for i, p in enumerate(positions)}
+    if len(col) != len(positions):
+        raise ValueError("duplicate candidate positions")
+    group_mean = [
+        sum(float(r[i]) for r in per_head_attention) / n_heads
+        for i in range(len(positions))
+    ]
+    order = sorted(range(len(positions)), key=lambda i: (-group_mean[i], positions[i]))
+    top = {int(positions[i]) for i in order[: int(budget)]}
+    prot = {int(p) for p in protected}
+    eligible = [int(j) for j in dict.fromkeys(evicted) if int(j) not in prot]
+    unknown = [j for j in eligible if j not in col]
+    if unknown:
+        raise ValueError(f"evicted positions not among candidates: {unknown[:5]}")
+    wanted = [
+        j for j in eligible if any(float(r[col[j]]) > tau for r in per_head_attention)
+    ]
+    collateral = [j for j in wanted if j not in top]
+    n = len(eligible)
+    return {
+        "n_evicted_eligible": n,
+        "n_wanted_any_head": len(wanted),
+        "n_collateral": len(collateral),
+        "wanted_any_head": (len(wanted) / n) if n else None,
+        "collateral": (len(collateral) / n) if n else None,
+        "tau": float(tau),
+        "budget_cut": int(budget),
+    }
