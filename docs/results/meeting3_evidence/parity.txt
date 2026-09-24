@@ -1,9 +1,8 @@
-# make parity, 2026-09-24T19:33:47Z, commit c92381927fa8c8b032d6f63da492f3ed413b226d + the uncommitted evidence files, synced
-  results/diag: local 111, remote 111, common 111, differing 0, local-only 0, remote-only 0
+# make parity, 2026-09-24T20:22:25Z, commit e9a584c9d8ee6452cd01901fdd0230c851ec464d + the regenerated evidence files, synced
 
   totals: local 111, remote 111
 
 == verdict
   PARITY OK (commit, source tree, and result artifacts agree)
 exit=0
-(this file is rewritten after the run, so the tree it describes differs from the final tree only in this file's own content; parity is re-verified after the final sync)
+(rewritten after the run; parity re-verified after the final sync)

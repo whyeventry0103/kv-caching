@@ -1,4 +1,4 @@
-# local gate at c92381927fa8c8b032d6f63da492f3ed413b226d (CPU, no torch: torch tests skip locally and run on the remote)
+# local gate at e9a584c9d8ee6452cd01901fdd0230c851ec464d (CPU, no torch: torch tests skip locally and run on the remote)
 SKIPPED [1] tests/test_restoration.py:215: could not import 'torch': No module named 'torch'
-467 passed, 37 skipped in 11.04s
+494 passed, 44 skipped in 16.43s
 make test exit=0

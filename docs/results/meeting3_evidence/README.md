@@ -48,10 +48,10 @@ of this commit; the first window is 2026-09-25 01:45 Dubai.
 | File | What it shows |
 |---|---|
 | `local_lint.txt`, `local_test.txt`, `local_dryrun.txt` | `make lint` / `make test` / `make dryrun`, each run bare, exit 0. Locally torch is absent, so the torch tests skip here. |
-| `remote_pytest.txt` | The same tree on the remote, pinned stack: every Meeting #3 torch test by name (37 PASSED, 0 FAILED), then the full suite (504 passed, 0 skipped). |
+| `remote_pytest.txt` | The same tree on the remote, pinned stack: every Meeting #3 test (incl. the R.13/R.14 repairs and scheduler) by name (130 PASSED, 0 FAILED), then the full suite (538 passed, 0 skipped). |
 | `parity.txt` | `make parity`: commit, source tree and all 111 `results/diag` artifacts agree between local and remote. |
 | `storage.md` | Measured footprint under both storage scopes, queued outputs, and the correction of the 11.2 GiB figure. |
-| `queue_dryrun_tick.txt` | Dry run of the 2026-09-25 01:45 orchestrator tick: the old Q.5 cells are reported BLOCKED with their reason, and `dacc-gate-smoke` is selected. |
+| `queue_dryrun_tick.txt` | Dry run of the 2026-09-25 01:45 orchestrator tick: the six CPU postprocess stages report what they wait on, the old Q.5 cells are reported BLOCKED with their reason, and `dacc-gate-smoke` is selected. |
 
 ## Mutation checks
 
