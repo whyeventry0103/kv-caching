@@ -1,0 +1,148 @@
+# Meeting #3 execution ledger -- DECLARATIVE CELL LIST.
+#
+# One entry per experimental cell. scripts/meeting3_manifest.py turns this into
+# results/meeting3/manifest.json, computing the hashes (config, source tree,
+# artifacts) rather than trusting hand-typed ones, and refusing unknown statuses.
+#
+# Status ladder (a cell only moves up after its check passes):
+#   NOT_STARTED  nothing exists
+#   IMPLEMENTED  code/config exist
+#   TESTED       unit/CPU tests pass
+#   VALIDATED    real-model (GPU) smoke passed its gate
+#   QUEUED       in configs/nightly_queue.yaml with its dependency chain
+#   RUNNING      generation in flight
+#   GENERATED    all expected units written and coverage-checked
+#   ANALYZED     the registered read has run
+#   COMPLETE     gates + coverage + analysis + figure all pass
+#   BLOCKED      cannot advance without an action outside this session's authority
+#   INVALID      instrument failed its gate; kept as record, never read as a result
+#
+# Protocol identities: "Q" = Amendment Q (2026-09-12); "R" = Amendment R
+# (2026-09-24), which registers the corrections and new cells below BEFORE any
+# of their outcomes exist.
+
+model:
+  key: r1_distill_qwen_7b
+  handle: deepseek-ai/DeepSeek-R1-Distill-Qwen-7B
+  revision: 916b56a44061fd5cd7d6a8fb632557ed4f724f60
+reference_bank: math500-fc-powered-merged   # 250 problems x 8 seeds, cap 16384
+runtime_pin: {torch: 2.7.1, transformers: 4.56.2, kvpress: 0.5.3}
+
+cells:
+  # ------------------------------------------------------------- Task 1
+  - id: T1.acc_curve
+    task: 1
+    protocol: "R.1"
+    question: "accuracy damage / readout / residual vs budget 256-2048"
+    inputs: [grid-diss256-tok, grid-diss512, grid-diss1024, grid-diss2048-tok,
+             readout-diss256, readout-diss512, readout-diss1024, readout-diss2048]
+    configs: []
+    expected_units: 3200     # 4 budgets x 2 presses x 400 conditions
+    outputs: [results/diag/amendment-k/m4-512-summary.json,
+              results/diag/amendment-k/m4-1024-summary.json,
+              results/meeting3/t1_budget_curve.json,
+              figures/fig8_budget_curve.pdf]
+    status: ANALYZED
+    note: "curve exists; R.1 adds realized ratios, flip masses and a TV panel"
+  - id: T1.tv512
+    task: 1
+    protocol: "R.1"
+    question: "per-step TV at budget 512 (missing intermediate point)"
+    configs: [configs/experiments/replay_ext_math500_b512_r1.yaml]
+    depends_on: []
+    expected_units: 400
+    status: NOT_STARTED
+  - id: T1.tv1024
+    task: 1
+    protocol: "R.1"
+    question: "per-step TV at budget 1024 (missing intermediate point)"
+    configs: [configs/experiments/replay_ext_math500_b1024_r1.yaml]
+    expected_units: 400
+    status: NOT_STARTED
+
+  # ------------------------------------------------------------- Q.1
+  - id: Q1.arms
+    task: 1
+    protocol: "Q.1"
+    question: "phase-0 locking at interval 16/64/256, floor 256"
+    configs: [configs/experiments/replay_sawtooth_i16_q1.yaml,
+              configs/experiments/replay_sawtooth_i64_q1.yaml,
+              configs/experiments/replay_sawtooth_i256_q1.yaml]
+    expected_units: 600
+    outputs: [results/diag/amendment-q/shape_sawtooth_i16.json,
+              results/diag/amendment-q/shape_sawtooth_i64.json,
+              results/diag/amendment-q/shape_sawtooth_i256.json]
+    status: ANALYZED
+    note: "legacy read AMPLITUDE-DEPENDENT; instrument check owed (Q1.legacy_control)"
+  - id: Q1.legacy_control
+    task: 1
+    protocol: "Q.1"
+    question: "removal-anchored phase excess must not exclude zero (as registered)"
+    status: NOT_STARTED
+    note: "registered 2026-09-12, never built; R.2 records why this gate cannot identify physical-removal effects"
+  - id: Q1.direct_control
+    task: 1
+    protocol: "R.2"
+    question: "does physical compaction of already-masked keys change outputs?"
+    status: NOT_STARTED
+
+  # ------------------------------------------------------------- Q.2
+  - id: Q2.dtv
+    task: 1
+    protocol: "Q.2"
+    configs: [configs/experiments/replay_onset_t0_q2.yaml,
+              configs/experiments/replay_onset_t512_q2.yaml,
+              configs/experiments/replay_onset_t2048_q2.yaml]
+    expected_units: 1200
+    outputs: [results/diag/amendment-q/onset_surface_q2.json]
+    status: ANALYZED
+    note: "MIXED; surface figure absent"
+  - id: Q2.figure
+    task: 1
+    protocol: "Q.2"
+    outputs: [figures/fig9_onset_grid.pdf]
+    status: NOT_STARTED
+  - id: Q2.dacc
+    task: 1
+    protocol: "R.3"
+    question: "free-running accuracy on the (budget, compression_start_step) grid"
+    expected_units: 1200     # 2 presses x 2 budgets x 3 onsets x 25 problems x 4 seeds
+    status: NOT_STARTED
+    note: "comparator: 100 matched rows from the FC bank if generation semantics match"
+
+  # ------------------------------------------------------------- Task 2
+  - id: Q3.algebra_control
+    task: 2
+    protocol: "R.4"
+    question: "same-q/K restriction identity, float64 + production dtype"
+    status: NOT_STARTED
+  - id: Q3.capture
+    task: 2
+    protocol: "Q.3/R.4"
+    question: "M, Delta, collateral per layer/group/event"
+    expected_units: 800
+    status: NOT_STARTED
+  - id: Q5.identity_repair
+    task: 2
+    protocol: "R.5"
+    question: "restoration reinserts the TRUE evicted K/V, per layer"
+    status: NOT_STARTED
+  - id: Q5.exact_lag
+    task: 2
+    protocol: "R.5"
+    question: "recovery after exact delay 1/4/16/64/256"
+    expected_units: 4000     # 5 lags x 800
+    status: NOT_STARTED
+
+  # ------------------------------------------------------------- Task 3
+  - id: Q6.fit
+    task: 3
+    protocol: "Q.6/R.6"
+    question: "full-only frozen PCA basis per layer, k=64"
+    status: NOT_STARTED
+  - id: Q6.project
+    task: 3
+    protocol: "Q.6/R.6"
+    question: "omega(Random) - omega(StreamingLLM), budget 256 primary"
+    expected_units: 800
+    status: NOT_STARTED

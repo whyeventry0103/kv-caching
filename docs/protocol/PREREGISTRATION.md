@@ -2845,3 +2845,230 @@ measured phase excess, but it has not passed the gate the amendment set for it.
 smoke on it, then the cell and its read. If the removal-anchored excess excludes
 zero, every phase result is suspect, and the Q.1 qualification and the P.2-v2
 phase statement must both be reopened before submission.
+
+---
+
+## Amendment R (2026-09-24): corrections found before execution, and completion of the Meeting #3 grid — registered BEFORE any of these outcomes exist
+
+Written after an external review of commit `3cc44da` and a reconciliation
+against the working tree (identical to that commit, clean). Every read, gate and
+default below is fixed here before the corresponding computation has run. Where
+an earlier amendment registered something, that registration and its original
+gate outcome stay visible; this amendment adds clarifications with new
+identities, it does not rewrite history. Probe script and outputs:
+`results/meeting3/probe_findings.py`.
+
+### R.0 Facts established from the pinned stack (torch 2.7.1, transformers 4.56.2, kvpress 0.5.3), read from installed source
+
+1. `ScorerPress.compress` keeps entries with `scores.topk(n_kept, dim=-1)` **per KV
+   head** and gathers them. The surviving cache is therefore in **score order,
+   not position order**, and each of the 4 KV heads retains a **different**
+   position set. After the first prune, cache index is not token position.
+2. `EnabledDecodingPress` prunes in the forward hook **after** the current
+   step's attention output; the first distribution the prune affects is the next
+   forward (`onset_step = profile_step + 1`, already recorded).
+3. The full-cache bank `math500-fc-powered-merged` (250 problems × 8 seeds, cap
+   16384, T 0.6, top-p 0.95) was generated at commit `b74f7f3`, after the stack
+   migration `56df135`; it contains all 100 `(pid, seed)` conditions of the Q.2
+   subset with identical decoding. The free-running cap for this family is
+   **16384**, not 8192 (8192 applied only to the eager-attention H2O cells).
+
+### R.1 Task 1 budget read (over existing valid rows)
+
+**Realized ratio** follows the project convention: budget ÷ (mean prompt
+tokens + mean generated tokens), computed by `scripts/report_prompt_lengths.py`
+from token-ID sidecars and the m4 `mean_free_run_tokens`. It is a ratio of
+means, reported beside the budget and never substituted for it.
+
+**New statistics, registered now:** a paired, problem-clustered 95% CI (2000
+resamples, seed 0, two-sided percentile; all four seeds of a problem resampled
+together) on (i) total change `Acc_free − Acc_FC` over the cell's 400 matched
+conditions and (ii) net signed flip mass. Harmful (`lost`) and beneficial
+(`gained`) flip masses are reported separately with a common denominator. The
+residual keeps its only name: accuracy change unexplained by on-reference
+readout.
+
+**Intermediate-budget TV (new cells):** teacher-forced replay at budgets 512
+and 1024, otherwise identical to `replay_ext_math500_diss256` (reference bank,
+25-problem subset, seeds 11/23/47/89, interval 64, extended measures), policies
+Random and StreamingLLM. Read: mean per-trace AUC-TV per cell with a
+problem-clustered CI, plotted on its own axis, never on the accuracy axis. No
+claim that TV predicts accuracy within a budget (P.3).
+
+### R.2 Q.1: the registered removal-anchored gate cannot identify physical-removal effects
+
+**Finding (demonstrated before any removal-anchored data exists).**
+`phase_amplitude` is `(max − min) / max` of the phase profile, which is
+invariant to circular rotation: `[1, 0.1 × 63]` and its 32-bucket rotation both
+give 0.9 (peaks at 0 and 32). Periodic selection at `s` therefore produces the
+same amplitude when the profile is re-anchored at `s + 32`, so a
+removal-anchored excess can exclude zero even when physical removal changes
+nothing. The Q.1 negative control as registered (2026-09-12) **cannot test what
+it was meant to test**. It remains registered, is implemented and run for the
+record, and its outcome is labelled NOT VALID FOR IDENTIFICATION whatever it is.
+The Q.1 AMPLITUDE-DEPENDENT result (2026-09-15) stays as recorded and stays
+unvalidated by any instrument check under the original protocol.
+
+**Also found:** `phase_amplitude_excess` returns `excess: None` when either
+amplitude is exactly 0 (truthiness), although the bootstrap draws treat 0
+correctly. Fixed as analysis version `phase-excess-v2`; old artifacts are not
+overwritten.
+
+**Direct functional control (new, R.2).** At each selection event keys are
+identified by absolute token position and made unattendable immediately
+(attention mask), their tensors kept until `s + 32`. Selection, budget, scoring
+and later evictions operate on the logically active set only; masked keys never
+count toward the budget or re-enter scoring; overlapping pending removals
+(interval 16, delay 32) are tracked explicitly. Immediately before removal the
+state is forked: arm A physically compacts the masked keys, arm B keeps them
+masked; identical next tokens, positions and policy/RNG state are replayed.
+**Read:** max |logit difference| and next-token TV between arms, and agreement
+of subsequent selection decisions. **Tolerance is fixed before science runs**
+from a deterministic control (two identical arm-B replays) as the observed
+maximum times 10, in the production dtype/backend. PASS = A−B within tolerance
+at every event; FAIL = any event outside it. A non-significant difference is
+never reported as exact equality. Fixed floor 256, intervals 16/64/256.
+
+### R.3 D_acc: free-running accuracy on the exposure grid (registered; `MEETING3_DESIGN.md` §1.4)
+
+Model `r1_distill_qwen_7b` @ `916b56a`; MATH-500, the Q.2 25-problem subset;
+seeds 11/23/47/89; policies Random, StreamingLLM; budgets 256, 2048;
+`compression_start_step` ∈ {0, 512, 2048}; interval 64; cap **16384**; sampling
+T 0.6, top-p 0.95. 1,200 compressed generations. **Comparator:** the 100
+matching rows of `math500-fc-powered-merged` (R.0.3 establishes compatibility);
+no new full-cache generations.
+
+Generation is gated by a decode-step counter driven from a model forward
+pre-hook (prefill = step 0), on an explicitly enabled instrumented press; the
+policy RNG is separate from the sampling RNG. `compression_start_step = None`
+must reproduce legacy generation (verified by test before science).
+
+**Estimand** per (policy, budget, onset): problem-weighted paired
+`Acc_FC − Acc_comp` (four seeds within problem), with a problem-clustered CI;
+full and compressed accuracy, harmful and beneficial flips and their signed
+difference, truncation rate, and achieved exposure (decode steps after the
+first prune). A generation that ends before its onset stays in the denominator
+as an **unexposed** assigned observation; truncations are incorrect in every
+denominator. The primary display is the (budget, onset) treatment grid.
+Achieved terminal exposure depends on the generated trajectory, so any plot
+against it is descriptive and is not comparable point-for-point with the
+teacher-forced D_tv surface.
+
+### R.4 Q.3 attention channels: timing, the zero control, and collateral
+
+Because of R.0.1–2, the registered `first_prune_delta_max == 0.0` gate is
+re-scoped explicitly rather than reinterpreted. Two measurements, separately
+named:
+
+- **Algebra control** (`attn-algebra-v1`): the same `q` and `K`, logits
+  restricted to the retained set `S`, softmax on `S` compared with full
+  attention renormalized onto `S`. The identity holds exactly; validated in
+  float64 on synthetic inputs and in the production dtype/backend, with raw
+  maximum errors reported against a fixed tolerance (1e-12 float64; 1e-2 bf16).
+- **Natural paired measurement** (`attn-profile-v2`): each branch's own live `q`
+  and `K`, read at the first forward after the prune, on the common
+  absolute-position support. `Delta` there may be non-zero even at the first
+  event, because an earlier layer's eviction already changed later layers'
+  inputs in the same forward. It measures an attention-shape change; it does not
+  separate query drift from key drift. The legacy `first_prune_delta_max` field
+  keeps its registered meaning and is recorded as NOT APPLICABLE to this
+  natural measurement; it is never rounded or overwritten.
+
+**Group convention (fixed now):** `M` and `Delta` computed per query head, then
+the unweighted mean over the query heads of each KV group (7 on this model,
+read from its config). `M` is cumulative mass on positions absent from the
+compressed history; a separately named `M_event` counts only positions evicted
+at that event. Normalization is computed from logits by log-sum-exp;
+underflow and undefined cases are flagged, never set to zero.
+
+**Collateral (clarified now):** fraction of positions actually evicted at the
+event that (a) received > τ = 0.01 attention from at least one query head of
+the group and (b) rank below the budget cut by the group's mean full-reference
+attention, with ties broken toward the lower position and protected positions
+(sinks and window of StreamingLLM) excluded from the denominator. This is
+separate from any policy score. The any-head-wanted fraction without (b) is
+reported as `wanted_any_head`, never as collateral. Events with no eviction are
+unavailable, not zero.
+
+**Grid:** Random, StreamingLLM, H2O-style / ObservedAttentionPress (no recency
+reservation), certified R-KV port; budgets 256, 2048; interval 64; Q.2 bank
+subset; ≤ 800 traces. Eager attention is requested by the observer for every
+policy; a full/full instrumentation-parity control runs first. **Registered
+contrast:** collateral R-KV − ObservedAttentionPress, problem-clustered CI;
+negative excluding zero supports the Q.3 ordering, a CI including zero is
+inconclusive, positive excluding zero reverses it.
+
+### R.5 Q.5: identity repair and an exact-lag protocol (the Q.5 sweep never ran)
+
+**Findings.** (a) `build_restoration_press` stashes `keys[:, :, -dropped:, :]`,
+the tail of a score-ordered tensor, which is not the evicted complement; (b)
+stash, flags and report are single press attributes shared across all layers,
+so tensors from different layers can be concatenated and one
+`intervened = True` blocks every later layer; (c) `_stash_candidates_by_age`
+followed by the matched planner's last-N rule selects ages 0/0/0/64/128 for
+requested lags 1/4/16/64/256; and eviction every 64 steps cannot realize most
+exact lags. The historical P.5 result is kept as recorded and marked **needs
+validation**; no historical conclusion is asserted false from source
+inspection alone.
+
+**Repair.** Selected indices are captured from the actual selection
+(recorded scores, `topk` re-applied and verified bitwise by gather equality
+against the returned cache); the true evicted complement of K and V is taken
+from the pre-compression tensors per (layer, KV group) with absolute positions;
+stashes, flags and reports are per layer; restored K/V are verified against the
+captured eviction event.
+
+**Exact-lag protocol (new, replaces the unexecuted Q.5 sweep).** The target
+cohort is the first eviction event at or after decode step 130 that exists in
+every layer. For each lag ℓ ∈ {1, 4, 16, 64, 256}, reinsertion happens at
+exactly decode step `e + ℓ`, from a snapshot taken at `e`, whether or not that
+step is a pruning step. All four arms within a lag share the pre-intervention
+state. Absolute read position therefore moves with ℓ: this is a
+**recovery-after-delay** experiment and does not isolate staleness from
+position. Read: the P.5 none-minus-arm effect over 200 steps from the first
+prediction that sees reinsertion; DECAY / FLAT-NULL / NON-MONOTONE by
+`classify_latency_sweep`, reported with requested and achieved lags. Traces
+that cannot supply the cohort or the full read window are counted as
+ineligible, never replaced by a nearest-age substitute.
+
+### R.6 Q.6: fitting and projection defaults
+
+Representation: the residual-stream output of each of the 28 decoder blocks at
+the prediction position (before final normalization for the last block).
+Fitting: full-only teacher-forced replay of the reference traces for the Q.2
+subset; up to 256 uniformly spaced decode positions per trace (endpoints
+included, prompt excluded), fixed from trace lengths alone; problems equal
+weight, seeds equal within problem. Standardization is **coordinate-wise**
+`(x − mean) / scale` — the existing `whiten()` — and is described as such, not
+as covariance whitening. Per-layer exact eigendecomposition of the weighted
+standardized covariance (float64 moments accumulated on CPU, one layer solved at
+a time), k = 64; fewer than 64 usable directions is a hard failure. The basis
+artifact stores mean, scale, basis, eigenvalues, fitting input hashes and
+diagnostics, and is frozen and hashed before any compressed projection;
+`FrozenBasis` additionally validates orthonormality, finiteness and rank at
+construction.
+
+Projection: teacher-forced full and compressed branches on identical prefixes;
+Random, StreamingLLM, ObservedAttentionPress, R-KV; budget 256 primary, 2048
+secondary. **Storage amendment (prospective):** the registered per-step,
+per-layer quantities are computed online for every step and the estimand is
+accumulated from all of them; on disk each trace stores per-layer sums and
+counts of finite ω, component-norm sums, singular-case counts by reason, and
+`(‖δ∥‖, ‖δ⊥‖)` at the same 256 sampled positions used for fitting. ω = 0/0 is
+`undefined_direction`; ω with zero parallel and positive perpendicular norm is
+`unbounded`; both are counted and excluded from the finite-ω mean under this
+rule, stated before data. **Estimand:** ω(Random) − ω(StreamingLLM), finite ω
+averaged over positions within trace, equal layer weights, then seeds within
+problem, then problems; problem-clustered CI; PREDICTED / NULL / REVERSED as in
+Q.6. Exploratory throughout.
+
+### R.7 Statistics, storage and scheduling
+
+New reads without a registered estimand use 2000 paired problem-cluster
+resamples, seed 0, two-sided percentile 95% CIs. The Q.1 trace-clustered result
+is not relabelled. `KVCACHE_PERSONAL_FREE_GB = 70` is the user-confirmed
+personal allocation recorded at setup (no system quota exists on the host);
+the storage guard compares this project's `du` (kvcache-storage and the source
+tree, hardlinks counted once) against it with a 1 GiB margin. A cell that does
+not fit is reported BLOCKED with its byte deficit; the scheduler continues with
+cells that fit. Nothing is deleted to make room without the owner's instruction.
