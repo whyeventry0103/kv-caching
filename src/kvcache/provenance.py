@@ -91,6 +91,106 @@ def inputs_sha256(*token_lists: Iterable[int]) -> str:
     ).hexdigest()
 
 
+PROVENANCE_SCHEMA = "provenance-v1"
+INPUT_MANIFEST = "configs/meeting3/input_manifest.json"
+REQUIRED_FIELDS = (
+    "schema",
+    "kind",
+    "implementation_id",
+    "config_name",
+    "config_sha256",
+    "model_revision",
+    "reference_run",
+    "basis_npz_sha256",
+    "input_manifest_sha256",
+)
+
+
+def _manifest_path(root: Path | None = None) -> Path:
+    # KVCACHE_INPUT_MANIFEST exists for tests with synthetic reference trees;
+    # production reads the committed file.
+    env = os.environ.get("KVCACHE_INPUT_MANIFEST")
+    if env:
+        return Path(env)
+    return (Path(root) if root is not None else PROJECT_ROOT) / INPUT_MANIFEST
+
+
+def input_manifest_sha256(root: Path | None = None) -> str:
+    return hashlib.sha256(_manifest_path(root).read_bytes()).hexdigest()
+
+
+def load_input_manifest(root: Path | None = None) -> dict[str, Any]:
+    return json.loads(_manifest_path(root).read_text(encoding="utf-8"))
+
+
+def expected_inputs(manifest: Mapping[str, Any], kind: str, pid: str, seed: int) -> str:
+    """The frozen reference-input hash a (problem, seed) row must carry.
+
+    Replay families hash prompt + reference trace; free-running D_acc hashes
+    the prompt only (it generates its own trace). A key absent from the
+    manifest is outside the frozen design and raises.
+    """
+    if kind == "dacc":
+        return manifest["prompts"][pid]
+    return manifest["traces_prompt_plus_trace"][f"{pid}|{int(seed)}"]
+
+
+def check_inputs(
+    manifest: Mapping[str, Any], kind: str, pid: str, seed: int, computed: str
+) -> None:
+    """Refuse a row whose reference inputs differ from the frozen manifest."""
+    try:
+        want = expected_inputs(manifest, kind, pid, seed)
+    except KeyError:
+        raise SystemExit(
+            f"REFUSED: ({pid}, {seed}) is not in the frozen input manifest"
+        ) from None
+    if computed != want:
+        raise SystemExit(
+            f"REFUSED: reference inputs for ({pid}, {seed}) differ from the frozen "
+            "input manifest; the reference bank changed"
+        )
+
+
+def validate_row_provenance(
+    prov: Mapping[str, Any] | None,
+    *,
+    expected: Mapping[str, Any] | None,
+    manifest: Mapping[str, Any] | None,
+    kind: str,
+    pid: str,
+    seed: int,
+) -> list[str]:
+    """Problems with one row's provenance (empty list = valid).
+
+    Required fields and schema version; equality with the EXPECTED run
+    identity derived from committed config/model/reference (not from the row
+    itself); and the row's input hash against the frozen manifest.
+    """
+    if not prov:
+        return ["no provenance"]
+    out = [f"missing {f}" for f in REQUIRED_FIELDS if f not in prov]
+    if prov.get("schema") != PROVENANCE_SCHEMA:
+        out.append(f"schema {prov.get('schema')!r} != {PROVENANCE_SCHEMA}")
+    if prov.get("kind") != kind:
+        out.append(f"kind {prov.get('kind')!r} != {kind!r}")
+    if expected is not None:
+        out += [
+            f"{k}: {prov.get(k)!r} != expected {v!r}"
+            for k, v in expected.items()
+            if prov.get(k) != v
+        ]
+    if manifest is not None:
+        try:
+            want = expected_inputs(manifest, kind, pid, seed)
+        except KeyError:
+            out.append("condition not in the frozen input manifest")
+        else:
+            if prov.get("inputs_sha256") != want:
+                out.append("inputs_sha256 differs from the frozen input manifest")
+    return out
+
+
 def identity(
     kind: str,
     config: Mapping[str, Any],
@@ -98,11 +198,14 @@ def identity(
     model_revision: str,
     reference_run: str | None = None,
     basis_npz_sha256: str | None = None,
+    root: Path | None = None,
 ) -> dict[str, Any]:
     """The run-level identity every row and gate of one run must share."""
     return {
+        "schema": PROVENANCE_SCHEMA,
+        "input_manifest_sha256": input_manifest_sha256(root),
         "kind": kind,
-        "implementation_id": implementation_id(kind),
+        "implementation_id": implementation_id(kind, root),
         "config_name": config.get("name"),
         "config_sha256": config_sha256(config),
         "model_revision": str(model_revision),

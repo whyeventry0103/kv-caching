@@ -64,3 +64,35 @@ def test_the_scheduler_rejects_failed_or_torn_markers(tmp_path):
     assert not M._marker_ok(tmp_path / "failed.json")
     assert not M._marker_ok(tmp_path / "torn.json")
     assert not M._marker_ok(tmp_path / "absent.json")
+
+
+def test_row_provenance_requires_schema_fields_identity_and_inputs():
+    from kvcache.provenance import PROVENANCE_SCHEMA, validate_row_provenance
+
+    manifest = {"traces_prompt_plus_trace": {"a|1": "h"}, "prompts": {"a": "p"}}
+    expected = {"config_sha256": "c", "kind": "capture"}
+    good = {
+        "schema": PROVENANCE_SCHEMA,
+        "kind": "capture",
+        "implementation_id": "i",
+        "config_name": "n",
+        "config_sha256": "c",
+        "model_revision": "r",
+        "reference_run": "ref",
+        "basis_npz_sha256": "b",
+        "input_manifest_sha256": "m",
+        "inputs_sha256": "h",
+    }
+    kw = dict(expected=expected, manifest=manifest, kind="capture", pid="a", seed=1)
+    assert validate_row_provenance(good, **kw) == []
+    assert validate_row_provenance({"anything": "same"}, **kw)  # review probe
+    assert validate_row_provenance({**good, "config_sha256": "x"}, **kw)
+    assert validate_row_provenance({**good, "inputs_sha256": "z"}, **kw)
+    assert validate_row_provenance(None, **kw) == ["no provenance"]
+    dacc = {**good, "kind": "dacc", "inputs_sha256": "p"}
+    assert (
+        validate_row_provenance(
+            dacc, expected=None, manifest=manifest, kind="dacc", pid="a", seed=1
+        )
+        == []
+    )

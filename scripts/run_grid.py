@@ -27,7 +27,13 @@ from kvcache.models import (
     tokenize_rendered_prompt,
 )
 from kvcache.presses import build_press, press_needs_eager_attention, press_seed
-from kvcache.provenance import identity, inputs_sha256, same_identity
+from kvcache.provenance import (
+    check_inputs,
+    identity,
+    inputs_sha256,
+    load_input_manifest,
+    same_identity,
+)
 from kvcache.runmeta import capture_runmeta
 from kvcache.token_ids import append_token_ids, build_token_ids_record
 
@@ -171,6 +177,7 @@ def main() -> int:
         if gated
         else None
     )
+    manifest = load_input_manifest() if gated else None
     if gated:
         # Onset-gated (D_acc) rows carry an experiment identity; a namespace
         # holding rows of another identity is refused, never resumed into.
@@ -189,6 +196,13 @@ def main() -> int:
                         f"REFUSED: {path} holds a row from a different experiment "
                         "identity; start a new run namespace"
                     )
+                check_inputs(
+                    manifest,
+                    "dacc",
+                    rec["pid"],
+                    int(rec["decoding"]["seed"]),
+                    rec["provenance"].get("inputs_sha256"),
+                )
     done_keys = _grid_done_keys(runs_root, store_token_ids) if args.resume else set()
     counts = {"rows": 0, "truncated": 0, "skipped_resume": len(done_keys)}
     if args.resume:
@@ -266,12 +280,9 @@ def main() -> int:
                                     press.compressions, generation.n_tokens
                                 ),
                             }
-                            row["provenance"] = {
-                                **ident,
-                                "inputs_sha256": inputs_sha256(
-                                    generation.prompt_token_ids
-                                ),
-                            }
+                            got = inputs_sha256(generation.prompt_token_ids)
+                            check_inputs(manifest, "dacc", problem.pid, int(seed), got)
+                            row["provenance"] = {**ident, "inputs_sha256": got}
                         output = append_result(runs_root, row)
                         if store_token_ids:
                             # Exact token IDs make every compressed trace replay-ready

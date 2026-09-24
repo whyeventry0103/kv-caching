@@ -879,3 +879,19 @@ def test_cpu_stages_never_take_a_gpu(tmp_path):
     assert candidates == []
     job, _ = M.select_job(tmp_path, jobs)
     assert job is None
+
+
+def test_default_storage_scope_is_both_trees_with_hardlinks_counted_once(tmp_path):
+    """R.15: the conservative combined footprint, not the storage tree alone."""
+    import os
+
+    a, b = tmp_path / "storage", tmp_path / "source"
+    a.mkdir()
+    b.mkdir()
+    (a / "big.bin").write_bytes(b"\0" * (4 << 20))
+    (b / "other.bin").write_bytes(b"\0" * (2 << 20))
+    os.link(a / "big.bin", b / "hardlink.bin")  # same inode in both trees
+    one = M.storage_used_gb(roots=[a])
+    both = M.storage_used_gb(roots=[a, b])
+    assert both == pytest.approx(one + 2 / 1024, rel=0.2)  # hardlink not doubled
+    assert M.BASE_ENV["KVCACHE_PERSONAL_FREE_GB"] == "72"

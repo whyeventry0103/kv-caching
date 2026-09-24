@@ -29,7 +29,13 @@ sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
 from run_replay import _heal_jsonl, _load_jsonl, _load_token_records, _reference_key
 
 from kvcache.cli import load_config, plan
-from kvcache.provenance import identity, inputs_sha256, same_identity
+from kvcache.provenance import (
+    check_inputs,
+    identity,
+    inputs_sha256,
+    load_input_manifest,
+    same_identity,
+)
 from kvcache.datasets import load_benchmark
 from kvcache.runmeta import capture_runmeta
 
@@ -125,6 +131,7 @@ def main() -> int:
     )
     if not args.resume and any((out_root / "math500").rglob("*.jsonl")):
         raise SystemExit("REFUSED: run namespace not empty; pass --resume")
+    manifest = load_input_manifest()
     done = set()
     if args.resume and (out_root / "math500").exists():
         for path in sorted((out_root / "math500").rglob("*.jsonl")):
@@ -134,6 +141,13 @@ def main() -> int:
                         f"REFUSED: {path} holds a row from a different experiment "
                         "identity; start a new run namespace"
                     )
+                check_inputs(
+                    manifest,
+                    "exact_lag",
+                    rec["pid"],
+                    int(rec["seed"]),
+                    (rec.get("provenance") or {}).get("inputs_sha256"),
+                )
                 done.add((rec["pid"], int(rec["seed"]), rec["press"]))
     models_cfg = _yaml(PROJECT_ROOT / "configs/models.yaml")["models"]
     model_cfg = models_cfg[model_name]
@@ -141,6 +155,13 @@ def main() -> int:
     for r in eligible:
         seed = int(r["decoding"]["seed"])
         rec = tokens[_reference_key(r)]
+        check_inputs(
+            manifest,
+            "exact_lag",
+            r["pid"],
+            seed,
+            inputs_sha256(rec["prompt_token_ids"], rec["trace_token_ids"]),
+        )
         for press_name in cfg["presses"]:
             if (r["pid"], seed, press_name) in done:
                 continue

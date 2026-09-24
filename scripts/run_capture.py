@@ -43,7 +43,14 @@ from run_basis_fit import BASIS_HEADER, BASIS_NPZ, sha256_file
 from run_replay import _heal_jsonl, _load_jsonl, _load_token_records, _reference_key
 
 from kvcache.capture import LAYER0_DELTA_TOL
-from kvcache.provenance import identity, inputs_sha256, same_identity, write_gate
+from kvcache.provenance import (
+    check_inputs,
+    identity,
+    inputs_sha256,
+    load_input_manifest,
+    same_identity,
+    write_gate,
+)
 from kvcache.cli import load_config, plan
 from kvcache.datasets import load_benchmark
 from kvcache.runmeta import capture_runmeta
@@ -96,6 +103,14 @@ def _persisted(out_root: Path, ident: dict[str, Any]) -> list[dict[str, Any]]:
                 raise SystemExit(
                     f"REFUSED: {path} holds a row from a different experiment "
                     f"identity; start a new run namespace (old rows are kept)"
+                )
+            if rec["press"] != "fullcache":
+                check_inputs(
+                    load_input_manifest(),
+                    "capture",
+                    rec["pid"],
+                    int(rec["seed"]),
+                    rec["provenance"].get("inputs_sha256"),
                 )
             rows.append(rec)
     return rows
@@ -198,6 +213,7 @@ def main() -> int:
         reference_run=cfg["reference_run_name"],
         basis_npz_sha256=basis_sha,
     )
+    manifest = load_input_manifest()
     persisted = _persisted(out_root, ident)
     done = {_key(r) for r in persisted} if args.resume else set()
     if not args.resume and persisted:
@@ -221,6 +237,7 @@ def main() -> int:
             continue
         rec = tokens[_reference_key(r)]
         prompt, trace = rec["prompt_token_ids"], rec["trace_token_ids"]
+        check_inputs(manifest, "capture", r["pid"], seed, inputs_sha256(prompt, trace))
         t0 = time.monotonic()
         full = record_full_branch(model, prompt, trace, interval=interval)
         full_s = time.monotonic() - t0

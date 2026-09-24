@@ -41,7 +41,11 @@ REMOTE_STORAGE = Path("/home/sk10741/kvcache-storage")
 
 BASE_ENV = {
     "KVCACHE_REMOTE": "1",
-    "KVCACHE_PERSONAL_FREE_GB": "70",
+    # R.15 (2026-09-25): 72 GiB, measured over storage + source trees combined.
+    # The owner delegated the decision; 77.61 GiB of their other project
+    # (TC-ViTok) was deleted on their instruction, so their total personal
+    # footprint fell by ~75.6 GiB while this allocation rose by 2 GiB.
+    "KVCACHE_PERSONAL_FREE_GB": "72",
     "REMOTE_DATA_ROOT": str(REMOTE_STORAGE / "data"),
     "REMOTE_CACHE_ROOT": str(REMOTE_STORAGE / "cache"),
     "REMOTE_RUNS_ROOT": str(REMOTE_STORAGE / "runs"),
@@ -205,23 +209,31 @@ def check_disk_budget(
         )
 
 
-def storage_used_gb(root: Path | None = None) -> float:
-    """Personal storage consumed, in GB. Walks the tree; df would be wrong.
+def storage_used_gb(root: Path | None = None, roots: Any = None) -> float:
+    """Personal storage consumed, in GiB. Walks the trees; df would be wrong.
 
     The filesystem is shared, so a global df reports other users' usage and the
     machine's total capacity, neither of which bounds what this project may
     consume. The personal budget is a declared number and this is measured
     against it.
+
+    R.15 (2026-09-25): the default scope is the CONSERVATIVE combined footprint
+    of the storage tree AND the source tree (which holds the .venv), with each
+    hardlinked inode counted once (``du -sck`` over both), not the storage tree
+    alone.
     """
-    base = Path(root) if root is not None else REMOTE_STORAGE
-    if not base.exists():
+    if roots is None:
+        roots = [root] if root is not None else [REMOTE_STORAGE, PROJECT_ROOT]
+    bases = [Path(r) for r in roots if Path(r).exists()]
+    if not bases:
         return 0.0
+    base = bases[0]
     # `du` in C rather than rglob in Python: this runs on every orchestrator
     # tick against a ~68 GB tree, and a Python walk of the model cache costs
     # seconds each time for a number that barely moves.
     try:
         out = subprocess.run(
-            ["du", "-s", "-k", str(base)],
+            ["du", "-s", "-c", "-k", *[str(b) for b in bases]],
             capture_output=True,
             text=True,
             timeout=120,
@@ -233,16 +245,23 @@ def storage_used_gb(root: Path | None = None) -> float:
             # decimal GB instead reports 73.01 against a budget of 70 and
             # refuses every job unconditionally -- a guard that is always on is
             # indistinguishable from a broken one.
-            return int(out.stdout.split()[0]) / (1024 * 1024)
+            # the last line is the combined total, hardlinks counted once
+            return int(out.stdout.strip().splitlines()[-1].split()[0]) / (1024 * 1024)
     except (OSError, ValueError, IndexError, subprocess.TimeoutExpired):
         pass
-    total = 0
-    for f in base.rglob("*"):
-        try:
-            if f.is_file() and not f.is_symlink():
-                total += f.stat().st_size
-        except OSError:
-            continue
+    total, seen = 0, set()
+    for b in bases:
+        for f in b.rglob("*"):
+            try:
+                if f.is_file() and not f.is_symlink():
+                    st = f.stat()
+                    if (st.st_dev, st.st_ino) in seen:
+                        continue
+                    seen.add((st.st_dev, st.st_ino))
+                    total += st.st_size
+            except OSError:
+                continue
+    del base
     return total / (1024**3)
 
 

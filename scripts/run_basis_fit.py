@@ -47,7 +47,14 @@ from kvcache.capture import (
     validate_basis_arrays,
 )
 from kvcache.cli import load_config, plan
-from kvcache.provenance import identity, same_identity, write_json_atomic
+from kvcache.provenance import (
+    check_inputs,
+    identity,
+    inputs_sha256,
+    load_input_manifest,
+    same_identity,
+    write_json_atomic,
+)
 from kvcache.datasets import load_benchmark
 from kvcache.runmeta import capture_runmeta
 
@@ -165,6 +172,7 @@ def main() -> int:
     model, _tok = load_model_and_tokenizer(model_cfg, allow_download=False)
     layers = model.model.layers
     n_layers, dim = len(layers), int(model.config.hidden_size)
+    manifest = load_input_manifest()
     acc = MomentAccumulator(n_layers, dim)
     input_hash = hashlib.sha256()
     started = time.monotonic()
@@ -182,6 +190,13 @@ def main() -> int:
         for n, r in enumerate(eligible):
             rec = tokens[_reference_key(r)]
             prompt, trace = rec["prompt_token_ids"], rec["trace_token_ids"]
+            check_inputs(
+                manifest,
+                "basis",
+                r["pid"],
+                int(r["decoding"]["seed"]),
+                inputs_sha256(prompt, trace),
+            )
             pos = sampled_decode_positions(len(trace), n_pos)
             if not pos:
                 raise SystemExit(f"trace too short to sample: {r['pid']}")

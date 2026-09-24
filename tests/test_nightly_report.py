@@ -55,7 +55,8 @@ def _setup(monkeypatch, tmp_path, used_gb):
 
 
 def test_a_refused_next_job_flags_the_night_blocked(monkeypatch, tmp_path):
-    rep = _setup(monkeypatch, tmp_path, used_gb=68.86)
+    # 71.0 of the 72 GiB allocation (R.15): 1.0 GiB headroom < 0.45 + 1 margin
+    rep = _setup(monkeypatch, tmp_path, used_gb=71.0)
     subject, body = rep.generate_report(write_snapshot=False)
     assert "BLOCKED (storage: restoration-lag1)" in subject
     assert "WILL NOT LAUNCH" in body
@@ -70,7 +71,7 @@ def test_a_job_that_fits_is_not_flagged(monkeypatch, tmp_path):
     assert "next: restoration-lag1" in body
 
 
-@pytest.mark.parametrize("used", [68.86, 40.0])
+@pytest.mark.parametrize("used", [71.0, 40.0])
 def test_the_report_never_raises_whatever_the_storage_state(
     monkeypatch, tmp_path, used
 ):

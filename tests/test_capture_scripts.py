@@ -89,7 +89,34 @@ def _setup(tmp_path, monkeypatch):
         )
     monkeypatch.setenv("KVCACHE_REMOTE", "1")
     monkeypatch.setenv("KVCACHE_BASE_RUNS_ROOT", str(tmp_path / "runs"))
+    _write_manifest(tmp_path, ref, monkeypatch)
     return run_basis_fit, run_capture
+
+
+def _write_manifest(tmp_path, ref, monkeypatch):
+    """A frozen input manifest for the synthetic reference tree."""
+    from kvcache.provenance import inputs_sha256
+
+    traces, prompts = {}, {}
+    for f in (ref / "token_ids").glob("*.jsonl"):
+        for line in f.read_text().splitlines():
+            t = json.loads(line)
+            traces[f"{t['pid']}|{t['seed']}"] = inputs_sha256(
+                t["prompt_token_ids"], t["trace_token_ids"]
+            )
+            prompts[t["pid"]] = inputs_sha256(t["prompt_token_ids"])
+    m = tmp_path / "input_manifest.json"
+    m.write_text(
+        json.dumps(
+            {
+                "schema": "input-manifest-v1",
+                "traces_prompt_plus_trace": traces,
+                "prompts": prompts,
+            }
+        )
+    )
+    monkeypatch.setenv("KVCACHE_INPUT_MANIFEST", str(m))
+    return m
 
 
 def _cfg(tmp_path, name, body):
@@ -348,3 +375,42 @@ def test_basis_header_without_matching_bytes_is_not_a_finished_fit(
     npz.unlink()
     with pytest.raises(SystemExit, match="missing or altered"):
         run_basis_fit.main()
+
+
+def test_a_changed_reference_bank_is_refused_at_generation(tmp_path, monkeypatch):
+    run_basis_fit, run_capture = _setup(tmp_path, monkeypatch)
+    m = tmp_path / "input_manifest.json"
+    d = json.loads(m.read_text())
+    key = next(iter(d["traces_prompt_plus_trace"]))
+    d["traces_prompt_plus_trace"][key] = "0" * 64
+    m.write_text(json.dumps(d))
+    fit_cfg = _cfg(
+        tmp_path,
+        "fit",
+        COMMON + "name: fit\npresses: [fullcache]\nbudgets: [full]\nk: 4\n"
+        "n_positions: 16\n",
+    )
+    monkeypatch.setenv("REMOTE_RUNS_ROOT", str(tmp_path / "runs" / "fit"))
+    monkeypatch.setattr(sys, "argv", ["x", "--config", str(fit_cfg), "--i-understand"])
+    with pytest.raises(SystemExit, match="frozen input manifest"):
+        run_basis_fit.main()
+
+
+def test_a_resumed_row_with_foreign_inputs_is_refused(tmp_path, monkeypatch):
+    run_basis_fit, run_capture = _setup(tmp_path, monkeypatch)
+    _fit(tmp_path, monkeypatch, run_basis_fit)
+    body = COMMON + (
+        "name: cap\npresses: [random]\nbudgets: [16]\ncompression_interval: 4\n"
+        "tau: 0.01\nbasis_run: fit\nreference_limit: 1\n"
+    )
+    monkeypatch.setenv("REMOTE_RUNS_ROOT", str(tmp_path / "runs" / "cap"))
+    cap = _cfg(tmp_path, "cap", body)
+    argv = ["x", "--config", str(cap), "--i-understand", "--resume"]
+    monkeypatch.setattr(sys, "argv", argv)
+    assert run_capture.main() == 0
+    f = next((tmp_path / "runs/cap/math500").rglob("*.jsonl"))
+    row = json.loads(f.read_text())
+    row["provenance"]["inputs_sha256"] = "f" * 64
+    f.write_text(json.dumps(row) + "\n")
+    with pytest.raises(SystemExit, match="frozen input manifest"):
+        run_capture.main()
