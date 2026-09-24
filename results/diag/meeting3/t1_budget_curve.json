@@ -1,0 +1,543 @@
+{
+  "amendment": "R.1",
+  "cells": [
+    {
+      "auc_tv": 0.10750623825627756,
+      "auc_tv_n_problems": 25,
+      "budget": 256,
+      "fc_accuracy_matched": 0.885,
+      "free_accuracy": 0.4225,
+      "free_accuracy_ci95": [
+        0.345,
+        0.5
+      ],
+      "mean_trace_tokens": 8109.9875,
+      "paired": {
+        "beneficial_flip_mass": {
+          "ci95": [
+            0.0,
+            0.0125
+          ],
+          "mean": 0.005,
+          "n_clusters": 100,
+          "n_observations": 400,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "harmful_flip_mass": {
+          "ci95": [
+            0.3875,
+            0.545
+          ],
+          "mean": 0.4675,
+          "n_clusters": 100,
+          "n_observations": 400,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "n_matched": 400,
+        "n_only_comp": 0,
+        "n_only_fc": 1600,
+        "note": "net flip mass == total_change on the matched population",
+        "total_change": {
+          "ci95": [
+            -0.545,
+            -0.38
+          ],
+          "mean": -0.4625,
+          "n_clusters": 100,
+          "n_observations": 400,
+          "n_resamples": 2000,
+          "seed": 0
+        }
+      },
+      "press": "random",
+      "readout_accuracy": 0.7653061224489796,
+      "readout_accuracy_ci95": [
+        0.6858,
+        0.8167
+      ],
+      "readout_change": -0.1377551020408163,
+      "realized_ratio": 0.03156601659373704,
+      "realized_ratio_pct": 3.1566016593737043,
+      "residual": -0.336734693877551,
+      "residual_ci95": [
+        -0.4042,
+        -0.2617
+      ],
+      "truncation_rate": 0.2325
+    },
+    {
+      "auc_tv": 0.10275934916439616,
+      "auc_tv_n_problems": 25,
+      "budget": 256,
+      "fc_accuracy_matched": 0.885,
+      "free_accuracy": 0.2375,
+      "free_accuracy_ci95": [
+        0.175,
+        0.305
+      ],
+      "mean_trace_tokens": 5340.0199999999995,
+      "paired": {
+        "beneficial_flip_mass": {
+          "ci95": [
+            0.0,
+            0.0075
+          ],
+          "mean": 0.0025,
+          "n_clusters": 100,
+          "n_observations": 400,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "harmful_flip_mass": {
+          "ci95": [
+            0.575,
+            0.725
+          ],
+          "mean": 0.65,
+          "n_clusters": 100,
+          "n_observations": 400,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "n_matched": 400,
+        "n_only_comp": 0,
+        "n_only_fc": 1600,
+        "note": "net flip mass == total_change on the matched population",
+        "total_change": {
+          "ci95": [
+            -0.7225,
+            -0.57
+          ],
+          "mean": -0.6475,
+          "n_clusters": 100,
+          "n_observations": 400,
+          "n_resamples": 2000,
+          "seed": 0
+        }
+      },
+      "press": "streamingllm",
+      "readout_accuracy": 0.5841836734693877,
+      "readout_accuracy_ci95": [
+        0.495,
+        0.6475
+      ],
+      "readout_change": -0.31887755102040816,
+      "realized_ratio": 0.04793989535619717,
+      "realized_ratio_pct": 4.793989535619717,
+      "residual": -0.3443877551020408,
+      "residual_ci95": [
+        -0.405,
+        -0.27
+      ],
+      "truncation_rate": 0.07
+    },
+    {
+      "auc_tv": null,
+      "auc_tv_n_problems": null,
+      "budget": 512,
+      "fc_accuracy_matched": 0.885,
+      "free_accuracy": 0.68,
+      "free_accuracy_ci95": [
+        0.6,
+        0.76
+      ],
+      "mean_trace_tokens": 4919.0025,
+      "paired": {
+        "beneficial_flip_mass": {
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "mean": 0.0,
+          "n_clusters": 100,
+          "n_observations": 400,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "harmful_flip_mass": {
+          "ci95": [
+            0.1425,
+            0.2725
+          ],
+          "mean": 0.205,
+          "n_clusters": 100,
+          "n_observations": 400,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "n_matched": 400,
+        "n_only_comp": 0,
+        "n_only_fc": 1600,
+        "note": "net flip mass == total_change on the matched population",
+        "total_change": {
+          "ci95": [
+            -0.2725,
+            -0.1425
+          ],
+          "mean": -0.205,
+          "n_clusters": 100,
+          "n_observations": 400,
+          "n_resamples": 2000,
+          "seed": 0
+        }
+      },
+      "press": "random",
+      "readout_accuracy": 0.8826530612244898,
+      "readout_accuracy_ci95": [
+        0.7992,
+        0.9267
+      ],
+      "readout_change": -0.020408163265306034,
+      "realized_ratio": 0.10408614348132575,
+      "realized_ratio_pct": 10.408614348132575,
+      "residual": -0.18877551020408168,
+      "residual_ci95": [
+        -0.2517,
+        -0.1292
+      ],
+      "truncation_rate": 0.085
+    },
+    {
+      "auc_tv": null,
+      "auc_tv_n_problems": null,
+      "budget": 512,
+      "fc_accuracy_matched": 0.885,
+      "free_accuracy": 0.4775,
+      "free_accuracy_ci95": [
+        0.3975,
+        0.56
+      ],
+      "mean_trace_tokens": 5287.2725,
+      "paired": {
+        "beneficial_flip_mass": {
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "mean": 0.0,
+          "n_clusters": 100,
+          "n_observations": 400,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "harmful_flip_mass": {
+          "ci95": [
+            0.3325,
+            0.4825
+          ],
+          "mean": 0.4075,
+          "n_clusters": 100,
+          "n_observations": 400,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "n_matched": 400,
+        "n_only_comp": 0,
+        "n_only_fc": 1600,
+        "note": "net flip mass == total_change on the matched population",
+        "total_change": {
+          "ci95": [
+            -0.485,
+            -0.3325
+          ],
+          "mean": -0.4075,
+          "n_clusters": 100,
+          "n_observations": 400,
+          "n_resamples": 2000,
+          "seed": 0
+        }
+      },
+      "press": "streamingllm",
+      "readout_accuracy": 0.8214285714285714,
+      "readout_accuracy_ci95": [
+        0.7342,
+        0.8708
+      ],
+      "readout_change": -0.08163265306122447,
+      "realized_ratio": 0.09683631778010307,
+      "realized_ratio_pct": 9.683631778010307,
+      "residual": -0.3341836734693877,
+      "residual_ci95": [
+        -0.3942,
+        -0.2625
+      ],
+      "truncation_rate": 0.0875
+    },
+    {
+      "auc_tv": null,
+      "auc_tv_n_problems": null,
+      "budget": 1024,
+      "fc_accuracy_matched": 0.885,
+      "free_accuracy": 0.8,
+      "free_accuracy_ci95": [
+        0.7275,
+        0.865
+      ],
+      "mean_trace_tokens": 3701.425,
+      "paired": {
+        "beneficial_flip_mass": {
+          "ci95": [
+            0.0,
+            0.0075
+          ],
+          "mean": 0.0025,
+          "n_clusters": 100,
+          "n_observations": 400,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "harmful_flip_mass": {
+          "ci95": [
+            0.05,
+            0.13
+          ],
+          "mean": 0.0875,
+          "n_clusters": 100,
+          "n_observations": 400,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "n_matched": 400,
+        "n_only_comp": 0,
+        "n_only_fc": 1600,
+        "note": "net flip mass == total_change on the matched population",
+        "total_change": {
+          "ci95": [
+            -0.1275,
+            -0.045
+          ],
+          "mean": -0.085,
+          "n_clusters": 100,
+          "n_observations": 400,
+          "n_resamples": 2000,
+          "seed": 0
+        }
+      },
+      "press": "random",
+      "readout_accuracy": 0.9030612244897959,
+      "readout_accuracy_ci95": [
+        0.8225,
+        0.945
+      ],
+      "readout_change": 0.0,
+      "realized_ratio": 0.27665020904111254,
+      "realized_ratio_pct": 27.665020904111252,
+      "residual": -0.08673469387755095,
+      "residual_ci95": [
+        -0.1325,
+        -0.0475
+      ],
+      "truncation_rate": 0.0325
+    },
+    {
+      "auc_tv": null,
+      "auc_tv_n_problems": null,
+      "budget": 1024,
+      "fc_accuracy_matched": 0.885,
+      "free_accuracy": 0.6875,
+      "free_accuracy_ci95": [
+        0.6075,
+        0.7625
+      ],
+      "mean_trace_tokens": 4195.2625,
+      "paired": {
+        "beneficial_flip_mass": {
+          "ci95": [
+            0.0,
+            0.02
+          ],
+          "mean": 0.0075,
+          "n_clusters": 100,
+          "n_observations": 400,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "harmful_flip_mass": {
+          "ci95": [
+            0.145,
+            0.2725
+          ],
+          "mean": 0.205,
+          "n_clusters": 100,
+          "n_observations": 400,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "n_matched": 400,
+        "n_only_comp": 0,
+        "n_only_fc": 1600,
+        "note": "net flip mass == total_change on the matched population",
+        "total_change": {
+          "ci95": [
+            -0.2675,
+            -0.1375
+          ],
+          "mean": -0.1975,
+          "n_clusters": 100,
+          "n_observations": 400,
+          "n_resamples": 2000,
+          "seed": 0
+        }
+      },
+      "press": "streamingllm",
+      "readout_accuracy": 0.8979591836734694,
+      "readout_accuracy_ci95": [
+        0.8175,
+        0.9375
+      ],
+      "readout_change": -0.005102040816326481,
+      "realized_ratio": 0.2440848457039339,
+      "realized_ratio_pct": 24.40848457039339,
+      "residual": -0.1964285714285714,
+      "residual_ci95": [
+        -0.2625,
+        -0.135
+      ],
+      "truncation_rate": 0.045
+    },
+    {
+      "auc_tv": 0.01282887468173492,
+      "auc_tv_n_problems": 25,
+      "budget": 2048,
+      "fc_accuracy_matched": 0.885,
+      "free_accuracy": 0.85,
+      "free_accuracy_ci95": [
+        0.7825,
+        0.9125
+      ],
+      "mean_trace_tokens": 3520.4100000000003,
+      "paired": {
+        "beneficial_flip_mass": {
+          "ci95": [
+            0.0,
+            0.0075
+          ],
+          "mean": 0.0025,
+          "n_clusters": 100,
+          "n_observations": 400,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "harmful_flip_mass": {
+          "ci95": [
+            0.015,
+            0.0625
+          ],
+          "mean": 0.0375,
+          "n_clusters": 100,
+          "n_observations": 400,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "n_matched": 400,
+        "n_only_comp": 0,
+        "n_only_fc": 1600,
+        "note": "net flip mass == total_change on the matched population",
+        "total_change": {
+          "ci95": [
+            -0.0625,
+            -0.0125
+          ],
+          "mean": -0.035,
+          "n_clusters": 100,
+          "n_observations": 400,
+          "n_resamples": 2000,
+          "seed": 0
+        }
+      },
+      "press": "random",
+      "readout_accuracy": 0.9005102040816326,
+      "readout_accuracy_ci95": [
+        0.82,
+        0.9425
+      ],
+      "readout_change": -0.0025510204081632404,
+      "realized_ratio": 0.5817504211157223,
+      "realized_ratio_pct": 58.175042111572225,
+      "residual": -0.03316326530612246,
+      "residual_ci95": [
+        -0.065,
+        -0.01
+      ],
+      "truncation_rate": 0.03
+    },
+    {
+      "auc_tv": 0.01859283392281451,
+      "auc_tv_n_problems": 25,
+      "budget": 2048,
+      "fc_accuracy_matched": 0.885,
+      "free_accuracy": 0.8075,
+      "free_accuracy_ci95": [
+        0.735,
+        0.87
+      ],
+      "mean_trace_tokens": 3715.9825,
+      "paired": {
+        "beneficial_flip_mass": {
+          "ci95": [
+            0.0,
+            0.025
+          ],
+          "mean": 0.01,
+          "n_clusters": 100,
+          "n_observations": 400,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "harmful_flip_mass": {
+          "ci95": [
+            0.05,
+            0.1325
+          ],
+          "mean": 0.0875,
+          "n_clusters": 100,
+          "n_observations": 400,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "n_matched": 400,
+        "n_only_comp": 0,
+        "n_only_fc": 1600,
+        "note": "net flip mass == total_change on the matched population",
+        "total_change": {
+          "ci95": [
+            -0.125,
+            -0.04
+          ],
+          "mean": -0.0775,
+          "n_clusters": 100,
+          "n_observations": 400,
+          "n_resamples": 2000,
+          "seed": 0
+        }
+      },
+      "press": "streamingllm",
+      "readout_accuracy": 0.9030612244897959,
+      "readout_accuracy_ci95": [
+        0.8225,
+        0.9425
+      ],
+      "readout_change": 0.0,
+      "realized_ratio": 0.5511328430637119,
+      "realized_ratio_pct": 55.11328430637119,
+      "residual": -0.07908163265306112,
+      "residual_ci95": [
+        -0.125,
+        -0.0417
+      ],
+      "truncation_rate": 0.0275
+    }
+  ],
+  "fc_run": "math500-fc-powered-merged",
+  "grids": {
+    "1024": "grid-diss1024",
+    "2048": "grid-diss2048-tok",
+    "256": "grid-diss256-tok",
+    "512": "grid-diss512"
+  },
+  "ratio_convention": "budget / (mean prompt + mean generated tokens), ratio of means",
+  "residual_name": "accuracy change unexplained by on-reference readout",
+  "tv_note": "AUC-TV exists at budgets 256 and 2048 only; 512/1024 replay not yet run"
+}

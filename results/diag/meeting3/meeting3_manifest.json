@@ -15,12 +15,12 @@
         "readout-diss1024",
         "readout-diss2048"
       ],
-      "note": "curve exists; R.1 adds realized ratios, flip masses and a TV panel",
+      "note": "R.1 paired problem-clustered CIs, flip masses and realized ratios read 2026-09-24 by scripts/report_budget_curve.py over raw rows (400 matched conditions per cell; totals equal the m4 summaries to 4 dp); fig8 redrawn with CIs and viewed. TV at 512/1024 is the separate T1.tv* cells.",
       "output_sha256": {
-        "figures/fig8_budget_curve.pdf": "8cfb8884af2f594feadbc9afc7f6e31e112b3ee2aa70024fc6d4ab757e587e45",
+        "figures/fig8_budget_curve.pdf": "8ab66ccce776eb16563f6500b3bd7933dc05cd69cfdab169fed7b1bff1e8c8ed",
         "results/diag/amendment-k/m4-1024-summary.json": "c720767464da76fbafac3bdf7c24e8b64ff83948209f73654e8c6a07a024d6f7",
         "results/diag/amendment-k/m4-512-summary.json": "0e7a5305ac516cc308ca60c599822c6212caba3917f435a990d8f21c7ef7fc82",
-        "results/diag/meeting3/t1_budget_curve.json": null
+        "results/diag/meeting3/t1_budget_curve.json": "0778ade561dc4aa9350867f758cb84d17a82951fe57c090fe4ffd0e57d99aeee"
       },
       "outputs": [
         "results/diag/amendment-k/m4-512-summary.json",
@@ -30,7 +30,7 @@
       ],
       "protocol": "R.1",
       "question": "accuracy damage / readout / residual vs budget 256-2048",
-      "status": "ANALYZED",
+      "status": "COMPLETE",
       "task": 1
     },
     {
@@ -230,11 +230,11 @@
     "transformers": "4.56.2"
   },
   "schema": "meeting3-manifest-v1",
-  "source_tree_sha256": "f11a97c49f4e55c258e0433d2eb7e7046a60b3eea67fd4cef6beb5f31be3f1d9",
+  "source_tree_sha256": "fa4fd129ca8f5ba100fd50e0cf7e8440e4874c531639537cffd401c8175160e8",
   "status_counts": {
-    "ANALYZED": 3,
+    "ANALYZED": 2,
     "BLOCKED": 0,
-    "COMPLETE": 0,
+    "COMPLETE": 1,
     "GENERATED": 0,
     "IMPLEMENTED": 0,
     "INVALID": 0,

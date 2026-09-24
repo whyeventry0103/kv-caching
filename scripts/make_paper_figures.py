@@ -903,12 +903,14 @@ def fig7_ratiomatched(out_dir: Path, curves: dict | None):
 
 
 # ---------------------------------------------------------------- Figure 8
-BUDGET_SUMMARIES = {
-    256: "results/diag/amendment-k/m4-powered-diss256-summary.json",
-    512: "results/diag/amendment-k/m4-512-summary.json",
-    1024: "results/diag/amendment-k/m4-1024-summary.json",
-    2048: "results/diag/amendment-k/m4-2048-summary.json",
-}
+T1_BUDGET_CURVE = "results/diag/meeting3/t1_budget_curve.json"
+
+
+def _err(mean: float, ci: list[float], sign: float = 1.0) -> list[list[float]]:
+    """Asymmetric error bar for a (possibly sign-flipped) mean and its CI."""
+    lo, hi = sorted(sign * x for x in ci)
+    m = sign * mean
+    return [[m - lo], [hi - m]]
 
 
 def fig8_budget_curve(out_dir: Path):
@@ -918,43 +920,66 @@ def fig8_budget_curve(out_dir: Path):
     the project's standing rule is that they are never merged:
 
     (a) accuracy LOST against the matched full-cache reference, at four
-        budgets. Plotted as a positive loss so the expected negative
-        correlation with cache size reads directly. The full cache is drawn
-        as a hollow anchor at zero: that point is zero BY CONSTRUCTION (full
-        cache against itself), not a measurement, and is marked as such.
-    (b) the same loss split into its readout part and its trajectory residual.
-        This is the finding the single curve hides: readout loss closes by
-        budget 512-1024 while the residual persists.
+        budgets, with the Amendment R.1 paired problem-clustered 95% CI on the
+        total change. Plotted as a positive loss so the expected negative
+        correlation with cache size reads directly; each point carries its
+        realized compression ratio. The full cache is drawn as a hollow anchor
+        at zero: that point is zero BY CONSTRUCTION (full cache against
+        itself), not a measurement, and is marked as such.
+    (b) the same loss split into its readout part and its trajectory residual
+        (residual with its problem-clustered CI).
     (c) per-step divergence (AUC-TV). Only budgets 256 and 2048 have replay
         profiles -- the 512 and 1024 cells were generation-only -- so this
         panel has two points and draws no curve between them.
 
-    Every value is read from a committed artifact; nothing is typed in.
+    Every value is read from the committed T1 artifact
+    (scripts/report_budget_curve.py); nothing is typed in.
     """
+    t1 = json.loads((PROJECT_ROOT / T1_BUDGET_CURVE).read_text(encoding="utf-8"))
     cells: dict[str, dict[int, dict]] = {"random": {}, "streamingllm": {}}
-    for b, rel in BUDGET_SUMMARIES.items():
-        for c in json.loads((PROJECT_ROOT / rel).read_text(encoding="utf-8"))["cells"]:
-            if c["press"] in cells:
-                cells[c["press"]][b] = c
-    auc = json.loads(
-        (PROJECT_ROOT / "results/diag/amendment-p/auc_resid_tv.json").read_text(
-            encoding="utf-8"
-        )
-    )["per_cell_summary"]
+    for c in t1["cells"]:
+        cells[c["press"]][c["budget"]] = c
     print("Figure 8 [DATA]")
-    budgets = sorted(BUDGET_SUMMARIES)
+    budgets = sorted(cells["random"])
     full_x = 8192  # visual anchor for the unbounded full cache, labelled as such
     label = {"random": "Random", "streamingllm": "StreamingLLM"}
-    fig, axes = plt.subplots(1, 3, figsize=(11.0, 3.2))
+    offset = {"random": 0.94, "streamingllm": 1.06}  # dodge overlapping CI bars
+    fig, axes = plt.subplots(1, 3, figsize=(11.0, 3.4))
 
     ax = axes[0]
     for press, by_b in cells.items():
         hue = MC[label[press]]
-        loss = [
-            by_b[b]["full_accuracy"] - by_b[b]["compressed_accuracy"] for b in budgets
-        ]
-        ax.plot(budgets, loss, "o-", color=hue, lw=1.6, ms=5, label=label[press])
-        ax.plot([budgets[-1], full_x], [loss[-1], 0.0], ls=(0, (2, 2)), color=hue, lw=1)
+        xs = [b * offset[press] for b in budgets]
+        tot = [by_b[b]["paired"]["total_change"] for b in budgets]
+        loss = [-t["mean"] for t in tot]
+        yerr = [[], []]
+        for t in tot:
+            e = _err(t["mean"], t["ci95"], sign=-1.0)
+            yerr[0] += e[0]
+            yerr[1] += e[1]
+        ax.errorbar(
+            xs,
+            loss,
+            yerr=yerr,
+            fmt="o-",
+            color=hue,
+            lw=1.6,
+            ms=5,
+            capsize=2.5,
+            elinewidth=0.9,
+            label=label[press],
+        )
+        ax.plot([xs[-1], full_x], [loss[-1], 0.0], ls=(0, (2, 2)), color=hue, lw=1)
+        for x, y, b in zip(xs, loss, budgets, strict=True):
+            ax.annotate(
+                f"{by_b[b]['realized_ratio_pct']:.0f}%",
+                (x, y),
+                (6 if press == "streamingllm" else -6, 4),
+                textcoords="offset points",
+                fontsize=6,
+                color=hue,
+                ha="left" if press == "streamingllm" else "right",
+            )
     ax.plot(full_x, 0.0, "o", mfc="white", mec=INK2, ms=6)
     ax.annotate(
         "0 by\nconstruction",
@@ -965,25 +990,38 @@ def fig8_budget_curve(out_dir: Path):
         ha="center",
     )
     ax.set_ylabel("accuracy lost vs. full cache")
-    ax.set_title("(a) total damage", fontsize=9)
+    ax.set_title("(a) total damage (paired 95% CI; % = realized ratio)", fontsize=8)
+    ax.set_ylim(-0.02, 0.8)
+    # The Random 256 ratio label sits left of its point; without this padding
+    # it was clipped against the y axis (seen in the first render).
+    ax.set_xlim(150, full_x * 1.3)
     ax.legend(frameon=False, fontsize=7.5)
 
     ax = axes[1]
     for press, by_b in cells.items():
         hue = MC[label[press]]
-        resid = [-by_b[b]["unexplained_residual"] for b in budgets]
+        xs = [b * offset[press] for b in budgets]
+        resid = [-by_b[b]["residual"] for b in budgets]
+        yerr = [[], []]
+        for b in budgets:
+            e = _err(by_b[b]["residual"], by_b[b]["residual_ci95"], sign=-1.0)
+            yerr[0] += e[0]
+            yerr[1] += e[1]
         ro = [-by_b[b]["readout_change"] for b in budgets]
-        ax.plot(
-            budgets,
+        ax.errorbar(
+            xs,
             resid,
-            "o-",
+            yerr=yerr,
+            fmt="o-",
             color=hue,
             lw=1.6,
             ms=5,
+            capsize=2.5,
+            elinewidth=0.9,
             label=f"{label[press]}: trajectory residual",
         )
         ax.plot(
-            budgets,
+            xs,
             ro,
             "s--",
             color=hue,
@@ -996,16 +1034,16 @@ def fig8_budget_curve(out_dir: Path):
     ax.set_title("(b) readout closes, trajectory persists", fontsize=9)
     # Every series is high at small budgets and the labels are long, so any
     # in-data legend position overlapped the StreamingLLM residual at 256/512
-    # (seen in two renders). Headroom above the data max (~0.345) gives the
-    # legend a region no series enters. A two-column legend was tried and
-    # spilled outside the axes over the y tick labels, so it stays one column.
-    ax.set_ylim(-0.01, 0.62)
+    # (seen in two renders). Headroom above the data max gives the legend a
+    # region no series enters. A two-column legend was tried and spilled
+    # outside the axes over the y tick labels, so it stays one column.
+    ax.set_ylim(-0.01, 0.66)
     ax.legend(frameon=False, fontsize=6.5, loc="upper right", ncol=1)
 
     ax = axes[2]
     for press in ("random", "streamingllm"):
         hue = MC[label[press]]
-        pts = [(b, auc[f"{press}-{b}"]["auc_mean"]) for b in (256, 2048)]
+        pts = [(b, cells[press][b]["auc_tv"]) for b in (256, 2048)]
         ax.plot(
             [p[0] for p in pts],
             [p[1] for p in pts],
@@ -1023,6 +1061,7 @@ def fig8_budget_curve(out_dir: Path):
         ticks = budgets + ([full_x] if i == 0 else [])
         ax.set_xticks(ticks)
         ax.set_xticklabels([str(t) for t in budgets] + (["full"] if i == 0 else []))
+        ax.minorticks_off()
         ax.set_xlabel("cache budget (entries)")
         _ygrid(ax)
     fig.tight_layout()
