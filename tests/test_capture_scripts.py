@@ -179,3 +179,60 @@ def test_capture_refuses_a_basis_whose_bytes_changed(tmp_path, monkeypatch):
     monkeypatch.setattr(sys, "argv", ["x", "--config", str(cap), "--i-understand"])
     with pytest.raises(SystemExit, match="frozen hash"):
         run_capture.main()
+
+
+def test_exact_lag_and_fork_control_runners_end_to_end(tmp_path, monkeypatch):
+    _setup(tmp_path, monkeypatch)
+    import run_exact_lag
+    import run_fork_control
+
+    fake = [SimpleNamespace(pid=p) for p in ("p1", "p2")]
+    for mod in (run_exact_lag, run_fork_control):
+        monkeypatch.setattr(mod, "load_benchmark", lambda *a, **k: fake)
+
+    el = _cfg(
+        tmp_path,
+        "el",
+        COMMON + "name: el\npresses: [random, streamingllm]\nbudgets: [16]\n"
+        "compression_interval: 4\ntrigger_step: 10\nwindow: 8\nlags: [1, 4]\n"
+        "reinsert_fraction: 0.25\n",
+    )
+    monkeypatch.setenv("REMOTE_RUNS_ROOT", str(tmp_path / "runs" / "el"))
+    argv = ["x", "--config", str(el), "--i-understand", "--resume", "--seeds", "11"]
+    monkeypatch.setattr(sys, "argv", argv)
+    assert run_exact_lag.main() == 0
+    rows = [
+        json.loads(line)
+        for p in (tmp_path / "runs/el/math500").rglob("*.jsonl")
+        for line in p.read_text().splitlines()
+    ]
+    assert len(rows) == 4 and all(r["status"] == "READ" for r in rows)
+    assert run_exact_lag.main() == 0  # resume redoes nothing
+    assert (
+        sum(
+            1
+            for p in (tmp_path / "runs/el/math500").rglob("*.jsonl")
+            for _ in p.read_text().splitlines()
+        )
+        == 4
+    )
+
+    fc = _cfg(
+        tmp_path,
+        "fc",
+        COMMON + "name: fc\npresses: [random]\nbudgets: [16]\nintervals: [4, 8]\n"
+        "delay: 6\n",
+    )
+    monkeypatch.setenv("REMOTE_RUNS_ROOT", str(tmp_path / "runs" / "fc"))
+    monkeypatch.setattr(
+        sys, "argv", ["x", "--config", str(fc), "--i-understand", "--seeds", "11"]
+    )
+    assert run_fork_control.main() == 0
+    rows = [
+        json.loads(line)
+        for p in (tmp_path / "runs/fc/math500").rglob("*.jsonl")
+        for line in p.read_text().splitlines()
+    ]
+    assert len(rows) == 4  # 2 problems x 2 intervals
+    assert all(r["deterministic_control_max_abs_logit"] == 0.0 for r in rows)
+    assert all(r["selection_agreement"] == 1.0 for r in rows)

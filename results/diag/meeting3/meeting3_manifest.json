@@ -43,10 +43,11 @@
       "depends_on": [],
       "expected_units": 400,
       "id": "T1.tv512",
+      "note": "storage: ~98 MiB per cell (replay-ext-diss256 = 392 MiB / 800 profiles, x200); both cells ~196 MiB vs 146 MiB usable (68.857 GiB used of 70, 1 GiB margin) of which ~117 MiB is committed to queued cells -> deficit ~167 MiB. Needs owner-approved space or a prospective summary-profile amendment. Config not written.",
       "output_sha256": {},
       "protocol": "R.1",
       "question": "per-step TV at budget 512 (missing intermediate point)",
-      "status": "NOT_STARTED",
+      "status": "BLOCKED",
       "task": 1
     },
     {
@@ -58,10 +59,11 @@
       ],
       "expected_units": 400,
       "id": "T1.tv1024",
+      "note": "storage: ~98 MiB per cell (replay-ext-diss256 = 392 MiB / 800 profiles, x200); both cells ~196 MiB vs 146 MiB usable (68.857 GiB used of 70, 1 GiB margin) of which ~117 MiB is committed to queued cells -> deficit ~167 MiB. Needs owner-approved space or a prospective summary-profile amendment. Config not written.",
       "output_sha256": {},
       "protocol": "R.1",
       "question": "per-step TV at budget 1024 (missing intermediate point)",
-      "status": "NOT_STARTED",
+      "status": "BLOCKED",
       "task": 1
     },
     {
@@ -94,22 +96,38 @@
       "task": 1
     },
     {
-      "config_sha256": {},
+      "config_sha256": {
+        "configs/experiments/fork_control_random_r11.yaml": "b469a462629c653d064b074a95b55a03900ae5f6291a7787e0f764b700a1fb23",
+        "configs/experiments/fork_control_slm_r11.yaml": "ffd390f70bc693ee97049b31041066ba63d133b70c0661c7b501e89431f24cf8"
+      },
+      "configs": [
+        "configs/experiments/fork_control_random_r11.yaml",
+        "configs/experiments/fork_control_slm_r11.yaml"
+      ],
       "id": "Q1.legacy_control",
-      "note": "registered 2026-09-12, never built; R.2 records why this gate cannot identify physical-removal effects",
+      "note": "registered 2026-09-12; R.2: cannot identify physical-removal effects. Computed for the record from arm A of the fork control (R.11), labelled NOT VALID FOR IDENTIFICATION by scripts/report_fork_control.py.",
       "output_sha256": {},
       "protocol": "Q.1",
       "question": "removal-anchored phase excess must not exclude zero (as registered)",
-      "status": "NOT_STARTED",
+      "status": "QUEUED",
       "task": 1
     },
     {
-      "config_sha256": {},
+      "config_sha256": {
+        "configs/experiments/fork_control_random_r11.yaml": "b469a462629c653d064b074a95b55a03900ae5f6291a7787e0f764b700a1fb23",
+        "configs/experiments/fork_control_slm_r11.yaml": "ffd390f70bc693ee97049b31041066ba63d133b70c0661c7b501e89431f24cf8"
+      },
+      "configs": [
+        "configs/experiments/fork_control_random_r11.yaml",
+        "configs/experiments/fork_control_slm_r11.yaml"
+      ],
+      "expected_units": 150,
       "id": "Q1.direct_control",
+      "note": "kvcache.fork_control; tiny-Qwen2 tests pass (B-vs-B exact, A-B < 1e-4, selections agree, sensitive to disabled masking); R.11 scope + degenerate tolerance rule registered before outcomes.",
       "output_sha256": {},
       "protocol": "R.2",
       "question": "does physical compaction of already-masked keys change outputs?",
-      "status": "NOT_STARTED",
+      "status": "QUEUED",
       "task": 1
     },
     {
@@ -280,16 +298,16 @@
     "transformers": "4.56.2"
   },
   "schema": "meeting3-manifest-v1",
-  "source_tree_sha256": "d49fa693c724d369f0ea6a1d07d8c58bfd4b863ca67ac6b3afe313c7e9d07914",
+  "source_tree_sha256": "2ee46a3085a73ce55245ae9995f64ed23a41c3247f8d4883ec6566617bd052cf",
   "status_counts": {
     "ANALYZED": 1,
-    "BLOCKED": 0,
+    "BLOCKED": 2,
     "COMPLETE": 3,
     "GENERATED": 0,
     "IMPLEMENTED": 0,
     "INVALID": 0,
-    "NOT_STARTED": 4,
-    "QUEUED": 6,
+    "NOT_STARTED": 0,
+    "QUEUED": 8,
     "RUNNING": 0,
     "TESTED": 1,
     "VALIDATED": 0

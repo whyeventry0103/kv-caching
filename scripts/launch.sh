@@ -38,6 +38,7 @@ case "$COMMAND" in
   basisfit) PY_SCRIPT="scripts/run_basis_fit.py" ;;
   capture) PY_SCRIPT="scripts/run_capture.py" ;;
   exactlag) PY_SCRIPT="scripts/run_exact_lag.py" ;;
+  forkcontrol) PY_SCRIPT="scripts/run_fork_control.py" ;;
   metrics) PY_SCRIPT="scripts/run_metrics.py" ;;
   mechanism) PY_SCRIPT="scripts/run_mechanism.py" ;;
   figures) PY_SCRIPT="scripts/make_figures.py" ;;

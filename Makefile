@@ -103,6 +103,9 @@ dryrun:
 	$(PYTHON) scripts/report_capture.py --runs-root runs --run capture-b256 --out /dev/null --dry-run
 	$(PYTHON) scripts/run_exact_lag.py --config configs/experiments/exact_lag_math500_r5.yaml --dry-run
 	$(PYTHON) scripts/report_exact_lag.py --runs-root runs --run exact-lag-r5 --out /dev/null --dry-run
+	$(PYTHON) scripts/run_fork_control.py --config configs/experiments/fork_control_random_r11.yaml --dry-run
+	$(PYTHON) scripts/run_fork_control.py --config configs/experiments/fork_control_slm_r11.yaml --dry-run
+	$(PYTHON) scripts/report_fork_control.py --runs-root runs --run fork-control-random --run fork-control-slm --out /dev/null --dry-run
 	$(PYTHON) scripts/report_dacc.py --runs-root runs --arms 0=dacc-t0 512=dacc-t512 2048=dacc-t2048 --legacy 256=grid-diss256-tok 2048=grid-diss2048-tok --out /dev/null --dry-run
 	$(PYTHON) scripts/report_onset_grid.py --runs-root runs --arms 0=replay-onset-t0 512=replay-onset-t512 2048=replay-onset-t2048 --out /dev/null --dry-run
 	$(PYTHON) scripts/run_replay.py --config configs/experiments/restoration_smoke.yaml --dry-run

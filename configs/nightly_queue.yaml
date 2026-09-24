@@ -911,6 +911,32 @@ jobs:
     est_output_gb: 0.03
     requires: dacc-gate-smoke
 
+  # Amendment R.2 / R.11: the Q.1 direct functional control (mask now, remove
+  # 32 forwards later, fork before every removal). One job per policy (single
+  # seed each) so both GPUs are used; ~T x ~3 forwards per (trace, interval),
+  # ~11 GPU-h per job (est.).
+  - name: fork-control-random
+    command: forkcontrol
+    config: configs/experiments/fork_control_random_r11.yaml
+    run_name: fork-control-random
+    total: 75
+    seeds: [11]
+    min_free_gb: 24
+    progress_kind: grid
+    est_output_gb: 0.01
+    requires: null
+
+  - name: fork-control-slm
+    command: forkcontrol
+    config: configs/experiments/fork_control_slm_r11.yaml
+    run_name: fork-control-slm
+    total: 75
+    seeds: [11]
+    min_free_gb: 24
+    progress_kind: grid
+    est_output_gb: 0.01
+    requires: null
+
   - name: capture-b2048
     command: capture
     config: configs/experiments/capture_math500_b2048_r9.yaml

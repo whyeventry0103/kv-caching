@@ -3221,3 +3221,38 @@ at that lag and counted. Effects and CIs: `restoration_read` exactly as P.5
 (trace-level bootstrap, 2000 resamples, seed 0), then `classify_latency_sweep`
 on the matched arm. Requested and achieved lags are recorded (equal by
 construction).
+
+### R.11 Q.1 direct functional control as implemented (recorded 2026-09-25, before any outcome)
+
+`kvcache.fork_control` / `scripts/run_fork_control.py`, queued as
+`fork-control-random` and `fork-control-slm`. `DeferredRemovalPress` selects
+every `interval` decode forwards over the logically active entries only (the
+scorer sees the gathered active set, so Random's fixed-seed draws are identical
+whatever is still physically present; masked entries never count toward the
+budget), makes non-selected entries unattendable at once by an additive −inf
+mask per KV head injected into each layer's attention (exactly 0 weight in the
+fp32 softmax), and physically removes them 32 forwards later; overlapping
+removals are tracked per entry. Arm A (physical removal on schedule) is
+replayed paired with the full cache; immediately before every removal the
+state is forked and arm B (keep masked) is replayed on the same tokens until
+the next selection event completes. Verified on a tiny Qwen2 with the pinned
+stack (`tests/test_fork_control.py`): B-vs-B exactly 0, A−B < 1e-4 with
+identical next selections (non-overlapping and overlapping removals), and the
+check fires when masking is disabled.
+
+**Scope (new, prospective):** policies Random and StreamingLLM, floor 256,
+intervals 16/64/256, delay 32, the Q.2 25-problem subset at **seed 11 only**
+(25 traces per policy × interval): a PASS/FAIL instrument control needs event
+coverage (≈ T/interval forks per trace), not power.
+
+**Tolerance rule, completed now.** R.2 fixes tolerance = 10 × the maximum
+|logit difference| between two identical arm-B replays (first 3 forks of every
+trace). If that maximum is exactly 0 — expected with deterministic kernels —
+the rule yields 0 and cannot separate kernel rounding from an effect. Then the
+read is **EXACT** if A−B is also exactly 0 everywhere, otherwise
+**TOLERANCE-DEGENERATE**, reported with the raw A−B maxima, next-token TV and
+selection agreement, and never as PASS or as equality. With a nonzero
+tolerance: PASS iff every compared A−B step is within it. The legacy
+removal-anchored gate is computed from arm A's TV profile (phase excess
+anchored at the first physical removal) and labelled NOT VALID FOR
+IDENTIFICATION whatever it shows.

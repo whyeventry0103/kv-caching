@@ -1,0 +1,20 @@
+name: fork_control_random_r11
+stage: forkcontrol
+# Amendment R.2 direct functional control for Q.1, scoped by R.11: policy
+# random, floor (budget) 256, intervals 16/64/256, removal delay 32, the Q.2
+# 25-problem subset at seed 11 (a PASS/FAIL instrument control needs event
+# coverage, not power; ~T/interval forks per trace). One queue job per policy
+# so the two single-seed jobs occupy both GPUs.
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+subset:
+  math500: 25
+presses: [random]
+budgets: [256]
+seeds: [11]
+intervals: [16, 64, 256]
+delay: 32
+n_deterministic: 3
+reference_run_name: math500-fc-powered-merged
+scale_authorized: true
+remote_only: true
