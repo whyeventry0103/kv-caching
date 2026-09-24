@@ -100,6 +100,7 @@ dryrun:
 	$(PYTHON) scripts/run_capture.py --config configs/experiments/capture_math500_smoke_r9.yaml --dry-run
 	$(PYTHON) scripts/run_capture.py --config configs/experiments/capture_math500_b256_r9.yaml --dry-run
 	$(PYTHON) scripts/run_capture.py --config configs/experiments/capture_math500_b2048_r9.yaml --dry-run
+	$(PYTHON) scripts/report_capture.py --runs-root runs --run capture-b256 --out /dev/null --dry-run
 	$(PYTHON) scripts/report_dacc.py --runs-root runs --arms 0=dacc-t0 512=dacc-t512 2048=dacc-t2048 --legacy 256=grid-diss256-tok 2048=grid-diss2048-tok --out /dev/null --dry-run
 	$(PYTHON) scripts/report_onset_grid.py --runs-root runs --arms 0=replay-onset-t0 512=replay-onset-t512 2048=replay-onset-t2048 --out /dev/null --dry-run
 	$(PYTHON) scripts/run_replay.py --config configs/experiments/restoration_smoke.yaml --dry-run
