@@ -250,7 +250,13 @@ def _enabled_decoding_press_cls(kvpress_module: Any) -> type:
                 module, hidden_states, keys, values, attentions, kwargs
             )
             if tap is not None:
-                tap.end(module, keys, compressed_keys, self.profile_step)
+                tap.end(
+                    module,
+                    keys,
+                    compressed_keys,
+                    self.profile_step,
+                    values_before=values,
+                )
             after = int(compressed_keys.shape[2])
             self.compressions.append(
                 {

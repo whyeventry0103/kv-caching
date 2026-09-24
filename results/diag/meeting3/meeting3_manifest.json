@@ -210,20 +210,27 @@
     {
       "config_sha256": {},
       "id": "Q5.identity_repair",
+      "note": "EventTap(stash_kv=True): true evicted complement per layer from the verified selection; layer-0 stash checked bitwise against full keys at every cohort (raises); per-layer state; mutation test: the old tail-stash bug is refused (tests/test_exact_lag.py). Real-model use in exact-lag-r5.",
       "output_sha256": {},
       "protocol": "R.5",
       "question": "restoration reinserts the TRUE evicted K/V, per layer",
-      "status": "NOT_STARTED",
+      "status": "TESTED",
       "task": 2
     },
     {
-      "config_sha256": {},
+      "config_sha256": {
+        "configs/experiments/exact_lag_math500_r5.yaml": "29c1be5eabbbe5f0c670e43404c4631816f08bae3b349240639b2d83d35be572"
+      },
+      "configs": [
+        "configs/experiments/exact_lag_math500_r5.yaml"
+      ],
       "expected_units": 4000,
       "id": "Q5.exact_lag",
+      "note": "kvcache.exact_lag + scripts/run_exact_lag.py / report_exact_lag.py; tiny-Qwen2 tests (deterministic snapshots, exact applied step, gate) pass; queue exact-lag-r5 requires capture-smoke; ~5 h on 2 GPUs.",
       "output_sha256": {},
       "protocol": "R.5",
       "question": "recovery after exact delay 1/4/16/64/256",
-      "status": "NOT_STARTED",
+      "status": "QUEUED",
       "task": 2
     },
     {
@@ -273,7 +280,7 @@
     "transformers": "4.56.2"
   },
   "schema": "meeting3-manifest-v1",
-  "source_tree_sha256": "625d945a0269201aed1782eaeafa3266cb0381454bb4a8c375e4b7bf154e7914",
+  "source_tree_sha256": "d49fa693c724d369f0ea6a1d07d8c58bfd4b863ca67ac6b3afe313c7e9d07914",
   "status_counts": {
     "ANALYZED": 1,
     "BLOCKED": 0,
@@ -281,10 +288,10 @@
     "GENERATED": 0,
     "IMPLEMENTED": 0,
     "INVALID": 0,
-    "NOT_STARTED": 6,
-    "QUEUED": 5,
+    "NOT_STARTED": 4,
+    "QUEUED": 6,
     "RUNNING": 0,
-    "TESTED": 0,
+    "TESTED": 1,
     "VALIDATED": 0
   }
 }

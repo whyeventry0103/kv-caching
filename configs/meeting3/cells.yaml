@@ -154,13 +154,21 @@ cells:
     task: 2
     protocol: "R.5"
     question: "restoration reinserts the TRUE evicted K/V, per layer"
-    status: NOT_STARTED
+    status: TESTED
+    note: "EventTap(stash_kv=True): true evicted complement per layer from the
+      verified selection; layer-0 stash checked bitwise against full keys at
+      every cohort (raises); per-layer state; mutation test: the old tail-stash
+      bug is refused (tests/test_exact_lag.py). Real-model use in exact-lag-r5."
   - id: Q5.exact_lag
     task: 2
     protocol: "R.5"
     question: "recovery after exact delay 1/4/16/64/256"
-    expected_units: 4000     # 5 lags x 800
-    status: NOT_STARTED
+    configs: [configs/experiments/exact_lag_math500_r5.yaml]
+    expected_units: 4000     # 200 (trace, policy) rows x 5 lags x 4 arms
+    status: QUEUED
+    note: "kvcache.exact_lag + scripts/run_exact_lag.py / report_exact_lag.py;
+      tiny-Qwen2 tests (deterministic snapshots, exact applied step, gate) pass;
+      queue exact-lag-r5 requires capture-smoke; ~5 h on 2 GPUs."
 
   # ------------------------------------------------------------- Task 3
   - id: Q6.fit

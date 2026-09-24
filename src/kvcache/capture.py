@@ -139,12 +139,19 @@ class EventTap:
     error here rather than a silently wrong position map downstream.
     """
 
-    def __init__(self, press: Any, tracker: PositionTracker) -> None:
+    def __init__(
+        self, press: Any, tracker: PositionTracker, *, stash_kv: bool = False
+    ) -> None:
         self.press = press
         self.tracker = tracker
         self.events: list[PruneEvent] = []
         self.listeners: list[Any] = []
         self._scores = None
+        # Amendment R.5 identity repair: the TRUE evicted complement of K and V,
+        # per layer (never shared across layers), in eviction order, most
+        # recent last. layer -> list of (step, positions [n_kv, E], K, V).
+        self.stash_kv = stash_kv
+        self.stash: dict[int, list[tuple[int, Any, Any, Any]]] = {}
         base = press.base_press
         original = base.score
 
@@ -161,7 +168,14 @@ class EventTap:
         # budget, so a stale tensor from the previous layer must never survive.
         self._scores = None
 
-    def end(self, module: Any, keys_before: Any, keys_after: Any, step: Any) -> None:
+    def end(
+        self,
+        module: Any,
+        keys_before: Any,
+        keys_after: Any,
+        step: Any,
+        values_before: Any = None,
+    ) -> None:
         import torch
 
         k_len, n_kept = int(keys_before.shape[2]), int(keys_after.shape[2])
@@ -184,6 +198,19 @@ class EventTap:
         mask = torch.ones_like(cand, dtype=torch.bool)
         mask.scatter_(1, idx[0], False)
         evicted = cand[mask].view(cand.shape[0], k_len - n_kept)
+        if self.stash_kv:
+            if values_before is None:
+                raise RuntimeError("stash_kv needs the pre-compression values")
+            # local indices of the evicted entries, per KV head, eviction order
+            # = cache order of the candidates (mask order is ascending index)
+            local = torch.arange(k_len, device=mask.device).expand_as(mask)[mask]
+            local = local.view(cand.shape[0], k_len - n_kept)
+            d = keys_before.shape[-1]
+            ek = keys_before[0].gather(1, local.unsqueeze(-1).expand(-1, -1, d))
+            evv = values_before[0].gather(1, local.unsqueeze(-1).expand(-1, -1, d))
+            self.stash.setdefault(int(module.layer_idx), []).append(
+                (int(step), evicted, ek, evv)
+            )
         ev = PruneEvent(int(step), int(module.layer_idx), cand, evicted)
         self.events.append(ev)
         for fn in self.listeners:

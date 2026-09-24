@@ -3197,3 +3197,27 @@ seed), PREDICTED / NULL / REVERSED; exploratory; no accuracy-scale claim.
 (primary) are queued ahead of the D_acc cells, because Tasks 2 and 3 have no
 measured result yet; `capture-b2048` last. Any GPU the capture chain leaves
 idle is filled by the D_acc cells.
+
+### R.10 Q.5 exact-lag protocol as implemented (recorded 2026-09-25, before any outcome)
+
+`kvcache.exact_lag` / `scripts/run_exact_lag.py`, queued as `exact-lag-r5`
+behind `capture-smoke`. Identity repair: `EventTap(stash_kv=True)` stashes, per
+layer and in eviction order, the true evicted K and V gathered from the
+pre-compression tensors at the verified selection; at the cohort the layer-0
+stash is checked bitwise against the full cache's layer-0 keys at the same
+absolute positions (the run raises otherwise; a mutation reproducing the old
+tail stash is refused in `tests/test_exact_lag.py`). One paired replay (the
+`none` arm) runs to `e + 256 + 200`, snapshotting the compressed cache and the
+press's step counters and hidden-state buffer immediately before forward
+`e + ℓ`; each arm restores a deep copy of that snapshot and applies
+`plan_reinsertion` / `apply_reinsertion` per (layer, KV head) with
+`n = 0.25 × budget = 64`, reinsertion rng seeded from (problem, seed, policy,
+layer, head, "reinsert") and eviction rng from the same key with "evict"
+(so `matched` and `random` evict the same entries), gated bitwise by
+`retained_set_report`. The read per (trace, lag, arm) is the mean TV over
+forwards `[e + ℓ, e + ℓ + 200)` against the full branch; traces lacking the
+cohort, a stash of ≥ 64 entries, or the full window at a lag are ineligible
+at that lag and counted. Effects and CIs: `restoration_read` exactly as P.5
+(trace-level bootstrap, 2000 resamples, seed 0), then `classify_latency_sweep`
+on the matched arm. Requested and achieved lags are recorded (equal by
+construction).

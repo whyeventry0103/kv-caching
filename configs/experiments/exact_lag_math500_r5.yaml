@@ -1,0 +1,23 @@
+name: exact_lag_math500_r5
+stage: exactlag
+# Amendment R.5 exact-lag restoration (replaces the unexecuted Q.5 sweep).
+# Identity-repaired stash (true evicted K/V per layer via kvcache.capture.EventTap,
+# layer-0 keys checked bitwise against the full cache), cohort = first effective
+# prune at or after step 130, reinsertion at exactly e + lag from a snapshot,
+# arms none/matched/random/relaxed, 200-forward read from the reinsertion step.
+# Same subset, policies, budget, interval and reinsert fraction as the P.5 cell.
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+subset:
+  math500: 25
+presses: [random, streamingllm]
+budgets: [256]
+seeds: [11, 23, 47, 89]
+reference_run_name: math500-fc-powered-merged
+compression_interval: 64
+trigger_step: 130
+window: 200
+lags: [1, 4, 16, 64, 256]
+reinsert_fraction: 0.25
+scale_authorized: true
+remote_only: true

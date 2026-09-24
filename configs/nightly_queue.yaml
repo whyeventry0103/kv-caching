@@ -863,6 +863,21 @@ jobs:
     est_output_gb: 0.03   # ~20 KB row + ~28 KB npz per condition
     requires: capture-smoke
 
+  # Amendment R.5 exact-lag restoration (Task 2, restoration half). Requires the
+  # capture smoke: it shares EventTap, which the smoke validates on the 7B model.
+  # Cost ~650 paired forwards + 15 arms x 200 per (trace, policy) -> ~5 h on
+  # 2 GPUs for 200 conditions.
+  - name: exact-lag-r5
+    command: exactlag
+    config: configs/experiments/exact_lag_math500_r5.yaml
+    run_name: exact-lag-r5
+    total: 200
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 28
+    progress_kind: grid
+    est_output_gb: 0.01
+    requires: capture-smoke
+
   - name: dacc-t2048
     command: grid
     config: configs/experiments/grid_math500_dacc_t2048_r3.yaml
