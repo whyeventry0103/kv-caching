@@ -3256,3 +3256,23 @@ tolerance: PASS iff every compared A−B step is within it. The legacy
 removal-anchored gate is computed from arm A's TV profile (phase excess
 anchored at the first physical removal) and labelled NOT VALID FOR
 IDENTIFICATION whatever it shows.
+
+### R.12 Summary-profile storage for the R.1 intermediate-budget TV cells (prospective, 2026-09-25)
+
+The R.1 TV cells at budgets 512 and 1024 were BLOCKED on storage: full
+per-step profiles need ~98 MiB per cell (measured from `replay-ext-diss256`:
+392 MiB / 800 profiles) against a projected ~167 MiB deficit. R.1's registered
+read is the per-trace mean TV (AUC), averaged over seeds within problem, then
+problems, with a problem-clustered CI; it does not need the per-step arrays.
+The cells therefore run exactly as registered (`replay_ext_math500_b{512,1024}_r1`:
+FC reference, Q.2 subset, seeds 11/23/47/89, interval 64, extended measures,
+Random and StreamingLLM) with `profile_storage: summary`:
+`write_replay_profile(storage="summary")` validates the full profile
+identically, then stores schema `tv-profile-summary-v1` (mean TV, max TV,
+256-step window means, mean JSD, top-1 agreement rate, pre-onset max TV, onset,
+cache statistics) — ~3 KB per trace. Readers needing per-step arrays refuse it
+by schema. The existing pre-eviction check in `run_replay` still runs on the
+in-memory profile. `report_budget_curve.py --tv-runs 512=t1-tv512
+1024=t1-tv1024` adds these AUCs with their CIs to the T1 artifact; the 256/2048
+values keep their Amendment P source (recorded per cell as `auc_tv_source`).
+Queued last (`t1-tv512`, `t1-tv1024`).

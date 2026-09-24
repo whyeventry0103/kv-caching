@@ -54,24 +54,20 @@ cells:
     configs: [configs/experiments/replay_ext_math500_b512_r1.yaml]
     depends_on: []
     expected_units: 400
-    status: BLOCKED
-    note: "storage: ~98 MiB per cell (replay-ext-diss256 = 392 MiB / 800
-      profiles, x200); both cells ~196 MiB vs 146 MiB usable (68.857 GiB used of
-      70, 1 GiB margin) of which ~117 MiB is committed to queued cells ->
-      deficit ~167 MiB. Needs owner-approved space or a prospective
-      summary-profile amendment. Config not written."
+    status: QUEUED
+    note: "was BLOCKED on storage (~98 MiB/cell full profiles vs ~167 MiB
+      deficit); R.12 runs it as registered with summary profiles (~3 KB/trace).
+      Queue t1-tv512, last."
   - id: T1.tv1024
     task: 1
     protocol: "R.1"
     question: "per-step TV at budget 1024 (missing intermediate point)"
     configs: [configs/experiments/replay_ext_math500_b1024_r1.yaml]
     expected_units: 400
-    status: BLOCKED
-    note: "storage: ~98 MiB per cell (replay-ext-diss256 = 392 MiB / 800
-      profiles, x200); both cells ~196 MiB vs 146 MiB usable (68.857 GiB used of
-      70, 1 GiB margin) of which ~117 MiB is committed to queued cells ->
-      deficit ~167 MiB. Needs owner-approved space or a prospective
-      summary-profile amendment. Config not written."
+    status: QUEUED
+    note: "was BLOCKED on storage (~98 MiB/cell full profiles vs ~167 MiB
+      deficit); R.12 runs it as registered with summary profiles (~3 KB/trace).
+      Queue t1-tv1024, last."
 
   # ------------------------------------------------------------- Q.1
   - id: Q1.arms

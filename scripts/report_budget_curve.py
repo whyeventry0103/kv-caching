@@ -22,6 +22,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
 from kvcache.metrics.paired import paired_flip_contrast  # noqa: E402
+from kvcache.stats import cluster_bootstrap_mean  # noqa: E402
 
 FC_RUN = "math500-fc-powered-merged"
 GRIDS = {
@@ -64,13 +65,45 @@ def _correct_by_condition(run_dir: Path, press: str | None, budget) -> dict:
     return out
 
 
+def _summary_auc(runs_root: Path, specs: list[str], n_resamples: int, seed: int):
+    """Per-(press, budget) AUC-TV from R.12 summary profiles, clustered by problem."""
+    out = {}
+    for spec in specs:
+        budget, _, run = spec.partition("=")
+        per: dict[str, dict[str, list[float]]] = {}
+        for path in sorted((runs_root / run / "profiles").rglob("*.json")):
+            if path.suffixes[-2:] != [".json"]:
+                continue
+            d = json.loads(path.read_text(encoding="utf-8"))
+            if d.get("schema_version") != "tv-profile-summary-v1":
+                raise SystemExit(f"not an R.12 summary profile: {path}")
+            per.setdefault(d["condition"]["press"], {}).setdefault(
+                d["reference_key"][1], []
+            ).append(float(d["mean_tv"]))
+        for press, by_pid in per.items():
+            # seeds collapse into their problem's mean first (the Amendment P
+            # convention), so a problem with more seeds does not weigh more
+            means = {pid: [sum(v) / len(v)] for pid, v in by_pid.items()}
+            out[(press, int(budget))] = cluster_bootstrap_mean(
+                means, n_resamples=n_resamples, seed=seed
+            )
+    return out
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--runs-root", required=True, type=Path)
     ap.add_argument("--out", required=True, type=Path)
     ap.add_argument("--n-resamples", type=int, default=2000)
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument(
+        "--tv-runs",
+        nargs="*",
+        default=[],
+        help="budget=run pairs of R.12 summary-profile TV cells (e.g. 512=t1-tv512)",
+    )
     a = ap.parse_args()
+    tv_new = _summary_auc(a.runs_root, a.tv_runs, a.n_resamples, a.seed)
 
     fc = _correct_by_condition(a.runs_root / FC_RUN, None, None)
     ratios = json.loads((PROJECT_ROOT / RATIOS).read_text(encoding="utf-8"))["realized"]
@@ -90,6 +123,7 @@ def main() -> int:
             pc = paired_flip_contrast(fc, comp, n_resamples=a.n_resamples, seed=a.seed)
             s = summ[press]
             tv = auc.get(f"{press}-{budget}")
+            new = tv_new.get((press, budget))
             rr = ratios[f"{press}-{budget}"]
             cells.append(
                 {
@@ -108,8 +142,18 @@ def main() -> int:
                     "residual_ci95": s["unexplained_residual_ci95"],
                     "truncation_rate": s["truncation_rate"],
                     "paired": pc,
-                    "auc_tv": None if tv is None else tv["auc_mean"],
-                    "auc_tv_n_problems": None if tv is None else tv["n_problems"],
+                    "auc_tv": (
+                        new["mean"] if new else (None if tv is None else tv["auc_mean"])
+                    ),
+                    "auc_tv_ci95": new["ci95"] if new else None,
+                    "auc_tv_n_problems": (
+                        new["n_clusters"]
+                        if new
+                        else (None if tv is None else tv["n_problems"])
+                    ),
+                    "auc_tv_source": (
+                        "R.12 summary profiles" if new else (AUC if tv else None)
+                    ),
                 }
             )
     out = {
@@ -121,7 +165,9 @@ def main() -> int:
             "budget / (mean prompt + mean generated tokens), ratio of means"
         ),
         "tv_note": (
-            "AUC-TV exists at budgets 256 and 2048 only; 512/1024 replay not yet run"
+            "AUC-TV = per-trace mean TV, seeds averaged within problem; 256/2048 "
+            "from the Amendment P artifact, 512/1024 from R.12 summary profiles "
+            "when --tv-runs is given"
         ),
         "cells": cells,
     }

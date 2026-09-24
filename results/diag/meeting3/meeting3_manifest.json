@@ -17,10 +17,10 @@
       ],
       "note": "R.1 paired problem-clustered CIs, flip masses and realized ratios read 2026-09-24 by scripts/report_budget_curve.py over raw rows (400 matched conditions per cell; totals equal the m4 summaries to 4 dp); fig8 redrawn with CIs and viewed. TV at 512/1024 is the separate T1.tv* cells.",
       "output_sha256": {
-        "figures/fig8_budget_curve.pdf": "8ab66ccce776eb16563f6500b3bd7933dc05cd69cfdab169fed7b1bff1e8c8ed",
+        "figures/fig8_budget_curve.pdf": "734619f70bd921645962d5ba7f76da21d0cfeaa37d184a61c748a61350b17fb8",
         "results/diag/amendment-k/m4-1024-summary.json": "c720767464da76fbafac3bdf7c24e8b64ff83948209f73654e8c6a07a024d6f7",
         "results/diag/amendment-k/m4-512-summary.json": "0e7a5305ac516cc308ca60c599822c6212caba3917f435a990d8f21c7ef7fc82",
-        "results/diag/meeting3/t1_budget_curve.json": "0778ade561dc4aa9350867f758cb84d17a82951fe57c090fe4ffd0e57d99aeee"
+        "results/diag/meeting3/t1_budget_curve.json": "369efacba876031b7e2df09d51c117be055c0589c272024e9148f0c2016b03dd"
       },
       "outputs": [
         "results/diag/amendment-k/m4-512-summary.json",
@@ -35,7 +35,7 @@
     },
     {
       "config_sha256": {
-        "configs/experiments/replay_ext_math500_b512_r1.yaml": null
+        "configs/experiments/replay_ext_math500_b512_r1.yaml": "b40021b409569eeff75523960161c045dbc5b75a91c058962de8aa7ea860687e"
       },
       "configs": [
         "configs/experiments/replay_ext_math500_b512_r1.yaml"
@@ -43,27 +43,27 @@
       "depends_on": [],
       "expected_units": 400,
       "id": "T1.tv512",
-      "note": "storage: ~98 MiB per cell (replay-ext-diss256 = 392 MiB / 800 profiles, x200); both cells ~196 MiB vs 146 MiB usable (68.857 GiB used of 70, 1 GiB margin) of which ~117 MiB is committed to queued cells -> deficit ~167 MiB. Needs owner-approved space or a prospective summary-profile amendment. Config not written.",
+      "note": "was BLOCKED on storage (~98 MiB/cell full profiles vs ~167 MiB deficit); R.12 runs it as registered with summary profiles (~3 KB/trace). Queue t1-tv512, last.",
       "output_sha256": {},
       "protocol": "R.1",
       "question": "per-step TV at budget 512 (missing intermediate point)",
-      "status": "BLOCKED",
+      "status": "QUEUED",
       "task": 1
     },
     {
       "config_sha256": {
-        "configs/experiments/replay_ext_math500_b1024_r1.yaml": null
+        "configs/experiments/replay_ext_math500_b1024_r1.yaml": "1465186b4593edb06f11e1551e94222c202ae606fafdead2789a1e149d7c487f"
       },
       "configs": [
         "configs/experiments/replay_ext_math500_b1024_r1.yaml"
       ],
       "expected_units": 400,
       "id": "T1.tv1024",
-      "note": "storage: ~98 MiB per cell (replay-ext-diss256 = 392 MiB / 800 profiles, x200); both cells ~196 MiB vs 146 MiB usable (68.857 GiB used of 70, 1 GiB margin) of which ~117 MiB is committed to queued cells -> deficit ~167 MiB. Needs owner-approved space or a prospective summary-profile amendment. Config not written.",
+      "note": "was BLOCKED on storage (~98 MiB/cell full profiles vs ~167 MiB deficit); R.12 runs it as registered with summary profiles (~3 KB/trace). Queue t1-tv1024, last.",
       "output_sha256": {},
       "protocol": "R.1",
       "question": "per-step TV at budget 1024 (missing intermediate point)",
-      "status": "BLOCKED",
+      "status": "QUEUED",
       "task": 1
     },
     {
@@ -298,16 +298,16 @@
     "transformers": "4.56.2"
   },
   "schema": "meeting3-manifest-v1",
-  "source_tree_sha256": "2ee46a3085a73ce55245ae9995f64ed23a41c3247f8d4883ec6566617bd052cf",
+  "source_tree_sha256": "61d07fd1eef99ae78ed5986087d6a0a91e2fce4bad5313d6fea38aa3318bda5b",
   "status_counts": {
     "ANALYZED": 1,
-    "BLOCKED": 2,
+    "BLOCKED": 0,
     "COMPLETE": 3,
     "GENERATED": 0,
     "IMPLEMENTED": 0,
     "INVALID": 0,
     "NOT_STARTED": 0,
-    "QUEUED": 8,
+    "QUEUED": 10,
     "RUNNING": 0,
     "TESTED": 1,
     "VALIDATED": 0

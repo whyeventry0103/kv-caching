@@ -399,6 +399,10 @@ def is_profile_file(path: str | Path) -> bool:
     return Path(path).suffixes[-2:] == [".json"]
 
 
+SUMMARY_SCHEMA = "tv-profile-summary-v1"
+SUMMARY_WINDOW = 256
+
+
 def write_replay_profile(
     root: str | Path,
     *,
@@ -408,7 +412,13 @@ def write_replay_profile(
     pid_hash: str,
     profile: ReplayProfile,
     overwrite: bool = False,
+    storage: str = "full",
 ) -> Path:
+    """Write one profile. ``storage="summary"`` (Amendment R.12) keeps only the
+    scalars and 256-step window means a read needs, validated identically; the
+    full per-step arrays are what exhausted the storage budget."""
+    if storage not in {"full", "summary"}:
+        raise ValueError(f"unknown profile storage {storage!r}")
     lengths = {
         len(profile.estimate),
         len(profile.lower),
@@ -455,6 +465,44 @@ def write_replay_profile(
     if path.exists() and not overwrite:
         raise FileExistsError(f"replay profile already exists: {path}")
     path.parent.mkdir(parents=True, exist_ok=True)
+    if storage == "summary":
+        est = [float(v) for v in profile.estimate]
+        win = SUMMARY_WINDOW
+        payload = {
+            # A distinct version: readers that need the per-step arrays refuse
+            # or skip it (no "estimate" key) instead of misreading it.
+            "schema_version": SUMMARY_SCHEMA,
+            "reference_key": list(reference_key),
+            "condition": {"press": press_name, "budget": budget},
+            "n_steps": len(est),
+            "mean_tv": sum(est) / len(est) if est else 0.0,
+            "max_tv": max(est) if est else 0.0,
+            "window": win,
+            "window_mean_tv": [
+                sum(est[i : i + win]) / len(est[i : i + win])
+                for i in range(0, len(est), win)
+            ],
+            "mean_jsd": (sum(profile.jsd) / len(profile.jsd) if profile.jsd else None),
+            "top1_agree_rate": (
+                sum(profile.top1_agree) / len(profile.top1_agree)
+                if profile.top1_agree
+                else None
+            ),
+            "pre_onset_max_tv": (
+                max(est[: profile.onset_step], default=0.0)
+                if profile.onset_step is not None
+                else None
+            ),
+            "onset_step": profile.onset_step,
+            "compression_interval": profile.compression_interval,
+            "cache_stats": {
+                "events": profile.compression_events,
+                "max_before_prune": profile.max_before_prune,
+                "max_after_prune": profile.max_after_prune,
+            },
+        }
+        path.write_text(json.dumps(payload, sort_keys=True), encoding="utf-8")
+        return path
     payload = {
         # v2 carries the Amendment P.4 measures; v1 is TV-only. Versioning is
         # load-bearing: an analysis that pooled the two would silently average

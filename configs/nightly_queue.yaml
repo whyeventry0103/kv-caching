@@ -947,3 +947,29 @@ jobs:
     progress_kind: grid
     est_output_gb: 0.03
     requires: capture-smoke
+
+  # Amendment R.1 / R.12: TV at the intermediate budgets for Task 1, with
+  # summary-only profiles (~3 KB/trace; the full format is what was BLOCKED on
+  # storage). Paired replay, ~19 h on 2 GPUs for both cells (est.). Last in the
+  # queue: Task 1 is already answered; these fill fig8 panel (c).
+  - name: t1-tv512
+    command: replay
+    config: configs/experiments/replay_ext_math500_b512_r1.yaml
+    run_name: t1-tv512
+    total: 200
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 24
+    progress_kind: grid
+    est_output_gb: 0.01
+    requires: null
+
+  - name: t1-tv1024
+    command: replay
+    config: configs/experiments/replay_ext_math500_b1024_r1.yaml
+    run_name: t1-tv1024
+    total: 200
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 24
+    progress_kind: grid
+    est_output_gb: 0.01
+    requires: null

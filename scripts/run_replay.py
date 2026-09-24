@@ -565,6 +565,7 @@ def main() -> int:
                         # On resume an orphan profile can survive a timed stop that
                         # killed the process before the row was appended; overwrite it.
                         overwrite=args.resume,
+                        storage=str(config.get("profile_storage", "full")),
                     )
                     if arm is not None:
                         # The instrument gate travels with the profile it gates.

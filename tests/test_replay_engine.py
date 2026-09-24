@@ -410,3 +410,46 @@ def test_every_profile_reader_skips_sidecars(tmp_path):
     ]
     assert module.main() == 0
     assert _json.loads(out.read_text(encoding="utf-8"))["n_profile_files"] == 1
+
+
+def test_summary_storage_keeps_the_read_scalars_and_drops_the_arrays(tmp_path):
+    """Amendment R.12: ~3 KB instead of the per-step arrays, same validation."""
+    import json
+
+    est = tuple([0.0] * 10 + [0.2] * 300)
+    profile = ReplayProfile(
+        estimate=est,
+        lower=est,
+        upper=est,
+        reference_token_ids=tuple(range(len(est))),
+        onset_step=10,
+        compression_interval=64,
+        compression_events=4,
+        max_before_prune=320,
+        max_after_prune=256,
+    )
+    path = write_replay_profile(
+        tmp_path,
+        reference_key=("math500", "p1", "model", "fullcache", "full", 11),
+        press_name="random",
+        budget=512,
+        pid_hash="pid",
+        profile=profile,
+        storage="summary",
+    )
+    d = json.loads(path.read_text())
+    assert d["schema_version"] == "tv-profile-summary-v1"
+    assert "estimate" not in d and "reference_token_ids" not in d
+    assert d["mean_tv"] == pytest.approx(0.2 * 300 / 310)
+    assert d["window_mean_tv"] == pytest.approx([0.2 * 246 / 256, 0.2])
+    assert d["pre_onset_max_tv"] == 0.0 and d["n_steps"] == 310
+    with pytest.raises(ValueError, match="storage"):
+        write_replay_profile(
+            tmp_path,
+            reference_key=("math500", "p1", "model", "fullcache", "full", 11),
+            press_name="random",
+            budget=512,
+            pid_hash="pid2",
+            profile=profile,
+            storage="gzip",
+        )

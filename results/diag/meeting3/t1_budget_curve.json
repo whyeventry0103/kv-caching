@@ -3,7 +3,9 @@
   "cells": [
     {
       "auc_tv": 0.10750623825627756,
+      "auc_tv_ci95": null,
       "auc_tv_n_problems": 25,
+      "auc_tv_source": "results/diag/amendment-p/auc_resid_tv.json",
       "budget": 256,
       "fc_accuracy_matched": 0.885,
       "free_accuracy": 0.4225,
@@ -69,7 +71,9 @@
     },
     {
       "auc_tv": 0.10275934916439616,
+      "auc_tv_ci95": null,
       "auc_tv_n_problems": 25,
+      "auc_tv_source": "results/diag/amendment-p/auc_resid_tv.json",
       "budget": 256,
       "fc_accuracy_matched": 0.885,
       "free_accuracy": 0.2375,
@@ -135,7 +139,9 @@
     },
     {
       "auc_tv": null,
+      "auc_tv_ci95": null,
       "auc_tv_n_problems": null,
+      "auc_tv_source": null,
       "budget": 512,
       "fc_accuracy_matched": 0.885,
       "free_accuracy": 0.68,
@@ -201,7 +207,9 @@
     },
     {
       "auc_tv": null,
+      "auc_tv_ci95": null,
       "auc_tv_n_problems": null,
+      "auc_tv_source": null,
       "budget": 512,
       "fc_accuracy_matched": 0.885,
       "free_accuracy": 0.4775,
@@ -267,7 +275,9 @@
     },
     {
       "auc_tv": null,
+      "auc_tv_ci95": null,
       "auc_tv_n_problems": null,
+      "auc_tv_source": null,
       "budget": 1024,
       "fc_accuracy_matched": 0.885,
       "free_accuracy": 0.8,
@@ -333,7 +343,9 @@
     },
     {
       "auc_tv": null,
+      "auc_tv_ci95": null,
       "auc_tv_n_problems": null,
+      "auc_tv_source": null,
       "budget": 1024,
       "fc_accuracy_matched": 0.885,
       "free_accuracy": 0.6875,
@@ -399,7 +411,9 @@
     },
     {
       "auc_tv": 0.01282887468173492,
+      "auc_tv_ci95": null,
       "auc_tv_n_problems": 25,
+      "auc_tv_source": "results/diag/amendment-p/auc_resid_tv.json",
       "budget": 2048,
       "fc_accuracy_matched": 0.885,
       "free_accuracy": 0.85,
@@ -465,7 +479,9 @@
     },
     {
       "auc_tv": 0.01859283392281451,
+      "auc_tv_ci95": null,
       "auc_tv_n_problems": 25,
+      "auc_tv_source": "results/diag/amendment-p/auc_resid_tv.json",
       "budget": 2048,
       "fc_accuracy_matched": 0.885,
       "free_accuracy": 0.8075,
@@ -539,5 +555,5 @@
   },
   "ratio_convention": "budget / (mean prompt + mean generated tokens), ratio of means",
   "residual_name": "accuracy change unexplained by on-reference readout",
-  "tv_note": "AUC-TV exists at budgets 256 and 2048 only; 512/1024 replay not yet run"
+  "tv_note": "AUC-TV = per-trace mean TV, seeds averaged within problem; 256/2048 from the Amendment P artifact, 512/1024 from R.12 summary profiles when --tv-runs is given"
 }

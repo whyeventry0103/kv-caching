@@ -1,0 +1,25 @@
+name: replay_ext_math500_b512_r1
+stage: replay
+mode: compression_replay
+# Amendment R.1 intermediate-budget TV cell, budget 512: otherwise identical to
+# replay_ext_math500_diss256 (FC reference, Q.2 25-problem subset, seeds
+# 11/23/47/89, interval 64, extended measures), policies Random and
+# StreamingLLM. profile_storage: summary (Amendment R.12) -- the full per-step
+# profiles would need ~98 MiB per cell against a ~167 MiB projected deficit;
+# the registered read (per-trace mean TV = AUC, problem-clustered CI) needs
+# only the summary, which also keeps 256-step window means.
+reference_run_name: math500-fc-powered-merged
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+subset:
+  math500: 25
+presses: [random, streamingllm]
+budgets: [512]
+seeds: [11, 23, 47, 89]
+compression_interval: 64
+extended_measures: true
+profile_storage: summary
+estimated_generation_count: 0
+estimated_replay_count: 200
+scale_authorized: true
+remote_only: true

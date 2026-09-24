@@ -1043,7 +1043,11 @@ def fig8_budget_curve(out_dir: Path):
     ax = axes[2]
     for press in ("random", "streamingllm"):
         hue = MC[label[press]]
-        pts = [(b, cells[press][b]["auc_tv"]) for b in (256, 2048)]
+        pts = [
+            (b, cells[press][b]["auc_tv"])
+            for b in budgets
+            if cells[press][b].get("auc_tv") is not None
+        ]
         ax.plot(
             [p[0] for p in pts],
             [p[1] for p in pts],
@@ -1052,7 +1056,8 @@ def fig8_budget_curve(out_dir: Path):
             ms=6,
             label=label[press],
         )
-    ax.set_title("(c) divergence (2 budgets measured)", fontsize=9)
+    n_tv = len({b for c in cells.values() for b, v in c.items() if v.get("auc_tv")})
+    ax.set_title(f"(c) divergence ({n_tv} budgets measured)", fontsize=9)
     ax.set_ylabel("mean per-step TV (AUC)")
     ax.legend(frameon=False, fontsize=7.5)
 

@@ -3,14 +3,14 @@
 Last updated 2026-09-24 (Asia/Dubai 23:15). Machine-readable companions:
 `configs/meeting3/cells.yaml` (ledger) → `results/diag/meeting3/meeting3_manifest.json`
 (`python scripts/meeting3_manifest.py --check`). Protocol: PREREGISTRATION
-Amendment R (R.0–R.11). Every number below was recomputed from the named
+Amendment R (R.0–R.12). Every number below was recomputed from the named
 artifact when this file was written.
 
 The three Meeting #3 problems, and where each stands:
 
 | Problem | Measured now | Queued (unattended, resumable) | Not yet runnable |
 |---|---|---|---|
-| **1. Divergence/damage vs cache size, exposure/horizon** | Accuracy curve 256→2048 with paired CIs, flips, realized ratios (**COMPLETE**); Q.2 exposure grid + occupancy audit (**COMPLETE**, verdict MIXED) | D_acc free-running (budget, onset) grid, 1,200 generations; Q.1 direct fork control, 150 conditions | TV at 512/1024 (**BLOCKED**, storage, §5) |
+| **1. Divergence/damage vs cache size, exposure/horizon** | Accuracy curve 256→2048 with paired CIs, flips, realized ratios (**COMPLETE**); Q.2 exposure grid + occupancy audit (**COMPLETE**, verdict MIXED) | D_acc free-running (budget, onset) grid, 1,200 generations; Q.1 direct fork control, 150 conditions; TV at 512/1024 (summary profiles, R.12) | — |
 | **2. Attention maps: M/Δ, GQA collateral, restoration** | — | Q.3 capture, 800 conditions (budget 256 first); Q.5 exact-lag restoration, 200 (trace, policy) × 5 lags × 4 arms | — |
 | **3. SVD/PCA trajectory direction** | — | Q.6 basis fit + projection (same capture) | — |
 
@@ -117,19 +117,14 @@ The zero-amplitude `excess` bug is fixed (`phase-excess-v2`).
 | Q.1 direct fork control | tiny Qwen2: B-vs-B exactly 0, A−B < 1e-4, next selections identical, fires when masking is off — **PASSED on CPU**; real run QUEUED |
 | Q.5 identity repair (true evicted K/V per layer) | tiny Qwen2: layer-0 stash equals full keys bitwise; the old tail-stash bug is refused (mutation test) — **PASSED on CPU**; real run QUEUED |
 
-## 5. Blocked and not-yet-built units
+## 5. Blocked units and open owner decisions
 
-- **T1.tv512 / T1.tv1024 (TV at the intermediate budgets): BLOCKED on
-  storage.**
-  - **Need:** ~196 MiB, measured from `replay-ext-diss256` (392 MiB for 800
-    profiles, scaled to 2 × 200 profiles).
-  - **Have:** 146 MiB usable now: 68.857 GiB used of the 70 GiB allocation,
-    minus the 1 GiB margin. About 117 MiB of that is committed to the queued
-    cells, so the projected **deficit is ~167 MiB**.
-  - **To unblock:** either the owner frees space (the guard forbids deleting
-    results; reclaim would have to come from the model/uv cache and needs the
-    owner's instruction), or a prospective amendment runs these cells with
-    summary-only profiles.
+- **T1.tv512 / T1.tv1024 (TV at the intermediate budgets): unblocked by R.12.**
+  Full per-step profiles would need ~196 MiB, against 146 MiB usable (68.857
+  GiB used of 70, 1 GiB margin), of which ~117 MiB is committed to queued cells.
+  The registered read needs only per-trace mean TV, so the cells run as
+  registered but store ~3 KB summary profiles (~1.2 MB total). Queued last as
+  `t1-tv512` / `t1-tv1024`, ~19 h on 2 GPUs (est.).
 - **Old Q.5 lag sweep (`restoration-lag*`): held as `blocked:`** because its
   press is invalid (R.5). The exact-lag replacement (R.10) is queued as
   `exact-lag-r5`.
@@ -150,6 +145,7 @@ The zero-amplitude `excess` bug is fixed (`phase-excess-v2`).
 | `dacc-t2048` → `dacc-t512` → `dacc-t0` | D_acc, 400 generations each | ~7.2 h each on 2 GPUs (measured) | require dacc-gate-smoke |
 | `fork-control-random`, `fork-control-slm` | Q.1 direct control, 75 conditions each | ~11 GPU-h each, one GPU each (est.) | none (live checks) |
 | `capture-b2048` | Q.3 + Q.6 secondary | ~12 h (est.) | requires capture-smoke |
+| `t1-tv512`, `t1-tv1024` | T1 AUC-TV at 512/1024 (R.12 summary profiles) | ~19 h on 2 GPUs (est.) | none |
 
 Readers (CPU, run after each cell completes; each decides readiness itself):
 
