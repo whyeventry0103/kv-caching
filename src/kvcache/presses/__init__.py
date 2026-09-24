@@ -202,7 +202,7 @@ def _enabled_decoding_press_cls(kvpress_module: Any) -> type:
             # before which compression does not run at all. Conflating them
             # would make the gate overwrite its own measurement.
             self.compression_start_step: int | None = None
-            self.compressions: list[dict[str, int]] = []
+            self.compressions: list[dict[str, int | None]] = []
 
         def forward_hook(self, module, input, kwargs, output):
             if not self.enabled:
@@ -245,7 +245,14 @@ def _enabled_decoding_press_cls(kvpress_module: Any) -> type:
             )
             after = int(compressed_keys.shape[2])
             self.compressions.append(
-                {"layer": int(module.layer_idx), "before": before, "after": after}
+                {
+                    "layer": int(module.layer_idx),
+                    "before": before,
+                    "after": after,
+                    # The forward during which this prune ran (prefill = 0). An
+                    # effective prune at step k first affects token k + 1.
+                    "step": self.profile_step,
+                }
             )
             if self.onset_step is None:
                 # DecodingPress prunes in a forward hook after the current token's

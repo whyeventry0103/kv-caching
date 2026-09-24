@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import re
 import time
+from collections.abc import Iterator, Sequence
+from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import Any
 
@@ -141,6 +143,78 @@ def generate_full_cache(
     )
 
 
+STEP_GATE_VERSION = "forward-pre-hook-v1"
+
+
+@contextmanager
+def decode_step_gate(model: Any, press: Any) -> Iterator[None]:
+    """Drive an instrumented press's step counter from free-running generation.
+
+    Amendment R.3. The onset gate (``compression_active``) compares
+    ``press.profile_step`` with ``compression_start_step``; in replay the loop
+    writes that counter, and in ``model.generate`` nothing does. A forward
+    pre-hook on the top-level model sets it before every forward, with the
+    replay loop's convention: the prefill is step 0 and the forward that
+    consumes generated token ``j - 1`` (and produces token ``j``'s logits) is
+    step ``j``. The press is explicitly enabled for the duration, because the
+    instrumented subclass is a no-op unless enabled.
+
+    The hook only counts; it never touches the sampling RNG, and the Random
+    policy's generator is its own, so policy randomness and sampling
+    randomness stay separate.
+    """
+    for attr in ("enabled", "profile_step", "compression_start_step"):
+        if not hasattr(press, attr):
+            raise TypeError(
+                f"step gate needs an instrumented press (missing {attr!r}); build "
+                "it with build_press(..., instrumented=True)"
+            )
+    counter = {"step": 0}
+
+    def pre_hook(_module: Any, _args: Any) -> None:
+        press.profile_step = counter["step"]
+        counter["step"] += 1
+
+    handle = model.register_forward_pre_hook(pre_hook)
+    previous = press.enabled
+    press.enabled = True
+    try:
+        yield
+    finally:
+        handle.remove()
+        press.enabled = previous
+
+
+def exposure_from_events(
+    events: Sequence[dict[str, Any]], n_tokens: int
+) -> dict[str, Any]:
+    """Achieved exposure of one generation, from the press's prune records.
+
+    An event is effective when it removed entries (``after < before``); an
+    event on a cache still under budget is a no-op and is not exposure. The
+    first effective prune at forward ``k`` first affects token ``k + 1``, so
+    the tokens sampled from a pruned cache number ``n_tokens - (k + 1)``. A
+    generation that ends first is an UNEXPOSED assigned observation (exposure
+    0), which stays in every denominator (R.3).
+    """
+    steps = [
+        int(e["step"])
+        for e in events
+        if e.get("step") is not None and int(e["after"]) < int(e["before"])
+    ]
+    if any(e.get("step") is None for e in events):
+        raise ValueError("prune event without a step: the press was not gated")
+    if not steps:
+        return {"eviction_onset_step": None, "achieved_exposure": 0, "exposed": False}
+    onset = min(steps) + 1
+    exposure = max(0, int(n_tokens) - onset)
+    return {
+        "eviction_onset_step": onset,
+        "achieved_exposure": exposure,
+        "exposed": exposure > 0,
+    }
+
+
 def generate_with_press(
     model: Any,
     tokenizer: Any,
@@ -151,8 +225,13 @@ def generate_with_press(
     press: Any,
     seed: int,
     max_new_tokens: int,
+    step_gate: bool = False,
 ) -> tuple[GenerationResult, int]:
-    """Generate once under a verified press context and report prompt length."""
+    """Generate once under a verified press context and report prompt length.
+
+    ``step_gate`` drives an instrumented press's decode-step counter
+    (:func:`decode_step_gate`); the default path is the legacy one, untouched.
+    """
     import torch
 
     prompt = render_prompt(tokenizer, problem.question, model_cfg)
@@ -163,7 +242,8 @@ def generate_with_press(
     input_ids = inputs["input_ids"]
     set_determinism(seed)
     started = time.monotonic()
-    with torch.inference_mode(), press(model):
+    gate = decode_step_gate(model, press) if step_gate else _no_gate()
+    with torch.inference_mode(), press(model), gate:
         output_ids = model.generate(
             **inputs,
             do_sample=True,
@@ -193,6 +273,11 @@ def generate_with_press(
     )
 
 
+@contextmanager
+def _no_gate() -> Iterator[None]:
+    yield
+
+
 def generate_compressed(
     model: Any,
     tokenizer: Any,
@@ -203,6 +288,7 @@ def generate_compressed(
     press: Any,
     seed: int,
     max_new_tokens: int,
+    step_gate: bool = False,
 ) -> GenerationResult:
     """Generate one compressed trace using the verified DecodingPress path."""
     result, _ = generate_with_press(
@@ -214,6 +300,7 @@ def generate_compressed(
         press=press,
         seed=seed,
         max_new_tokens=max_new_tokens,
+        step_gate=step_gate,
     )
     return result
 

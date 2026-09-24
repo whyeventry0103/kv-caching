@@ -16,7 +16,11 @@ sys.path.insert(0, str(PROJECT_ROOT / "src"))
 from kvcache.bank import append_result, build_result_row
 from kvcache.cli import load_config, plan
 from kvcache.datasets import load_benchmark
-from kvcache.generation import generate_compressed
+from kvcache.generation import (
+    STEP_GATE_VERSION,
+    exposure_from_events,
+    generate_compressed,
+)
 from kvcache.models import (
     load_model_and_tokenizer,
     render_prompt,
@@ -95,10 +99,37 @@ def _grid_done_keys(runs_root: Path, store_token_ids: bool) -> set:
     return result_keys & scan([p for p in all_jsonl if "token_ids" in p.parts])
 
 
+def _onset_gate(config: dict[str, Any]) -> tuple[bool, int | None]:
+    """Amendment R.3: whether this grid is onset-gated, and its start step.
+
+    The KEY's presence selects the gated path (instrumented press driven by a
+    decode-step pre-hook); a value of null is the always-on gate that the
+    parity test pins to legacy generation. Absent key = legacy path, untouched.
+    """
+    if "compression_start_step" not in config:
+        return False, None
+    start = config["compression_start_step"]
+    if start is not None and (
+        isinstance(start, bool) or not isinstance(start, int) or start < 0
+    ):
+        raise SystemExit(
+            f"REFUSED: compression_start_step must be a non-negative int or null, "
+            f"got {start!r}"
+        )
+    return True, start
+
+
 def main() -> int:
     args = _parser().parse_args()
     config = load_config(args.config)
     plan(config, args.config, "grid")
+    gated, start_step = _onset_gate(config)
+    if gated:
+        print(
+            json.dumps(
+                {"onset_gate": STEP_GATE_VERSION, "compression_start_step": start_step}
+            )
+        )
     if args.dry_run:
         print("DRY RUN: validated only; no model, dataset, CUDA, or job launch")
         return 0
@@ -167,7 +198,10 @@ def main() -> int:
                             # Per-(problem, seed) RNG so random eviction is
                             # decorrelated across problems (no lucky-seed artifact).
                             seed=press_seed(problem.pid, int(seed)),
+                            instrumented=gated,
                         )
+                        if gated:
+                            press.compression_start_step = start_step
                         generation = generate_compressed(
                             model,
                             tokenizer,
@@ -177,6 +211,7 @@ def main() -> int:
                             press=press,
                             seed=int(seed),
                             max_new_tokens=max_new_tokens,
+                            step_gate=gated,
                         )
                         prompt_tokens = len(
                             tokenize_rendered_prompt(
@@ -198,6 +233,15 @@ def main() -> int:
                             budget=int(budget),
                             compression_ratio=min(1.0, int(budget) / logical_tokens),
                         )
+                        if gated:
+                            row["onset"] = {
+                                "gate": STEP_GATE_VERSION,
+                                "compression_start_step": start_step,
+                                "prune_events": len(press.compressions),
+                                **exposure_from_events(
+                                    press.compressions, generation.n_tokens
+                                ),
+                            }
                         output = append_result(runs_root, row)
                         if store_token_ids:
                             # Exact token IDs make every compressed trace replay-ready

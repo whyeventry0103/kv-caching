@@ -67,6 +67,9 @@ class Job:
     # overruns does not fail at write time -- it fills the shared filesystem and
     # takes every other job with it. Declared per job and checked before launch.
     est_output_gb: float = 0.0
+    # Amendment R.7: a held cell. Never launched while set; logged as BLOCKED
+    # with this reason every tick, so a hold is visible rather than silent.
+    blocked: str | None = None
 
 
 # Amendment Q storage guard. Disk, not GPU memory: min_free_gb is a VRAM
@@ -98,6 +101,72 @@ def remaining_output_gb(job: Job, done: int) -> float:
         return max(0.0, float(job.est_output_gb))
     remaining = max(0, int(job.total) - max(0, int(done)))
     return float(job.est_output_gb) * (remaining / float(job.total))
+
+
+def disk_deficit_gb(
+    job: Job,
+    used_gb: float,
+    budget_gb: float,
+    done: int = 0,
+    reserved_gb: float = 0.0,
+) -> float:
+    """How far a launch would overrun the budget, in GB (0.0 = it fits).
+
+    ``reserved_gb`` is output still to be written by cells already running:
+    storage is measured live, so without the reservation a second cell could
+    be admitted against headroom the first has not yet filled (Amendment R.7).
+    """
+    if job.est_output_gb <= 0:
+        return 0.0
+    need = remaining_output_gb(job, done) + DISK_SAFETY_MARGIN_GB + reserved_gb
+    return max(0.0, need - disk_headroom_gb(used_gb, budget_gb))
+
+
+def disk_admission(
+    job: Job,
+    used_gb: float,
+    budget_gb: float,
+    done: int = 0,
+    reserved_gb: float = 0.0,
+) -> tuple[bool, str]:
+    """Admit or BLOCK one candidate; a block never stops the other candidates.
+
+    Amendment R.7: a cell that does not fit is reported BLOCKED with its byte
+    deficit and the scheduler continues with cells that DO fit. Each candidate
+    is judged against the same measured headroom, so this cannot launch a later
+    cell into the shortage that blocked an earlier one.
+    """
+    deficit = disk_deficit_gb(job, used_gb, budget_gb, done, reserved_gb)
+    if deficit <= 0:
+        return True, "fits"
+    return False, (
+        f"BLOCKED {job.name}: storage deficit {deficit:.3f} GiB "
+        f"({int(deficit * 1024**3)} bytes); projects "
+        f"{remaining_output_gb(job, done):.3f} GiB, headroom "
+        f"{disk_headroom_gb(used_gb, budget_gb):.3f} GiB of {budget_gb:.0f}, "
+        f"reserved by running cells {reserved_gb:.3f} GiB, margin "
+        f"{DISK_SAFETY_MARGIN_GB:.0f} GiB. Nothing is deleted to make room "
+        f"without the owner's instruction."
+    )
+
+
+def reserved_output_gb(
+    runs_root: Path,
+    jobs: list[Job],
+    live: dict[str, set[int]],
+    exclude: str | None = None,
+) -> float:
+    """Remaining projected output of every cell with a live session.
+
+    ``exclude`` is the candidate itself: a partly running cell being tail-filled
+    is already charged its full remainder as the candidate, and counting it
+    again as a reservation would block it over its own output.
+    """
+    return sum(
+        remaining_output_gb(j, count_progress(runs_root, j))
+        for j in jobs
+        if live.get(j.run_name) and j.name != exclude
+    )
 
 
 def check_disk_budget(
@@ -216,6 +285,7 @@ def load_queue(path: Path) -> tuple[bool, list[Job]]:
             marker=j.get("marker"),
             extra_args=tuple(j.get("extra_args") or ()),
             est_output_gb=float(j.get("est_output_gb") or 0.0),
+            blocked=j.get("blocked"),
         )
         for j in data["jobs"]
     ]
@@ -382,6 +452,9 @@ def launch_candidates(
         if job.name in skip:
             continue
         if count_progress(runs_root, job) >= job.total:
+            continue
+        if job.blocked:
+            notes.append(f"BLOCKED {job.name}: {job.blocked} -> skip")
             continue
         if job.requires is not None:
             req = by_name.get(job.requires)
@@ -657,16 +730,23 @@ def main() -> int:
             )
             continue
         done = count_progress(runs_root, job)
-        # Amendment Q storage guard, before anything is written. Raises rather
-        # than skipping: a cell that cannot fit is a queue error to fix, not a
-        # condition to quietly route around, and routing around it would launch
-        # the NEXT job into the same shortage.
-        check_disk_budget(
+        # Amendment Q storage guard, before anything is written; Amendment R.7
+        # makes a refusal a logged BLOCK of THIS cell (with its byte deficit)
+        # rather than an exit that also stranded every cell behind it -- which
+        # is what restoration-lag1 did to the whole queue on 2026-09-24. Each
+        # candidate is judged against the same measured headroom plus the
+        # output still owed by running cells, so no later cell is launched
+        # into the shortage.
+        ok, why = disk_admission(
             job,
             storage_used_gb(),
             float(BASE_ENV["KVCACHE_PERSONAL_FREE_GB"]),
             done=done,
+            reserved_gb=reserved_output_gb(runs_root, jobs, live, exclude=job.name),
         )
+        if not ok:
+            log(why)
+            continue
         log(
             f"selected: {job.name} {done}/{job.total} "
             f"(min_free_gb={job.min_free_gb}); needy seeds {needy}; "

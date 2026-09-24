@@ -153,14 +153,25 @@
       "task": 1
     },
     {
-      "config_sha256": {},
+      "config_sha256": {
+        "configs/experiments/dacc_gate_smoke_r3.yaml": "0e27f573234410522aa12f1d080df68cf64a2d519a163f9d165629f45667d0f6",
+        "configs/experiments/grid_math500_dacc_t0_r3.yaml": "2cbb77e17e6dc0de553e35ff5f5cc533f9fb21dfde9dbd235633f94697c22bb2",
+        "configs/experiments/grid_math500_dacc_t2048_r3.yaml": "ea54a1a91e89ea95624d9c9fc2351869dc7b7d3d00fe217b011e76ee59984054",
+        "configs/experiments/grid_math500_dacc_t512_r3.yaml": "71ed0cce9e1add9b5a3b1644bcbfb6c4f099a5ec9f580fea8469fcddab29f434"
+      },
+      "configs": [
+        "configs/experiments/dacc_gate_smoke_r3.yaml",
+        "configs/experiments/grid_math500_dacc_t2048_r3.yaml",
+        "configs/experiments/grid_math500_dacc_t512_r3.yaml",
+        "configs/experiments/grid_math500_dacc_t0_r3.yaml"
+      ],
       "expected_units": 1200,
       "id": "Q2.dacc",
-      "note": "comparator: 100 matched rows from the FC bank if generation semantics match",
+      "note": "gate implemented + CPU-validated (tests/test_onset_gate.py, tiny Qwen2, logit level, mutation-tested); queue: dacc-gate-smoke (real-model marker) -> dacc-t2048 -> dacc-t512 -> dacc-t0, ~7.2 h per cell on 2 GPUs, first window 2026-09-25 01:45. Comparator: 100 FC-bank rows (pids verified identical to Q.2's 25). R.8 records the B=2048 occupancy caveat.",
       "output_sha256": {},
       "protocol": "R.3",
       "question": "free-running accuracy on the (budget, compression_start_step) grid",
-      "status": "NOT_STARTED",
+      "status": "QUEUED",
       "task": 1
     },
     {
@@ -233,7 +244,7 @@
     "transformers": "4.56.2"
   },
   "schema": "meeting3-manifest-v1",
-  "source_tree_sha256": "867d9ceb6a7e71a3a6ad86fb82dee912dba5c5d274e6b3b053197e0fcef1d5de",
+  "source_tree_sha256": "5af4b195f0c5b7fc3ca0654e207f7b16b5db65dac47ea78aeeef467e0085aa5e",
   "status_counts": {
     "ANALYZED": 1,
     "BLOCKED": 0,
@@ -241,8 +252,8 @@
     "GENERATED": 0,
     "IMPLEMENTED": 0,
     "INVALID": 0,
-    "NOT_STARTED": 11,
-    "QUEUED": 0,
+    "NOT_STARTED": 10,
+    "QUEUED": 1,
     "RUNNING": 0,
     "TESTED": 0,
     "VALIDATED": 0

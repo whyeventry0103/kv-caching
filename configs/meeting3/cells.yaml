@@ -115,9 +115,17 @@ cells:
     task: 1
     protocol: "R.3"
     question: "free-running accuracy on the (budget, compression_start_step) grid"
+    configs: [configs/experiments/dacc_gate_smoke_r3.yaml,
+              configs/experiments/grid_math500_dacc_t2048_r3.yaml,
+              configs/experiments/grid_math500_dacc_t512_r3.yaml,
+              configs/experiments/grid_math500_dacc_t0_r3.yaml]
     expected_units: 1200     # 2 presses x 2 budgets x 3 onsets x 25 problems x 4 seeds
-    status: NOT_STARTED
-    note: "comparator: 100 matched rows from the FC bank if generation semantics match"
+    status: QUEUED
+    note: "gate implemented + CPU-validated (tests/test_onset_gate.py, tiny Qwen2,
+      logit level, mutation-tested); queue: dacc-gate-smoke (real-model marker)
+      -> dacc-t2048 -> dacc-t512 -> dacc-t0, ~7.2 h per cell on 2 GPUs, first
+      window 2026-09-25 01:45. Comparator: 100 FC-bank rows (pids verified
+      identical to Q.2's 25). R.8 records the B=2048 occupancy caveat."
 
   # ------------------------------------------------------------- Task 2
   - id: Q3.algebra_control

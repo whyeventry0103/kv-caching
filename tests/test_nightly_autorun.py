@@ -668,3 +668,89 @@ def test_the_report_does_not_hand_roll_its_own_stuck_scan():
         "report re-implemented the stuck scan; it must call na.stuck_jobs so the "
         "completeness filter cannot drift out of it again"
     )
+
+
+# --------------------------------------------------------------------------
+# Amendment R.7: BLOCKED is a per-cell status, never an exit that strands the
+# queue. On 2026-09-24 a dry-run of the 01:45 tick showed restoration-lag1
+# (0.45 GiB) refusing via SystemExit, so no cell queued behind it could launch.
+
+
+def _gb_job(name, est_gb, total=400, blocked=None):
+    return M.Job(
+        name=name,
+        command="grid",
+        config="c.yaml",
+        run_name=name,
+        total=total,
+        seeds=[11, 23, 47, 89],
+        min_free_gb=24,
+        progress_kind="grid",
+        requires=None,
+        est_output_gb=est_gb,
+        blocked=blocked,
+    )
+
+
+def test_a_held_cell_is_reported_blocked_and_the_next_cell_is_a_candidate(tmp_path):
+    jobs = [_gb_job("held", 0.45, blocked="R.5 identity repair"), _gb_job("b", 0.03)]
+    candidates, notes = M.launch_candidates(
+        tmp_path, jobs, skip=set(), live={}, state={}
+    )
+    assert [j.name for j, _ in candidates] == ["b"]
+    assert "BLOCKED held: R.5 identity repair -> skip" in notes
+
+
+def test_a_completed_held_cell_is_silent(tmp_path):
+    jobs = [_gb_job("held", 0.45, total=1, blocked="x")]
+    _write(tmp_path / "held" / "math500" / "m" / "a-256-s11.jsonl", 1)
+    candidates, notes = M.launch_candidates(
+        tmp_path, jobs, skip=set(), live={}, state={}
+    )
+    assert candidates == [] and notes == []
+
+
+def test_load_queue_reads_blocked(tmp_path):
+    q = tmp_path / "q.yaml"
+    q.write_text(
+        "version: 1\nenabled: true\njobs:\n"
+        "  - {name: a, command: grid, config: c.yaml, run_name: a, total: 1,\n"
+        "     seeds: [11], min_free_gb: 1, progress_kind: grid, requires: null,\n"
+        "     blocked: 'held for R.5'}\n"
+    )
+    _, jobs = M.load_queue(q)
+    assert jobs[0].blocked == "held for R.5"
+
+
+def test_deficit_is_exact_and_zero_when_the_cell_fits():
+    # headroom 70 - 68.86 = 1.14; need 0.45 + 1.0 margin = 1.45 -> short 0.31
+    assert M.disk_deficit_gb(_gb_job("r", 0.45), 68.86, 70.0) == pytest.approx(0.31)
+    assert M.disk_deficit_gb(_gb_job("d", 0.03), 68.86, 70.0) == 0.0
+    assert M.disk_deficit_gb(_gb_job("n", 0.0), 69.99, 70.0) == 0.0  # no estimate
+
+
+def test_the_2026_09_24_queue_blocks_the_big_cell_and_admits_the_small_one():
+    ok, why = M.disk_admission(_gb_job("restoration-lag1", 0.45), 68.86, 70.0)
+    assert not ok
+    assert why.startswith("BLOCKED restoration-lag1: storage deficit 0.310 GiB")
+    assert f"({int(0.31 * 1024**3)} bytes)" in why
+    assert "Nothing is deleted" in why
+    ok, _ = M.disk_admission(_gb_job("dacc-t0", 0.03), 68.86, 70.0)
+    assert ok
+
+
+def test_output_still_owed_by_running_cells_is_reserved(tmp_path):
+    running, cand = _gb_job("run", 0.10, total=400), _gb_job("cand", 0.10)
+    _write(tmp_path / "run" / "math500" / "m" / "a-256-s11.jsonl", 100)  # 1/4 done
+    live = {"run": {0}}
+    reserved = M.reserved_output_gb(tmp_path, [running, cand], live)
+    assert reserved == pytest.approx(0.075)
+    # 1.14 headroom: 0.10 + 1.0 = 1.10 fits alone; + 0.075 reserved = 1.175 does not
+    assert M.disk_admission(cand, 68.86, 70.0)[0]
+    assert not M.disk_admission(cand, 68.86, 70.0, reserved_gb=reserved)[0]
+
+
+def test_a_tail_filled_cell_is_not_charged_twice(tmp_path):
+    running = _gb_job("run", 0.10, total=400)
+    _write(tmp_path / "run" / "math500" / "m" / "a-256-s11.jsonl", 100)
+    assert M.reserved_output_gb(tmp_path, [running], {"run": {0}}, exclude="run") == 0.0

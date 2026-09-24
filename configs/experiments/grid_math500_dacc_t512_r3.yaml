@@ -1,0 +1,37 @@
+name: grid_math500_dacc_t512_r3
+stage: grid
+# Amendment R.3 D_acc -- FREE-RUNNING accuracy on the exposure grid, onset arm
+# t0=512. Same model, subset (the Q.2 25 problems: verified identical to the
+# replay-onset-* pids 2026-09-24), seeds, policies, budgets, interval and cap
+# as the Q.2 D_tv cells and grid_math500_dissociation (cap 16384, T 0.6,
+# top-p 0.95). Comparator: the 100 matching rows of math500-fc-powered-merged;
+# no new full-cache generations.
+#
+# The KEY compression_start_step selects run_grid's gated path: an instrumented
+# press explicitly enabled and driven by a decode-step forward pre-hook
+# (prefill = step 0; STEP_GATE_VERSION forward-pre-hook-v1). Parity with
+# legacy generation is pinned by tests/test_onset_gate.py (tiny model, logit
+# level, mutation-tested) and by the dacc-gate-smoke queue job on the real
+# model, which every D_acc cell requires.
+#
+# Each row carries onset.{compression_start_step, eviction_onset_step,
+# achieved_exposure, exposed, prune_events}. A generation that ends before its
+# eviction onset stays in every denominator as an UNEXPOSED observation.
+# Occupancy (Amendment R.8): at B=2048 the cache first exceeds budget near
+# decode step ~1976 whatever t0 is, so the t0=0 and t0=512 arms are expected
+# to have nearly the same achieved exposure there.
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+subset:
+  math500: 25
+presses: [random, streamingllm]
+budgets: [256, 2048]
+seeds: [11, 23, 47, 89]
+max_new_tokens:
+  math500: 16384
+compression_interval: 64
+compression_start_step: 512
+estimated_generation_count: 400
+scale_authorized: true
+remote_only: true
+store_token_ids: true

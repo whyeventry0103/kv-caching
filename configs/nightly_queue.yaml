@@ -748,6 +748,7 @@ jobs:
     progress_kind: grid      # counts runs/<run_name>/math500/**/*.jsonl, like every other replay cell
     est_output_gb: 0.45   # measured: restoration-diss256-v2 (same shape) is 0.425 GiB
     requires: replay-onset-t2048
+    blocked: "Amendment R.5 - the restoration press stashes the tail of a score-ordered tensor (not the evicted complement) and shares state across layers; the exact-lag protocol replaces this sweep, so these rows would be invalid"
 
   - name: restoration-lag4
     command: replay
@@ -759,6 +760,7 @@ jobs:
     progress_kind: grid      # counts runs/<run_name>/math500/**/*.jsonl, like every other replay cell
     est_output_gb: 0.45   # measured: restoration-diss256-v2 (same shape) is 0.425 GiB
     requires: restoration-lag1
+    blocked: "Amendment R.5 - the restoration press stashes the tail of a score-ordered tensor (not the evicted complement) and shares state across layers; the exact-lag protocol replaces this sweep, so these rows would be invalid"
 
   - name: restoration-lag16
     command: replay
@@ -770,6 +772,7 @@ jobs:
     progress_kind: grid      # counts runs/<run_name>/math500/**/*.jsonl, like every other replay cell
     est_output_gb: 0.45   # measured: restoration-diss256-v2 (same shape) is 0.425 GiB
     requires: restoration-lag4
+    blocked: "Amendment R.5 - the restoration press stashes the tail of a score-ordered tensor (not the evicted complement) and shares state across layers; the exact-lag protocol replaces this sweep, so these rows would be invalid"
 
   - name: restoration-lag64
     command: replay
@@ -781,6 +784,7 @@ jobs:
     progress_kind: grid      # counts runs/<run_name>/math500/**/*.jsonl, like every other replay cell
     est_output_gb: 0.45   # measured: restoration-diss256-v2 (same shape) is 0.425 GiB
     requires: restoration-lag16
+    blocked: "Amendment R.5 - the restoration press stashes the tail of a score-ordered tensor (not the evicted complement) and shares state across layers; the exact-lag protocol replaces this sweep, so these rows would be invalid"
 
   - name: restoration-lag256
     command: replay
@@ -792,3 +796,59 @@ jobs:
     progress_kind: grid      # counts runs/<run_name>/math500/**/*.jsonl, like every other replay cell
     est_output_gb: 0.45   # measured: restoration-diss256-v2 (same shape) is 0.425 GiB
     requires: restoration-lag64
+    blocked: "Amendment R.5 - the restoration press stashes the tail of a score-ordered tensor (not the evicted complement) and shares state across layers; the exact-lag protocol replaces this sweep, so these rows would be invalid"
+
+  # ======================================================================
+  # Amendment R.3 D_acc (Meeting #3 Task 1): FREE-RUNNING accuracy on the
+  # (budget, compression_start_step) grid. Gate first: dacc-gate-smoke runs the
+  # real-model parity/onset checks and writes dacc-gate-smoke-PASS.json only on
+  # PASS; every cell requires it. Measured cost from grid-diss{256,2048}-tok
+  # wallclock: ~14.4 GPU-h per 400-row cell, ~7.2 h on both GPUs, i.e. one
+  # cell per window. Order t2048 -> t512 -> t0: the largest exposure contrast
+  # lands first, and t0 (gated, start 0) doubles as a determinism control
+  # against the legacy grid-diss rows for the same (pid, seed, press, budget).
+  # est_output_gb: measured 24-45 MiB per 800 rows at these budgets -> ~17 MiB
+  # per cell; 0.03 declared.
+  - name: dacc-gate-smoke
+    command: daccsmoke
+    config: configs/experiments/dacc_gate_smoke_r3.yaml
+    run_name: dacc-gate-smoke
+    total: 1
+    seeds: [11]
+    min_free_gb: 24
+    progress_kind: marker
+    marker: dacc-gate-smoke-PASS.json
+    requires: null
+
+  - name: dacc-t2048
+    command: grid
+    config: configs/experiments/grid_math500_dacc_t2048_r3.yaml
+    run_name: dacc-t2048
+    total: 400
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 24
+    progress_kind: grid
+    est_output_gb: 0.03
+    requires: dacc-gate-smoke
+
+  - name: dacc-t512
+    command: grid
+    config: configs/experiments/grid_math500_dacc_t512_r3.yaml
+    run_name: dacc-t512
+    total: 400
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 24
+    progress_kind: grid
+    est_output_gb: 0.03
+    requires: dacc-gate-smoke
+
+  - name: dacc-t0
+    command: grid
+    config: configs/experiments/grid_math500_dacc_t0_r3.yaml
+    run_name: dacc-t0
+    total: 400
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 24
+    progress_kind: grid
+    est_output_gb: 0.03
+    requires: dacc-gate-smoke

@@ -3072,3 +3072,58 @@ the storage guard compares this project's `du` (kvcache-storage and the source
 tree, hardlinks counted once) against it with a 1 GiB margin. A cell that does
 not fit is reported BLOCKED with its byte deficit; the scheduler continues with
 cells that fit. Nothing is deleted to make room without the owner's instruction.
+
+### R.8 Clarifications recorded 2026-09-24, before any D_acc outcome exists
+
+1. **Exposure means eviction, not enablement (Q.2 occupancy audit).**
+   `compression_start_step` only enables the press, and the recorded
+   `onset_step` is the first prune *event*, which is a no-op while prompt +
+   generated tokens are under budget. Actual eviction onset is the first step
+   with TV > 0 (`kvcache.metrics.onset_surface.eviction_onset`); before it the
+   two passes are the same computation, so TV is exactly 0. Measured over the
+   Q.2 profiles (`results/diag/meeting3/q2_onset_grid.json`): at B = 2048 the
+   cache first exceeds budget at decode step ~1976 (range 1728–2049) whatever
+   t0 is, so the t0 = 0 and t0 = 512 arms have the same actual exposure (331
+   vs 332 steps at t = 2304) and the 2048-step nominal contrast is realized as
+   ~140 steps; at B = 256 actual tracks nominal within ~190 steps. The Q.2
+   verdict label (MIXED, full panel, nominal exposure) stands as recorded;
+   B = 2048 nominal-exposure slopes are **not** interpreted as exposure
+   effects. For D_acc the (budget, onset) treatment grid is run and displayed
+   as registered in R.3; any exposure reading at B = 2048 is labelled
+   non-identifying, and achieved exposure is reported per row.
+2. **Generation gate as implemented.** `kvcache.generation.decode_step_gate`:
+   a forward pre-hook on the top-level model sets `profile_step` (prefill = 0;
+   the forward producing token j's logits = j, the replay convention), on an
+   instrumented press explicitly enabled for the generation. An effective
+   prune at forward k first affects token k + 1; achieved exposure =
+   `n_tokens − (k + 1)` (`exposure_from_events`). Verified before science by
+   `tests/test_onset_gate.py` on a tiny random-init Qwen2 with the pinned
+   kvpress/transformers (gate None ≡ legacy at the logit level; gated arm
+   bit-identical to full cache before its onset and not at it; mutation-tested
+   — a token-level version passed an off-by-one counter and was replaced), and
+   on the real model by the `dacc-gate-smoke` queue job, whose PASS marker
+   every D_acc cell requires.
+3. **Determinism control (new, reported, not a verdict).** The gated t0 = 0
+   arm is expected to be token-identical to the legacy `grid-diss256-tok` /
+   `grid-diss2048-tok` rows for the same (pid, seed, press, budget) (precedent:
+   the 800-row exact replication). The reader reports the identical fraction;
+   any non-identical row is investigated before D_acc is interpreted.
+4. **Execution order** t0 = 2048 → 512 → 0 (one cell per window at the
+   measured ~7.2 h on two GPUs).
+5. **Correction to R.7's storage wording.** R.7 says the guard counts
+   "kvcache-storage and the source tree". That was a drafting error: the guard
+   as implemented since Amendment Q (`nightly_autorun.storage_used_gb`), and
+   every budget figure in `docs/project/context.md` (e.g. "68.14 GiB of the
+   ~70 GiB budget", 2026-09-14), measure `~/kvcache-storage` only. Both figures
+   today: 68.86 GiB storage-only; 69.19 GiB including `~/kv-caching` (11.2 GiB,
+   mostly `.venv`). Under the stricter reading the headroom (0.81 GiB) is below
+   the 1 GiB margin and no new cell could run. The implemented guard stands
+   until the owner states which trees the 70 GiB allocation covers.
+6. **BLOCKED implemented as registered in R.7.** A cell that does not fit is
+   logged `BLOCKED <name>: storage deficit … (<bytes>)` and the scheduler
+   continues; the output still owed by running cells is reserved. A dry run of
+   the 2026-09-25 01:45 tick showed the previous behaviour (`SystemExit` on
+   `restoration-lag1`, 0.31 GiB short) would have stranded every cell queued
+   after it. The five Q.5 `restoration-lag*` cells are held with an explicit
+   `blocked:` reason: R.5 found the press they use invalid and replaced that
+   sweep with the exact-lag protocol.

@@ -1,0 +1,19 @@
+name: dacc_gate_smoke_r3
+stage: daccsmoke
+# Amendment R.3 real-model gate (scripts/dacc_gate_smoke.py). Must PASS -- write
+# <base runs>/dacc-gate-smoke-PASS.json -- before any grid_math500_dacc_* cell
+# runs; the queue `requires` it. (a) gated t0=0 == legacy, token for token, per
+# policy at budget 256; (b) gated t0=512 first evicts at token 576 and matches
+# the full cache on tokens [0, 576). Short cap: both checks resolve by 576.
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+presses: [random, streamingllm]
+budgets: [256]
+seeds: [11]
+budget: 256
+onset: 512
+seed: 11
+compression_interval: 64
+max_new_tokens: 1024
+scale_authorized: true
+remote_only: true
