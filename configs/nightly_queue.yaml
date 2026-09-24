@@ -818,6 +818,7 @@ jobs:
     min_free_gb: 24
     progress_kind: marker
     marker: dacc-gate-smoke-PASS.json
+    gate: dacc_smoke
     requires: null
 
   # ======================================================================
@@ -839,6 +840,7 @@ jobs:
     progress_kind: marker
     marker: q6-basis-fit/basis/q6_basis.json
     est_output_gb: 0.03   # 28 x 3584 x 64 float32 basis + mean/scale ~ 27 MB
+    gate: basis
     requires: null
 
   - name: capture-smoke
@@ -850,6 +852,7 @@ jobs:
     min_free_gb: 28
     progress_kind: marker
     marker: capture-smoke-PASS.json
+    gate: capture_smoke
     requires: q6-basis-fit
 
   - name: capture-b256

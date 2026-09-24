@@ -77,6 +77,11 @@ class Job:
     # terminal (FINAL or INVALID). requires_all: every listed job complete.
     cpu_only: bool = False
     requires_all: tuple[str, ...] = ()
+    # R.15: a typed gate (kvcache.gates.GATE_KINDS). A marker job with a gate is
+    # complete only when the gate verifies against committed specs; marker jobs
+    # without one are HISTORICAL artifact markers (rkv smoke, shape outputs)
+    # and keep the scoped legacy rule in _marker_ok.
+    gate: str | None = None
     # Amendment R.7: a held cell. Never launched while set; logged as BLOCKED
     # with this reason every tick, so a hold is visible rather than silent.
     blocked: str | None = None
@@ -313,6 +318,7 @@ def load_queue(path: Path) -> tuple[bool, list[Job]]:
             blocked=j.get("blocked"),
             cpu_only=bool(j.get("cpu_only", False)),
             requires_all=tuple(j.get("requires_all") or ()),
+            gate=j.get("gate"),
         )
         for j in data["jobs"]
     ]
@@ -477,6 +483,10 @@ def count_progress(runs_root: Path, job: Job) -> int:
         # marker exists under the base runs root; there are no row files to count.
         # It must also parse and must not declare itself failed: a torn write
         # or a report saying passed=false is not completion (R.13).
+        if job.gate:
+            from kvcache.gates import gate_status
+
+            return 1 if gate_status(job.gate, runs_root, job.config)[0] else 0
         return 1 if job.marker and _marker_ok(runs_root / job.marker) else 0
     if job.progress_kind == "grid":
         base = run_dir / job.bench

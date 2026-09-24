@@ -216,3 +216,7 @@ def main() -> int:
 def _design(config: Path) -> tuple[list[str], list[int], list[str], list[int]]:
     d = design(config)
     return d["pids"], d["seeds"], d["presses"], d["intervals"]
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -193,3 +193,7 @@ def validate(rows: list[dict[str, Any]], design: Path | None) -> dict[str, Any]:
 def _design(config: Path) -> tuple[list[str], list[int], list[str]]:
     d = design(config)
     return d["pids"], d["seeds"], d["presses"]
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
