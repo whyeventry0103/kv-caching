@@ -203,6 +203,9 @@ def _enabled_decoding_press_cls(kvpress_module: Any) -> type:
             # would make the gate overwrite its own measurement.
             self.compression_start_step: int | None = None
             self.compressions: list[dict[str, int | None]] = []
+            # Meeting #3 capture (kvcache.capture.EventTap). None = no capture;
+            # the press then behaves exactly as before.
+            self.event_tap = None
 
         def forward_hook(self, module, input, kwargs, output):
             if not self.enabled:
@@ -240,9 +243,14 @@ def _enabled_decoding_press_cls(kvpress_module: Any) -> type:
 
         def compress(self, module, hidden_states, keys, values, attentions, kwargs):
             before = int(keys.shape[2])
+            tap = self.event_tap
+            if tap is not None:
+                tap.begin()
             compressed_keys, compressed_values = super().compress(
                 module, hidden_states, keys, values, attentions, kwargs
             )
+            if tap is not None:
+                tap.end(module, keys, compressed_keys, self.profile_step)
             after = int(compressed_keys.shape[2])
             self.compressions.append(
                 {

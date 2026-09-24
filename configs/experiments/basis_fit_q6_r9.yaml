@@ -1,0 +1,19 @@
+name: basis_fit_q6_r9
+stage: basisfit
+# Amendment R.6 / R.9 -- Q.6 fit: frozen full-only PCA basis per layer, k = 64,
+# from the FULL-CACHE reference traces of the Q.2 subset (25 problems x seeds
+# 11/23/47/89 = 100 traces), up to 256 uniformly spaced decode positions per
+# trace. scripts/run_basis_fit.py; the header q6_basis.json (npz sha256, input
+# hash, diagnostics) is written last and is the queue marker.
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+presses: [fullcache]
+budgets: [full]
+seeds: [11, 23, 47, 89]
+subset:
+  math500: 25
+reference_run_name: math500-fc-powered-merged
+k: 64
+n_positions: 256
+scale_authorized: true
+remote_only: true

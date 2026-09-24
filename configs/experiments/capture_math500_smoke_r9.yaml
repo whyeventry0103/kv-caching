@@ -1,0 +1,26 @@
+name: capture_math500_smoke_r9
+stage: capture
+# Amendment R.9 capture SMOKE (gate). One reference trace, the full/full
+# instrumentation-parity control first, then all four policies at budget 256.
+# PASS marker capture-smoke-PASS.json only if: full/full logits identical,
+# layer-0 Delta <= 1e-5, no non-finite values, >= 1 eviction event per policy
+# (plus the live checks that raise: topk gather equality, layer-0 key identity
+# at mapped positions, bitwise pre-eviction block outputs). Also measures the
+# real per-condition cost that sizes the cells behind it.
+presses: [random, streamingllm, h2o, rkv]
+budgets: [256]
+seeds: [11]
+reference_limit: 1
+fullfull_control: true
+smoke: true
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+subset:
+  math500: 25
+reference_run_name: math500-fc-powered-merged
+compression_interval: 64
+tau: 0.01
+trigger_step: 130
+basis_run: q6-basis-fit
+scale_authorized: true
+remote_only: true

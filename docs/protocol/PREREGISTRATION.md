@@ -3127,3 +3127,73 @@ cells that fit. Nothing is deleted to make room without the owner's instruction.
    after it. The five Q.5 `restoration-lag*` cells are held with an explicit
    `blocked:` reason: R.5 found the press they use invalid and replaced that
    sweep with the exact-lag protocol.
+
+### R.9 One capture for Q.3 and Q.6 (registered 2026-09-24, before any capture outcome exists)
+
+**Design.** R.4's grid and R.6's projection grid are the same (four policies ×
+budgets 256/2048 × the Q.2 subset's 100 FC reference traces), so one
+teacher-forced replay feeds both (`scripts/run_capture.py`,
+`kvcache.capture`). The full-cache branch of a trace is identical for every
+condition and is replayed **once** (block outputs at every forward, queries at
+the forwards an event can touch, and the final cache — a full cache is never
+pruned, so its keys are final); each condition then replays only its
+compressed branch. Both are the same stepwise computation as the paired
+replay. Eager attention for every policy (R.4).
+
+**Live controls (a violation raises; the run stops).** (i) `EventTap`
+recovers each effective prune's selection by re-applying `topk` to the scores
+the policy returned and requires the gathered keys to equal the compressed
+cache bitwise; (ii) at every read, the compressed layer-0 keys at their mapped
+absolute positions equal the full layer-0 keys bitwise (layer-0 keys depend
+only on token and position, so this validates the per-(layer, KV head)
+position maps at every event, not only the first); (iii) every block output
+before the first effective prune equals the full branch bitwise.
+**Recorded controls (gate the smoke; flagged per row):** the full/full
+instrumentation-parity control (logits identical, exactly 0); layer-0 Δ ≤
+1e-5 at every event (layer-0 q and retained keys are identical in both
+branches, so layer-0 Δ is the algebra identity of R.4 at fp32 precision); no
+non-finite value. Verified before science on a tiny random-init Qwen2 with the
+pinned kvpress for all four policies (`tests/test_capture.py`, including a
+mutation showing a wrong position map is caught) and end to end through both
+runners (`tests/test_capture_scripts.py`); on the real model by the
+`capture-smoke` queue job, whose PASS marker the capture cells require.
+
+**Q.3 as implemented.** Logits are recomputed in fp32 from each branch's own
+query (its `q_proj` then rotary at the current position) and cached keys;
+normalization by log-sum-exp. M, M_event and Δ at the first forward after each
+effective prune, per query head, then the unweighted mean over the group's 7
+heads. Collateral at the pruning forward, from the full-reference attention
+over all positions (float64 softmax), cut = budget among the group's pre-prune
+candidates, ties toward the lower position, τ = 0.01.
+`first_prune_delta_max` is recorded NOT APPLICABLE (R.4).
+
+**Storage rule (prospective; the full per-(layer, group, event) record would
+be ~0.27 GB for 800 conditions against ~0.14 GiB of headroom above the margin).** Per
+condition, `capture-v1` row: sums and counts of M, M_event, Δ by (layer,
+group); collateral / wanted / eligible counts by (layer, group); per-event
+means over (layer, group); full (layer, group) slices at the first, second and
+trigger event (first event at step ≥ 130, the Q.5 trigger); pooled collateral
+and wanted fractions; control values. Q.6: R.6's per-layer sums and counts
+(online over every decode forward) plus `(‖δ∥‖, ‖δ⊥‖)` at the 256 fit
+positions as float16 `.npz`. The basis is stored float32 and validated
+orthonormal to 1e-6 in float64 arithmetic; its states come from one forward
+over prompt + trace per full reference trace (same conditioning as stepwise
+decoding, differing only at kernel rounding).
+
+**Estimand arithmetic, fixed now.** Q.3 registered contrast: per condition,
+pooled collateral = Σ n_collateral / Σ n_eligible over all (layer, group,
+event); paired difference R-KV − ObservedAttentionPress per (problem, seed),
+averaged over seeds within problem, problems equal, 2000 problem-cluster
+resamples, seed 0, percentile 95% CI; read as R.4 (negative excluding zero
+supports the Q.3 ordering; including zero inconclusive; positive excluding zero
+reverses it). Budget 256 is primary, 2048 reported alongside. Descriptive, no
+test: per-policy M, M_event, Δ, wanted_any_head; the Q.3 cross-instrument ratio
+Δ/M at the trigger event (mean Δ over its (layer, group) slice divided by mean
+M, per condition, then averaged as above with a problem-clustered CI). Q.6: R.6
+exactly — ω(Random) − ω(StreamingLLM) at budget 256, paired per (problem,
+seed), PREDICTED / NULL / REVERSED; exploratory; no accuracy-scale claim.
+
+**Execution order.** `q6-basis-fit` → `capture-smoke` → `capture-b256`
+(primary) are queued ahead of the D_acc cells, because Tasks 2 and 3 have no
+measured result yet; `capture-b2048` last. Any GPU the capture chain leaves
+idle is filled by the D_acc cells.

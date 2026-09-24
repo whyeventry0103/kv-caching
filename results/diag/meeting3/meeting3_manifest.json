@@ -175,22 +175,36 @@
       "task": 1
     },
     {
-      "config_sha256": {},
+      "config_sha256": {
+        "configs/experiments/capture_math500_smoke_r9.yaml": "5567bec4e2e325b335b115f638738369daef7786136d20a3d2941b65b6112b77"
+      },
+      "configs": [
+        "configs/experiments/capture_math500_smoke_r9.yaml"
+      ],
       "id": "Q3.algebra_control",
+      "note": "R.9: validated in float64 on synthetic inputs (tests/test_capture.py channel_stats identity) and live at every event as layer-0 Delta <= 1e-5 (same q, same retained keys); full/full control exactly 0. Real-model check = capture-smoke gate.",
       "output_sha256": {},
       "protocol": "R.4",
       "question": "same-q/K restriction identity, float64 + production dtype",
-      "status": "NOT_STARTED",
+      "status": "QUEUED",
       "task": 2
     },
     {
-      "config_sha256": {},
+      "config_sha256": {
+        "configs/experiments/capture_math500_b2048_r9.yaml": "c3d27c35b9a1ee9762d54f28932ec0285918476c096fbf9be3b2df5d6f859280",
+        "configs/experiments/capture_math500_b256_r9.yaml": "2bc44e423118192090610926476e2b7a722d2f2057a2a77295ae873cbfbb1ef1"
+      },
+      "configs": [
+        "configs/experiments/capture_math500_b256_r9.yaml",
+        "configs/experiments/capture_math500_b2048_r9.yaml"
+      ],
       "expected_units": 800,
       "id": "Q3.capture",
+      "note": "R.9 combined capture with Q.6; CPU-validated on tiny Qwen2 for all 4 policies (live gather/position-map/pre-eviction checks, mutation-tested); queue q6-basis-fit -> capture-smoke -> capture-b256 (primary) ... b2048 last.",
       "output_sha256": {},
       "protocol": "Q.3/R.4",
       "question": "M, Delta, collateral per layer/group/event",
-      "status": "NOT_STARTED",
+      "status": "QUEUED",
       "task": 2
     },
     {
@@ -213,22 +227,37 @@
       "task": 2
     },
     {
-      "config_sha256": {},
+      "config_sha256": {
+        "configs/experiments/basis_fit_q6_r9.yaml": "13590efe540e6deb0f9b80a7ef94e3da6a6b13d8ba0a0e68be61508e5aeced6e"
+      },
+      "configs": [
+        "configs/experiments/basis_fit_q6_r9.yaml"
+      ],
+      "expected_units": 1,
       "id": "Q6.fit",
+      "note": "scripts/run_basis_fit.py; header q6_basis.json (npz sha256) is the marker; capture refuses a basis whose bytes differ.",
       "output_sha256": {},
       "protocol": "Q.6/R.6",
       "question": "full-only frozen PCA basis per layer, k=64",
-      "status": "NOT_STARTED",
+      "status": "QUEUED",
       "task": 3
     },
     {
-      "config_sha256": {},
+      "config_sha256": {
+        "configs/experiments/capture_math500_b2048_r9.yaml": "c3d27c35b9a1ee9762d54f28932ec0285918476c096fbf9be3b2df5d6f859280",
+        "configs/experiments/capture_math500_b256_r9.yaml": "2bc44e423118192090610926476e2b7a722d2f2057a2a77295ae873cbfbb1ef1"
+      },
+      "configs": [
+        "configs/experiments/capture_math500_b256_r9.yaml",
+        "configs/experiments/capture_math500_b2048_r9.yaml"
+      ],
       "expected_units": 800,
       "id": "Q6.project",
+      "note": "same capture cells as Q3.capture (R.9).",
       "output_sha256": {},
       "protocol": "Q.6/R.6",
       "question": "omega(Random) - omega(StreamingLLM), budget 256 primary",
-      "status": "NOT_STARTED",
+      "status": "QUEUED",
       "task": 3
     }
   ],
@@ -244,7 +273,7 @@
     "transformers": "4.56.2"
   },
   "schema": "meeting3-manifest-v1",
-  "source_tree_sha256": "5af4b195f0c5b7fc3ca0654e207f7b16b5db65dac47ea78aeeef467e0085aa5e",
+  "source_tree_sha256": "625d945a0269201aed1782eaeafa3266cb0381454bb4a8c375e4b7bf154e7914",
   "status_counts": {
     "ANALYZED": 1,
     "BLOCKED": 0,
@@ -252,8 +281,8 @@
     "GENERATED": 0,
     "IMPLEMENTED": 0,
     "INVALID": 0,
-    "NOT_STARTED": 10,
-    "QUEUED": 1,
+    "NOT_STARTED": 6,
+    "QUEUED": 5,
     "RUNNING": 0,
     "TESTED": 0,
     "VALIDATED": 0

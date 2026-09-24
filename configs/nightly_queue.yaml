@@ -820,6 +820,49 @@ jobs:
     marker: dacc-gate-smoke-PASS.json
     requires: null
 
+  # ======================================================================
+  # Amendment R.9: Meeting #3 Tasks 2 (Q.3 attention channels) + 3 (Q.6 latent
+  # split) in ONE capture replay. Queued AHEAD of the D_acc cells: Tasks 2/3
+  # have no measured result yet. Chain: frozen basis -> real-model smoke gate
+  # (full/full control, layer-0 algebra control, live position-map checks) ->
+  # budget-256 cell (both registered estimands) ; budget 2048 is last in the
+  # queue. Cost estimate from replay throughput (~25 fwd/s/GPU, mean 4.3k
+  # steps/trace): 1 full + 4 compressed branches per trace -> ~12 h on 2 GPUs
+  # for 400 conditions; the smoke measures the real figure.
+  - name: q6-basis-fit
+    command: basisfit
+    config: configs/experiments/basis_fit_q6_r9.yaml
+    run_name: q6-basis-fit
+    total: 1
+    seeds: [11]
+    min_free_gb: 24
+    progress_kind: marker
+    marker: q6-basis-fit/basis/q6_basis.json
+    est_output_gb: 0.03   # 28 x 3584 x 64 float32 basis + mean/scale ~ 27 MB
+    requires: null
+
+  - name: capture-smoke
+    command: capture
+    config: configs/experiments/capture_math500_smoke_r9.yaml
+    run_name: capture-smoke
+    total: 1
+    seeds: [11]
+    min_free_gb: 28
+    progress_kind: marker
+    marker: capture-smoke-PASS.json
+    requires: q6-basis-fit
+
+  - name: capture-b256
+    command: capture
+    config: configs/experiments/capture_math500_b256_r9.yaml
+    run_name: capture-b256
+    total: 400
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 28
+    progress_kind: grid
+    est_output_gb: 0.03   # ~20 KB row + ~28 KB npz per condition
+    requires: capture-smoke
+
   - name: dacc-t2048
     command: grid
     config: configs/experiments/grid_math500_dacc_t2048_r3.yaml
@@ -852,3 +895,14 @@ jobs:
     progress_kind: grid
     est_output_gb: 0.03
     requires: dacc-gate-smoke
+
+  - name: capture-b2048
+    command: capture
+    config: configs/experiments/capture_math500_b2048_r9.yaml
+    run_name: capture-b2048
+    total: 400
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 28
+    progress_kind: grid
+    est_output_gb: 0.03
+    requires: capture-smoke

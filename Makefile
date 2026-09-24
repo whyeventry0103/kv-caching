@@ -96,6 +96,10 @@ dryrun:
 	$(PYTHON) scripts/run_grid.py --config configs/experiments/grid_math500_dacc_t512_r3.yaml --dry-run
 	$(PYTHON) scripts/run_grid.py --config configs/experiments/grid_math500_dacc_t2048_r3.yaml --dry-run
 	$(PYTHON) scripts/dacc_gate_smoke.py --config configs/experiments/dacc_gate_smoke_r3.yaml --dry-run
+	$(PYTHON) scripts/run_basis_fit.py --config configs/experiments/basis_fit_q6_r9.yaml --dry-run
+	$(PYTHON) scripts/run_capture.py --config configs/experiments/capture_math500_smoke_r9.yaml --dry-run
+	$(PYTHON) scripts/run_capture.py --config configs/experiments/capture_math500_b256_r9.yaml --dry-run
+	$(PYTHON) scripts/run_capture.py --config configs/experiments/capture_math500_b2048_r9.yaml --dry-run
 	$(PYTHON) scripts/report_dacc.py --runs-root runs --arms 0=dacc-t0 512=dacc-t512 2048=dacc-t2048 --legacy 256=grid-diss256-tok 2048=grid-diss2048-tok --out /dev/null --dry-run
 	$(PYTHON) scripts/report_onset_grid.py --runs-root runs --arms 0=replay-onset-t0 512=replay-onset-t512 2048=replay-onset-t2048 --out /dev/null --dry-run
 	$(PYTHON) scripts/run_replay.py --config configs/experiments/restoration_smoke.yaml --dry-run
