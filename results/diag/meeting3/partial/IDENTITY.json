@@ -1,0 +1,21 @@
+{
+  "commit": "74e297434525c3a82fd0fc979178373ea073da1e",
+  "read_at_utc": "2026-09-25T13:40:44Z",
+  "status": "PARTIAL: verdicts withheld",
+  "analysis_id": {
+    "capture-b256": "d2ff1340988ed59e42931db428b5111319c25fda0ce1ca851790ed65ca1763a3",
+    "dacc": "39c77c14ec9206945434d19d321f2bb12eea39bc9e4adc5a3a174709d506b57a"
+  },
+  "implementation_id": {
+    "capture": "2143e52d83068f2cb0033626402b4a6911b5e78c6f784b12c13bd92d088f70c4",
+    "dacc": "4b5d38c5edd3a5b177e6d5de8af128e164959087e5e96acf38b395c45dc3741b"
+  },
+  "generation_digest": {
+    "capture-b256": "7754557687ecf8b6ed79dce29976ea1aee8f8a437a0de846940dac46856738c8",
+    "dacc": "71e4ec8067903eb68427797e6b3a4b1292d6e766544703582aef21700f05bddd"
+  },
+  "reproduce": [
+    "python scripts/report_capture.py --runs-root <runs> --run capture-b256 --config configs/experiments/capture_math500_b256_r9.yaml --out capture_b256_partial.json",
+    "python scripts/report_dacc.py --runs-root <runs> --arms 0=dacc-t0 512=dacc-t512 2048=dacc-t2048 --legacy 256=grid-diss256-tok 2048=grid-diss2048-tok --design configs/experiments/grid_math500_dacc_t0_r3.yaml --out dacc_partial.json"
+  ]
+}
