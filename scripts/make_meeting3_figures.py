@@ -173,6 +173,9 @@ def fig_exact_lag(path: Path, out_dir: Path = FIG_DIR) -> list[Path]:
     fig, axes = plt.subplots(1, len(pols), figsize=(4.4 * len(pols), 3.2))
     axes = axes if len(pols) > 1 else [axes]
     style = {"matched": "o-", "random": "s--", "relaxed": "^:"}
+    # arms share each lag; a small multiplicative dodge on the log axis keeps
+    # their error bars apart
+    dodge = {"matched": 0.88, "random": 1.0, "relaxed": 1.13}
     for ax, (p, v) in zip(axes, sorted(pols.items()), strict=True):
         for arm, fmt in style.items():
             pts = [
@@ -183,7 +186,7 @@ def fig_exact_lag(path: Path, out_dir: Path = FIG_DIR) -> list[Path]:
             if not pts:
                 continue
             pts.sort()
-            xs = [x for x, _ in pts]
+            xs = [x * dodge[arm] for x, _ in pts]
             ys = [a["effect_vs_no_intervention"] for _, a in pts]
             err = [
                 [y - a["effect_ci95"][0] for y, (_, a) in zip(ys, pts, strict=True)],
@@ -197,7 +200,17 @@ def fig_exact_lag(path: Path, out_dir: Path = FIG_DIR) -> list[Path]:
         )
         ax.set_xlabel("lag (decode steps)", fontsize=8)
         ax.set_ylabel("none - arm, mean TV over 200 steps", fontsize=8)
-        ax.legend(frameon=False, fontsize=7)
+    # one legend below the panels: inside an axis it lands on error bars
+    handles, labels = axes[0].get_legend_handles_labels()
+    fig.legend(
+        handles,
+        labels,
+        loc="lower center",
+        ncol=len(labels),
+        frameon=False,
+        fontsize=7,
+        bbox_to_anchor=(0.5, -0.06),
+    )
     fig.tight_layout()
     return _save(fig, "meeting3_exact_lag", out_dir)
 

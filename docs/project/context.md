@@ -24,6 +24,16 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-09-26 01:40 Dubai — Q.5 exact-lag FINAL.** 200/200, 0
+  provenance/content failures. Only 8/25 problems are eligible: stash =
+  prompt + cohort − 256 exactly (verified on all 200 rows), so short prompts
+  fall below n = 64. That leaves 30 traces (28 at lag 256). Trace-level CIs
+  are likely too narrow, so treat it as exploratory. Matched reinsertion:
+  Random NON-MONOTONE (lag 1 +0.0031 [+0.0004, +0.0061], NON-SPECIFIC; null
+  at 4–256), StreamingLLM FLAT-NULL (all CIs include 0). Descriptively, SLM
+  random-reinsert helps at every lag (+0.0092 to +0.0133). Write-up:
+  MEETING3_RESULTS §3b. Running: dacc-t2048 on both GPUs.
+
   **★★★★★ 2026-09-26 00:45 Dubai — Tasks 2/3 primary cell FINAL (capture-b256).**
   400/400, controls VALID, 0 provenance failures; budget 256 = realized ratio
   5.77%. Q.3 collateral R-KV − H2O-style = +0.000 [+0.000, +0.000]

@@ -3537,9 +3537,13 @@ kept.
      figures under `results/diag/meeting3/figures/` and adds the regression
      `test_no_stage_writes_into_the_source_tree`. The misplaced files were
      moved, not deleted.
-   - **Figure layout.** The capture figure's tick labels collided, and the
-     registered-contrast text overlapped a mark. Found by viewing the
-     rendered PNG. The contrast text moved to the x-label slot and the tick
-     labels are rotated. `make_meeting3_figures.py` is in every stage's
+   - **Figure layout.** Both problems were found by viewing the rendered
+     PNGs.
+     - Capture figure: the tick labels collided, and the registered-contrast
+       text overlapped a mark. The contrast text moved to the x-label slot and
+       the tick labels are rotated.
+     - Exact-lag figure: the three arms' error bars overlapped at each lag,
+       and the in-axis legends covered error bars. Each arm now has a small
+       log-axis offset, and one shared legend sits below the panels. `make_meeting3_figures.py` is in every stage's
      analysis identity, so each FINAL stage re-runs its reader and republishes
      from unchanged rows.

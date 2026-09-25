@@ -1,6 +1,6 @@
 # Meeting #3 — results and execution status
 
-Last updated 2026-09-26 (Asia/Dubai 00:45). Machine-readable companions:
+Last updated 2026-09-26 (Asia/Dubai 01:40). Machine-readable companions:
 `configs/meeting3/cells.yaml` (ledger) → `results/diag/meeting3/meeting3_manifest.json`
 (`python scripts/meeting3_manifest.py --check`). Protocol: PREREGISTRATION
 Amendment R (R.0–R.12). Every number below was recomputed from the named
@@ -8,16 +8,20 @@ artifact when this file was written. Review evidence (gate outputs, remote test 
 parity, queue dry-run, remote-only data list):
 [`meeting3_evidence/`](meeting3_evidence/README.md).
 
-**Execution status, 2026-09-26 00:45 Dubai (GPU night 2 in progress; early start at the owner's request, R.16.6).**
+**Execution status, 2026-09-26 01:40 Dubai (GPU night 2 in progress; early start at the owner's request, R.16.6).**
 
 - **Tasks 2/3 primary cell capture-b256: FINAL** (400/400, controls VALID,
   0 provenance failures). Q.3 collateral R-KV − H2O-style = +0.000
   [+0.000, +0.000] → **INCONCLUSIVE**. Q.6 ω(Random) − ω(StreamingLLM) =
   **+0.200 [+0.159, +0.234] → PREDICTED (exploratory)**. See §3a.
-- **Running:** exact-lag-r5 (seed 89, GPU0; 150/200 before it) and
-  dacc-t2048 (seed 23, GPU1; 200/400 before it). Not started: dacc-t512,
-  dacc-t0, fork-control-random/-slm, capture-b2048, t1-tv512, t1-tv1024.
-  Each postprocess stage reads its cell when complete.
+- **Q.5 exact-lag: FINAL** (200/200). Matched reinsertion restores nothing
+  at any lag for either policy: Random NON-MONOTONE (lag 1 +0.0031
+  [+0.0004, +0.0061], but NON-SPECIFIC), StreamingLLM FLAT-NULL. Only 8/25
+  problems are eligible (stash size is set by prompt length), so the read is
+  exploratory. See §3b.
+- **Running:** dacc-t2048 on both GPUs (seeds 23 and 89). Not started:
+  dacc-t512, dacc-t0, fork-control-random/-slm, capture-b2048, t1-tv512,
+  t1-tv1024. Each postprocess stage reads its cell when complete.
 
 **Execution status, 2026-09-25 11:30 Dubai (after GPU night 1).**
 
@@ -63,7 +67,7 @@ The three Meeting #3 problems, and where each stands:
 | Problem | Measured now | Queued (unattended, resumable) | Not yet runnable |
 |---|---|---|---|
 | **1. Divergence/damage vs cache size, exposure/horizon** | Accuracy curve 256→2048 with paired CIs, flips, realized ratios (**COMPLETE**); Q.2 exposure grid + occupancy audit (**COMPLETE**, verdict MIXED) | D_acc free-running (budget, onset) grid, 1,200 generations; Q.1 direct fork control, 150 conditions; TV at 512/1024 (summary profiles, R.12) | — |
-| **2. Attention maps: M/Δ, GQA collateral, restoration** | Q.3 capture at budget 256 (**FINAL**, 400 conditions; collateral contrast INCONCLUSIVE, M/Δ per policy with CIs, §3a) | Q.3 capture at 2048, 400 conditions (collateral structurally non-identifying there, R.16.3); Q.5 exact-lag restoration, 200 (trace, policy) × 5 lags × 4 arms | — |
+| **2. Attention maps: M/Δ, GQA collateral, restoration** | Q.3 capture at budget 256 (**FINAL**, 400 conditions; collateral contrast INCONCLUSIVE, M/Δ per policy with CIs, §3a); Q.5 exact-lag (**FINAL**: Random NON-MONOTONE, StreamingLLM FLAT-NULL; 8 eligible problems, exploratory, §3b) | Q.3 capture at 2048, 400 conditions (collateral structurally non-identifying there, R.16.3) | — |
 | **3. SVD/PCA trajectory direction** | Q.6 basis (frozen, k = 64) + projection at budget 256 (**FINAL**, ω contrast PREDICTED, exploratory, §3a) | Q.6 at budget 2048 (same capture) | — |
 
 ---
@@ -230,6 +234,99 @@ Reproduce:
 ```bash
 python scripts/report_capture.py --runs-root <runs> --run capture-b256 \
     --config configs/experiments/capture_math500_b256_r9.yaml --out <out> --final
+```
+
+## 3b. Task 2 — exact-lag restoration, Q.5 (FINAL)
+
+Read 2026-09-26 01:15 Dubai by the post-exact-lag stage.
+- **Artifact:** `results/diag/meeting3/exact_lag.json`, status FINAL.
+- **Sufficient statistics:** `exact_lag.conditions.tsv`.
+- **Figure:** `results/diag/meeting3/figures/meeting3_exact_lag.{pdf,png}`.
+
+Coverage and design:
+- Coverage COMPLETE: 200/200 (trace, policy) rows (25 problems × 4 seeds ×
+  2 policies). 0 provenance failures and 0 content failures, so every read
+  row passed its bitwise K/V restoration gates.
+- Budget 256 (realized ratio 5.77% on these traces, §3a). Cohort = the first
+  effective prune at or after step 130; reinsertion n = 64.
+- **Read:** mean TV over 200 forwards from the reinsertion step, none minus
+  arm (positive = the arm reduces divergence). Trace-level bootstrap exactly
+  as P.5: 2,000 resamples, seed 0.
+- This is recovery-after-delay: it does not isolate staleness from position
+  (R.5).
+
+**Eligibility: the read rests on 8 of 25 problems.**
+- 68 of 100 rows per policy are INELIGIBLE for the registered reason "stash
+  smaller than the reinsertion count" (R.10).
+- The mechanism was verified on all 200 rows: stash size = prompt tokens +
+  cohort step − 256, exactly. Eligibility is therefore a deterministic
+  function of prompt length and the prune schedule. It agrees across the two
+  policies on every trace.
+- What remains:
+
+  | Lags | Traces | Problems |
+  |---|---|---|
+  | 1–16 | 30 | 8 |
+  | 64 | 29 | 8 |
+  | 256 | 28 | 7 |
+
+  The short traces lose their read window at the long lags.
+- The registered bootstrap resamples traces, and these traces cluster
+  4-per-problem in 8 problems. **The CIs below are therefore likely too
+  narrow, and the read generalizes only to longer-prompt problems.** Treat the
+  whole of Q.5 as exploratory at this scope.
+
+Per-lag effects on the registered budget-matched arm, with the P.5 class and
+the sweep verdict from `classify_latency_sweep` (4 decimals, the P.5 scale
+exception in PAPER_FINDINGS):
+
+**Random: NON-MONOTONE**
+
+| Lag | Traces | Matched (registered) | Random-reinsert | Relaxed (reference only) | P.5 class |
+|---|---|---|---|---|---|
+| 1 | 30 | +0.0031 [+0.0004, +0.0061] | +0.0044 [+0.0010, +0.0085] | +0.0054 [+0.0021, +0.0090] | NON-SPECIFIC |
+| 4 | 30 | +0.0009 [-0.0020, +0.0042] | +0.0032 [+0.0000, +0.0070] | +0.0066 [+0.0029, +0.0108] | NO RESTORATION |
+| 16 | 30 | +0.0013 [-0.0018, +0.0042] | +0.0022 [-0.0019, +0.0065] | +0.0040 [+0.0007, +0.0074] | NO RESTORATION |
+| 64 | 29 | +0.0036 [-0.0001, +0.0075] | +0.0033 [-0.0002, +0.0074] | +0.0008 [-0.0043, +0.0055] | NO RESTORATION |
+| 256 | 28 | +0.0043 [-0.0006, +0.0094] | +0.0067 [+0.0011, +0.0129] | +0.0017 [-0.0037, +0.0073] | NO RESTORATION |
+
+**StreamingLLM: FLAT-NULL**
+
+| Lag | Traces | Matched (registered) | Random-reinsert | Relaxed (reference only) | P.5 class |
+|---|---|---|---|---|---|
+| 1 | 30 | -0.0004 [-0.0092, +0.0086] | +0.0129 [+0.0025, +0.0238] | +0.0044 [-0.0042, +0.0134] | NO RESTORATION |
+| 4 | 30 | -0.0007 [-0.0094, +0.0086] | +0.0125 [+0.0023, +0.0233] | +0.0034 [-0.0051, +0.0122] | NO RESTORATION |
+| 16 | 30 | -0.0011 [-0.0093, +0.0073] | +0.0117 [+0.0021, +0.0221] | +0.0013 [-0.0071, +0.0102] | NO RESTORATION |
+| 64 | 29 | -0.0035 [-0.0106, +0.0040] | +0.0092 [+0.0014, +0.0177] | -0.0073 [-0.0156, +0.0012] | NO RESTORATION |
+| 256 | 28 | -0.0002 [-0.0071, +0.0070] | +0.0133 [+0.0037, +0.0236] | -0.0053 [-0.0128, +0.0025] | NO RESTORATION |
+
+- **Random: NON-MONOTONE.**
+  - The matched arm reduces divergence only at lag 1: +0.0031 [+0.0004,
+    +0.0061].
+  - Even there, random-reinsert (+0.0044) does at least as well, so the P.5
+    class is NON-SPECIFIC. Putting back *which* tokens were evicted is not
+    shown to matter.
+  - At lags 4–256 the matched CI includes 0 (NO RESTORATION).
+  - The effect does not decay with lag. Relative to the no-intervention TV
+    at the same lag (0.0552–0.0928), every matched effect is at most 5.6%.
+- **StreamingLLM: FLAT-NULL.**
+  - The matched arm is null at every lag (point estimates −0.0035 to −0.0002,
+    all CIs include 0).
+  - Descriptive only, not a registered contrast: the random-reinsert arm is
+    positive at every lag, +0.0092 to +0.0133, each CI excluding 0 under the
+    trace-level bootstrap.
+  - So returning a random draw of *earlier*-evicted entries reduces
+    divergence, while returning the most recently evicted cohort does not.
+    With 8 problems and clustered traces this is a lead, not a finding.
+- **Answer to Q.5 at this scope.** Exact reinsertion of the evicted cohort
+  does not measurably restore the trajectory for either policy, at any lag
+  from 1 to 256.
+
+Reproduce:
+
+```bash
+python scripts/report_exact_lag.py --runs-root <runs> --run exact-lag-r5 \
+    --design configs/experiments/exact_lag_math500_r5.yaml --out <out> --final
 ```
 
 ## 4. Controls
