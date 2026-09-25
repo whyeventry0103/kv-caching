@@ -18,12 +18,12 @@ import meeting3_fixtures as fx  # noqa: E402
 import postprocess_meeting3 as pp  # noqa: E402
 
 FIGURES = {
-    "capture-b256": ["figures/meeting3_capture_b256.png"],
-    "capture-b2048": ["figures/meeting3_capture_b2048.png"],
-    "dacc": ["figures/meeting3_dacc.png"],
-    "exact-lag": ["figures/meeting3_exact_lag.png"],
+    "capture-b256": ["results/diag/meeting3/figures/meeting3_capture_b256.png"],
+    "capture-b2048": ["results/diag/meeting3/figures/meeting3_capture_b2048.png"],
+    "dacc": ["results/diag/meeting3/figures/meeting3_dacc.png"],
+    "exact-lag": ["results/diag/meeting3/figures/meeting3_exact_lag.png"],
     "fork-control": [],
-    "t1-tv": ["figures/fig8_budget_curve.png"],
+    "t1-tv": ["results/diag/meeting3/figures/fig8_budget_curve.png"],
 }
 BUILD = {
     "capture-b256": lambda r: fx.capture(r, 256),
@@ -38,21 +38,24 @@ BUILD = {
 OUTPUTS = {
     "capture-b256": [
         "results/diag/meeting3/capture_b256.json",
-        "figures/meeting3_capture_b256.pdf",
+        "results/diag/meeting3/figures/meeting3_capture_b256.pdf",
     ],
     "capture-b2048": [
         "results/diag/meeting3/capture_b2048.json",
-        "figures/meeting3_capture_b2048.pdf",
+        "results/diag/meeting3/figures/meeting3_capture_b2048.pdf",
     ],
-    "dacc": ["results/diag/meeting3/dacc.json", "figures/meeting3_dacc.pdf"],
+    "dacc": [
+        "results/diag/meeting3/dacc.json",
+        "results/diag/meeting3/figures/meeting3_dacc.pdf",
+    ],
     "exact-lag": [
         "results/diag/meeting3/exact_lag.json",
-        "figures/meeting3_exact_lag.pdf",
+        "results/diag/meeting3/figures/meeting3_exact_lag.pdf",
     ],
     "fork-control": ["results/diag/meeting3/fork_control.json"],
     "t1-tv": [
         "results/diag/meeting3/t1_budget_curve.json",
-        "figures/fig8_budget_curve.pdf",
+        "results/diag/meeting3/figures/fig8_budget_curve.pdf",
     ],
 }
 
@@ -145,7 +148,9 @@ def test_manifest_refresh_failure_is_retryable_and_never_terminal(tmp_path):
     fx.capture(tmp_path / "runs")
     m, runs, out = _run("capture-b256", tmp_path, manifest_argv=["false"])
     assert m["status"] == "MANIFEST-FAILED" and not m["terminal"]
-    assert (out / "figures/meeting3_capture_b256.png").exists()  # drawn, not accepted
+    assert (
+        out / "results/diag/meeting3/figures/meeting3_capture_b256.png"
+    ).exists()  # drawn, not accepted
     assert not pp.stage_done("capture-b256", runs, out_root=out)
     m2, _, _ = _run("capture-b256", tmp_path)
     assert m2["terminal"] and pp.stage_done("capture-b256", runs, out_root=out)
@@ -272,3 +277,19 @@ def test_every_kvcache_import_of_every_reader_is_fingerprinted():
                         rel,
                         node.module,
                     )
+
+
+@pytest.mark.parametrize("stage", sorted(pp.STAGES))
+def test_no_stage_writes_into_the_source_tree(stage, tmp_path):
+    """R.16.6: a figure published into figures/ changed the remote source-tree
+    hash, so every later preflight failed and the queue halted. Every output a
+    stage publishes (and everything it writes) must be under results/."""
+    BUILD[stage](tmp_path / "runs")
+    m, runs, out = _run(stage, tmp_path)
+    assert m["status"] == "FINAL"
+    assert all(p.startswith("results/") for p in m["outputs"]), m["outputs"]
+    written = [p.relative_to(out) for p in out.rglob("*") if p.is_file()]
+    stray = [
+        str(p) for p in written if p.parts[0] != "results" and p.name != "manifest.json"
+    ]
+    assert not stray, stray

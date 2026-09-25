@@ -52,7 +52,7 @@ cells:
     protocol: "R.1"
     stage: t1-tv
     outputs: [results/diag/meeting3/t1_budget_curve.json,
-              figures/fig8_budget_curve.pdf]
+              results/diag/meeting3/figures/fig8_budget_curve.pdf]
     question: "per-step TV at budget 512 (missing intermediate point)"
     configs: [configs/experiments/replay_ext_math500_b512_r1.yaml]
     depends_on: []
@@ -66,7 +66,7 @@ cells:
     protocol: "R.1"
     stage: t1-tv
     outputs: [results/diag/meeting3/t1_budget_curve.json,
-              figures/fig8_budget_curve.pdf]
+              results/diag/meeting3/figures/fig8_budget_curve.pdf]
     question: "per-step TV at budget 1024 (missing intermediate point)"
     configs: [configs/experiments/replay_ext_math500_b1024_r1.yaml]
     expected_units: 200     # trace-policy rows: 25 problems x 4 seeds x 2 policies (= queue total)
@@ -142,7 +142,7 @@ cells:
     protocol: "R.3"
     stage: dacc
     outputs: [results/diag/meeting3/dacc.json,
-              figures/meeting3_dacc.pdf]
+              results/diag/meeting3/figures/meeting3_dacc.pdf]
     question: "free-running accuracy on the (budget, compression_start_step) grid"
     configs: [configs/experiments/dacc_gate_smoke_r3.yaml,
               configs/experiments/grid_math500_dacc_t2048_r3.yaml,
@@ -174,7 +174,7 @@ cells:
     protocol: "Q.3/R.4"
     stage: capture-b256
     outputs: [results/diag/meeting3/capture_b256.json,
-              figures/meeting3_capture_b256.pdf]
+              results/diag/meeting3/figures/meeting3_capture_b256.pdf]
     question: "M, Delta, collateral per layer/group/event"
     configs: [configs/experiments/capture_math500_b256_r9.yaml,
               configs/experiments/capture_math500_b2048_r9.yaml]
@@ -189,7 +189,7 @@ cells:
     protocol: "Q.3/R.4"
     stage: capture-b2048
     outputs: [results/diag/meeting3/capture_b2048.json,
-              figures/meeting3_capture_b2048.pdf]
+              results/diag/meeting3/figures/meeting3_capture_b2048.pdf]
     question: "M, Delta, collateral per layer/group/event"
     configs: [configs/experiments/capture_math500_b256_r9.yaml,
               configs/experiments/capture_math500_b2048_r9.yaml]
@@ -213,7 +213,7 @@ cells:
     protocol: "R.5"
     stage: exact-lag
     outputs: [results/diag/meeting3/exact_lag.json,
-              figures/meeting3_exact_lag.pdf]
+              results/diag/meeting3/figures/meeting3_exact_lag.pdf]
     question: "recovery after exact delay 1/4/16/64/256"
     configs: [configs/experiments/exact_lag_math500_r5.yaml]
     expected_units: 4000     # 200 (trace, policy) rows x 5 lags x 4 arms
@@ -237,7 +237,7 @@ cells:
     protocol: "Q.6/R.6"
     stage: capture-b256
     outputs: [results/diag/meeting3/capture_b256.json,
-              figures/meeting3_capture_b256.pdf]
+              results/diag/meeting3/figures/meeting3_capture_b256.pdf]
     question: "omega(Random) - omega(StreamingLLM), budget 256 primary"
     configs: [configs/experiments/capture_math500_b256_r9.yaml,
               configs/experiments/capture_math500_b2048_r9.yaml]
@@ -250,7 +250,7 @@ cells:
     protocol: "Q.6/R.6"
     stage: capture-b2048
     outputs: [results/diag/meeting3/capture_b2048.json,
-              figures/meeting3_capture_b2048.pdf]
+              results/diag/meeting3/figures/meeting3_capture_b2048.pdf]
     question: "omega(Random) - omega(StreamingLLM), budget 256 primary"
     configs: [configs/experiments/capture_math500_b256_r9.yaml,
               configs/experiments/capture_math500_b2048_r9.yaml]

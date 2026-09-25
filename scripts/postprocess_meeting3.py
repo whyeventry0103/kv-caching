@@ -363,7 +363,9 @@ def run_stage(
                 _publish(tsv, dst, hist)
                 outputs.append(str(dst.relative_to(out_root)))
             for f in figures:
-                dst = out_root / "figures" / f.name
+                # never into the source tree: the preflight hashes it, and a
+                # generated file there halts every later launch (R.16.6)
+                dst = out_root / OUT / "figures" / f.name
                 _publish(f, dst, hist)
                 outputs.append(str(dst.relative_to(out_root)))
     record["outputs"] = {p: _sha(out_root / p) for p in outputs}
