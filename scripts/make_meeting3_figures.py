@@ -80,7 +80,8 @@ def _bar(ax: Any, stats: dict[str, Any], title: str, ylabel: str) -> None:
         xs.append(i)
         names.append(POLICY_LABEL[p])
     ax.set_xticks(xs)
-    ax.set_xticklabels(names, fontsize=8)
+    ax.set_xticklabels(names, fontsize=8, rotation=25, ha="right")
+    ax.set_xlim(-0.5, len(POLICY_LABEL) - 0.5 + 0.4)  # room for the n labels
     ax.set_title(title, fontsize=9)
     ax.set_ylabel(ylabel, fontsize=8)
     ax.grid(axis="y", color="#dddddd", lw=0.6)
@@ -94,27 +95,21 @@ def fig_capture(path: Path, out_dir: Path = FIG_DIR) -> list[Path]:
     fig, axes = plt.subplots(1, 4, figsize=(13.0, 3.2))
     _bar(axes[0], desc["collateral"], "(a) GQA collateral (pooled)", "fraction")
     q3 = d["q3_registered_contrast"]
-    axes[0].text(
-        0.02,
-        0.97,
+    # registered contrasts go in the x-label slot, below the ticks, where they
+    # cannot overlap a mark whatever the data range
+    axes[0].set_xlabel(
         f"R-KV - H2O = {q3['mean']:+.3f} [{q3['ci95'][0]:+.3f}, "
         f"{q3['ci95'][1]:+.3f}]\n{q3['verdict']}",
-        transform=axes[0].transAxes,
-        va="top",
-        fontsize=6.5,
+        fontsize=7,
     )
     _bar(axes[1], desc["M"], "(b) M: full mass outside S", "mass")
     _bar(axes[2], desc["Delta"], "(c) Delta: shape TV on S", "TV")
     _bar(axes[3], desc["omega"], "(d) omega = |d_perp| / |d_par|", "omega")
     q6 = d["q6_registered_contrast"]
-    axes[3].text(
-        0.02,
-        0.97,
+    axes[3].set_xlabel(
         f"Random - SLM = {q6['mean']:+.3f} [{q6['ci95'][0]:+.3f}, "
         f"{q6['ci95'][1]:+.3f}]\n{q6['verdict']} (exploratory)",
-        transform=axes[3].transAxes,
-        va="top",
-        fontsize=6.5,
+        fontsize=7,
     )
     fig.suptitle(f"Meeting #3 Tasks 2/3, budget {d['budget']}", fontsize=10)
     fig.tight_layout()

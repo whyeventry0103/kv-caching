@@ -1,12 +1,23 @@
 # Meeting #3 — results and execution status
 
-Last updated 2026-09-24 (Asia/Dubai 23:15). Machine-readable companions:
+Last updated 2026-09-26 (Asia/Dubai 00:45). Machine-readable companions:
 `configs/meeting3/cells.yaml` (ledger) → `results/diag/meeting3/meeting3_manifest.json`
 (`python scripts/meeting3_manifest.py --check`). Protocol: PREREGISTRATION
 Amendment R (R.0–R.12). Every number below was recomputed from the named
 artifact when this file was written. Review evidence (gate outputs, remote test run,
 parity, queue dry-run, remote-only data list):
 [`meeting3_evidence/`](meeting3_evidence/README.md).
+
+**Execution status, 2026-09-26 00:45 Dubai (GPU night 2 in progress; early start at the owner's request, R.16.6).**
+
+- **Tasks 2/3 primary cell capture-b256: FINAL** (400/400, controls VALID,
+  0 provenance failures). Q.3 collateral R-KV − H2O-style = +0.000
+  [+0.000, +0.000] → **INCONCLUSIVE**. Q.6 ω(Random) − ω(StreamingLLM) =
+  **+0.200 [+0.159, +0.234] → PREDICTED (exploratory)**. See §3a.
+- **Running:** exact-lag-r5 (seed 89, GPU0; 150/200 before it) and
+  dacc-t2048 (seed 23, GPU1; 200/400 before it). Not started: dacc-t512,
+  dacc-t0, fork-control-random/-slm, capture-b2048, t1-tv512, t1-tv1024.
+  Each postprocess stage reads its cell when complete.
 
 **Execution status, 2026-09-25 11:30 Dubai (after GPU night 1).**
 
@@ -52,8 +63,8 @@ The three Meeting #3 problems, and where each stands:
 | Problem | Measured now | Queued (unattended, resumable) | Not yet runnable |
 |---|---|---|---|
 | **1. Divergence/damage vs cache size, exposure/horizon** | Accuracy curve 256→2048 with paired CIs, flips, realized ratios (**COMPLETE**); Q.2 exposure grid + occupancy audit (**COMPLETE**, verdict MIXED) | D_acc free-running (budget, onset) grid, 1,200 generations; Q.1 direct fork control, 150 conditions; TV at 512/1024 (summary profiles, R.12) | — |
-| **2. Attention maps: M/Δ, GQA collateral, restoration** | — | Q.3 capture, 800 conditions (budget 256 first); Q.5 exact-lag restoration, 200 (trace, policy) × 5 lags × 4 arms | — |
-| **3. SVD/PCA trajectory direction** | — | Q.6 basis fit + projection (same capture) | — |
+| **2. Attention maps: M/Δ, GQA collateral, restoration** | Q.3 capture at budget 256 (**FINAL**, 400 conditions; collateral contrast INCONCLUSIVE, M/Δ per policy with CIs, §3a) | Q.3 capture at 2048, 400 conditions (collateral structurally non-identifying there, R.16.3); Q.5 exact-lag restoration, 200 (trace, policy) × 5 lags × 4 arms | — |
+| **3. SVD/PCA trajectory direction** | Q.6 basis (frozen, k = 64) + projection at budget 256 (**FINAL**, ω contrast PREDICTED, exploratory, §3a) | Q.6 at budget 2048 (same capture) | — |
 
 ---
 
@@ -144,6 +155,83 @@ and the peak sits at phase 9. Neither instrument check has run:
 
 The zero-amplitude `excess` bug is fixed (`phase-excess-v2`).
 
+## 3a. Tasks 2/3 — attention channels and trajectory direction at budget 256 (FINAL)
+
+Read 2026-09-26 by the post-capture-b256 stage.
+- **Artifact:** `results/diag/meeting3/capture_b256.json`, status FINAL.
+- **Sufficient statistics:** `capture_b256.conditions.tsv`, sha256 `3ccd9f39…`,
+  recorded in the JSON.
+- **Figure:** `results/diag/meeting3/figures/meeting3_capture_b256.{pdf,png}`.
+
+Coverage and design:
+- Coverage COMPLETE: 400/400 conditions (25 problems × 4 seeds × 4 policies),
+  0 duplicated, 0 unexpected, 0 provenance failures, identity consistent,
+  every control VALID.
+- **Budget 256 = realized ratio 5.77%:** 256 ÷ (93.7 mean prompt + 4,343.5
+  mean trace tokens) over the 100 teacher-forced full-cache traces, which
+  range from 510 to 16,538 tokens.
+- Estimator: equal-problem bootstrap (seeds within a problem, then problems),
+  2,000 resamples, seed 0, 95% percentile CI.
+
+**Registered reads**
+
+- **Q.3 collateral: R-KV − H2O-style (ObservedAttentionPress, no recency
+  reservation) = +0.000 [+0.000, +0.000] → INCONCLUSIVE.**
+  - Collateral is 0 in every one of the 400 conditions.
+  - Per policy, 46,451,328 evicted (position, KV group, layer, event)
+    instances were checked. Some head of the group gave more than τ = 0.01 of
+    its full attention to:
+
+    | Policy | Head-wanted instances |
+    |---|---|
+    | Random | 3,731,830 |
+    | R-KV | 1,294,665 |
+    | StreamingLLM | 739,823 |
+    | H2O-style | 54,932 |
+
+  - None of them ranked outside the group-mean top-256, so none counts as
+    collateral under R.4.
+  - At this budget the zero is **not** forced by the definition: the positive
+    control gives 1.0 (R.16.3). It is an empirical property of this model's
+    attention. The group-mean ranking never buried a position that a single
+    head wanted at more than 1%.
+  - The registered contrast therefore cannot order R-KV against H2O-style.
+    This is not evidence that GQA sharing is harmless in general: M and Δ
+    below show eviction removes substantial attended mass.
+- **Q.6 trajectory direction: ω(Random) − ω(StreamingLLM) = +0.200
+  [+0.159, +0.234] → PREDICTED.**
+  - ω = |d⊥| / |d∥| is the ratio of the hidden-state deviation outside the
+    frozen full-cache k = 64 basis to the deviation inside it.
+  - Random's deviation is more off-subspace than StreamingLLM's.
+  - **Exploratory (R.9):** one model, one benchmark, one budget. No
+    accuracy-scale claim.
+
+**Descriptive** (per policy, mean [95% CI] over 25 problems; not tested, no
+ordering claims):
+
+| Policy | M: full-cache mass on evicted positions | Δ: shape TV on kept set | ω |
+|---|---|---|---|
+| Random | 0.529 [0.502, 0.550] | 0.238 [0.217, 0.257] | 3.989 [3.936, 4.039] |
+| StreamingLLM | 0.268 [0.236, 0.299] | 0.160 [0.135, 0.185] | 3.789 [3.724, 3.857] |
+| H2O-style | 0.215 [0.183, 0.245] | 0.152 [0.129, 0.175] | 3.689 [3.618, 3.768] |
+| R-KV | 0.260 [0.226, 0.293] | 0.139 [0.118, 0.161] | 3.868 [3.802, 3.940] |
+
+- Random evicts 1.97–2.47× the attended mass of the three structured
+  policies (M 0.529 vs 0.215–0.268), and its CI is disjoint from theirs.
+- Among the structured policies, H2O-style has the lowest M and R-KV the
+  lowest Δ. Their CIs overlap.
+- The trigger-step Δ/M ratio is descriptive only. It is measured at the first
+  eviction at or after step 130, not at Q.5 reinsertion states, and licenses
+  no query-drift claim. The reader JSON carries it, along with
+  `wanted_any_head` and `M_event`.
+
+Reproduce:
+
+```bash
+python scripts/report_capture.py --runs-root <runs> --run capture-b256 \
+    --config configs/experiments/capture_math500_b256_r9.yaml --out <out> --final
+```
+
 ## 4. Controls
 
 | Control | Status |
@@ -151,9 +239,9 @@ The zero-amplitude `excess` bug is fixed (`phase-excess-v2`).
 | T1 paired totals equal the m4 summaries | **PASSED** (4 dp, all 8 cells) |
 | Q.2 pre-registered read reproduces the committed artifact | **PASSED** (byte-identical) |
 | Q.2 no divergence before nominal onset | **PASSED** (0 of 1,200 profiles; 276 never-diverged pairs all < 2,100 steps, below the first read window) |
-| D_acc gate: gate None ≡ legacy; gated ≡ full cache before onset (logit level) | **PASSED** on tiny Qwen2 with the pinned stack (mutation-tested); real-model `dacc-gate-smoke` **QUEUED** |
-| D_acc determinism control (gated t0 = 0 vs legacy grid rows) | QUEUED (reader built) |
-| Capture: topk gather equality, layer-0 key identity at mapped positions, bitwise pre-eviction, full/full = 0, layer-0 Δ ≤ 1e-5 | **PASSED** on tiny Qwen2 for all four policies (wrong position map caught by mutation); real-model `capture-smoke` **QUEUED** |
+| D_acc gate: gate None ≡ legacy; gated ≡ full cache before onset (logit level) | **PASSED** on tiny Qwen2 with the pinned stack (mutation-tested); real-model `dacc-gate-smoke` **PASSED** 2026-09-25 (token-identical at t0 = 0; onset at 576 exactly at t0 = 512) |
+| D_acc determinism control (gated t0 = 0 vs legacy grid rows) | QUEUED: needs `dacc-t0` (not yet started); reader built |
+| Capture: topk gather equality, layer-0 key identity at mapped positions, bitwise pre-eviction, full/full = 0, layer-0 Δ ≤ 1e-5 | **PASSED** on tiny Qwen2 for all four policies (wrong position map caught by mutation); real-model `capture-smoke` **PASSED** 2026-09-25 (full/full 0, layer-0 Δ 0.0); the same controls are VALID on all 400 capture-b256 rows |
 | Q.1 removal-anchored negative control | **INVALID for identification** (R.2); computed for the record from the fork control's arm A (QUEUED) |
 | Q.1 direct fork control | tiny Qwen2: B-vs-B exactly 0, A−B < 1e-4, next selections identical, fires when masking is off — **PASSED on CPU**; real run QUEUED |
 | Q.5 identity repair (true evicted K/V per layer) | tiny Qwen2: layer-0 stash equals full keys bitwise; the old tail-stash bug is refused (mutation test) — **PASSED on CPU**; real run QUEUED |

@@ -3520,3 +3520,26 @@ kept.
 5. **Partial outputs are committed** so progress claims can be recomputed:
    `results/diag/meeting3/partial/`, with reader JSON, per-condition TSVs, a
    timestamp and the code identity. Their verdicts stay withheld (PARTIAL).
+6. **Operations and figures (2026-09-26, analysis-side only; no estimand,
+   threshold, classification or generation source changes).**
+   - **Owner-requested early start.** On 2026-09-25 ~20:20 Dubai the owner
+     asked, in-session, "can u start the runs right now". A tmux loop
+     (`~/manual_ticks.sh` on the GPU host) ran the unchanged orchestrator
+     every 10 min from 20:24 until 01:40, when the cron window takes over. It
+     used `--max-hours-override` so every job still stops at 10:43. This is the
+     only departure from the 01:45–10:45 window: same code path, gates,
+     storage guard and resume semantics.
+   - **Figure path (commit 910d4dc).** Postprocessing published stage
+     figures into `figures/`, which is inside the hashed source tree. From
+     00:15 every tick's preflight failed with "remote source changed after
+     rsync" and nothing launched. No generation was affected: running jobs
+     continued, and the preflight only gates new launches. The fix publishes
+     figures under `results/diag/meeting3/figures/` and adds the regression
+     `test_no_stage_writes_into_the_source_tree`. The misplaced files were
+     moved, not deleted.
+   - **Figure layout.** The capture figure's tick labels collided, and the
+     registered-contrast text overlapped a mark. Found by viewing the
+     rendered PNG. The contrast text moved to the x-label slot and the tick
+     labels are rotated. `make_meeting3_figures.py` is in every stage's
+     analysis identity, so each FINAL stage re-runs its reader and republishes
+     from unchanged rows.

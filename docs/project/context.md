@@ -2,7 +2,7 @@
 
 **Purpose of this file:** a complete, self-contained handoff. An LLM with zero prior
 context should be able to read this and resume exactly where we are. Last updated
-2026-09-24. Repo: `/Users/apple/dev/kv-caching` (moved off `~/Desktop` 2026-06-14 to
+2026-09-26. Repo: `/Users/apple/dev/kv-caching` (moved off `~/Desktop` 2026-06-14 to
 escape a recurring macOS TCC lockout; `~/Desktop/kv-caching` is a **symlink** to this
 path, not a second copy — verified 2026-07-27), branch `main`, GitHub
 `whyeventry0103/kv-caching`. For the current commit run `git rev-parse --short
@@ -23,6 +23,21 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 ---
 
 ## 0. TL;DR — where we are right now
+
+  **★★★★★ 2026-09-26 00:45 Dubai — Tasks 2/3 primary cell FINAL (capture-b256).**
+  400/400, controls VALID, 0 provenance failures; budget 256 = realized ratio
+  5.77%. Q.3 collateral R-KV − H2O-style = +0.000 [+0.000, +0.000]
+  INCONCLUSIVE (0 collateral of 46,451,328 evicted instances per policy;
+  empirical at 256, not forced, R.16.3). Q.6 ω(Random) − ω(SLM) = +0.200
+  [+0.159, +0.234] PREDICTED, exploratory. M: Random 0.529 vs 0.215–0.268.
+  Write-up: docs/results/MEETING3_RESULTS.md §3a. Night 2 started early at
+  the owner's request (~/manual_ticks.sh, cron from 01:45; R.16.6). Postprocess
+  had published figures into the hashed source tree, so preflight aborted
+  launches from 00:15. Fixed in 910d4dc; figures now go to
+  results/diag/meeting3/figures/. In flight: exact-lag-r5 seed 89 (GPU0,
+  150/200 before), dacc-t2048 seed 23 (GPU1, 200/400 before). NEXT: the cron
+  window continues unattended to 10:43; commit each stage's outputs when its
+  postprocess stage reaches FINAL.
 
   **★★★★★ 2026-09-25 11:30 Dubai — GPU night 1 done; second review repaired.**
   Real-model gates PASSED (D_acc parity + onset 576; basis 100 traces k=64;
