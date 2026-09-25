@@ -791,6 +791,24 @@ def test_a_tail_filled_cell_is_not_charged_twice(tmp_path):
 # R.14: postprocessing stages run inline, idempotently, with retry.
 
 
+@pytest.fixture
+def fake_stage_done(monkeypatch):
+    """The scheduler's CPU-stage logic under test, with stage acceptance reduced
+    to the marker's terminal flag (the real stage_done is exercised end to end
+    in tests/test_postprocess.py)."""
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import postprocess_meeting3 as pp
+
+    def done(stage, runs_root, **_k):
+        try:
+            m = json.loads((runs_root / "postprocess" / f"{stage}.json").read_text())
+        except (OSError, ValueError):
+            return False
+        return m.get("terminal") is True
+
+    monkeypatch.setattr(pp, "stage_done", done)
+
+
 def _gen(name, total=2):
     return M.Job(
         name=name,
@@ -839,7 +857,7 @@ def _runner(tmp_path, *, terminal=True, rc=0, calls=None):
     return run
 
 
-def test_cpu_stage_waits_for_every_dependency(tmp_path):
+def test_cpu_stage_waits_for_every_dependency(tmp_path, fake_stage_done):
     jobs = [_gen("a"), _gen("b"), _post("p", requires_all=("a", "b"))]
     _write(tmp_path / "a" / "math500" / "m" / "x-256-s11.jsonl", 2)  # a done
     out = M.run_cpu_stages(tmp_path, jobs, lambda m: None, runner=_runner(tmp_path))
@@ -847,7 +865,9 @@ def test_cpu_stage_waits_for_every_dependency(tmp_path):
     assert not (tmp_path / "postprocess" / "p.json").exists()
 
 
-def test_generation_complete_before_start_runs_on_the_first_tick(tmp_path):
+def test_generation_complete_before_start_runs_on_the_first_tick(
+    tmp_path, fake_stage_done
+):
     jobs = [_gen("a"), _post("p", requires="a")]
     _write(tmp_path / "a" / "math500" / "m" / "x-256-s11.jsonl", 2)
     calls = []
@@ -862,7 +882,7 @@ def test_generation_complete_before_start_runs_on_the_first_tick(tmp_path):
     assert calls == ["p"]
 
 
-def test_a_failed_or_partial_stage_is_retried_next_tick(tmp_path):
+def test_a_failed_or_partial_stage_is_retried_next_tick(tmp_path, fake_stage_done):
     jobs = [_gen("a"), _post("p", requires="a")]
     _write(tmp_path / "a" / "math500" / "m" / "x-256-s11.jsonl", 2)
     out = M.run_cpu_stages(
@@ -873,7 +893,7 @@ def test_a_failed_or_partial_stage_is_retried_next_tick(tmp_path):
     assert "DONE" in out[0][1]
 
 
-def test_cpu_stages_never_take_a_gpu(tmp_path):
+def test_cpu_stages_never_take_a_gpu(tmp_path, fake_stage_done):
     jobs = [_post("p")]
     candidates, _ = M.launch_candidates(tmp_path, jobs, skip=set(), live={}, state={})
     assert candidates == []

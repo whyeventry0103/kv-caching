@@ -53,6 +53,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
 from kvcache.capture import LAYER0_DELTA_TOL
+from kvcache.gates import expected_run_identity, validate_rows
 from kvcache.coverage import (
     design,
     COMPLETE,
@@ -154,6 +155,7 @@ def read_capture(
     pids: list[str],
     seeds: list[int],
     budget: int,
+    expected_identity: dict[str, Any] | None,
     n_resamples: int = 2000,
     seed: int = 0,
 ) -> dict[str, Any]:
@@ -163,23 +165,24 @@ def read_capture(
         lambda r: (r["pid"], int(r["seed"]), r["press"], str(r["budget"])),
         expected,
     )
-    idents = {
-        json.dumps(
-            {
-                k: v
-                for k, v in (r.get("provenance") or {}).items()
-                if k != "inputs_sha256"
-            },
-            sort_keys=True,
-        )
-        for r in rows
-    }
-    identity_ok = len(idents) == 1 and "{}" not in idents
-    bad = {
-        (r["pid"], int(r["seed"]), r["press"]): f
-        for r in rows
-        if (f := control_failures(r))
-    }
+    # R.15: every row's provenance must carry the required fields, equal the
+    # identity derived from committed specs, and match the frozen input manifest
+    prov_bad = validate_rows(
+        rows,
+        kind="capture",
+        expected=expected_identity,
+        key=lambda r: (r["pid"], int(r["seed"]), r["press"]),
+    )
+    identity_ok = not prov_bad
+    bad = {}
+    for r in rows:
+        try:
+            k3 = (r["pid"], int(r["seed"]), r["press"])
+            f = control_failures(r)
+        except (KeyError, TypeError, ValueError) as e:
+            k3, f = (repr(r)[:40], 0, "?"), [f"malformed row: {e!r}"]
+        if f:
+            bad[k3] = f
     controls = "VALID" if not bad else "INVALID"
     table: list[dict[str, Any]] = []
     values: dict[str, dict[str, dict[tuple[str, int], float]]] = {
@@ -189,10 +192,18 @@ def read_capture(
         m: {p: {} for p in POLICIES} for m in METRICS
     }
     for r in rows:
-        k3 = (r["pid"], int(r["seed"]), r["press"])
-        if k3 in bad or r["press"] not in POLICIES or str(r["budget"]) != str(budget):
+        try:
+            k3 = (r["pid"], int(r["seed"]), r["press"])
+            skip = (
+                k3 in bad
+                or r["press"] not in POLICIES
+                or str(r["budget"]) != str(budget)
+            )
+            mv = None if skip else metric_values(r)
+        except (KeyError, TypeError, ValueError):
+            continue  # malformed: already INVALID through coverage/controls
+        if mv is None:
             continue
-        mv = metric_values(r)
         entry = {"pid": r["pid"], "seed": int(r["seed"]), "press": r["press"]}
         for m, (v, why) in mv.items():
             entry[m] = v
@@ -244,7 +255,11 @@ def read_capture(
         "budget": budget,
         "coverage": cov,
         "identity_consistent": identity_ok,
-        "n_identities": len(idents),
+        "provenance_failures": [
+            {"key": list(k), "problems": v}
+            for k, v in sorted(prov_bad.items(), key=repr)
+        ][:50],
+        "n_provenance_failures": len(prov_bad),
         "controls": controls,
         "control_failures": [
             {"pid": k[0], "seed": k[1], "press": k[2], "failures": f}
@@ -305,11 +320,15 @@ def main() -> int:
     if a.config is None:
         raise SystemExit("--config is required: the expected design comes from it")
     pids, seeds, budget = _design(a.config)
+    expected_identity, why = expected_run_identity(
+        "capture", str(a.config), a.runs_root
+    )
     res = read_capture(
         _rows(run_dir),
         pids=pids,
         seeds=seeds,
         budget=budget,
+        expected_identity=expected_identity,
         n_resamples=a.n_resamples,
         seed=a.seed,
     )
@@ -322,6 +341,8 @@ def main() -> int:
         f"--config {a.config} --out {a.out} --final"
     )
     res["run"] = a.run
+    res["expected_identity"] = expected_identity
+    res["expected_identity_note"] = why
     a.out.parent.mkdir(parents=True, exist_ok=True)
     a.out.write_text(json.dumps(res, indent=2, sort_keys=True) + "\n", "utf-8")
     cov = res["coverage"]

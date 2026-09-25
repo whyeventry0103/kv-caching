@@ -23,7 +23,8 @@ from typing import Any
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
-from kvcache.coverage import COMPLETE, check_coverage, expected_keys, design
+from kvcache.coverage import COMPLETE, check_coverage, design, expected_keys
+from kvcache.gates import expected_run_identity, validate_rows
 from kvcache.metrics.restoration import (
     classify_latency_sweep,
     classify_restoration,
@@ -101,12 +102,24 @@ def main() -> int:
         for line in p.read_text(encoding="utf-8").splitlines()
         if line.strip()
     ]
+    expected_identity = None
+    if a.design is not None:
+        expected_identity, _why = expected_run_identity(
+            "exact_lag", str(a.design), a.runs_root
+        )
+    checks = validate(rows, a.design, expected_identity=expected_identity)
     res = {
-        "amendment": "R.5 / R.10 / R.14",
+        "amendment": "R.5 / R.10 / R.14 / R.15",
         "run": a.run,
         "note": "recovery-after-delay; does not isolate staleness from position",
-        **validate(rows, a.design),
-        "policies": read_rows(rows, n_resamples=a.n_resamples, seed=a.seed),
+        **checks,
+        # no per-lag read at all on INVALID evidence: verdicts are suppressed,
+        # and every row reaching read_rows has passed the content checks
+        "policies": (
+            {}
+            if checks["status"] == "INVALID"
+            else read_rows(rows, n_resamples=a.n_resamples, seed=a.seed)
+        ),
     }
     if res["status"] != "FINAL":
         for v in res["policies"].values():
@@ -152,40 +165,140 @@ def main() -> int:
     return 0
 
 
-def validate(rows: list[dict[str, Any]], design: Path | None) -> dict[str, Any]:
-    """R.14: exact (problem, seed, policy) coverage and one experiment identity.
+REGISTERED_INELIGIBLE = (
+    "INELIGIBLE: no eviction at or after the trigger",
+    "INELIGIBLE: stash smaller than the reinsertion count",
+)
+ARMS = ("none", "matched", "random", "relaxed")
 
-    INELIGIBLE rows (no cohort, small stash, short trace) are legitimate
-    registered outcomes and count as covered; they are listed, not hidden.
+
+def row_problems(
+    r: dict[str, Any], *, lags: list[int], window: int, trigger: int
+) -> list[str]:
+    """Content checks for one exact-lag row (R.15); empty list = valid."""
+    import math
+
+    out: list[str] = []
+    st = r.get("status")
+    if st in REGISTERED_INELIGIBLE:
+        return out
+    if st != "READ":
+        return [f"status {st!r} is neither READ nor a registered ineligibility"]
+    e, n = r.get("cohort_step"), r.get("n_trace_tokens")
+    if not isinstance(e, int) or e < trigger:
+        out.append(f"cohort_step {e!r} invalid (trigger {trigger})")
+    if not isinstance(n, int):
+        out.append("n_trace_tokens missing")
+    sic = r.get("stash_identity_checks")
+    if not isinstance(sic, dict) or not (sic.get("n_entries_checked") or 0) > 0:
+        out.append("stash identity checks absent or checked nothing")
+    got = r.get("lags") or {}
+    if {str(x) for x in lags} != set(got):
+        out.append(f"lag set {sorted(got)} != configured {lags}")
+    if out:
+        return out
+    for lag in lags:
+        v = got[str(lag)]
+        start = e + lag
+        fits = start + window - 1 <= n - 1
+        if not v.get("eligible"):
+            if fits:
+                out.append(f"lag {lag}: ineligible although the window fits")
+            continue
+        if not fits:
+            out.append(f"lag {lag}: eligible although the window does not fit")
+        if not (v.get("requested_lag") == v.get("achieved_lag") == lag):
+            out.append(f"lag {lag}: requested/achieved lag mismatch")
+        if v.get("applied_step") != start:
+            out.append(f"lag {lag}: applied_step {v.get('applied_step')} != {start}")
+        for arm in ARMS:
+            x = v.get(arm)
+            if (
+                not isinstance(x, (int, float))
+                or not math.isfinite(x)
+                or not 0 <= x <= 1
+            ):
+                out.append(f"lag {lag}: arm {arm} value {x!r} not a finite TV")
+        gates = v.get("gates") or {}
+        for arm in ARMS[1:]:
+            g = gates.get(arm) or {}
+            if (
+                g.get("passed") is not True
+                or "VALUES" not in str(g.get("checked", "")).upper()
+            ):
+                out.append(
+                    f"lag {lag}: arm {arm} K/V restoration gate missing or failed"
+                )
+    return out
+
+
+def validate(
+    rows: list[dict[str, Any]],
+    design: Path | None,
+    *,
+    expected_identity: dict[str, Any] | None = None,
+    check_identity: bool = True,
+) -> dict[str, Any]:
+    """R.14/R.15: exact coverage, one expected identity, content checks.
+
+    Duplicated / unexpected / malformed / mismatched evidence -> INVALID;
+    missing rows -> PARTIAL. Registered ineligibility is a legitimate outcome,
+    listed separately; any other non-READ status is INVALID.
     """
+    import yaml
+
     if design is None:
-        return {"status": "PARTIAL", "coverage": {"status": "UNCHECKED"}}
+        return {
+            "status": "INVALID",
+            "coverage": {"status": "UNCHECKED"},
+            "why": "no design given",
+        }
     pids, seeds, presses = _design(design)
+    cfg = yaml.safe_load(Path(design).read_text(encoding="utf-8"))
+    lags = [int(x) for x in cfg["lags"]]
+    window, trigger = int(cfg["window"]), int(cfg["trigger_step"])
     cov = check_coverage(
         rows,
         lambda r: (r["pid"], int(r["seed"]), r["press"]),
         expected_keys(pids, seeds, presses),
     )
-    ids = {
-        json.dumps(
-            {
-                k: v
-                for k, v in (r.get("provenance") or {}).items()
-                if k != "inputs_sha256"
-            },
-            sort_keys=True,
+    prov = (
+        validate_rows(
+            rows,
+            kind="exact_lag",
+            expected=expected_identity,
+            key=lambda r: (r["pid"], int(r["seed"]), r["press"]),
         )
-        for r in rows
-    }
-    ident_ok = len(ids) == 1 and "{}" not in ids
+        if check_identity
+        else {}
+    )
+    content = {}
+    for r in rows:
+        try:
+            probs = row_problems(r, lags=lags, window=window, trigger=trigger)
+            k = (r["pid"], r["seed"], r["press"])
+        except (KeyError, TypeError, ValueError) as e:
+            probs, k = [f"malformed row: {e!r}"], (repr(r)[:40],)
+        if probs:
+            content[k] = probs
+    invalid = cov["status"] == "INVALID" or prov or content
+    status = (
+        "INVALID" if invalid else ("FINAL" if cov["status"] == COMPLETE else "PARTIAL")
+    )
     return {
-        "status": "FINAL" if cov["status"] == COMPLETE and ident_ok else "PARTIAL",
+        "status": status,
         "coverage": cov,
-        "identity_consistent": ident_ok,
+        "provenance_failures": [
+            {"key": list(k), "problems": v} for k, v in sorted(prov.items(), key=repr)
+        ][:50],
+        "content_failures": [
+            {"key": list(k), "problems": v}
+            for k, v in sorted(content.items(), key=repr)
+        ][:50],
         "ineligible_rows": [
-            [r["pid"], r["seed"], r["press"], r.get("status")]
+            [r.get("pid"), r.get("seed"), r.get("press"), r.get("status")]
             for r in rows
-            if r.get("status") != "READ"
+            if r.get("status") in REGISTERED_INELIGIBLE
         ],
     }
 

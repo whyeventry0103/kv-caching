@@ -140,29 +140,57 @@ def test_the_old_tail_stash_bug_is_refused(monkeypatch):
         _run(model, prompt, trace)
 
 
-def test_exact_lag_validation_requires_exact_coverage_and_one_identity(monkeypatch):
+def test_exact_lag_row_checks_reject_the_reviewed_counterexample():
+    """Review of cfa30cd: status READ, lags {}, provenance {anything: same},
+    stash_identity_checks {passed: false} was FINAL."""
     import report_exact_lag as rel
 
-    monkeypatch.setattr(rel, "_design", lambda _c: (["a", "b"], [1], ["random"]))
-    ok = [
-        {
-            "pid": p,
-            "seed": 1,
-            "press": "random",
-            "status": "READ",
-            "provenance": {"config_sha256": "x"},
-        }
-        for p in "ab"
-    ]
-    assert rel.validate(ok, Path("d.yaml"))["status"] == "FINAL"
-    assert rel.validate(ok[:1], Path("d.yaml"))["status"] == "PARTIAL"
-    dup = ok[:1] + ok[:1]
-    assert rel.validate(dup, Path("d.yaml"))["coverage"]["status"] == "INVALID"
-    mixed = [ok[0], {**ok[1], "provenance": {"config_sha256": "y"}}]
-    assert rel.validate(mixed, Path("d.yaml"))["status"] == "PARTIAL"
-    inel = [ok[0], {**ok[1], "status": "INELIGIBLE: no eviction"}]
-    v = rel.validate(inel, Path("d.yaml"))
-    assert v["status"] == "FINAL" and v["ineligible_rows"]
+    kw = dict(lags=[1, 4, 16, 64, 256], window=200, trigger=130)
+    probe = {
+        "status": "READ",
+        "lags": {},
+        "stash_identity_checks": {"passed": False},
+        "cohort_step": 192,
+        "n_trace_tokens": 1000,
+    }
+    probs = rel.row_problems(probe, **kw)
+    assert any("stash identity" in p for p in probs)
+    assert any("lag set" in p for p in probs)
+    assert (
+        rel.row_problems(
+            {"status": "INELIGIBLE: no eviction at or after the trigger"}, **kw
+        )
+        == []
+    )
+    assert rel.row_problems({"status": "INELIGIBLE: because"}, **kw)
+    gate = {"passed": True, "checked": "keys AND values"}
+    ok_lag = {
+        "eligible": True,
+        "requested_lag": 1,
+        "achieved_lag": 1,
+        "applied_step": 193,
+        "none": 0.3,
+        "matched": 0.2,
+        "random": 0.3,
+        "relaxed": 0.1,
+        "gates": {a: dict(gate) for a in ("matched", "random", "relaxed")},
+    }
+    row = {
+        "status": "READ",
+        "cohort_step": 192,
+        "n_trace_tokens": 1000,
+        "stash_identity_checks": {"n_entries_checked": 5},
+        "lags": {"1": ok_lag},
+    }
+    assert rel.row_problems(row, lags=[1], window=200, trigger=130) == []
+    bad = {**row, "lags": {"1": {**ok_lag, "achieved_lag": 4}}}
+    assert rel.row_problems(bad, lags=[1], window=200, trigger=130)
+    nan = {**row, "lags": {"1": {**ok_lag, "matched": float("nan")}}}
+    assert rel.row_problems(nan, lags=[1], window=200, trigger=130)
+    short = {**row, "n_trace_tokens": 300, "lags": {"1": {"eligible": False}}}
+    assert rel.row_problems(short, lags=[1], window=200, trigger=130) == []
+    fake_inel = {**row, "lags": {"1": {"eligible": False}}}  # window fits
+    assert rel.row_problems(fake_inel, lags=[1], window=200, trigger=130)
 
 
 def test_a_corrupted_deep_layer_stash_value_is_refused(monkeypatch):

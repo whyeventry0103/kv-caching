@@ -114,7 +114,9 @@ def test_reader_tolerance_rules_and_the_legacy_label():
     assert rf.classify(0.0, 0.0) == "EXACT"
     assert rf.classify(1e-7, 0.0) == "TOLERANCE-DEGENERATE"
     exp = {(f"p{k}", 11, "random", 4) for k in range(3)}
-    out = rf.read(_rows(True), n_resamples=50, seed=0, expected=exp)
+    out = rf.read(
+        _rows(True), n_resamples=50, seed=0, expected=exp, check_identity=False
+    )
     c = out["cells"]["random-i4"]
     assert out["tolerance"] == pytest.approx(1e-5)
     assert c["logit_gate"] == "PASS" and c["overall"] == "PASS"
@@ -127,7 +129,11 @@ def test_selection_disagreement_fails_even_within_logit_tolerance():
     rf = _reader()
     exp = {(f"p{k}", 11, "random", 4) for k in range(3)}
     out = rf.read(
-        _rows(False, det=1e-6, diff=1e-7), n_resamples=50, seed=0, expected=exp
+        _rows(False, det=1e-6, diff=1e-7),
+        n_resamples=50,
+        seed=0,
+        expected=exp,
+        check_identity=False,
     )
     c = out["cells"]["random-i4"]
     assert c["logit_gate"] == "PASS"  # R.11's numerical rule, unchanged
@@ -138,11 +144,36 @@ def test_selection_disagreement_fails_even_within_logit_tolerance():
 def test_no_comparisons_and_incomplete_coverage_are_never_pass():
     rf = _reader()
     exp = {(f"p{k}", 11, "random", 4) for k in range(3)}
-    out = rf.read(_rows(None), n_resamples=50, seed=0, expected=exp)
+    out = rf.read(
+        _rows(None), n_resamples=50, seed=0, expected=exp, check_identity=False
+    )
     c = out["cells"]["random-i4"]
     assert c["selection_gate"]["status"] == "NO-COMPARISONS"
     assert c["selection_gate"]["n_ineligible_trace_ended"] == 3
     assert c["overall"] == "INCONCLUSIVE"
-    out = rf.read(_rows(True, n=2), n_resamples=50, seed=0, expected=exp)
+    out = rf.read(
+        _rows(True, n=2), n_resamples=50, seed=0, expected=exp, check_identity=False
+    )
     assert out["coverage"]["status"] == "PARTIAL"
     assert out["overall"] == "INCONCLUSIVE"
+
+
+def test_malformed_fork_evidence_is_invalid_before_classification():
+    """Review of cfa30cd: an infinite deterministic control made tolerance inf
+    and turned A-B = 1.0 into PASS."""
+    rf = _reader()
+    rows = _rows(True, det=float("inf"), diff=1.0)
+    exp = {(f"p{k}", 11, "random", 4) for k in range(3)}
+    out = rf.read(rows, n_resamples=50, seed=0, expected=exp, check_identity=False)
+    assert out["status"] == "INVALID" and out["overall"] == "INVALID-EVIDENCE"
+    assert out["cells"] == {}
+    neg = _rows(True, det=1e-6, diff=-1.0)
+    assert (
+        rf.read(neg, n_resamples=50, seed=0, expected=exp, check_identity=False)[
+            "status"
+        ]
+        == "INVALID"
+    )
+    noprov = _rows(True)
+    out = rf.read(noprov, n_resamples=50, seed=0, expected=exp)  # identity checked
+    assert out["status"] == "INVALID" and out["provenance_failures"]

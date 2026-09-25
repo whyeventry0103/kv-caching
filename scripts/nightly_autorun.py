@@ -29,6 +29,7 @@ from typing import Any
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
+sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
 
 NVIDIA_SMI = "/usr/bin/nvidia-smi"
 TMUX = "/usr/bin/tmux"
@@ -496,7 +497,9 @@ def count_progress(runs_root: Path, job: Job) -> int:
             else []
         )
     elif job.progress_kind == "postprocess":
-        return 1 if _postprocess_done(runs_root / (job.marker or "")) else 0
+        from postprocess_meeting3 import stage_done
+
+        return 1 if stage_done(job.config, runs_root) else 0
     elif job.progress_kind == "readout":
         base = run_dir / "readout"
         paths = list(base.rglob("*.jsonl")) if base.exists() else []

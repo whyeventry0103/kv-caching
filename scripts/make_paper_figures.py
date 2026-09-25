@@ -913,7 +913,7 @@ def _err(mean: float, ci: list[float], sign: float = 1.0) -> list[list[float]]:
     return [[m - lo], [hi - m]]
 
 
-def fig8_budget_curve(out_dir: Path):
+def fig8_budget_curve(out_dir: Path, t1_path: Path | None = None):
     """Meeting #3 Task 1: damage against cache size, out to the full cache.
 
     Three panels, because "divergence/damage" is two different quantities and
@@ -935,7 +935,8 @@ def fig8_budget_curve(out_dir: Path):
     Every value is read from the committed T1 artifact
     (scripts/report_budget_curve.py); nothing is typed in.
     """
-    t1 = json.loads((PROJECT_ROOT / T1_BUDGET_CURVE).read_text(encoding="utf-8"))
+    src = Path(t1_path) if t1_path is not None else PROJECT_ROOT / T1_BUDGET_CURVE
+    t1 = json.loads(src.read_text(encoding="utf-8"))
     cells: dict[str, dict[int, dict]] = {"random": {}, "streamingllm": {}}
     for c in t1["cells"]:
         cells[c["press"]][c["budget"]] = c

@@ -3394,3 +3394,68 @@ mostly hardlinked into the uv cache under `~/kvcache-storage`. The combined
 footprint with hardlinks counted once was, and is, 69.19 GiB (68.858 GiB
 storage-only), so the headroom figures and the conclusion of R.8.5 stand.
 Details: `docs/results/meeting3_evidence/storage.md`.
+
+### R.15 Gate, provenance, reader and postprocessing enforcement; storage scope (2026-09-25, from the external review of cfa30cd)
+
+No registered estimand, design or classification rule changes. Generation-side
+parts landed before the first GPU window (`0a86cbe`). The rest landed before any
+Meeting #3 cell was read. The only real rows existing at the time were
+capture-b256 255/400 and dacc-t2048 200/400, all read PARTIAL with verdicts
+withheld.
+
+1. **Entry points.** `report_exact_lag.py` and `report_fork_control.py` lacked
+   `__main__`: as scheduled subprocesses they exited 0 having done nothing.
+   Restored. Every stage is now tested through its real reader subprocess.
+2. **Typed gates in the scheduler** (`kvcache.gates`). `dacc-gate-smoke`,
+   `q6-basis-fit` and `capture-smoke` count as complete only when they verify
+   against an expected identity. That identity is computed from the committed
+   config, `models.yaml`, the frozen input manifest and the current generation
+   code, never read from the marker. The basis must exist, hash to its header,
+   and carry the fit identity. The capture smoke's identity includes the
+   verified basis bytes. The six completed historical marker jobs keep the
+   legacy rule under a closed, named list.
+3. **Provenance.** `provenance-v1` requires every identity field plus the
+   row's input hash. That hash is checked against
+   `configs/meeting3/input_manifest.json`, the frozen sha256 of prompt+trace
+   for the 100 reference (problem, seed) traces and of the 25 prompts. This
+   check runs at generation, at resume and in every reader. Each run is matched
+   to its own config's identity; the onset and policy arms are deliberately
+   separate configs.
+4. **Reader validation.**
+   - Duplicated, unexpected, malformed or mismatched evidence → INVALID.
+   - Missing evidence → PARTIAL.
+   - Verdicts only on FINAL.
+   - Exact-lag also checks:
+     - every configured lag;
+     - finite TV for all four arms;
+     - saved K+V gates passed;
+     - requested = achieved lag, applied step = cohort + lag;
+     - positive stash identity checks;
+     - per-lag ineligibility only when the window does not fit;
+     - row ineligibility only by the two registered reasons.
+   - Fork validates finite, nonnegative controls, fork records and TV profiles
+     before any classification.
+   - D_acc distinguishes the R.8.3 control as NOT RUN / RAN-INCOMPLETE / FAILED
+     / PASSED. Only PASSED allows FINAL. FAILED keeps its registered
+     consequence ("investigate before D_acc is interpreted") as a terminal
+     status.
+5. **Transactional postprocessing.**
+   - The reader writes into a fresh attempt directory. Status comes only from
+     that report and the current exit code, so an old FINAL is never re-read.
+   - Figures are drawn only for a fresh FINAL.
+   - Previous outputs move to `history/`.
+   - The stage record is written, then the manifest is refreshed; only a
+     successful refresh finalizes the terminal marker.
+   - The scheduler accepts a stage only if its outputs still hash as recorded,
+     the analysis code/config identity is unchanged and the input rows are
+     unchanged. Otherwise the stage is simply re-run.
+   - A completed but inconclusive analysis is FINAL with a separate
+     `gate_outcome`. The manifest shows analysis completion and the control's
+     outcome separately.
+6. **Storage scope, owner-delegated.** On the owner's selection,
+   `/home/sk10741/TC-ViTok` (16.52 GiB) and `/home/sk10741/tc-vitok-data`
+   (61.09 GiB) were deleted, after verifying no reference, hardlink,
+   environment or process use by this project. The measured reclaim was
+   77.61 GiB. The guard now uses the conservative combined footprint of
+   `~/kvcache-storage` + `~/kv-caching`, hardlinks counted once, against a
+   72 GiB allocation (+2 GiB, backed by the freed space; 1 GiB margin kept).

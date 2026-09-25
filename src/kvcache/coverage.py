@@ -41,8 +41,18 @@ def check_coverage(
     key: Callable[[Mapping[str, Any]], tuple],
     expected: set[tuple],
 ) -> dict[str, Any]:
-    """Exact coverage of ``rows`` against ``expected`` keys."""
-    got = [key(r) for r in rows]
+    """Exact coverage of ``rows`` against ``expected`` keys.
+
+    A row whose key cannot be formed (missing or mistyped fields) becomes an
+    unexpected ``("<malformed>", i)`` key, so it makes the read INVALID instead
+    of crashing the reader or being dropped.
+    """
+    got = []
+    for i, r in enumerate(rows):
+        try:
+            got.append(key(r))
+        except (KeyError, TypeError, ValueError):
+            got.append(("<malformed>", i))
     counts = Counter(got)
     missing = sorted(expected - set(got), key=repr)
     dups = sorted((k for k, n in counts.items() if n > 1), key=repr)

@@ -21,7 +21,34 @@ from kvcache.coverage import (  # noqa: E402
 from kvcache.stats import cluster_bootstrap_mean  # noqa: E402
 
 PIDS, SEEDS, B = ["a", "b", "c", "d", "e", "f"], [1, 2], 256
-PROV = {"kind": "capture", "implementation_id": "x", "config_sha256": "y"}
+IDENT = {
+    "schema": "provenance-v1",
+    "kind": "capture",
+    "implementation_id": "impl",
+    "config_name": "capture_test",
+    "config_sha256": "cfg",
+    "model_revision": "rev",
+    "reference_run": "ref",
+    "basis_npz_sha256": "basis",
+    "input_manifest_sha256": "man",
+}
+
+
+@pytest.fixture(autouse=True)
+def _manifest(tmp_path, monkeypatch):
+    """A frozen input manifest covering this file's synthetic problems."""
+    m = tmp_path / "manifest.json"
+    m.write_text(
+        json.dumps(
+            {
+                "traces_prompt_plus_trace": {
+                    f"{p}|{s}": f"h-{p}-{s}" for p in PIDS + ["zz"] for s in SEEDS
+                },
+                "prompts": {p: f"p-{p}" for p in PIDS},
+            }
+        )
+    )
+    monkeypatch.setenv("KVCACHE_INPUT_MANIFEST", str(m))
 
 
 def _row(pid, seed, press, i=0, **kw):
@@ -32,7 +59,7 @@ def _row(pid, seed, press, i=0, **kw):
         "seed": seed,
         "press": press,
         "budget": B,
-        "provenance": dict(PROV),
+        "provenance": {**IDENT, "inputs_sha256": f"h-{pid}-{seed}"},
         "checks": {"n_nonfinite": 0, "layer0_delta_max": 1e-7},
         "collateral_pooled": coll,
         "wanted_any_head_pooled": 0.5,
@@ -56,7 +83,9 @@ def _grid():
 
 
 def _read(rows):
-    return read_capture(rows, pids=PIDS, seeds=SEEDS, budget=B, n_resamples=200)
+    return read_capture(
+        rows, pids=PIDS, seeds=SEEDS, budget=B, expected_identity=IDENT, n_resamples=200
+    )
 
 
 def test_complete_valid_grid_is_final_with_verdicts():
@@ -110,7 +139,32 @@ def test_mixed_provenance_is_not_final():
     rows = _grid()
     rows[5]["provenance"]["config_sha256"] = "other"
     out = _read(rows)
-    assert not out["identity_consistent"] and out["status"] != "FINAL"
+    assert not out["identity_consistent"] and out["status"] == "INVALID"
+
+
+def test_consistent_but_meaningless_provenance_is_invalid():
+    """Review of cfa30cd: {anything: "same"} on every row was accepted as FINAL."""
+    rows = _grid()
+    for r in rows:
+        r["provenance"] = {"anything": "same"}
+    out = _read(rows)
+    assert out["status"] == "INVALID" and out["n_provenance_failures"] == len(rows)
+    assert out["q3_registered_contrast"]["verdict"] is None
+
+
+def test_foreign_inputs_or_no_expected_identity_are_invalid():
+    rows = _grid()
+    rows[3]["provenance"]["inputs_sha256"] = "tampered"
+    assert _read(rows)["status"] == "INVALID"
+    out = read_capture(
+        _grid(),
+        pids=PIDS,
+        seeds=SEEDS,
+        budget=B,
+        expected_identity=None,
+        n_resamples=50,
+    )
+    assert out["status"] == "INVALID"
 
 
 def test_an_undefined_direction_is_an_exclusion_not_a_failed_instrument():
@@ -158,6 +212,7 @@ def test_cli_final_exits_nonzero_when_incomplete(tmp_path, monkeypatch):
     rows = _grid()[:-1]
     (run / "x.jsonl").write_text("".join(json.dumps(r) + "\n" for r in rows))
     monkeypatch.setattr(rc, "_design", lambda _c: (PIDS, SEEDS, B))
+    monkeypatch.setattr(rc, "expected_run_identity", lambda *a, **k: (IDENT, "ok"))
     out = tmp_path / "o.json"
     argv = [
         "x",

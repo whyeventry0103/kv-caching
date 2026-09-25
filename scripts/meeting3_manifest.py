@@ -66,6 +66,11 @@ def _evidence_status(cell: dict, outputs: dict) -> tuple[str | None, str]:
         return None, f"no record for stage {stage} yet"
     d = json.loads(rec.read_text(encoding="utf-8"))
     st = d.get("status")
+    gate = d.get("gate_outcome")
+    if st == "FINAL" and gate is not None:
+        # analysis complete is not the same as the control passing
+        why = f"stage {stage} FINAL; control outcome {gate}"
+        return ("COMPLETE" if gate == "PASS" else "ANALYZED"), why
     if st == "FINAL":
         full = all(h is not None for h in outputs.values())
         return ("COMPLETE" if full else "ANALYZED"), f"stage {stage} FINAL"

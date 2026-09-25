@@ -131,3 +131,86 @@ def gate_status(
     if d.get("identity") != want:
         return False, f"{marker.name} identity differs from the expected identity"
     return True, "verified"
+
+
+def expected_run_identity(
+    kind: str, config: str, runs_root: Path, *, root: Path = PROJECT_ROOT
+) -> tuple[dict[str, Any] | None, str]:
+    """The identity every row of a run of ``config`` must carry (R.15).
+
+    Derived from committed specs, never from the rows. For capture, the basis
+    must verify first (its bytes are part of the identity); ``None`` with the
+    reason when it does not.
+    """
+    cfg = _yaml(root / config)
+    rev = _revision(cfg, root)
+    if kind == "capture":
+        ok, why, sha = verify_basis(
+            Path(runs_root),
+            "configs/experiments/basis_fit_q6_r9.yaml",
+            root=root,
+            run_name=cfg["basis_run"],
+        )
+        if not ok:
+            return None, f"basis not verified: {why}"
+        return (
+            identity(
+                "capture",
+                cfg,
+                model_revision=rev,
+                reference_run=cfg["reference_run_name"],
+                basis_npz_sha256=sha,
+                root=root,
+            ),
+            "ok",
+        )
+    if kind == "dacc":
+        return (
+            identity("dacc", cfg, model_revision=rev, reference_run=None, root=root),
+            "ok",
+        )
+    if kind in ("exact_lag", "fork"):
+        return (
+            identity(
+                kind,
+                cfg,
+                model_revision=rev,
+                reference_run=cfg["reference_run_name"],
+                root=root,
+            ),
+            "ok",
+        )
+    raise ValueError(f"unknown run kind {kind!r}")
+
+
+def validate_rows(
+    rows: list[dict[str, Any]],
+    *,
+    kind: str,
+    expected: dict[str, Any] | None,
+    key: Any,
+) -> dict[tuple, list[str]]:
+    """Per-row provenance problems (row key -> problems); empty dict = all valid."""
+    from kvcache.provenance import load_input_manifest, validate_row_provenance
+
+    manifest = load_input_manifest()
+    bad: dict[tuple, list[str]] = {}
+    for r in rows:
+        try:
+            k = key(r)
+            seed = k[1]
+            probs = validate_row_provenance(
+                r.get("provenance"),
+                expected=expected,
+                manifest=manifest,
+                kind=kind,
+                pid=r["pid"],
+                seed=seed,
+            )
+        except (KeyError, TypeError, ValueError) as e:
+            k, probs = (repr(r)[:60],), [f"malformed row: {e!r}"]
+        if expected is None:
+            probs = ["expected identity unavailable", *probs]
+        if probs:
+            bad[k] = probs
+    return bad

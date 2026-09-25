@@ -46,6 +46,7 @@ from kvcache.coverage import (
     expected_keys,
     paired_equal_problem,
 )
+from kvcache.gates import expected_run_identity, validate_rows
 from kvcache.metrics.paired import trace_identity
 
 FC_RUN = "math500-fc-powered-merged"
@@ -137,6 +138,38 @@ def _write_table(path: Path, table: list[dict[str, Any]]) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
+def determinism_status(
+    per_budget: dict[str, dict[str, Any]], *, n_expected: int
+) -> dict[str, Any]:
+    """R.8.3 control, with coverage (R.15): RAN is not PASSED.
+
+    PASSED: every budget compared exactly ``n_expected`` shared traces and every
+    one was token-identical. FAILED: some shared trace differs. RAN-INCOMPLETE:
+    fewer shared traces than the design holds.
+    """
+    short = {
+        b: t["n_shared"] for b, t in per_budget.items() if t["n_shared"] != n_expected
+    }
+    differs = {
+        b: t["n_shared"] - t["n_identical"]
+        for b, t in per_budget.items()
+        if t["n_identical"] != t["n_shared"]
+    }
+    status = (
+        "FAILED"
+        if differs
+        else ("RAN-INCOMPLETE" if short or not per_budget else "PASSED")
+    )
+    return {
+        "status": status,
+        "note": "R.8.3 determinism control: gated t0=0 vs legacy rows",
+        "n_expected_per_budget": n_expected,
+        "short_coverage": short,
+        "n_non_identical": differs,
+        "per_budget": per_budget,
+    }
+
+
 def read_dacc(
     arm_rows: dict[int, list[dict[str, Any]]],
     fc: dict[tuple[str, int], bool],
@@ -145,6 +178,8 @@ def read_dacc(
     seeds: list[int],
     presses: list[str],
     budgets: list[int],
+    expected_identities: dict[int, dict[str, Any] | None] | None = None,
+    check_identity: bool = True,
     n_resamples: int = 2000,
     seed: int = 0,
 ) -> dict[str, Any]:
@@ -172,21 +207,26 @@ def read_dacc(
         ),
         expected,
     )
-    ident_ok = True
-    for rows in arm_rows.values():
-        ids = {
-            json.dumps(
-                {
-                    k: v
-                    for k, v in (r.get("provenance") or {}).items()
-                    if k != "inputs_sha256"
-                },
-                sort_keys=True,
+    # R.15: each arm's rows must carry THAT arm's expected identity (the onset
+    # configs differ on purpose) and inputs matching the frozen manifest.
+    prov: dict = {}
+    if check_identity:
+        for t0, rows in arm_rows.items():
+            prov.update(
+                validate_rows(
+                    rows,
+                    kind="dacc",
+                    expected=(expected_identities or {}).get(t0),
+                    key=lambda r: (
+                        r["pid"],
+                        int(r["decoding"]["seed"]),
+                        r["press"],
+                        str(r["budget"]),
+                        int(r["onset"]["compression_start_step"]),
+                    ),
+                )
             )
-            for r in rows
-        }
-        if len(ids) > 1 or "{}" in ids:
-            ident_ok = False
+    ident_ok = not prov
     missing_fc = sorted({(p, s) for p in pids for s in seeds} - set(fc))
     cells: dict[str, Any] = {}
     table: list[dict[str, Any]] = []
@@ -275,6 +315,9 @@ def read_dacc(
         ),
         "coverage": cov,
         "identity_consistent_within_arms": ident_ok,
+        "provenance_failures": [
+            {"key": list(k), "problems": v} for k, v in sorted(prov.items(), key=repr)
+        ][:50],
         "fc_comparators_missing": [list(k) for k in missing_fc],
         "n_cells_read": sum(c["status"] == "READ" for c in cells.values()),
         "cells": cells,
@@ -313,6 +356,12 @@ def main() -> int:
     if a.design is None:
         raise SystemExit("--design is required: the expected grid comes from it")
     pids, seeds, presses, budgets = _design(a.design)
+    identities = {
+        t0: expected_run_identity(
+            "dacc", f"configs/experiments/grid_math500_dacc_t{t0}_r3.yaml", a.runs_root
+        )[0]
+        for t0 in arms
+    }
     res = read_dacc(
         arm_rows,
         fc,
@@ -320,6 +369,7 @@ def main() -> int:
         seeds=seeds,
         presses=presses,
         budgets=budgets,
+        expected_identities=identities,
         n_resamples=a.n_resamples,
         seed=a.seed,
     )
@@ -337,11 +387,9 @@ def main() -> int:
             }
             mine = {k: v for k, v in gated.items() if k[3] == str(budget)}
             per_budget[str(budget)] = trace_identity(mine, leg)
-        control = {
-            "status": "RUN",
-            "note": "R.8.3 determinism control: gated t0=0 vs legacy rows",
-            "per_budget": per_budget,
-        }
+        control = determinism_status(
+            per_budget, n_expected=len(pids) * len(seeds) * len(presses)
+        )
 
     out = {
         "amendment": "R.3 (D_acc), R.8, R.14",
@@ -356,9 +404,19 @@ def main() -> int:
         **{k: v for k, v in res.items() if k != "table"},
         "determinism_control": control,
     }
-    if res["status"] == "FINAL" and control.get("status") != "RUN":
-        out["status"] = "PARTIAL"
-        out["why_not_final"] = "determinism control (R.8.3) not run"
+    if res["status"] == "FINAL" and control.get("status") != "PASSED":
+        if control.get("status") == "FAILED":
+            # R.8.3 as registered: a non-identical row is investigated before
+            # D_acc is interpreted. The measurement exists; its interpretation
+            # is withheld pending that investigation (terminal, needs a human).
+            out["status"] = "INVALID"
+            out["why_not_final"] = (
+                "R.8.3 determinism control FAILED: investigate before D_acc is "
+                "interpreted (registered consequence)"
+            )
+        else:
+            out["status"] = "PARTIAL"
+            out["why_not_final"] = f"determinism control (R.8.3) {control['status']}"
     tsv = a.out.with_suffix(".conditions.tsv")
     out["sufficient_statistics_tsv"] = tsv.name
     out["sufficient_statistics_sha256"] = _write_table(tsv, res["table"])

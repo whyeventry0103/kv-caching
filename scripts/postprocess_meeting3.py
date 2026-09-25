@@ -128,26 +128,90 @@ STAGES: dict[str, dict] = {
 }
 
 
+# Runs whose rows each stage reads (the generation digest) and the analysis
+# code/config files whose bytes define the analysis identity.
+STAGE_RUNS: dict[str, tuple[str, ...]] = {
+    "capture-b256": ("capture-b256", "q6-basis-fit"),
+    "capture-b2048": ("capture-b2048", "q6-basis-fit"),
+    "dacc": ("dacc-t0", "dacc-t512", "dacc-t2048"),
+    "exact-lag": ("exact-lag-r5",),
+    "fork-control": ("fork-control-random", "fork-control-slm"),
+    "t1-tv": ("t1-tv512", "t1-tv1024"),
+}
+ANALYSIS_COMMON = (
+    "scripts/postprocess_meeting3.py",
+    "scripts/make_meeting3_figures.py",
+    "scripts/meeting3_manifest.py",
+    "src/kvcache/coverage.py",
+    "src/kvcache/gates.py",
+    "src/kvcache/provenance.py",
+    "configs/meeting3/q2_subset_pids.json",
+    "configs/meeting3/input_manifest.json",
+)
+
+
 def _sha(path: Path) -> str | None:
     return hashlib.sha256(path.read_bytes()).hexdigest() if path.exists() else None
 
 
-def _status(stage: str, out: Path, rc: int) -> str:
-    if not out.exists():
-        return "PARTIAL"
-    d = json.loads(out.read_text(encoding="utf-8"))
+def analysis_id(stage: str) -> str:
+    """sha256 over the reader, the shared analysis code and the stage's configs."""
+    spec = STAGES[stage]
+    files = set(ANALYSIS_COMMON) | {spec["reader"][0]}
+    files |= {a for a in spec["reader"] if a.startswith("configs/")}
     if stage == "t1-tv":
-        # the budget-curve reader has no FINAL flag: done when both TV cells
-        # contributed an AUC with a CI
-        cells = [c for c in d["cells"] if c["budget"] in (512, 1024)]
-        ok = cells and all(c.get("auc_tv_ci95") for c in cells)
-        return "FINAL" if (rc == 0 and ok) else "PARTIAL"
-    if stage == "fork-control":
-        cov = d.get("coverage", {}).get("status")
-        if d.get("overall") == "FAIL":
-            return "INVALID"
-        return "FINAL" if cov == "COMPLETE" else "PARTIAL"
-    return d.get("status", "PARTIAL")
+        files |= {"scripts/make_paper_figures.py"}
+    h = hashlib.sha256()
+    for rel in sorted(files):
+        h.update(rel.encode() + b"\0")
+        h.update(
+            (PROJECT_ROOT / rel).read_bytes() if (PROJECT_ROOT / rel).exists() else b""
+        )
+    return h.hexdigest()
+
+
+def generation_digest(stage: str, runs_root: Path) -> str:
+    """sha256 over every row/profile/basis file the stage's reader consumes."""
+    h = hashlib.sha256()
+    for run in STAGE_RUNS[stage]:
+        base = Path(runs_root) / run
+        if not base.exists():
+            h.update(f"{run}:absent".encode())
+            continue
+        for f in sorted(base.rglob("*")):
+            if f.is_file() and f.suffix in (".jsonl", ".json", ".npz"):
+                h.update(str(f.relative_to(runs_root)).encode() + b"\0")
+                h.update(hashlib.sha256(f.read_bytes()).digest())
+    return h.hexdigest()
+
+
+def fresh_status(stage: str, report: dict | None, rc: int) -> tuple[str, str | None]:
+    """(status, gate outcome) from THIS attempt's report and exit code only.
+
+    A reader that crashed (no report, or an exit code other than 0 = FINAL and
+    3 = not final) is READER-FAILED, retried; an old FINAL file is never read.
+    Fork: analysis completion (FINAL) and the control's outcome are separate.
+    """
+    if report is None or rc not in (0, 3):
+        return "READER-FAILED", None
+    if stage == "t1-tv":
+        cells = [c for c in report.get("cells", []) if c.get("budget") in (512, 1024)]
+        ok = rc == 0 and len(cells) == 4 and all(c.get("auc_tv_ci95") for c in cells)
+        return ("FINAL" if ok else "PARTIAL"), None
+    st = report.get("status", "PARTIAL")
+    if st == "FINAL" and rc != 0:
+        return "READER-FAILED", None  # a FINAL report must come with exit 0
+    gate = report.get("overall") if stage == "fork-control" else None
+    return st, gate
+
+
+def _publish(src: Path, dst: Path, history: Path) -> None:
+    """Move an existing ``dst`` into history (kept), then move ``src`` in."""
+    if dst.exists():
+        history.mkdir(parents=True, exist_ok=True)
+        os.replace(dst, history / dst.name)
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    os.replace(src, dst)
 
 
 def run_stage(
@@ -156,13 +220,18 @@ def run_stage(
     *,
     python: str = sys.executable,
     out_root: Path = PROJECT_ROOT,
+    manifest_argv: list[str] | None = None,
 ) -> dict:
-    """``out_root`` receives results and figures (the project tree in
-    production; a temporary tree in tests, so tests never touch real artifacts)."""
+    """One transactional attempt (R.15). ``out_root`` receives results and
+    figures (the project tree in production, a temporary tree in tests)."""
     spec = STAGES[stage]
+    ts = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
+    attempt = out_root / OUT / "attempts" / f"{stage}-{ts}-{os.getpid()}"
+    attempt.mkdir(parents=True, exist_ok=True)
+    final_json = out_root / spec["output"]
+    fresh_json = attempt / final_json.name
     reader_args = list(spec["reader"][1:])
-    i = reader_args.index("--out")
-    reader_args[i + 1] = str(out_root / reader_args[i + 1])
+    reader_args[reader_args.index("--out") + 1] = str(fresh_json)
     argv = [
         python,
         str(PROJECT_ROOT / spec["reader"][0]),
@@ -172,60 +241,117 @@ def run_stage(
     ]
     if stage != "t1-tv":
         argv.append("--final")
+    digest_before = generation_digest(stage, runs_root)
     res = subprocess.run(argv, cwd=PROJECT_ROOT, capture_output=True, text=True)
-    out = out_root / spec["output"]
-    status = _status(stage, out, res.returncode)
-    figures: list[str] = []
-    if status == "FINAL" and spec["figure"]:
-        kind, src = spec["figure"]
-        if kind == "t1":
-            import make_paper_figures as mpf
-
-            if out_root == PROJECT_ROOT:
-                mpf.fig8_budget_curve(PROJECT_ROOT / "figures")
-                figures = [
-                    "figures/fig8_budget_curve.pdf",
-                    "figures/fig8_budget_curve.png",
-                ]
-        else:
-            import make_meeting3_figures as m3f
-
-            fn = {
-                "capture": m3f.fig_capture,
-                "dacc": m3f.fig_dacc,
-                "exact_lag": m3f.fig_exact_lag,
-            }[kind]
-            made = fn(out_root / src, out_root / "figures")
-            figures = [str(p.relative_to(out_root)) for p in made]
-    outputs = [spec["output"], *figures]
-    tsv = out.with_suffix(".conditions.tsv")
-    if tsv.exists():
-        outputs.append(str(tsv.relative_to(out_root)))
-    marker = {
+    try:
+        report = json.loads(fresh_json.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        report = None
+    status, gate = fresh_status(stage, report, res.returncode)
+    record: dict = {
         "stage": stage,
         "status": status,
-        "terminal": status in ("FINAL", "INVALID"),
-        "passed": status == "FINAL",
+        "gate_outcome": gate,
+        "attempt": str(attempt.relative_to(out_root)),
         "reader_exit": res.returncode,
         "reader_tail": res.stdout.strip().splitlines()[-6:],
         "reader_stderr_tail": res.stderr.strip().splitlines()[-6:],
-        "outputs": {p: _sha(out_root / p) for p in outputs},
-        "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "analysis_id": analysis_id(stage),
+        "generation_digest": digest_before,
+        "finalized": False,
+        "terminal": False,
+        "passed": False,
+        "timestamp": ts,
     }
-    write_json_atomic(runs_root / "postprocess" / f"{stage}.json", marker)
-    # The same record inside the results tree, where the manifest derives cell
-    # statuses from evidence rather than from the ledger's declarations.
-    write_json_atomic(out_root / OUT / "stages" / f"{stage}.json", marker)
-    manifest_rc = None  # refreshed after the stage record exists
-    if out_root == PROJECT_ROOT:
-        manifest_rc = subprocess.run(
-            [python, "scripts/meeting3_manifest.py"],
-            cwd=PROJECT_ROOT,
-            capture_output=True,
-            text=True,
-        ).returncode
-    marker["manifest_exit"] = manifest_rc
-    return marker
+    outputs: list[str] = []
+    if status in ("FINAL", "INVALID"):
+        figures: list[Path] = []
+        if status == "FINAL" and spec["figure"]:
+            kind, _src = spec["figure"]
+            if kind == "t1":
+                import make_paper_figures as mpf
+
+                mpf.fig8_budget_curve(attempt, t1_path=fresh_json)
+                figures = [
+                    attempt / "fig8_budget_curve.pdf",
+                    attempt / "fig8_budget_curve.png",
+                ]
+            else:
+                import make_meeting3_figures as m3f
+
+                fn = {
+                    "capture": m3f.fig_capture,
+                    "dacc": m3f.fig_dacc,
+                    "exact_lag": m3f.fig_exact_lag,
+                }[kind]
+                figures = fn(fresh_json, attempt)
+                if not figures:
+                    record["status"] = status = "FIGURE-FAILED"
+        if status in ("FINAL", "INVALID"):
+            hist = out_root / OUT / "history" / f"{stage}-{ts}"
+            if fresh_json != final_json:
+                _publish(fresh_json, final_json, hist)
+            outputs.append(str(final_json.relative_to(out_root)))
+            tsv = attempt / final_json.with_suffix(".conditions.tsv").name
+            if tsv.exists():
+                dst = final_json.with_suffix(".conditions.tsv")
+                _publish(tsv, dst, hist)
+                outputs.append(str(dst.relative_to(out_root)))
+            for f in figures:
+                dst = out_root / "figures" / f.name
+                _publish(f, dst, hist)
+                outputs.append(str(dst.relative_to(out_root)))
+    record["outputs"] = {p: _sha(out_root / p) for p in outputs}
+    # Phase 1: the stage record exists (not finalized) so the manifest can
+    # derive the cell status; phase 2 only after the manifest refresh succeeds.
+    stage_record = out_root / OUT / "stages" / f"{stage}.json"
+    write_json_atomic(stage_record, record)
+    if status in ("FINAL", "INVALID"):
+        margv = manifest_argv or (
+            [python, "scripts/meeting3_manifest.py"]
+            if out_root == PROJECT_ROOT
+            else None
+        )
+        mrc = (
+            subprocess.run(
+                margv, cwd=PROJECT_ROOT, capture_output=True, text=True
+            ).returncode
+            if margv
+            else 0
+        )
+        record["manifest_exit"] = mrc
+        if mrc == 0 and all(record["outputs"].values()):
+            record.update(finalized=True, terminal=True, passed=status == "FINAL")
+        else:
+            record["status"] = "MANIFEST-FAILED" if mrc else "OUTPUT-MISSING"
+    write_json_atomic(stage_record, record)
+    write_json_atomic(Path(runs_root) / "postprocess" / f"{stage}.json", record)
+    return record
+
+
+def stage_done(stage: str, runs_root: Path, *, out_root: Path = PROJECT_ROOT) -> bool:
+    """Scheduler acceptance: terminal marker AND it still describes reality.
+
+    The outputs it lists must exist with the recorded hashes, the analysis code
+    and configs must be unchanged, and the stage's input rows must be unchanged
+    since the read. Otherwise the stage is re-run (idempotently).
+    """
+    try:
+        m = json.loads(
+            (Path(runs_root) / "postprocess" / f"{stage}.json").read_text(
+                encoding="utf-8"
+            )
+        )
+    except (OSError, ValueError):
+        return False
+    if m.get("terminal") is not True or m.get("finalized") is not True:
+        return False
+    if m.get("analysis_id") != analysis_id(stage):
+        return False
+    if m.get("generation_digest") != generation_digest(stage, runs_root):
+        return False
+    outs = m.get("outputs") or {}
+    return bool(outs) and all(_sha(out_root / p) == h for p, h in outs.items())
 
 
 def main() -> int:
@@ -242,7 +368,14 @@ def main() -> int:
         return 0
     runs_root = Path(os.environ["KVCACHE_BASE_RUNS_ROOT"])
     m = run_stage(a.stage, runs_root)
-    print(json.dumps({k: m[k] for k in ("stage", "status", "terminal", "reader_exit")}))
+    print(
+        json.dumps(
+            {
+                k: m.get(k)
+                for k in ("stage", "status", "terminal", "reader_exit", "gate_outcome")
+            }
+        )
+    )
     return 0 if m["terminal"] else 3
 
 

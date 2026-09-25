@@ -17,6 +17,34 @@ import report_dacc as rd  # noqa: E402
 PIDS, SEEDS, PRESSES, BUDGETS = ["a", "b"], [1, 2], ["random"], [256]
 
 
+def _ident(t0):
+    return {
+        "schema": "provenance-v1",
+        "kind": "dacc",
+        "implementation_id": "impl",
+        "config_name": f"dacc_t{t0}",
+        "config_sha256": f"cfg{t0}",
+        "model_revision": "rev",
+        "reference_run": None,
+        "basis_npz_sha256": None,
+        "input_manifest_sha256": "man",
+    }
+
+
+IDENTS = {0: _ident(0), 512: _ident(512)}
+
+
+@pytest.fixture(autouse=True)
+def _manifest(tmp_path, monkeypatch):
+    m = tmp_path / "manifest.json"
+    m.write_text(
+        json.dumps(
+            {"traces_prompt_plus_trace": {}, "prompts": {p: f"p-{p}" for p in PIDS}}
+        )
+    )
+    monkeypatch.setenv("KVCACHE_INPUT_MANIFEST", str(m))
+
+
 def _row(pid, seed, t0, correct, press="random", budget=256):
     return {
         "pid": pid,
@@ -26,7 +54,7 @@ def _row(pid, seed, t0, correct, press="random", budget=256):
         "correct": correct,
         "truncated": False,
         "n_tokens": 100,
-        "provenance": {"kind": "dacc", "config_sha256": f"cfg{t0}"},
+        "provenance": {**_ident(t0), "inputs_sha256": f"p-{pid}"},
         "onset": {
             "compression_start_step": t0,
             "eviction_onset_step": 65,
@@ -54,6 +82,7 @@ def _read(arms, fc=FC):
         seeds=SEEDS,
         presses=PRESSES,
         budgets=BUDGETS,
+        expected_identities=IDENTS,
         n_resamples=100,
     )
 
@@ -115,6 +144,11 @@ def test_cli_final_is_nonzero_without_the_determinism_control(tmp_path, monkeypa
         )
     )
     monkeypatch.setattr(rd, "_design", lambda _c: (PIDS, SEEDS, PRESSES, BUDGETS))
+    monkeypatch.setattr(
+        rd,
+        "expected_run_identity",
+        lambda k, cfg, rr: (IDENTS[int(cfg.split("_t")[1].split("_")[0])], "ok"),
+    )
     out = tmp_path / "o.json"
     monkeypatch.setattr(
         sys,
@@ -139,3 +173,13 @@ def test_cli_final_is_nonzero_without_the_determinism_control(tmp_path, monkeypa
     d = json.loads(out.read_text())
     assert d["status"] == "PARTIAL" and "determinism" in d["why_not_final"]
     assert (tmp_path / "o.conditions.tsv").exists()
+
+
+def test_determinism_ran_is_not_passed():
+    ok = {"256": {"n_shared": 4, "n_identical": 4}}
+    assert rd.determinism_status(ok, n_expected=4)["status"] == "PASSED"
+    short = {"256": {"n_shared": 3, "n_identical": 3}}
+    assert rd.determinism_status(short, n_expected=4)["status"] == "RAN-INCOMPLETE"
+    bad = {"256": {"n_shared": 4, "n_identical": 3}}
+    assert rd.determinism_status(bad, n_expected=4)["status"] == "FAILED"
+    assert rd.determinism_status({}, n_expected=4)["status"] == "RAN-INCOMPLETE"

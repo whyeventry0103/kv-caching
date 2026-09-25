@@ -28,7 +28,8 @@ from typing import Any
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
-from kvcache.coverage import COMPLETE, check_coverage, expected_keys, design
+from kvcache.coverage import COMPLETE, check_coverage, design, expected_keys
+from kvcache.gates import expected_run_identity, validate_rows
 from kvcache.metrics.profile_shape import phase_amplitude_excess
 
 
@@ -84,13 +85,96 @@ def overall(logit: str, selection: str, coverage_complete: bool) -> str:
     return "INCONCLUSIVE"
 
 
+def _listing(d: dict) -> list[dict[str, Any]]:
+    return [{"key": list(k), "problems": v} for k, v in sorted(d.items(), key=repr)][
+        :50
+    ]
+
+
+def row_problems(r: dict[str, Any]) -> list[str]:
+    """R.15: the evidence must be well-formed BEFORE any numerical classification.
+
+    A non-finite or negative control magnitude would otherwise turn into an
+    infinite tolerance and a vacuous PASS (review of cfa30cd).
+    """
+    import math
+
+    def fin(x: Any, hi: float | None = None) -> bool:
+        return (
+            isinstance(x, (int, float))
+            and math.isfinite(x)
+            and x >= 0
+            and (hi is None or x <= hi)
+        )
+
+    out = []
+    if not fin(r.get("deterministic_control_max_abs_logit")):
+        out.append("deterministic control magnitude not finite and >= 0")
+    forks = r.get("forks")
+    if not isinstance(forks, list):
+        return out + ["forks missing"]
+    if r.get("n_forks") is not None and r.get("n_forks") != len(forks):
+        out.append("n_forks disagrees with the fork records")
+    for i, f in enumerate(forks):
+        if not fin(f.get("max_abs_logit")):
+            out.append(f"fork {i}: max_abs_logit not finite and >= 0")
+        if not fin(f.get("max_tv"), 1.0):
+            out.append(f"fork {i}: max_tv not a finite TV")
+        if f.get("selection_agrees") not in (True, False, None):
+            out.append(f"fork {i}: selection_agrees not True/False/None")
+    prof = r.get("tv_profile")
+    if not isinstance(prof, list) or not all(fin(x, 1.0) for x in prof):
+        out.append("tv_profile missing or not finite TV values")
+    return out
+
+
 def read(
     rows: list[dict[str, Any]],
     *,
     n_resamples: int,
     seed: int,
     expected: set[tuple] | None = None,
+    expected_identities: dict[str, dict[str, Any]] | None = None,
+    check_identity: bool = True,
 ) -> dict:
+    content = {}
+    for r in rows:
+        try:
+            k = (r["pid"], r["seed"], r["press"], r["interval"])
+            probs = row_problems(r)
+        except (KeyError, TypeError, ValueError) as e:
+            k, probs = (repr(r)[:40],), [f"malformed row: {e!r}"]
+        if probs:
+            content[k] = probs
+    prov: dict = {}
+    if check_identity:
+        by_press: dict[str, list] = defaultdict(list)
+        for r in rows:
+            by_press[str(r.get("press"))].append(r)
+        for press, rs in by_press.items():
+            prov.update(
+                validate_rows(
+                    rs,
+                    kind="fork",
+                    expected=(expected_identities or {}).get(press),
+                    key=lambda r: (r["pid"], int(r["seed"]), r["press"], r["interval"]),
+                )
+            )
+    if content or prov:
+        return {
+            "status": "INVALID",
+            "overall": "INVALID-EVIDENCE",
+            "coverage": {"status": "UNCHECKED"},
+            "content_failures": [
+                {"key": list(k), "problems": v}
+                for k, v in sorted(content.items(), key=repr)
+            ][:50],
+            "provenance_failures": [
+                {"key": list(k), "problems": v}
+                for k, v in sorted(prov.items(), key=repr)
+            ][:50],
+            "cells": {},
+        }
     cov = (
         check_coverage(
             rows,
@@ -139,6 +223,11 @@ def read(
         }
     verdicts = {c["overall"] for c in cells.values()}
     return {
+        "status": (
+            "INVALID"
+            if cov["status"] == "INVALID"
+            else ("FINAL" if complete else "PARTIAL")
+        ),
         "coverage": cov,
         "deterministic_control_max_abs_logit": det,
         "tolerance": tol,
@@ -165,13 +254,25 @@ def main() -> int:
         if line.strip()
     ]
     expected = None
+    identities: dict[str, dict[str, Any]] = {}
     if a.design:
         expected = set()
         for d in a.design:
             pids, seeds, presses, intervals = _design(Path(d))
             expected |= expected_keys(pids, seeds, presses, intervals)
+            ident, _why = expected_run_identity("fork", str(d), a.runs_root)
+            for p_ in presses:
+                identities[p_] = ident
     res = {"amendment": "R.2 / R.11 / R.14", "runs": a.run}
-    res.update(read(rows, n_resamples=a.n_resamples, seed=a.seed, expected=expected))
+    res.update(
+        read(
+            rows,
+            n_resamples=a.n_resamples,
+            seed=a.seed,
+            expected=expected,
+            expected_identities=identities,
+        )
+    )
     cols = (
         "pid seed press interval n_forks max_abs_logit max_tv "
         "n_compared n_disagree det_max"
@@ -204,11 +305,14 @@ def main() -> int:
     res["sufficient_statistics_sha256"] = hashlib.sha256(data).hexdigest()
     a.out.parent.mkdir(parents=True, exist_ok=True)
     a.out.write_text(json.dumps(res, indent=2, sort_keys=True) + "\n", "utf-8")
-    print(f"tolerance {res['tolerance']}; overall {res['overall']}")
+    print(
+        f"status {res.get('status')}; tolerance {res.get('tolerance')}; "
+        f"overall {res.get('overall')}"
+    )
     for k, c in res["cells"].items():
         print(k, c["overall"], c["logit_gate"], c["selection_gate"]["status"])
     print(f"wrote {a.out}")
-    if a.final and res["coverage"].get("status") != COMPLETE:
+    if a.final and res["status"] != "FINAL":
         return 3
     return 0
 
