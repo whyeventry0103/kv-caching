@@ -240,17 +240,11 @@ def read_dacc(
                     if r["press"] == press and str(r["budget"]) == str(budget)
                 ]
                 comp = {(r["pid"], int(r["decoding"]["seed"])): r for r in rs}
-                need = {(p, s) for p in pids for s in seeds}
-                if set(comp) != need or len(rs) != len(need) or not need <= set(fc):
-                    cells[key] = {"status": "PARTIAL", "n_rows": len(rs)}
-                    continue
-                fcv = {k: float(fc[k]) for k in need}
-                cv = {k: float(bool(comp[k]["correct"])) for k in need}
-                lost = {k: float(fc[k] and not comp[k]["correct"]) for k in need}
-                gained = {k: float(comp[k]["correct"] and not fc[k]) for k in need}
-                zero = dict.fromkeys(need, 0.0)
-                for k in need:
-                    r = comp[k]
+                # per-condition sufficient statistics for EVERY generated row
+                # with a comparator, complete cell or not (R.16.5)
+                for k, r in sorted(comp.items()):
+                    if k not in fc:
+                        continue
                     table.append(
                         {
                             "onset": t0,
@@ -265,6 +259,15 @@ def read_dacc(
                             "achieved_exposure": r["onset"]["achieved_exposure"],
                         }
                     )
+                need = {(p, s) for p in pids for s in seeds}
+                if set(comp) != need or len(rs) != len(need) or not need <= set(fc):
+                    cells[key] = {"status": "PARTIAL", "n_rows": len(rs)}
+                    continue
+                fcv = {k: float(fc[k]) for k in need}
+                cv = {k: float(bool(comp[k]["correct"])) for k in need}
+                lost = {k: float(fc[k] and not comp[k]["correct"]) for k in need}
+                gained = {k: float(comp[k]["correct"] and not fc[k]) for k in need}
+                zero = dict.fromkeys(need, 0.0)
                 ev = [
                     r["onset"]["eviction_onset_step"]
                     for r in rs
