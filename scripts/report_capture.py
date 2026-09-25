@@ -149,6 +149,36 @@ def metric_values(row: dict[str, Any]) -> dict[str, tuple[float | None, str | No
     }
 
 
+def collateral_counts(
+    rows: list[dict[str, Any]], bad: dict, budget: int
+) -> dict[str, dict[str, int]]:
+    out = {
+        p: {"n_eligible": 0, "n_wanted": 0, "n_collateral": 0, "n_rows": 0}
+        for p in POLICIES
+    }
+    for r in rows:
+        try:
+            k3 = (r["pid"], int(r["seed"]), r["press"])
+            if (
+                k3 in bad
+                or r["press"] not in POLICIES
+                or str(r["budget"]) != str(budget)
+            ):
+                continue
+            cnt = r["counts_by_layer_group"]
+            o = out[r["press"]]
+            o["n_rows"] += 1
+            for src, dst in (
+                ("n_eligible", "n_eligible"),
+                ("n_wanted", "n_wanted"),
+                ("n_collateral", "n_collateral"),
+            ):
+                o[dst] += int(sum(sum(x) for x in cnt[src]))
+        except (KeyError, TypeError, ValueError):
+            continue
+    return out
+
+
 def read_capture(
     rows: list[dict[str, Any]],
     *,
@@ -277,6 +307,9 @@ def read_capture(
             for m in METRICS
         },
         "eligibility_exclusions": exclusions,
+        # R.16: raw totals behind the pooled collateral, per policy, over valid
+        # rows (sum over every layer, KV group and event).
+        "collateral_counts": collateral_counts(rows, bad, budget),
         "sufficient_statistics": table,
         "notes": [
             "verdicts are withheld unless coverage is COMPLETE, identity is "

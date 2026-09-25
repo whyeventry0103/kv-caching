@@ -68,3 +68,12 @@ needs the owner's instruction.
 The guard now measures the combined footprint against a **72 GiB** allocation:
 2.81 GiB headroom, **1.81 GiB usable** after the 1 GiB margin. That covers all
 queued outputs (0.23 GiB declared).
+
+**Authorization record (R.16.4).**
+- The deletion of `tc-vitok-data` rests on the owner's in-session selection
+  "Both folders". The pasted instruction named only the project folder.
+- The 72 GiB allocation was first set under the owner's delegation
+  ("whatever u think is best"), which conflicted with the earlier "Keep the
+  70 GiB limit".
+- It was **explicitly approved** by the owner on 2026-09-25 (~17:30 Dubai):
+  "Approve 72 GiB".

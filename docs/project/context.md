@@ -33,8 +33,9 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
   validation, transactional postprocessing; acceptance table
   docs/results/meeting3_evidence/acceptance_cfa30cd.md. Storage: TC-ViTok
   deleted on the owner's selection (77.61 GiB reclaimed); guard = combined
-  trees at 72 GiB. Smoke/partial collateral is 0.0 for all policies (structural
-  under R.4's definition, flagged). NEXT: window 2026-09-26 01:45 resumes
+  trees at 72 GiB. Smoke/partial collateral is 0.0 for all policies: forced to zero at B=2048
+  (7 heads, tau 0.01), NOT forced at B=256 (positive control) -- empirical
+  there (R.16.3). 72 GiB explicitly approved by the owner (R.16.4). NEXT: window 2026-09-26 01:45 resumes
   capture-b256 (seeds 23/89), then post-capture-b256 reads Tasks 2/3.
 
   **★★★★★ 2026-09-24 23:20 Dubai — every Meeting #3 unit is now measured,

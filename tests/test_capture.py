@@ -277,3 +277,54 @@ def test_a_wrong_position_map_is_caught_by_the_layer0_key_check(monkeypatch):
         replay_condition(
             model, _press(), full, prompt, trace, budget=16, interval=4, tau=0.01
         )
+
+
+# ------------------------------------------------ collateral at real dimensions
+def _logits_from_probs(torch, probs):
+    return torch.log(torch.tensor(probs, dtype=torch.float64).clamp_min(1e-300))
+
+
+def test_collateral_positive_control_at_seven_heads_b256():
+    """Review of f68d3f1: at B=256 collateral is NOT structurally zero.
+
+    One KV group of 7 query heads over 320 candidates (a real B=256 event:
+    budget + interval). Head 0 gives 0.02 to evicted position 319 and 0.98 to
+    position 0; heads 1-6 spread their mass over positions 0..255. Position 319
+    is wanted (0.02 > tau) but its group mean ranks below all 256 others.
+    Production tensor path and the pure-Python reference must both count it.
+    """
+    torch = pytest.importorskip("torch")
+    from kvcache.capture import collateral_stats
+    from kvcache.metrics.attn_channels import collateral_event
+
+    n = 320
+    h0 = [0.0] * n
+    h0[0], h0[319] = 0.98, 0.02
+    other = [1 / 256 if j < 256 else 0.0 for j in range(n)]
+    probs = [h0] + [other] * 6
+    cands = torch.arange(n).unsqueeze(0)
+    ev = torch.tensor([[319]])
+    got = collateral_stats(
+        _logits_from_probs(torch, probs), cands, ev, budget=256, tau=0.01
+    )
+    assert got["n_collateral"] == [1] and got["n_wanted"] == [1]
+    ref = collateral_event(probs, list(range(n)), [319], budget=256, tau=0.01)
+    assert ref["n_collateral"] == 1 and ref["collateral"] == 1.0
+
+
+def test_collateral_is_structurally_zero_at_b2048_with_seven_heads():
+    """A wanted position has group mean > tau/7 = 1/700; group means sum to 1,
+    so fewer than 700 positions can exceed it and all lie inside the top 2048.
+    Checked on adversarial random attention at the real B=2048 event size."""
+    torch = pytest.importorskip("torch")
+    from kvcache.capture import collateral_stats
+
+    g = torch.Generator().manual_seed(0)
+    n = 2112
+    for sharp in (0.5, 2.0, 8.0):
+        logits = torch.randn(7, n, generator=g, dtype=torch.float64) * sharp
+        ev = torch.randperm(n, generator=g)[:64].unsqueeze(0)
+        got = collateral_stats(
+            logits, torch.arange(n).unsqueeze(0), ev, budget=2048, tau=0.01
+        )
+        assert got["n_collateral"] == [0]

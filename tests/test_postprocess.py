@@ -17,7 +17,6 @@ sys.path.insert(0, str(ROOT / "tests"))
 import meeting3_fixtures as fx  # noqa: E402
 import postprocess_meeting3 as pp  # noqa: E402
 
-OK_MANIFEST = [sys.executable, "-c", "pass"]
 FIGURES = {
     "capture-b256": ["figures/meeting3_capture_b256.png"],
     "capture-b2048": ["figures/meeting3_capture_b2048.png"],
@@ -36,13 +35,72 @@ BUILD = {
 }
 
 
+OUTPUTS = {
+    "capture-b256": [
+        "results/diag/meeting3/capture_b256.json",
+        "figures/meeting3_capture_b256.pdf",
+    ],
+    "capture-b2048": [
+        "results/diag/meeting3/capture_b2048.json",
+        "figures/meeting3_capture_b2048.pdf",
+    ],
+    "dacc": ["results/diag/meeting3/dacc.json", "figures/meeting3_dacc.pdf"],
+    "exact-lag": [
+        "results/diag/meeting3/exact_lag.json",
+        "figures/meeting3_exact_lag.pdf",
+    ],
+    "fork-control": ["results/diag/meeting3/fork_control.json"],
+    "t1-tv": [
+        "results/diag/meeting3/t1_budget_curve.json",
+        "figures/fig8_budget_curve.pdf",
+    ],
+}
+
+
+def _real_manifest(stage, tmp_path):
+    """The REAL manifest builder over a minimal isolated ledger (R.16)."""
+    out = tmp_path / "out"
+    cells = tmp_path / "cells.yaml"
+    cells.write_text(
+        json.dumps(
+            {
+                "model": "m",
+                "reference_bank": "b",
+                "runtime_pin": {},
+                "cells": [
+                    {
+                        "id": f"cell-{stage}",
+                        "task": 1,
+                        "protocol": "R.16",
+                        "stage": stage,
+                        "status": "QUEUED",
+                        "outputs": OUTPUTS[stage],
+                    }
+                ],
+            }
+        )
+    )
+    return [
+        sys.executable,
+        str(ROOT / "scripts" / "meeting3_manifest.py"),
+        "--root",
+        str(out),
+        "--cells",
+        str(cells),
+        "--out",
+        str(out / "manifest.json"),
+    ]
+
+
+def _manifest_status(tmp_path, stage):
+    d = json.loads((tmp_path / "out" / "manifest.json").read_text())
+    return {c["id"]: c["status"] for c in d["cells"]}[f"cell-{stage}"]
+
+
 def _run(stage, tmp_path, **kw):
     runs, out = tmp_path / "runs", tmp_path / "out"
-    return (
-        pp.run_stage(stage, runs, out_root=out, **{"manifest_argv": OK_MANIFEST, **kw}),
-        runs,
-        out,
-    )
+    kw.setdefault("manifest_argv", _real_manifest(stage, tmp_path))
+    return pp.run_stage(stage, runs, out_root=out, **kw), runs, out
 
 
 @pytest.mark.parametrize("stage", sorted(pp.STAGES))
@@ -60,6 +118,8 @@ def test_every_stage_finalizes_through_its_real_reader(stage, tmp_path):
     )
     assert rec["finalized"] is True and rec["manifest_exit"] == 0
     assert pp.stage_done(stage, runs, out_root=out)
+    # the real manifest derived the ledger status from this stage's evidence
+    assert _manifest_status(tmp_path, stage) == "COMPLETE"
     if stage == "fork-control":
         assert m["gate_outcome"] == "PASS"
     if stage == "dacc":
@@ -125,6 +185,7 @@ def test_invalid_evidence_is_terminal_invalid_without_a_verdict(stage, build, tm
     assert m["status"] == "INVALID" and m["terminal"] and not m["passed"]
     for f in FIGURES[stage]:
         assert not (out / f).exists()
+    assert _manifest_status(tmp_path, stage) == "INVALID"
 
 
 def test_a_missing_condition_stays_partial_and_is_retried(tmp_path):
@@ -134,3 +195,80 @@ def test_a_missing_condition_stays_partial_and_is_retried(tmp_path):
     m, runs, out = _run("capture-b256", tmp_path)
     assert m["status"] == "PARTIAL" and not m["terminal"]
     assert not pp.stage_done("capture-b256", runs, out_root=out)
+
+
+# ---------------------------------------------------------------- R.16 reuse
+def _mutate_jsonl(path, fn):
+    rows = [json.loads(line) for line in path.read_text().splitlines() if line]
+    fn(rows)
+    path.write_text("".join(json.dumps(r) + "\n" for r in rows))
+
+
+def test_a_changed_full_cache_comparator_invalidates_dacc(tmp_path):
+    """Review of f68d3f1: the FC bank was outside the digest; FINAL stayed accepted."""
+    fx.dacc(tmp_path / "runs")
+    m, runs, out = _run("dacc", tmp_path)
+    assert pp.stage_done("dacc", runs, out_root=out)
+    _mutate_jsonl(
+        runs / "math500-fc-powered-merged/math500/m/fc.jsonl",
+        lambda rows: rows[0].update(correct=False),
+    )
+    assert not pp.stage_done("dacc", runs, out_root=out)
+
+
+def test_a_changed_legacy_determinism_token_invalidates_dacc(tmp_path):
+    fx.dacc(tmp_path / "runs")
+    m, runs, out = _run("dacc", tmp_path)
+    _mutate_jsonl(
+        runs / "grid-diss256-tok/token_ids/m/t.jsonl",
+        lambda rows: rows[0].update(trace_token_ids=[9, 9]),
+    )
+    assert not pp.stage_done("dacc", runs, out_root=out)
+
+
+def test_a_changed_historical_tv_input_invalidates_t1(tmp_path):
+    fx.t1_tv(tmp_path / "runs")
+    m, runs, out = _run("t1-tv", tmp_path)
+    assert pp.stage_done("t1-tv", runs, out_root=out)
+    _mutate_jsonl(
+        runs / "grid-diss512/math500/m/rows.jsonl",
+        lambda rows: rows[0].update(correct=not rows[0]["correct"]),
+    )
+    assert not pp.stage_done("t1-tv", runs, out_root=out)
+
+
+def test_a_changed_imported_estimator_changes_the_analysis_identity(tmp_path):
+    import shutil
+
+    for stage, module in (
+        ("dacc", "src/kvcache/stats.py"),
+        ("exact-lag", "src/kvcache/metrics/restoration.py"),
+    ):
+        root = tmp_path / stage
+        for rel in pp.analysis_files(stage):
+            (root / rel).parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy(ROOT / rel, root / rel)
+        before = pp.analysis_id(stage, root)
+        assert module in pp.analysis_files(stage, root)
+        with (root / module).open("a") as fh:
+            fh.write("\n# estimator changed\n")
+        assert pp.analysis_id(stage, root) != before, stage
+
+
+def test_every_kvcache_import_of_every_reader_is_fingerprinted():
+    import ast
+
+    for stage in pp.STAGES:
+        files = set(pp.analysis_files(stage))
+        for rel in [f for f in files if f.endswith(".py")]:
+            tree = ast.parse((ROOT / rel).read_text())
+            for node in ast.walk(tree):
+                if isinstance(node, ast.ImportFrom) and (node.module or "").startswith(
+                    "kvcache."
+                ):
+                    mod = "src/" + node.module.replace(".", "/")
+                    assert f"{mod}.py" in files or f"{mod}/__init__.py" in files, (
+                        stage,
+                        rel,
+                        node.module,
+                    )

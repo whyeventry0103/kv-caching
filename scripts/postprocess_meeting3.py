@@ -128,23 +128,49 @@ STAGES: dict[str, dict] = {
 }
 
 
-# Runs whose rows each stage reads (the generation digest) and the analysis
-# code/config files whose bytes define the analysis identity.
-STAGE_RUNS: dict[str, tuple[str, ...]] = {
-    "capture-b256": ("capture-b256", "q6-basis-fit"),
-    "capture-b2048": ("capture-b2048", "q6-basis-fit"),
-    "dacc": ("dacc-t0", "dacc-t512", "dacc-t2048"),
-    "exact-lag": ("exact-lag-r5",),
-    "fork-control": ("fork-control-random", "fork-control-slm"),
-    "t1-tv": ("t1-tv512", "t1-tv1024"),
+# R.16: every input a stage's reader consumes. (run, subtree): None = the
+# whole run directory. Repo inputs are committed files the reader reads as
+# data. Reuse of a finished stage is valid only while ALL of these, and the
+# analysis code (the reader plus every kvcache module it imports, transitively),
+# are unchanged.
+STAGE_DATA: dict[str, tuple[tuple[str, str | None], ...]] = {
+    "capture-b256": (("capture-b256", None), ("q6-basis-fit", None)),
+    "capture-b2048": (("capture-b2048", None), ("q6-basis-fit", None)),
+    "dacc": (
+        ("dacc-t0", None),
+        ("dacc-t512", None),
+        ("dacc-t2048", None),
+        ("math500-fc-powered-merged", "math500"),  # full-cache comparators
+        ("grid-diss256-tok", "token_ids"),  # R.8.3 determinism control
+        ("grid-diss2048-tok", "token_ids"),
+    ),
+    "exact-lag": (("exact-lag-r5", None),),
+    "fork-control": (("fork-control-random", None), ("fork-control-slm", None)),
+    "t1-tv": (
+        ("t1-tv512", None),
+        ("t1-tv1024", None),
+        ("math500-fc-powered-merged", "math500"),
+        ("grid-diss256-tok", "math500"),
+        ("grid-diss512", "math500"),
+        ("grid-diss1024", "math500"),
+        ("grid-diss2048-tok", "math500"),
+    ),
 }
+STAGE_REPO_INPUTS: dict[str, tuple[str, ...]] = {
+    "t1-tv": (
+        "results/diag/amendment-k/m4-powered-diss256-summary.json",
+        "results/diag/amendment-k/m4-512-summary.json",
+        "results/diag/amendment-k/m4-1024-summary.json",
+        "results/diag/amendment-k/m4-2048-summary.json",
+        "results/diag/meeting3/prompt_lengths_budget_curve.json",
+        "results/diag/amendment-p/auc_resid_tv.json",
+    ),
+}
+STAGE_RUNS = {k: tuple(sorted({r for r, _ in v})) for k, v in STAGE_DATA.items()}
 ANALYSIS_COMMON = (
     "scripts/postprocess_meeting3.py",
     "scripts/make_meeting3_figures.py",
     "scripts/meeting3_manifest.py",
-    "src/kvcache/coverage.py",
-    "src/kvcache/gates.py",
-    "src/kvcache/provenance.py",
     "configs/meeting3/q2_subset_pids.json",
     "configs/meeting3/input_manifest.json",
 )
@@ -154,34 +180,73 @@ def _sha(path: Path) -> str | None:
     return hashlib.sha256(path.read_bytes()).hexdigest() if path.exists() else None
 
 
-def analysis_id(stage: str) -> str:
-    """sha256 over the reader, the shared analysis code and the stage's configs."""
+def kvcache_closure(files: set[str], root: Path = PROJECT_ROOT) -> set[str]:
+    """``files`` plus every src/kvcache module they import, transitively."""
+    import ast
+
+    out, todo = set(), list(files)
+    while todo:
+        rel = todo.pop()
+        if rel in out:
+            continue
+        out.add(rel)
+        path = root / rel
+        if not rel.endswith(".py") or not path.exists():
+            continue
+        for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):
+            names = []
+            if isinstance(node, ast.ImportFrom) and node.module:
+                names = [node.module] + [f"{node.module}.{a.name}" for a in node.names]
+            elif isinstance(node, ast.Import):
+                names = [a.name for a in node.names]
+            for n in names:
+                if n != "kvcache" and not n.startswith("kvcache."):
+                    continue
+                parts = n.split(".")
+                for cand in (
+                    "src/" + "/".join(parts) + ".py",
+                    "src/" + "/".join(parts) + "/__init__.py",
+                ):
+                    if (root / cand).exists() and cand not in out:
+                        todo.append(cand)
+    return out
+
+
+def analysis_files(stage: str, root: Path = PROJECT_ROOT) -> list[str]:
     spec = STAGES[stage]
     files = set(ANALYSIS_COMMON) | {spec["reader"][0]}
     files |= {a for a in spec["reader"] if a.startswith("configs/")}
     if stage == "t1-tv":
         files |= {"scripts/make_paper_figures.py"}
+    return sorted(kvcache_closure(files, root))
+
+
+def analysis_id(stage: str, root: Path = PROJECT_ROOT) -> str:
+    """sha256 over the reader, its transitive kvcache imports, shared analysis
+    code and the stage's configs."""
     h = hashlib.sha256()
-    for rel in sorted(files):
+    for rel in analysis_files(stage, root):
         h.update(rel.encode() + b"\0")
-        h.update(
-            (PROJECT_ROOT / rel).read_bytes() if (PROJECT_ROOT / rel).exists() else b""
-        )
+        h.update((root / rel).read_bytes() if (root / rel).exists() else b"")
     return h.hexdigest()
 
 
-def generation_digest(stage: str, runs_root: Path) -> str:
-    """sha256 over every row/profile/basis file the stage's reader consumes."""
+def generation_digest(stage: str, runs_root: Path, root: Path = PROJECT_ROOT) -> str:
+    """sha256 over every data input the stage's reader consumes (R.16)."""
     h = hashlib.sha256()
-    for run in STAGE_RUNS[stage]:
-        base = Path(runs_root) / run
+    for run, sub in STAGE_DATA[stage]:
+        base = Path(runs_root) / run / (sub or "")
         if not base.exists():
-            h.update(f"{run}:absent".encode())
+            h.update(f"{run}/{sub}:absent".encode())
             continue
         for f in sorted(base.rglob("*")):
             if f.is_file() and f.suffix in (".jsonl", ".json", ".npz"):
                 h.update(str(f.relative_to(runs_root)).encode() + b"\0")
                 h.update(hashlib.sha256(f.read_bytes()).digest())
+    for rel in STAGE_REPO_INPUTS.get(stage, ()):
+        h.update(f"repo:{rel}".encode() + b"\0")
+        p = root / rel
+        h.update(hashlib.sha256(p.read_bytes()).digest() if p.exists() else b"absent")
     return h.hexdigest()
 
 

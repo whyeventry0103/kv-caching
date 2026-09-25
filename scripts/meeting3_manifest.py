@@ -23,6 +23,9 @@ import sys
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
+# Where results, figures and stage records live: the project tree in
+# production; --root points it at an isolated tree (acceptance tests).
+OUT_ROOT = PROJECT_ROOT
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
 import yaml  # noqa: E402
@@ -61,7 +64,7 @@ def _evidence_status(cell: dict, outputs: dict) -> tuple[str | None, str]:
     stage = cell.get("stage")
     if not stage:
         return None, "declared (no stage)"
-    rec = PROJECT_ROOT / "results/diag/meeting3/stages" / f"{stage}.json"
+    rec = OUT_ROOT / "results/diag/meeting3/stages" / f"{stage}.json"
     if not rec.exists():
         return None, f"no record for stage {stage} yet"
     d = json.loads(rec.read_text(encoding="utf-8"))
@@ -103,7 +106,7 @@ def build(cells_path: Path) -> tuple[dict, list[str]]:
                 configs[c] = None
         outputs = {}
         for o in cell.get("outputs") or []:
-            p = PROJECT_ROOT / o
+            p = OUT_ROOT / o
             outputs[o] = _sha256(p) if p.exists() else None
         if status in NEEDS_OUTPUTS:
             missing = [o for o, h in outputs.items() if h is None]
@@ -157,7 +160,11 @@ def main() -> int:
         default=PROJECT_ROOT / "results/diag/meeting3/meeting3_manifest.json",
     )
     ap.add_argument("--check", action="store_true")
+    ap.add_argument("--root", type=Path, default=None)
     a = ap.parse_args()
+    if a.root is not None:
+        global OUT_ROOT
+        OUT_ROOT = a.root
     manifest, problems = build(a.cells)
     for p in problems:
         print(f"PROBLEM: {p}")

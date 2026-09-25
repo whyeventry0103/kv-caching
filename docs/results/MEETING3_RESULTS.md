@@ -24,18 +24,26 @@ parity, queue dry-run, remote-only data list):
   - No cell is complete yet, so there are no Task 2/3 answers yet.
   - The next window (2026-09-26 01:45) resumes capture-b256 seeds 23/89.
     The post-capture-b256 stage then reads it automatically.
-- **Observed on the smoke trace, reported now so it is not a surprise later.**
-  Pooled GQA collateral was 0.0 for all four policies, and it is also 0.0 on
-  all 255 partial capture rows. Under the registered definition (R.4), a
-  position is collateral only when the group-MEAN attention ranks it in the
-  bottom (candidates − budget), ≈64 of ~320. A position that some head gives
-  more than τ = 0.01 has a group mean of at least 0.0014, far above that tail.
-  So collateral is structurally rare at budget 256. If the full cell confirms
-  this, the registered R-KV − H2O contrast reads INCONCLUSIVE (0, CI 0). That
-  is a property of the definition, not an instrument failure.
-- **Storage.** Owner-delegated decision, R.15.6: TC-ViTok deleted, 77.61 GiB
-  reclaimed. The guard now measures `~/kvcache-storage` + `~/kv-caching` with
-  hardlinks counted once, against 72 GiB.
+- **Collateral (corrected, R.16.3).** Pooled GQA collateral is 0.0 for all
+  four policies on the smoke trace and on the partial capture-b256 rows.
+  Per-policy eligible/wanted/collateral totals are in
+  `results/diag/meeting3/partial/`.
+  - **Budget 2048: forced to zero** with 7 heads and τ = 0.01 (a wanted
+    position's group mean exceeds 1/700; fewer than 700 positions can, all
+    inside the top 2048). The collateral contrast there is structurally
+    non-identifying.
+  - **Budget 256: not forced.** A production positive control gives
+    collateral 1.0, so the zeros there are an empirical property of the
+    measured attention. My earlier claim that they follow from the definition
+    was wrong and is withdrawn.
+  - If the full cell stays at zero, the registered R-KV − H2O contrast at 256
+    reads INCONCLUSIVE. That says nothing about GQA damage in general; M, Δ and
+    ω are unaffected.
+- **Storage.** TC-ViTok (both folders, selected in-session) deleted, 77.61 GiB
+  reclaimed. The guard measures `~/kvcache-storage` + `~/kv-caching` with
+  hardlinks counted once, against **72 GiB, explicitly approved by the owner
+  2026-09-25 (R.16.4)**. R.15.6's "owner-delegated" wording is corrected
+  there.
 - **Pipeline.** Hardened after the review of cfa30cd (R.15). Acceptance table:
   `meeting3_evidence/acceptance_cfa30cd.md`.
 

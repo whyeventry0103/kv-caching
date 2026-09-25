@@ -42,10 +42,11 @@ REMOTE_STORAGE = Path("/home/sk10741/kvcache-storage")
 
 BASE_ENV = {
     "KVCACHE_REMOTE": "1",
-    # R.15 (2026-09-25): 72 GiB, measured over storage + source trees combined.
-    # The owner delegated the decision; 77.61 GiB of their other project
-    # (TC-ViTok) was deleted on their instruction, so their total personal
-    # footprint fell by ~75.6 GiB while this allocation rose by 2 GiB.
+    # R.15/R.16.4 (2026-09-25): 72 GiB, measured over storage + source trees
+    # combined (hardlinks once), EXPLICITLY approved by the owner ("Approve
+    # 72 GiB"); 77.61 GiB of their other project (TC-ViTok, both folders
+    # selected by the owner) was deleted, so their total personal footprint fell
+    # by ~75.6 GiB while this allocation rose by 2 GiB.
     "KVCACHE_PERSONAL_FREE_GB": "72",
     "REMOTE_DATA_ROOT": str(REMOTE_STORAGE / "data"),
     "REMOTE_CACHE_ROOT": str(REMOTE_STORAGE / "cache"),

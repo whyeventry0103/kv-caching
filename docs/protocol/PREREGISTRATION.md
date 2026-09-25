@@ -3459,3 +3459,64 @@ withheld.
    77.61 GiB. The guard now uses the conservative combined footprint of
    `~/kvcache-storage` + `~/kv-caching`, hardlinks counted once, against a
    72 GiB allocation (+2 GiB, backed by the freed space; 1 GiB margin kept).
+
+### R.16 Bounded closeout after the review of f68d3f1 (2026-09-25, before any Meeting #3 cell is read)
+
+No estimand, threshold or classification changes. Valid generated rows are
+kept.
+
+1. **Stage reuse fingerprints.** The generation digest omitted inputs the
+   readers consume. Reproduced: after a FINAL D_acc stage, changing one
+   full-cache comparator left the digest unchanged and the stage accepted.
+   Fixed:
+   - Each stage enumerates every data input
+     (`postprocess_meeting3.STAGE_DATA` / `STAGE_REPO_INPUTS`): D_acc adds the
+     full-cache bank rows and the two legacy token banks; T1-TV adds the
+     full-cache bank, the four historical grids and the six committed numeric
+     artifacts it reads.
+   - The analysis identity covers the reader plus the transitive closure of
+     every `kvcache` module it imports, by static import parsing (e.g.
+     `stats.py`, `metrics/paired.py`, `metrics/restoration.py`).
+
+   Regressions mutate a full-cache comparator, a legacy determinism token, a
+   historical TV grid row and an imported estimator. A completeness test
+   asserts that every `kvcache` import of every stage is fingerprinted.
+2. **Acceptance through the real manifest builder.** It runs over an isolated
+   ledger (`meeting3_manifest.py --root`). All six stages derive COMPLETE;
+   invalid evidence derives INVALID.
+3. **Collateral interpretation (R.4 unchanged).**
+   - **Budget 2048: forced to zero.** With 7 heads and τ = 0.01, a position
+     wanted by some head has group mean > 1/700. Group means sum to ≤ 1, so
+     fewer than 700 candidates exceed that, and all lie inside the top 2048.
+     The registered collateral contrast at budget 2048 is therefore
+     **structurally non-identifying** and will be reported as such, whatever
+     the data. M, M_event, Δ and ω at 2048 are unaffected.
+   - **Budget 256: not forced.** A 7-head, 320-candidate positive control
+     yields collateral 1.0 in both the production tensor code and the
+     reference.
+   - **The observed zeros at 256 are an empirical outcome**, not a
+     consequence of the definition. The earlier prose claim that a wanted
+     position's group mean is "far above that tail" is withdrawn: it is not a
+     general mathematical fact.
+   - capture-v1 rows record eligible, wanted and collateral counts, published
+     per policy; they record no per-position group-mean ranks. A rank
+     diagnostic would need new generation and is not done.
+4. **Storage authorization record (corrects R.15.6).** The exact statements:
+   - 2026-09-25 ~00:40, pasted instruction: permission to delete "the entire
+     old project folder named approximately `tc-vitok`", and "Keep the 70 GiB
+     limit and 1 GiB margin".
+   - ~00:45, in-session question: storage resolution answered "whatever u
+     think is best here honestly"; folder selection answered "Both folders".
+     That option named `/home/sk10741/TC-ViTok` and
+     `/home/sk10741/tc-vitok-data` with their sizes.
+
+   So the deletion of `tc-vitok-data` rests on that in-session selection, not
+   on the pasted instruction, which named only the project folder. The
+   72 GiB setting in R.15.6 rested on the delegation, which conflicted with
+   the pasted "Keep the 70 GiB limit". Calling it "owner-delegated" understated
+   that conflict. **Explicit approval was then obtained, 2026-09-25 ~17:30
+   Dubai, in-session: "Approve 72 GiB".** The combined scope with hardlinks
+   counted once and the 1 GiB margin are unchanged. No further deletion.
+5. **Partial outputs are committed** so progress claims can be recomputed:
+   `results/diag/meeting3/partial/`, with reader JSON, per-condition TSVs, a
+   timestamp and the code identity. Their verdicts stay withheld (PARTIAL).
