@@ -1,6 +1,6 @@
 # Meeting #3 — results and execution status
 
-Last updated 2026-09-26 (Asia/Dubai 01:40). Machine-readable companions:
+Last updated 2026-09-26 (Asia/Dubai 01:25). Machine-readable companions:
 `configs/meeting3/cells.yaml` (ledger) → `results/diag/meeting3/meeting3_manifest.json`
 (`python scripts/meeting3_manifest.py --check`). Protocol: PREREGISTRATION
 Amendment R (R.0–R.12). Every number below was recomputed from the named
@@ -8,7 +8,7 @@ artifact when this file was written. Review evidence (gate outputs, remote test 
 parity, queue dry-run, remote-only data list):
 [`meeting3_evidence/`](meeting3_evidence/README.md).
 
-**Execution status, 2026-09-26 01:40 Dubai (GPU night 2 in progress; early start at the owner's request, R.16.6).**
+**Execution status, 2026-09-26 01:25 Dubai (GPU night 2 in progress; early start at the owner's request, R.16.6).**
 
 - **Tasks 2/3 primary cell capture-b256: FINAL** (400/400, controls VALID,
   0 provenance failures). Q.3 collateral R-KV − H2O-style = +0.000

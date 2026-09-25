@@ -1,14 +1,14 @@
 {
-  "analysis_id": "1813cf1dc53114a99a7ae6ba5bab42bd597ef9d4d4877e40bf549f4193c29e29",
-  "attempt": "results/diag/meeting3/attempts/capture-b256-20260925T204521Z-3037273",
+  "analysis_id": "1325fceb4317bd350e30eefd95a2a37990db3a4feea3c8ffcc2ecf8c1758dc85",
+  "attempt": "results/diag/meeting3/attempts/capture-b256-20260925T212531Z-3048535",
   "finalized": true,
   "gate_outcome": null,
   "generation_digest": "82fdfc729f5226d89913532f6922305d826145e3efeae5ae3ca0e9446e66eb19",
   "manifest_exit": 0,
   "outputs": {
     "results/diag/meeting3/capture_b256.conditions.tsv": "3ccd9f3971fa0dc1551017af04457bb1d9dbcc423c33b322c576b6386a1418c5",
-    "results/diag/meeting3/capture_b256.json": "dc4f364780fa16bfce4e0eb12e5cf608a495c13ffb99f051bf62a300f09708e8",
-    "results/diag/meeting3/figures/meeting3_capture_b256.pdf": "484637f093fff11f3c6d7cd6d443f99dc3b6c8cdba44179e61bcb480c3236bbb",
+    "results/diag/meeting3/capture_b256.json": "6b5fc3a28da406d9805125058790a0277c58975b0efcd6240b022da8bbfbe5f6",
+    "results/diag/meeting3/figures/meeting3_capture_b256.pdf": "5e9c26ce954d402b5e189b47a656d2ea9d15218be55de6e67ae08b0ac642b438",
     "results/diag/meeting3/figures/meeting3_capture_b256.png": "73d39eb34cd122114a81ed4a253eda19e7da1132cd987c007254b46efd44f282"
   },
   "passed": true,
@@ -18,10 +18,10 @@
     "status FINAL; coverage COMPLETE (400/400, dup 0, unexpected 0); controls VALID; identity True",
     "collateral rkv - h2o: mean=0.0 ci=[0.0, 0.0] verdict=INCONCLUSIVE",
     "omega random - streamingllm: mean=0.19997669999999995 ci=[0.1586558999999999, 0.23398439999999998] verdict=PREDICTED",
-    "wrote /home/sk10741/kv-caching/results/diag/meeting3/attempts/capture-b256-20260925T204521Z-3037273/capture_b256.json"
+    "wrote /home/sk10741/kv-caching/results/diag/meeting3/attempts/capture-b256-20260925T212531Z-3048535/capture_b256.json"
   ],
   "stage": "capture-b256",
   "status": "FINAL",
   "terminal": true,
-  "timestamp": "20260925T204521Z"
+  "timestamp": "20260925T212531Z"
 }

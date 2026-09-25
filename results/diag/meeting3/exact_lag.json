@@ -1,0 +1,1354 @@
+{
+  "amendment": "R.5 / R.10 / R.14 / R.15",
+  "content_failures": [],
+  "coverage": {
+    "duplicated": [],
+    "missing": [],
+    "n_expected": 200,
+    "n_rows": 200,
+    "n_unique_expected_present": 200,
+    "status": "COMPLETE",
+    "unexpected": []
+  },
+  "ineligible_rows": [
+    [
+      "test/algebra/1098.json",
+      11,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/algebra/2036.json",
+      11,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/algebra/2193.json",
+      11,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/algebra/2427.json",
+      11,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/algebra/2584.json",
+      11,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/intermediate_algebra/1000.json",
+      11,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/intermediate_algebra/134.json",
+      11,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/intermediate_algebra/1994.json",
+      11,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/intermediate_algebra/607.json",
+      11,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/number_theory/1032.json",
+      11,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/number_theory/515.json",
+      11,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/number_theory/572.json",
+      11,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/number_theory/737.json",
+      11,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/prealgebra/1622.json",
+      11,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/precalculus/1303.json",
+      11,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/precalculus/807.json",
+      11,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/precalculus/927.json",
+      11,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/algebra/1098.json",
+      23,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/algebra/2036.json",
+      23,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/algebra/2193.json",
+      23,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/algebra/2427.json",
+      23,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/algebra/2584.json",
+      23,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/intermediate_algebra/1000.json",
+      23,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/intermediate_algebra/134.json",
+      23,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/intermediate_algebra/1994.json",
+      23,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/intermediate_algebra/607.json",
+      23,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/number_theory/1032.json",
+      23,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/number_theory/515.json",
+      23,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/number_theory/572.json",
+      23,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/number_theory/737.json",
+      23,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/prealgebra/1622.json",
+      23,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/precalculus/1303.json",
+      23,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/precalculus/807.json",
+      23,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/precalculus/927.json",
+      23,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/algebra/1098.json",
+      47,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/algebra/2036.json",
+      47,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/algebra/2193.json",
+      47,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/algebra/2427.json",
+      47,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/algebra/2584.json",
+      47,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/intermediate_algebra/1000.json",
+      47,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/intermediate_algebra/134.json",
+      47,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/intermediate_algebra/1994.json",
+      47,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/intermediate_algebra/607.json",
+      47,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/number_theory/1032.json",
+      47,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/number_theory/515.json",
+      47,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/number_theory/572.json",
+      47,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/number_theory/737.json",
+      47,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/prealgebra/1622.json",
+      47,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/precalculus/1303.json",
+      47,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/precalculus/807.json",
+      47,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/precalculus/927.json",
+      47,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/algebra/1098.json",
+      89,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/algebra/2036.json",
+      89,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/algebra/2193.json",
+      89,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/algebra/2427.json",
+      89,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/algebra/2584.json",
+      89,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/intermediate_algebra/1000.json",
+      89,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/intermediate_algebra/134.json",
+      89,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/intermediate_algebra/1994.json",
+      89,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/intermediate_algebra/607.json",
+      89,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/number_theory/1032.json",
+      89,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/number_theory/515.json",
+      89,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/number_theory/572.json",
+      89,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/number_theory/737.json",
+      89,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/prealgebra/1622.json",
+      89,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/precalculus/1303.json",
+      89,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/precalculus/807.json",
+      89,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/precalculus/927.json",
+      89,
+      "random",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/algebra/1098.json",
+      11,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/algebra/2036.json",
+      11,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/algebra/2193.json",
+      11,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/algebra/2427.json",
+      11,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/algebra/2584.json",
+      11,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/intermediate_algebra/1000.json",
+      11,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/intermediate_algebra/134.json",
+      11,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/intermediate_algebra/1994.json",
+      11,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/intermediate_algebra/607.json",
+      11,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/number_theory/1032.json",
+      11,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/number_theory/515.json",
+      11,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/number_theory/572.json",
+      11,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/number_theory/737.json",
+      11,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/prealgebra/1622.json",
+      11,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/precalculus/1303.json",
+      11,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/precalculus/807.json",
+      11,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/precalculus/927.json",
+      11,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/algebra/1098.json",
+      23,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/algebra/2036.json",
+      23,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/algebra/2193.json",
+      23,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/algebra/2427.json",
+      23,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/algebra/2584.json",
+      23,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/intermediate_algebra/1000.json",
+      23,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/intermediate_algebra/134.json",
+      23,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/intermediate_algebra/1994.json",
+      23,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/intermediate_algebra/607.json",
+      23,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/number_theory/1032.json",
+      23,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/number_theory/515.json",
+      23,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/number_theory/572.json",
+      23,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/number_theory/737.json",
+      23,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/prealgebra/1622.json",
+      23,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/precalculus/1303.json",
+      23,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/precalculus/807.json",
+      23,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/precalculus/927.json",
+      23,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/algebra/1098.json",
+      47,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/algebra/2036.json",
+      47,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/algebra/2193.json",
+      47,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/algebra/2427.json",
+      47,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/algebra/2584.json",
+      47,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/intermediate_algebra/1000.json",
+      47,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/intermediate_algebra/134.json",
+      47,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/intermediate_algebra/1994.json",
+      47,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/intermediate_algebra/607.json",
+      47,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/number_theory/1032.json",
+      47,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/number_theory/515.json",
+      47,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/number_theory/572.json",
+      47,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/number_theory/737.json",
+      47,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/prealgebra/1622.json",
+      47,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/precalculus/1303.json",
+      47,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/precalculus/807.json",
+      47,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/precalculus/927.json",
+      47,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/algebra/1098.json",
+      89,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/algebra/2036.json",
+      89,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/algebra/2193.json",
+      89,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/algebra/2427.json",
+      89,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/algebra/2584.json",
+      89,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/intermediate_algebra/1000.json",
+      89,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/intermediate_algebra/134.json",
+      89,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/intermediate_algebra/1994.json",
+      89,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/intermediate_algebra/607.json",
+      89,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/number_theory/1032.json",
+      89,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/number_theory/515.json",
+      89,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/number_theory/572.json",
+      89,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/number_theory/737.json",
+      89,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/prealgebra/1622.json",
+      89,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/precalculus/1303.json",
+      89,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/precalculus/807.json",
+      89,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ],
+    [
+      "test/precalculus/927.json",
+      89,
+      "streamingllm",
+      "INELIGIBLE: stash smaller than the reinsertion count"
+    ]
+  ],
+  "note": "recovery-after-delay; does not isolate staleness from position",
+  "policies": {
+    "random": {
+      "n_ineligible": 68,
+      "n_rows": 100,
+      "per_lag": {
+        "1": {
+          "achieved_lags": [
+            1
+          ],
+          "anchored_on": "trigger_step",
+          "applied_step_range": null,
+          "arms": {
+            "matched": {
+              "effect_ci95": [
+                0.00043221625052038105,
+                0.006134564479407972
+              ],
+              "effect_vs_no_intervention": 0.0030755712052709726,
+              "excludes_zero": true,
+              "n_traces": 30
+            },
+            "random": {
+              "effect_ci95": [
+                0.0009895776167253107,
+                0.00850558605260446
+              ],
+              "effect_vs_no_intervention": 0.0044119316074847335,
+              "excludes_zero": true,
+              "n_traces": 30
+            },
+            "relaxed": {
+              "effect_ci95": [
+                0.0020553221330194523,
+                0.009001326371568412
+              ],
+              "effect_vs_no_intervention": 0.005418110245334567,
+              "excludes_zero": true,
+              "n_traces": 30
+            }
+          },
+          "baseline_mean_divergence": 0.055228091043775206,
+          "classification": "NON-SPECIFIC",
+          "n_resamples": 2000,
+          "n_traces": 30,
+          "note": "Positive effect = divergence reduced relative to no intervention. Only the 'matched' arm answers the causal question; 'relaxed' is confounded with cache size and is a reference point only. A 'matched' effect that 'random' reproduces shows that any perturbation helps, not that the reinserted tokens were load-bearing.",
+          "requested_lag": 1,
+          "seed": 0,
+          "trigger_step": 0,
+          "window": 1
+        },
+        "16": {
+          "achieved_lags": [
+            16
+          ],
+          "anchored_on": "trigger_step",
+          "applied_step_range": null,
+          "arms": {
+            "matched": {
+              "effect_ci95": [
+                -0.001837138877044386,
+                0.004203746528667439
+              ],
+              "effect_vs_no_intervention": 0.001277837094129436,
+              "excludes_zero": false,
+              "n_traces": 30
+            },
+            "random": {
+              "effect_ci95": [
+                -0.001862833964549115,
+                0.00648767599833451
+              ],
+              "effect_vs_no_intervention": 0.00219956578913125,
+              "excludes_zero": false,
+              "n_traces": 30
+            },
+            "relaxed": {
+              "effect_ci95": [
+                0.0007234273505734359,
+                0.0074243088523231445
+              ],
+              "effect_vs_no_intervention": 0.004018530408489543,
+              "excludes_zero": true,
+              "n_traces": 30
+            }
+          },
+          "baseline_mean_divergence": 0.058319822405510764,
+          "classification": "NO RESTORATION",
+          "n_resamples": 2000,
+          "n_traces": 30,
+          "note": "Positive effect = divergence reduced relative to no intervention. Only the 'matched' arm answers the causal question; 'relaxed' is confounded with cache size and is a reference point only. A 'matched' effect that 'random' reproduces shows that any perturbation helps, not that the reinserted tokens were load-bearing.",
+          "requested_lag": 16,
+          "seed": 0,
+          "trigger_step": 0,
+          "window": 1
+        },
+        "256": {
+          "achieved_lags": [
+            256
+          ],
+          "anchored_on": "trigger_step",
+          "applied_step_range": null,
+          "arms": {
+            "matched": {
+              "effect_ci95": [
+                -0.000592680199414323,
+                0.009423977073156148
+              ],
+              "effect_vs_no_intervention": 0.004349812521777978,
+              "excludes_zero": false,
+              "n_traces": 28
+            },
+            "random": {
+              "effect_ci95": [
+                0.0010721651231500775,
+                0.012877477724008986
+              ],
+              "effect_vs_no_intervention": 0.006694133418598902,
+              "excludes_zero": true,
+              "n_traces": 28
+            },
+            "relaxed": {
+              "effect_ci95": [
+                -0.003727634930704988,
+                0.007324798697583462
+              ],
+              "effect_vs_no_intervention": 0.0017096174065654665,
+              "excludes_zero": false,
+              "n_traces": 28
+            }
+          },
+          "baseline_mean_divergence": 0.09284279883492018,
+          "classification": "NO RESTORATION",
+          "n_resamples": 2000,
+          "n_traces": 28,
+          "note": "Positive effect = divergence reduced relative to no intervention. Only the 'matched' arm answers the causal question; 'relaxed' is confounded with cache size and is a reference point only. A 'matched' effect that 'random' reproduces shows that any perturbation helps, not that the reinserted tokens were load-bearing.",
+          "requested_lag": 256,
+          "seed": 0,
+          "trigger_step": 0,
+          "window": 1
+        },
+        "4": {
+          "achieved_lags": [
+            4
+          ],
+          "anchored_on": "trigger_step",
+          "applied_step_range": null,
+          "arms": {
+            "matched": {
+              "effect_ci95": [
+                -0.0020495451354507403,
+                0.0041793727288511745
+              ],
+              "effect_vs_no_intervention": 0.0008727689205712259,
+              "excludes_zero": false,
+              "n_traces": 30
+            },
+            "random": {
+              "effect_ci95": [
+                4.0832700195606206e-05,
+                0.0069677242497699025
+              ],
+              "effect_vs_no_intervention": 0.0032340751713181254,
+              "excludes_zero": true,
+              "n_traces": 30
+            },
+            "relaxed": {
+              "effect_ci95": [
+                0.002875067473533552,
+                0.01082613925180095
+              ],
+              "effect_vs_no_intervention": 0.006629745391579687,
+              "excludes_zero": true,
+              "n_traces": 30
+            }
+          },
+          "baseline_mean_divergence": 0.05581670660089721,
+          "classification": "NO RESTORATION",
+          "n_resamples": 2000,
+          "n_traces": 30,
+          "note": "Positive effect = divergence reduced relative to no intervention. Only the 'matched' arm answers the causal question; 'relaxed' is confounded with cache size and is a reference point only. A 'matched' effect that 'random' reproduces shows that any perturbation helps, not that the reinserted tokens were load-bearing.",
+          "requested_lag": 4,
+          "seed": 0,
+          "trigger_step": 0,
+          "window": 1
+        },
+        "64": {
+          "achieved_lags": [
+            64
+          ],
+          "anchored_on": "trigger_step",
+          "applied_step_range": null,
+          "arms": {
+            "matched": {
+              "effect_ci95": [
+                -5.5279784197751546e-05,
+                0.007525697059275586
+              ],
+              "effect_vs_no_intervention": 0.003568802303427037,
+              "excludes_zero": false,
+              "n_traces": 29
+            },
+            "random": {
+              "effect_ci95": [
+                -0.00024057922993143033,
+                0.00738858423451538
+              ],
+              "effect_vs_no_intervention": 0.0033444518306387097,
+              "excludes_zero": false,
+              "n_traces": 29
+            },
+            "relaxed": {
+              "effect_ci95": [
+                -0.004256970797223765,
+                0.005548222272554294
+              ],
+              "effect_vs_no_intervention": 0.0008339466150021874,
+              "excludes_zero": false,
+              "n_traces": 29
+            }
+          },
+          "baseline_mean_divergence": 0.067357374331901,
+          "classification": "NO RESTORATION",
+          "n_resamples": 2000,
+          "n_traces": 29,
+          "note": "Positive effect = divergence reduced relative to no intervention. Only the 'matched' arm answers the causal question; 'relaxed' is confounded with cache size and is a reference point only. A 'matched' effect that 'random' reproduces shows that any perturbation helps, not that the reinserted tokens were load-bearing.",
+          "requested_lag": 64,
+          "seed": 0,
+          "trigger_step": 0,
+          "window": 1
+        }
+      },
+      "sweep": {
+        "effects": [
+          0.0030755712052709726,
+          0.0008727689205712259,
+          0.001277837094129436,
+          0.003568802303427037,
+          0.004349812521777978
+        ],
+        "helps_at_lag": {
+          "1": true,
+          "16": false,
+          "256": false,
+          "4": false,
+          "64": false
+        },
+        "lags": [
+          1,
+          4,
+          16,
+          64,
+          256
+        ],
+        "monotone_decreasing": false,
+        "n_points": 5,
+        "verdict": "NON-MONOTONE"
+      }
+    },
+    "streamingllm": {
+      "n_ineligible": 68,
+      "n_rows": 100,
+      "per_lag": {
+        "1": {
+          "achieved_lags": [
+            1
+          ],
+          "anchored_on": "trigger_step",
+          "applied_step_range": null,
+          "arms": {
+            "matched": {
+              "effect_ci95": [
+                -0.009153510714611816,
+                0.00864700281227916
+              ],
+              "effect_vs_no_intervention": -0.00036054766456421026,
+              "excludes_zero": false,
+              "n_traces": 30
+            },
+            "random": {
+              "effect_ci95": [
+                0.002488097583948501,
+                0.023803031224608365
+              ],
+              "effect_vs_no_intervention": 0.012885736413578212,
+              "excludes_zero": true,
+              "n_traces": 30
+            },
+            "relaxed": {
+              "effect_ci95": [
+                -0.004223822131769345,
+                0.01337416839202747
+              ],
+              "effect_vs_no_intervention": 0.0044191790601970345,
+              "excludes_zero": false,
+              "n_traces": 30
+            }
+          },
+          "baseline_mean_divergence": 0.06790024510769976,
+          "classification": "NO RESTORATION",
+          "n_resamples": 2000,
+          "n_traces": 30,
+          "note": "Positive effect = divergence reduced relative to no intervention. Only the 'matched' arm answers the causal question; 'relaxed' is confounded with cache size and is a reference point only. A 'matched' effect that 'random' reproduces shows that any perturbation helps, not that the reinserted tokens were load-bearing.",
+          "requested_lag": 1,
+          "seed": 0,
+          "trigger_step": 0,
+          "window": 1
+        },
+        "16": {
+          "achieved_lags": [
+            16
+          ],
+          "anchored_on": "trigger_step",
+          "applied_step_range": null,
+          "arms": {
+            "matched": {
+              "effect_ci95": [
+                -0.009308921759542043,
+                0.0073036221483399714
+              ],
+              "effect_vs_no_intervention": -0.0011242562094848471,
+              "excludes_zero": false,
+              "n_traces": 30
+            },
+            "random": {
+              "effect_ci95": [
+                0.0020623326613284244,
+                0.022148630796379118
+              ],
+              "effect_vs_no_intervention": 0.011660819011489649,
+              "excludes_zero": true,
+              "n_traces": 30
+            },
+            "relaxed": {
+              "effect_ci95": [
+                -0.007119726372614782,
+                0.01015718059722561
+              ],
+              "effect_vs_no_intervention": 0.0013000018682085964,
+              "excludes_zero": false,
+              "n_traces": 30
+            }
+          },
+          "baseline_mean_divergence": 0.07029670662116934,
+          "classification": "NO RESTORATION",
+          "n_resamples": 2000,
+          "n_traces": 30,
+          "note": "Positive effect = divergence reduced relative to no intervention. Only the 'matched' arm answers the causal question; 'relaxed' is confounded with cache size and is a reference point only. A 'matched' effect that 'random' reproduces shows that any perturbation helps, not that the reinserted tokens were load-bearing.",
+          "requested_lag": 16,
+          "seed": 0,
+          "trigger_step": 0,
+          "window": 1
+        },
+        "256": {
+          "achieved_lags": [
+            256
+          ],
+          "anchored_on": "trigger_step",
+          "applied_step_range": null,
+          "arms": {
+            "matched": {
+              "effect_ci95": [
+                -0.007135327576959538,
+                0.006974944444964608
+              ],
+              "effect_vs_no_intervention": -0.00023454229995452925,
+              "excludes_zero": false,
+              "n_traces": 28
+            },
+            "random": {
+              "effect_ci95": [
+                0.0036728750847233593,
+                0.02356049611067405
+              ],
+              "effect_vs_no_intervention": 0.013267467289351664,
+              "excludes_zero": true,
+              "n_traces": 28
+            },
+            "relaxed": {
+              "effect_ci95": [
+                -0.012774116470011365,
+                0.0025426878352490323
+              ],
+              "effect_vs_no_intervention": -0.005296732151342695,
+              "excludes_zero": false,
+              "n_traces": 28
+            }
+          },
+          "baseline_mean_divergence": 0.1124412528098787,
+          "classification": "NO RESTORATION",
+          "n_resamples": 2000,
+          "n_traces": 28,
+          "note": "Positive effect = divergence reduced relative to no intervention. Only the 'matched' arm answers the causal question; 'relaxed' is confounded with cache size and is a reference point only. A 'matched' effect that 'random' reproduces shows that any perturbation helps, not that the reinserted tokens were load-bearing.",
+          "requested_lag": 256,
+          "seed": 0,
+          "trigger_step": 0,
+          "window": 1
+        },
+        "4": {
+          "achieved_lags": [
+            4
+          ],
+          "anchored_on": "trigger_step",
+          "applied_step_range": null,
+          "arms": {
+            "matched": {
+              "effect_ci95": [
+                -0.009399752769297763,
+                0.008555178353633393
+              ],
+              "effect_vs_no_intervention": -0.0006848546960953791,
+              "excludes_zero": false,
+              "n_traces": 30
+            },
+            "random": {
+              "effect_ci95": [
+                0.0022814714947226797,
+                0.023320807857862724
+              ],
+              "effect_vs_no_intervention": 0.012505114524967836,
+              "excludes_zero": true,
+              "n_traces": 30
+            },
+            "relaxed": {
+              "effect_ci95": [
+                -0.005143030050127682,
+                0.012246470949195712
+              ],
+              "effect_vs_no_intervention": 0.0034003681151557478,
+              "excludes_zero": false,
+              "n_traces": 30
+            }
+          },
+          "baseline_mean_divergence": 0.06829388171261508,
+          "classification": "NO RESTORATION",
+          "n_resamples": 2000,
+          "n_traces": 30,
+          "note": "Positive effect = divergence reduced relative to no intervention. Only the 'matched' arm answers the causal question; 'relaxed' is confounded with cache size and is a reference point only. A 'matched' effect that 'random' reproduces shows that any perturbation helps, not that the reinserted tokens were load-bearing.",
+          "requested_lag": 4,
+          "seed": 0,
+          "trigger_step": 0,
+          "window": 1
+        },
+        "64": {
+          "achieved_lags": [
+            64
+          ],
+          "anchored_on": "trigger_step",
+          "applied_step_range": null,
+          "arms": {
+            "matched": {
+              "effect_ci95": [
+                -0.010635965852400049,
+                0.00398436220267984
+              ],
+              "effect_vs_no_intervention": -0.0035004277462318944,
+              "excludes_zero": false,
+              "n_traces": 29
+            },
+            "random": {
+              "effect_ci95": [
+                0.0013751508719477988,
+                0.017698817100336686
+              ],
+              "effect_vs_no_intervention": 0.009171048330556444,
+              "excludes_zero": true,
+              "n_traces": 29
+            },
+            "relaxed": {
+              "effect_ci95": [
+                -0.015576614772612256,
+                0.0012019529615602995
+              ],
+              "effect_vs_no_intervention": -0.007317749825581173,
+              "excludes_zero": false,
+              "n_traces": 29
+            }
+          },
+          "baseline_mean_divergence": 0.07527305148111907,
+          "classification": "NO RESTORATION",
+          "n_resamples": 2000,
+          "n_traces": 29,
+          "note": "Positive effect = divergence reduced relative to no intervention. Only the 'matched' arm answers the causal question; 'relaxed' is confounded with cache size and is a reference point only. A 'matched' effect that 'random' reproduces shows that any perturbation helps, not that the reinserted tokens were load-bearing.",
+          "requested_lag": 64,
+          "seed": 0,
+          "trigger_step": 0,
+          "window": 1
+        }
+      },
+      "sweep": {
+        "effects": [
+          -0.00036054766456421026,
+          -0.0006848546960953791,
+          -0.0011242562094848471,
+          -0.0035004277462318944,
+          -0.00023454229995452925
+        ],
+        "helps_at_lag": {
+          "1": false,
+          "16": false,
+          "256": false,
+          "4": false,
+          "64": false
+        },
+        "lags": [
+          1,
+          4,
+          16,
+          64,
+          256
+        ],
+        "monotone_decreasing": false,
+        "n_points": 5,
+        "verdict": "FLAT-NULL"
+      }
+    }
+  },
+  "provenance_failures": [],
+  "reproduce": "python scripts/report_exact_lag.py --runs-root <runs> --run exact-lag-r5 --design configs/experiments/exact_lag_math500_r5.yaml --out /home/sk10741/kv-caching/results/diag/meeting3/attempts/exact-lag-20260925T212534Z-3048601/exact_lag.json --final",
+  "run": "exact-lag-r5",
+  "status": "FINAL",
+  "sufficient_statistics_sha256": "6a55f8439ec730fe64a4e30f0420e022b740e2a691e7cf6d8914f9eaafcd03e9",
+  "sufficient_statistics_tsv": "exact_lag.conditions.tsv"
+}

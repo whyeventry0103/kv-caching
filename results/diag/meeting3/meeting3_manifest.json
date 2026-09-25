@@ -258,7 +258,7 @@
       "id": "Q3.algebra_control",
       "note": "R.9: validated in float64 on synthetic inputs (tests/test_capture.py channel_stats identity) and live at every event as layer-0 Delta <= 1e-5 (same q, same retained keys); full/full control exactly 0. Real-model check = capture-smoke gate.",
       "output_sha256": {
-        "results/diag/meeting3/capture_b256.json": "dc4f364780fa16bfce4e0eb12e5cf608a495c13ffb99f051bf62a300f09708e8"
+        "results/diag/meeting3/capture_b256.json": "6b5fc3a28da406d9805125058790a0277c58975b0efcd6240b022da8bbfbe5f6"
       },
       "outputs": [
         "results/diag/meeting3/capture_b256.json"
@@ -284,8 +284,8 @@
       "id": "Q3.capture",
       "note": "R.9 combined capture with Q.6; CPU-validated on tiny Qwen2 for all 4 policies (live gather/position-map/pre-eviction checks, mutation-tested); queue q6-basis-fit -> capture-smoke -> capture-b256 (primary) ... b2048 last.",
       "output_sha256": {
-        "results/diag/meeting3/capture_b256.json": "dc4f364780fa16bfce4e0eb12e5cf608a495c13ffb99f051bf62a300f09708e8",
-        "results/diag/meeting3/figures/meeting3_capture_b256.pdf": "484637f093fff11f3c6d7cd6d443f99dc3b6c8cdba44179e61bcb480c3236bbb"
+        "results/diag/meeting3/capture_b256.json": "6b5fc3a28da406d9805125058790a0277c58975b0efcd6240b022da8bbfbe5f6",
+        "results/diag/meeting3/figures/meeting3_capture_b256.pdf": "5e9c26ce954d402b5e189b47a656d2ea9d15218be55de6e67ae08b0ac642b438"
       },
       "outputs": [
         "results/diag/meeting3/capture_b256.json",
@@ -345,13 +345,13 @@
         "configs/experiments/exact_lag_math500_r5.yaml"
       ],
       "declared_status": "QUEUED",
-      "evidence": "no record for stage exact-lag yet",
+      "evidence": "stage exact-lag FINAL",
       "expected_units": 4000,
       "id": "Q5.exact_lag",
       "note": "kvcache.exact_lag + scripts/run_exact_lag.py / report_exact_lag.py; tiny-Qwen2 tests (deterministic snapshots, exact applied step, gate) pass; queue exact-lag-r5 requires capture-smoke; ~5 h on 2 GPUs.",
       "output_sha256": {
-        "results/diag/meeting3/exact_lag.json": null,
-        "results/diag/meeting3/figures/meeting3_exact_lag.pdf": null
+        "results/diag/meeting3/exact_lag.json": "b76578ea9d96d1191acd1becc38cb0797832cbdc5a20f6e0aa772e6e0ffffb82",
+        "results/diag/meeting3/figures/meeting3_exact_lag.pdf": "bffd76e4181f6fc1268adcb56fe3960fc521b0205bb6af69477881ff3f043b4a"
       },
       "outputs": [
         "results/diag/meeting3/exact_lag.json",
@@ -360,7 +360,7 @@
       "protocol": "R.5",
       "question": "recovery after exact delay 1/4/16/64/256",
       "stage": "exact-lag",
-      "status": "QUEUED",
+      "status": "COMPLETE",
       "task": 2
     },
     {
@@ -396,8 +396,8 @@
       "id": "Q6.project",
       "note": "same capture cells as Q3.capture (R.9).",
       "output_sha256": {
-        "results/diag/meeting3/capture_b256.json": "dc4f364780fa16bfce4e0eb12e5cf608a495c13ffb99f051bf62a300f09708e8",
-        "results/diag/meeting3/figures/meeting3_capture_b256.pdf": "484637f093fff11f3c6d7cd6d443f99dc3b6c8cdba44179e61bcb480c3236bbb"
+        "results/diag/meeting3/capture_b256.json": "6b5fc3a28da406d9805125058790a0277c58975b0efcd6240b022da8bbfbe5f6",
+        "results/diag/meeting3/figures/meeting3_capture_b256.pdf": "5e9c26ce954d402b5e189b47a656d2ea9d15218be55de6e67ae08b0ac642b438"
       },
       "outputs": [
         "results/diag/meeting3/capture_b256.json",
@@ -450,16 +450,16 @@
     "transformers": "4.56.2"
   },
   "schema": "meeting3-manifest-v1",
-  "source_tree_sha256": "cfa251685b5136111d292d92a972cddd2ef3c55d55aa080561fbc07345ae6a95",
+  "source_tree_sha256": "88656c62bbdef367872a97b569dfa5dbafe2ce1f2d6b02b277edd07993f1dcfb",
   "status_counts": {
     "ANALYZED": 1,
     "BLOCKED": 0,
-    "COMPLETE": 6,
+    "COMPLETE": 7,
     "GENERATED": 0,
     "IMPLEMENTED": 0,
     "INVALID": 0,
     "NOT_STARTED": 0,
-    "QUEUED": 9,
+    "QUEUED": 8,
     "RUNNING": 0,
     "TESTED": 1,
     "VALIDATED": 0

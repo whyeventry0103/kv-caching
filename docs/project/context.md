@@ -24,7 +24,7 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
-  **★★★★★ 2026-09-26 01:40 Dubai — Q.5 exact-lag FINAL.** 200/200, 0
+  **★★★★★ 2026-09-26 01:25 Dubai — Q.5 exact-lag FINAL.** 200/200, 0
   provenance/content failures. Only 8/25 problems are eligible: stash =
   prompt + cohort − 256 exactly (verified on all 200 rows), so short prompts
   fall below n = 64. That leaves 30 traces (28 at lag 256). Trace-level CIs
