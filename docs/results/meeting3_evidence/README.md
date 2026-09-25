@@ -27,6 +27,10 @@ torch 2.7.1 / transformers 4.56.2 / kvpress 0.5.3 on the remote host. It does
 **not** mean validated on the 7B model: that is what the queued smoke gates
 (`dacc-gate-smoke`, `capture-smoke`) do, and none of them has run yet.
 
+## Second repair pass (review of cfa30cd, 2026-09-25)
+
+See **`acceptance_cfa30cd.md`**: every finding, its fix, its production-path test and the observed result. Tested implementation `58d4dc8`; implementation ids in `remote_pytest.txt`.
+
 ## Repair pass for the external review of 4e38224 (2026-09-25)
 
 | Finding | Fix | Commit | Regression tests |

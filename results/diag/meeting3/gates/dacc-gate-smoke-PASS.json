@@ -1,0 +1,56 @@
+{
+  "checks": [
+    {
+      "achieved_exposure": 494,
+      "check": "parity-random-256-t0=0",
+      "eviction_onset_step": 257,
+      "exposed": true,
+      "n_tokens": [
+        751,
+        751
+      ],
+      "passed": true,
+      "token_identical": true
+    },
+    {
+      "achieved_exposure": 705,
+      "check": "parity-streamingllm-256-t0=0",
+      "eviction_onset_step": 257,
+      "exposed": true,
+      "n_tokens": [
+        962,
+        962
+      ],
+      "passed": true,
+      "token_identical": true
+    },
+    {
+      "achieved_exposure": 412,
+      "check": "onset-random-256-t0=512",
+      "eviction_onset_step": 576,
+      "expected_eviction_onset": 576,
+      "exposed": true,
+      "first_divergence_from_full": 577,
+      "n_tokens": [
+        1004,
+        988
+      ],
+      "passed": true,
+      "prefix_identical_to_full_cache": true
+    }
+  ],
+  "gate": "Amendment R.3 D_acc onset gate (real model)",
+  "identity": {
+    "basis_npz_sha256": null,
+    "config_name": "dacc_gate_smoke_r3",
+    "config_sha256": "537abe903e1e05c43254739e8d24e7c6f74356068b1f93c5ef43c3658e589dcf",
+    "implementation_id": "4b5d38c5edd3a5b177e6d5de8af128e164959087e5e96acf38b395c45dc3741b",
+    "input_manifest_sha256": "c9df04ea43c4d3ca05cbb7322a47105c26f1407e8e081d01bd70acb173ce87fd",
+    "kind": "dacc",
+    "model_revision": "916b56a44061fd5cd7d6a8fb632557ed4f724f60",
+    "reference_run": null,
+    "schema": "provenance-v1"
+  },
+  "passed": true,
+  "pid": "test/precalculus/807.json"
+}

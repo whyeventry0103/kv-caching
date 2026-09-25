@@ -8,6 +8,37 @@ artifact when this file was written. Review evidence (gate outputs, remote test 
 parity, queue dry-run, remote-only data list):
 [`meeting3_evidence/`](meeting3_evidence/README.md).
 
+**Execution status, 2026-09-25 11:30 Dubai (after GPU night 1).**
+
+- **Real-model gates, all PASSED.** Reports are in `results/diag/meeting3/gates/`.
+  - **D_acc gate.** The gated t0=0 run is token-identical to legacy generation
+    for Random and StreamingLLM. At t0=512, eviction starts at token 576 exactly
+    as predicted, and tokens [0, 576) are identical to the full cache.
+  - **Q.6 basis.** 100 traces, k=64, orthonormality error 6.8e-9, 340 s. The
+    64 directions explain 21–41% of variance per layer.
+  - **Capture smoke.** Full/full differs by exactly 0. Layer-0 Δ is exactly 0.0
+    for all four policies, with 21 events each and no non-finite value.
+- **Generated.** capture-b256 **255/400**, dacc-t2048 **200/400**.
+  - Read by the strict readers: PARTIAL, 0 provenance failures, controls
+    VALID, verdicts withheld.
+  - No cell is complete yet, so there are no Task 2/3 answers yet.
+  - The next window (2026-09-26 01:45) resumes capture-b256 seeds 23/89.
+    The post-capture-b256 stage then reads it automatically.
+- **Observed on the smoke trace, reported now so it is not a surprise later.**
+  Pooled GQA collateral was 0.0 for all four policies, and it is also 0.0 on
+  all 255 partial capture rows. Under the registered definition (R.4), a
+  position is collateral only when the group-MEAN attention ranks it in the
+  bottom (candidates − budget), ≈64 of ~320. A position that some head gives
+  more than τ = 0.01 has a group mean of at least 0.0014, far above that tail.
+  So collateral is structurally rare at budget 256. If the full cell confirms
+  this, the registered R-KV − H2O contrast reads INCONCLUSIVE (0, CI 0). That
+  is a property of the definition, not an instrument failure.
+- **Storage.** Owner-delegated decision, R.15.6: TC-ViTok deleted, 77.61 GiB
+  reclaimed. The guard now measures `~/kvcache-storage` + `~/kv-caching` with
+  hardlinks counted once, against 72 GiB.
+- **Pipeline.** Hardened after the review of cfa30cd (R.15). Acceptance table:
+  `meeting3_evidence/acceptance_cfa30cd.md`.
+
 The three Meeting #3 problems, and where each stands:
 
 | Problem | Measured now | Queued (unattended, resumable) | Not yet runnable |

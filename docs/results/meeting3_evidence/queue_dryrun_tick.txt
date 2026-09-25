@@ -1,27 +1,21 @@
-# nightly_autorun dry-run of the first 2026-09-25 tick, tree at e9a584c9d8ee6452cd01901fdd0230c851ec464d
-[2026-09-25 00:22:04] === nightly_autorun start (dry_run=True force=True) ===
-[2026-09-25 00:22:04] cpu stage post-capture-b256: waiting on ['capture-b256']
-[2026-09-25 00:22:04] cpu stage post-capture-b2048: waiting on ['capture-b2048']
-[2026-09-25 00:22:04] cpu stage post-dacc: waiting on ['dacc-t0', 'dacc-t512', 'dacc-t2048']
-[2026-09-25 00:22:04] cpu stage post-exact-lag: waiting on ['exact-lag-r5']
-[2026-09-25 00:22:04] cpu stage post-fork-control: waiting on ['fork-control-random', 'fork-control-slm']
-[2026-09-25 00:22:04] cpu stage post-t1-tv: waiting on ['t1-tv512', 't1-tv1024']
-[2026-09-25 00:22:04] BLOCKED restoration-lag1: Amendment R.5 - the restoration press stashes the tail of a score-ordered tensor (not the evicted complement) and shares state across layers; the exact-lag protocol replaces this sweep, so these rows would be invalid -> skip
-[2026-09-25 00:22:04] BLOCKED restoration-lag4: Amendment R.5 - the restoration press stashes the tail of a score-ordered tensor (not the evicted complement) and shares state across layers; the exact-lag protocol replaces this sweep, so these rows would be invalid -> skip
-[2026-09-25 00:22:04] BLOCKED restoration-lag16: Amendment R.5 - the restoration press stashes the tail of a score-ordered tensor (not the evicted complement) and shares state across layers; the exact-lag protocol replaces this sweep, so these rows would be invalid -> skip
-[2026-09-25 00:22:04] BLOCKED restoration-lag64: Amendment R.5 - the restoration press stashes the tail of a score-ordered tensor (not the evicted complement) and shares state across layers; the exact-lag protocol replaces this sweep, so these rows would be invalid -> skip
-[2026-09-25 00:22:04] BLOCKED restoration-lag256: Amendment R.5 - the restoration press stashes the tail of a score-ordered tensor (not the evicted complement) and shares state across layers; the exact-lag protocol replaces this sweep, so these rows would be invalid -> skip
-[2026-09-25 00:22:04] capture-smoke: dependency incomplete -> skip
-[2026-09-25 00:22:04] capture-b256: dependency incomplete -> skip
-[2026-09-25 00:22:04] exact-lag-r5: dependency incomplete -> skip
-[2026-09-25 00:22:04] dacc-t2048: dependency incomplete -> skip
-[2026-09-25 00:22:04] dacc-t512: dependency incomplete -> skip
-[2026-09-25 00:22:04] dacc-t0: dependency incomplete -> skip
-[2026-09-25 00:22:04] capture-b2048: dependency incomplete -> skip
-[2026-09-25 00:22:04]   gpu0: 47.4GB free util=0%
-[2026-09-25 00:22:04]   gpu1: 47.4GB free util=0%
-[2026-09-25 00:22:04] selected: dacc-gate-smoke 0/1 (min_free_gb=24); needy seeds [11]; window->10:45
-[2026-09-25 00:22:04] launch assignment: {0: [11]}
-[2026-09-25 00:22:04] DRY-RUN would launch:
-[2026-09-25 00:22:04]   tmux -s dacc-gate-smoke-g0: bash scripts/launch.sh --i-understand daccsmoke configs/experiments/dacc_gate_smoke_r3.yaml --resume --seeds 11 [CUDA=0, MAX_HOURS=9.0]
-[2026-09-25 00:22:04] DRY-RUN: nothing launched
+# nightly_autorun dry-run of the 2026-09-26 01:45 tick, tree at 58d4dc8b4f0ecd5bee8150f5ca2aae4f9a1e11ae
+[2026-09-25 11:35:32] === nightly_autorun start (dry_run=True force=True) ===
+[2026-09-25 11:35:32] cpu stage post-capture-b256: waiting on ['capture-b256']
+[2026-09-25 11:35:32] cpu stage post-capture-b2048: waiting on ['capture-b2048']
+[2026-09-25 11:35:32] cpu stage post-dacc: waiting on ['dacc-t0', 'dacc-t512', 'dacc-t2048']
+[2026-09-25 11:35:32] cpu stage post-exact-lag: waiting on ['exact-lag-r5']
+[2026-09-25 11:35:32] cpu stage post-fork-control: waiting on ['fork-control-random', 'fork-control-slm']
+[2026-09-25 11:35:32] cpu stage post-t1-tv: waiting on ['t1-tv512', 't1-tv1024']
+[2026-09-25 11:35:32] BLOCKED restoration-lag1: Amendment R.5 - the restoration press stashes the tail of a score-ordered tensor (not the evicted complement) and shares state across layers; the exact-lag protocol replaces this sweep, so these rows would be invalid -> skip
+[2026-09-25 11:35:32] BLOCKED restoration-lag4: Amendment R.5 - the restoration press stashes the tail of a score-ordered tensor (not the evicted complement) and shares state across layers; the exact-lag protocol replaces this sweep, so these rows would be invalid -> skip
+[2026-09-25 11:35:32] BLOCKED restoration-lag16: Amendment R.5 - the restoration press stashes the tail of a score-ordered tensor (not the evicted complement) and shares state across layers; the exact-lag protocol replaces this sweep, so these rows would be invalid -> skip
+[2026-09-25 11:35:32] BLOCKED restoration-lag64: Amendment R.5 - the restoration press stashes the tail of a score-ordered tensor (not the evicted complement) and shares state across layers; the exact-lag protocol replaces this sweep, so these rows would be invalid -> skip
+[2026-09-25 11:35:32] BLOCKED restoration-lag256: Amendment R.5 - the restoration press stashes the tail of a score-ordered tensor (not the evicted complement) and shares state across layers; the exact-lag protocol replaces this sweep, so these rows would be invalid -> skip
+[2026-09-25 11:35:32]   gpu0: 47.4GB free util=0%
+[2026-09-25 11:35:32]   gpu1: 47.4GB free util=0%
+[2026-09-25 11:35:33] selected: capture-b256 255/400 (min_free_gb=28); needy seeds [23, 89]; window->10:45
+[2026-09-25 11:35:33] launch assignment: {0: [23], 1: [89]}
+[2026-09-25 11:35:33] DRY-RUN would launch:
+[2026-09-25 11:35:33]   tmux -s capture-b256-g0: bash scripts/launch.sh --i-understand capture configs/experiments/capture_math500_b256_r9.yaml --resume --seeds 23 [CUDA=0, MAX_HOURS=9.0]
+[2026-09-25 11:35:33]   tmux -s capture-b256-g1: bash scripts/launch.sh --i-understand capture configs/experiments/capture_math500_b256_r9.yaml --resume --seeds 89 [CUDA=1, MAX_HOURS=9.0]
+[2026-09-25 11:35:33] DRY-RUN: nothing launched

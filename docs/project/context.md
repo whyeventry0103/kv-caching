@@ -24,6 +24,19 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-09-25 11:30 Dubai — GPU night 1 done; second review repaired.**
+  Real-model gates PASSED (D_acc parity + onset 576; basis 100 traces k=64;
+  capture smoke full/full 0, layer-0 Δ 0.0). Generated: capture-b256 255/400,
+  dacc-t2048 200/400 (strict readers: PARTIAL, 0 provenance failures). Review of
+  cfa30cd fixed in 0a86cbe/9d46e6c/58d4dc8 (R.15): reader entry points, typed
+  gates in the scheduler, provenance-v1 + frozen input manifest, full reader
+  validation, transactional postprocessing; acceptance table
+  docs/results/meeting3_evidence/acceptance_cfa30cd.md. Storage: TC-ViTok
+  deleted on the owner's selection (77.61 GiB reclaimed); guard = combined
+  trees at 72 GiB. Smoke/partial collateral is 0.0 for all policies (structural
+  under R.4's definition, flagged). NEXT: window 2026-09-26 01:45 resumes
+  capture-b256 (seeds 23/89), then post-capture-b256 reads Tasks 2/3.
+
   **★★★★★ 2026-09-24 23:20 Dubai — every Meeting #3 unit is now measured,
   queued behind a verified gate, or BLOCKED with a stated reason.** Built today
   and CPU-verified on the remote with the pinned stack (tiny Qwen2, mutation

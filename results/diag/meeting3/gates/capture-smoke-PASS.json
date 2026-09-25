@@ -1,0 +1,135 @@
+{
+  "expected_conditions": [
+    [
+      "test/algebra/1098.json",
+      11,
+      "fullcache",
+      "full"
+    ],
+    [
+      "test/algebra/1098.json",
+      11,
+      "h2o",
+      "256"
+    ],
+    [
+      "test/algebra/1098.json",
+      11,
+      "random",
+      "256"
+    ],
+    [
+      "test/algebra/1098.json",
+      11,
+      "rkv",
+      "256"
+    ],
+    [
+      "test/algebra/1098.json",
+      11,
+      "streamingllm",
+      "256"
+    ]
+  ],
+  "failures": [],
+  "gate": "R.9 capture smoke",
+  "identity": {
+    "basis_npz_sha256": "68546e59839537cb30d162533baa7eff7fbb4f10a177a9bf8a9dbe596e9ae222",
+    "config_name": "capture_math500_smoke_r9",
+    "config_sha256": "45fa3a3ee5a2b2f7bdc67ea644ab48171b8e8bd41f12a1a933c288770f852848",
+    "implementation_id": "2143e52d83068f2cb0033626402b4a6911b5e78c6f784b12c13bd92d088f70c4",
+    "input_manifest_sha256": "c9df04ea43c4d3ca05cbb7322a47105c26f1407e8e081d01bd70acb173ce87fd",
+    "kind": "capture",
+    "model_revision": "916b56a44061fd5cd7d6a8fb632557ed4f724f60",
+    "reference_run": "math500-fc-powered-merged",
+    "schema": "provenance-v1"
+  },
+  "passed": true,
+  "rows": [
+    {
+      "Delta_mean": null,
+      "M_mean": null,
+      "budget": "full",
+      "checks": {
+        "fullfull_max": 0.0,
+        "layer0_delta_max": 0.0,
+        "n_nonfinite": 0
+      },
+      "collateral_pooled": null,
+      "full_branch_s": 35.353922923095524,
+      "n_events": 0,
+      "n_trace_tokens": 1597,
+      "pid": "test/algebra/1098.json",
+      "press": "fullcache",
+      "wallclock_s": 34.88933578133583
+    },
+    {
+      "Delta_mean": 0.102591,
+      "M_mean": 0.144991,
+      "budget": 256,
+      "checks": {
+        "fullfull_max": 0.0,
+        "layer0_delta_max": 0.0,
+        "n_nonfinite": 0
+      },
+      "collateral_pooled": 0.0,
+      "full_branch_s": 35.353922923095524,
+      "n_events": 21,
+      "n_trace_tokens": 1597,
+      "pid": "test/algebra/1098.json",
+      "press": "h2o",
+      "wallclock_s": 39.12814477272332
+    },
+    {
+      "Delta_mean": 0.229895,
+      "M_mean": 0.468939,
+      "budget": 256,
+      "checks": {
+        "fullfull_max": 0.0,
+        "layer0_delta_max": 0.0,
+        "n_nonfinite": 0
+      },
+      "collateral_pooled": 0.0,
+      "full_branch_s": 35.353922923095524,
+      "n_events": 21,
+      "n_trace_tokens": 1597,
+      "pid": "test/algebra/1098.json",
+      "press": "random",
+      "wallclock_s": 39.421068533323705
+    },
+    {
+      "Delta_mean": 0.0883502,
+      "M_mean": 0.191317,
+      "budget": 256,
+      "checks": {
+        "fullfull_max": 0.0,
+        "layer0_delta_max": 0.0,
+        "n_nonfinite": 0
+      },
+      "collateral_pooled": 0.0,
+      "full_branch_s": 35.353922923095524,
+      "n_events": 21,
+      "n_trace_tokens": 1597,
+      "pid": "test/algebra/1098.json",
+      "press": "rkv",
+      "wallclock_s": 40.15108299255371
+    },
+    {
+      "Delta_mean": 0.113033,
+      "M_mean": 0.195948,
+      "budget": 256,
+      "checks": {
+        "fullfull_max": 0.0,
+        "layer0_delta_max": 0.0,
+        "n_nonfinite": 0
+      },
+      "collateral_pooled": 0.0,
+      "full_branch_s": 35.353922923095524,
+      "n_events": 21,
+      "n_trace_tokens": 1597,
+      "pid": "test/algebra/1098.json",
+      "press": "streamingllm",
+      "wallclock_s": 39.26382298953831
+    }
+  ]
+}

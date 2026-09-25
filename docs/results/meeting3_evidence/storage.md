@@ -53,3 +53,18 @@ allocation are unchanged.
 **Open owner decision.** Whether the 70 GiB covers `~/kv-caching`. If it does,
 nothing new can run until 0.19 GiB plus each cell's output is freed, which
 needs the owner's instruction.
+
+## Update 2026-09-25 (R.15.6): owner-delegated decision executed
+
+| Item | Measured |
+|---|---|
+| `/home/sk10741/TC-ViTok` | 17,319,180 KiB (16.52 GiB), no inode shared with the KV trees |
+| `/home/sk10741/tc-vitok-data` | 64,058,284 KiB (61.09 GiB), no inode shared with the KV trees |
+| Checks before deletion | no reference from `~/kv-caching` code or configs (one prose mention in `docs/strategy/research_landscape.md`); no symlink or hardlink into the KV trees; no process with a cwd or open file inside; `~/.bashrc` exports into `tc-vitok-data` only for interactive shells (it returns at line 8 otherwise); `launch.sh` sets its own `HF_HOME` |
+| `df` available before → after | 177,478,176 → 258,855,640 KiB: **+77.61 GiB reclaimed** (equals the two folders' sizes exactly) |
+| Left untouched | the two `TC-ViTok_cleanup_manifest_*` folders (not selected) |
+| KV combined footprint after | 72,551,280 KiB = 69.19 GiB (unchanged, as expected) |
+
+The guard now measures the combined footprint against a **72 GiB** allocation:
+2.81 GiB headroom, **1.81 GiB usable** after the 1 GiB margin. That covers all
+queued outputs (0.23 GiB declared).

@@ -1,7 +1,5 @@
-# local gate at e9a584c9d8ee6452cd01901fdd0230c851ec464d, 2026-09-24T20:20:40Z
-.venv/bin/ruff check .
-All checks passed!
-.venv/bin/black --check .
+# local gate at 58d4dc8b4f0ecd5bee8150f5ca2aae4f9a1e11ae, 2026-09-25T07:33:52Z
 All done! ✨ 🍰 ✨
-165 files would be left unchanged.
+168 files would be left unchanged.
+make lint exit=0
 make lint exit=0
