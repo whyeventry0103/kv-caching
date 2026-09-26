@@ -137,3 +137,57 @@ def test_collapse_labels():
     # includes zero but large relative to the between-r range: not a collapse
     wide = {"mean": 0.05, "ci95": [-0.01, 0.11], "mismatch_bound": 0.0}
     assert r.collapse_label([wide] * 3, 0.1) == "MIXED"
+
+
+def _collapse_fixture(shift):
+    """TV linear in log r (the registered pooled model), plus a per-budget shift."""
+    import math
+
+    prompts = {("a", 1): 100, ("a", 2): 100, ("b", 1): 100, ("b", 2): 100}
+    win = {}
+    for b in r.BUDGETS:
+        for t in r.POSITIONS:
+            lr = math.log(b / (100 + t))
+            win[(b, t)] = {
+                k: 0.2 - 0.05 * lr + shift.get(b, 0.0) + 0.0001 * i
+                for i, k in enumerate(sorted(prompts))
+            }
+    return win, prompts
+
+
+def test_collapse_read_collapses_when_tv_is_a_function_of_r_alone():
+    win, prompts = _collapse_fixture({})
+    o = r.collapse_read(win, prompts, n_resamples=200)
+    assert o["n_traces"] == 4 and len(o["pairs"]) == 3
+    # the pairs differ only through the residual r mismatch, which the bound covers
+    for p in o["pairs"]:
+        assert abs(p["mean"]) <= abs(p["mismatch_bound"])
+        assert p["r_rel_mismatch"] < 0.1
+    assert o["label"] == "COLLAPSE"
+    assert o["pooled"]["delta_r2_budget_after_r"] < 0.01
+
+
+def test_collapse_read_sees_an_absolute_budget_effect():
+    win, prompts = _collapse_fixture({256: 0.05, 512: 0.03, 1024: 0.01})
+    o = r.collapse_read(win, prompts, n_resamples=200)
+    assert o["label"].startswith("NO COLLAPSE: absolute budget")
+    # budget explains variance that log r cannot (the shift is partly collinear
+    # with log r, so it is small here, but its CI is clear of zero)
+    assert o["pooled"]["delta_r2_budget_after_r"] > 0.005
+    assert o["pooled"]["delta_r2_ci95"][0] > 0
+
+
+def test_ratio_equal_problem_and_branches():
+    num = {("a", 1): 1.0, ("b", 1): 3.0}
+    den = {("a", 1): 2.0, ("b", 1): 6.0}
+    o = r.ratio_equal_problem(num, den, n_resamples=100)
+    assert o["ratio"] == pytest.approx(0.5) and o["ci95"] == [0.5, 0.5]
+    assert r.restoration_branch([0.6, 0.9]) == "DRIFT DOMINATES"
+    assert r.restoration_branch([0.01, 0.08]) == "MASS DOMINATES"
+    assert r.restoration_branch([0.2, 0.4]) == "MIXED"
+    assert r.restoration_branch([0.05, 0.3]) == "INDETERMINATE"
+
+
+def test_distribution_index_rule():
+    o = r.distribution(list(range(101)))
+    assert o["median"] == 50 and o["p95"] == 95 and o["p99"] == 99 and o["max"] == 100

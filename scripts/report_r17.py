@@ -17,6 +17,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import statistics
 import sys
 from pathlib import Path
 from typing import Any
@@ -274,12 +275,285 @@ def bridge(runs: Path, a: argparse.Namespace) -> dict[str, Any]:
     }
 
 
+def _profiles(run_dir: Path) -> list[tuple[dict[str, Any], Path]]:
+    from kvcache.replay import is_profile_file
+
+    root = run_dir / "profiles"
+    out = []
+    for f in sorted(root.rglob("*.json")) if root.exists() else []:
+        if is_profile_file(f):
+            out.append((json.loads(f.read_text(encoding="utf-8")), f))
+    return out
+
+
+def _pk(d: dict[str, Any]) -> tuple[str, str, int, tuple[str, int]]:
+    rk = d["reference_key"]
+    c = d["condition"]
+    return c["press"], str(c["budget"]), int(rk[5]), (rk[1], int(rk[5]))
+
+
+def collapse(runs: Path, a: argparse.Namespace) -> dict[str, Any]:
+    """R.17.1.1: onset-0 window TV at 2304/3328/4352, four budgets, per policy."""
+    win: dict[str, dict[tuple[int, int], dict[tuple[str, int], float]]] = {}
+    for d, _f in _profiles(runs / "replay-onset-t0"):
+        press, budget, _s, key = _pk(d)
+        for t in r17.POSITIONS:
+            if t + 256 <= len(d["estimate"]):
+                win.setdefault(press, {}).setdefault((int(budget), t), {})[key] = (
+                    r17.window_tv(d["estimate"], t)
+                )
+    missing = []
+    for b, run in ((512, "t1-tv512"), (1024, "t1-tv1024")):
+        profs = _profiles(runs / run)
+        if not profs:
+            missing.append(run)
+        for d, _f in profs:
+            press, _b, _s, key = _pk(d)
+            for t in r17.POSITIONS:
+                v = r17.summary_window_tv(d, t)
+                if v is not None:
+                    win.setdefault(press, {}).setdefault((b, t), {})[key] = v
+    prompts = {
+        (r["pid"], _seed(r)): int(r["prompt_tokens"])
+        for r in _rows(runs / "capture-b256")
+    }
+    if missing:
+        return {
+            "read": "R.17.1.1 collapse test",
+            "status": "PENDING",
+            "why": f"no profiles yet in {missing}",
+        }
+    return {
+        "read": "R.17.1.1 collapse test (onset 0)",
+        "status": "READ",
+        "inputs": {
+            "b256_b2048": "replay-onset-t0 (tv-profile-v2, full per-step)",
+            "b512_b1024": "t1-tv512 / t1-tv1024 (tv-profile-summary-v1 windows)",
+            "prompts": "capture-b256 prompt_tokens",
+        },
+        "ratio_convention": "r = budget / (prompt + position)",
+        "per_policy": {
+            p: r17.collapse_read(w, prompts, n_resamples=a.n_resamples, seed=a.seed)
+            for p, w in sorted(win.items())
+        },
+    }
+
+
+def auc_tv(runs: Path, a: argparse.Namespace) -> dict[str, Any]:
+    """R.17.1.3: per-trace mean TV (AUC) at four budgets, equal-problem CIs."""
+    vals: dict[tuple[str, str], dict[tuple[str, int], float]] = {}
+    for d, _f in _profiles(runs / "replay-ext-diss256"):
+        press, budget, _s, key = _pk(d)
+        est = d["estimate"]
+        vals.setdefault((press, budget), {})[key] = sum(est) / len(est)
+    for run in ("t1-tv512", "t1-tv1024"):
+        for d, _f in _profiles(runs / run):
+            press, budget, _s, key = _pk(d)
+            vals.setdefault((press, budget), {})[key] = float(d["mean_tv"])
+    cells = {}
+    for (press, budget), v in sorted(vals.items()):
+        o = equal_problem_bootstrap(v, n_resamples=a.n_resamples, seed=a.seed)
+        cells[f"{press}-{budget}"] = {
+            k: o[k] for k in ("mean", "ci95", "n_problems", "n_values")
+        }
+    return {
+        "read": "R.17.1.3 AUC-TV with problem-clustered CIs",
+        "inputs": {
+            "b256_b2048": "replay-ext-diss256 (the profiles behind "
+            "results/diag/amendment-p/auc_resid_tv.json)",
+            "b512_b1024": "t1-tv512 / t1-tv1024 summaries (mean_tv)",
+        },
+        "cells": cells,
+    }
+
+
+def restore(runs: Path, a: argparse.Namespace) -> dict[str, Any]:
+    """R.17.2.3: eligibility, R_fs with its branch, cohort arms, channels."""
+    sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
+    from report_exact_lag import read_rows
+
+    rows = _rows(runs / "restore-v2")
+    fc = _fc(runs)
+    status = {}
+    for r in rows:
+        status.setdefault(r["press"], []).append(r["status"])
+    out: dict[str, Any] = {
+        "read": "R.17.2.3 restoration redesigned",
+        "n_rows": len(rows),
+        "status_counts": {
+            p: {s: v.count(s) for s in set(v)} for p, v in sorted(status.items())
+        },
+        "per_policy": {},
+    }
+    for press in sorted(status):
+        rs = [r for r in rows if r["press"] == press]
+        read = [r for r in rs if r["status"] == "READ"]
+        elig = {(r["pid"], _seed(r)): r["status"] == "READ" for r in rs}
+        toks = {(r["pid"], _seed(r)): int(r["n_trace_tokens"]) for r in rs}
+        prof = r17.eligibility_profile(
+            elig, fc, toks, n_resamples=a.n_resamples, seed=a.seed
+        )
+        fs = [r for r in read if (r.get("full_restore") or {}).get("eligible")]
+        num = {(r["pid"], _seed(r)): r["full_restore"]["window_mean_tv"] for r in fs}
+        den = {
+            (r["pid"], _seed(r)): r["full_restore"]["none_window_mean_tv"] for r in fs
+        }
+        ratio = (
+            r17.ratio_equal_problem(num, den, n_resamples=a.n_resamples, seed=a.seed)
+            if fs
+            else None
+        )
+        chan: dict[str, Any] = {}
+        for arm in ("none", "full_restore"):
+            by_off: dict[int, dict[str, dict[tuple[str, int], float]]] = {}
+            for r in fs:
+                e = r["cohort_step"]
+                for s_, v in (r.get("channels") or {}).get(arm, {}).items():
+                    off = int(s_) - e
+                    for f in ("M", "Delta"):
+                        by_off.setdefault(off, {}).setdefault(f, {})[
+                            (r["pid"], _seed(r))
+                        ] = v[f]
+            chan[arm] = {
+                str(off): {
+                    f: {
+                        k: o[k]
+                        for k in ("mean", "ci95")
+                        for o in [
+                            equal_problem_bootstrap(
+                                vals, n_resamples=a.n_resamples, seed=a.seed
+                            )
+                        ]
+                    }
+                    for f, vals in fs_.items()
+                }
+                for off, fs_ in sorted(by_off.items())
+            }
+        out["per_policy"][press] = {
+            "eligibility": prof,
+            "full_restore": {
+                "n_traces": len(fs),
+                "R_fs": ratio,
+                "branch": r17.restoration_branch(ratio["ci95"]) if ratio else None,
+            },
+            "cohort_arms": read_rows(read, n_resamples=a.n_resamples, seed=a.seed).get(
+                press
+            ),
+            "channels_by_offset_from_trigger": chan,
+        }
+    return out
+
+
+def fork_precision(runs: Path, a: argparse.Namespace) -> dict[str, Any]:
+    """R.17.0.5: the fork gap against the bf16-vs-fp32 floor; its distribution."""
+    from kvcache.fork_precision import fork_p95, gate_read, window_max_p95
+
+    fp_path = runs / "fork-precision" / "fork_precision.json"
+    forks: dict[tuple[str, int], list[dict[str, Any]]] = {}
+    for run in ("fork-control-random", "fork-control-slm"):
+        for r in _rows(runs / run):
+            for f in r.get("forks") or []:
+                forks.setdefault((r["press"], int(r["interval"])), []).append(
+                    {**f, "n_trace_tokens": r.get("n_forward")}
+                )
+    dist = {
+        f"{p}-i{i}": {
+            q: r17.distribution([f[q] for f in fs if f.get(q) is not None])
+            for q in ("first_tv", "max_tv", "first_abs_logit", "max_abs_logit")
+        }
+        for (p, i), fs in sorted(forks.items())
+    }
+    where = {}
+    for (p, i), fs in sorted(forks.items()):
+        steps = sorted(f["step"] for f in fs)
+        qs = [steps[int(q * (len(steps) - 1))] for q in (0.25, 0.5, 0.75)]
+        bins: dict[str, list[float]] = {"Q1": [], "Q2": [], "Q3": [], "Q4": []}
+        for f in fs:
+            b = (
+                "Q1"
+                if f["step"] <= qs[0]
+                else (
+                    "Q2"
+                    if f["step"] <= qs[1]
+                    else ("Q3" if f["step"] <= qs[2] else "Q4")
+                )
+            )
+            bins[b].append(f["max_tv"])
+        where[f"{p}-i{i}"] = {
+            "step_quartile_edges": qs,
+            "max_tv_by_step_quartile": {
+                k: r17.distribution(v) for k, v in bins.items()
+            },
+        }
+    out: dict[str, Any] = {
+        "read": "R.17.0.5 direct fork control: distribution and precision-floor gate",
+        "fork_distribution": dist,
+        "fork_max_tv_by_trace_position": where,
+        "layers_and_vocabulary": "fork-control-v1 stores per-fork first/max TV and "
+        "|logit| only; per-layer and per-vocabulary location come from the "
+        "one-trace diagnosis below",
+    }
+    if not fp_path.exists():
+        out["status"] = "PENDING: fork-precision has not run"
+        return out
+    d = json.loads(fp_path.read_text(encoding="utf-8"))
+    floor_blocks: list[list[float]] = []
+    for _pid, steps in d["floor"].items():
+        js = sorted(int(j) for j in steps)
+        block: list[float] = []
+        prev = None
+        for j in js:
+            if prev is not None and j != prev + 1:
+                floor_blocks.append(block)
+                block = []
+            block.append(float(steps[str(j)]["tv"]))
+            prev = j
+        if block:
+            floor_blocks.append(block)
+    floor = {i: window_max_p95(floor_blocks, i) for i in (16, 64, 256)}
+    fork_stat = {k: fork_p95([f["max_tv"] for f in fs]) for k, fs in forks.items()}
+    gate = gate_read(fork_stat, {i: floor[i]["p95"] for i in floor})
+    diag = {}
+    for dtype, v in d["diagnosis"].items():
+        st = v["steps"]
+        diag[dtype] = {
+            "fork_step": v["fork_step"],
+            "n_compared": v["n_compared"],
+            "max_tv": max(x["tv"] for x in st),
+            "max_abs_logit": max(x["max_abs_logit"] for x in st),
+            "median_argmax_rank_in_b": statistics.median(
+                x["argmax_token_rank_in_b"] for x in st
+            ),
+            "min_top10_overlap": min(x["top10_overlap"] for x in st),
+            "top1_agree_all": all(x["top1_agree"] for x in st),
+        }
+    fp32 = diag.get("float32") or {}
+    numerics = fp32.get("max_tv", 1) <= 1e-6 and fp32.get("max_abs_logit", 1) <= 1e-3
+    out.update(
+        {
+            "status": "READ",
+            "floor": {str(k): v for k, v in floor.items()},
+            "floor_all_steps_tv": r17.distribution(
+                [x for b in floor_blocks for x in b]
+            ),
+            "gate": gate,
+            "diagnosis": diag,
+            "diagnosis_label": "NUMERICS" if numerics else "IMPLEMENTATION",
+        }
+    )
+    return out
+
+
 READS = {
     "eligibility": ("exact_lag_eligibility", eligibility),
     "dacc-restricted": ("dacc_restricted", dacc_restricted),
     "mdelta": ("mdelta", mdelta),
     "omega-layers": ("omega_layers", omega_layers),
     "bridge": ("bridge", bridge),
+    "collapse": ("collapse", collapse),
+    "auc-tv": ("auc_tv", auc_tv),
+    "restore": ("restore_v2", restore),
+    "fork-precision": ("fork_precision", fork_precision),
 }
 
 

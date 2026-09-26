@@ -336,3 +336,182 @@ def collapse_label(pairs: Sequence[Mapping[str, Any]], tv_range: float) -> str:
                 else "NO COLLAPSE: horizon matters"
             )
     return "MIXED"
+
+
+BUDGETS = (256, 512, 1024, 2048)
+POSITIONS = (2304, 3328, 4352)
+PAIRS = ((256, 512), (512, 1024), (1024, 2048))
+
+
+def _ols_r2(y: Sequence[float], cols: Sequence[Sequence[float]]) -> float:
+    """R^2 of an OLS fit with intercept (numpy lstsq)."""
+    import numpy as np
+
+    y_ = np.asarray(y, dtype=float)
+    x = np.column_stack([np.ones(len(y_)), *[np.asarray(c, float) for c in cols]])
+    beta, *_ = np.linalg.lstsq(x, y_, rcond=None)
+    resid = y_ - x @ beta
+    tot = float(((y_ - y_.mean()) ** 2).sum())
+    return 1.0 - float((resid**2).sum()) / tot if tot > 0 else 0.0
+
+
+def collapse_read(
+    win: Mapping[tuple[int, int], Mapping[Key, float]],
+    prompts: Mapping[Key, int],
+    *,
+    n_resamples: int = 2000,
+    seed: int = 0,
+) -> dict[str, Any]:
+    """R.17.1.1 for one policy: matched-ratio pairs, R, label, pooled Delta R^2.
+
+    ``win[(budget, position)]`` maps (problem, seed) -> onset-0 window-mean TV.
+    The panel is the traces present in every one of the 12 cells.
+    """
+    import math
+
+    import numpy as np
+
+    panel = set(prompts)
+    for cell in win.values():
+        panel &= set(cell)
+    if not panel:
+        return {"n_traces": 0, "label": "not established at this n (empty panel)"}
+    mp = statistics.fmean(prompts[k] for k in panel)
+
+    def r_at(b: int, t: int) -> float:
+        return b / (mp + t)
+
+    means = {
+        (b, t): statistics.fmean(win[(b, t)][k] for k in panel)
+        for b in BUDGETS
+        for t in POSITIONS
+    }
+    tv_range = max(means.values()) - min(means.values())
+    pairs = []
+    for bs, bl in PAIRS:
+        d = {k: win[(bs, POSITIONS[0])][k] - win[(bl, POSITIONS[-1])][k] for k in panel}
+        o = equal_problem_bootstrap(d, n_resamples=n_resamples, seed=seed)
+        rs = [r_at(bs, t) for t in POSITIONS]
+        ys = [means[(bs, t)] for t in POSITIONS]
+        slope = float(np.polyfit(rs, ys, 1)[0])
+        dr = r_at(bs, POSITIONS[0]) - r_at(bl, POSITIONS[-1])
+        pairs.append(
+            {
+                "pair": f"B{bs}@{POSITIONS[0]} vs B{bl}@{POSITIONS[-1]}",
+                "r_small": r_at(bs, POSITIONS[0]),
+                "r_large": r_at(bl, POSITIONS[-1]),
+                "r_rel_mismatch": abs(dr) / r_at(bl, POSITIONS[-1]),
+                "mean": o["mean"],
+                "ci95": o["ci95"],
+                "mismatch_bound": slope * dr,
+                "within_budget_slope_per_unit_r": slope,
+            }
+        )
+    label = collapse_label(pairs, tv_range)
+    # pooled: TV on log r, then with budget indicators; problem bootstrap of dR^2
+    rows = [
+        (k, b, t, win[(b, t)][k], math.log(b / (prompts[k] + t)))
+        for k in panel
+        for b in BUDGETS
+        for t in POSITIONS
+    ]
+
+    def dr2(rs: list[tuple[Key, int, int, float, float]]) -> tuple[float, float]:
+        y = [x[3] for x in rs]
+        lr = [x[4] for x in rs]
+        dummies = [[1.0 if x[1] == b else 0.0 for x in rs] for b in BUDGETS[1:]]
+        r2a = _ols_r2(y, [lr])
+        return r2a, _ols_r2(y, [lr, *dummies]) - r2a
+
+    r2_r, d_r2 = dr2(rows)
+    by_pid: dict[str, list] = defaultdict(list)
+    for x in rows:
+        by_pid[x[0][0]].append(x)
+    pids = sorted(by_pid)
+    rng = random.Random(seed)
+    draws = sorted(
+        dr2([x for _ in pids for x in by_pid[pids[rng.randrange(len(pids))]]])[1]
+        for _ in range(n_resamples)
+    )
+    return {
+        "n_traces": len(panel),
+        "n_problems": len({k[0] for k in panel}),
+        "mean_prompt_tokens": mp,
+        "cell_means": {f"B{b}@{t}": v for (b, t), v in sorted(means.items())},
+        "cell_r": {f"B{b}@{t}": r_at(b, t) for b in BUDGETS for t in POSITIONS},
+        "tv_range_across_cells": tv_range,
+        "pairs": pairs,
+        "label": label,
+        "pooled": {
+            "r2_log_r": r2_r,
+            "delta_r2_budget_after_r": d_r2,
+            "delta_r2_ci95": [
+                draws[int(0.025 * (n_resamples - 1))],
+                draws[int(0.975 * (n_resamples - 1))],
+            ],
+        },
+    }
+
+
+def ratio_equal_problem(
+    num: Mapping[Key, float],
+    den: Mapping[Key, float],
+    *,
+    n_resamples: int = 2000,
+    seed: int = 0,
+) -> dict[str, Any]:
+    """Ratio of equal-problem means with a problem-cluster percentile CI."""
+    keys = sorted(set(num) & set(den))
+    per: dict[str, list[Key]] = defaultdict(list)
+    for k in keys:
+        per[k[0]].append(k)
+    pids = sorted(per)
+
+    def eqm(vals: Mapping[Key, float], ps: Sequence[str]) -> float:
+        return statistics.fmean(statistics.fmean(vals[k] for k in per[p]) for p in ps)
+
+    point = eqm(num, pids) / eqm(den, pids)
+    rng = random.Random(seed)
+    draws = []
+    for _ in range(n_resamples):
+        ps = [pids[rng.randrange(len(pids))] for _ in pids]
+        d = eqm(den, ps)
+        if d > 0:
+            draws.append(eqm(num, ps) / d)
+    draws.sort()
+    n = len(draws)
+    return {
+        "ratio": point,
+        "ci95": [draws[int(0.025 * (n - 1))], draws[int(0.975 * (n - 1))]],
+        "n_traces": len(keys),
+        "n_problems": len(pids),
+        "n_resamples_used": n,
+    }
+
+
+def restoration_branch(ci: Sequence[float]) -> str:
+    """R.17.2.3 full-self-restoration branches, on the CI of R_fs."""
+    lo, hi = ci
+    if lo >= 0.50:
+        return "DRIFT DOMINATES"
+    if hi <= 0.10:
+        return "MASS DOMINATES"
+    if lo > 0.10 and hi < 0.50:
+        return "MIXED"
+    return "INDETERMINATE"
+
+
+def distribution(values: Sequence[float]) -> dict[str, Any]:
+    """mean, median, p95, p99, max (index rule sorted[int(q (n-1))])."""
+    vs = sorted(float(v) for v in values)
+    if not vs:
+        return {"n": 0}
+    q = lambda p: vs[int(p * (len(vs) - 1))]  # noqa: E731
+    return {
+        "n": len(vs),
+        "mean": statistics.fmean(vs),
+        "median": statistics.median(vs),
+        "p95": q(0.95),
+        "p99": q(0.99),
+        "max": vs[-1],
+    }

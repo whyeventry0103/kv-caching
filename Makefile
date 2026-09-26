@@ -126,6 +126,10 @@ dryrun:
 	$(PYTHON) scripts/report_r17.py --runs-root runs --dry-run mdelta
 	$(PYTHON) scripts/report_r17.py --runs-root runs --dry-run omega-layers
 	$(PYTHON) scripts/report_r17.py --runs-root runs --dry-run bridge
+	$(PYTHON) scripts/report_r17.py --runs-root runs --dry-run collapse
+	$(PYTHON) scripts/report_r17.py --runs-root runs --dry-run auc-tv
+	$(PYTHON) scripts/report_r17.py --runs-root runs --dry-run restore
+	$(PYTHON) scripts/report_r17.py --runs-root runs --dry-run fork-precision
 	$(PYTHON) scripts/run_replay.py --config configs/experiments/restoration_smoke.yaml --dry-run
 	$(PYTHON) scripts/run_replay.py --config configs/experiments/restoration_diss256.yaml --dry-run
 	$(PYTHON) scripts/run_shape_analysis.py --config configs/experiments/shape_p2v2_restricted.yaml --dry-run
