@@ -157,7 +157,10 @@ def test_v2_keeps_every_v1_field_and_adds_exact_head_and_nested_sums(policy):
         for g in range(model.config.num_key_value_heads):
             for f_h, f_g in (("M_head", "M"), ("Delta_head", "Delta")):
                 hs = heads[f_h][layer][g * rep : (g + 1) * rep]
-                assert sum(hs) / rep == pytest.approx(grp[f_g][layer][g], abs=1e-9)
+                # per event the group mean of the head values IS the stored group
+                # value; summed over events the two orders differ by float32
+                # rounding only (observed ~1e-9 relative)
+                assert sum(hs) / rep == pytest.approx(grp[f_g][layer][g], rel=1e-6)
     assert v2["n_measured_by_layer"] == [
         sum(x) // model.config.num_key_value_heads
         for x in v2["n_measured_by_layer_group"]

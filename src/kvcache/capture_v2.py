@@ -50,8 +50,9 @@ NESTED_KS = (8, 16, 32, 64, 128, 256)
 def head_stats(full_logits: Any, comp_positions: Any, evicted: Any) -> dict[str, Any]:
     """Per query head M and M_event -- the values ``channel_stats`` averages.
 
-    Same operations in the same order as ``channel_stats``, so the group mean
-    of these equals its stored group value exactly (tested).
+    Same operations in the same order as ``channel_stats``: per event, the
+    group mean of these equals its group value exactly. Summed over events the
+    two orders agree to float32 rounding (tested at 1e-6 relative).
     """
     import torch
 
