@@ -207,3 +207,30 @@ def test_omega_components_attributes_a_perp_only_change():
     assert o["par"]["mean"] == pytest.approx(0.0)
     assert o["perp"]["mean"] == pytest.approx(2.0)
     assert o["log_perp_over_par"]["mean"] == pytest.approx(__import__("math").log(2))
+
+
+def test_omega_by_k_uses_the_r6_rule_at_each_k():
+    def nl(o_small, o_large):
+        return {
+            "ks": [8, 64],
+            "sum_omega": [[2 * o_small, 2 * o_large]],
+            "n_finite": [[2, 2]],
+        }
+
+    a = {(f"p{i}", 1): nl(3.0, 2.0) for i in range(4)}
+    b = {(f"p{i}", 1): nl(1.0, 1.5) for i in range(4)}
+    o = r.omega_by_k(a, b, n_resamples=50)
+    assert o["per_k"]["8"]["contrast"]["mean"] == pytest.approx(2.0)
+    assert o["per_k"]["64"]["contrast"]["mean"] == pytest.approx(0.5)
+
+
+def test_head_dispersion_is_max_minus_min_within_each_group():
+    row = {
+        "sum_by_layer_head": {"M_head": [[0.2, 0.4, 1.0, 1.0]]},  # 2 events
+        "n_measured_by_layer": [2],
+    }
+    o = r.head_dispersion(
+        {("a", 1): row, ("b", 1): row}, heads_per_group=2, n_resamples=20
+    )
+    # group 1: means 0.1, 0.2 -> 0.1; group 2: 0.5, 0.5 -> 0.0; mean 0.05
+    assert o["mean"] == pytest.approx(0.05)

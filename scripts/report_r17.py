@@ -577,6 +577,39 @@ def fork_precision(runs: Path, a: argparse.Namespace) -> dict[str, Any]:
     return out
 
 
+def capture_v2(runs: Path, a: argparse.Namespace) -> dict[str, Any]:
+    """R.17.1.6/1.7 on capture-v2 rows: nested-k omega and per-head dispersion."""
+    rows = _rows(runs / a.capture_run)
+    if not rows or "latent_nested" not in rows[0]:
+        return {"status": "PENDING or not a capture-v2 run", "n_rows": len(rows)}
+    by = {
+        p: {(r["pid"], _seed(r)): r for r in rows if r["press"] == p} for p in POLICIES
+    }
+    heads = rows[0]["sum_by_layer_head"]["M_head"][0]
+    groups = len(rows[0]["sum_by_layer_group"]["M"][0])
+    rep = len(heads) // groups
+    acc = {r.get("nested_acceptance", {}).get("passed") for r in rows}
+    return {
+        "read": "R.17.1.6/1.7 capture-v2 extras",
+        "inputs": {"capture_run": a.capture_run, "n_rows": len(rows)},
+        "nested_acceptance_passed": sorted(map(str, acc)),
+        "omega_by_k_random_minus_slm": r17.omega_by_k(
+            {k: r["latent_nested"] for k, r in by["random"].items()},
+            {k: r["latent_nested"] for k, r in by["streamingllm"].items()},
+            n_resamples=a.n_resamples,
+            seed=a.seed,
+        ),
+        "within_group_M_dispersion": {
+            p: r17.head_dispersion(
+                rs, heads_per_group=rep, n_resamples=a.n_resamples, seed=a.seed
+            )
+            for p, rs in by.items()
+            if rs
+        },
+        "heads_per_group": rep,
+    }
+
+
 READS = {
     "eligibility": ("exact_lag_eligibility", eligibility),
     "dacc-restricted": ("dacc_restricted", dacc_restricted),
@@ -587,6 +620,7 @@ READS = {
     "auc-tv": ("auc_tv", auc_tv),
     "restore": ("restore_v2", restore),
     "fork-precision": ("fork_precision", fork_precision),
+    "capture-v2": ("capture_v2_extras", capture_v2),
 }
 
 

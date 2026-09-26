@@ -561,3 +561,77 @@ def omega_components(
         )
         out[name] = _brief(o)
     return out
+
+
+def omega_by_k(
+    rows_a: Mapping[Key, Mapping[str, Any]],
+    rows_b: Mapping[Key, Mapping[str, Any]],
+    *,
+    n_resamples: int = 2000,
+    seed: int = 0,
+) -> dict[str, Any]:
+    """R.17.1.7 k-sensitivity from capture-v2 ``latent_nested`` (a - b per k).
+
+    Per trace and k: finite omega_k averaged over positions within layer, then
+    equal layer weights (the R.6 rule at every k); then the paired equal-problem
+    contrast. Layers with no finite omega_k are excluded, never zero.
+    """
+
+    def trace_omega(nl: Mapping[str, Any], i: int) -> float | None:
+        vals = [
+            s[i] / n[i]
+            for s, n in zip(nl["sum_omega"], nl["n_finite"], strict=True)
+            if n[i] > 0
+        ]
+        return statistics.fmean(vals) if vals else None
+
+    ks = next(iter(rows_a.values()))["ks"]
+    out: dict[str, Any] = {"ks": ks, "per_k": {}}
+    for i, k in enumerate(ks):
+        a = {key: trace_omega(v, i) for key, v in rows_a.items()}
+        b = {key: trace_omega(v, i) for key, v in rows_b.items()}
+        a = {key: v for key, v in a.items() if v is not None}
+        b = {key: v for key, v in b.items() if v is not None}
+        o = paired_equal_problem(a, b, n_resamples=n_resamples, seed=seed)
+        out["per_k"][str(k)] = {
+            "a_mean": equal_problem_bootstrap(a, n_resamples=n_resamples, seed=seed)[
+                "mean"
+            ],
+            "b_mean": equal_problem_bootstrap(b, n_resamples=n_resamples, seed=seed)[
+                "mean"
+            ],
+            "contrast": _brief(o),
+        }
+    return out
+
+
+def head_dispersion(
+    rows: Mapping[Key, Mapping[str, Any]],
+    *,
+    heads_per_group: int,
+    field: str = "M_head",
+    n_resamples: int = 2000,
+    seed: int = 0,
+) -> dict[str, Any]:
+    """R.17.1.6 within-group dispersion of a per-head channel (max - min).
+
+    Per trace, layer and KV group: the per-head means (sum / measured events)
+    of the group's heads, max minus min; averaged over groups and layers per
+    trace, then the equal-problem mean with CI.
+    """
+    vals = {}
+    for key, r in rows.items():
+        sums = r["sum_by_layer_head"][field]
+        n = r["n_measured_by_layer"]
+        per = []
+        for layer, heads in enumerate(sums):
+            if not n[layer]:
+                continue
+            means = [h / n[layer] for h in heads]
+            for g in range(0, len(means), heads_per_group):
+                grp = means[g : g + heads_per_group]
+                per.append(max(grp) - min(grp))
+        if per:
+            vals[key] = statistics.fmean(per)
+    o = equal_problem_bootstrap(vals, n_resamples=n_resamples, seed=seed)
+    return {k: o[k] for k in ("mean", "ci95", "n_problems", "n_values")}
