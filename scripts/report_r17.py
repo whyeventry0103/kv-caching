@@ -147,6 +147,21 @@ def _trace_layer_means(r: dict[str, Any], field: str) -> list[float | None]:
     return out
 
 
+def _capture_ratio(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    """budget / (mean prompt + mean trace) over the capture's distinct traces."""
+    t = {(r["pid"], _seed(r)): (r["prompt_tokens"], r["n_trace_tokens"]) for r in rows}
+    mp = statistics.fmean(p for p, _ in t.values())
+    mt = statistics.fmean(n for _, n in t.values())
+    budget = int(rows[0]["budget"])
+    return {
+        "budget": budget,
+        "mean_prompt_tokens": mp,
+        "mean_trace_tokens": mt,
+        "ratio": budget / (mp + mt),
+        "n_traces": len(t),
+    }
+
+
 def mdelta(runs: Path, a: argparse.Namespace) -> dict[str, Any]:
     rows = _rows(runs / a.capture_run)
     per: dict[str, dict[tuple[str, int], dict[str, Any]]] = {p: {} for p in POLICIES}
@@ -204,6 +219,7 @@ def mdelta(runs: Path, a: argparse.Namespace) -> dict[str, Any]:
             else "CONFIRMATORY (R.17.1.5)"
         ),
         "inputs": {"capture_run": a.capture_run, "n_rows": len(rows)},
+        "realized_ratio": _capture_ratio(rows),
         "per_policy": brief,
         "per_layer": layers,
         "H2": {"M": m_read, "Delta": d_read, "label": r17.h2_label(m_read, d_read)},
