@@ -24,6 +24,17 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-09-27 01:50 Dubai — R.17 non-GPU work done; GPU cells
+  queued in the requested order.** Queue: q6-basis-fit-k256 ->
+  capture2-smoke -> capture-b2048 (capture-v2) -> t1-tv512/1024 -> restore-v2
+  -> fork-precision. Each new family (capture_v2, restore_v2, fork_precision)
+  passed its torch tests on the host CPU before release. Readers are ready
+  (`scripts/report_r17.py`: collapse, auc-tv, restore, fork-precision; and
+  report_capture for b2048 v2). Paper: the mechanism draft is in an \iffalse
+  block (`ddadc57`); ICML page budget written. NEXT: process each cell as it
+  lands (worklist docs/project/r17_worklist.md); Tier 3 config and
+  footprint.
+
   **★★★★★ 2026-09-27 — R.17 underway (target venue: proposed ICML 2027,
   pending supervisor confirmation).**
   - Registration: `ac78eab`. Worklist: docs/project/r17_worklist.md.

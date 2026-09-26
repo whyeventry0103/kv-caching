@@ -9,26 +9,28 @@ what was observed, not what was intended.
 
 | Item | What | Done when | Status |
 |---|---|---|---|
-| hold | capture-b2048 held before its first row | remote dry-run shows BLOCKED | DONE (e.g. commit after 470a9bc) |
-| 0.7 | storage facts for capture latent and t1-tv | code + a real row inspected | t1-tv: summary windows cover the Q.2 windows (no re-spec) |
-| R.17 | registration of every read below | committed before any read | |
-| 0.1 | reinsertion paragraph retracted/rewritten | PDF rebuilt ×2, no `^!`, claims pinned | |
-| 0.2 | locking wording per R.2 | PDF rebuilt, PAPER_FINDINGS quotes old/new | |
-| 0.3 | Q.2 ratio note | PREREGISTRATION dated note | |
-| 0.4 | four cleanup items | each checked | |
-| 0.5 | fork control: arms, distribution, fp32 diagnosis, floor | FINAL read + diagnosis run | |
-| 0.6 | M/Δ report | numbers from capture_b256 | |
-| 1.1 | collapse test | needs t1-tv rows | |
-| 1.2 | D_acc restricted onset contrast | read written | |
-| 1.3 | AUC-TV CIs at four budgets | needs t1-tv rows for 512/1024 | |
-| 1.4 | Problem 1 figures | PNG viewed | |
-| 1.5 | H2/H3 on b256 (exploratory) | read written | |
-| 1.6 | collateral explanation + rank diagnostic record | written | |
-| 1.7 | per-layer ω profiles; k sensitivity status | read written | |
-| 1.8 | bridge AUROC | read written | |
-| 2.1 | b2048 schema + release | tests pass; hold removed | |
-| 2.2 | t1-tv re-spec | not needed (0.7) | |
-| 2.3 | restoration redesign | implemented, tested, queued | |
-| 2.4 | fp32 fork diagnosis + precision floor | run | |
-| 3 | Llama-8B capture config + footprint | config dry-run | |
-| P.1–P.4 | mechanism section, ICML budget, gates, report | | |
+| hold | capture-b2048 held before its first row | remote dry-run shows BLOCKED | DONE, released onto capture-v2 after host tests (`5b46a69`) |
+| R.17 | registration of every read | committed before any read | DONE `ac78eab`; addenda A-D |
+| 0.1 | reinsertion paragraph retracted/rewritten | PDF x2, claims pinned | DONE `a549250` |
+| 0.2 | locking wording per R.2 | PDF, PAPER_FINDINGS old/new | DONE `a549250` |
+| 0.3 | Q.2 ratio note | dated note at the table | DONE `ac78eab` |
+| 0.4 | cleanup a-d | each checked | DONE `afbc9a3` |
+| 0.5 | fork control arms / distribution / fp32 diagnosis / floor | FINAL read + fork-precision job | arms stated; job queued (last per order); distribution reader ready; waiting on the fork FINAL |
+| 0.6 | M/Delta report | mdelta.json | DONE |
+| 0.7 | storage facts | code + rows | DONE (t1-tv summaries cover the collapse windows) |
+| 1.1 | collapse test | needs t1-tv rows | reader ready; PENDING t1-tv512/1024 |
+| 1.2 | D_acc restricted | dacc_restricted.json | DONE: NOT ESTABLISHED |
+| 1.3 | AUC-TV CIs | auc_tv.json | 256/2048 DONE; 512/1024 PENDING t1-tv |
+| 1.4 | figures | PNG viewed | DONE (supervisor, heatmaps); collapse plot after 1.1 |
+| 1.5 | H2/H3 b256 | mdelta.json | DONE (exploratory): NEITHER / HOLDS; b2048 confirmatory PENDING |
+| 1.6 | collateral | written | DONE |
+| 1.7 | per-layer omega; k status | omega_layers.json | DONE; nested k comes with b2048 |
+| 1.8 | bridge | bridge.json | DONE: NOT CONFIRMED |
+| 2.1 | b2048 on capture-v2 | host tests pass; chain queued | DONE (queued: q6-basis-fit-k256 -> capture2-smoke -> capture-b2048) |
+| 2.2 | t1-tv | no re-spec needed | queued |
+| 2.3 | restore-v2 | host tests pass; queued | DONE (queued after t1-tv) |
+| 2.4 | fork-precision | host tests pass; queued | DONE (queued last) |
+| 3 | Llama-8B capture | config + footprint | TODO |
+| P.1 | mechanism draft | pinned, not compiled | DONE `ddadc57`; the section 4.4 discrepancy is recorded |
+| P.2 | ICML page budget | doc | DONE `ddadc57` |
+| P.3/P.4 | gates, report | | after the GPU cells |
