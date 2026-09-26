@@ -3526,9 +3526,16 @@ kept.
      asked, in-session, "can u start the runs right now". A tmux loop
      (`~/manual_ticks.sh` on the GPU host) ran the unchanged orchestrator
      every 10 min from 20:24 until 01:40, when the cron window takes over. It
-     used `--max-hours-override` so every job still stops at 10:43. This is the
-     only departure from the 01:45–10:45 window: same code path, gates,
-     storage guard and resume semantics.
+     used `--max-hours-override` so every job still stops at 10:43.
+
+     Second owner-requested start, 2026-09-26 11:39 Dubai. The owner asked,
+     in-session, "can u start the runs again rn, this is also just a one time
+     bypass from our nightly runs". `~/manual_ticks_0926.sh` ticks until
+     2026-09-27 01:40, and every job stops at 10:43 that day.
+
+     These two starts are the only departures from the 01:45–10:45 window:
+     same code path, gates, storage guard and resume semantics. Each start is
+     a one-time bypass and authorizes no later one.
    - **Figure path (commit 910d4dc).** Postprocessing published stage
      figures into `figures/`, which is inside the hashed source tree. From
      00:15 every tick's preflight failed with "remote source changed after

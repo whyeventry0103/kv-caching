@@ -24,6 +24,12 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-09-26 11:39 Dubai — one-time owner-requested daytime start
+  (R.16.6).** tmux `manual-ticks` runs ~/manual_ticks_0926.sh until
+  2026-09-27 01:40, then cron takes over; jobs stop at 2026-09-27 10:43.
+  dacc-t512 resumed from 320/400 on both GPUs. This is not a standing
+  authorization for later out-of-window starts.
+
   **★★★★★ 2026-09-26 10:43 Dubai — night 2 closed cleanly.** dacc-t2048
   400/400; dacc-t512 320/400 (stopped by timer, resumable). No
   abort/traceback/storage block after 00:31. Remaining: dacc-t512 80,
