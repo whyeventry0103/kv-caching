@@ -65,7 +65,9 @@ def test_cohort_arms_equal_exact_lag_and_full_restoration_removes_missing_mass(
     fs = out["full_restore"]
     assert fs["eligible"] and fs["gate"]["passed"]
     e = out["cohort_step"]
-    assert fs["cache_len_after"] == len(prompt) + e  # every position, once
+    # every position once at restoration; then the window's tokens are appended
+    assert fs["cache_len_at_restore"] == len(prompt) + e
+    assert fs["cache_len_after"] == len(prompt) + e + 10
     steps = [str(s) for s in measure_steps(e, 10, 3)]
     assert sorted(out["channels"]["full_restore"], key=int) == steps
     assert sorted(out["channels"]["none"], key=int) == steps

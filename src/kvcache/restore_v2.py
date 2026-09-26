@@ -312,6 +312,7 @@ def run_restore_v2(
                 if not gate["passed"]:
                     raise RuntimeError("full-restoration gate failed")
                 arm_tracker["full_restore"] = tr
+                len_at_restore = int(cache.layers[0].keys.shape[2])
                 tvs = []
                 for j in range(start, start + window):
                     press.profile_step = j
@@ -332,6 +333,7 @@ def run_restore_v2(
                         none_tv[j] for j in range(start, start + window)
                     )
                     / window,
+                    "cache_len_at_restore": len_at_restore,
                     "cache_len_after": int(cache.layers[0].keys.shape[2]),
                 }
             out["full_restore"] = fs
