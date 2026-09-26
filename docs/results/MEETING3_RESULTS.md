@@ -19,9 +19,16 @@ parity, queue dry-run, remote-only data list):
   [+0.0004, +0.0061], but NON-SPECIFIC), StreamingLLM FLAT-NULL. Only 8/25
   problems are eligible (stash size is set by prompt length), so the read is
   exploratory. See §3b.
-- **Running:** dacc-t2048 on both GPUs (seeds 23 and 89). Not started:
-  dacc-t512, dacc-t0, fork-control-random/-slm, capture-b2048, t1-tv512,
-  t1-tv1024. Each postprocess stage reads its cell when complete.
+- **End of night 2 (10:43 Dubai):**
+  - dacc-t2048 **400/400** (complete); dacc-t512 **320/400**.
+  - dacc-t512 stopped on the window timer (rc 124), resumable.
+  - Night 2 had no aborts, tracebacks or storage blocks after the 00:31 fix.
+  - Not started: dacc-t0, fork-control-random/-slm, capture-b2048,
+    t1-tv512, t1-tv1024.
+  - post-dacc reads only when all three D_acc arms are complete.
+  - The next window opens 2026-09-27 01:45 (cron).
+  - Estimated remaining GPU work, on the §6 cost estimates: about 4
+    windows.
 
 **Execution status, 2026-09-25 11:30 Dubai (after GPU night 1).**
 
