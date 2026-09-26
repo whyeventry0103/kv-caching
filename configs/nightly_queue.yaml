@@ -1012,7 +1012,6 @@ jobs:
     command: restore2
     config: configs/experiments/restore_v2_math500_r17.yaml
     run_name: restore-v2
-    blocked: "Amendment R.17 (2026-09-27) - held until the restore-v2 tests pass on the pinned stack (R.17.2.3)"
     total: 200
     seeds: [11, 23, 47, 89]
     min_free_gb: 28
