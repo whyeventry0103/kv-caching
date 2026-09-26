@@ -191,3 +191,19 @@ def test_ratio_equal_problem_and_branches():
 def test_distribution_index_rule():
     o = r.distribution(list(range(101)))
     assert o["median"] == 50 and o["p95"] == 95 and o["p99"] == 99 and o["max"] == 100
+
+
+def test_omega_components_attributes_a_perp_only_change():
+    lat = lambda par, perp: {  # noqa: E731
+        "sum_par": [par * 2],
+        "sum_perp": [perp * 2],
+        "n_finite": [2],
+        "n_undefined": [0],
+        "n_unbounded": [0],
+    }
+    a = {(f"p{i}", 1): lat(1.0, 4.0) for i in range(5)}
+    b = {(f"p{i}", 1): lat(1.0, 2.0) for i in range(5)}
+    o = r.omega_components(a, b, n_resamples=50)
+    assert o["par"]["mean"] == pytest.approx(0.0)
+    assert o["perp"]["mean"] == pytest.approx(2.0)
+    assert o["log_perp_over_par"]["mean"] == pytest.approx(__import__("math").log(2))

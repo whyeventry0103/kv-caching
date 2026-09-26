@@ -515,3 +515,49 @@ def distribution(values: Sequence[float]) -> dict[str, Any]:
         "p99": q(0.99),
         "max": vs[-1],
     }
+
+
+def omega_components(
+    rows_a: Mapping[Key, Mapping[str, Sequence[float]]],
+    rows_b: Mapping[Key, Mapping[str, Sequence[float]]],
+    *,
+    n_resamples: int = 2000,
+    seed: int = 0,
+) -> dict[str, Any]:
+    """R.17 addendum D: which component carries an omega contrast (a - b).
+
+    Per trace, layer-equal means over ALL steps of ||d_par|| and ||d_perp||
+    (sum / steps, steps = finite + undefined + unbounded); then paired
+    equal-problem contrasts of each, of their logs, and of log(perp / par).
+    """
+    import math
+
+    def comp(lat: Mapping[str, Sequence[float]]) -> tuple[float, float]:
+        n = [
+            f + u + b
+            for f, u, b in zip(
+                lat["n_finite"], lat["n_undefined"], lat["n_unbounded"], strict=True
+            )
+        ]
+        par = statistics.fmean(s / k for s, k in zip(lat["sum_par"], n, strict=True))
+        perp = statistics.fmean(s / k for s, k in zip(lat["sum_perp"], n, strict=True))
+        return par, perp
+
+    ca = {k: comp(v) for k, v in rows_a.items()}
+    cb = {k: comp(v) for k, v in rows_b.items()}
+    out: dict[str, Any] = {}
+    for name, f in (
+        ("perp", lambda c: c[1]),
+        ("par", lambda c: c[0]),
+        ("log_perp", lambda c: math.log(c[1])),
+        ("log_par", lambda c: math.log(c[0])),
+        ("log_perp_over_par", lambda c: math.log(c[1] / c[0])),
+    ):
+        o = paired_equal_problem(
+            {k: f(v) for k, v in ca.items()},
+            {k: f(v) for k, v in cb.items()},
+            n_resamples=n_resamples,
+            seed=seed,
+        )
+        out[name] = _brief(o)
+    return out

@@ -3867,3 +3867,12 @@ details of R.17.2.3, fixed before any output exists.
     (`INELIGIBLE: no eviction at or after the trigger`).
   - Per lag, a window that does not fit is ineligible, as in R.10.
   - Full restoration needs e + 200 ≤ the last forward.
+
+**R.17 addendum D (2026-09-27; descriptive, already seen).** The ω component
+decomposition shown in the 2026-09-27 status report is made an artifact.
+- *Per trace:* layer-equal means of ‖δ∥‖ and ‖δ⊥‖ over all steps, each layer
+  computed as sum / (n_finite + n_undefined + n_unbounded).
+- *Contrasts (Random − StreamingLLM, paired equal-problem):* ‖δ⊥‖, ‖δ∥‖, their
+  logs, and log(‖δ⊥‖ / ‖δ∥‖).
+- *Artifact:* `results/diag/meeting3/r17/omega_layers.json` (key
+  `components`). No verdict.

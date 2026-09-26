@@ -228,6 +228,23 @@ def omega_layers(runs: Path, a: argparse.Namespace) -> dict[str, Any]:
         "k_sensitivity": "not computable: capture-v1 stores per-step per-layer "
         "norms at k = 64, not projection coefficients",
         "per_layer": out,
+        "components": {
+            "note": "R.17 addendum D: Random - StreamingLLM, paired equal-problem",
+            **r17.omega_components(
+                {
+                    (r["pid"], _seed(r)): r["latent"]
+                    for r in rows
+                    if r["press"] == "random"
+                },
+                {
+                    (r["pid"], _seed(r)): r["latent"]
+                    for r in rows
+                    if r["press"] == "streamingllm"
+                },
+                n_resamples=a.n_resamples,
+                seed=a.seed,
+            ),
+        },
     }
 
 
