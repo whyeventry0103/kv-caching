@@ -1346,7 +1346,7 @@
     }
   },
   "provenance_failures": [],
-  "reproduce": "python scripts/report_exact_lag.py --runs-root <runs> --run exact-lag-r5 --design configs/experiments/exact_lag_math500_r5.yaml --out /home/sk10741/kv-caching/results/diag/meeting3/attempts/exact-lag-20260925T212534Z-3048601/exact_lag.json --final",
+  "reproduce": "python scripts/report_exact_lag.py --runs-root <runs> --run exact-lag-r5 --design configs/experiments/exact_lag_math500_r5.yaml --out /home/sk10741/kv-caching/results/diag/meeting3/attempts/exact-lag-20260926T183021Z-3098598/exact_lag.json --final",
   "run": "exact-lag-r5",
   "status": "FINAL",
   "sufficient_statistics_sha256": "6a55f8439ec730fe64a4e30f0420e022b740e2a691e7cf6d8914f9eaafcd03e9",

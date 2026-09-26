@@ -1,15 +1,15 @@
 {
-  "analysis_id": "289fed9c36350717e3627a015df68dbc30f2d954c466b86d68bc6d3da2787526",
-  "attempt": "results/diag/meeting3/attempts/dacc-20260926T174004Z-3095978",
+  "analysis_id": "56f89a931debaba65e5844023673dba2df02e6cd6550bd24aec6e1b773e36eec",
+  "attempt": "results/diag/meeting3/attempts/dacc-20260926T183017Z-3098447",
   "finalized": true,
   "gate_outcome": null,
   "generation_digest": "0254a56d62d6c5d9e3f466568a0556672790dd6d8de007623d7c96e8a867b07d",
   "manifest_exit": 0,
   "outputs": {
     "results/diag/meeting3/dacc.conditions.tsv": "15442e72895dd04337f43449419d04d139701f7d154847c1cf29e88204fcca7f",
-    "results/diag/meeting3/dacc.json": "4a14673aef58e58a1b26b6a5e124a5fc8e67f6e197cf03651dc109df262412db",
-    "results/diag/meeting3/figures/meeting3_dacc.pdf": "9c4de9a81df456c3291923f1ec3f76f1b8f983d1fb35d03a05e6ba50fb05990b",
-    "results/diag/meeting3/figures/meeting3_dacc.png": "0cc0575e54817728461f187c68c6150f2bd615a5d8afa82ce175c6884001cc5e"
+    "results/diag/meeting3/dacc.json": "4cc9930b74a07539f387e808512abfb59c01aaaeb62a2599e964855f28483daf",
+    "results/diag/meeting3/figures/meeting3_dacc.pdf": "8f1b58c94c698f18b2daedfcb173992847a055811520ff2a2829c003023974aa",
+    "results/diag/meeting3/figures/meeting3_dacc.png": "400331bf5bb3c6472c3dbf265beb387fe605db231e38a31a64a8f33e54ea6ab1"
   },
   "passed": true,
   "reader_exit": 0,
@@ -20,10 +20,10 @@
     "     streamingllm-256-t0 fc=0.850 comp=0.250 damage=+0.600 [+0.420,+0.750] lost=0.610 gained=0.010 trunc=0.10 exposed=1.00",
     "  streamingllm-256-t2048 fc=0.850 comp=0.440 damage=+0.410 [+0.230,+0.580] lost=0.420 gained=0.010 trunc=0.10 exposed=0.64",
     "   streamingllm-256-t512 fc=0.850 comp=0.270 damage=+0.580 [+0.400,+0.740] lost=0.580 gained=0.000 trunc=0.13 exposed=0.96",
-    "wrote /home/sk10741/kv-caching/results/diag/meeting3/attempts/dacc-20260926T174004Z-3095978/dacc.json"
+    "wrote /home/sk10741/kv-caching/results/diag/meeting3/attempts/dacc-20260926T183017Z-3098447/dacc.json"
   ],
   "stage": "dacc",
   "status": "FINAL",
   "terminal": true,
-  "timestamp": "20260926T174004Z"
+  "timestamp": "20260926T183017Z"
 }
