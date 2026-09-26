@@ -1424,6 +1424,69 @@ def build_catalogue() -> list[Entry]:
         "profiles whose TV and JSD non-zero supports differ somewhere",
     )
 
+    # Meeting #3 Q.5 exact-lag restoration (R.10), identity-repaired, and who
+    # it describes (R.17 addendum A). These replace the retracted P.5 claims.
+    M3 = DIAG / "meeting3"
+    _el = M3 / "exact_lag.json"
+    if _el.exists():
+        _eld, _elr = _load(_el), _el.relative_to(PROJECT_ROOT)
+        for _press, _pv in _eld["policies"].items():
+            for _lag, _lv in _pv["per_lag"].items():
+                for _arm, _av in (_lv.get("arms") or {}).items():
+                    add(
+                        f"m3.el.{_press}.lag{_lag}.{_arm}.effect",
+                        _av["effect_vs_no_intervention"],
+                        f"{_elr} :: policies.{_press}.per_lag.{_lag}.arms.{_arm}"
+                        ".effect_vs_no_intervention",
+                        f"exact-lag {_arm} arm, none minus arm ({_press}, lag {_lag})",
+                    )
+                    for _i, _b in enumerate(_av["effect_ci95"]):
+                        add(
+                            f"m3.el.{_press}.lag{_lag}.{_arm}."
+                            f"ci{'lo' if _i == 0 else 'hi'}",
+                            _b,
+                            f"{_elr} :: policies.{_press}.per_lag.{_lag}.arms."
+                            f"{_arm}.effect_ci95[{_i}]",
+                            f"exact-lag {_arm} CI bound ({_press}, lag {_lag})",
+                        )
+    _eg = M3 / "r17" / "exact_lag_eligibility.json"
+    if _eg.exists():
+        _egd, _egr = _load(_eg), _eg.relative_to(PROJECT_ROOT)
+        for _s in ("eligible", "ineligible"):
+            _v = _egd[_s]
+            add(
+                f"m3.el.{_s}.fc_accuracy",
+                _v["fc_accuracy"]["mean"],
+                f"{_egr} :: {_s}.fc_accuracy.mean",
+                f"full-cache accuracy of the {_s} restoration traces",
+            )
+            for _i, _bd in enumerate(_v["fc_accuracy"]["ci95"]):
+                add(
+                    f"m3.el.{_s}.fc_accuracy.ci{'lo' if _i == 0 else 'hi'}",
+                    _bd,
+                    f"{_egr} :: {_s}.fc_accuracy.ci95[{_i}]",
+                    f"full-cache accuracy CI bound, {_s} restoration traces",
+                )
+            add(
+                f"m3.el.{_s}.n_problems",
+                _v["n_problems"],
+                f"{_egr} :: {_s}.n_problems",
+                f"{_s} problems in the exact-lag read",
+            )
+            add(
+                f"m3.el.{_s}.n_traces",
+                _v["n_traces"],
+                f"{_egr} :: {_s}.n_traces",
+                f"{_s} traces in the exact-lag read",
+            )
+            add(
+                f"m3.el.{_s}.realized_ratio_pct",
+                100 * _v["realized_ratio"],
+                f"100 * {_egr} :: {_s}.realized_ratio",
+                f"realized cache ratio (%) on the {_s} traces at budget 256",
+                kind="derived",
+            )
+
     _fc = _load(P / "m3_INVALID_floor_collapse.json")
     add(
         "m3v1.compression_events",

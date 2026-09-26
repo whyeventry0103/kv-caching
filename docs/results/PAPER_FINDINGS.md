@@ -1379,6 +1379,84 @@ exists at 256 only.
 
 <!-- AUDIT:ARCHIVAL-END -->
 
+### 5d. R.17 corrections to the paper (2026-09-27): reinsertion retracted and rewritten; locking reworded per R.2
+
+**0.1 Reinsertion (§4.8, "Follow-up probes").**
+
+- **Retracted.** The P.5 cell stashed the tail of a score-ordered tensor, not
+  the evicted entries (PREREGISTRATION R.5). Its specificity control and its
+  matched-arm null no longer carry any claim. The figures 6.49× (Random) and
+  5.49× (StreamingLLM) (`p5.*.random_over_baseline`, from
+  `results/diag/amendment-p/restoration_diss256_v2.json`) and the sentence "the
+  cache is acutely sensitive to which entries occupy it" now appear only inside
+  the retraction.
+- **Old (removed):**
+  > "The specificity control is where the information is. Re-inserting the same
+  > number of entries drawn at random from the evicted pool … moves divergence by
+  > −0.249 (Random) and −0.244 (StreamingLLM), which is 6.49× and 5.49× their
+  > respective baselines. The cache is acutely sensitive to which entries occupy
+  > it, while restoring the specific entries a policy just evicted is close to
+  > neutral."
+
+  Also removed: the matched-arm null −0.0013 [−0.0019, −0.0007] and
+  −0.0015 [−0.0022, −0.0009], and "The instrument gate passed on all 800
+  profiles". That gate checked re-inserted against stashed entries, not
+  stashed against evicted ones.
+- **New.**
+  - Identity-repaired exact-lag read (`results/diag/meeting3/exact_lag.json`,
+    R.10). At no lag and for neither policy does the matched arm meet the
+    pre-registered restoration criterion.
+  - Random, lag 1: matched **+0.0031 [+0.0004, +0.0061]**; the random draw
+    gives +0.0044 [+0.0010, +0.0085] (NON-SPECIFIC).
+  - Random, lags 4–256: every matched CI includes 0.
+  - StreamingLLM: every matched CI includes 0.
+  - Scope, from `results/diag/meeting3/r17/exact_lag_eligibility.json`: 8 of 25
+    problems (32 of 100 traces) are eligible; budget 256 is a 3.4% realized
+    cache on these traces. Full-cache accuracy is **0.594 [0.250, 0.875]**
+    eligible against **0.971 [0.926, 1.000]** ineligible, so the eligible
+    problems are long-prompt and low-accuracy. Exploratory.
+  - The text states that no numeric precision floor has been measured yet
+    (R.17.0.5), and that the redesigned probe (R.17.2.3) has not run.
+- **Also qualified:** the "A diagnosis of ours was wrong" paragraph now notes
+  that the corrected P.5 cell itself stashed the wrong entries, so it records a
+  diagnosis, not a result.
+- **Pinned:** 11 new claims in `paper_claims.json` (keys `p5.*` and
+  `m3.el.*`). The trigger step 130 is listed as a protocol constant.
+
+**0.2 Eviction-locking wording (§ threats, "A windowing defect…").**
+
+- **Old:**
+  > "\textbf{The locking is amplitude-dependent, and we qualified it because a
+  > pre-registered control said to.} … the outcome is the branch that
+  > constrains us: **locking is established at the deployed amplitude and is not
+  > detectable at amplitude 16, and amplitudes below 64 are otherwise
+  > untested.**"
+
+  It also said: "Within a prune cycle the divergence is locked to the eviction
+  event at the compression interval this paper deploys." The `**…**` was
+  Markdown inside LaTeX and printed literal asterisks; that is fixed too.
+- **New:**
+  > "\textbf{Locking is detected at two amplitudes and is not yet validated.} …
+  > \textbf{phase locking is detected for Random at compression intervals 64 and
+  > 256 and not detected at 16; amplitudes below 64 are otherwise untested.} The
+  > phase statistic is invariant to circular rotation, so it cannot separate
+  > physical removal from the selection that precedes it (Amendment R.2). The
+  > direct control that does separate them … has not yet validated this
+  > amplitude-dependent reading, so we report the locking as detected, not
+  > established."
+
+  The earlier sentence now reads "the Random divergence is detectably
+  phase-locked to the eviction event …", and StreamingLLM is called
+  indeterminate.
+- **Numbers unchanged** (`results/diag/amendment-q/shape_sawtooth_i{16,64,256}.json`):
+  - Random I=16: +0.0110 [−0.0252, +0.0300];
+  - Random I=64: +0.1193 [+0.0446, +0.1410];
+  - Random I=256: +0.3183 [+0.1881, +0.3361].
+
+**PDF.** Rebuilt twice: no `^!` errors and no undefined references. One
+sub-point overfull box in §3 predates these edits (it is identical in the HEAD
+build). The page count is unchanged.
+
 ## 5. Framing discipline (non-negotiable — apply throughout)
 - **Divergence ≠ damage.** ADD / TV / residual are "behavioral-fidelity loss," never "damage."
   Correctness is the only quality arbiter. Carry the **signed flip-mass** (gained vs lost correct

@@ -16,6 +16,8 @@
       ],
       "mean": 0.125
     },
+    "mean_prompt_tokens": 178.5,
+    "mean_trace_tokens": 7352.125,
     "median_trace_tokens": 5905.5,
     "n_problems": 8,
     "n_traces": 32,
@@ -28,7 +30,8 @@
       "test/prealgebra/1139.json",
       "test/precalculus/1199.json",
       "test/precalculus/990.json"
-    ]
+    ],
+    "realized_ratio": 0.03399452236700141
   },
   "ineligible": {
     "fc_accuracy": {
@@ -46,6 +49,8 @@
       ],
       "mean": 0.0
     },
+    "mean_prompt_tokens": 53.76470588235294,
+    "mean_trace_tokens": 2927.6176470588234,
     "median_trace_tokens": 2318.5,
     "n_problems": 17,
     "n_traces": 68,
@@ -67,7 +72,8 @@
       "test/precalculus/1303.json",
       "test/precalculus/807.json",
       "test/precalculus/927.json"
-    ]
+    ],
+    "realized_ratio": 0.0858662089240088
   },
   "inputs": {
     "exact_lag_run": "exact-lag-r5",

@@ -465,36 +465,33 @@ length as the positive results, because a divergence measure that is
 \emph{not} load-bearing is part of what the reader needs in order to price the
 measure that is.
 
-\textbf{Reinserting evicted entries does not reduce divergence.} At budget
-$256$ ($3.8\%$ realized cache), we re-inserted the most recently evicted
-key/value entries at a fixed trigger and measured per-step TV against the
-full-cache trace over the next $200$ steps, against a no-intervention arm on
-the same traces. The instrument gate passed on all $800$ profiles (reinserted
-entries bitwise identical to what was stashed, maximum absolute difference
-$0.0$). Effects are the no-intervention arm minus the treated arm, so a
-\emph{positive} value would mean divergence reduced: budget-matched
-reinsertion gives $-0.0013$ (CI $[-0.0019, -0.0007]$) for Random against a
-baseline divergence of $0.038$, and $-0.0015$ (CI $[-0.0022, -0.0009]$) for
-StreamingLLM against $0.044$. At roughly $3\%$ of the baseline the matched arm
-is \textbf{indistinguishable from no help}; we do not read it as a measured
-harm, and the relaxed arm, which is permitted to grow the cache, does no better
-($-0.0014$ for both), so the null is not an artifact of holding the budget
-fixed. (These four quantities are shown to four decimals: at three, each
-estimate lands on one of its own displayed interval bounds, which would make a
-correct null read as a malformed interval.)
-
-The specificity control is where the information is. Re-inserting the same
-\emph{number} of entries drawn at random from the evicted pool --- with the
-same entries dropped to make room, so the arms differ only in \emph{which}
-entries return --- moves divergence by $-0.249$ (Random) and $-0.244$
-(StreamingLLM), which is $6.49\times$ and $5.49\times$ their respective
-baselines. The cache is acutely sensitive to which entries occupy it, while restoring the specific entries a policy just
-evicted is close to neutral. This is a divergence-scale result and carries no
-accuracy claim: no flip-mass is implied and none is reported. Its scope is
-narrow and we state it rather than let it be inferred --- one trigger, a
-reinsertion fraction of $0.25$ of the budget, a $200$-step read window, two
-policies, one model, one benchmark. A null for that intervention is not a null
-for reinsertion in general.
+\textbf{Re-inserting evicted entries: a retraction and a narrower result.} An
+earlier version of this section reported a specificity control for
+re-insertion, and we retract it: the stash from which entries were re-inserted
+was the tail of a score-ordered tensor, not the entries the policy had evicted
+(Amendment R.5). Its reported effects --- random re-insertion moving divergence
+by $6.49\times$ (Random) and $5.49\times$ (StreamingLLM) the baseline, read at
+the time as showing that ``the cache is acutely sensitive to which entries
+occupy it'' --- do not describe re-insertion of evicted entries, and neither
+they nor that cell's matched-arm null are claimed. With the stash repaired ---
+the true evicted keys and values of every layer, checked bitwise against the
+full cache before use --- we re-inserted the cohort evicted at the first prune
+at or after step $130$ at exact lags of $1$ to $256$ steps, budget-matched,
+against no intervention and against re-inserting an equal number of evicted
+entries drawn at random. At no lag and for neither policy did returning the
+true evicted cohort meet the pre-registered restoration criterion (an effect
+excluding zero and exceeding the random draw's): for Random the matched arm
+reduced divergence only at lag $1$ ($+0.0031$, CI $[0.0004, 0.0061]$), where
+the random draw did at least as well ($+0.0044$), and for StreamingLLM no
+lag's matched interval excludes zero. The result is exploratory and narrow. The
+stash reaches the re-insertion count only when the prompt is long, so $8$ of
+the $25$ problems ($32$ of $100$ traces; budget $256$, $3.4\%$ realized cache on
+these traces) were eligible, and they are long-prompt, low-accuracy problems:
+full-cache accuracy $0.594$ against $0.971$ for the ineligible set. These
+divergence differences have not yet been set against a measured numeric
+precision floor (Amendment R.17). A redesigned probe, with a later trigger that
+makes every problem eligible and a full self-restoration arm, is registered and
+has not yet run.
 
 \textbf{AUC-TV does not predict the residual once budget is held fixed.} Across
 the seven cells with both quantities, the rank correlation between AUC-TV and
@@ -613,7 +610,10 @@ per-trace profile differs, which shows the fix took effect and that the eviction
 confound was not what produced the effect. The invalidation was still correct
 --- arms differing in two ways are uninterpretable whatever the numbers --- but
 our stated mechanism for it was not, and we report the wrong diagnosis rather
-than quietly replacing it with the right one.
+than quietly replacing it with the right one. The corrected cell was itself
+later found to stash the wrong entries (Amendment R.5), so its random-arm effect
+is retracted in Section~\ref{sec:followups}; this paragraph records a
+diagnosis, not a result.
 
 %% RESOLVED(M.3-RESTATEMENT) 2026-09-08, site 6 of 7. Visited and left
 %% UNCHANGED, deliberately. This paragraph already does what candidate A asks
@@ -644,14 +644,15 @@ on true prune steps and asserts the restricted profile still peaks at bucket
 zero, failing on the old re-basing and passing on the new; and a rotation
 constant across all $96$ traces is not what a judgement call produces. The two
 measured results this cell yields are reported together throughout, since
-neither is interpretable alone. Within a prune cycle the divergence is locked to
-the eviction event \emph{at the compression interval this paper deploys}. Across
+neither is interpretable alone. Within a prune cycle the Random divergence is
+detectably phase-locked to the eviction event \emph{at the compression interval
+this paper deploys}; the next paragraph states what that detection does and does
+not establish. Across
 cycles the envelope rises in the fixed-budget arm, where the realized
 compression ratio worsens monotonically, and does not in the ratio-matched arm.
 Both are measurements; this paragraph does not say what produces the rise.
 
-\textbf{The locking is amplitude-dependent, and we qualified it because a
-pre-registered control said to.} The cache is a sawtooth rather than a ceiling:
+\textbf{Locking is detected at two amplitudes and is not yet validated.} The cache is a sawtooth rather than a ceiling:
 it holds $256$ entries just after a prune and $256$ plus the compression
 interval just before the next, so the interval is also the per-event eviction
 amplitude. Sweeping it at a fixed floor of $256$ --- the same floor as every
@@ -660,17 +661,22 @@ zero for Random at intervals $64$ ($+0.119$, CI $[0.045, 0.141]$) and $256$
 ($+0.318$, CI $[0.188, 0.336]$), peaking at phase $0$, the prune step, in both.
 At interval $16$ it does not ($+0.011$, CI $[-0.025, 0.030]$). The read condition
 and its three branches were fixed in writing before these profiles existed
-(Amendment Q.1), and the outcome is the branch that constrains us: **locking is
-established at the deployed amplitude and is not detectable at amplitude $16$,
-and amplitudes below $64$ are otherwise untested.** The interval-$16$ interval is
-not a tight null --- it excludes an effect of the size seen at $64$, not a small
+(Amendment Q.1), and the outcome is the branch that constrains us:
+\textbf{phase locking is detected for Random at compression intervals $64$ and
+$256$ and not detected at $16$; amplitudes below $64$ are otherwise untested.}
+The phase statistic is invariant to circular rotation, so it cannot separate
+physical removal from the selection that precedes it (Amendment R.2). The
+direct control that does separate them --- masking the evicted entries at once
+and removing them physically later --- has not yet validated this
+amplitude-dependent reading, so we report the locking as detected, not
+established. The interval-$16$ confidence interval is not a tight null --- it excludes an effect of the size seen at $64$, not a small
 one --- so we write \emph{not detectably locked}, not \emph{not locked}. We do
 not compare the excess magnitudes across intervals: raw phase amplitude scales
 with the number of phase buckets, which differs by construction between these
 arms, and that restriction was pre-committed rather than adopted after seeing
 the numbers. For StreamingLLM no arm excludes zero and every peak sits away from
-the prune step, consistent with its earlier withdrawal; we make no phase claim
-for it.
+the prune step: StreamingLLM is indeterminate, consistent with its earlier
+withdrawal, and we make no phase claim for it.
 
 %% ADDED 2026-09-08 with the M.3 restatement. This is the figure the mechanism
 %% clause work concluded the paper needed, and it replaces the "overlay the

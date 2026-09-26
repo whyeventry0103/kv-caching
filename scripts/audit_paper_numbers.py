@@ -58,6 +58,7 @@ PROTOCOL_INTEGERS = {
     197,
     263,
     347,  # the frozen seed set
+    130,  # restoration trigger step (2x median onset; exact_lag trigger_step)
     12,
     15,
     16,

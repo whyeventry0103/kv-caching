@@ -222,7 +222,14 @@ def test_the_real_catalogue_has_no_two_entries_sharing_an_exact_value_and_rule()
     # is cited in the .tex, so none makes a sentence ambiguous; the claims gate
     # pins any that are cited later. Set to the exact new count, with no slack,
     # so the next growth trips this again and gets the same examination.
-    assert len(collisions) <= 127, (
+    #
+    # 127 -> 129 on 2026-09-27 (R.17), examined. Cataloguing the exact-lag
+    # eligibility profile added 2 groups, both small-integer coincidences
+    # between unrelated counts: m3.el.eligible.n_problems == 8 ==
+    # grader.tok.xc_only_correct, and m3.el.ineligible.n_problems == 17 ==
+    # auc_tv_spread_pct.rounded. The 8 is cited in the .tex and is pinned to its
+    # own key by a claim; the 17 is not cited.
+    assert len(collisions) <= 129, (
         f"{len(collisions)} exact-value collisions in the catalogue; if this "
         "grew, a new derived quantity is duplicating an existing one"
     )

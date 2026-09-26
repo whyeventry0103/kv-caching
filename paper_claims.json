@@ -636,6 +636,61 @@
       "context": "CI $[-0.025, 0.030]$",
       "literal": "0.030",
       "key": "q1.i16.random.cihi"
+    },
+    {
+      "context": "by $6.49\\times$ (Random) and $5.49\\times$ (StreamingLLM) the baseline, read at",
+      "literal": "6.49",
+      "key": "p5.random.random_over_baseline"
+    },
+    {
+      "context": "by $6.49\\times$ (Random) and $5.49\\times$ (StreamingLLM) the baseline, read at",
+      "literal": "5.49",
+      "key": "p5.streamingllm.random_over_baseline"
+    },
+    {
+      "context": "reduced divergence only at lag $1$ ($+0.0031$, CI $[0.0004, 0.0061]$), where",
+      "literal": "0.0031",
+      "key": "m3.el.random.lag1.matched.effect"
+    },
+    {
+      "context": "reduced divergence only at lag $1$ ($+0.0031$, CI $[0.0004, 0.0061]$), where",
+      "literal": "0.0004",
+      "key": "m3.el.random.lag1.matched.cilo"
+    },
+    {
+      "context": "reduced divergence only at lag $1$ ($+0.0031$, CI $[0.0004, 0.0061]$), where",
+      "literal": "0.0061",
+      "key": "m3.el.random.lag1.matched.cihi"
+    },
+    {
+      "context": "the random draw did at least as well ($+0.0044$), and for StreamingLLM no",
+      "literal": "0.0044",
+      "key": "m3.el.random.lag1.random.effect"
+    },
+    {
+      "context": "the $25$ problems ($32$ of $100$ traces; budget $256$, $3.4\\%$ realized cache on",
+      "literal": "3.4",
+      "key": "m3.el.eligible.realized_ratio_pct"
+    },
+    {
+      "context": "the $25$ problems ($32$ of $100$ traces; budget $256$, $3.4\\%$ realized cache on",
+      "literal": "32",
+      "key": "m3.el.eligible.n_traces"
+    },
+    {
+      "context": "full-cache accuracy $0.594$ against $0.971$ for the ineligible set. These",
+      "literal": "0.594",
+      "key": "m3.el.eligible.fc_accuracy"
+    },
+    {
+      "context": "full-cache accuracy $0.594$ against $0.971$ for the ineligible set. These",
+      "literal": "0.971",
+      "key": "m3.el.ineligible.fc_accuracy"
+    },
+    {
+      "context": "stash reaches the re-insertion count only when the prompt is long, so $8$ of",
+      "literal": "8",
+      "key": "m3.el.eligible.n_problems"
     }
   ]
 }
