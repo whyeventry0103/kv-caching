@@ -1,0 +1,24 @@
+name: basis_fit_q6_k256_r17
+# Amendment R.17.2.1: the frozen R.6 fit repeated with k = 256 (nothing else
+# changes), for nested-k projection norms in capture-v2. Acceptance against the
+# frozen k = 64 fit (mean/scale within 1e-6 relative, principal angles <= 1e-3
+# rad on the leading 64 directions) is checked by run_capture_v2.py.
+basis_run_name: q6-basis-fit-k256
+stage: basisfit
+# Amendment R.6 / R.9 -- Q.6 fit: frozen full-only PCA basis per layer, k = 64,
+# from the FULL-CACHE reference traces of the Q.2 subset (25 problems x seeds
+# 11/23/47/89 = 100 traces), up to 256 uniformly spaced decode positions per
+# trace. scripts/run_basis_fit.py; the header q6_basis.json (npz sha256, input
+# hash, diagnostics) is written last and is the queue marker.
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+presses: [fullcache]
+budgets: [full]
+seeds: [11, 23, 47, 89]
+subset:
+  math500: 25
+reference_run_name: math500-fc-powered-merged
+k: 256
+n_positions: 256
+scale_authorized: true
+remote_only: true

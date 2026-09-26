@@ -179,6 +179,22 @@ def collateral_counts(
     return out
 
 
+def _family(config: Path) -> str:
+    """The generation family a config's rows carry (capture-v2 names it, R.17.2.1).
+
+    The expected identity is always derived from committed specs; a config with
+    no ``family`` key is capture-v1.
+    """
+    import yaml
+
+    path = Path(config)
+    if not path.exists():
+        return "capture"
+    return (yaml.safe_load(path.read_text(encoding="utf-8")) or {}).get(
+        "family", "capture"
+    )
+
+
 def read_capture(
     rows: list[dict[str, Any]],
     *,
@@ -188,6 +204,7 @@ def read_capture(
     expected_identity: dict[str, Any] | None,
     n_resamples: int = 2000,
     seed: int = 0,
+    kind: str = "capture",
 ) -> dict[str, Any]:
     expected = expected_keys(pids, seeds, POLICIES, [str(budget)])
     cov = check_coverage(
@@ -199,7 +216,7 @@ def read_capture(
     # identity derived from committed specs, and match the frozen input manifest
     prov_bad = validate_rows(
         rows,
-        kind="capture",
+        kind=kind,
         expected=expected_identity,
         key=lambda r: (r["pid"], int(r["seed"]), r["press"]),
     )
@@ -353,9 +370,8 @@ def main() -> int:
     if a.config is None:
         raise SystemExit("--config is required: the expected design comes from it")
     pids, seeds, budget = _design(a.config)
-    expected_identity, why = expected_run_identity(
-        "capture", str(a.config), a.runs_root
-    )
+    kind = _family(a.config)
+    expected_identity, why = expected_run_identity(kind, str(a.config), a.runs_root)
     res = read_capture(
         _rows(run_dir),
         pids=pids,
@@ -364,6 +380,7 @@ def main() -> int:
         expected_identity=expected_identity,
         n_resamples=a.n_resamples,
         seed=a.seed,
+        kind=kind,
     )
     table = res.pop("sufficient_statistics")
     tsv = a.out.with_suffix(".conditions.tsv")

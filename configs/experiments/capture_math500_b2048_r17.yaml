@@ -1,0 +1,27 @@
+name: capture_math500_b2048_r17
+stage: capture2
+family: capture_v2
+# Amendment R.17.2.1: the registered b2048 cell run with capture-v2 (per-query-
+# head M/Delta, nested-k norms) because it had no rows when held. Confirmatory
+# reads: H2, H3 and the omega replication (R.17.1.5).
+# Amendment R.4 (Q.3 attention channels) + R.6 (Q.6 latent split) in ONE
+# teacher-forced replay per trace (R.9): 4 policies x budget 2048 x the Q.2
+# subset (100 FC reference traces) = 400 conditions. Budget 256 is primary for
+# both registered estimands (collateral R-KV - ObservedAttentionPress;
+# omega(Random) - omega(StreamingLLM)); 2048 secondary. Requires the frozen
+# basis (q6-basis-fit) and the capture smoke.
+presses: [random, streamingllm, h2o, rkv]
+budgets: [2048]
+seeds: [11, 23, 47, 89]
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+subset:
+  math500: 25
+reference_run_name: math500-fc-powered-merged
+compression_interval: 64
+tau: 0.01
+trigger_step: 130
+basis_run: q6-basis-fit
+nested_basis_run: q6-basis-fit-k256
+scale_authorized: true
+remote_only: true

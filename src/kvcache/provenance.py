@@ -37,6 +37,15 @@ GENERATION_SOURCES: dict[str, tuple[str, ...]] = {
         "src/kvcache/models.py",
         "scripts/run_capture.py",
     ),
+    "capture_v2": (
+        "src/kvcache/capture.py",
+        "src/kvcache/capture_v2.py",
+        "src/kvcache/presses/__init__.py",
+        "src/kvcache/presses/rkv.py",
+        "src/kvcache/replay.py",
+        "src/kvcache/models.py",
+        "scripts/run_capture_v2.py",
+    ),
     "basis": (
         "src/kvcache/capture.py",
         "src/kvcache/models.py",

@@ -192,7 +192,7 @@ cells:
               results/diag/meeting3/figures/meeting3_capture_b2048.pdf]
     question: "M, Delta, collateral per layer/group/event"
     configs: [configs/experiments/capture_math500_b256_r9.yaml,
-              configs/experiments/capture_math500_b2048_r9.yaml]
+              configs/experiments/capture_math500_b2048_r17.yaml]
     expected_units: 400     # 25 problems x 4 seeds x 4 policies, budget 2048 (secondary)
     status: QUEUED
     note: "R.9 combined capture with Q.6; CPU-validated on tiny Qwen2 for all 4
@@ -253,7 +253,7 @@ cells:
               results/diag/meeting3/figures/meeting3_capture_b2048.pdf]
     question: "omega(Random) - omega(StreamingLLM), budget 256 primary"
     configs: [configs/experiments/capture_math500_b256_r9.yaml,
-              configs/experiments/capture_math500_b2048_r9.yaml]
+              configs/experiments/capture_math500_b2048_r17.yaml]
     expected_units: 400     # 25 problems x 4 seeds x 4 policies, budget 2048 (secondary)
     status: QUEUED
     note: "same capture cells as Q3.capture (R.9)."

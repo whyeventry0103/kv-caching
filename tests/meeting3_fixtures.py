@@ -62,8 +62,13 @@ def write_basis(runs: Path) -> str:
 
 def capture(runs: Path, budget: int = 256, *, bad_control: bool = False) -> None:
     write_basis(runs)
-    config = f"{EXP}/capture_math500_b{budget}_r9.yaml"
-    ident, why = expected_run_identity("capture", config, runs)
+    # b2048 runs as capture-v2 (R.17.2.1); b256 stays capture-v1
+    config, kind = (
+        (f"{EXP}/capture_math500_b2048_r17.yaml", "capture_v2")
+        if budget == 2048
+        else (f"{EXP}/capture_math500_b{budget}_r9.yaml", "capture")
+    )
+    ident, why = expected_run_identity(kind, config, runs)
     assert ident, why
     rows = []
     for i, pid in enumerate(PIDS):

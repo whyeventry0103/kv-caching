@@ -58,7 +58,7 @@ STAGES: dict[str, dict] = {
             "--run",
             "capture-b2048",
             "--config",
-            f"{EXP}/capture_math500_b2048_r9.yaml",
+            f"{EXP}/capture_math500_b2048_r17.yaml",
             "--out",
             f"{OUT}/capture_b2048.json",
         ],

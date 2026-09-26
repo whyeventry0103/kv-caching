@@ -37,6 +37,7 @@ case "$COMMAND" in
   daccsmoke) PY_SCRIPT="scripts/dacc_gate_smoke.py" ;;
   basisfit) PY_SCRIPT="scripts/run_basis_fit.py" ;;
   capture) PY_SCRIPT="scripts/run_capture.py" ;;
+  capture2) PY_SCRIPT="scripts/run_capture_v2.py" ;;
   exactlag) PY_SCRIPT="scripts/run_exact_lag.py" ;;
   forkcontrol) PY_SCRIPT="scripts/run_fork_control.py" ;;
   forkprecision) PY_SCRIPT="scripts/run_fork_precision.py" ;;

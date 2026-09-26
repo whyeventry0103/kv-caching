@@ -100,6 +100,9 @@ dryrun:
 	$(PYTHON) scripts/run_capture.py --config configs/experiments/capture_math500_smoke_r9.yaml --dry-run
 	$(PYTHON) scripts/run_capture.py --config configs/experiments/capture_math500_b256_r9.yaml --dry-run
 	$(PYTHON) scripts/run_capture.py --config configs/experiments/capture_math500_b2048_r9.yaml --dry-run
+	$(PYTHON) scripts/run_capture_v2.py --config configs/experiments/capture_math500_smoke_r17.yaml --dry-run
+	$(PYTHON) scripts/run_capture_v2.py --config configs/experiments/capture_math500_b2048_r17.yaml --dry-run
+	$(PYTHON) scripts/run_basis_fit.py --config configs/experiments/basis_fit_q6_k256_r17.yaml --dry-run
 	$(PYTHON) scripts/report_capture.py --runs-root runs --run capture-b256 --out /dev/null --dry-run
 	$(PYTHON) scripts/run_exact_lag.py --config configs/experiments/exact_lag_math500_r5.yaml --dry-run
 	$(PYTHON) scripts/report_exact_lag.py --runs-root runs --run exact-lag-r5 --out /dev/null --dry-run

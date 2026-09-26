@@ -94,7 +94,12 @@ def gate_status(
     runs_root = Path(runs_root)
     cfg = _yaml(root / config)
     if kind == "basis":
-        ok, why, _ = verify_basis(runs_root, config, root=root)
+        ok, why, _ = verify_basis(
+            runs_root,
+            config,
+            root=root,
+            run_name=cfg.get("basis_run_name", "q6-basis-fit"),
+        )
         return ok, why
     if kind == "dacc_smoke":
         marker = runs_root / "dacc-gate-smoke-PASS.json"
@@ -105,8 +110,12 @@ def gate_status(
             reference_run=None,
             root=root,
         )
-    elif kind == "capture_smoke":
-        marker = runs_root / "capture-smoke-PASS.json"
+    elif kind in ("capture_smoke", "capture_v2_smoke"):
+        marker = runs_root / (
+            "capture-smoke-PASS.json"
+            if kind == "capture_smoke"
+            else "capture2-smoke-PASS.json"
+        )
         basis_cfg = "configs/experiments/basis_fit_q6_r9.yaml"
         ok, why, sha = verify_basis(
             runs_root, basis_cfg, root=root, run_name=cfg["basis_run"]
@@ -114,7 +123,7 @@ def gate_status(
         if not ok:
             return False, f"capture smoke depends on the basis: {why}"
         want = identity(
-            "capture",
+            "capture" if kind == "capture_smoke" else "capture_v2",
             cfg,
             model_revision=_revision(cfg, root),
             reference_run=cfg["reference_run_name"],
@@ -180,7 +189,7 @@ def expected_run_identity(
     """
     cfg = _yaml(root / config)
     rev = _revision(cfg, root)
-    if kind == "capture":
+    if kind in ("capture", "capture_v2"):
         ok, why, sha = verify_basis(
             Path(runs_root),
             "configs/experiments/basis_fit_q6_r9.yaml",
@@ -191,7 +200,7 @@ def expected_run_identity(
             return None, f"basis not verified: {why}"
         return (
             identity(
-                "capture",
+                kind,
                 cfg,
                 model_revision=rev,
                 reference_run=cfg["reference_run_name"],

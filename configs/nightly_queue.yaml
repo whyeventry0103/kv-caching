@@ -940,34 +940,45 @@ jobs:
     est_output_gb: 0.01
     requires: null
 
+  # Amendment R.17.2.1 (queue order per the 2026-09-27 instruction: 2.1, 2.2,
+  # 2.3, 2.4). The frozen fit repeated at k = 256 for nested-k norms, then a
+  # capture-v2 smoke (the R.9 controls plus the v2 fields), then b2048 on v2.
+  - name: q6-basis-fit-k256
+    command: basisfit
+    config: configs/experiments/basis_fit_q6_k256_r17.yaml
+    run_name: q6-basis-fit-k256
+    total: 1
+    seeds: [11]
+    min_free_gb: 24
+    progress_kind: marker
+    marker: q6-basis-fit-k256/basis/q6_basis.json
+    est_output_gb: 0.11   # 28 x 3584 x 256 float32 basis + mean/scale ~ 103 MB
+    gate: basis
+    requires: null
+
+  - name: capture2-smoke
+    command: capture2
+    config: configs/experiments/capture_math500_smoke_r17.yaml
+    run_name: capture2-smoke
+    total: 1
+    seeds: [11]
+    min_free_gb: 28
+    progress_kind: marker
+    marker: capture2-smoke-PASS.json
+    gate: capture_v2_smoke
+    requires: q6-basis-fit-k256
+
   - name: capture-b2048
-    command: capture
-    config: configs/experiments/capture_math500_b2048_r9.yaml
+    command: capture2
+    config: configs/experiments/capture_math500_b2048_r17.yaml
     run_name: capture-b2048
-    blocked: "Amendment R.17 (2026-09-27) - held before its first row so the b2048 schema can gain per-query-head M/Delta and nested-k projection norms (R.17.2.1); release only with that schema landed and tested"
+    blocked: "Amendment R.17 (2026-09-27) - held until the capture-v2 tests pass on the pinned stack (R.17.2.1)"
     total: 400
     seeds: [11, 23, 47, 89]
     min_free_gb: 28
     progress_kind: grid
     est_output_gb: 0.03
-    requires: capture-smoke
-
-  # Amendment R.17.0.5: the validity gate for every Meeting #3 divergence
-  # result. First-fork diagnosis in bf16 and fp32, and the bf16-vs-fp32
-  # precision floor the fork gap is judged against. One model at a time; fp32
-  # 7B needs ~31 GB. Short (~1-2 h, est.); queued ahead of the long TV cells.
-  - name: fork-precision
-    command: forkprecision
-    config: configs/experiments/fork_precision_r17.yaml
-    run_name: fork-precision
-    total: 1
-    seeds: [11]
-    min_free_gb: 40
-    progress_kind: marker
-    marker: fork-precision/fork_precision.json
-    est_output_gb: 0.01
-    gate: fork_precision
-    requires: null
+    requires: capture2-smoke
 
   # Amendment R.1 / R.12: TV at the intermediate budgets for Task 1, with
   # summary-only profiles (~3 KB/trace; the full format is what was BLOCKED on
@@ -993,6 +1004,23 @@ jobs:
     min_free_gb: 24
     progress_kind: grid
     est_output_gb: 0.01
+    requires: null
+
+  # Amendment R.17.0.5: the validity gate for every Meeting #3 divergence
+  # result. First-fork diagnosis in bf16 and fp32, and the bf16-vs-fp32
+  # precision floor the fork gap is judged against. One model at a time; fp32
+  # 7B needs ~31 GB. Short (~1-2 h, est.); queued ahead of the long TV cells.
+  - name: fork-precision
+    command: forkprecision
+    config: configs/experiments/fork_precision_r17.yaml
+    run_name: fork-precision
+    total: 1
+    seeds: [11]
+    min_free_gb: 40
+    progress_kind: marker
+    marker: fork-precision/fork_precision.json
+    est_output_gb: 0.01
+    gate: fork_precision
     requires: null
 
   # ======================================================================
