@@ -2860,6 +2860,13 @@
     }
   },
   "read": "R.17.1.5 H2/H3 (b256: exploratory) and the M/Delta report (0.6)",
+  "realized_ratio": {
+    "budget": 256,
+    "mean_prompt_tokens": 93.68,
+    "mean_trace_tokens": 4343.46,
+    "n_traces": 100,
+    "ratio": 0.05769482143903505
+  },
   "reproduce": "python scripts/report_r17.py --runs-root /home/sk10741/kvcache-storage/runs mdelta",
   "status_on_this_run": "EXPLORATORY: per-policy means were printed before R.17",
   "stored": "per-(layer, KV group) sums over events; per-query-head values are computed and averaged within the group, not stored (capture-v1)"

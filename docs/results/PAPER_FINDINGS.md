@@ -1457,6 +1457,59 @@ exists at 256 only.
 sub-point overfull box in §3 predates these edits (it is identical in the HEAD
 build). The page count is unchanged.
 
+### 5e. R.17 reads on existing data, and the mechanism-section draft (2026-09-27)
+
+Target venue: proposed ICML 2027, pending supervisor confirmation. All reads
+were registered in PREREGISTRATION R.17 (`ac78eab`) before they ran.
+Artifacts are under `results/diag/meeting3/r17/`.
+
+- **R.17.1.2 D_acc onset, restricted to reference > 2304 tokens (not blind;
+  pre-committed reading applied): NOT ESTABLISHED for both policies.**
+  - Random: +0.110 [+0.030, +0.200] unrestricted → **−0.048 [−0.184, +0.075]**
+    restricted.
+  - StreamingLLM: +0.190 [+0.080, +0.310] → **+0.026 [−0.066, +0.118]**.
+  - 60/100 pairs retained, full-cache accuracy 0.798 [0.623, 0.939], 0
+    attrition. Source: `dacc_restricted.json`.
+- **R.17.1.5 (b256, exploratory).**
+  - **H2 NEITHER:** spread(M) 0.3147 against half-width 0.0312; spread(Δ)
+    0.0984 against 0.0223.
+  - **H3 HOLDS:** M(H2O-style) − M(Random) = −0.315 [−0.330, −0.298], while
+    H2O-style's free-run total change is −0.637 against −0.463.
+  - Confirmatory at b2048 is pending. Source: `mdelta.json`, which also holds
+    the first-prune control (layer-0 Δ exactly 0.0) and the per-layer profiles.
+- **R.17.1.7 ω.**
+  - Per-layer profiles are in `omega_layers.json`.
+  - Addendum D: log(‖δ⊥‖/‖δ∥‖) Random − StreamingLLM = +0.080 [+0.064, +0.092],
+    so the contrast is carried by proportionally larger off-subspace
+    displacement.
+  - k-sensitivity is not computable on b256 (norms at k = 64 only).
+- **R.17.1.8 bridge: pre-commitment NOT CONFIRMED.**
+  - AUROC 0.478–0.659; smallest Benjamini–Hochberg q 0.165. ω ≈ 0.5.
+  - Δ's positive AUROC does not survive BH.
+  - Source: `bridge.json`.
+- **R.17.1.3 AUC-TV CIs.**
+  - b256: Random 0.1075 [0.0906, 0.1240], StreamingLLM 0.1028
+    [0.0831, 0.1235].
+  - b2048: Random 0.0128 [0.0063, 0.0201], StreamingLLM 0.0186
+    [0.0091, 0.0291].
+  - 512/1024 are pending (t1-tv). Source: `auc_tv.json`.
+- **Collateral.** The instrument is validated by a positive control (1.0). The
+  b256 zero is empirical. Whether real attention at 256 can produce collateral
+  is not established at this n, and the rank diagnostic is recorded as
+  missing.
+
+**Mechanism-section draft (P.1).**
+- It sits in `kv_readout_vs_trajectory_paper.tex` inside a marked `\iffalse`
+  block, so it is not compiled. Its 32 literals are pinned in
+  `paper_claims.json`. It states only reads that have been read, and names
+  every pending cell as pending.
+- **Discrepancy recorded, not resolved silently:** the instruction said the
+  draft replaces "the current §4.4". In the compiled PDF §4.4 is the
+  reverse-replay bracket, a core estimand result. The draft therefore targets
+  §4.5 "Where the divergence is…" (`sec:mechanism`) and §4.8, and leaves §4.4
+  untouched. Adopting it is a pending decision.
+- Page plan: `docs/strategy/ICML2027_PAGE_BUDGET.md`.
+
 ## 5. Framing discipline (non-negotiable — apply throughout)
 - **Divergence ≠ damage.** ADD / TV / residual are "behavioral-fidelity loss," never "damage."
   Correctness is the only quality arbiter. Carry the **signed flip-mass** (gained vs lost correct

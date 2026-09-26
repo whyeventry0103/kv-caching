@@ -349,6 +349,82 @@ Third, undefined-boundary reverse rows could be \emph{informative} missingness: 
 %% construction, "compounds" is the unlicensed attribution). The section now
 %% claims what it can: a localization of the divergence, and the consequence
 %% for where readout evaluation looks.
+%% ======================================================================
+%% R.17 P.1 MECHANISM SECTION DRAFT (2026-09-27) -- NOT COMPILED (\iffalse).
+%% Target venue: proposed ICML 2027, pending supervisor confirmation.
+%% Intended to replace S4.5 "Where the divergence is..." (label sec:mechanism)
+%% and S4.8 "Follow-up probes" when adopted. The instruction said "S4.4"; in
+%% the compiled PDF S4.4 is the reverse-replay bracket, which this draft does
+%% NOT replace (PAPER_FINDINGS 5e records the discrepancy). Every literal is
+%% pinned in paper_claims.json; only registered reads that have been read are
+%% stated, and every pending cell is named as pending.
+%% ======================================================================
+\iffalse
+\subsection{Mechanism: dose, attention and geometry}
+\label{sec:mechanism-r17}
+Every divergence number in this section is subject to a numeric precision
+floor that has not yet been measured (Amendment R.17); until it is, they are
+reported as measured and not as exceeding numerics.
+
+\textbf{Dose, not horizon.} Under a fixed budget $B$ the cache covers a
+shrinking fraction $r = B/(p + t)$ of a trace of prompt $p$ at position $t$, so
+budget and position are two handles on one quantity. We move it three ways,
+each with its own confound. Across budgets, damage falls monotonically but
+budget and ratio move together. Staggering compression onset at a fixed budget
+and read position varies exposure while holding $r$: the pre-registered read is
+mixed --- at budget $256$ the exposure slope is positive at the earliest read
+position and negative at the two later ones --- and at budget $2048$ the onset
+arms reach the same actual exposure, so that row cannot identify exposure.
+Free-running, a later onset appears to reduce damage at budget $256$
+($+0.110$ for Random, $+0.190$ for StreamingLLM), but restricting to generations
+whose full-cache reference exceeds $2304$ tokens, a pre-treatment covariate that
+removes the generations never compressed in the late arm, leaves the Random contrast at
+$-0.048$ (CI $[-0.184, 0.075]$) and $+0.026$ ($[-0.066, 0.118]$) for StreamingLLM: the onset
+effect on accuracy is not established. Whether divergence at matched $r$
+depends on budget or position is a collapse test registered in Amendment R.17;
+it awaits divergence at budgets $512$ and $1024$.
+
+\textbf{Attention: lost mass and shape distortion.} At the first forward after
+each eviction, $M$ is the full model's attention mass on the evicted positions
+(selection failure) and $\Delta$ the total variation between the compressed
+model's attention and the full model's attention renormalised onto the kept set
+(state drift). At budget $256$ ($5.77\%$ realized cache), Random loses the most
+attended mass, $M = 0.529$ (CI $[0.502, 0.550]$), against $0.215$ to $0.268$ for the
+three structured policies, and has the largest shape distortion,
+$\Delta = 0.238$ ($[0.217, 0.257]$). The H2O-style press (ObservedAttentionPress,
+no recency reservation) loses the least mass, with $M$ lower than Random's by $0.315$ (CI
+$[-0.330, -0.298]$ for the signed difference), yet it has the larger free-running loss at this
+budget ($-0.637$ against $-0.463$ total change): the quantity its retention rule
+optimises is not the one that governs damage. These budget-$256$ reads are
+exploratory, because their means were printed before the hypotheses were
+registered; budget $2048$ is their confirmatory test and has not yet run. GQA
+collateral, a position one head needed that the group mean ranked out of the
+cache, is zero at budget $256$ in all $400$ conditions. A positive control shows
+the instrument can return a non-zero value, so the zero is a property of this
+model's attention; whether attention at this budget can produce collateral at
+all is not established at this $n$.
+
+\textbf{Latent geometry.} Projecting each layer's hidden-state deviation onto a
+frozen $64$-dimensional full-cache basis, $\omega = \|\delta_\perp\|/\|\delta_\parallel\|$
+is larger for Random than for StreamingLLM by $+0.200$ (CI $[0.159, 0.234]$), as
+pre-registered. The contrast is carried by proportionally larger off-subspace
+displacement, a log-ratio difference of $+0.080$ ($[0.064, 0.092]$), not by smaller in-subspace
+displacement. It is exploratory: one model, one benchmark, one budget. No
+fine-scale quantity predicts a coarse outcome within a cell: the teacher-forced
+per-trace $\omega$, $\Delta$ and $M$ do not predict whether the same condition
+truncates when run free (AUROC $0.478$ to $0.659$; the smallest
+Benjamini--Hochberg $q$ over the six tests is $0.165$).
+
+\textbf{Restoration.} The earlier restoration result is retracted
+(\cref{sec:followups}). With the stash repaired, returning the evicted cohort
+restores nothing beyond a random draw at any lag, on $8$ of $25$ problems that
+are long-prompt and low-accuracy. A redesigned probe, with a later trigger that
+makes every long-enough trace eligible and a full self-restoration arm that
+separates missing mass from state drift directly, is registered and has not yet
+run.
+\fi
+%% ===== END R.17 P.1 DRAFT =====
+
 \subsection{Where the divergence is, and where readout evaluation looks}
 \label{sec:mechanism}
 Why does readout-style evaluation miss a 34-point loss? \cref{fig:tvprofile} answers with onset-aligned per-step TV between full-cache and compressed teacher-forced replay of identical token IDs (800 profiles; median onset at step 65, one step after the first prune at the compression interval of 64).

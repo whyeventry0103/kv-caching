@@ -691,6 +691,166 @@
       "context": "stash reaches the re-insertion count only when the prompt is long, so $8$ of",
       "literal": "8",
       "key": "m3.el.eligible.n_problems"
+    },
+    {
+      "context": "($+0.110$ for Random, $+0.190$ for StreamingLLM), but restricting to generations",
+      "literal": "0.110",
+      "key": "m3.dacc.onset.random.unrestricted"
+    },
+    {
+      "context": "($+0.110$ for Random, $+0.190$ for StreamingLLM), but restricting to generations",
+      "literal": "0.190",
+      "key": "m3.dacc.onset.streamingllm.unrestricted"
+    },
+    {
+      "context": "$-0.048$ (CI $[-0.184, 0.075]$) and $+0.026$ ($[-0.066, 0.118]$) for StreamingLLM: the onset",
+      "literal": "-0.048",
+      "key": "m3.dacc.onset.random.restricted"
+    },
+    {
+      "context": "$-0.048$ (CI $[-0.184, 0.075]$) and $+0.026$ ($[-0.066, 0.118]$) for StreamingLLM: the onset",
+      "literal": "-0.184",
+      "key": "m3.dacc.onset.random.restricted.cilo"
+    },
+    {
+      "context": "$-0.048$ (CI $[-0.184, 0.075]$) and $+0.026$ ($[-0.066, 0.118]$) for StreamingLLM: the onset",
+      "literal": "0.075",
+      "key": "m3.dacc.onset.random.restricted.cihi"
+    },
+    {
+      "context": "$-0.048$ (CI $[-0.184, 0.075]$) and $+0.026$ ($[-0.066, 0.118]$) for StreamingLLM: the onset",
+      "literal": "0.026",
+      "key": "m3.dacc.onset.streamingllm.restricted"
+    },
+    {
+      "context": "$-0.048$ (CI $[-0.184, 0.075]$) and $+0.026$ ($[-0.066, 0.118]$) for StreamingLLM: the onset",
+      "literal": "-0.066",
+      "key": "m3.dacc.onset.streamingllm.restricted.cilo"
+    },
+    {
+      "context": "$-0.048$ (CI $[-0.184, 0.075]$) and $+0.026$ ($[-0.066, 0.118]$) for StreamingLLM: the onset",
+      "literal": "0.118",
+      "key": "m3.dacc.onset.streamingllm.restricted.cihi"
+    },
+    {
+      "context": "(state drift). At budget $256$ ($5.77\\%$ realized cache), Random loses the most",
+      "literal": "5.77",
+      "key": "m3.cap256.realized_ratio_pct"
+    },
+    {
+      "context": "attended mass, $M = 0.529$ (CI $[0.502, 0.550]$), against $0.215$ to $0.268$ for the",
+      "literal": "0.529",
+      "key": "m3.cap256.M.random.mean"
+    },
+    {
+      "context": "attended mass, $M = 0.529$ (CI $[0.502, 0.550]$), against $0.215$ to $0.268$ for the",
+      "literal": "0.502",
+      "key": "m3.cap256.M.random.cilo"
+    },
+    {
+      "context": "attended mass, $M = 0.529$ (CI $[0.502, 0.550]$), against $0.215$ to $0.268$ for the",
+      "literal": "0.550",
+      "key": "m3.cap256.M.random.cihi"
+    },
+    {
+      "context": "attended mass, $M = 0.529$ (CI $[0.502, 0.550]$), against $0.215$ to $0.268$ for the",
+      "literal": "0.215",
+      "key": "m3.cap256.M.h2o.mean"
+    },
+    {
+      "context": "attended mass, $M = 0.529$ (CI $[0.502, 0.550]$), against $0.215$ to $0.268$ for the",
+      "literal": "0.268",
+      "key": "m3.cap256.M.streamingllm.mean"
+    },
+    {
+      "context": "$\\Delta = 0.238$ ($[0.217, 0.257]$). The H2O-style press (ObservedAttentionPress,",
+      "literal": "0.238",
+      "key": "m3.cap256.Delta.random.mean"
+    },
+    {
+      "context": "$\\Delta = 0.238$ ($[0.217, 0.257]$). The H2O-style press (ObservedAttentionPress,",
+      "literal": "0.217",
+      "key": "m3.cap256.Delta.random.cilo"
+    },
+    {
+      "context": "$\\Delta = 0.238$ ($[0.217, 0.257]$). The H2O-style press (ObservedAttentionPress,",
+      "literal": "0.257",
+      "key": "m3.cap256.Delta.random.cihi"
+    },
+    {
+      "context": "no recency reservation) loses the least mass, with $M$ lower than Random's by $0.315$ (CI",
+      "literal": "0.315",
+      "key": "m3.h3.mean"
+    },
+    {
+      "context": "$[-0.330, -0.298]$ for the signed difference), yet it has the larger free-running loss at this",
+      "literal": "-0.330",
+      "key": "m3.h3.cilo"
+    },
+    {
+      "context": "$[-0.330, -0.298]$ for the signed difference), yet it has the larger free-running loss at this",
+      "literal": "-0.298",
+      "key": "m3.h3.cihi"
+    },
+    {
+      "context": "budget ($-0.637$ against $-0.463$ total change): the quantity its retention rule",
+      "literal": "-0.637",
+      "key": "h2o256.h2o.total_change"
+    },
+    {
+      "context": "budget ($-0.637$ against $-0.463$ total change): the quantity its retention rule",
+      "literal": "-0.463",
+      "key": "diss256.random.total_change"
+    },
+    {
+      "context": "is larger for Random than for StreamingLLM by $+0.200$ (CI $[0.159, 0.234]$), as",
+      "literal": "0.200",
+      "key": "m3.cap256.q6.mean"
+    },
+    {
+      "context": "is larger for Random than for StreamingLLM by $+0.200$ (CI $[0.159, 0.234]$), as",
+      "literal": "0.159",
+      "key": "m3.cap256.q6.cilo"
+    },
+    {
+      "context": "is larger for Random than for StreamingLLM by $+0.200$ (CI $[0.159, 0.234]$), as",
+      "literal": "0.234",
+      "key": "m3.cap256.q6.cihi"
+    },
+    {
+      "context": "displacement, a log-ratio difference of $+0.080$ ($[0.064, 0.092]$), not by smaller in-subspace",
+      "literal": "0.080",
+      "key": "m3.omega.log_perp_over_par.mean"
+    },
+    {
+      "context": "displacement, a log-ratio difference of $+0.080$ ($[0.064, 0.092]$), not by smaller in-subspace",
+      "literal": "0.064",
+      "key": "m3.omega.log_perp_over_par.cilo"
+    },
+    {
+      "context": "displacement, a log-ratio difference of $+0.080$ ($[0.064, 0.092]$), not by smaller in-subspace",
+      "literal": "0.092",
+      "key": "m3.omega.log_perp_over_par.cihi"
+    },
+    {
+      "context": "truncates when run free (AUROC $0.478$ to $0.659$; the smallest",
+      "literal": "0.478",
+      "key": "m3.bridge.auroc_min"
+    },
+    {
+      "context": "truncates when run free (AUROC $0.478$ to $0.659$; the smallest",
+      "literal": "0.659",
+      "key": "m3.bridge.auroc_max"
+    },
+    {
+      "context": "Benjamini--Hochberg $q$ over the six tests is $0.165$).",
+      "literal": "0.165",
+      "key": "m3.bridge.q_min"
+    },
+    {
+      "context": "restores nothing beyond a random draw at any lag, on $8$ of $25$ problems that",
+      "literal": "8",
+      "key": "m3.el.eligible.n_problems"
     }
   ]
 }

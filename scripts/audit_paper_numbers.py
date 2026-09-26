@@ -59,6 +59,7 @@ PROTOCOL_INTEGERS = {
     263,
     347,  # the frozen seed set
     130,  # restoration trigger step (2x median onset; exact_lag trigger_step)
+    2304,  # first Q.2 read position; the R.17.1.2 reference-length threshold
     12,
     15,
     16,

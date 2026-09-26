@@ -229,7 +229,13 @@ def test_the_real_catalogue_has_no_two_entries_sharing_an_exact_value_and_rule()
     # grader.tok.xc_only_correct, and m3.el.ineligible.n_problems == 17 ==
     # auc_tv_spread_pct.rounded. The 8 is cited in the .tex and is pinned to its
     # own key by a claim; the 17 is not cited.
-    assert len(collisions) <= 129, (
+    #
+    # 129 -> 130 on 2026-09-27 (R.17 mechanism draft), examined: one new group,
+    # m3.bridge.q_min == residual_contrast.rkv_vs_streamingllm.ci1 == 0.165, a
+    # coincidence between unrelated quantities; the draft's 0.165 is pinned to
+    # the bridge key by a claim. (m3.dacc.onset.random.unrestricted.cilo joined
+    # the existing 0.03 group; that group is not new.)
+    assert len(collisions) <= 130, (
         f"{len(collisions)} exact-value collisions in the catalogue; if this "
         "grew, a new derived quantity is duplicating an existing one"
     )

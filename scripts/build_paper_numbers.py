@@ -1487,6 +1487,183 @@ def build_catalogue() -> list[Entry]:
                 kind="derived",
             )
 
+    # R.17 mechanism-section literals (capture-b256 FINAL read and the R.17
+    # reads on disk). Every value is taken from its artifact, never retyped.
+    _cap = M3 / "capture_b256.json"
+    if _cap.exists():
+        _cd, _cr = _load(_cap), _cap.relative_to(PROJECT_ROOT)
+        for _f in ("M", "Delta"):
+            for _press, _s in _cd["descriptive"][_f].items():
+                add(
+                    f"m3.cap256.{_f}.{_press}.mean",
+                    _s["mean"],
+                    f"{_cr} :: descriptive.{_f}.{_press}.mean",
+                    f"capture b256 {_f}, {_press}, equal-problem mean",
+                )
+                for _i, _b in enumerate(_s["ci95"]):
+                    add(
+                        f"m3.cap256.{_f}.{_press}.ci{'lo' if _i == 0 else 'hi'}",
+                        _b,
+                        f"{_cr} :: descriptive.{_f}.{_press}.ci95[{_i}]",
+                        f"capture b256 {_f} CI bound, {_press}",
+                    )
+        _q6 = _cd["q6_registered_contrast"]
+        add(
+            "m3.cap256.q6.mean",
+            _q6["mean"],
+            f"{_cr} :: q6_registered_contrast.mean",
+            "omega(Random) - omega(StreamingLLM), b256",
+        )
+        for _i, _b in enumerate(_q6["ci95"]):
+            add(
+                f"m3.cap256.q6.ci{'lo' if _i == 0 else 'hi'}",
+                _b,
+                f"{_cr} :: q6_registered_contrast.ci95[{_i}]",
+                "omega contrast CI bound, b256",
+            )
+    R17 = M3 / "r17"
+    _md = R17 / "mdelta.json"
+    if _md.exists():
+        _mdd, _mdr = _load(_md), _md.relative_to(PROJECT_ROOT)
+        add(
+            "m3.cap256.realized_ratio_pct",
+            100 * _mdd["realized_ratio"]["ratio"],
+            f"100 * {_mdr} :: realized_ratio.ratio",
+            "capture b256 realized ratio (%), budget / (mean prompt + mean trace)",
+            kind="derived",
+        )
+        add(
+            "m3.h3.mean",
+            _mdd["H3"]["mean"],
+            f"{_mdr} :: H3.mean",
+            "M(H2O-style) - M(Random), b256 (exploratory)",
+        )
+        for _i, _b in enumerate(_mdd["H3"]["ci95"]):
+            add(
+                f"m3.h3.ci{'lo' if _i == 0 else 'hi'}",
+                _b,
+                f"{_mdr} :: H3.ci95[{_i}]",
+                "H3 CI bound",
+            )
+    _dr = R17 / "dacc_restricted.json"
+    if _dr.exists():
+        _drd, _drr = _load(_dr), _dr.relative_to(PROJECT_ROOT)
+        for _press in ("random", "streamingllm"):
+            _c = _drd["cells"][f"{_press}-256"]["t0_0_vs_2048"]
+            add(
+                f"m3.dacc.onset.{_press}.unrestricted",
+                _c["unrestricted"]["mean"],
+                f"{_drr} :: cells.{_press}-256.t0_0_vs_2048.unrestricted.mean",
+                f"D_acc onset contrast t0 0 vs 2048, B256, {_press}, all pairs",
+            )
+            add(
+                f"m3.dacc.onset.{_press}.restricted",
+                _c["restricted"]["mean"],
+                f"{_drr} :: cells.{_press}-256.t0_0_vs_2048.restricted.mean",
+                f"same, restricted to reference > 2304 tokens, {_press}",
+            )
+            for _i, _b in enumerate(_c["restricted"]["ci95"]):
+                add(
+                    f"m3.dacc.onset.{_press}.restricted.ci{'lo' if _i == 0 else 'hi'}",
+                    _b,
+                    f"{_drr} :: cells.{_press}-256.t0_0_vs_2048.restricted.ci95[{_i}]",
+                    f"restricted onset contrast CI bound, {_press}",
+                )
+    if _dr.exists():
+        for _press in ("random", "streamingllm"):
+            _c = _drd["cells"][f"{_press}-256"]["t0_0_vs_2048"]["unrestricted"]
+            for _i, _b in enumerate(_c["ci95"]):
+                _lh = "lo" if _i == 0 else "hi"
+                add(
+                    f"m3.dacc.onset.{_press}.unrestricted.ci{_lh}",
+                    _b,
+                    f"{_drr} :: cells.{_press}-256.t0_0_vs_2048"
+                    f".unrestricted.ci95[{_i}]",
+                    f"unrestricted onset contrast CI bound, {_press}",
+                )
+        _rf = _drd["retained_fc_accuracy"]
+        add(
+            "m3.dacc.retained_fc_accuracy",
+            _rf["mean"],
+            f"{_drr} :: retained_fc_accuracy.mean",
+            "full-cache accuracy of the pairs with reference > 2304 tokens",
+        )
+        for _i, _b in enumerate(_rf["ci95"]):
+            add(
+                f"m3.dacc.retained_fc_accuracy.ci{'lo' if _i == 0 else 'hi'}",
+                _b,
+                f"{_drr} :: retained_fc_accuracy.ci95[{_i}]",
+                "retained-pair full-cache accuracy CI bound",
+            )
+    if _md.exists():
+        for _f in ("M", "Delta"):
+            for _q in ("spread", "median_half_width"):
+                add(
+                    f"m3.h2.{_f}.{_q}",
+                    _mdd["H2"][_f][_q],
+                    f"{_mdr} :: H2.{_f}.{_q}",
+                    f"H2 {_q} of {_f} across the four policies, b256",
+                )
+    _at = R17 / "auc_tv.json"
+    if _at.exists():
+        _atd, _atr = _load(_at), _at.relative_to(PROJECT_ROOT)
+        for _cell, _v in _atd["cells"].items():
+            add(
+                f"m3.auc.{_cell}.mean",
+                _v["mean"],
+                f"{_atr} :: cells.{_cell}.mean",
+                f"AUC-TV (per-trace mean TV), {_cell}",
+            )
+            for _i, _b in enumerate(_v["ci95"]):
+                add(
+                    f"m3.auc.{_cell}.ci{'lo' if _i == 0 else 'hi'}",
+                    _b,
+                    f"{_atr} :: cells.{_cell}.ci95[{_i}]",
+                    f"AUC-TV CI bound, {_cell}",
+                )
+    _ol = R17 / "omega_layers.json"
+    if _ol.exists():
+        _old, _olr = _load(_ol), _ol.relative_to(PROJECT_ROOT)
+        _lc = _old["components"]["log_perp_over_par"]
+        add(
+            "m3.omega.log_perp_over_par.mean",
+            _lc["mean"],
+            f"{_olr} :: components.log_perp_over_par.mean",
+            "Random - SLM contrast of log(|d_perp| / |d_par|)",
+        )
+        for _i, _b in enumerate(_lc["ci95"]):
+            add(
+                f"m3.omega.log_perp_over_par.ci{'lo' if _i == 0 else 'hi'}",
+                _b,
+                f"{_olr} :: components.log_perp_over_par.ci95[{_i}]",
+                "log(perp/par) contrast CI bound",
+            )
+    _br = R17 / "bridge.json"
+    if _br.exists():
+        _brd, _brr = _load(_br), _br.relative_to(PROJECT_ROOT)
+        _au = [t["auroc"] for t in _brd["tests"]]
+        add(
+            "m3.bridge.auroc_min",
+            min(_au),
+            f"min over {_brr} :: tests[].auroc",
+            "smallest of the six bridge AUROCs",
+            kind="derived",
+        )
+        add(
+            "m3.bridge.auroc_max",
+            max(_au),
+            f"max over {_brr} :: tests[].auroc",
+            "largest of the six bridge AUROCs",
+            kind="derived",
+        )
+        add(
+            "m3.bridge.q_min",
+            min(t["q_bh"] for t in _brd["tests"]),
+            f"min over {_brr} :: tests[].q_bh",
+            "smallest Benjamini-Hochberg q of the six bridge tests",
+            kind="derived",
+        )
+
     _fc = _load(P / "m3_INVALID_floor_collapse.json")
     add(
         "m3v1.compression_events",
