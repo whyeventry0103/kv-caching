@@ -2772,6 +2772,17 @@ computed within one `(budget, read position)` cell so the realised ratio
 | b256@3328 | 0.077 | 14 | **−8.88e-07** | [−1.46e-06, −3.21e-07] | **yes** |
 | b256@4352 | 0.059 | 10 | **−1.35e-06** | [−2.42e-06, −5.93e-07] | **yes** |
 
+**Ratio note (2026-09-27, R.17.0.3).**
+- The `r` column above is budget ÷ decode step (`t`), as `onset_surface_q2.json`
+  reports it. It excludes the prompt.
+- The project convention is budget ÷ (mean prompt + position). On the full
+  panel (`results/diag/meeting3/q2_onset_grid.json`, per-cell mean prompt) the
+  corrected values are:
+  - B = 256: **0.106 / 0.075 / 0.057**;
+  - B = 2048: **0.847 / 0.596 / 0.459**.
+- Slopes, CIs and the MIXED verdict are unaffected: each cell is still matched
+  on `t`. Every new artifact uses the prompt-inclusive convention only.
+
 **Verdict: MIXED.** Not RATIO-ONLY — three cells exclude zero. Not
 HORIZON-PRESENT — the sign is not consistent: at budget 256 the slope is
 positive at the earliest read position and negative at both later ones. Per the
@@ -3555,6 +3566,9 @@ kept.
      - D_acc figure: the two policies' error bars overlapped at each onset,
        and the B = 2048 legend ran into StreamingLLM's error bars. Same fix:
        a ±35-step offset and a legend below the panels.
+     - `make_meeting3_figures.py` is in every stage's analysis identity, so
+       each FINAL stage re-runs its reader and republishes from unchanged
+       rows.
 7. **Stage-record basenames (2026-09-26, analysis-side only).**
    - The published stage record `results/diag/meeting3/stages/dacc.json`
      shared its basename with the reader output `dacc.json`.
@@ -3570,6 +3584,225 @@ kept.
    - Both scripts are in every stage's analysis identity, so each FINAL stage
      re-reads its unchanged rows and republishes.
    - The old `stages/<stage>.json` files on the GPU host are superseded and
-     left in place: no remote deletion is authorized. Nothing reads them. `make_meeting3_figures.py` is in every stage's
-     analysis identity, so each FINAL stage re-runs its reader and republishes
-     from unchanged rows.
+     left in place: no remote deletion is authorized. Nothing reads them.
+
+### R.17 Validity gate, reads on existing data, and new cells (registered 2026-09-27, before any read below is run)
+
+Target venue: proposed ICML 2027, pending supervisor confirmation. Every read
+below is fixed here, with its branches, before it is computed. The
+realized-ratio convention for every new artifact and figure is
+`r = budget / (prompt tokens + position)` (R.17.0.3). Estimators are the
+project's equal-problem, problem-clustered bootstrap (2,000 resamples, seed 0)
+unless stated.
+
+**What was already seen before this registration.** Stating it keeps the
+registration honest about which reads are blind.
+- Partial fork-control aggregates (51/150 conditions, 2026-09-26): max next-token
+  TV 0.0623 and max |logit| 10.09 in Random I=16.
+- The b256 per-policy M/Δ/ω means with CIs (MEETING3_RESULTS §3a).
+- The D_acc stratification by exposure at t0 = 2048 (§2a). This is closely
+  related to R.17.1.2, so that read is **not blind**.
+- None of the reads R.17.0.5, R.17.1.1, R.17.1.3, R.17.1.7 or R.17.1.8 has been
+  computed.
+
+**R.17.0.5 Direct fork control: validity gate for every Meeting #3 divergence
+result.**
+- *Arms (as implemented, `kvcache.fork_control`).*
+  - At every selection event the non-selected entries are made unattendable
+    immediately: an additive −inf mask per KV head, injected into every
+    layer's attention.
+  - Before the physical removal due `delay` = 32 forwards later, the state is
+    forked. **Arm A** compacts the due entries out of the cache (gather).
+    **Arm B** keeps them in place, masked. Both replay the identical next
+    tokens and positions until the next selection event.
+  - **Replay control:** arm B replayed twice from the same snapshot at the
+    first 3 forks of each trace; its maximum |logit difference| is the R.11
+    tolerance base.
+  - Stored per fork: the first-step and max-over-steps next-token TV and
+    |logit| difference, and selection agreement. Nothing per step, per layer
+    or per vocabulary entry is stored.
+- *Diagnosis (new, one trace).* One Random I=64 trace from the fork panel (the
+  first pid in the frozen subset order, seed 11), at its first physical
+  removal. Arms A and B are re-run for the full compared span in bf16 and again
+  with the model in fp32, recording per step the TV, the max |logit|
+  difference, the vocabulary rank (in arm B) of the token carrying the max
+  difference, and the top-10 overlap.
+  - **NUMERICS** if the fp32 max TV ≤ 1e-6 and max |logit| ≤ 1e-3: the bf16 gap
+    is kernel numerics.
+  - **IMPLEMENTATION** otherwise: position ids, RoPE application, kernel path
+    and mask placement are checked in turn, and each finding is recorded.
+- *Replacement gate (R.11's tolerance is relative to a control that is exactly
+  0, so it cannot pass).*
+  - **Precision floor:** 10 frozen-subset problems at seed 23 (the fork data
+    uses seed 11 only), full-cache teacher-forced traces, bf16 vs fp32 (eager
+    attention in both). Per step: next-token TV and max |logit|.
+  - For each interval I ∈ {16, 64, 256}: floor_p95(I) is the 95th percentile,
+    over non-overlapping windows of length I, of the window-maximum TV.
+  - Fork statistic: the 95th percentile over forks of `max_tv`, per
+    (policy, I).
+  - **PASS** iff fork_p95 ≤ **2 ×** floor_p95(I) for all six (policy, I) arms;
+    **FAIL** otherwise. The multiple 2 is fixed here; the floor has not been
+    measured. The same comparison for |logit| is reported descriptively.
+- *Consequence.* Until PASS, every Meeting #3 divergence number in the paper
+  carries its numeric floor, and the eviction-locking claim keeps the R.2
+  wording (detected at intervals 64 and 256 for Random, not at 16;
+  StreamingLLM indeterminate; not yet validated by the direct control).
+
+**R.17.1.1 Problem 1 collapse test (onset 0).**
+- *Matched-ratio pairs* (r at the mean prompt of the panel):
+  - (B = 256, t = 2304) vs (B = 512, t = 4352);
+  - (B = 512, t = 2304) vs (B = 1024, t = 4352);
+  - (B = 1024, t = 2304) vs (B = 2048, t = 4352).
+- *Panel.* Traces whose onset-0 profile at every one of the four budgets has a
+  full window at 4352, i.e. n_steps ≥ 4608. Profiles:
+  - B = 256/2048: the Q.2 onset-0 arm's full per-step profiles.
+  - B = 512/1024: t1-tv summaries, with the window at index t/256. Summary
+    windows are aligned at multiples of 256, and a window is used only if
+    n_steps ≥ t + 256.
+- *Read (per policy).*
+  - Pair difference d = window-mean TV(smaller B, t = 2304) − window-mean
+    TV(larger B, t = 4352), paired within trace, equal-problem CI.
+  - Residual r-mismatch bound per pair = (OLS slope of the smaller budget's
+    cell means on r over its three positions) × Δr. A pair whose CI excludes 0
+    but whose |d| ≤ |bound| counts as including 0.
+  - R = range of the policy's 12 onset-0 cell means (4 budgets × 3 positions)
+    on the panel.
+- *Branches.*
+  - **COLLAPSE** if all three d include 0 and every |d| < 0.25 R.
+  - **NO COLLAPSE** if all three exclude 0 with one sign. d > 0 means that at
+    matched r the smaller cache (earlier position) diverges more: absolute
+    budget matters. d < 0 means the later position diverges more: horizon
+    matters.
+  - **MIXED** otherwise.
+- *Also.* OLS of per-trace window TV on log r over all 12 onset-0 cells, then
+  with budget indicators added. ΔR² is the variance explained by budget after
+  r, with an equal-problem CI; descriptive.
+
+**R.17.1.2 D_acc onset contrast restricted to long reference traces (not blind;
+see above).**
+- *Restriction.* (problem, seed) pairs whose full-cache reference generation
+  exceeds 2304 generated tokens (`n_tokens` of the `math500-fc-powered-merged`
+  row). This is a pre-treatment covariate. The compressed run's own length is
+  never used.
+- *Report.* Retained fraction, the retained subset's full-cache accuracy, and
+  the remaining attrition (generations unexposed at t0 = 2048 within the
+  retained set). Contrasts t0 0 vs 2048, 512 vs 2048 and 0 vs 512, per budget
+  and policy, restricted beside unrestricted. Same estimator as §2a.
+- *Pre-committed reading.* If the restricted B = 256 contrast (t0 0 vs 2048)
+  includes 0 for a policy, the onset effect on accuracy is **not established**
+  for that policy, and the unrestricted effect is attributable to
+  never-compressed traces. If it excludes 0 and is positive, the onset effect
+  holds among long traces.
+
+**R.17.1.3 AUC-TV CIs at four budgets.** Per-trace mean TV at onset 0:
+- B = 256/2048 from the profiles behind `results/diag/amendment-p/auc_resid_tv.json`;
+- B = 512/1024 from the t1-tv summaries' `mean_tv`.
+
+Equal-problem CI per (policy, budget). Descriptive, no verdict.
+
+**R.17.1.5 Problem 2 hypotheses on M and Δ.** These are *confirmatory on
+capture-b2048* and *exploratory on capture-b256*, whose means were already
+printed.
+- **H2 (structural mirror).** Across the four policies:
+  - spread(X) = max − min of the per-policy equal-problem means;
+  - hw(X) = median over policies of the CI half-width.
+  - **MIRROR** if spread(Δ) < hw(Δ) and spread(M) > hw(M). **INVERTED** if
+    spread(Δ) > hw(Δ) and spread(M) < hw(M). **NEITHER** otherwise.
+- **H3 (the mass objective is not the damage objective).** Paired M contrast,
+  H2O-style / ObservedAttentionPress (no recency reservation) minus Random,
+  equal-problem CI. **HOLDS** if the CI is entirely negative; **FAILS**
+  otherwise.
+  - Premise, from `results/diag/amendment-k/m4-h2o256-full-summary.json` and
+    `m4-powered-diss256-summary.json`: total change at B = 256 is −0.6375
+    (H2O-style) vs −0.4625 (Random).
+- **Replication at 2048.** ω(Random) − ω(StreamingLLM), as R.6:
+  PREDICTED / NULL / REVERSED.
+- **Collateral at 2048.** Structurally non-identifying (R.16.3); reported, not
+  read.
+
+**R.17.1.6 Collateral (descriptive; no redesign, no GPU time).**
+- The b256 zero is explained by the R.16.3 condition. A head-wanted evicted
+  position is collateral only if at least 256 of the ~320 event candidates
+  have group-mean attention above its own (> 1/700).
+- The per-position rank diagnostic was not recorded in capture-v1. It is
+  recorded here as missing.
+- Within-group dispersion of per-head M (max − min over the 7 heads) is
+  reported for capture-b2048 only. capture-v1 stores group means, not per-head
+  values.
+
+**R.17.1.7 Problem 3 per-layer ω.**
+- Per layer, per policy (Random, StreamingLLM): trace ω_layer = sum_omega /
+  n_finite, then equal-problem mean with CI; descriptive.
+- k-sensitivity is **not computable on b256**: capture-v1 stores per-step
+  per-layer norms at k = 64 only, not projection coefficients. Nested k is
+  added for b2048 (R.17.2.1).
+
+**R.17.1.8 The bridge (within cell, B = 256).**
+- *Pairing.* Each capture-b256 trace's M_mean, Delta_mean and ω_trace is paired
+  with the free-run truncation of the same (problem, seed, policy, 256) from
+  `grid-diss256-tok`, for Random and StreamingLLM.
+- *Tests.* AUROC per predictor (3 predictors × 2 policies = 6 tests).
+  - Equal-problem cluster-bootstrap CI.
+  - Two-sided bootstrap p = 2 · min(P(AUROC* ≤ 0.5), P(AUROC* ≥ 0.5)).
+  - Benjamini–Hochberg at q = 0.05 across the 6.
+- *Pre-commit.* ω and Δ predict truncation positively (AUROC > 0.5, significant
+  after BH); M carries no prediction (not significant). Each of the six is
+  reported as CONFIRMED or NOT CONFIRMED. A policy with fewer than 5
+  truncations in the panel is reported "not established at this n".
+
+**R.17.2.1 capture-b2048 schema (the cell had 0 rows when held).**
+- *New generation family `capture_v2`.* Editing `capture.py` or
+  `run_capture.py` would change the `capture` family identity and invalidate
+  the FINAL b256 rows, so v2 lives in new modules.
+- *Adds, reduced in the same pass:*
+  - per-query-head sums of M, M_event and Δ per layer (columnar
+    [layer][head]);
+  - per-layer projection norms at nested k ∈ {8, 16, 32, 64, 128, 256}.
+- *Basis.*
+  - k ≤ 64 uses the frozen basis's leading columns, which are ordered by
+    descending eigenvalue.
+  - k ∈ {128, 256} needs a basis refit identical except k = 256
+    (`basis_fit_q6_k256_r17.yaml`). Its acceptance check: mean and scale equal
+    the frozen fit's within 1e-6 relative, and every principal angle between
+    its first 64 columns and the frozen basis ≤ 1e-3 rad.
+  - If the check fails, b2048 records nested k ≤ 64 only and says so.
+- *Registered ω* stays the R.6 k = 64 quantity.
+- *Gate.* A `capture_v2` smoke on one trace (the R.9 controls) must PASS before
+  b2048 runs.
+- *Confirmatory reads:* H2, H3 and the ω replication (R.17.1.5).
+
+**R.17.2.3 Restoration, redesigned (new family `restore_v2`; `exact_lag.py`
+unchanged).**
+- *Trigger:* the first prune at or after decode step 1024 present in every
+  layer. The stash then holds every entry evicted before the trigger (≥ 768 at
+  B = 256).
+- *Arms:* none; the exact cohort at lags {1, 4, 16, 64, 256} (matched / random
+  / relaxed, as R.10).
+- **Full self-restoration.** Every stashed evicted entry is returned at the
+  trigger, and eviction is disabled from then on, so no position is missing
+  and M = 0 for the read window. The returned K/V are the compressed branch's
+  own (identity-checked as R.15.4), so what remains is state drift.
+- *Read window:* 200 forwards from the first prediction that sees the
+  intervention. M and Δ at the trigger forward and every 16th forward of the
+  window, in the none and full-restoration arms.
+- *Eligibility* (the trace reaches trigger + 256 + 200) and the eligible
+  subset's full-cache accuracy are reported before any effect.
+- *Branches for full self-restoration.* R_fs = (mean over traces of the arm's
+  window-mean TV) / (the same for none), equal-problem CI.
+  - **DRIFT DOMINATES** if the CI lower bound ≥ 0.50.
+  - **MASS DOMINATES** if the CI upper bound ≤ 0.10.
+  - **MIXED** if the CI lies within (0.10, 0.50).
+  - **INDETERMINATE** if it straddles 0.10 or 0.50.
+  - The cohort arms are read as R.10.
+- *If the stash cannot hold the full history,* the reason is recorded and only
+  the cohort arms run.
+
+**R.17.3 Cross-architecture replication (only if storage permits after Tier
+2).** A B = 256 capture on DeepSeek-R1-Distill-Llama-8B for M, Δ and ω, with its
+own frozen full-only basis. H2, H3 and the ω contrast are registered as
+replications. If it does not fit, the config is prepared and the footprint
+recorded.
+
+**R.17.0.3 Ratio convention.** All new artifacts and figures report
+`r = B / (prompt + position)` only. The Q.2 table's decode-only values carry a
+dated note at the table.
