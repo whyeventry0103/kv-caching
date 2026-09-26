@@ -1036,6 +1036,48 @@ jobs:
     gate: fork_precision
     requires: null
 
+  # Amendment R.17.3 / addendum E: cross-architecture replication on
+  # DeepSeek-R1-Distill-Llama-8B. Own frozen input manifest (named in each
+  # config and exported by the scheduler), own basis, capture-v2 at budget 256.
+  - name: q6-basis-fit-llama8b
+    command: basisfit
+    config: configs/experiments/basis_fit_q6_llama8b_r17.yaml
+    run_name: q6-basis-fit-llama8b
+    blocked: "Amendment R.17.3 (addendum E) - runs only after every Tier 2 cell is complete and storage is re-measured; released by hand"
+    total: 1
+    seeds: [11]
+    min_free_gb: 28
+    progress_kind: marker
+    marker: q6-basis-fit-llama8b/basis/q6_basis.json
+    est_output_gb: 0.04
+    gate: basis
+    requires: null
+
+  - name: capture-llama8b-smoke
+    command: capture2
+    config: configs/experiments/capture_math500_llama8b_smoke_r17.yaml
+    run_name: capture-llama8b-smoke
+    blocked: "Amendment R.17.3 (addendum E) - runs only after every Tier 2 cell is complete and storage is re-measured; released by hand"
+    total: 1
+    seeds: [11]
+    min_free_gb: 32
+    progress_kind: marker
+    marker: capture-llama8b-smoke-PASS.json
+    gate: capture_v2_smoke
+    requires: q6-basis-fit-llama8b
+
+  - name: capture-llama8b-b256
+    command: capture2
+    config: configs/experiments/capture_math500_llama8b_b256_r17.yaml
+    run_name: capture-llama8b-b256
+    blocked: "Amendment R.17.3 (addendum E) - runs only after every Tier 2 cell is complete and storage is re-measured; released by hand"
+    total: 400
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 32
+    progress_kind: grid
+    est_output_gb: 0.03
+    requires: capture-llama8b-smoke
+
   # ======================================================================
   # R.14 postprocessing: CPU stages run inline by every orchestrator tick
   # (never given a GPU; also at the 10:50 tick). Each runs its registered

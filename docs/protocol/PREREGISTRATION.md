@@ -3876,3 +3876,40 @@ decomposition shown in the 2026-09-27 status report is made an artifact.
   logs, and log(‖δ⊥‖ / ‖δ∥‖).
 - *Artifact:* `results/diag/meeting3/r17/omega_layers.json` (key
   `components`). No verdict.
+
+**R.17 addendum E (2026-09-27, before any Tier 3 job runs).** The
+cross-architecture replication (R.17.3) on DeepSeek-R1-Distill-Llama-8B
+(revision `6a6f4aa`), specified before any output exists.
+- *Reference and inputs.*
+  - The Llama full-cache bank `fc-llama50` covers all 100 (problem, seed)
+    pairs of the frozen subset.
+  - Its frozen input manifest (`configs/meeting3/input_manifest_llama8b.json`)
+    was built by `scripts/build_input_manifest.py`. The same script rebuilds
+    the committed Qwen manifest byte-for-byte.
+  - Configs name their manifest (`input_manifest`). The default manifest, and
+    every existing identity, is unchanged.
+- *Basis.* The R.6 fit repeated on the Llama FC traces
+  (`basis_fit_q6_llama8b_r17.yaml`: k = 64, 256 positions, same subset and
+  seeds).
+- *Capture.* capture-v2 at budget 256, all four policies: Random,
+  StreamingLLM, H2O-style (ObservedAttentionPress, no recency reservation),
+  and R-KV.
+  - The R-KV numbers characterize **our port, which is certified at Qwen 7B
+    and not on Llama**. The capture's live controls (top-k gather equality,
+    layer-0 key identity, bitwise pre-eviction) apply to every press.
+  - Smoke first, with its own marker (`capture-llama8b-smoke-PASS.json`).
+- *Registered replications (confirmatory for Llama).*
+  - **H2 and H3** exactly as R.17.1.5.
+  - **The ω contrast** ω(Random) − ω(StreamingLLM), PREDICTED / NULL /
+    REVERSED as R.6.
+  - The collateral contrast is reported, not read: Llama-8B has 32 query
+    heads over 8 KV heads (4 to 1), so R.16.3's 7-head argument does not
+    transfer, and no positive control has been run at this grouping.
+- *Footprint (estimate).* Basis ≈ 0.035 GiB (32 × 4096 × 64 float32 plus
+  mean and scale); capture ≈ 0.025 GiB (400 rows with per-head sums, plus
+  npz). Total ≈ 0.06 GiB, against 69.31 GiB measured plus ≈ 0.19 GiB declared
+  for Tier 2, under the 71 GiB usable line (72 GiB approved minus the 1 GiB
+  margin).
+- *When it runs.* The three queue jobs are held (`blocked:`) and released by
+  hand only once every Tier 2 cell is complete and storage has been
+  re-measured.

@@ -131,21 +131,35 @@ REQUIRED_FIELDS = (
 )
 
 
-def _manifest_path(root: Path | None = None) -> Path:
-    # KVCACHE_INPUT_MANIFEST exists for tests with synthetic reference trees;
-    # production reads the committed file.
+def _manifest_path(root: Path | None = None, path: str | Path | None = None) -> Path:
+    """The frozen input manifest in force: explicit > environment > default.
+
+    ``path`` is a config's ``input_manifest`` (R.17.3: a second model's frozen
+    reference inputs); the scheduler exports the same file as
+    KVCACHE_INPUT_MANIFEST to that config's jobs, which is how runners (whose
+    bytes are generation identity and are not edited) pick it up. Without
+    either, the committed Qwen manifest -- unchanged for every existing run.
+    """
+    base = Path(root) if root is not None else PROJECT_ROOT
+    if path:
+        p = Path(path)
+        return p if p.is_absolute() else base / p
     env = os.environ.get("KVCACHE_INPUT_MANIFEST")
     if env:
         return Path(env)
-    return (Path(root) if root is not None else PROJECT_ROOT) / INPUT_MANIFEST
+    return base / INPUT_MANIFEST
 
 
-def input_manifest_sha256(root: Path | None = None) -> str:
-    return hashlib.sha256(_manifest_path(root).read_bytes()).hexdigest()
+def input_manifest_sha256(
+    root: Path | None = None, path: str | Path | None = None
+) -> str:
+    return hashlib.sha256(_manifest_path(root, path).read_bytes()).hexdigest()
 
 
-def load_input_manifest(root: Path | None = None) -> dict[str, Any]:
-    return json.loads(_manifest_path(root).read_text(encoding="utf-8"))
+def load_input_manifest(
+    root: Path | None = None, path: str | Path | None = None
+) -> dict[str, Any]:
+    return json.loads(_manifest_path(root, path).read_text(encoding="utf-8"))
 
 
 def expected_inputs(manifest: Mapping[str, Any], kind: str, pid: str, seed: int) -> str:
@@ -224,11 +238,12 @@ def identity(
     reference_run: str | None = None,
     basis_npz_sha256: str | None = None,
     root: Path | None = None,
+    manifest_path: str | Path | None = None,
 ) -> dict[str, Any]:
     """The run-level identity every row and gate of one run must share."""
     return {
         "schema": PROVENANCE_SCHEMA,
-        "input_manifest_sha256": input_manifest_sha256(root),
+        "input_manifest_sha256": input_manifest_sha256(root, manifest_path),
         "kind": kind,
         "implementation_id": implementation_id(kind, root),
         "config_name": config.get("name"),

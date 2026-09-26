@@ -68,8 +68,9 @@ from kvcache.datasets import load_benchmark
 from kvcache.runmeta import capture_runmeta
 
 SCHEMA = "capture-v2"
-SMOKE_PASS = "capture2-smoke-PASS.json"
-SMOKE_FAIL = "capture2-smoke-FAIL.json"
+# smoke markers are named by the config (``smoke_marker``), so a second model's
+# smoke cannot overwrite the first model's gate (R.17.3)
+SMOKE_DEFAULT = "capture2-smoke"
 KIND = "capture_v2"
 
 
@@ -443,7 +444,8 @@ def main() -> int:
                 for s_ in rows
             ],
         }
-        target = write_gate(base, SMOKE_PASS, SMOKE_FAIL, report)
+        marker = cfg.get("smoke_marker", SMOKE_DEFAULT)
+        target = write_gate(base, f"{marker}-PASS.json", f"{marker}-FAIL.json", report)
         print(f"{'PASS' if not fails else 'FAIL'}: wrote {target}")
         return 0 if not fails else 1
     return 0

@@ -663,6 +663,18 @@ def select_job(
     return None, "next job blocked on incomplete dependency or stuck"
 
 
+def _config_input_manifest(config: str) -> str | None:
+    """A job config's ``input_manifest`` (repo-relative), if it names one."""
+    import yaml
+
+    path = PROJECT_ROOT / config
+    if not path.exists():
+        return None
+    return (yaml.safe_load(path.read_text(encoding="utf-8")) or {}).get(
+        "input_manifest"
+    )
+
+
 def build_launch_specs(
     job: Job, assignment: dict[int, list[int]], max_hours: float
 ) -> list[LaunchSpec]:
@@ -674,6 +686,12 @@ def build_launch_specs(
         env["KVCACHE_RUN_NAME"] = job.run_name
         env["KVCACHE_MAX_HOURS"] = str(max_hours)
         env["KVCACHE_ALLOW_EXISTING_RUN"] = "1"
+        manifest = _config_input_manifest(job.config)
+        if manifest:
+            # R.17.3: a config that names its own frozen input manifest (a
+            # second model) gets it here; runners read it via the existing
+            # KVCACHE_INPUT_MANIFEST override, so no generation file changes.
+            env["KVCACHE_INPUT_MANIFEST"] = str(PROJECT_ROOT / manifest)
         launch_argv = [
             "bash",
             "scripts/launch.sh",

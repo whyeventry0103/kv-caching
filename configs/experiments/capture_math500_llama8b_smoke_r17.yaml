@@ -1,0 +1,33 @@
+name: capture_math500_llama8b_smoke_r17
+stage: capture2
+family: capture_v2
+# Amendment R.17.3 (addendum E): cross-architecture replication on
+# DeepSeek-R1-Distill-Llama-8B (capture-v2 schema, own frozen basis and input
+# manifest; R-KV is our port, not certified on Llama).
+basis_config: configs/experiments/basis_fit_q6_llama8b_r17.yaml
+input_manifest: configs/meeting3/input_manifest_llama8b.json
+smoke_marker: capture-llama8b-smoke
+# Amendment R.9 capture SMOKE (gate). One reference trace, the full/full
+# instrumentation-parity control first, then all four policies at budget 256.
+# PASS marker capture-smoke-PASS.json only if: full/full logits identical,
+# layer-0 Delta <= 1e-5, no non-finite values, >= 1 eviction event per policy
+# (plus the live checks that raise: topk gather equality, layer-0 key identity
+# at mapped positions, bitwise pre-eviction block outputs). Also measures the
+# real per-condition cost that sizes the cells behind it.
+presses: [random, streamingllm, h2o, rkv]
+budgets: [256]
+seeds: [11]
+reference_limit: 1
+fullfull_control: true
+smoke: true
+models: [r1_distill_llama_8b]
+benchmarks: [math500]
+subset:
+  math500: 25
+reference_run_name: fc-llama50
+compression_interval: 64
+tau: 0.01
+trigger_step: 130
+basis_run: q6-basis-fit-llama8b
+scale_authorized: true
+remote_only: true

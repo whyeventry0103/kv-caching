@@ -179,20 +179,22 @@ def collateral_counts(
     return out
 
 
+def _config(config: Path) -> dict[str, Any]:
+    import yaml
+
+    path = Path(config)
+    if not path.exists():
+        return {}
+    return yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+
+
 def _family(config: Path) -> str:
     """The generation family a config's rows carry (capture-v2 names it, R.17.2.1).
 
     The expected identity is always derived from committed specs; a config with
     no ``family`` key is capture-v1.
     """
-    import yaml
-
-    path = Path(config)
-    if not path.exists():
-        return "capture"
-    return (yaml.safe_load(path.read_text(encoding="utf-8")) or {}).get(
-        "family", "capture"
-    )
+    return _config(config).get("family", "capture")
 
 
 def read_capture(
@@ -205,8 +207,10 @@ def read_capture(
     n_resamples: int = 2000,
     seed: int = 0,
     kind: str = "capture",
+    manifest_path: str | None = None,
+    policies: tuple[str, ...] = POLICIES,
 ) -> dict[str, Any]:
-    expected = expected_keys(pids, seeds, POLICIES, [str(budget)])
+    expected = expected_keys(pids, seeds, policies, [str(budget)])
     cov = check_coverage(
         rows,
         lambda r: (r["pid"], int(r["seed"]), r["press"], str(r["budget"])),
@@ -218,6 +222,7 @@ def read_capture(
         rows,
         kind=kind,
         expected=expected_identity,
+        manifest_path=manifest_path,
         key=lambda r: (r["pid"], int(r["seed"]), r["press"]),
     )
     identity_ok = not prov_bad
@@ -381,6 +386,8 @@ def main() -> int:
         n_resamples=a.n_resamples,
         seed=a.seed,
         kind=kind,
+        manifest_path=_config(a.config).get("input_manifest"),
+        policies=tuple(_config(a.config).get("presses") or POLICIES),
     )
     table = res.pop("sufficient_statistics")
     tsv = a.out.with_suffix(".conditions.tsv")

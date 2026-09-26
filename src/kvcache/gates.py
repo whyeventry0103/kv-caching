@@ -81,6 +81,7 @@ def verify_basis(
         model_revision=_revision(cfg, root),
         reference_run=cfg["reference_run_name"],
         root=root,
+        manifest_path=cfg.get("input_manifest"),
     )
     if head.get("identity") != want:
         return False, "basis identity differs from the expected fit identity", None
@@ -109,14 +110,15 @@ def gate_status(
             model_revision=_revision(cfg, root),
             reference_run=None,
             root=root,
+            manifest_path=cfg.get("input_manifest"),
         )
     elif kind in ("capture_smoke", "capture_v2_smoke"):
         marker = runs_root / (
             "capture-smoke-PASS.json"
             if kind == "capture_smoke"
-            else "capture2-smoke-PASS.json"
+            else f"{cfg.get('smoke_marker', 'capture2-smoke')}-PASS.json"
         )
-        basis_cfg = "configs/experiments/basis_fit_q6_r9.yaml"
+        basis_cfg = cfg.get("basis_config", "configs/experiments/basis_fit_q6_r9.yaml")
         ok, why, sha = verify_basis(
             runs_root, basis_cfg, root=root, run_name=cfg["basis_run"]
         )
@@ -129,6 +131,7 @@ def gate_status(
             reference_run=cfg["reference_run_name"],
             basis_npz_sha256=sha,
             root=root,
+            manifest_path=cfg.get("input_manifest"),
         )
     elif kind == "fork_precision":
         return _fork_precision_status(runs_root, cfg, root)
@@ -165,6 +168,7 @@ def _fork_precision_status(
         model_revision=_revision(cfg, root),
         reference_run=cfg["reference_run_name"],
         root=root,
+        manifest_path=cfg.get("input_manifest"),
     )
     if d.get("provenance") != want:
         return False, f"{marker.name} identity differs from the expected identity"
@@ -192,7 +196,7 @@ def expected_run_identity(
     if kind in ("capture", "capture_v2"):
         ok, why, sha = verify_basis(
             Path(runs_root),
-            "configs/experiments/basis_fit_q6_r9.yaml",
+            cfg.get("basis_config", "configs/experiments/basis_fit_q6_r9.yaml"),
             root=root,
             run_name=cfg["basis_run"],
         )
@@ -206,12 +210,20 @@ def expected_run_identity(
                 reference_run=cfg["reference_run_name"],
                 basis_npz_sha256=sha,
                 root=root,
+                manifest_path=cfg.get("input_manifest"),
             ),
             "ok",
         )
     if kind == "dacc":
         return (
-            identity("dacc", cfg, model_revision=rev, reference_run=None, root=root),
+            identity(
+                "dacc",
+                cfg,
+                model_revision=rev,
+                reference_run=None,
+                root=root,
+                manifest_path=cfg.get("input_manifest"),
+            ),
             "ok",
         )
     if kind in ("exact_lag", "fork", "restore_v2"):
@@ -222,6 +234,7 @@ def expected_run_identity(
                 model_revision=rev,
                 reference_run=cfg["reference_run_name"],
                 root=root,
+                manifest_path=cfg.get("input_manifest"),
             ),
             "ok",
         )
@@ -234,11 +247,12 @@ def validate_rows(
     kind: str,
     expected: dict[str, Any] | None,
     key: Any,
+    manifest_path: str | Path | None = None,
 ) -> dict[tuple, list[str]]:
     """Per-row provenance problems (row key -> problems); empty dict = all valid."""
     from kvcache.provenance import load_input_manifest, validate_row_provenance
 
-    manifest = load_input_manifest()
+    manifest = load_input_manifest(path=manifest_path)
     bad: dict[tuple, list[str]] = {}
     for r in rows:
         try:
