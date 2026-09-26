@@ -1,0 +1,83 @@
+{
+  "amendment": "R.17",
+  "cells": {
+    "h2o-2048": {
+      "ci95": [
+        0.006522201359248026,
+        0.022369064431616036
+      ],
+      "mean": 0.013877813188264984,
+      "n_problems": 25,
+      "n_values": 100
+    },
+    "h2o-256": {
+      "ci95": [
+        0.06853175228696824,
+        0.10045008928350799
+      ],
+      "mean": 0.0840052280168251,
+      "n_problems": 25,
+      "n_values": 100
+    },
+    "random-2048": {
+      "ci95": [
+        0.006322252065594531,
+        0.02014933216649191
+      ],
+      "mean": 0.01282887468173492,
+      "n_problems": 25,
+      "n_values": 100
+    },
+    "random-256": {
+      "ci95": [
+        0.09059521868694137,
+        0.12404852998779026
+      ],
+      "mean": 0.10750623825627753,
+      "n_problems": 25,
+      "n_values": 100
+    },
+    "rkv-2048": {
+      "ci95": [
+        0.005898189078180091,
+        0.02169526222520313
+      ],
+      "mean": 0.01313926371220974,
+      "n_problems": 25,
+      "n_values": 100
+    },
+    "rkv-256": {
+      "ci95": [
+        0.06388166643451472,
+        0.09612090009084094
+      ],
+      "mean": 0.07972595798354333,
+      "n_problems": 25,
+      "n_values": 100
+    },
+    "streamingllm-2048": {
+      "ci95": [
+        0.009097385186221416,
+        0.029103397146721107
+      ],
+      "mean": 0.01859283392281451,
+      "n_problems": 25,
+      "n_values": 100
+    },
+    "streamingllm-256": {
+      "ci95": [
+        0.08309162693811623,
+        0.1235350020795709
+      ],
+      "mean": 0.10275934916439619,
+      "n_problems": 25,
+      "n_values": 100
+    }
+  },
+  "inputs": {
+    "b256_b2048": "replay-ext-diss256 (the profiles behind results/diag/amendment-p/auc_resid_tv.json)",
+    "b512_b1024": "t1-tv512 / t1-tv1024 summaries (mean_tv)"
+  },
+  "read": "R.17.1.3 AUC-TV with problem-clustered CIs",
+  "reproduce": "python scripts/report_r17.py --runs-root /home/sk10741/kvcache-storage/runs auc-tv"
+}
