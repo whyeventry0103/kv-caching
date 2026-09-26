@@ -3806,3 +3806,13 @@ recorded.
 **R.17.0.3 Ratio convention.** All new artifacts and figures report
 `r = B / (prompt + position)` only. The Q.2 table's decode-only values carry a
 dated note at the table.
+
+**R.17 addendum A (2026-09-27, before the artifact is produced).** Restoration
+eligibility profile, descriptive.
+- Split the exact-lag (problem, seed) traces into eligible and ineligible
+  (registered R.10 reason). Report per split: problem and trace counts,
+  full-cache accuracy and truncation (equal-problem CIs), and median reference
+  trace length.
+- Artifact: `results/diag/meeting3/r17/exact_lag_eligibility.json`.
+- The same split was computed ad hoc on 2026-09-27, before registration:
+  full-cache accuracy 0.594 vs 0.971. This artifact is what the paper cites.
