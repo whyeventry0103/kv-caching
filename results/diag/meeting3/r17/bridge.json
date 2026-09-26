@@ -1,0 +1,114 @@
+{
+  "amendment": "R.17",
+  "family": "6 tests, Benjamini-Hochberg q = 0.05",
+  "inputs": {
+    "capture_run": "capture-b256",
+    "grid_run": "grid-diss256-tok"
+  },
+  "read": "R.17.1.8 bridge: teacher-forced M/Delta/omega vs free-run truncation",
+  "reproduce": "python scripts/report_r17.py --runs-root /home/sk10741/kvcache-storage/runs bridge",
+  "tests": [
+    {
+      "auroc": 0.5428571428571428,
+      "ci95": [
+        0.3357444243520193,
+        0.725594949004371
+      ],
+      "n_positive": 30,
+      "n_problems": 25,
+      "n_resamples_dropped_one_class": 0,
+      "n_resamples_used": 2000,
+      "n_traces": 100,
+      "p_two_sided": 0.697,
+      "policy": "random",
+      "predictor": "omega",
+      "q_bh": 0.786,
+      "verdict": "NOT CONFIRMED"
+    },
+    {
+      "auroc": 0.6585714285714286,
+      "ci95": [
+        0.4997854997854998,
+        0.8025846702317291
+      ],
+      "n_positive": 30,
+      "n_problems": 25,
+      "n_resamples_dropped_one_class": 0,
+      "n_resamples_used": 2000,
+      "n_traces": 100,
+      "p_two_sided": 0.05,
+      "policy": "random",
+      "predictor": "Delta",
+      "q_bh": 0.165,
+      "verdict": "NOT CONFIRMED"
+    },
+    {
+      "auroc": 0.6290476190476191,
+      "ci95": [
+        0.4712063892391761,
+        0.7712800519818064
+      ],
+      "n_positive": 30,
+      "n_problems": 25,
+      "n_resamples_dropped_one_class": 0,
+      "n_resamples_used": 2000,
+      "n_traces": 100,
+      "p_two_sided": 0.099,
+      "policy": "random",
+      "predictor": "M",
+      "q_bh": 0.165,
+      "verdict": "CONFIRMED (no prediction)"
+    },
+    {
+      "auroc": 0.4777777777777778,
+      "ci95": [
+        0.2907608695652174,
+        0.6560283687943262
+      ],
+      "n_positive": 10,
+      "n_problems": 25,
+      "n_resamples_dropped_one_class": 0,
+      "n_resamples_used": 2000,
+      "n_traces": 100,
+      "p_two_sided": 0.786,
+      "policy": "streamingllm",
+      "predictor": "omega",
+      "q_bh": 0.786,
+      "verdict": "NOT CONFIRMED"
+    },
+    {
+      "auroc": 0.6522222222222223,
+      "ci95": [
+        0.4838709677419355,
+        0.8085106382978723
+      ],
+      "n_positive": 10,
+      "n_problems": 25,
+      "n_resamples_dropped_one_class": 0,
+      "n_resamples_used": 2000,
+      "n_traces": 100,
+      "p_two_sided": 0.071,
+      "policy": "streamingllm",
+      "predictor": "Delta",
+      "q_bh": 0.165,
+      "verdict": "NOT CONFIRMED"
+    },
+    {
+      "auroc": 0.6433333333333333,
+      "ci95": [
+        0.46390168970814133,
+        0.8098958333333334
+      ],
+      "n_positive": 10,
+      "n_problems": 25,
+      "n_resamples_dropped_one_class": 0,
+      "n_resamples_used": 2000,
+      "n_traces": 100,
+      "p_two_sided": 0.11,
+      "policy": "streamingllm",
+      "predictor": "M",
+      "q_bh": 0.165,
+      "verdict": "CONFIRMED (no prediction)"
+    }
+  ]
+}

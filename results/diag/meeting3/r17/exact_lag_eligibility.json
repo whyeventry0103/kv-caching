@@ -1,0 +1,80 @@
+{
+  "amendment": "R.17",
+  "eligible": {
+    "fc_accuracy": {
+      "ci95": [
+        0.25,
+        0.875
+      ],
+      "mean": 0.59375,
+      "n_problems": 8
+    },
+    "fc_truncation": {
+      "ci95": [
+        0.0,
+        0.3125
+      ],
+      "mean": 0.125
+    },
+    "median_trace_tokens": 5905.5,
+    "n_problems": 8,
+    "n_traces": 32,
+    "problems": [
+      "test/algebra/1349.json",
+      "test/algebra/1837.json",
+      "test/geometry/248.json",
+      "test/geometry/434.json",
+      "test/intermediate_algebra/1197.json",
+      "test/prealgebra/1139.json",
+      "test/precalculus/1199.json",
+      "test/precalculus/990.json"
+    ]
+  },
+  "ineligible": {
+    "fc_accuracy": {
+      "ci95": [
+        0.9264705882352942,
+        1.0
+      ],
+      "mean": 0.9705882352941176,
+      "n_problems": 17
+    },
+    "fc_truncation": {
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "mean": 0.0
+    },
+    "median_trace_tokens": 2318.5,
+    "n_problems": 17,
+    "n_traces": 68,
+    "problems": [
+      "test/algebra/1098.json",
+      "test/algebra/2036.json",
+      "test/algebra/2193.json",
+      "test/algebra/2427.json",
+      "test/algebra/2584.json",
+      "test/intermediate_algebra/1000.json",
+      "test/intermediate_algebra/134.json",
+      "test/intermediate_algebra/1994.json",
+      "test/intermediate_algebra/607.json",
+      "test/number_theory/1032.json",
+      "test/number_theory/515.json",
+      "test/number_theory/572.json",
+      "test/number_theory/737.json",
+      "test/prealgebra/1622.json",
+      "test/precalculus/1303.json",
+      "test/precalculus/807.json",
+      "test/precalculus/927.json"
+    ]
+  },
+  "inputs": {
+    "exact_lag_run": "exact-lag-r5",
+    "fc_run": "math500-fc-powered-merged"
+  },
+  "n_rows": 200,
+  "read": "R.17 addendum: who the exact-lag restoration read describes",
+  "reproduce": "python scripts/report_r17.py --runs-root /home/sk10741/kvcache-storage/runs eligibility",
+  "rule": "eligible iff stash (= prompt + cohort step - 256) >= 64 (R.10)"
+}

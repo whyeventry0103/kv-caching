@@ -1,0 +1,327 @@
+{
+  "amendment": "R.17",
+  "cells": {
+    "random-2048": {
+      "t0_0_vs_2048": {
+        "restricted": {
+          "ci95": [
+            -0.02631578947368421,
+            0.05263157894736842
+          ],
+          "excludes_zero": false,
+          "mean": 0.013157894736842105,
+          "n_pairs": 60,
+          "n_problems": 19
+        },
+        "unrestricted": {
+          "ci95": [
+            -0.02,
+            0.05
+          ],
+          "excludes_zero": false,
+          "mean": 0.01,
+          "n_pairs": 100,
+          "n_problems": 25
+        }
+      },
+      "t0_0_vs_512": {
+        "restricted": {
+          "ci95": [
+            -0.039473684210526314,
+            0.13157894736842105
+          ],
+          "excludes_zero": false,
+          "mean": 0.039473684210526314,
+          "n_pairs": 60,
+          "n_problems": 19
+        },
+        "unrestricted": {
+          "ci95": [
+            -0.03,
+            0.11
+          ],
+          "excludes_zero": false,
+          "mean": 0.03,
+          "n_pairs": 100,
+          "n_problems": 25
+        }
+      },
+      "t0_512_vs_2048": {
+        "restricted": {
+          "ci95": [
+            -0.10526315789473684,
+            0.039473684210526314
+          ],
+          "excludes_zero": false,
+          "mean": -0.02631578947368421,
+          "n_pairs": 60,
+          "n_problems": 19
+        },
+        "unrestricted": {
+          "ci95": [
+            -0.08,
+            0.03
+          ],
+          "excludes_zero": false,
+          "mean": -0.02,
+          "n_pairs": 100,
+          "n_problems": 25
+        }
+      },
+      "unexposed_at_t0_2048_within_retained": 0
+    },
+    "random-256": {
+      "registered_reading": "onset effect NOT ESTABLISHED; unrestricted effect attributable to never-compressed traces",
+      "t0_0_vs_2048": {
+        "restricted": {
+          "ci95": [
+            -0.18421052631578946,
+            0.07456140350877193
+          ],
+          "excludes_zero": false,
+          "mean": -0.048245614035087724,
+          "n_pairs": 60,
+          "n_problems": 19
+        },
+        "unrestricted": {
+          "ci95": [
+            0.03,
+            0.2
+          ],
+          "excludes_zero": true,
+          "mean": 0.11,
+          "n_pairs": 100,
+          "n_problems": 25
+        }
+      },
+      "t0_0_vs_512": {
+        "restricted": {
+          "ci95": [
+            -0.18421052631578946,
+            0.07894736842105263
+          ],
+          "excludes_zero": false,
+          "mean": -0.039473684210526314,
+          "n_pairs": 60,
+          "n_problems": 19
+        },
+        "unrestricted": {
+          "ci95": [
+            -0.09,
+            0.07
+          ],
+          "excludes_zero": false,
+          "mean": -0.01,
+          "n_pairs": 100,
+          "n_problems": 25
+        }
+      },
+      "t0_512_vs_2048": {
+        "restricted": {
+          "ci95": [
+            -0.09210526315789473,
+            0.08333333333333333
+          ],
+          "excludes_zero": false,
+          "mean": -0.008771929824561405,
+          "n_pairs": 60,
+          "n_problems": 19
+        },
+        "unrestricted": {
+          "ci95": [
+            0.01,
+            0.23
+          ],
+          "excludes_zero": true,
+          "mean": 0.12,
+          "n_pairs": 100,
+          "n_problems": 25
+        }
+      },
+      "unexposed_at_t0_2048_within_retained": 0
+    },
+    "streamingllm-2048": {
+      "t0_0_vs_2048": {
+        "restricted": {
+          "ci95": [
+            -0.06578947368421052,
+            0.09210526315789473
+          ],
+          "excludes_zero": false,
+          "mean": 0.013157894736842105,
+          "n_pairs": 60,
+          "n_problems": 19
+        },
+        "unrestricted": {
+          "ci95": [
+            -0.05,
+            0.04
+          ],
+          "excludes_zero": false,
+          "mean": 0.0,
+          "n_pairs": 100,
+          "n_problems": 25
+        }
+      },
+      "t0_0_vs_512": {
+        "restricted": {
+          "ci95": [
+            -0.039473684210526314,
+            0.10087719298245613
+          ],
+          "excludes_zero": false,
+          "mean": 0.030701754385964907,
+          "n_pairs": 60,
+          "n_problems": 19
+        },
+        "unrestricted": {
+          "ci95": [
+            -0.03,
+            0.07
+          ],
+          "excludes_zero": false,
+          "mean": 0.02,
+          "n_pairs": 100,
+          "n_problems": 25
+        }
+      },
+      "t0_512_vs_2048": {
+        "restricted": {
+          "ci95": [
+            -0.09649122807017543,
+            0.06578947368421052
+          ],
+          "excludes_zero": false,
+          "mean": -0.017543859649122806,
+          "n_pairs": 60,
+          "n_problems": 19
+        },
+        "unrestricted": {
+          "ci95": [
+            -0.07,
+            0.03
+          ],
+          "excludes_zero": false,
+          "mean": -0.02,
+          "n_pairs": 100,
+          "n_problems": 25
+        }
+      },
+      "unexposed_at_t0_2048_within_retained": 0
+    },
+    "streamingllm-256": {
+      "registered_reading": "onset effect NOT ESTABLISHED; unrestricted effect attributable to never-compressed traces",
+      "t0_0_vs_2048": {
+        "restricted": {
+          "ci95": [
+            -0.06578947368421052,
+            0.11842105263157894
+          ],
+          "excludes_zero": false,
+          "mean": 0.02631578947368421,
+          "n_pairs": 60,
+          "n_problems": 19
+        },
+        "unrestricted": {
+          "ci95": [
+            0.08,
+            0.31
+          ],
+          "excludes_zero": true,
+          "mean": 0.19,
+          "n_pairs": 100,
+          "n_problems": 25
+        }
+      },
+      "t0_0_vs_512": {
+        "restricted": {
+          "ci95": [
+            -0.16666666666666666,
+            0.05701754385964912
+          ],
+          "excludes_zero": false,
+          "mean": -0.03508771929824562,
+          "n_pairs": 60,
+          "n_problems": 19
+        },
+        "unrestricted": {
+          "ci95": [
+            -0.05,
+            0.09
+          ],
+          "excludes_zero": false,
+          "mean": 0.02,
+          "n_pairs": 100,
+          "n_problems": 25
+        }
+      },
+      "t0_512_vs_2048": {
+        "restricted": {
+          "ci95": [
+            -0.04824561403508772,
+            0.17105263157894737
+          ],
+          "excludes_zero": false,
+          "mean": 0.06140350877192983,
+          "n_pairs": 60,
+          "n_problems": 19
+        },
+        "unrestricted": {
+          "ci95": [
+            0.05,
+            0.31
+          ],
+          "excludes_zero": true,
+          "mean": 0.17,
+          "n_pairs": 100,
+          "n_problems": 25
+        }
+      },
+      "unexposed_at_t0_2048_within_retained": 0
+    }
+  },
+  "contrast": "Acc_comp(later onset) - Acc_comp(earlier onset)",
+  "inputs": {
+    "dacc_tsv": "results/diag/meeting3/dacc.conditions.tsv",
+    "fc_run": "math500-fc-powered-merged"
+  },
+  "min_reference_tokens_exclusive": 2304,
+  "n_pairs_retained": 60,
+  "n_pairs_total": 100,
+  "read": "R.17.1.2 D_acc onset contrasts restricted on reference length",
+  "reproduce": "python scripts/report_r17.py --runs-root /home/sk10741/kvcache-storage/runs dacc-restricted",
+  "retained_fc_accuracy": {
+    "ci95": [
+      0.6228070175438597,
+      0.9385964912280701
+    ],
+    "estimator": "equal-problem (seeds within problem, then problems)",
+    "mean": 0.7982456140350876,
+    "n_problems": 19,
+    "n_resamples": 2000,
+    "n_values": 60,
+    "seed": 0,
+    "seeds_per_problem": {
+      "test/algebra/1098.json": 1,
+      "test/algebra/1349.json": 3,
+      "test/algebra/1837.json": 2,
+      "test/algebra/2193.json": 2,
+      "test/algebra/2427.json": 3,
+      "test/algebra/2584.json": 2,
+      "test/geometry/434.json": 4,
+      "test/intermediate_algebra/1000.json": 4,
+      "test/intermediate_algebra/1197.json": 4,
+      "test/intermediate_algebra/1994.json": 4,
+      "test/intermediate_algebra/607.json": 4,
+      "test/number_theory/1032.json": 4,
+      "test/number_theory/515.json": 2,
+      "test/number_theory/737.json": 4,
+      "test/prealgebra/1139.json": 4,
+      "test/precalculus/1199.json": 4,
+      "test/precalculus/1303.json": 1,
+      "test/precalculus/927.json": 4,
+      "test/precalculus/990.json": 4
+    }
+  },
+  "retained_fraction": 0.6
+}
