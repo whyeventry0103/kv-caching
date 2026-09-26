@@ -39,6 +39,7 @@ case "$COMMAND" in
   capture) PY_SCRIPT="scripts/run_capture.py" ;;
   capture2) PY_SCRIPT="scripts/run_capture_v2.py" ;;
   exactlag) PY_SCRIPT="scripts/run_exact_lag.py" ;;
+  restore2) PY_SCRIPT="scripts/run_restore_v2.py" ;;
   forkcontrol) PY_SCRIPT="scripts/run_fork_control.py" ;;
   forkprecision) PY_SCRIPT="scripts/run_fork_precision.py" ;;
   metrics) PY_SCRIPT="scripts/run_metrics.py" ;;

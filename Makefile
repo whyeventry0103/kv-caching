@@ -119,6 +119,7 @@ dryrun:
 	$(PYTHON) scripts/postprocess_meeting3.py --stage t1-tv --dry-run
 	$(PYTHON) scripts/report_dacc.py --runs-root runs --arms 0=dacc-t0 512=dacc-t512 2048=dacc-t2048 --legacy 256=grid-diss256-tok 2048=grid-diss2048-tok --out /dev/null --dry-run
 	$(PYTHON) scripts/report_onset_grid.py --runs-root runs --arms 0=replay-onset-t0 512=replay-onset-t512 2048=replay-onset-t2048 --out /dev/null --dry-run
+	$(PYTHON) scripts/run_restore_v2.py --config configs/experiments/restore_v2_math500_r17.yaml --dry-run
 	$(PYTHON) scripts/run_fork_precision.py --config configs/experiments/fork_precision_r17.yaml --dry-run
 	$(PYTHON) scripts/report_r17.py --runs-root runs --dry-run eligibility
 	$(PYTHON) scripts/report_r17.py --runs-root runs --dry-run dacc-restricted

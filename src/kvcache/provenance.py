@@ -59,6 +59,15 @@ GENERATION_SOURCES: dict[str, tuple[str, ...]] = {
         "src/kvcache/models.py",
         "scripts/run_exact_lag.py",
     ),
+    "restore_v2": (
+        "src/kvcache/restore_v2.py",
+        "src/kvcache/exact_lag.py",
+        "src/kvcache/capture.py",
+        "src/kvcache/presses/__init__.py",
+        "src/kvcache/metrics/restoration.py",
+        "src/kvcache/models.py",
+        "scripts/run_restore_v2.py",
+    ),
     "fork": (
         "src/kvcache/fork_control.py",
         "src/kvcache/presses/__init__.py",

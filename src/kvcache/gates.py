@@ -214,7 +214,7 @@ def expected_run_identity(
             identity("dacc", cfg, model_revision=rev, reference_run=None, root=root),
             "ok",
         )
-    if kind in ("exact_lag", "fork"):
+    if kind in ("exact_lag", "fork", "restore_v2"):
         return (
             identity(
                 kind,

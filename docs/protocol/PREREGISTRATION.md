@@ -3837,3 +3837,33 @@ Implementation details of R.17.0.5, fixed before any output exists.
 - *Job.* `fork-precision` (config `fork_precision_r17.yaml`, new generation
   family `fork_precision`; `fork_control.py` is not modified). Output:
   `runs/fork-precision/fork_precision.json`.
+
+**R.17 addendum C (2026-09-27, before `restore-v2` runs).** Implementation
+details of R.17.2.3, fixed before any output exists.
+- *Module and runner.* `kvcache.restore_v2` and `scripts/run_restore_v2.py`,
+  new family `restore_v2`. `exact_lag.py` and `capture.py` are unmodified.
+- *Cohort arms.* Identical to R.10 at the new trigger. Tested: with a common
+  trigger they reproduce `run_exact_lag`'s arms exactly.
+- *Full self-restoration.* Applied to the lag-1 snapshot, immediately before
+  forward e + 1. Every stashed entry of every layer is appended to the live
+  cache, and eviction is off for the 200-forward window.
+  - *Gate:* the returned K and V equal the stash bitwise, and per KV head the
+    cache holds each absolute position 0..P+e−1 exactly once. The run raises
+    otherwise.
+- *M and Δ measurement points.* The first forward after the trigger prune
+  (e + 1) and every 16th forward of the window: 13 points, in the none and
+  full-restoration arms.
+  - Measuring *at* forward e would read the pre-prune cache, which is why the
+    points start at e + 1.
+  - M and Δ are the R.4 channels (`capture.channel_stats`) with an empty
+    event set, averaged over groups and then layers. Per-layer values are
+    stored.
+- *R_fs.* The equal-problem mean of the full-restoration window-mean TV,
+  divided by the equal-problem mean of the none arm's window-mean TV over the
+  same forwards [e + 1, e + 201). CI: problem-cluster bootstrap of the ratio,
+  2,000 resamples, seed 0. Branches exactly as R.17.2.3.
+- *Eligibility.*
+  - A trace is ineligible if it has no prune at or after 1024
+    (`INELIGIBLE: no eviction at or after the trigger`).
+  - Per lag, a window that does not fit is ineligible, as in R.10.
+  - Full restoration needs e + 200 ≤ the last forward.

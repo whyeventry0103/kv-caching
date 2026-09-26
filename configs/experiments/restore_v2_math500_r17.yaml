@@ -1,0 +1,25 @@
+name: restore_v2_math500_r17
+stage: restore2
+# Amendment R.17.2.3: restoration redesigned. Trigger = first effective prune at
+# or after decode step 1024 (stash >= 768 at budget 256 for every trace that
+# reaches it); the R.10 cohort arms (matched/random/relaxed) at lags
+# 1/4/16/64/256; the full self-restoration arm (every stashed entry returned
+# before forward e+1, eviction off); M and Delta in the none and
+# full-restoration arms at e+1 and every 16th forward of the 200-forward window.
+# Same subset, policies, budget, interval and reinsert fraction as exact-lag-r5.
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+subset:
+  math500: 25
+presses: [random, streamingllm]
+budgets: [256]
+seeds: [11, 23, 47, 89]
+reference_run_name: math500-fc-powered-merged
+compression_interval: 64
+trigger_step: 1024
+window: 200
+lags: [1, 4, 16, 64, 256]
+reinsert_fraction: 0.25
+measure_every: 16
+scale_authorized: true
+remote_only: true

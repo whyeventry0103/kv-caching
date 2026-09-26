@@ -1005,6 +1005,21 @@ jobs:
     est_output_gb: 0.01
     requires: null
 
+  # Amendment R.17.2.3: restoration redesigned (trigger at the first prune at
+  # or after step 1024; the R.10 cohort arms; full self-restoration; M/Delta
+  # through the read window). 25 problems x 4 seeds x 2 policies = 200 rows.
+  - name: restore-v2
+    command: restore2
+    config: configs/experiments/restore_v2_math500_r17.yaml
+    run_name: restore-v2
+    blocked: "Amendment R.17 (2026-09-27) - held until the restore-v2 tests pass on the pinned stack (R.17.2.3)"
+    total: 200
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 28
+    progress_kind: grid
+    est_output_gb: 0.02
+    requires: null
+
   # Amendment R.17.0.5: the validity gate for every Meeting #3 divergence
   # result. First-fork diagnosis in bf16 and fp32, and the bf16-vs-fp32
   # precision floor the fork gap is judged against. One model at a time; fp32
