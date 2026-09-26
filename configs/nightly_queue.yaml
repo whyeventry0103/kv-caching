@@ -944,6 +944,7 @@ jobs:
     command: capture
     config: configs/experiments/capture_math500_b2048_r9.yaml
     run_name: capture-b2048
+    blocked: "Amendment R.17 (2026-09-27) - held before its first row so the b2048 schema can gain per-query-head M/Delta and nested-k projection norms (R.17.2.1); release only with that schema landed and tested"
     total: 400
     seeds: [11, 23, 47, 89]
     min_free_gb: 28
