@@ -1,5 +1,58 @@
 {
   "amendment": "R.17",
+  "components": {
+    "log_par": {
+      "ci95": [
+        0.2174362954871742,
+        0.3221168543969379
+      ],
+      "excludes_zero": true,
+      "mean": 0.2707025487374232,
+      "n_pairs": 100,
+      "n_problems": 25
+    },
+    "log_perp": {
+      "ci95": [
+        0.29618131713129914,
+        0.39908776142793717
+      ],
+      "excludes_zero": true,
+      "mean": 0.3504983652455527,
+      "n_pairs": 100,
+      "n_problems": 25
+    },
+    "log_perp_over_par": {
+      "ci95": [
+        0.06369248238432676,
+        0.09193367877775298
+      ],
+      "excludes_zero": true,
+      "mean": 0.07979581650812953,
+      "n_pairs": 100,
+      "n_problems": 25
+    },
+    "note": "R.17 addendum D: Random - StreamingLLM, paired equal-problem",
+    "par": {
+      "ci95": [
+        1.2253135087065663,
+        1.8911573589123878
+      ],
+      "excludes_zero": true,
+      "mean": 1.577049256243572,
+      "n_pairs": 100,
+      "n_problems": 25
+    },
+    "perp": {
+      "ci95": [
+        6.031743837141493,
+        8.484413055597564
+      ],
+      "excludes_zero": true,
+      "mean": 7.338520053292885,
+      "n_pairs": 100,
+      "n_problems": 25
+    }
+  },
   "estimator": "trace omega_layer = sum_omega / n_finite; equal-problem mean",
   "inputs": {
     "capture_run": "capture-b256"
