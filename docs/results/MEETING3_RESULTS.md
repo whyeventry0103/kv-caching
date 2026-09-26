@@ -8,6 +8,29 @@ artifact when this file was written. Review evidence (gate outputs, remote test 
 parity, queue dry-run, remote-only data list):
 [`meeting3_evidence/`](meeting3_evidence/README.md).
 
+**Status, 2026-09-27 (Amendment R.17 in progress).** Target venue: proposed ICML
+2027, pending supervisor confirmation.
+
+- R.17 was registered (`ac78eab`) before any of its reads ran.
+- **Task 1 onset effect: NOT ESTABLISHED** once never-compressed traces are
+  excluded (R.17.1.2). Restricted B = 256 contrasts, t0 0 vs 2048:
+  - Random −0.048 [−0.184, +0.075];
+  - StreamingLLM +0.026 [−0.066, +0.118]. See §2a.
+- **Paper (`a549250`).** The P.5 reinsertion specificity control is
+  retracted (stash defect, R.5), and reinsertion is restated from the
+  repaired exact-lag read. Eviction locking is reworded "detected, not
+  established" (R.2).
+- **Bridge (R.17.1.8):** 0 of 6 AUROC tests survive Benjamini–Hochberg. The
+  pre-committed "ω and Δ predict truncation" is NOT CONFIRMED (§3a).
+- **Validity gate (R.17.0.5).**
+  - The fork control is still running.
+  - Its replacement PASS rule (fork p95 ≤ 2 × a bf16-vs-fp32 precision
+    floor) is registered.
+  - The fp32 diagnosis and the floor are new jobs.
+- **Queue.** capture-b2048 is held for the v2 schema (R.17.2.1). t1-tv512 and
+  t1-tv1024 stay queued: their summaries carry the collapse-test windows
+  (R.17.1.1).
+
 **Execution status, 2026-09-26 22:30 Dubai (one-time daytime start at the owner's request, R.16.6).**
 
 - **Task 1 D_acc: FINAL.** 1,200/1,200 generations, 0 provenance failures;
@@ -88,9 +111,9 @@ The three Meeting #3 problems, and where each stands:
 
 | Problem | Measured now | Queued (unattended, resumable) | Not yet runnable |
 |---|---|---|---|
-| **1. Divergence/damage vs cache size, exposure/horizon** | Accuracy curve 256→2048 with paired CIs, flips, realized ratios (**COMPLETE**); Q.2 exposure grid + occupancy audit (**COMPLETE**, verdict MIXED); D_acc free-running (budget, onset) grid, 1,200 generations (**FINAL**, §2a) | Q.1 direct fork control, 150 conditions; TV at 512/1024 (summary profiles, R.12) | — |
-| **2. Attention maps: M/Δ, GQA collateral, restoration** | Q.3 capture at budget 256 (**FINAL**, 400 conditions; collateral contrast INCONCLUSIVE, M/Δ per policy with CIs, §3a); Q.5 exact-lag (**FINAL**: Random NON-MONOTONE, StreamingLLM FLAT-NULL; 8 eligible problems, exploratory, §3b) | Q.3 capture at 2048, 400 conditions (collateral structurally non-identifying there, R.16.3) | — |
-| **3. SVD/PCA trajectory direction** | Q.6 basis (frozen, k = 64) + projection at budget 256 (**FINAL**, ω contrast PREDICTED, exploratory, §3a) | Q.6 at budget 2048 (same capture) | — |
+| **1. Divergence/damage vs cache size, exposure/horizon** | Accuracy curve 256→2048 with paired CIs, flips, realized ratios (**COMPLETE**); Q.2 exposure grid + occupancy audit (**COMPLETE**, verdict MIXED); D_acc free-running (budget, onset) grid, 1,200 generations (**FINAL**, §2a; onset effect **not established** once never-compressed traces are excluded, R.17.1.2) | Q.1 direct fork control, 150 conditions (**running**); TV at 512/1024 (summary profiles; also feed the collapse test R.17.1.1) | precision floor and fp32 fork diagnosis (R.17.0.5; being implemented) |
+| **2. Attention maps: M/Δ, GQA collateral, restoration** | Q.3 capture at budget 256 (**FINAL**, 400 conditions; collateral contrast INCONCLUSIVE, M/Δ per policy with CIs, §3a); Q.5 exact-lag (**FINAL**: Random NON-MONOTONE, StreamingLLM FLAT-NULL; 8 eligible problems, exploratory, §3b) | Q.3 capture at 2048, 400 conditions (collateral structurally non-identifying there, R.16.3) — **held** for the v2 schema (R.17.2.1) | restoration redesign (R.17.2.3; being implemented) |
+| **3. SVD/PCA trajectory direction** | Q.6 basis (frozen, k = 64) + projection at budget 256 (**FINAL**, ω contrast PREDICTED, exploratory, §3a) | Q.6 at budget 2048 (same capture, held) with nested k (R.17.2.1) | — |
 
 ---
 
@@ -164,7 +187,7 @@ row cannot identify exposure. Only B = 256 does, and there the nominal and
 actual slopes agree. The committed Q.2 artifact's `realized_ratio` omits the
 prompt (B/t); the grid reports both.
 
-**D_acc (free-running accuracy on the same grid): QUEUED.** Details in §6.
+**D_acc (free-running accuracy on the same grid): FINAL** (§2a; restricted re-read R.17.1.2).
 
 ## 2a. Task 1 — damage against exposure, free-running (D_acc; FINAL)
 
@@ -243,20 +266,37 @@ are **non-identifying** (R.8.1).
 | StreamingLLM | short | 36 | 0.972 | 0.556 → 0.972 | +0.150 of +0.190 | +0.479 [+0.250, +0.729] |
 | StreamingLLM | long | 64 | 0.781 | 0.078 → 0.141 | +0.040 | +0.083 [+0.004, +0.171] |
 
+**Registered re-read, R.17.1.2 (2026-09-27; not blind, because the
+stratification above was seen first).**
+- *Restriction:* (problem, seed) pairs whose full-cache reference exceeds
+  2,304 generated tokens, a pre-treatment covariate.
+- *Retained:* 60/100 pairs, full-cache accuracy 0.798 [0.623, 0.939]. 0
+  retained pairs are unexposed at t0 = 2048 (no attrition).
+- *Artifact:* `results/diag/meeting3/r17/dacc_restricted.json`.
+- *Contrast:* Acc_comp(later onset) − Acc_comp(earlier onset), with
+  equal-problem CIs.
+
+| Policy | Budget | t0 0 vs 2048: unrestricted → restricted | t0 512 vs 2048: unrestricted → restricted |
+|---|---|---|---|
+| Random | 256 | +0.110 [+0.030, +0.200] → **−0.048 [−0.184, +0.075]** | +0.120 [+0.010, +0.230] → −0.009 [−0.092, +0.083] |
+| StreamingLLM | 256 | +0.190 [+0.080, +0.310] → **+0.026 [−0.066, +0.118]** | +0.170 [+0.050, +0.310] → +0.061 [−0.048, +0.171] |
+| Random | 2048 | +0.010 [−0.020, +0.050] → +0.013 [−0.026, +0.053] | −0.020 [−0.080, +0.030] → −0.026 [−0.105, +0.039] |
+| StreamingLLM | 2048 | +0.000 [−0.050, +0.040] → +0.013 [−0.066, +0.092] | −0.020 [−0.070, +0.030] → −0.018 [−0.096, +0.066] |
+
 **Answer to Task 1 (exposure/horizon) at this scope** (one model, MATH-500
 subset of 25 problems):
-- At the 3–4% realized ratio of B = 256, starting compression later reduces
-  damage mainly by **letting short solutions finish before compression
-  begins**.
-- For long solutions, which are compressed in both arms, accuracy is already
-  low at either onset. A 2,048-step delay recovers nothing measurable for
-  Random, and +0.083 [+0.004, +0.171] for StreamingLLM.
-- **Exposure to compression, not merely the horizon at which it starts,
-  governs damage here.** Divergence is not damage: the teacher-forced D_tv
-  read (Q.2, MIXED) stands separately and is not compared point-for-point
-  (R.3).
-- At B = 2048 (~46–50%) damage is small at every onset, and the onset
-  contrast is non-identifying.
+- Per the pre-committed reading, the **onset effect on accuracy is not
+  established** at B = 256 for either policy. Its unrestricted appearance
+  comes from generations that finish before compression starts in the late
+  arm.
+- Among long traces, compressed in both arms, a 2,048-step delay of
+  compression onset changes accuracy by an amount **not distinguishable from
+  zero at this n** (60 pairs). That is not evidence of no effect.
+- At B = 2048 (~46–50%), damage is small at every onset and the onset contrast
+  is non-identifying.
+- Divergence is not damage: the teacher-forced D_tv read (Q.2, MIXED) stands
+  separately (R.3). The dose-vs-horizon collapse test on TV is R.17.1.1, which
+  is waiting on the t1-tv cells.
 
 Reproduce:
 
@@ -353,6 +393,90 @@ ordering claims):
   eviction at or after step 130, not at Q.5 reinsertion states, and licenses
   no query-drift claim. The reader JSON carries it, along with
   `wanted_any_head` and `M_event`.
+  - Trigger Δ/M: Random 0.4645 [0.3907, 0.5663]; StreamingLLM 0.4572
+    [0.3945, 0.5317]; H2O-style 0.9854 [0.7703, 1.2683]; R-KV 0.5305
+    [0.4485, 0.6285].
+  - The Q.3 cross-instrument prediction (Δ vs M at the *reinsertion* trigger)
+    is **outstanding**: it was not measured at those states (R.15.5).
+    R.17.2.3 measures it.
+
+**R.17 additions (2026-09-27).** Artifacts are under
+`results/diag/meeting3/r17/`: `mdelta.json`, `omega_layers.json` and
+`bridge.json`.
+
+*What Q.3 registered for M and Δ.* Per-policy M, M_event, Δ and
+wanted_any_head, plus Δ/M at the trigger: all descriptive, no test (R.9). The
+only registered test is the collateral contrast.
+
+*What is stored* (0.6/0.7):
+- **M and Δ:** per trace, per-(layer, KV group) sums over events, plus the
+  per-(layer, group) values at the first, second and trigger events.
+- **Per-query-head values** are computed and then averaged within each 7-head
+  group. They are **not stored** in capture-v1.
+- **Latent geometry:** per step and per layer, only the norms (‖δ∥‖, ‖δ⊥‖) at
+  k = 64, all 28 layers, all four policies. They are stored as per-step sums
+  plus 256 sampled positions in a per-row npz. **No projection coefficients**
+  are kept, so k-sensitivity cannot be computed on b256.
+- **Per-trace values** are stored for everything above.
+
+*First-prune self-control.* Layer-0 Δ is **exactly 0.0** (maximum over all 400
+rows and every event), with 0 non-finite values. The registered tolerance is
+≤ 1e-5 (R.9).
+
+*Per-layer profiles* (equal-problem mean [95% CI], full tables in
+`mdelta.json` and `omega_layers.json`):
+- **M.** Random peaks at layer 4, 0.6715 [0.6314, 0.7030]. StreamingLLM peaks
+  at layer 14, 0.3836 [0.3414, 0.4202]. H2O-style and R-KV peak at layer 16:
+  0.3197 [0.2782, 0.3566] and 0.3790 [0.3351, 0.4177]. The minimum is at layer
+  0 for all four.
+- **Δ.** Exactly 0 at layer 0 (the control above). It peaks at layer 16 for
+  every policy: Random 0.3886 [0.3557, 0.4167], StreamingLLM 0.2703
+  [0.2354, 0.3040], H2O-style 0.2534 [0.2182, 0.2861], R-KV 0.2363
+  [0.2026, 0.2690].
+- **ω.** Random ranges from 4.4957 [4.4305, 4.5518] at layer 8 down to 2.4172
+  [2.3266, 2.5166] at layer 27. StreamingLLM ranges from 4.2607
+  [4.0981, 4.4128] at layer 0 down to 2.3554 [2.2587, 2.4659] at layer 27.
+
+*H2 / H3 (R.17.1.5; EXPLORATORY on b256, because the means were printed
+before R.17; confirmatory on b2048).*
+- **H2: NEITHER.**
+  - spread(M) = 0.3147 against a median CI half-width of 0.0312;
+  - spread(Δ) = 0.0984 against 0.0223.
+  - Both spreads are large, so Δ does not mirror the accuracy-scale
+    near-constant residual here.
+- **H3: HOLDS.** M(H2O-style) − M(Random) = **−0.3147 [−0.3296, −0.2981]**.
+  - H2O-style loses far less full-model attention mass than Random, yet has
+    larger free-run damage at B = 256: total change −0.6375 vs −0.4625
+    (`results/diag/amendment-k/m4-*256*`).
+  - The attention-mass objective is not the damage objective, at this scope.
+
+*Bridge (R.17.1.8).* Teacher-forced per-trace M, Δ and ω against free-run
+truncation of the same (problem, seed, policy) at B = 256, from
+`grid-diss256-tok`. AUROC [95% CI], two-sided bootstrap p, Benjamini–Hochberg
+q over the 6 tests:
+
+| Policy (truncated / traces) | ω | Δ | M |
+|---|---|---|---|
+| Random (30/100) | 0.543 [0.336, 0.726], q 0.786 | 0.659 [0.500, 0.803], q 0.165 | 0.629 [0.471, 0.771], q 0.165 |
+| StreamingLLM (10/100) | 0.478 [0.291, 0.656], q 0.786 | 0.652 [0.484, 0.809], q 0.165 | 0.643 [0.464, 0.810], q 0.165 |
+
+- **The pre-commitment is not confirmed.** ω does not predict truncation (AUROC
+  ≈ 0.5), and Δ's positive AUROC does not survive BH.
+- M carries no significant prediction, as pre-committed, but its point
+  estimates are as large as Δ's. So "Δ predicts and M does not" is **not
+  established at this n**.
+
+*Collateral (R.17.1.6).*
+- The zero is explained by R.16.3 but is not strictly forced. With a 7-to-1
+  grouping, mean aggregation and a 64-of-320 cut per event (20%), a
+  head-wanted evicted position is collateral only if at least 256 of the ~320
+  candidates have group-mean attention above its own, which is > 1/700 each
+  (> 36.6% of the group's mass, spread flat).
+- The per-position rank diagnostic that would show how close real events come
+  was **not recorded** in capture-v1. That is recorded here as missing and will
+  not be rescued with GPU time.
+- Within-group dispersion of per-head M needs per-head storage, which arrives
+  with capture-b2048 (R.17.2.1).
 
 Reproduce:
 
@@ -445,7 +569,20 @@ exception in PAPER_FINDINGS):
     With 8 problems and clustered traces this is a lead, not a finding.
 - **Answer to Q.5 at this scope.** Exact reinsertion of the evicted cohort
   does not measurably restore the trajectory for either policy, at any lag
-  from 1 to 256.
+  from 1 to 256, **on long-prompt, low-accuracy problems**.
+- **Who the read describes** (R.17 addendum A,
+  `results/diag/meeting3/r17/exact_lag_eligibility.json`):
+
+  | Set | Problems / traces | Full-cache accuracy | Full-cache truncation | Realized ratio at B = 256 |
+  |---|---|---|---|---|
+  | Eligible | 8 / 32 | 0.594 [0.250, 0.875] | 0.125 [0.000, 0.312] | 3.4% (mean prompt 178.5 + trace 7,352.1) |
+  | Ineligible | 17 / 68 | 0.971 [0.926, 1.000] | 0.000 [0.000, 0.000] | 8.6% |
+
+  Every problem becomes eligible under the redesign R.17.2.3 (trigger at
+  step 1024).
+- **Paper.** The historical P.5 specificity control, built on the defective
+  stash, is retracted, and the paper now states this read instead
+  (PAPER_FINDINGS §5d).
 
 Reproduce:
 
@@ -461,65 +598,84 @@ python scripts/report_exact_lag.py --runs-root <runs> --run exact-lag-r5 \
 | T1 paired totals equal the m4 summaries | **PASSED** (4 dp, all 8 cells) |
 | Q.2 pre-registered read reproduces the committed artifact | **PASSED** (byte-identical) |
 | Q.2 no divergence before nominal onset | **PASSED** (0 of 1,200 profiles; 276 never-diverged pairs all < 2,100 steps, below the first read window) |
-| D_acc gate: gate None ≡ legacy; gated ≡ full cache before onset (logit level) | **PASSED** on tiny Qwen2 with the pinned stack (mutation-tested); real-model `dacc-gate-smoke` **PASSED** 2026-09-25 (token-identical at t0 = 0; onset at 576 exactly at t0 = 512) |
-| D_acc determinism control (gated t0 = 0 vs legacy grid rows) | QUEUED: needs `dacc-t0` (not yet started); reader built |
-| Capture: topk gather equality, layer-0 key identity at mapped positions, bitwise pre-eviction, full/full = 0, layer-0 Δ ≤ 1e-5 | **PASSED** on tiny Qwen2 for all four policies (wrong position map caught by mutation); real-model `capture-smoke` **PASSED** 2026-09-25 (full/full 0, layer-0 Δ 0.0); the same controls are VALID on all 400 capture-b256 rows |
-| Q.1 removal-anchored negative control | **INVALID for identification** (R.2); computed for the record from the fork control's arm A (QUEUED) |
-| Q.1 direct fork control | tiny Qwen2: B-vs-B exactly 0, A−B < 1e-4, next selections identical, fires when masking is off — **PASSED on CPU**; real run QUEUED |
-| Q.5 identity repair (true evicted K/V per layer) | tiny Qwen2: layer-0 stash equals full keys bitwise; the old tail-stash bug is refused (mutation test) — **PASSED on CPU**; real run QUEUED |
+| D_acc gate: gate None ≡ legacy; gated ≡ full cache before onset (logit level) | **PASSED** on tiny Qwen2 (mutation-tested) and on the real model: `dacc-gate-smoke`, 2026-09-25, token-identical at t0 = 0, onset at 576 exactly at t0 = 512 |
+| D_acc determinism control (gated t0 = 0 vs legacy grid rows) | **PASSED**: 200/200 token-identical at each budget (`results/diag/meeting3/dacc.json`) |
+| Capture: topk gather equality, layer-0 key identity at mapped positions, bitwise pre-eviction, full/full = 0, layer-0 Δ ≤ 1e-5 | **PASSED** on tiny Qwen2 and on the real model (`capture-smoke`, 2026-09-25). VALID on all 400 capture-b256 rows; layer-0 Δ maximum exactly 0.0 |
+| Collateral positive control (7 heads, 320 candidates, B = 256) | **PASSED**: production tensor path and reference both return 1.0 (`tests/test_capture.py`, pinned stack, GPU-host CPU, 2026-09-27) |
+| Q.1 removal-anchored negative control | **INVALID for identification** (R.2); computed for the record from the fork control's arm A |
+| Q.1 direct fork control (validity gate, R.17.0.5) | Tiny Qwen2 **PASSED on CPU**. Real runs: fork-control-random and -slm **RUNNING**. The partial read is TOLERANCE-DEGENERATE (replay control exactly 0). The replacement precision-floor gate is registered; floor and fp32 diagnosis not yet run |
+| Q.5 identity repair (true evicted K/V per layer) | **PASSED** on CPU and on every real exact-lag row: K and V bitwise gates in all 200 rows, 0 content failures |
 
-## 5. Blocked units and open owner decisions
+## 5. Held units and resolved decisions
 
-- **T1.tv512 / T1.tv1024 (TV at the intermediate budgets): unblocked by R.12.**
-  Full per-step profiles would need ~196 MiB, against 146 MiB usable (68.857
-  GiB used of 70, 1 GiB margin), of which ~117 MiB is committed to queued cells.
-  The registered read needs only per-trace mean TV, so the cells run as
-  registered but store ~3 KB summary profiles (~1.2 MB total). Queued last as
-  `t1-tv512` / `t1-tv1024`, ~19 h on 2 GPUs (est.).
-- **Old Q.5 lag sweep (`restoration-lag*`): held as `blocked:`** because its
-  press is invalid (R.5). The exact-lag replacement (R.10) is queued as
-  `exact-lag-r5`.
-- **Storage definition.** R.8.5: the guard measures `~/kvcache-storage`
-  only. Counting `~/kv-caching` (5.85 GiB alone, but mostly hardlinks into the uv
-  cache, so +0.33 GiB when hardlinks are counted once; corrected 2026-09-25,
-  see `meeting3_evidence/storage.md`) would leave 0.81 GiB
-  of headroom, below the 1 GiB margin, and block everything. The owner should
-  confirm which trees the 70 GiB covers.
+- **capture-b2048: held (`blocked:`, R.17)** before its first row, until the
+  v2 schema (per-query-head M/Δ, nested-k norms) is implemented, tested and
+  smoke-gated (R.17.2.1).
+- **t1-tv512 / t1-tv1024: queued, unchanged.**
+  - Their R.12 summary profiles keep 256-step window means aligned at
+    multiples of 256. The collapse test's windows at 2304/3328/4352 are
+    windows 9/13/17, on the same panel, seeds and interval as the Q.2 onset-0
+    arm.
+  - So no re-specification is needed (R.17.1.1). Each window is used only if
+    n_steps ≥ position + 256.
+- **Old Q.5 lag sweep (`restoration-lag*`): held.** Its press is invalid
+  (R.5). Replaced by exact-lag (R.10), with a redesign registered (R.17.2.3).
+- **Storage definition: resolved.** The guard measures `~/kvcache-storage` +
+  `~/kv-caching`, with hardlinks counted once, against 72 GiB with a 1 GiB
+  margin. The owner explicitly approved this on 2026-09-25 (R.16.4). Footprint
+  on 2026-09-26 23:10: 69.30 GiB.
 
-## 6. What runs unattended, in order (01:45–10:45 Dubai windows)
+## 6. Queue (01:45–10:45 Dubai cron windows; out-of-window starts only when the owner asks, R.16.6)
 
-| Queue job | Measures | Cost (measured or estimated) | Gate |
+| Queue job | Measures | Status | Cost |
 |---|---|---|---|
-| `dacc-gate-smoke` | D_acc parity + onset on the 7B model | ~10 min | writes `dacc-gate-smoke-PASS.json` |
-| `q6-basis-fit` | frozen full-only basis, 28 layers, k = 64 | ~15 min (est.) | header `q6_basis.json` (npz sha256) |
-| `capture-smoke` | full/full + 4 policies on 1 trace | ~15–30 min | writes `capture-smoke-PASS.json` |
-| `capture-b256` | **Q.3 + Q.6 primary**, 400 conditions | ~12 h on 2 GPUs (est.) | requires capture-smoke |
-| `exact-lag-r5` | Q.5 exact-lag restoration, 200 (trace, policy) | ~5 h on 2 GPUs (est.) | requires capture-smoke |
-| `dacc-t2048` → `dacc-t512` → `dacc-t0` | D_acc, 400 generations each | ~7.2 h each on 2 GPUs (measured) | require dacc-gate-smoke |
-| `fork-control-random`, `fork-control-slm` | Q.1 direct control, 75 conditions each | ~11 GPU-h each, one GPU each (est.) | none (live checks) |
-| `capture-b2048` | Q.3 + Q.6 secondary | ~12 h (est.) | requires capture-smoke |
-| `t1-tv512`, `t1-tv1024` | T1 AUC-TV at 512/1024 (R.12 summary profiles) | ~19 h on 2 GPUs (est.) | none |
+| `dacc-gate-smoke`, `q6-basis-fit`, `capture-smoke` | gates | **PASSED** | — |
+| `capture-b256` | Q.3 + Q.6 primary, 400 conditions | **FINAL** (§3a) | — |
+| `exact-lag-r5` | Q.5, 200 (trace, policy) | **FINAL** (§3b) | — |
+| `dacc-t2048`, `dacc-t512`, `dacc-t0` | D_acc, 1,200 generations | **FINAL** (§2a) | ~7.2 h each on 2 GPUs (measured) |
+| `fork-control-random`, `fork-control-slm` | Q.1 direct control, 75 conditions each | **RUNNING** | ~11 GPU-h each (est.) |
+| `t1-tv512`, `t1-tv1024` | TV at 512/1024 (summary profiles) | queued | ~19 h on 2 GPUs (est.) |
+| `capture-b2048` | Q.3 + Q.6 secondary; H2/H3/ω confirmatory | **held** (R.17.2.1) | ~12 h (est.) |
 
-Readers (CPU, run after each cell completes; each decides readiness itself):
+The scheduled readers, exactly as `scripts/postprocess_meeting3.py` runs them
+(each gets `--runs-root`; every reader except the budget curve also gets `--final`):
 
 ```bash
 ssh kvcache-gpu 'cd ~/kv-caching && R=~/kvcache-storage/runs && \
+  .venv/bin/python scripts/report_capture.py --runs-root $R --run capture-b256 \
+    --config configs/experiments/capture_math500_b256_r9.yaml \
+    --out results/diag/meeting3/capture_b256.json --final; \
+  .venv/bin/python scripts/report_capture.py --runs-root $R --run capture-b2048 \
+    --config configs/experiments/capture_math500_b2048_r9.yaml \
+    --out results/diag/meeting3/capture_b2048.json --final; \
   .venv/bin/python scripts/report_dacc.py --runs-root $R \
     --arms 0=dacc-t0 512=dacc-t512 2048=dacc-t2048 \
     --legacy 256=grid-diss256-tok 2048=grid-diss2048-tok \
-    --out results/diag/meeting3/dacc.json && \
-  .venv/bin/python scripts/report_capture.py --runs-root $R --run capture-b256 \
-    --out results/diag/meeting3/capture_b256.json && \
+    --design configs/experiments/grid_math500_dacc_t0_r3.yaml \
+    --out results/diag/meeting3/dacc.json --final; \
   .venv/bin/python scripts/report_exact_lag.py --runs-root $R --run exact-lag-r5 \
-    --out results/diag/meeting3/exact_lag.json && \
+    --design configs/experiments/exact_lag_math500_r5.yaml \
+    --out results/diag/meeting3/exact_lag.json --final; \
   .venv/bin/python scripts/report_fork_control.py --runs-root $R \
     --run fork-control-random --run fork-control-slm \
-    --out results/diag/meeting3/fork_control.json'
+    --design configs/experiments/fork_control_random_r11.yaml \
+    --design configs/experiments/fork_control_slm_r11.yaml \
+    --out results/diag/meeting3/fork_control.json --final; \
+  .venv/bin/python scripts/report_budget_curve.py --runs-root $R \
+    --tv-runs 512=t1-tv512 1024=t1-tv1024 \
+    --out results/diag/meeting3/t1_budget_curve.json'
 ```
 
-Registered reads: D_acc per R.3/R.8; Q.3 contrast collateral(R-KV) −
-collateral(ObservedAttentionPress), with a negative CI excluding 0 supporting
-the Q.3 ordering; Q.6 ω(Random) − ω(StreamingLLM), labelled PREDICTED / NULL /
-REVERSED, exploratory (R.9); Q.5 per-lag P.5 effects and the DECAY /
-FLAT-NULL / NON-MONOTONE sweep verdict (R.5, R.10); Q.1 fork control PASS /
-FAIL, or EXACT / TOLERANCE-DEGENERATE under R.11.
+Each `--final` read exits 3 while its cell is incomplete, and that is expected.
+The R.17 reads run with `python scripts/report_r17.py --runs-root $R <read>`.
+
+Registered reads:
+- D_acc per R.3/R.8, plus R.17.1.2.
+- Q.3: collateral R-KV − H2O-style (R.4); H2/H3 per R.17.1.5.
+- Q.6: ω(Random) − ω(StreamingLLM), PREDICTED / NULL / REVERSED, exploratory
+  (R.9).
+- Q.5 per R.10, and the redesign per R.17.2.3.
+- Q.1: fork-control TOLERANCE-DEGENERATE under R.11, and PASS/FAIL under the
+  R.17.0.5 floor.
+- Collapse test: R.17.1.1.
+- Bridge: R.17.1.8.

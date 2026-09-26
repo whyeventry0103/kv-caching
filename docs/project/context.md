@@ -24,6 +24,23 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-09-27 — R.17 underway (target venue: proposed ICML 2027,
+  pending supervisor confirmation).**
+  - Registration: `ac78eab`. Worklist: docs/project/r17_worklist.md.
+  - Done:
+    - capture-b2048 held before its first row, for the v2 schema.
+    - t1-tv cells kept: their summaries carry the collapse-test windows.
+    - Reads on disk: D_acc restricted, onset effect NOT ESTABLISHED (Random
+      −0.048 [−0.184, +0.075], SLM +0.026 [−0.066, +0.118]); H2 NEITHER, H3
+      HOLDS (b256, exploratory); bridge 0/6 after BH; per-layer M/Δ/ω;
+      restoration eligibility 8/25, FC acc 0.594 vs 0.971.
+    - Paper (`a549250`): P.5 specificity retracted, reinsertion restated,
+      locking reworded per R.2.
+    - Q.2 ratio note; cleanup 0.4a–d.
+  - Next: fp32 fork diagnosis plus precision floor (new family); capture_v2
+    and the k=256 basis refit; restore_v2; Tier 1 figures; P.1/P.2.
+  - GPU work runs only in cron windows.
+
   **★★★★★ 2026-09-26 22:30 Dubai — Task 1 D_acc FINAL.** 1,200/1,200, 0
   provenance failures, determinism control PASSED (200/200 identical per
   budget). At B = 256 (realized 2.7–4.4%), damage t0 = 0 vs 2048 is Random

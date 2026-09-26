@@ -55,6 +55,8 @@ of this commit; the first window is 2026-09-25 01:45 Dubai.
 | `remote_pytest.txt` | The same tree on the remote, pinned stack: every Meeting #3 test (incl. the R.13/R.14 repairs and scheduler) by name (130 PASSED, 0 FAILED), then the full suite (538 passed, 0 skipped). |
 | `parity.txt` | `make parity`: commit, source tree and all 111 `results/diag` artifacts agree between local and remote. |
 | `storage.md` | Measured footprint under both storage scopes, queued outputs, and the correction of the 11.2 GiB figure. |
+| `r16_operations.md` | R.16.6/R.16.7 operational record: the preflight-halt log lines and recovery, both out-of-window starts, the stage-record collision failure and fix, the host stage-record listing. |
+| `manual_ticks_20260925.sh.txt`, `manual_ticks_20260926.sh.txt` | Verbatim copies of the two owner-requested tick loops (sha256 in `r16_operations.md`). |
 | `queue_dryrun_tick.txt` | Dry run of the 2026-09-25 01:45 orchestrator tick: the six CPU postprocess stages report what they wait on, the old Q.5 cells are reported BLOCKED with their reason, and `dacc-gate-smoke` is selected. |
 
 ## Mutation checks

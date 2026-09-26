@@ -23,7 +23,10 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-FIG_DIR = PROJECT_ROOT / "figures"
+# Under results/, never the hashed source tree: a figure written into figures/
+# on the GPU host changes the source-tree hash and halts every later launch
+# (R.16.6). Postprocessing passes this same directory explicitly.
+FIG_DIR = PROJECT_ROOT / "results" / "diag" / "meeting3" / "figures"
 POLICY_LABEL = {
     "random": "Random",
     "streamingllm": "StreamingLLM",

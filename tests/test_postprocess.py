@@ -308,3 +308,12 @@ def test_stage_records_never_share_a_basename_with_published_outputs(stage, tmp_
     names = [p.name for p in diag.rglob("*") if p.is_file()]
     dupes = sorted({n for n in names if names.count(n) > 1})
     assert not dupes, dupes
+
+
+def test_standalone_figure_script_defaults_outside_the_source_tree():
+    """R.17 0.4(b): run by hand with no --out-dir, the figure script must not
+    write into figures/ (hashed source tree) -- the path that halted the queue."""
+    import make_meeting3_figures as m3f
+
+    rel = m3f.FIG_DIR.relative_to(m3f.PROJECT_ROOT)
+    assert rel.parts[0] == "results", rel
