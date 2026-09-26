@@ -1,0 +1,30 @@
+name: fork_precision_r17
+stage: forkprecision
+# Amendment R.17.0.5. (1) First-fork diagnosis of the arm A (compact) / arm B
+# (mask) gap on one registered trace, in bf16 and again with the model in fp32.
+# (2) The precision floor: teacher-forced full-cache logits, bf16 vs fp32, at
+# fixed 256-step blocks on 10 frozen-subset problems at seed 23 (the fork data
+# is seed 11 only). Model loading, press and delay exactly as the fork cells.
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+subset:
+  math500: 25
+presses: [random]
+budgets: [256]
+seeds: [11, 23]
+reference_run_name: math500-fc-powered-merged
+dtypes: [bfloat16, float32]
+diagnosis:
+  press: random
+  interval: 64
+  delay: 32
+  seed: 11
+  pid_rank: 0          # first pid of configs/meeting3/q2_subset_pids.json
+floor:
+  seed: 23
+  n_problems: 10       # first 10 pids of the frozen subset order
+  block_starts: [256, 2048, 4096, 8192]
+  block_length: 256
+estimated_generation_count: 0
+scale_authorized: true
+remote_only: true

@@ -952,6 +952,23 @@ jobs:
     est_output_gb: 0.03
     requires: capture-smoke
 
+  # Amendment R.17.0.5: the validity gate for every Meeting #3 divergence
+  # result. First-fork diagnosis in bf16 and fp32, and the bf16-vs-fp32
+  # precision floor the fork gap is judged against. One model at a time; fp32
+  # 7B needs ~31 GB. Short (~1-2 h, est.); queued ahead of the long TV cells.
+  - name: fork-precision
+    command: forkprecision
+    config: configs/experiments/fork_precision_r17.yaml
+    run_name: fork-precision
+    total: 1
+    seeds: [11]
+    min_free_gb: 40
+    progress_kind: marker
+    marker: fork-precision/fork_precision.json
+    est_output_gb: 0.01
+    gate: fork_precision
+    requires: null
+
   # Amendment R.1 / R.12: TV at the intermediate budgets for Task 1, with
   # summary-only profiles (~3 KB/trace; the full format is what was BLOCKED on
   # storage). Paired replay, ~19 h on 2 GPUs for both cells (est.). Last in the

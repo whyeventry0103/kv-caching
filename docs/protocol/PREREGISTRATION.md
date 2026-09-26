@@ -3816,3 +3816,24 @@ eligibility profile, descriptive.
 - Artifact: `results/diag/meeting3/r17/exact_lag_eligibility.json`.
 - The same split was computed ad hoc on 2026-09-27, before registration:
   full-cache accuracy 0.594 vs 0.971. This artifact is what the paper cites.
+
+**R.17 addendum B (2026-09-27, before the fork-precision job runs).**
+Implementation details of R.17.0.5, fixed before any output exists.
+- *Diagnosis trace.* The first pid of `configs/meeting3/q2_subset_pids.json`
+  (`test/precalculus/807.json`), seed 11, Random, budget 256, interval 64,
+  delay 32. Model loading, press construction and attention implementation are
+  exactly as in the fork cells. fp32 means the same weights loaded with
+  `dtype: float32`.
+- *Floor traces and blocks.* The first 10 pids of the frozen subset at seed 23.
+  Teacher-forced full cache, bf16 logits stored as produced, then compared
+  against the fp32 pass. Steps are sampled in 256-step blocks starting at
+  forwards 256, 2048, 4096 and 8192. Only blocks that fit inside the trace are
+  used.
+- *Floor statistic for interval I.* The 95th percentile over non-overlapping
+  I-step windows inside the blocks (never crossing a block boundary) of the
+  window-maximum TV. The fork statistic is the 95th percentile over forks of
+  `max_tv`, per (policy, I). The index rule is `sorted[int(0.95 (n − 1))]` for
+  both.
+- *Job.* `fork-precision` (config `fork_precision_r17.yaml`, new generation
+  family `fork_precision`; `fork_control.py` is not modified). Output:
+  `runs/fork-precision/fork_precision.json`.

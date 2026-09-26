@@ -121,6 +121,8 @@ def gate_status(
             basis_npz_sha256=sha,
             root=root,
         )
+    elif kind == "fork_precision":
+        return _fork_precision_status(runs_root, cfg, root)
     else:
         raise ValueError(f"unknown gate kind {kind!r}")
     d = _read(marker)
@@ -130,6 +132,40 @@ def gate_status(
         return False, f"{marker.name} does not say passed: true"
     if d.get("identity") != want:
         return False, f"{marker.name} identity differs from the expected identity"
+    return True, "verified"
+
+
+def _fork_precision_status(
+    runs_root: Path, cfg: dict[str, Any], root: Path
+) -> tuple[bool, str]:
+    """R.17.0.5 output: complete, of this identity, with every registered part.
+
+    A parseable file is not enough (R.15): both dtype diagnoses must have
+    compared at least one step, and every registered floor trace must carry
+    compared steps.
+    """
+    marker = runs_root / "fork-precision" / "fork_precision.json"
+    d = _read(marker)
+    if d is None:
+        return False, f"{marker.name} absent, empty or unreadable"
+    if d.get("passed") is not True:
+        return False, f"{marker.name} does not say passed: true"
+    want = identity(
+        "fork_precision",
+        cfg,
+        model_revision=_revision(cfg, root),
+        reference_run=cfg["reference_run_name"],
+        root=root,
+    )
+    if d.get("provenance") != want:
+        return False, f"{marker.name} identity differs from the expected identity"
+    diag = d.get("diagnosis") or {}
+    for dtype in cfg["dtypes"]:
+        if not (diag.get(dtype) or {}).get("n_compared"):
+            return False, f"no compared diagnosis steps in {dtype}"
+    floor = d.get("floor") or {}
+    if len(floor) != int(cfg["floor"]["n_problems"]) or not all(floor.values()):
+        return False, "floor comparison missing for a registered trace"
     return True, "verified"
 
 

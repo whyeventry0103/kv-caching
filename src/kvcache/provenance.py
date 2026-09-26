@@ -56,6 +56,13 @@ GENERATION_SOURCES: dict[str, tuple[str, ...]] = {
         "src/kvcache/models.py",
         "scripts/run_fork_control.py",
     ),
+    "fork_precision": (
+        "src/kvcache/fork_precision.py",
+        "src/kvcache/fork_control.py",
+        "src/kvcache/presses/__init__.py",
+        "src/kvcache/models.py",
+        "scripts/run_fork_precision.py",
+    ),
     "dacc": (
         "src/kvcache/generation.py",
         "src/kvcache/presses/__init__.py",

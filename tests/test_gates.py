@@ -169,3 +169,38 @@ def test_historical_markers_keep_their_scoped_legacy_rule(tmp_path):
         "shape-sawtooth-i256",
         "onset-surface-q2",
     }
+
+
+def _fork_precision_output(runs, **over):
+    cfg = _yaml(ROOT / BY["fork-precision"].config)
+    ident = identity(
+        "fork_precision",
+        cfg,
+        model_revision=_revision(cfg, ROOT),
+        reference_run=cfg["reference_run_name"],
+    )
+    d = {
+        "passed": True,
+        "provenance": ident,
+        "diagnosis": {t: {"n_compared": 3} for t in cfg["dtypes"]},
+        "floor": {f"p{i}": {"256": {"tv": 0.0}} for i in range(10)},
+    }
+    d.update(over)
+    out = runs / "fork-precision" / "fork_precision.json"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(d))
+
+
+def test_fork_precision_gate_needs_every_registered_part(tmp_path):
+    assert not _done(tmp_path, "fork-precision")  # absent
+    _fork_precision_output(tmp_path)
+    assert _done(tmp_path, "fork-precision")
+    for bad in (
+        {"passed": False},
+        {"provenance": {"kind": "fork_precision"}},
+        {"diagnosis": {"bfloat16": {"n_compared": 3}}},  # fp32 missing
+        {"floor": {"p0": {"256": {}}}},  # 1 of 10 traces
+    ):
+        runs = tmp_path / str(len(list(tmp_path.iterdir())))
+        _fork_precision_output(runs, **bad)
+        assert not _done(runs, "fork-precision"), bad
