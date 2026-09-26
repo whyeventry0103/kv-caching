@@ -132,7 +132,9 @@ def fig_dacc(path: Path, out_dir: Path = FIG_DIR) -> list[Path]:
             )
             if not cs:
                 continue
-            xs = [c["onset"] for c in cs]
+            # the policies share each onset; dodge them apart by a few steps
+            dx = {"random": -35, "streamingllm": 35}.get(p, 0)
+            xs = [c["onset"] + dx for c in cs]
             ys = [c["damage_fc_minus_comp"]["mean"] for c in cs]
             err = [
                 [
@@ -160,7 +162,18 @@ def fig_dacc(path: Path, out_dir: Path = FIG_DIR) -> list[Path]:
         )
         ax.set_xlabel("compression_start_step t0", fontsize=8)
         ax.set_ylabel("damage Acc_FC - Acc_comp", fontsize=8)
-        ax.legend(frameon=False, fontsize=7)
+        ax.set_xticks([0, 512, 2048])
+    # one legend below the panels: inside an axis it lands on error bars
+    handles, labels = axes[0].get_legend_handles_labels()
+    fig.legend(
+        handles,
+        labels,
+        loc="lower center",
+        ncol=len(labels),
+        frameon=False,
+        fontsize=7,
+        bbox_to_anchor=(0.5, -0.06),
+    )
     fig.tight_layout()
     return _save(fig, "meeting3_dacc", out_dir)
 

@@ -24,6 +24,16 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-09-26 22:30 Dubai — Task 1 D_acc FINAL.** 1,200/1,200, 0
+  provenance failures, determinism control PASSED (200/200 identical per
+  budget). At B = 256 (realized 2.7–4.4%), damage t0 = 0 vs 2048 is Random
+  +0.110 [+0.030, +0.200] and SLM +0.190 [+0.080, +0.310] (descriptive).
+  About 90% of it (+0.100 / +0.150) comes from the 36 pairs whose
+  full-cache trace ends before 2048, which stay uncompressed. On the 64 long
+  pairs: Random −0.035 [−0.184, +0.092], SLM +0.083 [+0.004, +0.171]. At
+  B = 2048 every onset contrast is null (non-identifying, R.8.1). Write-up:
+  MEETING3_RESULTS §2a. Running: fork-control-random/-slm.
+
   **★★★★★ 2026-09-26 11:39 Dubai — one-time owner-requested daytime start
   (R.16.6).** tmux `manual-ticks` runs ~/manual_ticks_0926.sh until
   2026-09-27 01:40, then cron takes over; jobs stop at 2026-09-27 10:43.

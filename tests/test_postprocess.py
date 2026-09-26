@@ -117,7 +117,7 @@ def test_every_stage_finalizes_through_its_real_reader(stage, tmp_path):
         assert (out / f).exists(), f
     assert all(h for h in m["outputs"].values())
     rec = json.loads(
-        (out / "results/diag/meeting3/stages" / f"{stage}.json").read_text()
+        (out / "results/diag/meeting3/stages" / f"{stage}.stage.json").read_text()
     )
     assert rec["finalized"] is True and rec["manifest_exit"] == 0
     assert pp.stage_done(stage, runs, out_root=out)
@@ -293,3 +293,18 @@ def test_no_stage_writes_into_the_source_tree(stage, tmp_path):
         str(p) for p in written if p.parts[0] != "results" and p.name != "manifest.json"
     ]
     assert not stray, stray
+
+
+@pytest.mark.parametrize("stage", sorted(pp.STAGES))
+def test_stage_records_never_share_a_basename_with_published_outputs(stage, tmp_path):
+    """R.16.7: the D_acc record `stages/dacc.json` shared its basename with the
+    reader output `dacc.json`, so a bare citation of `dacc.json` resolved to two
+    files and the results/diag uniqueness test failed on real data. Every file a
+    stage publishes under results/diag must have a basename of its own."""
+    BUILD[stage](tmp_path / "runs")
+    m, runs, out = _run(stage, tmp_path)
+    assert m["status"] == "FINAL"
+    diag = out / "results" / "diag"
+    names = [p.name for p in diag.rglob("*") if p.is_file()]
+    dupes = sorted({n for n in names if names.count(n) > 1})
+    assert not dupes, dupes

@@ -64,7 +64,7 @@ def _evidence_status(cell: dict, outputs: dict) -> tuple[str | None, str]:
     stage = cell.get("stage")
     if not stage:
         return None, "declared (no stage)"
-    rec = OUT_ROOT / "results/diag/meeting3/stages" / f"{stage}.json"
+    rec = OUT_ROOT / "results/diag/meeting3/stages" / f"{stage}.stage.json"
     if not rec.exists():
         return None, f"no record for stage {stage} yet"
     d = json.loads(rec.read_text(encoding="utf-8"))

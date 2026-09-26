@@ -1,6 +1,6 @@
 # Meeting #3 — results and execution status
 
-Last updated 2026-09-26 (Asia/Dubai 01:25). Machine-readable companions:
+Last updated 2026-09-26 (Asia/Dubai 22:30). Machine-readable companions:
 `configs/meeting3/cells.yaml` (ledger) → `results/diag/meeting3/meeting3_manifest.json`
 (`python scripts/meeting3_manifest.py --check`). Protocol: PREREGISTRATION
 Amendment R (R.0–R.12). Every number below was recomputed from the named
@@ -8,7 +8,22 @@ artifact when this file was written. Review evidence (gate outputs, remote test 
 parity, queue dry-run, remote-only data list):
 [`meeting3_evidence/`](meeting3_evidence/README.md).
 
-**Execution status, 2026-09-26 01:25 Dubai (GPU night 2 in progress; early start at the owner's request, R.16.6).**
+**Execution status, 2026-09-26 22:30 Dubai (one-time daytime start at the owner's request, R.16.6).**
+
+- **Task 1 D_acc: FINAL.** 1,200/1,200 generations, 0 provenance failures;
+  the R.8.3 determinism control PASSED (200/200 token-identical at each
+  budget).
+  - **B = 256:** earlier onset does more damage. Damage at t0 = 0 vs 2048:
+    Random +0.110 [+0.030, +0.200], StreamingLLM +0.190 [+0.080, +0.310]
+    (descriptive paired contrasts).
+  - That effect is carried almost entirely by the 36/100 generations whose
+    full-cache trace ends before step 2048. On the 64 long generations,
+    delaying onset recovers little.
+  - **B = 2048:** no onset contrast excludes 0 (non-identifying, R.8.1).
+  - See §2a.
+- **Running (11:39 start, stops 2026-09-27 10:43):** fork-control-random and
+  fork-control-slm (28 and 15 of 75 rows at 22:12). Not started:
+  capture-b2048, t1-tv512, t1-tv1024.
 
 - **Tasks 2/3 primary cell capture-b256: FINAL** (400/400, controls VALID,
   0 provenance failures). Q.3 collateral R-KV − H2O-style = +0.000
@@ -73,7 +88,7 @@ The three Meeting #3 problems, and where each stands:
 
 | Problem | Measured now | Queued (unattended, resumable) | Not yet runnable |
 |---|---|---|---|
-| **1. Divergence/damage vs cache size, exposure/horizon** | Accuracy curve 256→2048 with paired CIs, flips, realized ratios (**COMPLETE**); Q.2 exposure grid + occupancy audit (**COMPLETE**, verdict MIXED) | D_acc free-running (budget, onset) grid, 1,200 generations; Q.1 direct fork control, 150 conditions; TV at 512/1024 (summary profiles, R.12) | — |
+| **1. Divergence/damage vs cache size, exposure/horizon** | Accuracy curve 256→2048 with paired CIs, flips, realized ratios (**COMPLETE**); Q.2 exposure grid + occupancy audit (**COMPLETE**, verdict MIXED); D_acc free-running (budget, onset) grid, 1,200 generations (**FINAL**, §2a) | Q.1 direct fork control, 150 conditions; TV at 512/1024 (summary profiles, R.12) | — |
 | **2. Attention maps: M/Δ, GQA collateral, restoration** | Q.3 capture at budget 256 (**FINAL**, 400 conditions; collateral contrast INCONCLUSIVE, M/Δ per policy with CIs, §3a); Q.5 exact-lag (**FINAL**: Random NON-MONOTONE, StreamingLLM FLAT-NULL; 8 eligible problems, exploratory, §3b) | Q.3 capture at 2048, 400 conditions (collateral structurally non-identifying there, R.16.3) | — |
 | **3. SVD/PCA trajectory direction** | Q.6 basis (frozen, k = 64) + projection at budget 256 (**FINAL**, ω contrast PREDICTED, exploratory, §3a) | Q.6 at budget 2048 (same capture) | — |
 
@@ -150,6 +165,109 @@ actual slopes agree. The committed Q.2 artifact's `realized_ratio` omits the
 prompt (B/t); the grid reports both.
 
 **D_acc (free-running accuracy on the same grid): QUEUED.** Details in §6.
+
+## 2a. Task 1 — damage against exposure, free-running (D_acc; FINAL)
+
+Read 2026-09-26 21:40 Dubai by the post-dacc stage.
+- **Artifact:** `results/diag/meeting3/dacc.json`, status FINAL.
+- **Sufficient statistics:** `dacc.conditions.tsv`, with one row per
+  (onset, policy, budget, problem, seed).
+- **Figure:** `results/diag/meeting3/figures/meeting3_dacc.{pdf,png}`.
+
+Coverage, estimand and controls:
+- Coverage COMPLETE: 1,200/1,200 generations (3 onsets × 2 policies ×
+  2 budgets × 25 problems × 4 seeds). 0 provenance failures; identity
+  consistent within each arm.
+- **Estimand (R.3):** damage = Acc_FC − Acc_comp, paired by (problem, seed)
+  against `math500-fc-powered-merged`, equal-problem mean, problem-cluster
+  bootstrap 95% CI.
+  - Truncated generations are scored incorrect. A truncation hits the 16,384
+    cap *with no answer marker*; cap-hitting rows that contain a marker are
+    scored normally.
+  - Generations that end before their onset stay in the denominator as
+    unexposed assigned observations.
+- **Determinism control (R.8.3): PASSED.** The gated t0 = 0 arm is
+  token-identical to the legacy grid rows for all 200 shared generations at
+  each budget.
+- Full-cache accuracy on the subset is 0.850.
+
+**Registered display: the (budget, onset) grid.**
+- "Realized" is budget ÷ (mean prompt 93.7 + mean generated tokens).
+- Flip columns are masses over the 100 pairs.
+
+| Policy | Budget | t0 | Realized | Comp acc | Damage [95% CI] | Harmful | Beneficial | Trunc | Unexposed |
+|---|---|---|---|---|---|---|---|---|---|
+| Random | 256 | 0 | 2.76% | 0.37 | +0.480 [+0.310, +0.640] | 0.49 | 0.01 | 0.30 | 0 |
+| Random | 256 | 512 | 2.68% | 0.36 | +0.490 [+0.340, +0.630] | 0.49 | 0.00 | 0.32 | 4 |
+| Random | 256 | 2048 | 3.27% | 0.48 | +0.370 [+0.210, +0.530] | 0.37 | 0.00 | 0.23 | 36 |
+| StreamingLLM | 256 | 0 | 3.90% | 0.25 | +0.600 [+0.420, +0.750] | 0.61 | 0.01 | 0.10 | 0 |
+| StreamingLLM | 256 | 512 | 3.93% | 0.27 | +0.580 [+0.400, +0.740] | 0.58 | 0.00 | 0.13 | 4 |
+| StreamingLLM | 256 | 2048 | 4.38% | 0.44 | +0.410 [+0.230, +0.580] | 0.42 | 0.01 | 0.10 | 36 |
+| Random | 2048 | 0 | 48.10% | 0.81 | +0.040 [−0.010, +0.120] | 0.05 | 0.01 | 0.04 | 31 |
+| Random | 2048 | 512 | 49.84% | 0.84 | +0.010 [−0.020, +0.050] | 0.03 | 0.02 | 0.02 | 31 |
+| Random | 2048 | 2048 | 45.70% | 0.82 | +0.030 [−0.020, +0.090] | 0.05 | 0.02 | 0.05 | 36 |
+| StreamingLLM | 2048 | 0 | 47.06% | 0.76 | +0.090 [+0.030, +0.160] | 0.10 | 0.01 | 0.03 | 31 |
+| StreamingLLM | 2048 | 512 | 44.60% | 0.78 | +0.070 [+0.020, +0.150] | 0.07 | 0.00 | 0.05 | 31 |
+| StreamingLLM | 2048 | 2048 | 46.21% | 0.76 | +0.090 [+0.020, +0.180] | 0.10 | 0.01 | 0.01 | 36 |
+
+At B = 2048, 31–36 of 100 generations never exceed the budget at all, and
+t0 = 0 and 512 reach nearly the same achieved exposure. Onset readings there
+are **non-identifying** (R.8.1).
+
+**Onset contrasts** (descriptive, not registered).
+- Extra damage from the earlier onset = Acc_comp(later) − Acc_comp(earlier),
+  with the same paired equal-problem estimator (`paired_equal_problem`,
+  2,000 resamples, seed 0).
+- None of these tests carries a registered verdict. The family is small and
+  reported whole.
+
+| Policy | Budget | t0 0 vs 2048 | t0 512 vs 2048 | t0 0 vs 512 |
+|---|---|---|---|---|
+| Random | 256 | **+0.110 [+0.030, +0.200]** | **+0.120 [+0.010, +0.230]** | −0.010 [−0.090, +0.070] |
+| StreamingLLM | 256 | **+0.190 [+0.080, +0.310]** | **+0.170 [+0.050, +0.310]** | +0.020 [−0.050, +0.090] |
+| Random | 2048 | +0.010 [−0.020, +0.050] | −0.020 [−0.080, +0.030] | +0.030 [−0.030, +0.110] |
+| StreamingLLM | 2048 | +0.000 [−0.050, +0.040] | −0.020 [−0.070, +0.030] | +0.020 [−0.030, +0.070] |
+
+**Where the B = 256 onset effect comes from** (descriptive).
+- The gated arm is bit-identical to the full cache before its onset
+  (R.8.2, `dacc-gate-smoke`).
+- So a generation is unexposed at t0 = 2048 exactly when its full-cache
+  trajectory ends first. That is a pre-treatment property: the 36 such
+  (problem, seed) pairs are identical for both policies.
+- Splitting the t0 = 0 vs 2048 contrast on it:
+
+| Policy | Stratum | Pairs | FC acc | Comp acc t0 = 0 → 2048 | Share of the 100-pair contrast | Within-stratum contrast |
+|---|---|---|---|---|---|---|
+| Random | short (full-cache trace ends < 2048) | 36 | 0.972 | 0.694 → 0.972 | +0.100 of +0.110 | +0.285 [+0.111, +0.465] |
+| Random | long | 64 | 0.781 | 0.188 → 0.203 | +0.010 | −0.035 [−0.184, +0.092] |
+| StreamingLLM | short | 36 | 0.972 | 0.556 → 0.972 | +0.150 of +0.190 | +0.479 [+0.250, +0.729] |
+| StreamingLLM | long | 64 | 0.781 | 0.078 → 0.141 | +0.040 | +0.083 [+0.004, +0.171] |
+
+**Answer to Task 1 (exposure/horizon) at this scope** (one model, MATH-500
+subset of 25 problems):
+- At the 3–4% realized ratio of B = 256, starting compression later reduces
+  damage mainly by **letting short solutions finish before compression
+  begins**.
+- For long solutions, which are compressed in both arms, accuracy is already
+  low at either onset. A 2,048-step delay recovers nothing measurable for
+  Random, and +0.083 [+0.004, +0.171] for StreamingLLM.
+- **Exposure to compression, not merely the horizon at which it starts,
+  governs damage here.** Divergence is not damage: the teacher-forced D_tv
+  read (Q.2, MIXED) stands separately and is not compared point-for-point
+  (R.3).
+- At B = 2048 (~46–50%) damage is small at every onset, and the onset
+  contrast is non-identifying.
+
+Reproduce:
+
+```bash
+python scripts/report_dacc.py --runs-root <runs> \
+    --arms 0=dacc-t0 512=dacc-t512 2048=dacc-t2048 \
+    --design configs/experiments/grid_math500_dacc_t0_r3.yaml --out <out> --final
+```
+
+The descriptive contrasts come from `kvcache.coverage.paired_equal_problem` over
+`dacc.conditions.tsv`: `comp_correct` keyed by (pid, seed).
 
 ## 3. Task 1 — phase locking (Q.1; recorded, control outstanding)
 

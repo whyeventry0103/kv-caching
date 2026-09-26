@@ -371,7 +371,9 @@ def run_stage(
     record["outputs"] = {p: _sha(out_root / p) for p in outputs}
     # Phase 1: the stage record exists (not finalized) so the manifest can
     # derive the cell status; phase 2 only after the manifest refresh succeeds.
-    stage_record = out_root / OUT / "stages" / f"{stage}.json"
+    # `.stage.json`: a bare `<stage>.json` collides with a reader output of the
+    # same name (dacc.json), and cited basenames must be unique (R.16.7)
+    stage_record = out_root / OUT / "stages" / f"{stage}.stage.json"
     write_json_atomic(stage_record, record)
     if status in ("FINAL", "INVALID"):
         margv = manifest_argv or (

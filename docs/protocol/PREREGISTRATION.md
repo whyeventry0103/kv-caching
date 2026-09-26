@@ -3551,6 +3551,25 @@ kept.
        the tick labels are rotated.
      - Exact-lag figure: the three arms' error bars overlapped at each lag,
        and the in-axis legends covered error bars. Each arm now has a small
-       log-axis offset, and one shared legend sits below the panels. `make_meeting3_figures.py` is in every stage's
+       log-axis offset, and one shared legend sits below the panels.
+     - D_acc figure: the two policies' error bars overlapped at each onset,
+       and the B = 2048 legend ran into StreamingLLM's error bars. Same fix:
+       a ±35-step offset and a legend below the panels.
+7. **Stage-record basenames (2026-09-26, analysis-side only).**
+   - The published stage record `results/diag/meeting3/stages/dacc.json`
+     shared its basename with the reader output `dacc.json`.
+     `test_identity_bearing_artifact_basenames_are_unique_under_results_diag`
+     failed as soon as the D_acc record existed. That test guards against the
+     bare-filename ambiguity that once let a sign-flipped `readout_change` be
+     cited.
+   - The test is right and unchanged. Records are now
+     `stages/<stage>.stage.json`, written by `postprocess_meeting3.py` and
+     read by `meeting3_manifest.py`.
+   - Regression: `test_stage_records_never_share_a_basename_with_published_outputs`,
+     which failed for `dacc` before the fix.
+   - Both scripts are in every stage's analysis identity, so each FINAL stage
+     re-reads its unchanged rows and republishes.
+   - The old `stages/<stage>.json` files on the GPU host are superseded and
+     left in place: no remote deletion is authorized. Nothing reads them. `make_meeting3_figures.py` is in every stage's
      analysis identity, so each FINAL stage re-runs its reader and republishes
      from unchanged rows.
