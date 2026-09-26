@@ -31,10 +31,15 @@ def eligibility_profile(
     fc: Mapping[Key, Mapping[str, Any]],
     trace_tokens: Mapping[Key, int],
     *,
+    prompt_tokens: Mapping[Key, int] | None = None,
+    budget: int = 256,
     n_resamples: int = 2000,
     seed: int = 0,
 ) -> dict[str, Any]:
     """Who the restoration read describes: eligible vs ineligible traces.
+
+    With ``prompt_tokens`` the realized ratio is reported per subset as
+    ``budget / (mean prompt + mean trace tokens)`` (the project convention).
 
     ``eligible`` maps (problem, seed) -> whether the trace was read; ``fc`` maps
     the same keys to the full-cache reference row (``correct``, ``truncated``);
@@ -67,6 +72,12 @@ def eligibility_profile(
                 statistics.median(trace_tokens[k] for k in keys) if keys else None
             ),
         }
+        if prompt_tokens is not None and keys:
+            mp = statistics.fmean(prompt_tokens[k] for k in keys)
+            mt = statistics.fmean(trace_tokens[k] for k in keys)
+            out[label]["mean_prompt_tokens"] = mp
+            out[label]["mean_trace_tokens"] = mt
+            out[label]["realized_ratio"] = budget / (mp + mt)
     return out
 
 

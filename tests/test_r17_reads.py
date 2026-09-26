@@ -99,6 +99,11 @@ def test_eligibility_profile_splits_and_requires_reference_rows():
     assert o["eligible"]["fc_accuracy"]["mean"] == pytest.approx(0.5)
     assert o["eligible"]["median_trace_tokens"] == 200
     assert o["ineligible"]["n_problems"] == 1
+    assert "realized_ratio" not in o["eligible"]
+    pt = {("a", 1): 20, ("a", 2): 40, ("b", 1): 10}
+    o2 = r.eligibility_profile(elig, fc, toks, prompt_tokens=pt, n_resamples=50)
+    # 256 / (mean prompt 30 + mean trace 200)
+    assert o2["eligible"]["realized_ratio"] == pytest.approx(256 / 230)
     with pytest.raises(ValueError):
         r.eligibility_profile({("c", 1): True}, fc, toks)
 

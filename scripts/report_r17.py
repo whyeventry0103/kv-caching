@@ -83,8 +83,18 @@ def eligibility(runs: Path, a: argparse.Namespace) -> dict[str, Any]:
     if split:
         raise ValueError(f"eligibility differs across policies for {split[:3]}")
     elig = {k: next(iter(v)) for k, v in by_key.items()}
+    prompts = {
+        (r["pid"], _seed(r)): int(r["prompt_tokens"])
+        for r in _rows(runs / "capture-b256")
+    }
     prof = r17.eligibility_profile(
-        elig, fc, toks, n_resamples=a.n_resamples, seed=a.seed
+        elig,
+        fc,
+        toks,
+        prompt_tokens=prompts,
+        budget=256,
+        n_resamples=a.n_resamples,
+        seed=a.seed,
     )
     return {
         "read": "R.17 addendum: who the exact-lag restoration read describes",
