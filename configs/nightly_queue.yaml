@@ -972,7 +972,6 @@ jobs:
     command: capture2
     config: configs/experiments/capture_math500_b2048_r17.yaml
     run_name: capture-b2048
-    blocked: "Amendment R.17 (2026-09-27) - held until the capture-v2 tests pass on the pinned stack (R.17.2.1)"
     total: 400
     seeds: [11, 23, 47, 89]
     min_free_gb: 28
