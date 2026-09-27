@@ -1,0 +1,27 @@
+{
+  "analysis_id": "27e62fba772c6da4f3c883f739bdb2dcb1a2a376d3ec3afa6a6234333d880b2a",
+  "attempt": "results/diag/meeting3/attempts/fork-control-20260926T235001Z-3121217",
+  "finalized": true,
+  "gate_outcome": "INCONCLUSIVE",
+  "generation_digest": "5707be53f55bcc07d696bdce290dae7f2ea87bd78e2f4e7fa7ec9c9c97a6f712",
+  "manifest_exit": 0,
+  "outputs": {
+    "results/diag/meeting3/fork_control.conditions.tsv": "01edca6ed1f4267c1038d5b3acb857075927e9709b5db307a213e24cd5d8c7c2",
+    "results/diag/meeting3/fork_control.json": "53666ed21ced0010ab8bebc697baee3143cc8853dbae91fa6d5668d711bae305"
+  },
+  "passed": true,
+  "reader_exit": 0,
+  "reader_stderr_tail": [],
+  "reader_tail": [
+    "random-i64 INCONCLUSIVE TOLERANCE-DEGENERATE PASS",
+    "random-i256 INCONCLUSIVE TOLERANCE-DEGENERATE PASS",
+    "streamingllm-i16 INCONCLUSIVE TOLERANCE-DEGENERATE PASS",
+    "streamingllm-i64 INCONCLUSIVE TOLERANCE-DEGENERATE PASS",
+    "streamingllm-i256 INCONCLUSIVE TOLERANCE-DEGENERATE PASS",
+    "wrote /home/sk10741/kv-caching/results/diag/meeting3/attempts/fork-control-20260926T235001Z-3121217/fork_control.json"
+  ],
+  "stage": "fork-control",
+  "status": "FINAL",
+  "terminal": true,
+  "timestamp": "20260926T235001Z"
+}

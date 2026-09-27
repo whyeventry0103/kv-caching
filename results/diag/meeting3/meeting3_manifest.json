@@ -129,11 +129,11 @@
         "configs/experiments/fork_control_slm_r11.yaml"
       ],
       "declared_status": "QUEUED",
-      "evidence": "no record for stage fork-control yet",
+      "evidence": "stage fork-control FINAL; control outcome INCONCLUSIVE",
       "id": "Q1.legacy_control",
       "note": "registered 2026-09-12; R.2: cannot identify physical-removal effects. Computed for the record from arm A of the fork control (R.11), labelled NOT VALID FOR IDENTIFICATION by scripts/report_fork_control.py.",
       "output_sha256": {
-        "results/diag/meeting3/fork_control.json": null
+        "results/diag/meeting3/fork_control.json": "53666ed21ced0010ab8bebc697baee3143cc8853dbae91fa6d5668d711bae305"
       },
       "outputs": [
         "results/diag/meeting3/fork_control.json"
@@ -141,7 +141,7 @@
       "protocol": "Q.1",
       "question": "removal-anchored phase excess must not exclude zero (as registered)",
       "stage": "fork-control",
-      "status": "QUEUED",
+      "status": "ANALYZED",
       "task": 1
     },
     {
@@ -154,12 +154,12 @@
         "configs/experiments/fork_control_slm_r11.yaml"
       ],
       "declared_status": "QUEUED",
-      "evidence": "no record for stage fork-control yet",
+      "evidence": "stage fork-control FINAL; control outcome INCONCLUSIVE",
       "expected_units": 150,
       "id": "Q1.direct_control",
       "note": "kvcache.fork_control; tiny-Qwen2 tests pass (B-vs-B exact, A-B < 1e-4, selections agree, sensitive to disabled masking); R.11 scope + degenerate tolerance rule registered before outcomes.",
       "output_sha256": {
-        "results/diag/meeting3/fork_control.json": null
+        "results/diag/meeting3/fork_control.json": "53666ed21ced0010ab8bebc697baee3143cc8853dbae91fa6d5668d711bae305"
       },
       "outputs": [
         "results/diag/meeting3/fork_control.json"
@@ -167,7 +167,7 @@
       "protocol": "R.2",
       "question": "does physical compaction of already-masked keys change outputs?",
       "stage": "fork-control",
-      "status": "QUEUED",
+      "status": "ANALYZED",
       "task": 1
     },
     {
@@ -233,8 +233,8 @@
       "id": "Q2.dacc",
       "note": "gate implemented + CPU-validated (tests/test_onset_gate.py, tiny Qwen2, logit level, mutation-tested); queue: dacc-gate-smoke (real-model marker) -> dacc-t2048 -> dacc-t512 -> dacc-t0, ~7.2 h per cell on 2 GPUs, first window 2026-09-25 01:45. Comparator: 100 FC-bank rows (pids verified identical to Q.2's 25). R.8 records the B=2048 occupancy caveat.",
       "output_sha256": {
-        "results/diag/meeting3/dacc.json": "4cc9930b74a07539f387e808512abfb59c01aaaeb62a2599e964855f28483daf",
-        "results/diag/meeting3/figures/meeting3_dacc.pdf": "8f1b58c94c698f18b2daedfcb173992847a055811520ff2a2829c003023974aa"
+        "results/diag/meeting3/dacc.json": "93b0253a1aae878b971e3d5d95a0b806d431facc0a7147765306ceebea7cc706",
+        "results/diag/meeting3/figures/meeting3_dacc.pdf": "7d9519d8930dc0aef22791b843584cdcb6bcf80b2a2634a625c2d329959d1ee5"
       },
       "outputs": [
         "results/diag/meeting3/dacc.json",
@@ -258,7 +258,7 @@
       "id": "Q3.algebra_control",
       "note": "R.9: validated in float64 on synthetic inputs (tests/test_capture.py channel_stats identity) and live at every event as layer-0 Delta <= 1e-5 (same q, same retained keys); full/full control exactly 0. Real-model check = capture-smoke gate.",
       "output_sha256": {
-        "results/diag/meeting3/capture_b256.json": "88c561bb7172fd91b9dbb661fac9dcb013a9d087b45a49bde1850adf0b5d2bd4"
+        "results/diag/meeting3/capture_b256.json": "74c2745f80e3e89176ece857124760bd736d56b387b8b276e43aa6ab0fdd1678"
       },
       "outputs": [
         "results/diag/meeting3/capture_b256.json"
@@ -284,8 +284,8 @@
       "id": "Q3.capture",
       "note": "R.9 combined capture with Q.6; CPU-validated on tiny Qwen2 for all 4 policies (live gather/position-map/pre-eviction checks, mutation-tested); queue q6-basis-fit -> capture-smoke -> capture-b256 (primary) ... b2048 last.",
       "output_sha256": {
-        "results/diag/meeting3/capture_b256.json": "88c561bb7172fd91b9dbb661fac9dcb013a9d087b45a49bde1850adf0b5d2bd4",
-        "results/diag/meeting3/figures/meeting3_capture_b256.pdf": "2eb7743e00dd809743993a4b875ae519d844e3e36aeb68161ab22acb774b58eb"
+        "results/diag/meeting3/capture_b256.json": "74c2745f80e3e89176ece857124760bd736d56b387b8b276e43aa6ab0fdd1678",
+        "results/diag/meeting3/figures/meeting3_capture_b256.pdf": "f3cccdcb94c0c08026f165a5a96c939208789870fafb286d3cd71ddd3416d098"
       },
       "outputs": [
         "results/diag/meeting3/capture_b256.json",
@@ -299,12 +299,12 @@
     },
     {
       "config_sha256": {
-        "configs/experiments/capture_math500_b2048_r9.yaml": "c3d27c35b9a1ee9762d54f28932ec0285918476c096fbf9be3b2df5d6f859280",
+        "configs/experiments/capture_math500_b2048_r17.yaml": "4f775997c81dc7857ff4530f57da1f4720231002e67bb44b243ddcd24b281baf",
         "configs/experiments/capture_math500_b256_r9.yaml": "2bc44e423118192090610926476e2b7a722d2f2057a2a77295ae873cbfbb1ef1"
       },
       "configs": [
         "configs/experiments/capture_math500_b256_r9.yaml",
-        "configs/experiments/capture_math500_b2048_r9.yaml"
+        "configs/experiments/capture_math500_b2048_r17.yaml"
       ],
       "declared_status": "QUEUED",
       "evidence": "no record for stage capture-b2048 yet",
@@ -350,8 +350,8 @@
       "id": "Q5.exact_lag",
       "note": "kvcache.exact_lag + scripts/run_exact_lag.py / report_exact_lag.py; tiny-Qwen2 tests (deterministic snapshots, exact applied step, gate) pass; queue exact-lag-r5 requires capture-smoke; ~5 h on 2 GPUs.",
       "output_sha256": {
-        "results/diag/meeting3/exact_lag.json": "9f493b400fd6a162003c07f0dc2c76ffe2f40ff0944da4f0d856175021d2f381",
-        "results/diag/meeting3/figures/meeting3_exact_lag.pdf": "0ce9d09bbb3564091684d7f7dd07de0c53cea1e1c157f52340d07c9c4fdf96af"
+        "results/diag/meeting3/exact_lag.json": "294db4c68610339c010fee8ae7dec4a999e91137d482acb9869d3f4e6203d244",
+        "results/diag/meeting3/figures/meeting3_exact_lag.pdf": "51c9ccc8bd9034991e24ef2aef81dfb864f88fb48c19d51ff96c72967f6aa88c"
       },
       "outputs": [
         "results/diag/meeting3/exact_lag.json",
@@ -396,8 +396,8 @@
       "id": "Q6.project",
       "note": "same capture cells as Q3.capture (R.9).",
       "output_sha256": {
-        "results/diag/meeting3/capture_b256.json": "88c561bb7172fd91b9dbb661fac9dcb013a9d087b45a49bde1850adf0b5d2bd4",
-        "results/diag/meeting3/figures/meeting3_capture_b256.pdf": "2eb7743e00dd809743993a4b875ae519d844e3e36aeb68161ab22acb774b58eb"
+        "results/diag/meeting3/capture_b256.json": "74c2745f80e3e89176ece857124760bd736d56b387b8b276e43aa6ab0fdd1678",
+        "results/diag/meeting3/figures/meeting3_capture_b256.pdf": "f3cccdcb94c0c08026f165a5a96c939208789870fafb286d3cd71ddd3416d098"
       },
       "outputs": [
         "results/diag/meeting3/capture_b256.json",
@@ -411,12 +411,12 @@
     },
     {
       "config_sha256": {
-        "configs/experiments/capture_math500_b2048_r9.yaml": "c3d27c35b9a1ee9762d54f28932ec0285918476c096fbf9be3b2df5d6f859280",
+        "configs/experiments/capture_math500_b2048_r17.yaml": "4f775997c81dc7857ff4530f57da1f4720231002e67bb44b243ddcd24b281baf",
         "configs/experiments/capture_math500_b256_r9.yaml": "2bc44e423118192090610926476e2b7a722d2f2057a2a77295ae873cbfbb1ef1"
       },
       "configs": [
         "configs/experiments/capture_math500_b256_r9.yaml",
-        "configs/experiments/capture_math500_b2048_r9.yaml"
+        "configs/experiments/capture_math500_b2048_r17.yaml"
       ],
       "declared_status": "QUEUED",
       "evidence": "no record for stage capture-b2048 yet",
@@ -450,16 +450,16 @@
     "transformers": "4.56.2"
   },
   "schema": "meeting3-manifest-v1",
-  "source_tree_sha256": "6db7f3d3a4e92b6b940e068c76090ffe86327c0a3893b6019b24166214da6f6b",
+  "source_tree_sha256": "f2171cdb03d3c646b42f69945e02208dcb67540c668a4c1c32e6d65c3ee8501a",
   "status_counts": {
-    "ANALYZED": 1,
+    "ANALYZED": 3,
     "BLOCKED": 0,
     "COMPLETE": 8,
     "GENERATED": 0,
     "IMPLEMENTED": 0,
     "INVALID": 0,
     "NOT_STARTED": 0,
-    "QUEUED": 7,
+    "QUEUED": 5,
     "RUNNING": 0,
     "TESTED": 1,
     "VALIDATED": 0
