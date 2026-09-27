@@ -8,6 +8,12 @@ artifact when this file was written. Review evidence (gate outputs, remote test 
 parity, queue dry-run, remote-only data list):
 [`meeting3_evidence/`](meeting3_evidence/README.md).
 
+**Status, 2026-09-27 11:00 Dubai.** Q.1 fork control FINAL (all
+TOLERANCE-DEGENERATE; the gap distribution is reported in §4). capture-v2 smoke
+PASSED. The k = 256 basis is frozen and accepted. capture-b2048 is at 380/400
+and resumes 2026-09-28 01:45, followed by t1-tv512/1024, restore-v2 and
+fork-precision. Tier 3 (Llama-8B) is prepared and held until Tier 2 completes.
+
 **Status, 2026-09-27 (Amendment R.17 in progress).** Target venue: proposed ICML
 2027, pending supervisor confirmation.
 
@@ -603,7 +609,8 @@ python scripts/report_exact_lag.py --runs-root <runs> --run exact-lag-r5 \
 | Capture: topk gather equality, layer-0 key identity at mapped positions, bitwise pre-eviction, full/full = 0, layer-0 Δ ≤ 1e-5 | **PASSED** on tiny Qwen2 and on the real model (`capture-smoke`, 2026-09-25). VALID on all 400 capture-b256 rows; layer-0 Δ maximum exactly 0.0 |
 | Collateral positive control (7 heads, 320 candidates, B = 256) | **PASSED**: production tensor path and reference both return 1.0 (`tests/test_capture.py`, pinned stack, GPU-host CPU, 2026-09-27) |
 | Q.1 removal-anchored negative control | **INVALID for identification** (R.2); computed for the record from the fork control's arm A |
-| Q.1 direct fork control (validity gate, R.17.0.5) | Tiny Qwen2 **PASSED on CPU**. Real runs: fork-control-random and -slm **RUNNING**. The partial read is TOLERANCE-DEGENERATE (replay control exactly 0). The replacement precision-floor gate is registered; floor and fp32 diagnosis not yet run |
+| Q.1 direct fork control (validity gate, R.17.0.5) | **FINAL, 150/150** (`results/diag/meeting3/fork_control.json`). TOLERANCE-DEGENERATE in all six cells (INCONCLUSIVE, R.11): the replay control is exactly 0. Selection agreement 1.0. Gap distribution (`r17/fork_precision.json`): StreamingLLM `max_tv` median and p95 are 0.0 at I=16/64; Random `max_tv` median 0.048 (I=64) and 0.062 (I=256), tail in the last trace-position quartile. **Precision-floor gate and fp32 diagnosis pending** (fork-precision, queued fourth) |
+| capture-v2 smoke (R.17.2.1) | **PASSED** 2026-09-27: full/full 0, layer-0 Δ 0.0, 0 non-finite, 21 events per policy. Nested-basis acceptance passed (max principal angle 1.46e-4 rad ≤ 1e-3; mean and scale identical), so nested k up to 256 is licensed. The smoke's H2O-style M equals the v1 b256 row for the same trace |
 | Q.5 identity repair (true evicted K/V per layer) | **PASSED** on CPU and on every real exact-lag row: K and V bitwise gates in all 200 rows, 0 content failures |
 
 ## 5. Held units and resolved decisions
