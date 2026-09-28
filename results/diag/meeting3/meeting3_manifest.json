@@ -22,7 +22,7 @@
         "figures/fig8_budget_curve.pdf": "734619f70bd921645962d5ba7f76da21d0cfeaa37d184a61c748a61350b17fb8",
         "results/diag/amendment-k/m4-1024-summary.json": "c720767464da76fbafac3bdf7c24e8b64ff83948209f73654e8c6a07a024d6f7",
         "results/diag/amendment-k/m4-512-summary.json": "0e7a5305ac516cc308ca60c599822c6212caba3917f435a990d8f21c7ef7fc82",
-        "results/diag/meeting3/t1_budget_curve.json": "369efacba876031b7e2df09d51c117be055c0589c272024e9148f0c2016b03dd"
+        "results/diag/meeting3/t1_budget_curve.json": "78577f6b1a1ec1a21b216e9b1705630ac3c82db14d1f523bfe368741023011fc"
       },
       "outputs": [
         "results/diag/amendment-k/m4-512-summary.json",
@@ -44,13 +44,13 @@
       ],
       "declared_status": "QUEUED",
       "depends_on": [],
-      "evidence": "no record for stage t1-tv yet",
+      "evidence": "stage t1-tv FINAL",
       "expected_units": 200,
       "id": "T1.tv512",
       "note": "was BLOCKED on storage (~98 MiB/cell full profiles vs ~167 MiB deficit); R.12 runs it as registered with summary profiles (~3 KB/trace). Queue t1-tv512, last.",
       "output_sha256": {
-        "results/diag/meeting3/figures/fig8_budget_curve.pdf": null,
-        "results/diag/meeting3/t1_budget_curve.json": "369efacba876031b7e2df09d51c117be055c0589c272024e9148f0c2016b03dd"
+        "results/diag/meeting3/figures/fig8_budget_curve.pdf": "cf2db0ce64157579c521781c6b17a6c8a252e0e0f92e0259d866e786cd4ce012",
+        "results/diag/meeting3/t1_budget_curve.json": "78577f6b1a1ec1a21b216e9b1705630ac3c82db14d1f523bfe368741023011fc"
       },
       "outputs": [
         "results/diag/meeting3/t1_budget_curve.json",
@@ -59,7 +59,7 @@
       "protocol": "R.1",
       "question": "per-step TV at budget 512 (missing intermediate point)",
       "stage": "t1-tv",
-      "status": "QUEUED",
+      "status": "COMPLETE",
       "task": 1
     },
     {
@@ -70,13 +70,13 @@
         "configs/experiments/replay_ext_math500_b1024_r1.yaml"
       ],
       "declared_status": "QUEUED",
-      "evidence": "no record for stage t1-tv yet",
+      "evidence": "stage t1-tv FINAL",
       "expected_units": 200,
       "id": "T1.tv1024",
       "note": "was BLOCKED on storage (~98 MiB/cell full profiles vs ~167 MiB deficit); R.12 runs it as registered with summary profiles (~3 KB/trace). Queue t1-tv1024, last.",
       "output_sha256": {
-        "results/diag/meeting3/figures/fig8_budget_curve.pdf": null,
-        "results/diag/meeting3/t1_budget_curve.json": "369efacba876031b7e2df09d51c117be055c0589c272024e9148f0c2016b03dd"
+        "results/diag/meeting3/figures/fig8_budget_curve.pdf": "cf2db0ce64157579c521781c6b17a6c8a252e0e0f92e0259d866e786cd4ce012",
+        "results/diag/meeting3/t1_budget_curve.json": "78577f6b1a1ec1a21b216e9b1705630ac3c82db14d1f523bfe368741023011fc"
       },
       "outputs": [
         "results/diag/meeting3/t1_budget_curve.json",
@@ -85,7 +85,7 @@
       "protocol": "R.1",
       "question": "per-step TV at budget 1024 (missing intermediate point)",
       "stage": "t1-tv",
-      "status": "QUEUED",
+      "status": "COMPLETE",
       "task": 1
     },
     {
@@ -450,16 +450,16 @@
     "transformers": "4.56.2"
   },
   "schema": "meeting3-manifest-v1",
-  "source_tree_sha256": "f2171cdb03d3c646b42f69945e02208dcb67540c668a4c1c32e6d65c3ee8501a",
+  "source_tree_sha256": "a9186546c47d9a8b8ad6c7192f61c0b66e364aa9832510972e98ba4b839f57b4",
   "status_counts": {
     "ANALYZED": 3,
     "BLOCKED": 0,
-    "COMPLETE": 10,
+    "COMPLETE": 12,
     "GENERATED": 0,
     "IMPLEMENTED": 0,
     "INVALID": 0,
     "NOT_STARTED": 0,
-    "QUEUED": 3,
+    "QUEUED": 1,
     "RUNNING": 0,
     "TESTED": 1,
     "VALIDATED": 0

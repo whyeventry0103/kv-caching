@@ -138,10 +138,13 @@
       "truncation_rate": 0.07
     },
     {
-      "auc_tv": null,
-      "auc_tv_ci95": null,
-      "auc_tv_n_problems": null,
-      "auc_tv_source": null,
+      "auc_tv": 0.056118486364990526,
+      "auc_tv_ci95": [
+        0.0433198228916796,
+        0.06880518362130897
+      ],
+      "auc_tv_n_problems": 25,
+      "auc_tv_source": "R.12 summary profiles",
       "budget": 512,
       "fc_accuracy_matched": 0.885,
       "free_accuracy": 0.68,
@@ -206,10 +209,13 @@
       "truncation_rate": 0.085
     },
     {
-      "auc_tv": null,
-      "auc_tv_ci95": null,
-      "auc_tv_n_problems": null,
-      "auc_tv_source": null,
+      "auc_tv": 0.06520094617506066,
+      "auc_tv_ci95": [
+        0.05060495475029413,
+        0.08062405753235931
+      ],
+      "auc_tv_n_problems": 25,
+      "auc_tv_source": "R.12 summary profiles",
       "budget": 512,
       "fc_accuracy_matched": 0.885,
       "free_accuracy": 0.4775,
@@ -274,10 +280,13 @@
       "truncation_rate": 0.0875
     },
     {
-      "auc_tv": null,
-      "auc_tv_ci95": null,
-      "auc_tv_n_problems": null,
-      "auc_tv_source": null,
+      "auc_tv": 0.027936128972228195,
+      "auc_tv_ci95": [
+        0.01868856805832168,
+        0.03788918611275011
+      ],
+      "auc_tv_n_problems": 25,
+      "auc_tv_source": "R.12 summary profiles",
       "budget": 1024,
       "fc_accuracy_matched": 0.885,
       "free_accuracy": 0.8,
@@ -342,10 +351,13 @@
       "truncation_rate": 0.0325
     },
     {
-      "auc_tv": null,
-      "auc_tv_ci95": null,
-      "auc_tv_n_problems": null,
-      "auc_tv_source": null,
+      "auc_tv": 0.035930468673128206,
+      "auc_tv_ci95": [
+        0.02475638742857075,
+        0.048164256624674474
+      ],
+      "auc_tv_n_problems": 25,
+      "auc_tv_source": "R.12 summary profiles",
       "budget": 1024,
       "fc_accuracy_matched": 0.885,
       "free_accuracy": 0.6875,

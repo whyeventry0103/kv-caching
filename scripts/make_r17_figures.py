@@ -277,6 +277,9 @@ def fig_collapse(out: Path) -> list[Path]:
             ys = [v["cell_means"][small], v["cell_means"][large]]
             ax.plot(xs, ys, "-", color="black", lw=2.2, alpha=0.35)
         ax.set_xscale("log")
+        ax.xaxis.set_minor_locator(matplotlib.ticker.NullLocator())
+        ticks = [0.05, 0.1, 0.2, 0.4, 0.8]
+        ax.set_xticks(ticks, [f"{t:g}" for t in ticks])
         ax.set_xlabel("realized ratio r = B / (prompt + position)", fontsize=8)
         ax.set_ylabel("onset-0 window-mean TV", fontsize=8)
         ax.set_title(f"{LABEL.get(p, p)}: {v['label']}", fontsize=8)
