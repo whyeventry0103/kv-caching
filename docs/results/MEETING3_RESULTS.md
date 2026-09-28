@@ -315,6 +315,51 @@ python scripts/report_dacc.py --runs-root <runs> \
 The descriptive contrasts come from `kvcache.coverage.paired_equal_problem` over
 `dacc.conditions.tsv`: `comp_correct` keyed by (pid, seed).
 
+## 2b. Task 1 — dose vs horizon: the collapse test (R.17.1.1) and TV at four budgets (R.17.1.3)
+
+Read 2026-09-28 23:55 Dubai. Artifacts:
+- `results/diag/meeting3/r17/collapse.json`
+- `r17/auc_tv.json`
+- figures `figures/r17_collapse.{pdf,png}` and
+  `figures/r17_supervisor_damage_and_tv.{pdf,png}`
+
+**Design.** At onset 0, window-mean TV (256-step window) at positions
+2304/3328/4352 for B = 256/512/1024/2048, with r = B / (prompt + position).
+- *Panel:* the 29 traces (10 problems) with a full window at 4352 under all
+  four budgets; mean prompt 114.7.
+- *Pairs:* each pair differs two-fold in budget and by 2,048 positions, with
+  r matched within 7.7%.
+- *Source profiles:* B = 256/2048 from the Q.2 onset-0 arm, 512/1024 from the
+  t1-tv summaries.
+
+| Pair (r) | Random: d [95% CI] | StreamingLLM: d [95% CI] |
+|---|---|---|
+| B256@2304 (0.106) vs B512@4352 (0.115) | +0.0361 [−0.0133, +0.0692] | +0.0229 [−0.0183, +0.0495] |
+| B512@2304 (0.212) vs B1024@4352 (0.229) | +0.0177 [−0.0226, +0.0452] | +0.0184 [−0.0295, +0.0500] |
+| B1024@2304 (0.423) vs B2048@4352 (0.459) | +0.0121 [−0.0057, +0.0242] | +0.0198 [−0.0260, +0.0507] |
+| Range of cell means R | 0.1435 | 0.1140 |
+| **Registered label** | **MIXED** | **COLLAPSE** |
+| Pooled: ΔR² of budget after log r | 0.029 [0.004, 0.073] | 0.033 [0.003, 0.082] |
+
+d = TV(smaller B, earlier position) − TV(larger B, later position).
+- **StreamingLLM collapses** onto r by the registered rule.
+- **Random is MIXED** only because pair 1's point estimate (0.0361) exceeds
+  0.25 R (0.0359) by 0.0002. All three of its CIs include 0.
+- Every point estimate is positive (the smaller cache at the earlier position
+  diverges more). The pooled fit gives budget a small share of variance beyond
+  log r whose CI excludes 0.
+- So a residual absolute-budget effect is **suggested but not established at
+  this n** (10 problems). Dose (r) carries most of the divergence.
+
+**AUC-TV** (per-trace mean TV, onset 0, 25 problems × 4 seeds, clustered CI):
+
+| Budget | Random | StreamingLLM |
+|---|---|---|
+| 256 | 0.1075 [0.0906, 0.1240] | 0.1028 [0.0831, 0.1235] |
+| 512 | 0.0561 [0.0433, 0.0688] | 0.0652 [0.0506, 0.0806] |
+| 1024 | 0.0279 [0.0187, 0.0379] | 0.0359 [0.0248, 0.0482] |
+| 2048 | 0.0128 [0.0063, 0.0201] | 0.0186 [0.0091, 0.0291] |
+
 ## 3. Task 1 — phase locking (Q.1; recorded, control outstanding)
 
 Recorded 2026-09-15 (Amendment Q.1, result): **Random is AMPLITUDE-DEPENDENT**.
