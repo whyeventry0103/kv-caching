@@ -1,0 +1,147 @@
+{
+  "amendment": "R.17",
+  "heads_per_group": 7,
+  "inputs": {
+    "capture_run": "capture-b2048",
+    "n_rows": 400
+  },
+  "nested_acceptance_passed": [
+    "True"
+  ],
+  "omega_by_k_random_minus_slm": {
+    "ks": [
+      8,
+      16,
+      32,
+      64,
+      128,
+      256
+    ],
+    "per_k": {
+      "128": {
+        "a_mean": 3.1185201893698156,
+        "b_mean": 2.993298376293091,
+        "contrast": {
+          "ci95": [
+            0.0979487186046225,
+            0.15140902968794845
+          ],
+          "excludes_zero": true,
+          "mean": 0.12522181307672461,
+          "n_pairs": 69,
+          "n_problems": 21
+        }
+      },
+      "16": {
+        "a_mean": 8.476217181169863,
+        "b_mean": 7.767080232729696,
+        "contrast": {
+          "ci95": [
+            0.5756239035657577,
+            0.8387367671477188
+          ],
+          "excludes_zero": true,
+          "mean": 0.7091369484401677,
+          "n_pairs": 69,
+          "n_problems": 21
+        }
+      },
+      "256": {
+        "a_mean": 2.24243904884453,
+        "b_mean": 2.1754059218972834,
+        "contrast": {
+          "ci95": [
+            0.05039475460180626,
+            0.0818683565184599
+          ],
+          "excludes_zero": true,
+          "mean": 0.06703312694724681,
+          "n_pairs": 69,
+          "n_problems": 21
+        }
+      },
+      "32": {
+        "a_mean": 5.965647613930424,
+        "b_mean": 5.556426089331688,
+        "contrast": {
+          "ci95": [
+            0.32833331797241716,
+            0.49003811319247687
+          ],
+          "excludes_zero": true,
+          "mean": 0.4092215245987371,
+          "n_pairs": 69,
+          "n_problems": 21
+        }
+      },
+      "64": {
+        "a_mean": 4.30181089073456,
+        "b_mean": 4.07662226910189,
+        "contrast": {
+          "ci95": [
+            0.17798721237796883,
+            0.2733433698053596
+          ],
+          "excludes_zero": true,
+          "mean": 0.2251886216326697,
+          "n_pairs": 69,
+          "n_problems": 21
+        }
+      },
+      "8": {
+        "a_mean": 12.399508024044005,
+        "b_mean": 11.320440489766263,
+        "contrast": {
+          "ci95": [
+            0.8626380294600703,
+            1.2878761344438212
+          ],
+          "excludes_zero": true,
+          "mean": 1.079067534277742,
+          "n_pairs": 69,
+          "n_problems": 21
+        }
+      }
+    }
+  },
+  "read": "R.17.1.6/1.7 capture-v2 extras",
+  "reproduce": "python scripts/report_r17.py --runs-root /home/sk10741/kvcache-storage/runs --capture-run capture-b2048 capture-v2",
+  "within_group_M_dispersion": {
+    "h2o": {
+      "ci95": [
+        0.05109838539277935,
+        0.10056950577013175
+      ],
+      "mean": 0.07478693257447112,
+      "n_problems": 21,
+      "n_values": 69
+    },
+    "random": {
+      "ci95": [
+        0.11402942669596221,
+        0.17577672019955037
+      ],
+      "mean": 0.1445913950993641,
+      "n_problems": 21,
+      "n_values": 69
+    },
+    "rkv": {
+      "ci95": [
+        0.06491315041801513,
+        0.11657085656629397
+      ],
+      "mean": 0.08949069439944982,
+      "n_problems": 21,
+      "n_values": 69
+    },
+    "streamingllm": {
+      "ci95": [
+        0.10448664687354856,
+        0.16255243765183758
+      ],
+      "mean": 0.13267365557279387,
+      "n_problems": 21,
+      "n_values": 69
+    }
+  }
+}

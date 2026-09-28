@@ -307,13 +307,13 @@
         "configs/experiments/capture_math500_b2048_r17.yaml"
       ],
       "declared_status": "QUEUED",
-      "evidence": "no record for stage capture-b2048 yet",
+      "evidence": "stage capture-b2048 FINAL",
       "expected_units": 400,
       "id": "Q3.capture_b2048",
       "note": "R.9 combined capture with Q.6; CPU-validated on tiny Qwen2 for all 4 policies (live gather/position-map/pre-eviction checks, mutation-tested); queue q6-basis-fit -> capture-smoke -> capture-b256 (primary) ... b2048 last.",
       "output_sha256": {
-        "results/diag/meeting3/capture_b2048.json": null,
-        "results/diag/meeting3/figures/meeting3_capture_b2048.pdf": null
+        "results/diag/meeting3/capture_b2048.json": "1cc2fc1bb57a61f9bcc5d3ba110dcd6a9ca290b7f8731411f29903338e3d8145",
+        "results/diag/meeting3/figures/meeting3_capture_b2048.pdf": "2cab8ca7b2523228a8f9defd754dc5d8eb3b72f657e431ccccbde498b8060ad2"
       },
       "outputs": [
         "results/diag/meeting3/capture_b2048.json",
@@ -322,7 +322,7 @@
       "protocol": "Q.3/R.4",
       "question": "M, Delta, collateral per layer/group/event",
       "stage": "capture-b2048",
-      "status": "QUEUED",
+      "status": "COMPLETE",
       "task": 2
     },
     {
@@ -419,13 +419,13 @@
         "configs/experiments/capture_math500_b2048_r17.yaml"
       ],
       "declared_status": "QUEUED",
-      "evidence": "no record for stage capture-b2048 yet",
+      "evidence": "stage capture-b2048 FINAL",
       "expected_units": 400,
       "id": "Q6.project_b2048",
       "note": "same capture cells as Q3.capture (R.9).",
       "output_sha256": {
-        "results/diag/meeting3/capture_b2048.json": null,
-        "results/diag/meeting3/figures/meeting3_capture_b2048.pdf": null
+        "results/diag/meeting3/capture_b2048.json": "1cc2fc1bb57a61f9bcc5d3ba110dcd6a9ca290b7f8731411f29903338e3d8145",
+        "results/diag/meeting3/figures/meeting3_capture_b2048.pdf": "2cab8ca7b2523228a8f9defd754dc5d8eb3b72f657e431ccccbde498b8060ad2"
       },
       "outputs": [
         "results/diag/meeting3/capture_b2048.json",
@@ -434,7 +434,7 @@
       "protocol": "Q.6/R.6",
       "question": "omega(Random) - omega(StreamingLLM), budget 256 primary",
       "stage": "capture-b2048",
-      "status": "QUEUED",
+      "status": "COMPLETE",
       "task": 3
     }
   ],
@@ -454,12 +454,12 @@
   "status_counts": {
     "ANALYZED": 3,
     "BLOCKED": 0,
-    "COMPLETE": 8,
+    "COMPLETE": 10,
     "GENERATED": 0,
     "IMPLEMENTED": 0,
     "INVALID": 0,
     "NOT_STARTED": 0,
-    "QUEUED": 5,
+    "QUEUED": 3,
     "RUNNING": 0,
     "TESTED": 1,
     "VALIDATED": 0

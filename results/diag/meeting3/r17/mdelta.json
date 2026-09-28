@@ -25,6 +25,12 @@
     "n_problems": 25
   },
   "amendment": "R.17",
+  "excluded_no_measured_event": {
+    "h2o": 0,
+    "random": 0,
+    "rkv": 0,
+    "streamingllm": 0
+  },
   "first_prune_self_control": {
     "layer0_delta_max": 0.0,
     "n_nonfinite": 0,

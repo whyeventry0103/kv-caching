@@ -31,6 +31,10 @@
       "n_pairs": 100,
       "n_problems": 25
     },
+    "n_excluded_no_deviation": {
+      "a": 0,
+      "b": 0
+    },
     "note": "R.17 addendum D: Random - StreamingLLM, paired equal-problem",
     "par": {
       "ci95": [

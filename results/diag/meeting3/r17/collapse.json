@@ -1,0 +1,7 @@
+{
+  "amendment": "R.17",
+  "read": "R.17.1.1 collapse test",
+  "reproduce": "python scripts/report_r17.py --runs-root /home/sk10741/kvcache-storage/runs collapse",
+  "status": "PENDING",
+  "why": "no profiles yet in ['t1-tv512', 't1-tv1024']"
+}
