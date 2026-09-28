@@ -543,9 +543,16 @@ def omega_components(
         perp = statistics.fmean(s / k for s, k in zip(lat["sum_perp"], n, strict=True))
         return par, perp
 
-    ca = {k: comp(v) for k, v in rows_a.items()}
-    cb = {k: comp(v) for k, v in rows_b.items()}
-    out: dict[str, Any] = {}
+    # a trace that never diverged (no eviction: every step 0/0) has no
+    # direction; it is excluded, as the R.6 finite-omega rule excludes it
+    ca = {k: c for k, v in rows_a.items() if min(c := comp(v)) > 0}
+    cb = {k: c for k, v in rows_b.items() if min(c := comp(v)) > 0}
+    out: dict[str, Any] = {
+        "n_excluded_no_deviation": {
+            "a": len(rows_a) - len(ca),
+            "b": len(rows_b) - len(cb),
+        }
+    }
     for name, f in (
         ("perp", lambda c: c[1]),
         ("par", lambda c: c[0]),

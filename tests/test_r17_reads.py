@@ -234,3 +234,31 @@ def test_head_dispersion_is_max_minus_min_within_each_group():
     )
     # group 1: means 0.1, 0.2 -> 0.1; group 2: 0.5, 0.5 -> 0.0; mean 0.05
     assert o["mean"] == pytest.approx(0.05)
+
+
+def test_omega_components_excludes_traces_that_never_diverged():
+    lat = lambda par, perp: {  # noqa: E731
+        "sum_par": [par * 2],
+        "sum_perp": [perp * 2],
+        "n_finite": [2],
+        "n_undefined": [0],
+        "n_unbounded": [0],
+    }
+    a = {(f"p{i}", 1): lat(1.0, 4.0) for i in range(5)}
+    a[("p5", 1)] = lat(0.0, 0.0)  # no eviction: every step 0/0
+    b = {(f"p{i}", 1): lat(1.0, 2.0) for i in range(6)}
+    o = r.omega_components(a, b, n_resamples=50)
+    assert o["n_excluded_no_deviation"] == {"a": 1, "b": 0}
+    assert o["log_perp_over_par"]["n_pairs"] == 5
+
+
+def test_head_dispersion_skips_traces_with_no_measured_event():
+    measured = {
+        "sum_by_layer_head": {"M_head": [[0.2, 0.4]]},
+        "n_measured_by_layer": [2],
+    }
+    empty = {"sum_by_layer_head": {"M_head": [[]]}, "n_measured_by_layer": [0]}
+    o = r.head_dispersion(
+        {("a", 1): measured, ("b", 1): empty}, heads_per_group=2, n_resamples=20
+    )
+    assert o["n_values"] == 1 and o["mean"] == pytest.approx(0.1)

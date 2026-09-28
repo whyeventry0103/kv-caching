@@ -173,8 +173,14 @@ def mdelta(runs: Path, a: argparse.Namespace) -> dict[str, Any]:
         stats[f] = {}
         layers[f] = {}
         for p in POLICIES:
+            # a trace with no eviction event has no M/Delta: unavailable, never
+            # zero (R.4) -- the same exclusion the registered reader applies
             stats[f][p] = equal_problem_bootstrap(
-                {k: r[f"{f}_mean"] for k, r in per[p].items()},
+                {
+                    k: r[f"{f}_mean"]
+                    for k, r in per[p].items()
+                    if r[f"{f}_mean"] is not None
+                },
                 n_resamples=a.n_resamples,
                 seed=a.seed,
             )
@@ -193,11 +199,14 @@ def mdelta(runs: Path, a: argparse.Namespace) -> dict[str, Any]:
     m_read = r17.spread_read(stats["M"])
     d_read = r17.spread_read(stats["Delta"])
     h3 = r17.h3_read(
-        {k: r["M_mean"] for k, r in per["h2o"].items()},
-        {k: r["M_mean"] for k, r in per["random"].items()},
+        {k: r["M_mean"] for k, r in per["h2o"].items() if r["M_mean"] is not None},
+        {k: r["M_mean"] for k, r in per["random"].items() if r["M_mean"] is not None},
         n_resamples=a.n_resamples,
         seed=a.seed,
     )
+    excluded = {
+        p: sum(1 for r in per[p].values() if r["M_mean"] is None) for p in POLICIES
+    }
     ctrl = {
         "layer0_delta_max": max(float(r["checks"]["layer0_delta_max"]) for r in rows),
         "n_nonfinite": sum(int(r["checks"]["n_nonfinite"]) for r in rows),
@@ -221,6 +230,7 @@ def mdelta(runs: Path, a: argparse.Namespace) -> dict[str, Any]:
         "inputs": {"capture_run": a.capture_run, "n_rows": len(rows)},
         "realized_ratio": _capture_ratio(rows),
         "per_policy": brief,
+        "excluded_no_measured_event": excluded,
         "per_layer": layers,
         "H2": {"M": m_read, "Delta": d_read, "label": r17.h2_label(m_read, d_read)},
         "H3": {"contrast": "M(H2O-style) - M(Random)", **h3},
@@ -585,8 +595,11 @@ def capture_v2(runs: Path, a: argparse.Namespace) -> dict[str, Any]:
     by = {
         p: {(r["pid"], _seed(r)): r for r in rows if r["press"] == p} for p in POLICIES
     }
-    heads = rows[0]["sum_by_layer_head"]["M_head"][0]
-    groups = len(rows[0]["sum_by_layer_group"]["M"][0])
+    # group size from a row that measured something (a trace with no eviction
+    # event has empty per-head sums)
+    ref = next(r for r in rows if any(r["n_measured_by_layer"]))
+    heads = next(h for h in ref["sum_by_layer_head"]["M_head"] if h)
+    groups = len(ref["sum_by_layer_group"]["M"][0])
     rep = len(heads) // groups
     acc = {r.get("nested_acceptance", {}).get("passed") for r in rows}
     return {
