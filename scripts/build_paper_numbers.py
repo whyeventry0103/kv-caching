@@ -1545,6 +1545,15 @@ def build_catalogue() -> list[Entry]:
                 f"{_mdr} :: H3.ci95[{_i}]",
                 "H3 CI bound",
             )
+    _md2 = R17 / "mdelta_capture-b2048.json"
+    if _md2.exists():
+        _m2d, _m2r = _load(_md2), _md2.relative_to(PROJECT_ROOT)
+        add(
+            "m3.cap2048.n_no_event_per_policy",
+            _m2d["excluded_no_measured_event"]["random"],
+            f"{_m2r} :: excluded_no_measured_event.random",
+            "b2048 traces per policy with no eviction event (unavailable, R.4)",
+        )
     _dr = R17 / "dacc_restricted.json"
     if _dr.exists():
         _drd, _drr = _load(_dr), _dr.relative_to(PROJECT_ROOT)
