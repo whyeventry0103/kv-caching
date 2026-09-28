@@ -118,8 +118,8 @@ The three Meeting #3 problems, and where each stands:
 | Problem | Measured now | Queued (unattended, resumable) | Not yet runnable |
 |---|---|---|---|
 | **1. Divergence/damage vs cache size, exposure/horizon** | Accuracy curve 256→2048 with paired CIs, flips, realized ratios (**COMPLETE**); Q.2 exposure grid + occupancy audit (**COMPLETE**, verdict MIXED); D_acc free-running (budget, onset) grid, 1,200 generations (**FINAL**, §2a; onset effect **not established** once never-compressed traces are excluded, R.17.1.2) | Q.1 direct fork control, 150 conditions (**running**); TV at 512/1024 (summary profiles; also feed the collapse test R.17.1.1) | precision floor and fp32 fork diagnosis (R.17.0.5; being implemented) |
-| **2. Attention maps: M/Δ, GQA collateral, restoration** | Q.3 capture at budget 256 (**FINAL**, 400 conditions; collateral contrast INCONCLUSIVE, M/Δ per policy with CIs, §3a); Q.5 exact-lag (**FINAL**: Random NON-MONOTONE, StreamingLLM FLAT-NULL; 8 eligible problems, exploratory, §3b) | Q.3 capture at 2048, 400 conditions (collateral structurally non-identifying there, R.16.3) — **held** for the v2 schema (R.17.2.1) | restoration redesign (R.17.2.3; being implemented) |
-| **3. SVD/PCA trajectory direction** | Q.6 basis (frozen, k = 64) + projection at budget 256 (**FINAL**, ω contrast PREDICTED, exploratory, §3a) | Q.6 at budget 2048 (same capture, held) with nested k (R.17.2.1) | — |
+| **2. Attention maps: M/Δ, GQA collateral, restoration** | Q.3 capture at budget 256 (**FINAL**, 400 conditions; collateral contrast INCONCLUSIVE, M/Δ per policy with CIs, §3a); Q.5 exact-lag (**FINAL**: Random NON-MONOTONE, StreamingLLM FLAT-NULL; 8 eligible problems, exploratory, §3b) | Q.3 at 2048 **FINAL** (§3c: H3 HOLDS, H2 NEITHER, confirmatory) | restoration redesign (R.17.2.3; being implemented) |
+| **3. SVD/PCA trajectory direction** | Q.6 at budget 256 (**FINAL**, PREDICTED, §3a) and at 2048 (**FINAL**, replication PREDICTED; ordering holds at every k from 8 to 256, §3c) | — | — |
 
 ---
 
@@ -596,6 +596,69 @@ Reproduce:
 python scripts/report_exact_lag.py --runs-root <runs> --run exact-lag-r5 \
     --design configs/experiments/exact_lag_math500_r5.yaml --out <out> --final
 ```
+
+## 3c. Tasks 2/3 at budget 2048 on capture-v2 (FINAL; R.17 confirmatory reads)
+
+Read 2026-09-28 02:50 Dubai by the post-capture-b2048 stage; the R.17 reads
+followed. Artifacts:
+- `results/diag/meeting3/capture_b2048.json`
+- `r17/mdelta_capture-b2048.json`
+- `r17/omega_layers_capture-b2048.json`
+- `r17/capture_v2_extras_capture-b2048.json`
+- figure `figures/meeting3_capture_b2048.{pdf,png}`
+
+**Coverage and controls.** 400/400, controls VALID (layer-0 Δ exactly 0.0), 0
+provenance failures. Budget 2048 is a **46.16%** realized cache (mean prompt
+93.7 + trace 4,343.5).
+- **31 of 100 traces per policy never exceed the budget.** With no eviction
+  event, M, Δ and ω are unavailable, not zero (R.4/R.6). They are excluded by
+  both the registered reader and the R.17 reads, leaving 21 problems and 69
+  traces.
+
+**Registered reads.**
+- **Q.6 ω(Random) − ω(StreamingLLM) = +0.225 [+0.178, +0.273] → PREDICTED.**
+  This is the replication registered in R.17.1.5 of the b256 result
+  (+0.200 [+0.159, +0.234]). Its scope is exploratory: one model, one
+  benchmark (R.6).
+- **Q.3 collateral:** 0 in every condition. At 2048 this is **structurally
+  non-identifying** (R.16.3). It is reported, not read.
+- **H3 (confirmatory): HOLDS.** M(H2O-style) − M(Random) = **−0.119
+  [−0.139, −0.097]**. H2O-style loses the least attended mass (0.0496
+  [0.0302, 0.0713]; Random 0.1690 [0.1309, 0.2072]), yet its free-run damage
+  is not the smallest.
+- **H2 (confirmatory): NEITHER.**
+  - spread(Δ) = 0.0273, above its median CI half-width 0.0234, though narrowly;
+  - spread(M) = 0.119 against 0.024.
+  - Δ varies across policies by about as much as its own uncertainty. The
+    registered "mirror" (small Δ spread, large M spread) is not met, and at
+    b256 it failed clearly.
+
+**Descriptive (mean [95% CI], 21 problems).**
+
+| Policy | M | Δ | Within-group per-head M dispersion (max − min over 7 heads) |
+|---|---|---|---|
+| Random | 0.1690 [0.1309, 0.2072] | 0.0877 [0.0658, 0.1109] | 0.1446 [0.1140, 0.1758] |
+| StreamingLLM | 0.0922 [0.0684, 0.1186] | 0.0868 [0.0592, 0.1182] | 0.1327 [0.1045, 0.1626] |
+| H2O-style | 0.0496 [0.0302, 0.0713] | 0.0717 [0.0488, 0.0975] | 0.0748 [0.0511, 0.1006] |
+| R-KV | 0.0640 [0.0421, 0.0886] | 0.0604 [0.0436, 0.0787] | 0.0895 [0.0649, 0.1166] |
+
+**k-sensitivity of ω (R.17.1.7).**
+- Nested k runs from the k = 256 refit. It passed acceptance: max principal
+  angle 1.46e-4 rad, mean and scale identical.
+- ω(Random) − ω(StreamingLLM) at each k:
+
+  | k | 8 | 16 | 32 | 64 | 128 | 256 |
+  |---|---|---|---|---|---|---|
+  | contrast | +1.079 [+0.863, +1.288] | +0.709 [+0.576, +0.839] | +0.409 [+0.328, +0.490] | +0.225 [+0.178, +0.273] | +0.125 [+0.098, +0.151] | +0.067 [+0.050, +0.082] |
+
+- The ordering holds at every k. The magnitude shrinks as k grows, because ω
+  itself does (Random 12.4 at k = 8 down to 2.24 at k = 256).
+
+**Which component carries ω at 2048 (addendum D).** Unlike b256, no single
+log component differs:
+- log(‖δ⊥‖ / ‖δ∥‖) = +0.065 [+0.042, +0.090];
+- log ‖δ⊥‖ = −0.003 [−0.133, +0.127];
+- log ‖δ∥‖ = −0.067 [−0.187, +0.062].
 
 ## 4. Controls
 

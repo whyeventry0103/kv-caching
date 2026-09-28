@@ -1510,6 +1510,26 @@ Artifacts are under `results/diag/meeting3/r17/`.
   untouched. Adopting it is a pending decision.
 - Page plan: `docs/strategy/ICML2027_PAGE_BUDGET.md`.
 
+### 5f. capture-b2048 on capture-v2: the confirmatory reads (2026-09-28)
+
+Numbers and CIs are in `docs/results/MEETING3_RESULTS.md` §3c. Artifacts:
+- `results/diag/meeting3/capture_b2048.json`
+- `results/diag/meeting3/r17/*_capture-b2048.json`
+
+The registered outcomes, stated plainly:
+- the ω contrast replicates (**PREDICTED**), and its ordering holds at every
+  nested k from 8 to 256;
+- **H3 HOLDS**;
+- **H2 NEITHER** (not the registered mirror; Δ's spread is only just above its
+  half-width);
+- collateral is structurally non-identifying at 2048 and is not read.
+
+A reader bug was found and fixed on the way. Traces with no eviction event
+(31/100 per policy at 2048) had crashed the R.17 reads; they are now excluded
+as unavailable (R.4/R.6), as the registered reader already did. The b256
+numbers are unchanged, and every b256 exclusion count is 0. These literals
+enter the paper only with catalogue entries (the next draft update).
+
 ## 5. Framing discipline (non-negotiable — apply throughout)
 - **Divergence ≠ damage.** ADD / TV / residual are "behavioral-fidelity loss," never "damage."
   Correctness is the only quality arbiter. Carry the **signed flip-mass** (gained vs lost correct
