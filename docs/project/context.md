@@ -24,6 +24,12 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-09-28 20:51 Dubai — one-time owner-requested early start
+  (R.16.6, the third).** tmux `manual-ticks` runs ~/manual_ticks_0928.sh
+  until 2026-09-29 01:40; jobs stop 10:43. t1-tv1024 resumed from 119/200.
+  Then restore-v2, then fork-precision. capture-b2048 is FINAL (R.17
+  confirmatory: omega PREDICTED, H3 HOLDS, H2 NEITHER).
+
   **★★★★★ 2026-09-27 01:50 Dubai — R.17 non-GPU work done; GPU cells
   queued in the requested order.** Queue: q6-basis-fit-k256 ->
   capture2-smoke -> capture-b2048 (capture-v2) -> t1-tv512/1024 -> restore-v2

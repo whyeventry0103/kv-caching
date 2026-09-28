@@ -3544,7 +3544,11 @@ kept.
      bypass from our nightly runs". `~/manual_ticks_0926.sh` ticks until
      2026-09-27 01:40, and every job stops at 10:43 that day.
 
-     These two starts are the only departures from the 01:45–10:45 window:
+     Third owner-requested start, 2026-09-28 20:51 Dubai: "can you start the
+     runs right now". `~/manual_ticks_0928.sh` ticks until 2026-09-29 01:40,
+     and every job stops at 10:43 that day.
+
+     These three starts are the only departures from the 01:45–10:45 window:
      same code path, gates, storage guard and resume semantics. Each start is
      a one-time bypass and authorizes no later one.
    - **Figure path (commit 910d4dc).** Postprocessing published stage
