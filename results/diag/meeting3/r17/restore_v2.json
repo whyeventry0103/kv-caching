@@ -1,0 +1,1554 @@
+{
+  "amendment": "R.17",
+  "n_rows": 200,
+  "per_policy": {
+    "random": {
+      "channels_by_offset_from_trigger": {
+        "full_restore": {
+          "1": {
+            "Delta": {
+              "ci95": [
+                0.14082594586597266,
+                0.16408409390022002
+              ],
+              "mean": 0.15210205942241287
+            },
+            "M": {
+              "ci95": [
+                -2.1311425678557773e-09,
+                1.6852278480951955e-09
+              ],
+              "mean": -2.5634873588945945e-10
+            }
+          },
+          "113": {
+            "Delta": {
+              "ci95": [
+                0.08442727152006618,
+                0.09814967325863627
+              ],
+              "mean": 0.09124416336860686
+            },
+            "M": {
+              "ci95": [
+                -6.327827308104912e-10,
+                3.90575388565741e-09
+              ],
+              "mean": 1.5117666418357495e-09
+            }
+          },
+          "129": {
+            "Delta": {
+              "ci95": [
+                0.08390236720688769,
+                0.09857682846025757
+              ],
+              "mean": 0.09076401534450328
+            },
+            "M": {
+              "ci95": [
+                -1.2281244726932939e-08,
+                1.3497055558499455e-09
+              ],
+              "mean": -4.292574787454614e-09
+            }
+          },
+          "145": {
+            "Delta": {
+              "ci95": [
+                0.08184377048030636,
+                0.10190945645808824
+              ],
+              "mean": 0.09104892009966693
+            },
+            "M": {
+              "ci95": [
+                -2.004160952755129e-09,
+                1.2018812831151793e-09
+              ],
+              "mean": -3.946737488192296e-10
+            }
+          },
+          "161": {
+            "Delta": {
+              "ci95": [
+                0.08478170873994323,
+                0.10276997074712806
+              ],
+              "mean": 0.0930997367199563
+            },
+            "M": {
+              "ci95": [
+                -2.367662019028395e-09,
+                5.345370914371321e-10
+              ],
+              "mean": -8.888439375425418e-10
+            }
+          },
+          "17": {
+            "Delta": {
+              "ci95": [
+                0.11837523596212064,
+                0.13747649421831795
+              ],
+              "mean": 0.12768204916268125
+            },
+            "M": {
+              "ci95": [
+                -7.563240647666268e-10,
+                2.5722019527911213e-09
+              ],
+              "mean": 9.133498306921447e-10
+            }
+          },
+          "177": {
+            "Delta": {
+              "ci95": [
+                0.08240180611201574,
+                0.09644271999232366
+              ],
+              "mean": 0.08887688457304778
+            },
+            "M": {
+              "ci95": [
+                -7.587212159917721e-09,
+                -1.0089562398431914e-09
+              ],
+              "mean": -3.5986998983530193e-09
+            }
+          },
+          "193": {
+            "Delta": {
+              "ci95": [
+                0.07940949440100147,
+                0.09562235045092483
+              ],
+              "mean": 0.08703359533608328
+            },
+            "M": {
+              "ci95": [
+                -2.0099702706502243e-09,
+                1.3148585939881451e-09
+              ],
+              "mean": -3.360731028391843e-10
+            }
+          },
+          "33": {
+            "Delta": {
+              "ci95": [
+                0.10363434435728575,
+                0.1208538914947389
+              ],
+              "mean": 0.11232081550342772
+            },
+            "M": {
+              "ci95": [
+                -2.3074739805261953e-09,
+                1.292686301279434e-09
+              ],
+              "mean": -6.095541369935545e-10
+            }
+          },
+          "49": {
+            "Delta": {
+              "ci95": [
+                0.10357996017837505,
+                0.12240849377658812
+              ],
+              "mean": 0.1121520353844394
+            },
+            "M": {
+              "ci95": [
+                -4.795262440032486e-09,
+                -2.970014634951719e-10
+              ],
+              "mean": -2.2496763295780527e-09
+            }
+          },
+          "65": {
+            "Delta": {
+              "ci95": [
+                0.09639386100625703,
+                0.11151765034758553
+              ],
+              "mean": 0.10315489662158173
+            },
+            "M": {
+              "ci95": [
+                -1.2219936728544961e-09,
+                1.3098458773118438e-09
+              ],
+              "mean": 1.9774050232315974e-11
+            }
+          },
+          "81": {
+            "Delta": {
+              "ci95": [
+                0.09307264327793428,
+                0.10721904523407354
+              ],
+              "mean": 0.09995586625576373
+            },
+            "M": {
+              "ci95": [
+                -9.257979166569691e-10,
+                2.876307310502341e-09
+              ],
+              "mean": 1.0279178977790261e-09
+            }
+          },
+          "97": {
+            "Delta": {
+              "ci95": [
+                0.0882580227177338,
+                0.10554475280705013
+              ],
+              "mean": 0.09606931669605685
+            },
+            "M": {
+              "ci95": [
+                -4.299812377458016e-09,
+                1.0468814586475761e-09
+              ],
+              "mean": -1.6142940962185685e-09
+            }
+          }
+        },
+        "none": {
+          "1": {
+            "Delta": {
+              "ci95": [
+                0.22930548088611213,
+                0.25336719605247565
+              ],
+              "mean": 0.24069136249373616
+            },
+            "M": {
+              "ci95": [
+                0.558039816379148,
+                0.5804385868980299
+              ],
+              "mean": 0.5691871696432668
+            }
+          },
+          "113": {
+            "Delta": {
+              "ci95": [
+                0.21714138117663206,
+                0.24203743744389308
+              ],
+              "mean": 0.22897566286043178
+            },
+            "M": {
+              "ci95": [
+                0.47912023058308967,
+                0.5105092833816472
+              ],
+              "mean": 0.49448345631863627
+            }
+          },
+          "129": {
+            "Delta": {
+              "ci95": [
+                0.23365626509217288,
+                0.25916640202714397
+              ],
+              "mean": 0.24554362027173204
+            },
+            "M": {
+              "ci95": [
+                0.5655473345790857,
+                0.5932858508091331
+              ],
+              "mean": 0.5790903842102529
+            }
+          },
+          "145": {
+            "Delta": {
+              "ci95": [
+                0.22103759050202956,
+                0.24643689149709802
+              ],
+              "mean": 0.23281467567421568
+            },
+            "M": {
+              "ci95": [
+                0.5176417560081944,
+                0.5458947178041045
+              ],
+              "mean": 0.531760458342014
+            }
+          },
+          "161": {
+            "Delta": {
+              "ci95": [
+                0.2278643922881678,
+                0.24977720236486112
+              ],
+              "mean": 0.23880746956343676
+            },
+            "M": {
+              "ci95": [
+                0.5118528215929733,
+                0.5322996562102899
+              ],
+              "mean": 0.5223314674693115
+            }
+          },
+          "17": {
+            "Delta": {
+              "ci95": [
+                0.21566817659370985,
+                0.23779768463005202
+              ],
+              "mean": 0.22606343312636165
+            },
+            "M": {
+              "ci95": [
+                0.5027536655996098,
+                0.5266412794359013
+              ],
+              "mean": 0.5145561622912138
+            }
+          },
+          "177": {
+            "Delta": {
+              "ci95": [
+                0.2201341186109136,
+                0.24081134854673616
+              ],
+              "mean": 0.23020260872819187
+            },
+            "M": {
+              "ci95": [
+                0.48517878168994294,
+                0.5057703415523209
+              ],
+              "mean": 0.4957456368406022
+            }
+          },
+          "193": {
+            "Delta": {
+              "ci95": [
+                0.24119123719038538,
+                0.25666072259431644
+              ],
+              "mean": 0.24881572636248106
+            },
+            "M": {
+              "ci95": [
+                0.573886135171744,
+                0.5932892295236271
+              ],
+              "mean": 0.5834373006937168
+            }
+          },
+          "33": {
+            "Delta": {
+              "ci95": [
+                0.21171145778313827,
+                0.23612601615604945
+              ],
+              "mean": 0.2238375096877996
+            },
+            "M": {
+              "ci95": [
+                0.4842266808319393,
+                0.5124001819677355
+              ],
+              "mean": 0.4983029983242944
+            }
+          },
+          "49": {
+            "Delta": {
+              "ci95": [
+                0.2170314114630437,
+                0.23643157903048662
+              ],
+              "mean": 0.2263886905092809
+            },
+            "M": {
+              "ci95": [
+                0.4799894878348809,
+                0.5083113734560486
+              ],
+              "mean": 0.49434320811211824
+            }
+          },
+          "65": {
+            "Delta": {
+              "ci95": [
+                0.22978587311069806,
+                0.25298676247263163
+              ],
+              "mean": 0.24047587284497687
+            },
+            "M": {
+              "ci95": [
+                0.5608848254787662,
+                0.5854393641874638
+              ],
+              "mean": 0.5732187516691666
+            }
+          },
+          "81": {
+            "Delta": {
+              "ci95": [
+                0.2213318361471119,
+                0.2352991686479765
+              ],
+              "mean": 0.22850968622480564
+            },
+            "M": {
+              "ci95": [
+                0.5140501760992237,
+                0.5396919782247601
+              ],
+              "mean": 0.5278336947316319
+            }
+          },
+          "97": {
+            "Delta": {
+              "ci95": [
+                0.21804015825956224,
+                0.23684099829933117
+              ],
+              "mean": 0.22690532970891727
+            },
+            "M": {
+              "ci95": [
+                0.4933233107384738,
+                0.5172834886692553
+              ],
+              "mean": 0.5051978978269275
+            }
+          }
+        }
+      },
+      "cohort_arms": {
+        "n_ineligible": 0,
+        "n_rows": 92,
+        "per_lag": {
+          "1": {
+            "achieved_lags": [
+              1
+            ],
+            "anchored_on": "trigger_step",
+            "applied_step_range": null,
+            "arms": {
+              "matched": {
+                "effect_ci95": [
+                  -0.00045922497925889803,
+                  0.002812310999308986
+                ],
+                "effect_vs_no_intervention": 0.0011730771491398342,
+                "excludes_zero": false,
+                "n_traces": 91
+              },
+              "random": {
+                "effect_ci95": [
+                  0.007117002725535069,
+                  0.011809778633276348
+                ],
+                "effect_vs_no_intervention": 0.009450634237568527,
+                "excludes_zero": true,
+                "n_traces": 91
+              },
+              "relaxed": {
+                "effect_ci95": [
+                  -0.00034454768710235744,
+                  0.004270244117658555
+                ],
+                "effect_vs_no_intervention": 0.001961149651218335,
+                "excludes_zero": false,
+                "n_traces": 91
+              }
+            },
+            "baseline_mean_divergence": 0.11119411221160268,
+            "classification": "NO RESTORATION",
+            "n_resamples": 2000,
+            "n_traces": 91,
+            "note": "Positive effect = divergence reduced relative to no intervention. Only the 'matched' arm answers the causal question; 'relaxed' is confounded with cache size and is a reference point only. A 'matched' effect that 'random' reproduces shows that any perturbation helps, not that the reinserted tokens were load-bearing.",
+            "requested_lag": 1,
+            "seed": 0,
+            "trigger_step": 0,
+            "window": 1
+          },
+          "16": {
+            "achieved_lags": [
+              16
+            ],
+            "anchored_on": "trigger_step",
+            "applied_step_range": null,
+            "arms": {
+              "matched": {
+                "effect_ci95": [
+                  -0.001523897363803077,
+                  0.0020978299049421185
+                ],
+                "effect_vs_no_intervention": 0.00021995845238875867,
+                "excludes_zero": false,
+                "n_traces": 89
+              },
+              "random": {
+                "effect_ci95": [
+                  0.0072926174093828145,
+                  0.012094599363201645
+                ],
+                "effect_vs_no_intervention": 0.009609220923875549,
+                "excludes_zero": true,
+                "n_traces": 89
+              },
+              "relaxed": {
+                "effect_ci95": [
+                  -0.002028863726701459,
+                  0.002529626889523169
+                ],
+                "effect_vs_no_intervention": 0.00028852978014630974,
+                "excludes_zero": false,
+                "n_traces": 89
+              }
+            },
+            "baseline_mean_divergence": 0.11314278097489704,
+            "classification": "NO RESTORATION",
+            "n_resamples": 2000,
+            "n_traces": 89,
+            "note": "Positive effect = divergence reduced relative to no intervention. Only the 'matched' arm answers the causal question; 'relaxed' is confounded with cache size and is a reference point only. A 'matched' effect that 'random' reproduces shows that any perturbation helps, not that the reinserted tokens were load-bearing.",
+            "requested_lag": 16,
+            "seed": 0,
+            "trigger_step": 0,
+            "window": 1
+          },
+          "256": {
+            "achieved_lags": [
+              256
+            ],
+            "anchored_on": "trigger_step",
+            "applied_step_range": null,
+            "arms": {
+              "matched": {
+                "effect_ci95": [
+                  6.246301024821603e-05,
+                  0.004217285085801398
+                ],
+                "effect_vs_no_intervention": 0.0020615432293997157,
+                "excludes_zero": true,
+                "n_traces": 85
+              },
+              "random": {
+                "effect_ci95": [
+                  0.0068907952982861535,
+                  0.012941230469773806
+                ],
+                "effect_vs_no_intervention": 0.009877028432400096,
+                "excludes_zero": true,
+                "n_traces": 85
+              },
+              "relaxed": {
+                "effect_ci95": [
+                  -0.0031034007110967063,
+                  0.0021179815848729796
+                ],
+                "effect_vs_no_intervention": -0.0004600288024231629,
+                "excludes_zero": false,
+                "n_traces": 85
+              }
+            },
+            "baseline_mean_divergence": 0.13082535547051927,
+            "classification": "NON-SPECIFIC",
+            "n_resamples": 2000,
+            "n_traces": 85,
+            "note": "Positive effect = divergence reduced relative to no intervention. Only the 'matched' arm answers the causal question; 'relaxed' is confounded with cache size and is a reference point only. A 'matched' effect that 'random' reproduces shows that any perturbation helps, not that the reinserted tokens were load-bearing.",
+            "requested_lag": 256,
+            "seed": 0,
+            "trigger_step": 0,
+            "window": 1
+          },
+          "4": {
+            "achieved_lags": [
+              4
+            ],
+            "anchored_on": "trigger_step",
+            "applied_step_range": null,
+            "arms": {
+              "matched": {
+                "effect_ci95": [
+                  -0.001498780383179077,
+                  0.0016408470237137434
+                ],
+                "effect_vs_no_intervention": 7.087927599806396e-05,
+                "excludes_zero": false,
+                "n_traces": 91
+              },
+              "random": {
+                "effect_ci95": [
+                  0.006203689593652956,
+                  0.010916380340761443
+                ],
+                "effect_vs_no_intervention": 0.008565028729755834,
+                "excludes_zero": true,
+                "n_traces": 91
+              },
+              "relaxed": {
+                "effect_ci95": [
+                  -0.0012957878326096725,
+                  0.0035084125403560163
+                ],
+                "effect_vs_no_intervention": 0.0011215567394670743,
+                "excludes_zero": false,
+                "n_traces": 91
+              }
+            },
+            "baseline_mean_divergence": 0.11154230119156804,
+            "classification": "NO RESTORATION",
+            "n_resamples": 2000,
+            "n_traces": 91,
+            "note": "Positive effect = divergence reduced relative to no intervention. Only the 'matched' arm answers the causal question; 'relaxed' is confounded with cache size and is a reference point only. A 'matched' effect that 'random' reproduces shows that any perturbation helps, not that the reinserted tokens were load-bearing.",
+            "requested_lag": 4,
+            "seed": 0,
+            "trigger_step": 0,
+            "window": 1
+          },
+          "64": {
+            "achieved_lags": [
+              64
+            ],
+            "anchored_on": "trigger_step",
+            "applied_step_range": null,
+            "arms": {
+              "matched": {
+                "effect_ci95": [
+                  -0.0029742776232021483,
+                  0.0012662714835638992
+                ],
+                "effect_vs_no_intervention": -0.0008555263349443013,
+                "excludes_zero": false,
+                "n_traces": 88
+              },
+              "random": {
+                "effect_ci95": [
+                  0.008186870906002985,
+                  0.013717305213315984
+                ],
+                "effect_vs_no_intervention": 0.010923056078454979,
+                "excludes_zero": true,
+                "n_traces": 88
+              },
+              "relaxed": {
+                "effect_ci95": [
+                  -0.004419397540654137,
+                  0.0007517662248354779
+                ],
+                "effect_vs_no_intervention": -0.0017890974948312236,
+                "excludes_zero": false,
+                "n_traces": 88
+              }
+            },
+            "baseline_mean_divergence": 0.11754505278504651,
+            "classification": "NO RESTORATION",
+            "n_resamples": 2000,
+            "n_traces": 88,
+            "note": "Positive effect = divergence reduced relative to no intervention. Only the 'matched' arm answers the causal question; 'relaxed' is confounded with cache size and is a reference point only. A 'matched' effect that 'random' reproduces shows that any perturbation helps, not that the reinserted tokens were load-bearing.",
+            "requested_lag": 64,
+            "seed": 0,
+            "trigger_step": 0,
+            "window": 1
+          }
+        },
+        "sweep": {
+          "effects": [
+            0.0011730771491398342,
+            7.087927599806396e-05,
+            0.00021995845238875867,
+            -0.0008555263349443013,
+            0.0020615432293997157
+          ],
+          "helps_at_lag": {
+            "1": false,
+            "16": false,
+            "256": true,
+            "4": false,
+            "64": false
+          },
+          "lags": [
+            1,
+            4,
+            16,
+            64,
+            256
+          ],
+          "monotone_decreasing": false,
+          "n_points": 5,
+          "verdict": "NON-MONOTONE"
+        }
+      },
+      "eligibility": {
+        "eligible": {
+          "fc_accuracy": {
+            "ci95": [
+              0.7083333333333334,
+              0.9583333333333334
+            ],
+            "mean": 0.84375,
+            "n_problems": 24
+          },
+          "fc_truncation": {
+            "ci95": [
+              0.0,
+              0.11458333333333333
+            ],
+            "mean": 0.041666666666666664
+          },
+          "median_trace_tokens": 2933.0,
+          "n_problems": 24,
+          "n_traces": 92,
+          "problems": [
+            "test/algebra/1098.json",
+            "test/algebra/1349.json",
+            "test/algebra/1837.json",
+            "test/algebra/2036.json",
+            "test/algebra/2193.json",
+            "test/algebra/2427.json",
+            "test/algebra/2584.json",
+            "test/geometry/434.json",
+            "test/intermediate_algebra/1000.json",
+            "test/intermediate_algebra/1197.json",
+            "test/intermediate_algebra/134.json",
+            "test/intermediate_algebra/1994.json",
+            "test/intermediate_algebra/607.json",
+            "test/number_theory/1032.json",
+            "test/number_theory/515.json",
+            "test/number_theory/572.json",
+            "test/number_theory/737.json",
+            "test/prealgebra/1139.json",
+            "test/prealgebra/1622.json",
+            "test/precalculus/1199.json",
+            "test/precalculus/1303.json",
+            "test/precalculus/807.json",
+            "test/precalculus/927.json",
+            "test/precalculus/990.json"
+          ]
+        },
+        "ineligible": {
+          "fc_accuracy": {
+            "ci95": [
+              1.0,
+              1.0
+            ],
+            "mean": 1.0,
+            "n_problems": 3
+          },
+          "fc_truncation": {
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "mean": 0.0
+          },
+          "median_trace_tokens": 672.5,
+          "n_problems": 3,
+          "n_traces": 8,
+          "problems": [
+            "test/geometry/248.json",
+            "test/prealgebra/1622.json",
+            "test/precalculus/807.json"
+          ]
+        }
+      },
+      "full_restore": {
+        "R_fs": {
+          "ci95": [
+            0.3203587529213585,
+            0.3582473200904118
+          ],
+          "n_problems": 24,
+          "n_resamples_used": 2000,
+          "n_traces": 91,
+          "ratio": 0.3377754594282003
+        },
+        "branch": "MIXED",
+        "n_traces": 91
+      }
+    },
+    "streamingllm": {
+      "channels_by_offset_from_trigger": {
+        "full_restore": {
+          "1": {
+            "Delta": {
+              "ci95": [
+                0.11374724408025422,
+                0.1388566460975978
+              ],
+              "mean": 0.12561638437806064
+            },
+            "M": {
+              "ci95": [
+                -1.5617356704200117e-09,
+                1.3697684063002633e-09
+              ],
+              "mean": -1.4521687954234498e-10
+            }
+          },
+          "113": {
+            "Delta": {
+              "ci95": [
+                0.07821204419919273,
+                0.08958992458688693
+              ],
+              "mean": 0.08354698889940794
+            },
+            "M": {
+              "ci95": [
+                -1.5022749258517027e-10,
+                4.097477789818412e-09
+              ],
+              "mean": 1.928592623225908e-09
+            }
+          },
+          "129": {
+            "Delta": {
+              "ci95": [
+                0.07862796967980565,
+                0.08834410407946543
+              ],
+              "mean": 0.08335714870508315
+            },
+            "M": {
+              "ci95": [
+                -7.521052142520447e-10,
+                1.473517826687442e-09
+              ],
+              "mean": 3.5502978010463935e-10
+            }
+          },
+          "145": {
+            "Delta": {
+              "ci95": [
+                0.0792759653230037,
+                0.0973198666099398
+              ],
+              "mean": 0.08690889026368653
+            },
+            "M": {
+              "ci95": [
+                -1.6044935494317941e-09,
+                1.4714049413058663e-09
+              ],
+              "mean": -2.140431797933704e-11
+            }
+          },
+          "161": {
+            "Delta": {
+              "ci95": [
+                0.08200514084871559,
+                0.09513302730816316
+              ],
+              "mean": 0.08814909000209319
+            },
+            "M": {
+              "ci95": [
+                -5.036971313753927e-10,
+                2.5315497242311306e-09
+              ],
+              "mean": 1.0181503286912994e-09
+            }
+          },
+          "17": {
+            "Delta": {
+              "ci95": [
+                0.10001482048530652,
+                0.11630024865423495
+              ],
+              "mean": 0.10756959153479241
+            },
+            "M": {
+              "ci95": [
+                -1.1958540606370141e-09,
+                2.2372104351544354e-09
+              ],
+              "mean": 5.345360959143455e-10
+            }
+          },
+          "177": {
+            "Delta": {
+              "ci95": [
+                0.07770044428599206,
+                0.08808511880990755
+              ],
+              "mean": 0.08260106920634927
+            },
+            "M": {
+              "ci95": [
+                -1.915728380305175e-09,
+                7.89540408109311e-10
+              ],
+              "mean": -5.776128776039704e-10
+            }
+          },
+          "193": {
+            "Delta": {
+              "ci95": [
+                0.07849766488260006,
+                0.09755484660918083
+              ],
+              "mean": 0.08720476112966213
+            },
+            "M": {
+              "ci95": [
+                -1.030339074357958e-09,
+                2.302146021458272e-09
+              ],
+              "mean": 6.541181984292311e-10
+            }
+          },
+          "33": {
+            "Delta": {
+              "ci95": [
+                0.08885763597439988,
+                0.10594365944797617
+              ],
+              "mean": 0.09688107350048662
+            },
+            "M": {
+              "ci95": [
+                -7.745421191229169e-10,
+                2.056646996461378e-09
+              ],
+              "mean": 6.224405017059565e-10
+            }
+          },
+          "49": {
+            "Delta": {
+              "ci95": [
+                0.08853110775990423,
+                0.10075854026015602
+              ],
+              "mean": 0.09430720084186299
+            },
+            "M": {
+              "ci95": [
+                -3.963724123016921e-09,
+                9.070108336761804e-10
+              ],
+              "mean": -1.116409689507072e-09
+            }
+          },
+          "65": {
+            "Delta": {
+              "ci95": [
+                0.08601389861521763,
+                0.09947167133635497
+              ],
+              "mean": 0.09239593933977182
+            },
+            "M": {
+              "ci95": [
+                -6.209075420057714e-10,
+                2.183339962363324e-09
+              ],
+              "mean": 6.78661861095572e-10
+            }
+          },
+          "81": {
+            "Delta": {
+              "ci95": [
+                0.08473396292492186,
+                0.09396630580655285
+              ],
+              "mean": 0.08946721013894098
+            },
+            "M": {
+              "ci95": [
+                -3.70649263619756e-10,
+                2.847533753426689e-09
+              ],
+              "mean": 1.3251588114650805e-09
+            }
+          },
+          "97": {
+            "Delta": {
+              "ci95": [
+                0.08253486505897839,
+                0.09807420621828421
+              ],
+              "mean": 0.08942605435778017
+            },
+            "M": {
+              "ci95": [
+                -1.9035845215722553e-09,
+                1.5783037879752978e-09
+              ],
+              "mean": -2.2546770276418104e-10
+            }
+          }
+        },
+        "none": {
+          "1": {
+            "Delta": {
+              "ci95": [
+                0.11114279184022009,
+                0.13419916632535336
+              ],
+              "mean": 0.12225800008690428
+            },
+            "M": {
+              "ci95": [
+                0.2228889900697617,
+                0.2492493680273626
+              ],
+              "mean": 0.23592168141003064
+            }
+          },
+          "113": {
+            "Delta": {
+              "ci95": [
+                0.12317693737263437,
+                0.14717604955547445
+              ],
+              "mean": 0.135158567752071
+            },
+            "M": {
+              "ci95": [
+                0.21960610930303423,
+                0.25109984288186143
+              ],
+              "mean": 0.2361195368100039
+            }
+          },
+          "129": {
+            "Delta": {
+              "ci95": [
+                0.11969618958149415,
+                0.14099274672099413
+              ],
+              "mean": 0.13026359916451233
+            },
+            "M": {
+              "ci95": [
+                0.23822619144422266,
+                0.2673221874699396
+              ],
+              "mean": 0.2528597560082008
+            }
+          },
+          "145": {
+            "Delta": {
+              "ci95": [
+                0.12486418356448191,
+                0.14080276412243534
+              ],
+              "mean": 0.13257982319087855
+            },
+            "M": {
+              "ci95": [
+                0.23803028160159193,
+                0.2596907226446395
+              ],
+              "mean": 0.24897175522646794
+            }
+          },
+          "161": {
+            "Delta": {
+              "ci95": [
+                0.13289426611091973,
+                0.15716160104299584
+              ],
+              "mean": 0.1449341245721111
+            },
+            "M": {
+              "ci95": [
+                0.2457675942042399,
+                0.2676669350171107
+              ],
+              "mean": 0.25706221086217
+            }
+          },
+          "17": {
+            "Delta": {
+              "ci95": [
+                0.1113036183343779,
+                0.13209733982789443
+              ],
+              "mean": 0.12111584383611834
+            },
+            "M": {
+              "ci95": [
+                0.21216849833061655,
+                0.24039227358898932
+              ],
+              "mean": 0.22594684628411268
+            }
+          },
+          "177": {
+            "Delta": {
+              "ci95": [
+                0.12611264005138922,
+                0.14783478047609114
+              ],
+              "mean": 0.13672550396817285
+            },
+            "M": {
+              "ci95": [
+                0.22855177425709183,
+                0.24753678509769664
+              ],
+              "mean": 0.23810842942949087
+            }
+          },
+          "193": {
+            "Delta": {
+              "ci95": [
+                0.13052321443891352,
+                0.1445465652190799
+              ],
+              "mean": 0.13743912147326645
+            },
+            "M": {
+              "ci95": [
+                0.25082713806454743,
+                0.2714755176141533
+              ],
+              "mean": 0.2609460254306979
+            }
+          },
+          "33": {
+            "Delta": {
+              "ci95": [
+                0.11069262813474606,
+                0.1316847041896489
+              ],
+              "mean": 0.12129412114431727
+            },
+            "M": {
+              "ci95": [
+                0.20781230196700476,
+                0.23682892336122072
+              ],
+              "mean": 0.2227103630388488
+            }
+          },
+          "49": {
+            "Delta": {
+              "ci95": [
+                0.1144543163391063,
+                0.13525580862118486
+              ],
+              "mean": 0.12495141476392746
+            },
+            "M": {
+              "ci95": [
+                0.2131050320052069,
+                0.23990264840124706
+              ],
+              "mean": 0.22670781297612908
+            }
+          },
+          "65": {
+            "Delta": {
+              "ci95": [
+                0.1157289591716281,
+                0.13229858646948178
+              ],
+              "mean": 0.12382757952871053
+            },
+            "M": {
+              "ci95": [
+                0.2354562871318887,
+                0.2541774898002456
+              ],
+              "mean": 0.24509432629981476
+            }
+          },
+          "81": {
+            "Delta": {
+              "ci95": [
+                0.12229588228769393,
+                0.1430364564407177
+              ],
+              "mean": 0.13330184465915423
+            },
+            "M": {
+              "ci95": [
+                0.23112577858975983,
+                0.25757753940221545
+              ],
+              "mean": 0.24541542045901424
+            }
+          },
+          "97": {
+            "Delta": {
+              "ci95": [
+                0.12212341653607188,
+                0.1370836534659334
+              ],
+              "mean": 0.12983867857768755
+            },
+            "M": {
+              "ci95": [
+                0.22362978229740826,
+                0.24744684564638955
+              ],
+              "mean": 0.23623543706286462
+            }
+          }
+        }
+      },
+      "cohort_arms": {
+        "n_ineligible": 0,
+        "n_rows": 92,
+        "per_lag": {
+          "1": {
+            "achieved_lags": [
+              1
+            ],
+            "anchored_on": "trigger_step",
+            "applied_step_range": null,
+            "arms": {
+              "matched": {
+                "effect_ci95": [
+                  -0.00193107597579433,
+                  0.004189713939941612
+                ],
+                "effect_vs_no_intervention": 0.0010948863494011159,
+                "excludes_zero": false,
+                "n_traces": 91
+              },
+              "random": {
+                "effect_ci95": [
+                  0.0071093211308590415,
+                  0.014094936625514597
+                ],
+                "effect_vs_no_intervention": 0.010518878010888756,
+                "excludes_zero": true,
+                "n_traces": 91
+              },
+              "relaxed": {
+                "effect_ci95": [
+                  -0.0005383298977686147,
+                  0.00490788108188237
+                ],
+                "effect_vs_no_intervention": 0.0022324634273482116,
+                "excludes_zero": false,
+                "n_traces": 91
+              }
+            },
+            "baseline_mean_divergence": 0.09809392836897506,
+            "classification": "NO RESTORATION",
+            "n_resamples": 2000,
+            "n_traces": 91,
+            "note": "Positive effect = divergence reduced relative to no intervention. Only the 'matched' arm answers the causal question; 'relaxed' is confounded with cache size and is a reference point only. A 'matched' effect that 'random' reproduces shows that any perturbation helps, not that the reinserted tokens were load-bearing.",
+            "requested_lag": 1,
+            "seed": 0,
+            "trigger_step": 0,
+            "window": 1
+          },
+          "16": {
+            "achieved_lags": [
+              16
+            ],
+            "anchored_on": "trigger_step",
+            "applied_step_range": null,
+            "arms": {
+              "matched": {
+                "effect_ci95": [
+                  -0.0015139408199679031,
+                  0.004859333434441649
+                ],
+                "effect_vs_no_intervention": 0.0016851503914352979,
+                "excludes_zero": false,
+                "n_traces": 89
+              },
+              "random": {
+                "effect_ci95": [
+                  0.007469390263761528,
+                  0.014639889509647072
+                ],
+                "effect_vs_no_intervention": 0.01091479637240124,
+                "excludes_zero": true,
+                "n_traces": 89
+              },
+              "relaxed": {
+                "effect_ci95": [
+                  -0.001710159908122946,
+                  0.004531721823600809
+                ],
+                "effect_vs_no_intervention": 0.0013321165837430983,
+                "excludes_zero": false,
+                "n_traces": 89
+              }
+            },
+            "baseline_mean_divergence": 0.10100240295128861,
+            "classification": "NO RESTORATION",
+            "n_resamples": 2000,
+            "n_traces": 89,
+            "note": "Positive effect = divergence reduced relative to no intervention. Only the 'matched' arm answers the causal question; 'relaxed' is confounded with cache size and is a reference point only. A 'matched' effect that 'random' reproduces shows that any perturbation helps, not that the reinserted tokens were load-bearing.",
+            "requested_lag": 16,
+            "seed": 0,
+            "trigger_step": 0,
+            "window": 1
+          },
+          "256": {
+            "achieved_lags": [
+              256
+            ],
+            "anchored_on": "trigger_step",
+            "applied_step_range": null,
+            "arms": {
+              "matched": {
+                "effect_ci95": [
+                  -0.004229776760994856,
+                  0.002645299697603342
+                ],
+                "effect_vs_no_intervention": -0.0008792639488517055,
+                "excludes_zero": false,
+                "n_traces": 85
+              },
+              "random": {
+                "effect_ci95": [
+                  0.004972850942400863,
+                  0.012219586685372071
+                ],
+                "effect_vs_no_intervention": 0.008399394931815539,
+                "excludes_zero": true,
+                "n_traces": 85
+              },
+              "relaxed": {
+                "effect_ci95": [
+                  -0.004944674840968249,
+                  0.0020716807593886676
+                ],
+                "effect_vs_no_intervention": -0.0015669791648977467,
+                "excludes_zero": false,
+                "n_traces": 85
+              }
+            },
+            "baseline_mean_divergence": 0.11012226983506397,
+            "classification": "NO RESTORATION",
+            "n_resamples": 2000,
+            "n_traces": 85,
+            "note": "Positive effect = divergence reduced relative to no intervention. Only the 'matched' arm answers the causal question; 'relaxed' is confounded with cache size and is a reference point only. A 'matched' effect that 'random' reproduces shows that any perturbation helps, not that the reinserted tokens were load-bearing.",
+            "requested_lag": 256,
+            "seed": 0,
+            "trigger_step": 0,
+            "window": 1
+          },
+          "4": {
+            "achieved_lags": [
+              4
+            ],
+            "anchored_on": "trigger_step",
+            "applied_step_range": null,
+            "arms": {
+              "matched": {
+                "effect_ci95": [
+                  -0.002238386862857322,
+                  0.00422629650801935
+                ],
+                "effect_vs_no_intervention": 0.000991042954649101,
+                "excludes_zero": false,
+                "n_traces": 91
+              },
+              "random": {
+                "effect_ci95": [
+                  0.006528627882527459,
+                  0.014178444480023629
+                ],
+                "effect_vs_no_intervention": 0.010350136487549297,
+                "excludes_zero": true,
+                "n_traces": 91
+              },
+              "relaxed": {
+                "effect_ci95": [
+                  -0.0005706005666359356,
+                  0.00485794043278583
+                ],
+                "effect_vs_no_intervention": 0.0021249571427205765,
+                "excludes_zero": false,
+                "n_traces": 91
+              }
+            },
+            "baseline_mean_divergence": 0.09885810995244997,
+            "classification": "NO RESTORATION",
+            "n_resamples": 2000,
+            "n_traces": 91,
+            "note": "Positive effect = divergence reduced relative to no intervention. Only the 'matched' arm answers the causal question; 'relaxed' is confounded with cache size and is a reference point only. A 'matched' effect that 'random' reproduces shows that any perturbation helps, not that the reinserted tokens were load-bearing.",
+            "requested_lag": 4,
+            "seed": 0,
+            "trigger_step": 0,
+            "window": 1
+          },
+          "64": {
+            "achieved_lags": [
+              64
+            ],
+            "anchored_on": "trigger_step",
+            "applied_step_range": null,
+            "arms": {
+              "matched": {
+                "effect_ci95": [
+                  -0.001745410050120462,
+                  0.005457086408777815
+                ],
+                "effect_vs_no_intervention": 0.0017568699266371918,
+                "excludes_zero": false,
+                "n_traces": 88
+              },
+              "random": {
+                "effect_ci95": [
+                  0.007603182032568839,
+                  0.015696002410782006
+                ],
+                "effect_vs_no_intervention": 0.011579475771116053,
+                "excludes_zero": true,
+                "n_traces": 88
+              },
+              "relaxed": {
+                "effect_ci95": [
+                  -0.0055061963878293456,
+                  0.0024430841151490954
+                ],
+                "effect_vs_no_intervention": -0.0015105489975964094,
+                "excludes_zero": false,
+                "n_traces": 88
+              }
+            },
+            "baseline_mean_divergence": 0.10602154014686654,
+            "classification": "NO RESTORATION",
+            "n_resamples": 2000,
+            "n_traces": 88,
+            "note": "Positive effect = divergence reduced relative to no intervention. Only the 'matched' arm answers the causal question; 'relaxed' is confounded with cache size and is a reference point only. A 'matched' effect that 'random' reproduces shows that any perturbation helps, not that the reinserted tokens were load-bearing.",
+            "requested_lag": 64,
+            "seed": 0,
+            "trigger_step": 0,
+            "window": 1
+          }
+        },
+        "sweep": {
+          "effects": [
+            0.0010948863494011159,
+            0.000991042954649101,
+            0.0016851503914352979,
+            0.0017568699266371918,
+            -0.0008792639488517055
+          ],
+          "helps_at_lag": {
+            "1": false,
+            "16": false,
+            "256": false,
+            "4": false,
+            "64": false
+          },
+          "lags": [
+            1,
+            4,
+            16,
+            64,
+            256
+          ],
+          "monotone_decreasing": false,
+          "n_points": 5,
+          "verdict": "FLAT-NULL"
+        }
+      },
+      "eligibility": {
+        "eligible": {
+          "fc_accuracy": {
+            "ci95": [
+              0.7083333333333334,
+              0.9583333333333334
+            ],
+            "mean": 0.84375,
+            "n_problems": 24
+          },
+          "fc_truncation": {
+            "ci95": [
+              0.0,
+              0.11458333333333333
+            ],
+            "mean": 0.041666666666666664
+          },
+          "median_trace_tokens": 2933.0,
+          "n_problems": 24,
+          "n_traces": 92,
+          "problems": [
+            "test/algebra/1098.json",
+            "test/algebra/1349.json",
+            "test/algebra/1837.json",
+            "test/algebra/2036.json",
+            "test/algebra/2193.json",
+            "test/algebra/2427.json",
+            "test/algebra/2584.json",
+            "test/geometry/434.json",
+            "test/intermediate_algebra/1000.json",
+            "test/intermediate_algebra/1197.json",
+            "test/intermediate_algebra/134.json",
+            "test/intermediate_algebra/1994.json",
+            "test/intermediate_algebra/607.json",
+            "test/number_theory/1032.json",
+            "test/number_theory/515.json",
+            "test/number_theory/572.json",
+            "test/number_theory/737.json",
+            "test/prealgebra/1139.json",
+            "test/prealgebra/1622.json",
+            "test/precalculus/1199.json",
+            "test/precalculus/1303.json",
+            "test/precalculus/807.json",
+            "test/precalculus/927.json",
+            "test/precalculus/990.json"
+          ]
+        },
+        "ineligible": {
+          "fc_accuracy": {
+            "ci95": [
+              1.0,
+              1.0
+            ],
+            "mean": 1.0,
+            "n_problems": 3
+          },
+          "fc_truncation": {
+            "ci95": [
+              0.0,
+              0.0
+            ],
+            "mean": 0.0
+          },
+          "median_trace_tokens": 672.5,
+          "n_problems": 3,
+          "n_traces": 8,
+          "problems": [
+            "test/geometry/248.json",
+            "test/prealgebra/1622.json",
+            "test/precalculus/807.json"
+          ]
+        }
+      },
+      "full_restore": {
+        "R_fs": {
+          "ci95": [
+            0.2785380898912258,
+            0.31685097035527904
+          ],
+          "n_problems": 24,
+          "n_resamples_used": 2000,
+          "n_traces": 91,
+          "ratio": 0.2969048641973089
+        },
+        "branch": "MIXED",
+        "n_traces": 91
+      }
+    }
+  },
+  "read": "R.17.2.3 restoration redesigned",
+  "reproduce": "python scripts/report_r17.py --runs-root /home/sk10741/kvcache-storage/runs restore",
+  "status_counts": {
+    "random": {
+      "INELIGIBLE: no eviction at or after the trigger": 8,
+      "READ": 92
+    },
+    "streamingllm": {
+      "INELIGIBLE: no eviction at or after the trigger": 8,
+      "READ": 92
+    }
+  }
+}

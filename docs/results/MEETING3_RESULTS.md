@@ -8,6 +8,15 @@ artifact when this file was written. Review evidence (gate outputs, remote test 
 parity, queue dry-run, remote-only data list):
 [`meeting3_evidence/`](meeting3_evidence/README.md).
 
+**Status, 2026-09-29 03:20 Dubai. Tier 2 is complete.**
+- restore-v2 FINAL at 200/200: full self-restoration is **MIXED** for both
+  policies (R_fs 0.338 Random, 0.297 StreamingLLM), and the cohort arms repeat
+  the exact-lag labels on 24 problems (§3d).
+- fork-precision FINAL: the validity gate FAILS by 0.3% (§4a).
+- Storage re-measured after Tier 2: 69.449 GiB of 72.
+- Tier 3 (Llama-8B) is still held; releasing it needs the owner's go-ahead
+  in-session.
+
 **Status, 2026-09-27 11:00 Dubai.** Q.1 fork control FINAL (all
 TOLERANCE-DEGENERATE; the gap distribution is reported in §4). capture-v2 smoke
 PASSED. The k = 256 basis is frozen and accepted. capture-b2048 is at 380/400
@@ -118,7 +127,7 @@ The three Meeting #3 problems, and where each stands:
 | Problem | Measured now | Queued (unattended, resumable) | Not yet runnable |
 |---|---|---|---|
 | **1. Divergence/damage vs cache size, exposure/horizon** | Accuracy curve 256→2048 with paired CIs, flips, realized ratios (**COMPLETE**); Q.2 exposure grid + occupancy audit (**COMPLETE**, verdict MIXED); D_acc free-running (budget, onset) grid, 1,200 generations (**FINAL**, §2a; onset effect **not established** once never-compressed traces are excluded, R.17.1.2) | Q.1 direct fork control, 150 conditions (**running**); TV at 512/1024 (summary profiles; also feed the collapse test R.17.1.1) | precision floor and fp32 fork diagnosis (R.17.0.5; being implemented) |
-| **2. Attention maps: M/Δ, GQA collateral, restoration** | Q.3 capture at budget 256 (**FINAL**, 400 conditions; collateral contrast INCONCLUSIVE, M/Δ per policy with CIs, §3a); Q.5 exact-lag (**FINAL**: Random NON-MONOTONE, StreamingLLM FLAT-NULL; 8 eligible problems, exploratory, §3b) | Q.3 at 2048 **FINAL** (§3c: H3 HOLDS, H2 NEITHER, confirmatory) | restoration redesign (R.17.2.3; being implemented) |
+| **2. Attention maps: M/Δ, GQA collateral, restoration** | Q.3 capture at budget 256 (**FINAL**, 400 conditions; collateral contrast INCONCLUSIVE, M/Δ per policy with CIs, §3a); Q.5 exact-lag (**FINAL**: Random NON-MONOTONE, StreamingLLM FLAT-NULL; 8 eligible problems, exploratory, §3b) | Q.3 at 2048 **FINAL** (§3c: H3 HOLDS, H2 NEITHER, confirmatory) | restoration redesign restore-v2 **FINAL** (§3d: full self-restoration MIXED for both policies; cohort arms NON-MONOTONE / FLAT-NULL on 24 problems) |
 | **3. SVD/PCA trajectory direction** | Q.6 at budget 256 (**FINAL**, PREDICTED, §3a) and at 2048 (**FINAL**, replication PREDICTED; ordering holds at every k from 8 to 256, §3c) | — | — |
 
 ---
@@ -704,6 +713,97 @@ log component differs:
 - log(‖δ⊥‖ / ‖δ∥‖) = +0.065 [+0.042, +0.090];
 - log ‖δ⊥‖ = −0.003 [−0.133, +0.127];
 - log ‖δ∥‖ = −0.067 [−0.187, +0.062].
+
+## 3d. Task 2 — restoration redesigned, restore-v2 (R.17.2.3; FINAL)
+
+Read 2026-09-29 03:16 Dubai. Artifact: `results/diag/meeting3/r17/restore_v2.json`
+(`python scripts/report_r17.py --runs-root <runs> restore`). 200/200 rows
+(25 problems × 4 seeds × Random/StreamingLLM), budget 256, trigger = the first
+prune at or after decode step 1024 (addendum C).
+
+**Eligibility, stated before any effect.**
+
+| Set | Problems / traces | Full-cache accuracy | Full-cache truncation | Median trace tokens |
+|---|---|---|---|---|
+| Eligible (READ) | 24 / 92 | 0.844 [0.708, 0.958] | 0.042 [0.000, 0.115] | 2,933 |
+| Ineligible ("no eviction at or after the trigger") | 3 / 8 | 1.000 | 0.000 | 672.5 |
+
+- Identical for both policies. Two problems have both eligible and
+  ineligible seeds, so the problem counts sum to 27.
+- One READ trace (seed 47, 1,075 trace tokens) is too short for the 200-forward
+  window after the trigger. It is out of the full-restoration and lag-1 reads
+  (91 traces), per addendum C. Longer lags lose more (89 / 88 / 85 traces at
+  16 / 64 / 256), as R.10.
+- Compared with exact-lag (8 problems, full-cache accuracy 0.594), this read
+  covers nearly the whole subset.
+
+**Full self-restoration: MIXED for both policies.** R_fs = full-restoration
+window-mean TV ÷ no-intervention window-mean TV over forwards [e + 1, e + 201),
+with equal-problem CI (91 traces, 24 problems):
+
+| Policy | R_fs [95% CI] | Branch |
+|---|---|---|
+| Random | 0.338 [0.320, 0.358] | **MIXED** |
+| StreamingLLM | 0.297 [0.279, 0.317] | **MIXED** |
+
+- Returning *every* evicted entry and stopping eviction removes about two
+  thirds of the divergence over the next 200 forwards. The remaining third is
+  state drift: the returned K/V are the compressed branch's own and M is 0
+  (|mean M| < 1e-8 at every measured point).
+- Both CIs sit well inside (0.10, 0.50). Neither DRIFT DOMINATES nor MASS
+  DOMINATES.
+- The remaining divergence is about a third of the no-intervention level
+  (lag-1 baseline window-mean TV 0.1112 Random, 0.0981 StreamingLLM). That
+  puts it far above the precision floor's mean per-step TV (0.0062, §4a).
+
+**Channels (descriptive; mean [95% CI] at the first forward after the trigger,
+e + 1, and at e + 193).**
+
+| Policy | Arm | M at e+1 | Δ at e+1 | Δ at e+193 |
+|---|---|---|---|---|
+| Random | none | 0.5692 [0.5580, 0.5804] | 0.2407 [0.2293, 0.2534] | 0.2488 |
+| Random | full restore | 0 | 0.1521 [0.1408, 0.1641] | 0.0870 [0.0794, 0.0956] |
+| StreamingLLM | none | 0.2359 [0.2229, 0.2492] | 0.1223 [0.1111, 0.1342] | 0.1374 |
+| StreamingLLM | full restore | 0 | 0.1256 [0.1137, 0.1389] | 0.0872 [0.0785, 0.0976] |
+
+- After full restoration, Δ (shape distortion from the drifted queries) is
+  not zero. It falls over the window, to about 0.087 for both policies by
+  e + 193, while the no-intervention Δ stays flat or rises.
+- For StreamingLLM, restoring everything does not change Δ at e + 1; it
+  only diverges from the no-intervention arm later.
+- This is the measurement the Q.3 cross-instrument prediction (Δ vs M at the
+  reinsertion trigger) was waiting on (§3a). It is descriptive and licenses no
+  causal query-drift claim.
+
+**Cohort arms (as R.10, at the new trigger).** Effect = none − arm window-mean
+TV (positive = divergence reduced), trace-level bootstrap.
+
+| Lag | Traces | Random matched | Random random-reinsert | StreamingLLM matched | StreamingLLM random-reinsert |
+|---|---|---|---|---|---|
+| 1 | 91 | +0.0012 [−0.0005, +0.0028] | +0.0095 [+0.0071, +0.0118] | +0.0011 [−0.0019, +0.0042] | +0.0105 [+0.0071, +0.0141] |
+| 4 | 91 | +0.0001 [−0.0015, +0.0016] | +0.0086 [+0.0062, +0.0109] | +0.0010 [−0.0022, +0.0042] | +0.0104 [+0.0065, +0.0142] |
+| 16 | 89 | +0.0002 [−0.0015, +0.0021] | +0.0096 [+0.0073, +0.0121] | +0.0017 [−0.0015, +0.0049] | +0.0109 [+0.0075, +0.0146] |
+| 64 | 88 | −0.0009 [−0.0030, +0.0013] | +0.0109 [+0.0082, +0.0137] | +0.0018 [−0.0017, +0.0055] | +0.0116 [+0.0076, +0.0157] |
+| 256 | 85 | +0.0021 [+0.0001, +0.0042] | +0.0099 [+0.0069, +0.0129] | −0.0009 [−0.0042, +0.0026] | +0.0084 [+0.0050, +0.0122] |
+
+- **Random: NON-MONOTONE.** The matched arm excludes 0 only at lag 256, and
+  random-reinsert does more there, so it is NON-SPECIFIC. Every other lag is
+  NO RESTORATION.
+- **StreamingLLM: FLAT-NULL.** No lag excludes 0.
+- These are the same labels as exact-lag (§3b), now on 24 problems instead of 8.
+- Returning the 64 *most recently* evicted entries does nothing measurable.
+  Returning 64 *randomly drawn earlier* evictions reduces divergence at every
+  lag for both policies, repeating the §3b lead at full coverage.
+- Every matched effect is below the precision floor's mean per-step TV
+  (0.0062). The random-reinsert effects exceed it by less than 2×.
+
+**Answer to Task 2 (restoration) at this scope.**
+- The trajectory is largely restorable: putting back everything that was
+  evicted removes about two thirds of the divergence.
+- The restorable part is not in the most recently evicted cohort.
+- What cannot be restored, about a third, is carried in the drifted state.
+
+One model, one benchmark, budget 256; exploratory at this scope.
 
 ## 4. Controls
 

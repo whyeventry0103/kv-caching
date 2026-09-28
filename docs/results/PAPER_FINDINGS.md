@@ -1530,6 +1530,27 @@ as unavailable (R.4/R.6), as the registered reader already did. The b256
 numbers are unchanged, and every b256 exclusion count is 0. These literals
 enter the paper only with catalogue entries (the next draft update).
 
+### 5g. restore-v2: restoration redesigned, R.17.2.3 (2026-09-29)
+
+Numbers and CIs are in `docs/results/MEETING3_RESULTS.md` §3d. Artifact:
+`results/diag/meeting3/r17/restore_v2.json`. Trigger at the first prune at or
+after step 1024; 24 of 25 problems eligible (exact-lag had 8).
+
+The registered outcomes, stated plainly:
+- **Full self-restoration: MIXED for both policies.** Returning every evicted
+  entry and stopping eviction removes about two thirds of the divergence; the
+  remaining third is state drift. Neither DRIFT DOMINATES nor MASS DOMINATES.
+- **Cohort arms: Random NON-MONOTONE, StreamingLLM FLAT-NULL**, the same
+  labels as exact-lag, now at near-full coverage. The matched arm is below
+  the precision floor at every lag.
+- Descriptive: random-reinsert of earlier evictions reduces divergence at
+  every lag for both policies, while the most recent cohort does not.
+
+Wording for the paper: "restorable in aggregate, not by the most recent
+cohort," never "restoration works" or "eviction is reversible". Scope: one
+model, one benchmark, budget 256, exploratory. These literals enter the paper
+only with catalogue entries.
+
 ## 5. Framing discipline (non-negotiable — apply throughout)
 - **Divergence ≠ damage.** ADD / TV / residual are "behavioral-fidelity loss," never "damage."
   Correctness is the only quality arbiter. Carry the **signed flip-mass** (gained vs lost correct

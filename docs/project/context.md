@@ -24,6 +24,18 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-09-29 03:20 Dubai — Tier 2 COMPLETE.** restore-v2 FINAL
+  200/200 (read `report_r17.py restore`, artifact
+  `results/diag/meeting3/r17/restore_v2.json`): full self-restoration MIXED,
+  R_fs Random 0.338 [0.320, 0.358], StreamingLLM 0.297 [0.279, 0.317];
+  cohort arms Random NON-MONOTONE (lag 256 only, NON-SPECIFIC), StreamingLLM
+  FLAT-NULL; 24/25 problems eligible, FC acc 0.844 [0.708, 0.958]
+  (MEETING3_RESULTS §3d, PAPER_FINDINGS §5g). fork-precision FINAL, gate FAIL
+  2.006 vs 2.0 (§4a). Storage 69.449/72 GiB. GPUs idle. NEXT: owner go-ahead
+  to remove the three Tier 3 `blocked:` lines (q6-basis-fit-llama8b,
+  capture-llama8b-smoke, capture-llama8b-b256), then sync/push; then the P.1
+  draft update with the landed reads, and P.3/P.4.
+
   **★★★★★ 2026-09-28 20:51 Dubai — one-time owner-requested early start
   (R.16.6, the third).** tmux `manual-ticks` runs ~/manual_ticks_0928.sh
   until 2026-09-29 01:40; jobs stop 10:43. t1-tv1024 resumed from 119/200.
