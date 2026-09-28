@@ -36,9 +36,9 @@ were moved, not deleted, and the next tick passed:
   `results/diag/meeting3/figures/`, pinned by
   `test_standalone_figure_script_defaults_outside_the_source_tree`.
 
-## R.16.6 — the two owner-requested out-of-window starts
+## R.16.6 — the owner-requested out-of-window starts
 
-Both starts ran the unchanged orchestrator through a tmux loop using
+Every start ran the unchanged orchestrator through a tmux loop using
 `--max-hours-override`, which bypasses only the window check. Copies of the
 scripts are in this directory with their sha256:
 
