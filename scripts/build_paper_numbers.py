@@ -1630,6 +1630,39 @@ def build_catalogue() -> list[Entry]:
                     f"{_atr} :: cells.{_cell}.ci95[{_i}]",
                     f"AUC-TV CI bound, {_cell}",
                 )
+    _fp = R17 / "fork_precision.json"
+    if _fp.exists() and _load(_fp).get("status") == "READ":
+        _fpd, _fpr = _load(_fp), _fp.relative_to(PROJECT_ROOT)
+        for _iv, _fl in _fpd["floor"].items():
+            add(
+                f"m3.fp.floor.i{_iv}.p95",
+                _fl["p95"],
+                f"{_fpr} :: floor.{_iv}.p95",
+                f"precision floor: p95 window-max TV, windows of {_iv}",
+            )
+        for _arm, _v in _fpd["gate"]["arms"].items():
+            for _q in ("ratio", "fork_p95_max_tv"):
+                add(
+                    f"m3.fp.{_arm}.{_q}",
+                    _v[_q],
+                    f"{_fpr} :: gate.arms.{_arm}.{_q}",
+                    f"R.17.0.5 gate {_q}, {_arm}",
+                )
+        for _q in ("mean", "median", "p95", "p99", "max"):
+            add(
+                f"m3.fp.floor_all_steps.{_q}",
+                _fpd["floor_all_steps_tv"][_q],
+                f"{_fpr} :: floor_all_steps_tv.{_q}",
+                f"bf16-vs-fp32 full-cache per-step TV, {_q}",
+            )
+        for _t, _v in _fpd["diagnosis"].items():
+            for _q in ("max_tv", "max_abs_logit", "median_argmax_rank_in_b"):
+                add(
+                    f"m3.fp.diag.{_t}.{_q}",
+                    _v[_q],
+                    f"{_fpr} :: diagnosis.{_t}.{_q}",
+                    f"first-fork diagnosis {_q}, {_t}",
+                )
     _ol = R17 / "omega_layers.json"
     if _ol.exists():
         _old, _olr = _load(_ol), _ol.relative_to(PROJECT_ROOT)

@@ -1,5 +1,54 @@
 {
   "amendment": "R.17",
+  "diagnosis": {
+    "bfloat16": {
+      "fork_step": 288,
+      "max_abs_logit": 0.34375,
+      "max_tv": 0.053036242723464966,
+      "median_argmax_rank_in_b": 115,
+      "min_top10_overlap": 9,
+      "n_compared": 33,
+      "top1_agree_all": true
+    },
+    "float32": {
+      "fork_step": 288,
+      "max_abs_logit": 1.621246337890625e-05,
+      "max_tv": 1.2634027370950207e-06,
+      "median_argmax_rank_in_b": 10051,
+      "min_top10_overlap": 10,
+      "n_compared": 33,
+      "top1_agree_all": true
+    }
+  },
+  "diagnosis_label": "IMPLEMENTATION",
+  "floor": {
+    "16": {
+      "max": 0.07233947515487671,
+      "median": 0.02704052533954382,
+      "n_windows": 256,
+      "p95": 0.05012081563472748
+    },
+    "256": {
+      "max": 0.07233947515487671,
+      "median": 0.049985768273472786,
+      "n_windows": 16,
+      "p95": 0.05781204253435135
+    },
+    "64": {
+      "max": 0.07233947515487671,
+      "median": 0.039631351828575134,
+      "n_windows": 64,
+      "p95": 0.056122466921806335
+    }
+  },
+  "floor_all_steps_tv": {
+    "max": 0.07233947515487671,
+    "mean": 0.006163019642913382,
+    "median": 0.00039445843140129,
+    "n": 4096,
+    "p95": 0.02733825519680977,
+    "p99": 0.041555020958185196
+  },
   "fork_distribution": {
     "random-i16": {
       "first_abs_logit": {
@@ -454,8 +503,50 @@
       ]
     }
   },
+  "gate": {
+    "arms": {
+      "random-i16": {
+        "floor_p95_window_max_tv": 0.05012081563472748,
+        "fork_p95_max_tv": 0.030901,
+        "passed": true,
+        "ratio": 0.6165302700818273
+      },
+      "random-i256": {
+        "floor_p95_window_max_tv": 0.05781204253435135,
+        "fork_p95_max_tv": 0.115944,
+        "passed": false,
+        "ratio": 2.0055337074642745
+      },
+      "random-i64": {
+        "floor_p95_window_max_tv": 0.056122466921806335,
+        "fork_p95_max_tv": 0.0623143,
+        "passed": true,
+        "ratio": 1.1103271723037504
+      },
+      "streamingllm-i16": {
+        "floor_p95_window_max_tv": 0.05012081563472748,
+        "fork_p95_max_tv": 0.0,
+        "passed": true,
+        "ratio": 0.0
+      },
+      "streamingllm-i256": {
+        "floor_p95_window_max_tv": 0.05781204253435135,
+        "fork_p95_max_tv": 0.060421,
+        "passed": true,
+        "ratio": 1.045128270015688
+      },
+      "streamingllm-i64": {
+        "floor_p95_window_max_tv": 0.056122466921806335,
+        "fork_p95_max_tv": 0.0,
+        "passed": true,
+        "ratio": 0.0
+      }
+    },
+    "multiple": 2.0,
+    "verdict": "FAIL"
+  },
   "layers_and_vocabulary": "fork-control-v1 stores per-fork first/max TV and |logit| only; per-layer and per-vocabulary location come from the one-trace diagnosis below",
   "read": "R.17.0.5 direct fork control: distribution and precision-floor gate",
   "reproduce": "python scripts/report_r17.py --runs-root /home/sk10741/kvcache-storage/runs fork-precision",
-  "status": "PENDING: fork-precision has not run"
+  "status": "READ"
 }

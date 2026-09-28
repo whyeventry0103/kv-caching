@@ -717,9 +717,74 @@ log component differs:
 | Capture: topk gather equality, layer-0 key identity at mapped positions, bitwise pre-eviction, full/full = 0, layer-0 Δ ≤ 1e-5 | **PASSED** on tiny Qwen2 and on the real model (`capture-smoke`, 2026-09-25). VALID on all 400 capture-b256 rows; layer-0 Δ maximum exactly 0.0 |
 | Collateral positive control (7 heads, 320 candidates, B = 256) | **PASSED**: production tensor path and reference both return 1.0 (`tests/test_capture.py`, pinned stack, GPU-host CPU, 2026-09-27) |
 | Q.1 removal-anchored negative control | **INVALID for identification** (R.2); computed for the record from the fork control's arm A |
-| Q.1 direct fork control (validity gate, R.17.0.5) | **FINAL, 150/150** (`results/diag/meeting3/fork_control.json`). TOLERANCE-DEGENERATE in all six cells (INCONCLUSIVE, R.11): the replay control is exactly 0. Selection agreement 1.0. Gap distribution (`r17/fork_precision.json`): StreamingLLM `max_tv` median and p95 are 0.0 at I=16/64; Random `max_tv` median 0.048 (I=64) and 0.062 (I=256), tail in the last trace-position quartile. **Precision-floor gate and fp32 diagnosis pending** (fork-precision, queued fourth) |
+| Q.1 direct fork control (validity gate, R.17.0.5) | **FINAL, 150/150** (`results/diag/meeting3/fork_control.json`). TOLERANCE-DEGENERATE in all six cells (INCONCLUSIVE, R.11): the replay control is exactly 0. Selection agreement 1.0. Gap distribution (`r17/fork_precision.json`): StreamingLLM `max_tv` median and p95 are 0.0 at I=16/64; Random `max_tv` median 0.048 (I=64) and 0.062 (I=256), tail in the last trace-position quartile. **Precision-floor gate: **FAIL** (Random I=256, ratio 2.006 against 2.0); fp32 diagnosis **IMPLEMENTATION** by threshold (§4a) |
 | capture-v2 smoke (R.17.2.1) | **PASSED** 2026-09-27: full/full 0, layer-0 Δ 0.0, 0 non-finite, 21 events per policy. Nested-basis acceptance passed (max principal angle 1.46e-4 rad ≤ 1e-3; mean and scale identical), so nested k up to 256 is licensed. The smoke's H2O-style M equals the v1 b256 row for the same trace |
 | Q.5 identity repair (true evicted K/V per layer) | **PASSED** on CPU and on every real exact-lag row: K and V bitwise gates in all 200 rows, 0 content failures |
+
+## 4a. The validity gate (R.17.0.5): FAIL by a hair, and the precision floor
+
+Read 2026-09-29 02:08 Dubai. Artifact: `results/diag/meeting3/r17/fork_precision.json`.
+Raw output: `runs/fork-precision/fork_precision.json` on the GPU host.
+
+**Precision floor.**
+- Measured on 10 frozen-subset problems at seed 23: bf16 vs fp32, full-cache
+  teacher forcing, 4,096 sampled steps.
+- Per-step next-token TV: mean 0.0062, median 0.0004, p95 0.0273, p99 0.0416,
+  max 0.0723.
+- 95th percentile of the window maximum: 0.0501 (16-step windows), 0.0561
+  (64), 0.0578 (256).
+
+**Gate** (PASS iff fork p95 `max_tv` ≤ 2 × floor, for all six arms):
+
+| Arm | Fork p95 max_tv | Floor p95 | Ratio | Passed |
+|---|---|---|---|---|
+| Random I=16 | 0.0309 | 0.0501 | 0.617 | yes |
+| Random I=64 | 0.0623 | 0.0561 | 1.110 | yes |
+| **Random I=256** | **0.1159** | **0.0578** | **2.006** | **no** |
+| StreamingLLM I=16 | 0.0000 | 0.0501 | 0.000 | yes |
+| StreamingLLM I=64 | 0.0000 | 0.0561 | 0.000 | yes |
+| StreamingLLM I=256 | 0.0604 | 0.0578 | 1.045 | yes |
+
+- **Verdict: FAIL.** One arm (Random, I=256) exceeds the fixed multiple, by
+  0.3%.
+- Per R.17.0.5(e): every Meeting #3 divergence number carries this floor, and
+  eviction locking keeps the R.2 wording ("detected, not established").
+
+**fp32 diagnosis (one trace, first removal at step 288, 33 compared steps).**
+
+| | Max TV (A vs B) | Max \|logit\| | Median vocab rank of the max-difference token (arm B) | Top-1 agrees | Min top-10 overlap |
+|---|---|---|---|---|---|
+| bf16 | 0.0530 | 0.344 | 115 | all | 9 |
+| fp32 | 1.26e-6 | 1.6e-5 | 10,051 | all | 10 |
+
+- **Registered label: IMPLEMENTATION.** The fp32 max TV of 1.26e-6 exceeds the
+  pre-set 1e-6 threshold; the |logit| criterion (≤ 1e-3) is met.
+- **The implementation checks the branch requires**, recorded from the code
+  (`kvcache.fork_control`):
+  - *Positions:* both arms receive identical `cache_position`.
+  - *RoPE:* compaction gathers already-rotated cached keys, with no
+    re-rotation; new tokens are rotated at the same absolute position in both
+    arms.
+  - *Mask:* the same builder puts −inf on the masked columns for every query
+    head of the group; arm A has those columns removed instead.
+  - *Kernel path:* both arms use the same model and the same default attention
+    implementation.
+  - **The only difference found is the key/value length, and so the
+    reduction length.**
+- The gap shrinks by about four orders of magnitude in fp32, and in fp32 the
+  largest remaining difference sits deep in the vocabulary tail (rank ~10k).
+  Both are consistent with reduction-order rounding. The label stays as
+  registered.
+
+**What the floor means for the Meeting #3 divergence numbers.**
+- The floor is bf16 against fp32, so it bounds precision noise from above for
+  bf16-against-bf16 comparisons.
+- Its mean per-step TV (0.0062) is:
+  - about 1/17 of budget-256 divergence (AUC-TV 0.1075 Random);
+  - about half of budget-2048 divergence (0.0128 Random, 0.0186 StreamingLLM);
+  - above the exact-lag restoration effects (~0.003).
+- So the budget-2048 TV magnitudes and the restoration differences are **not
+  established above precision at this floor**. The budget-256 divergence is.
 
 ## 5. Held units and resolved decisions
 
