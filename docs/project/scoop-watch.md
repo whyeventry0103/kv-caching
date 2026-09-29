@@ -106,3 +106,63 @@ binary and this sweep did not fit it. Recommend splitting it into "has the
 instrument" and "computes the decomposition", because a paper can now do the
 first without the second, and recording only "not foreclosing" would have lost
 exactly the information that mattered.
+
+---
+
+## 2026-09-30 — sweep (Claude Code): no foreclosure, but a new mandatory control
+
+**Read depth, stated once:** arXiv abstract pages and the HTML full text, read
+through a summarizing fetch. Nothing below is cited in the paper yet. Each
+paper needs a direct read of its tables before any number is quoted in the
+`.tex`.
+
+Foreclosure test, split as the last sweep recommended: (a) has the instrument
+(fixed-trace / teacher-forced replay against free running), (b) computes the
+accuracy-scale decomposition.
+
+| Paper | (a) instrument | (b) decomposition | Verdict |
+|---|---|---|---|
+| 2609.03430 "Random Attention: Rethinking KV Cache Eviction for Efficient Reasoning" (Wang et al., Salesforce; v1 2026-09-03, v2 2026-09-28) | no | no | NOT foreclosing; **changes what a reviewer will ask** |
+| 2609.16617 "Divergence Timing and Cumulative Disagreement under KV-Cache Eviction" (Luo, Yu; v1 2026-09-15) | no (paired free-running coupling) | token-mismatch decomposition only, no accuracy | NOT foreclosing; cite |
+| 2606.26875 "Information-Aware KV Cache Compression for Long Reasoning" (InfoKV; 2026-06-25) | no | no | method paper; cite in the methods strand |
+
+### 2609.03430 Random Attention — corroborates, and exposes a gap in our design
+
+- *Claim:* uniform random eviction per attention head, with the prompt always
+  kept, matches the strongest selector on four models (Qwen3-4B/14B/32B,
+  Phi-4-reasoning) and six reasoning tasks at about 4× compression. Reported
+  MATH500 on Qwen3-4B: 0.874 against full attention 0.939.
+- *Their explanation:* the prompt is the fragile part of the cache, and most of
+  the gap between selectors is whether the selector happened to keep it; the
+  trace is redundant in text and across heads.
+- *Corroborates:* Random-beats-recency is no longer ours alone (VaSE and this
+  paper). PAPER_FINDINGS §1's "ours alone" wording needs restating.
+- **Gap in our design, verified on the host 2026-09-30:** none of our presses
+  protects the prompt. `kvpress.RandomPress` scores every position uniformly;
+  `StreamingLLMPress` keeps `n_sink = 4` and the recent window, so the question
+  is evicted once the trace outgrows the budget. At budget 256 (3–5% realized)
+  a reviewer who has read this paper can attribute our residual to prompt loss
+  under an extreme budget.
+- **Consequence:** a prompt-protected arm through the full decomposition is now
+  a required control, not an upside experiment. It is not registered yet.
+
+### 2609.16617 Divergence timing — adjacent vocabulary, different object
+
+- Exact decomposition of expected token mismatch into a first-mismatch term
+  plus post-divergence exposure × mismatch rate. Llama-3.1-8B-Instruct and
+  Qwen2.5-7B-Instruct; eviction at prefill only; 128 generated tokens; HELMET
+  and RULER documents; no task accuracy; no reasoning models.
+- Overlaps our Q.2 / collapse vocabulary ("exposure", "divergence timing") but
+  not our estimand. Cite in §2.3 beside VeriCache.
+
+### Venue dates, as found
+
+- ICLR 2027: abstract 2026-09-18, paper 2026-09-25 (iclr.cc call for papers).
+  **Passed.**
+- ICML 2027: no dates found on icml.cc as of 2026-09-30. A search hit giving
+  22 January 2027 came from a non-ICML domain and is **unverified**. Target
+  venue: proposed ICML 2027, pending supervisor confirmation.
+
+**VERDICT: no foreclosure. The residual as a defined estimand, the bracket, and
+the two-literature reconciliation remain unclaimed. The prompt-protection
+control is the new priority.**
