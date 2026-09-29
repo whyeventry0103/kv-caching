@@ -41,7 +41,7 @@ what was observed, not what was intended.
 |---|---|---|---|
 | S.0 | Amendment S registered | committed before any S output | DONE `2fd421f`; addendum A |
 | S.1 build | prompt-protected presses, runners, smoke gate, queue | host tests pass; scheduler dry-run selects pp-smoke | DONE `1e188ce` (25 host tests) |
-| S.1 smoke | `pp-smoke-PASS.json` | marker exists, gate verifies | PENDING (first job of the 2026-09-30 window) |
+| S.1 smoke | `pp-smoke-PASS.json` | marker exists, gate verifies | PASSED 2026-09-30 02:07; identity control exactly 0.0 for both presses on all three traces; archived `results/diag/amendment-s/pp_smoke.json` |
 | S.1 cells | grid/readout/reverse at 256; grid/readout at 1024 | 800/800 each | QUEUED |
 | S.1 read | `report_s.py protection`, `consequence`; `report_m4` bracket | FINAL artifacts under results/diag/amendment-s/ | reader DONE and tested; nothing read |
 | S.2 build | restore-v3 | host tests pass | DONE `2b6e454` (determinism vs restore-v2 exact on the tiny model) |

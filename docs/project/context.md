@@ -24,6 +24,22 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-09-30 02:07 Dubai — S.1 smoke PASSED; S cells running.**
+  `pp-smoke-PASS.json` written 02:07, archived as
+  `results/diag/amendment-s/pp_smoke.json` (sha256 `6d68a74c…`, host commit
+  `15778e3`). All registered checks held on the three rule-selected traces
+  (prompt lengths 353 / 52 / 17): pre-eviction TV exactly 0; post-prune cache
+  equal to the target (417 for the long prompt under the relaxed-budget rule,
+  256 otherwise); prompt kept at every prune in all 28 layers; both free
+  generations pruned. **Identity control: max |TV difference| = 0.0 for both
+  presses on all three traces**, so on the real model the unprotected
+  StreamingLLM press is four sinks plus recency and the unprotected Random
+  press is reproduced exactly (S addendum A, facts 1 and 2). restore-v3
+  launched 01:55 on GPU1 (11 rows by 02:07); grid-pp256 is next on GPU0.
+  SYNC DEFERRED on purpose: this note is committed and pushed but NOT synced,
+  so the host source tree stays at `15778e3` while the S cells write rows.
+  Sync with the next change the host needs (e.g. the Tier 3 release).
+
   **★★★★★ 2026-09-30 00:30 Dubai — Amendment S registered, built and
   queued (owner instruction 2026-09-30: "start all the 4 tasks").** Trigger:
   scoop-watch 2026-09-30 read arXiv:2609.03430 (prompt is the fragile part of

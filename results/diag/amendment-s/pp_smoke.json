@@ -1,0 +1,241 @@
+{
+  "failures": [],
+  "gate": "S.1 prompt-protected press smoke",
+  "identity": {
+    "basis_npz_sha256": null,
+    "config_name": "pp_smoke_s1",
+    "config_sha256": "a3be4d0b0e7fe6d9295c4a43b09077d04a50761b67b6ff79b5bb82dd763283e3",
+    "implementation_id": "09f41063a653a1524c8ff241c5cf6cf7bb6a9c232c281dafb30f24b9bdfda476",
+    "input_manifest_sha256": "c9df04ea43c4d3ca05cbb7322a47105c26f1407e8e081d01bd70acb173ce87fd",
+    "kind": "pp",
+    "model_revision": "916b56a44061fd5cd7d6a8fb632557ed4f724f60",
+    "reference_run": "math500-fc-powered-merged",
+    "schema": "provenance-v1"
+  },
+  "passed": true,
+  "records": [
+    {
+      "expected_target": 417,
+      "first_effective_prune": 128,
+      "identity_max_abs_diff": 0.0,
+      "kind": "replay",
+      "mean_tv": 0.11937008262658667,
+      "n_layers": 28,
+      "n_replayed": 1536,
+      "pid": "test/prealgebra/1646.json",
+      "post_prune_sizes": [
+        417
+      ],
+      "pre_eviction_max_tv": 0.0,
+      "press": "random_pp",
+      "prompt_len": 353,
+      "protect": {
+        "base": "random",
+        "budget": 256,
+        "budget_relaxed": true,
+        "n_layers_pruned": 28,
+        "n_prunes": 616,
+        "prompt_len": 353,
+        "prompt_len_forced": false,
+        "target": 417
+      },
+      "protection_max_abs_diff": 0.9997796799470962,
+      "wallclock_s": 200.59351310599595
+    },
+    {
+      "expected_target": 417,
+      "first_effective_prune": 128,
+      "identity_max_abs_diff": 0.0,
+      "kind": "replay",
+      "mean_tv": 0.11337399764916867,
+      "n_layers": 28,
+      "n_replayed": 1536,
+      "pid": "test/prealgebra/1646.json",
+      "post_prune_sizes": [
+        417
+      ],
+      "pre_eviction_max_tv": 0.0,
+      "press": "streamingllm_pp",
+      "prompt_len": 353,
+      "protect": {
+        "base": "streamingllm",
+        "budget": 256,
+        "budget_relaxed": true,
+        "n_layers_pruned": 28,
+        "n_prunes": 616,
+        "prompt_len": 353,
+        "prompt_len_forced": false,
+        "target": 417
+      },
+      "protection_max_abs_diff": 0.9993167116481345,
+      "wallclock_s": 200.81023218203336
+    },
+    {
+      "expected_target": 256,
+      "first_effective_prune": 256,
+      "identity_max_abs_diff": 0.0,
+      "kind": "replay",
+      "mean_tv": 0.04313727469703629,
+      "n_layers": 28,
+      "n_replayed": 1536,
+      "pid": "test/algebra/2584.json",
+      "post_prune_sizes": [
+        256
+      ],
+      "pre_eviction_max_tv": 0.0,
+      "press": "random_pp",
+      "prompt_len": 52,
+      "protect": {
+        "base": "random",
+        "budget": 256,
+        "budget_relaxed": false,
+        "n_layers_pruned": 28,
+        "n_prunes": 560,
+        "prompt_len": 52,
+        "prompt_len_forced": false,
+        "target": 256
+      },
+      "protection_max_abs_diff": 0.9715721225365996,
+      "wallclock_s": 199.67099216394126
+    },
+    {
+      "expected_target": 256,
+      "first_effective_prune": 256,
+      "identity_max_abs_diff": 0.0,
+      "kind": "replay",
+      "mean_tv": 0.05218473458416157,
+      "n_layers": 28,
+      "n_replayed": 1536,
+      "pid": "test/algebra/2584.json",
+      "post_prune_sizes": [
+        256
+      ],
+      "pre_eviction_max_tv": 0.0,
+      "press": "streamingllm_pp",
+      "prompt_len": 52,
+      "protect": {
+        "base": "streamingllm",
+        "budget": 256,
+        "budget_relaxed": false,
+        "n_layers_pruned": 28,
+        "n_prunes": 560,
+        "prompt_len": 52,
+        "prompt_len_forced": false,
+        "target": 256
+      },
+      "protection_max_abs_diff": 0.9700022074393928,
+      "wallclock_s": 200.12167056836188
+    },
+    {
+      "expected_target": 256,
+      "first_effective_prune": 256,
+      "identity_max_abs_diff": 0.0,
+      "kind": "replay",
+      "mean_tv": 0.06211762014066816,
+      "n_layers": 28,
+      "n_replayed": 1536,
+      "pid": "test/algebra/1098.json",
+      "post_prune_sizes": [
+        256
+      ],
+      "pre_eviction_max_tv": 0.0,
+      "press": "random_pp",
+      "prompt_len": 17,
+      "protect": {
+        "base": "random",
+        "budget": 256,
+        "budget_relaxed": false,
+        "n_layers_pruned": 28,
+        "n_prunes": 560,
+        "prompt_len": 17,
+        "prompt_len_forced": false,
+        "target": 256
+      },
+      "protection_max_abs_diff": 0.9993212015251629,
+      "wallclock_s": 200.03380250185728
+    },
+    {
+      "expected_target": 256,
+      "first_effective_prune": 256,
+      "identity_max_abs_diff": 0.0,
+      "kind": "replay",
+      "mean_tv": 0.060951329655925014,
+      "n_layers": 28,
+      "n_replayed": 1536,
+      "pid": "test/algebra/1098.json",
+      "post_prune_sizes": [
+        256
+      ],
+      "pre_eviction_max_tv": 0.0,
+      "press": "streamingllm_pp",
+      "prompt_len": 17,
+      "protect": {
+        "base": "streamingllm",
+        "budget": 256,
+        "budget_relaxed": false,
+        "n_layers_pruned": 28,
+        "n_prunes": 560,
+        "prompt_len": 17,
+        "prompt_len_forced": false,
+        "target": 256
+      },
+      "protection_max_abs_diff": 0.9912432297132909,
+      "wallclock_s": 200.04126050136983
+    },
+    {
+      "kind": "generation",
+      "n_tokens": 700,
+      "pid": "test/algebra/2584.json",
+      "press": "random_pp",
+      "prompt_len": 52,
+      "protect": {
+        "base": "random",
+        "budget": 256,
+        "budget_relaxed": false,
+        "n_layers_pruned": 28,
+        "n_prunes": 196,
+        "prompt_len": 52,
+        "prompt_len_forced": false,
+        "target": 256
+      }
+    },
+    {
+      "kind": "generation",
+      "n_tokens": 700,
+      "pid": "test/algebra/2584.json",
+      "press": "streamingllm_pp",
+      "prompt_len": 52,
+      "protect": {
+        "base": "streamingllm",
+        "budget": 256,
+        "budget_relaxed": false,
+        "n_layers_pruned": 28,
+        "n_prunes": 196,
+        "prompt_len": 52,
+        "prompt_len_forced": false,
+        "target": 256
+      }
+    }
+  ],
+  "runmeta": {
+    "commit": "15778e33182324c4acaee76ae75873046160e0a9",
+    "source_tree_hash": "371ff1d5247156bcccb4c4158777c5e399f2faeee58f79c976e50624516810f7"
+  },
+  "selected": [
+    {
+      "pid": "test/prealgebra/1646.json",
+      "prompt_len": 353,
+      "trace_len": 7607
+    },
+    {
+      "pid": "test/algebra/2584.json",
+      "prompt_len": 52,
+      "trace_len": 2568
+    },
+    {
+      "pid": "test/algebra/1098.json",
+      "prompt_len": 17,
+      "trace_len": 1597
+    }
+  ]
+}
