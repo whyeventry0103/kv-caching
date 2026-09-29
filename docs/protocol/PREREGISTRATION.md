@@ -4108,3 +4108,39 @@ No further GPU time goes to the fork control and phase locking, the
 onset/exposure grid, the collateral contrast, or the cohort lag sweep. Their
 results stand as registered and move to the appendix. Eviction locking keeps
 the R.2 wording ("detected, not established").
+
+**S addendum A (2026-09-30, before any S row exists): readers, and three facts
+found while building.**
+- *Readers.* `kvcache.metrics.s_reads` and `scripts/report_s.py` compute the
+  S.1 and S.2 estimands exactly as registered above. They were written and
+  tested on synthetic rows before any S row existed. A read refuses an
+  incomplete cell; a `--partial` read carries no label.
+- *The S.1 residual is paired per condition.* It is free-run minus readout
+  correctness on the conditions whose reference trace has an answer boundary
+  (`report_m4`'s complete-case layer). That set is a property of the shared
+  reference trace, so it is the same in the protected and unprotected cells;
+  the reader raises if it is not.
+- *Fact 1: the unprotected StreamingLLM press is recency only where tied top-k
+  keeps position order.* `StreamingLLMPress` scores by cache slot, and
+  `ScorerPress` gathers top-k indices in score order. Probed on the host: tied
+  top-k returns slots in position order on CUDA at every production size
+  (k_len ≥ 100; targets 256 to 2048), and does not at tiny sizes or on CPU.
+  The S.1 smoke's identity control (protected length forced to 4, exact TV
+  equality with the unprotected press on the real model) is the check that our
+  StreamingLLM cells are sinks plus recency. If it fails, that is a finding
+  about every existing StreamingLLM cell and is reported as such before any
+  S.1 read.
+- *Fact 2: the unprotected Random press reuses one score vector.* It reseeds
+  its generator at every prune, so the score depends on the cache slot, and
+  slots are in score order after the first prune. Eviction is therefore a
+  fixed pseudo-random pattern over slots, not a fresh uniform draw each time.
+  Random+prompt keeps this mechanism unchanged, so protection is the only
+  difference between the cells.
+- *Fact 3, for S.4.* `configs/models.yaml` already pins Qwen3-4B
+  (`1cfa9a72…`). Rendered offline from the cached tokenizer on the pinned stack:
+  with `enable_thinking: true` the prompt ends at `<|im_start|>assistant\n`
+  and the model emits `<think>` itself; with `false` the template writes an
+  empty think block. The missing `<think>` prefix recorded in 2026-07 is
+  therefore the template's design, not a rendering fault. What remains for
+  S.4 is storage, and a full-cache pilot to confirm the answer-boundary
+  detector on traces that carry their own `<think>`.

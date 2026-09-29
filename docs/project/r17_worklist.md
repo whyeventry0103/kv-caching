@@ -34,3 +34,20 @@ what was observed, not what was intended.
 | P.1 | mechanism draft | pinned, not compiled | DONE `ddadc57`; the section 4.4 discrepancy is recorded |
 | P.2 | ICML page budget | doc | DONE `ddadc57` |
 | P.3/P.4 | gates, report | | after the GPU cells |
+
+## Amendment S (started 2026-09-30, owner instruction "start all the 4 tasks")
+
+| Item | What | Done when | Status |
+|---|---|---|---|
+| S.0 | Amendment S registered | committed before any S output | DONE `2fd421f`; addendum A |
+| S.1 build | prompt-protected presses, runners, smoke gate, queue | host tests pass; scheduler dry-run selects pp-smoke | DONE `1e188ce` (25 host tests) |
+| S.1 smoke | `pp-smoke-PASS.json` | marker exists, gate verifies | PENDING (first job of the 2026-09-30 window) |
+| S.1 cells | grid/readout/reverse at 256; grid/readout at 1024 | 800/800 each | QUEUED |
+| S.1 read | `report_s.py protection`, `consequence`; `report_m4` bracket | FINAL artifacts under results/diag/amendment-s/ | reader DONE and tested; nothing read |
+| S.2 build | restore-v3 | host tests pass | DONE `2b6e454` (determinism vs restore-v2 exact on the tiny model) |
+| S.2 cell | restore-v3, 200 rows | 200/200 | QUEUED (last) |
+| S.2 read | `report_s.py origin` | determinism control passes, then ratios | reader DONE and tested; nothing read |
+| S.3 | Tier 3 Llama release | three `blocked:` lines removed | BLOCKED on a permission the session does not have |
+| S.4 | native reasoning model | storage decided by the owner | HELD |
+| P.1 | mechanism draft update with landed reads (b2048, collapse, gate FAIL, restore-v2) | literals pinned, PDF x2 | TODO |
+| P.4 | final report table | | after the S cells |

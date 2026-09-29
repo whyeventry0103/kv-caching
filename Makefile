@@ -127,6 +127,8 @@ dryrun:
 	$(PYTHON) scripts/run_fork_precision.py --config configs/experiments/fork_precision_r17.yaml --dry-run
 	$(PYTHON) scripts/run_restore_v3.py --config configs/experiments/restore_v3_math500_s2.yaml --dry-run
 	$(PYTHON) scripts/pp_smoke.py --config configs/experiments/pp_smoke_s1.yaml --dry-run
+	$(PYTHON) scripts/report_s.py --runs-root runs --dry-run protection
+	$(PYTHON) scripts/report_s.py --runs-root runs --dry-run origin
 	$(PYTHON) scripts/run_grid_pp.py --config configs/experiments/grid_math500_pp256_s1.yaml --dry-run
 	$(PYTHON) scripts/run_grid_pp.py --config configs/experiments/grid_math500_pp1024_s1.yaml --dry-run
 	$(PYTHON) scripts/run_replay_pp.py --config configs/experiments/readout_math500_pp256_s1.yaml --dry-run

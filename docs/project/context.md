@@ -24,6 +24,26 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-09-30 00:30 Dubai — Amendment S registered, built and
+  queued (owner instruction 2026-09-30: "start all the 4 tasks").** Trigger:
+  scoop-watch 2026-09-30 read arXiv:2609.03430 (prompt is the fragile part of
+  the cache); none of our presses protects the prompt, so the residual is open
+  to a prompt-loss reading. (1) S.1 prompt-protected decomposition, presses
+  `random_pp` / `streamingllm_pp` (`kvcache.presses.prompt_protect`), budgets
+  256 and 1024. Queue: pp-smoke -> grid-pp256 -> readout-pp256 ->
+  reverse-readout-pp256 -> grid-pp1024 -> readout-pp1024 (5 cells x 800).
+  (2) S.2 restore-v3 (arms frozen/prompt/trace/full), 200 rows, queued last.
+  (3) Tier 3 Llama capture: release conditions met, but the three `blocked:`
+  lines are STILL in configs/nightly_queue.yaml — the session's permission
+  layer refused the edit twice; the owner must remove them or grant it.
+  (4) Qwen3 HELD on storage (2.55 GiB free; Qwen3-4B is already pinned, its
+  template is by design). Readers exist and are tested: `scripts/report_s.py`
+  (protection / consequence / origin). Host tests 40 passed. NOTHING READ YET.
+  NEXT: confirm `pp-smoke-PASS.json` after the 01:45 window opens; if it FAILS
+  on the identity control, read S addendum A fact 1 before anything else. When
+  a cell reaches 800/800: `report_s.py --runs-root ~/kvcache-storage/runs
+  protection --budget 256` on the host, then `report_m4` for the bracket.
+
   **★★★★★ 2026-09-29 03:20 Dubai — Tier 2 COMPLETE.** restore-v2 FINAL
   200/200 (read `report_r17.py restore`, artifact
   `results/diag/meeting3/r17/restore_v2.json`): full self-restoration MIXED,
