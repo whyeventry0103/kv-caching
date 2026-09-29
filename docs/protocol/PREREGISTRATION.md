@@ -3917,3 +3917,194 @@ cross-architecture replication (R.17.3) on DeepSeek-R1-Distill-Llama-8B
 - *When it runs.* The three queue jobs are held (`blocked:`) and released by
   hand only once every Tier 2 cell is complete and storage has been
   re-measured.
+
+---
+
+## Amendment S (2026-09-30): prompt-protected decomposition, restoration by origin, and the cross-model holds — registered BEFORE any of these outcomes exist
+
+Target venue: proposed ICML 2027, pending supervisor confirmation.
+
+**Why now.** The 2026-09-30 scoop-watch sweep (`docs/project/scoop-watch.md`)
+read arXiv:2609.03430, which attributes most of the gap between eviction
+selectors to whether the prompt is kept. Verified on the host the same day:
+none of our presses protects the prompt. `kvpress.RandomPress` scores every
+position; `StreamingLLMPress` keeps `n_sink = 4` and the recent window. The
+residual at budget 256 is therefore open to a prompt-loss reading until a
+prompt-protected arm is run. The owner instructed these runs on 2026-09-30.
+
+Nothing frozen is changed. No existing generation family's source files are
+edited: the new presses live in a new module and are reached through new
+runners, so every existing `implementation_id` is unchanged.
+
+### S.1 Prompt-protected decomposition
+
+**Presses (new module `kvcache.presses.prompt_protect`).**
+- **Random+prompt (`random_pp`).** The unprotected Random press with one
+  change: at every prune, the score of every cache entry whose absolute
+  position is inside the prompt is set to the dtype maximum, in every KV head
+  and layer. Everything else (score generator, seed, top-k, interval) is the
+  unprotected press's own code.
+- **StreamingLLM+prompt (`streamingllm_pp`).** `StreamingLLMPress` with
+  `n_sink` set to the prompt length instead of 4. The four sink tokens are the
+  first four prompt tokens, so they stay protected.
+- *Prompt length* is read by the press from the prefill forward (the whole
+  prompt in one forward, in both `generate` and replay). A first forward that
+  is not a pure prefill raises.
+- *Budget.* The cache target is the nominal budget B **including** the prompt,
+  so protected and unprotected cells hold the same number of entries.
+- *Relaxed-budget rule, fixed here.* If the prompt leaves fewer than 64 trace
+  slots (P > B − 64), the target for that condition is P + 64 and the condition
+  is flagged `budget_relaxed`. On the 100-problem grid the prompt lengths are
+  15 to 353 tokens (median 51.5), so at B = 256 this flags the 3 problems with
+  P = 216, 344 and 353 (12 of 400 conditions per press) and at B = 1024 none.
+- *Live self-check, every prune of every production row.* The press tracks
+  absolute positions per layer and KV head and raises unless every prompt
+  position survives; for StreamingLLM+prompt it also raises unless the retained
+  trace entries are the most recent ones.
+
+**Cells.** MATH-500, R1-Distill-Qwen-7B, the same 100 problems × 4 seeds,
+interval 64 and cap 16,384 as the unprotected cells; reference
+`math500-fc-powered-merged`.
+
+| Cell | Runs | Compared with |
+|---|---|---|
+| B = 256 | free-run grid, forward readout, reverse readout | `grid-diss256-tok`, `readout-diss256-g0/g1`, `reverse-readout-diss256` |
+| B = 1024 | free-run grid, forward readout | `grid-diss1024`, `readout-diss1024` |
+
+Budget 1024 is a 24–28% realized cache on the unprotected cells, the regime
+concurrent work evaluates. The unprotected 1024 cell has no reverse readout,
+so none is run here.
+
+**Gate before any powered row (`pp-smoke`, marker `pp-smoke-PASS.json`).** On
+three reference traces at seed 11 (the longest-prompt, median-prompt and
+shortest-prompt problems among those with at least 1,024 trace tokens), first
+1,536 trace tokens, B = 256:
+1. teacher-forced paired replay under each protected press: pre-eviction TV is
+   exactly 0, at least one prune occurs, the post-prune cache equals the
+   effective target, and the live self-check never raises;
+2. **identity control:** with the protected length forced to 0 (Random) or 4
+   (StreamingLLM), the protected press's per-step TV profile equals the
+   unprotected press's profile exactly;
+3. one free-running generation per press (cap 700 tokens): the prompt length
+   the press read equals the tokenized prompt length, and at least one prune
+   occurred.
+A failure writes `pp-smoke-FAIL.json` and no powered cell launches.
+
+**Estimands (fixed here).** Per press and budget, on the 400 matched
+conditions, truncated generations in the denominator and scored incorrect:
+- free-run accuracy, readout accuracy, total change, readout change and the
+  residual with its problem-clustered 95% CI, exactly as Amendment K
+  (`report_m4`); at B = 256 also the reverse endpoint and bracket;
+- **paired protection contrasts** against the unprotected cell on the same
+  (problem, seed) conditions: Δfree, Δreadout and Δresidual (protected minus
+  unprotected), problem-clustered bootstrap, 2,000 resamples, seed 0;
+- flip masses (harmful, beneficial) and the truncation rate, per cell.
+- **Sensitivity read:** the same quantities with the `budget_relaxed` problems
+  removed from both arms.
+
+**Pre-committed read, per press and budget.**
+- **RESIDUAL PERSISTS** if the protected residual's CI excludes 0.
+- **RESIDUAL NOT DETECTED** if it includes 0. This is "not established at this
+  n," not evidence of no residual.
+- The protection effect on the residual is **SHRINKS** (Δresidual CI above 0),
+  **GROWS** (below 0) or **UNCHANGED** (includes 0).
+- Channel attribution is descriptive: which of Δfree and Δreadout exclude 0.
+
+**Consequence for the paper, decided now.**
+- *A. PERSISTS at both budgets for both presses.* The headline stands, and the
+  protected cells enter the paper as its robustness control.
+- *B. PERSISTS at 256, NOT DETECTED at 1024.* The headline is stated for the
+  extreme budget only. The 4× regime is reported as "not established under
+  prompt protection."
+- *C. NOT DETECTED at both budgets.* The residual is attributable to prompt
+  loss at this scope. The headline is rewritten around that, and the
+  unprotected cells are reported as what they are.
+- *Presses disagree.* Reported per press; no pooled claim.
+- If a protected cell's free-run accuracy is at the floor or the ceiling (both
+  channels floored, or no accuracy left to lose), the residual there is
+  uninformative and is labelled so, as the Llama-Random cell is.
+
+Scope: one model, one benchmark; exploratory at this scope.
+
+### S.2 Restoration by origin (`restore-v3`, new family `restore_v3`)
+
+**Question.** restore-v2 found that returning every evicted entry removes about
+two thirds of the divergence (R_fs 0.338 Random, 0.297 StreamingLLM) while the
+most recent 64 do nothing. Is the restorable part the prompt?
+
+**Design.** Same traces, policies (Random, StreamingLLM), budget 256, trigger
+(first prune at or after step 1024), lag-1 snapshot, 200-forward window and
+identity-checked stash as restore-v2. `restore_v2.py` and `exact_lag.py` are
+not modified. Four arms, each applied immediately before forward e + 1 with
+**eviction switched off for the window in every arm**:
+
+| Arm | Returned to the cache |
+|---|---|
+| `frozen` | nothing |
+| `prompt` | every stashed entry whose absolute position is in the prompt |
+| `trace` | the same number of stashed entries per KV head, drawn uniformly without replacement from non-prompt positions |
+| `full` | every stashed entry (the restore-v2 arm) |
+
+- `frozen` exists because full restoration changes two things at once: it
+  returns entries and it stops eviction. Every ratio below is taken against
+  `frozen`, so stopping eviction is held constant.
+- *Rectangular cache.* Random retains different positions in each KV head, so
+  the number of evicted prompt entries differs by head. Let n be the largest
+  such count over heads and layers. Every head returns all of its stashed
+  prompt entries and is padded to n with its own most recently evicted trace
+  entries. The pad count is recorded per row. `trace` returns n per head.
+- *Gate.* Returned K and V equal the stash bitwise; after `prompt`, every KV
+  head of every layer holds every prompt position exactly once; after `full`,
+  every absolute position exactly once. The run raises otherwise.
+
+**Estimand.** Per policy, with TV the window-mean over forwards [e + 1, e + 201):
+ρ_arm = (TV_frozen − TV_arm) / (TV_frozen − TV_full), a ratio of equal-problem
+means, problem-cluster bootstrap CI, 2,000 resamples, seed 0.
+
+**Pre-committed read.**
+- **UNDEFINED** if the CI of TV_frozen − TV_full includes 0: nothing to apportion.
+- **PROMPT CARRIES IT** if ρ_prompt's CI lower bound ≥ 0.50.
+- **PROMPT MINOR** if its upper bound ≤ 0.20.
+- **PARTIAL** if the CI lies within (0.20, 0.50); **INDETERMINATE** if it
+  straddles a threshold.
+- **Specificity:** ρ_prompt − ρ_trace, paired. PROMPT-SPECIFIC if its CI is
+  above 0, otherwise NON-SPECIFIC (any equal-sized return does as well).
+
+**Controls.**
+- *Determinism:* for every (trace, policy) the `full` arm's and the
+  no-intervention window-mean TV must equal the restore-v2 row's values to
+  within 1e-6. If not, STOP: that is an instrument bug, not a result.
+- *Eligibility* and the eligible subset's full-cache accuracy are reported
+  before any effect, as R.17.2.3.
+- Every effect is reported beside the precision floor (mean per-step TV
+  0.0062, R.17.0.5).
+
+This is divergence, not damage: no accuracy claim follows from S.2.
+
+### S.3 Tier 3 (Llama-8B capture): release conditions met
+
+Addendum E's two conditions hold: every Tier 2 cell is complete, and storage
+was re-measured at 69.449 GiB on 2026-09-29 03:15 Dubai, under the 71 GiB
+usable line. The owner instructed the release on 2026-09-30. The three
+`blocked:` lines are still in `configs/nightly_queue.yaml`: the session's
+permission layer refused the edit twice and it was not worked around. The
+registered reads are unchanged (addendum E).
+
+### S.4 A native reasoning model: intended, HELD
+
+Every model in the paper is an R1 distillation. A model trained to reason
+natively is the generality check a reviewer will ask for first. It is held on
+three things that are the owner's to decide, and no run is registered until
+they are settled:
+1. **Storage.** 2.55 GiB remain of the 72 GiB approval. No model fits.
+2. **A pinned revision** in `configs/models.yaml` (the `TODO(human)` sentinel).
+3. **The chat template.** The 2026-07 probe found that Qwen3's template renders
+   no explicit `<think>` prefix on the pinned stack.
+The cell specification is registered in an addendum before any run.
+
+### S.5 Stopped lines
+
+No further GPU time goes to the fork control and phase locking, the
+onset/exposure grid, the collateral contrast, or the cohort lag sweep. Their
+results stand as registered and move to the appendix. Eviction locking keeps
+the R.2 wording ("detected, not established").
