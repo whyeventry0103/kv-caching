@@ -14,6 +14,8 @@ must match it field for field.
 * ``capture_smoke``: ``capture-smoke-PASS.json`` says ``passed: true`` and its
   identity equals the capture smoke's expected identity, which includes the
   bytes of the VERIFIED basis.
+* ``pp_smoke`` (Amendment S.1): ``pp-smoke-PASS.json`` says ``passed: true`` and
+  its identity equals the prompt-protected smoke's expected identity.
 
 A generation-code change therefore invalidates a gate (the smoke must rerun),
 while reader, figure or documentation edits do not.
@@ -130,6 +132,16 @@ def gate_status(
             model_revision=_revision(cfg, root),
             reference_run=cfg["reference_run_name"],
             basis_npz_sha256=sha,
+            root=root,
+            manifest_path=cfg.get("input_manifest"),
+        )
+    elif kind == "pp_smoke":
+        marker = runs_root / "pp-smoke-PASS.json"
+        want = identity(
+            "pp",
+            cfg,
+            model_revision=_revision(cfg, root),
+            reference_run=cfg["reference_run_name"],
             root=root,
             manifest_path=cfg.get("input_manifest"),
         )

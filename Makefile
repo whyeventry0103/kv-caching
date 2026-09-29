@@ -125,6 +125,12 @@ dryrun:
 	$(PYTHON) scripts/report_onset_grid.py --runs-root runs --arms 0=replay-onset-t0 512=replay-onset-t512 2048=replay-onset-t2048 --out /dev/null --dry-run
 	$(PYTHON) scripts/run_restore_v2.py --config configs/experiments/restore_v2_math500_r17.yaml --dry-run
 	$(PYTHON) scripts/run_fork_precision.py --config configs/experiments/fork_precision_r17.yaml --dry-run
+	$(PYTHON) scripts/pp_smoke.py --config configs/experiments/pp_smoke_s1.yaml --dry-run
+	$(PYTHON) scripts/run_grid_pp.py --config configs/experiments/grid_math500_pp256_s1.yaml --dry-run
+	$(PYTHON) scripts/run_grid_pp.py --config configs/experiments/grid_math500_pp1024_s1.yaml --dry-run
+	$(PYTHON) scripts/run_replay_pp.py --config configs/experiments/readout_math500_pp256_s1.yaml --dry-run
+	$(PYTHON) scripts/run_replay_pp.py --config configs/experiments/readout_math500_pp1024_s1.yaml --dry-run
+	$(PYTHON) scripts/run_replay.py --config configs/experiments/reverse_readout_pp256_s1.yaml --dry-run
 	$(PYTHON) scripts/report_r17.py --runs-root runs --dry-run eligibility
 	$(PYTHON) scripts/report_r17.py --runs-root runs --dry-run dacc-restricted
 	$(PYTHON) scripts/report_r17.py --runs-root runs --dry-run mdelta

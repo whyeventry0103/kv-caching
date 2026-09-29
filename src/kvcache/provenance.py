@@ -81,6 +81,22 @@ GENERATION_SOURCES: dict[str, tuple[str, ...]] = {
         "src/kvcache/models.py",
         "scripts/run_fork_precision.py",
     ),
+    # Amendment S.1: the prompt-protected presses and everything a protected
+    # row passes through. The unprotected runners are listed because the
+    # protected runners execute their ``main`` unchanged.
+    "pp": (
+        "src/kvcache/presses/prompt_protect.py",
+        "src/kvcache/presses/__init__.py",
+        "src/kvcache/generation.py",
+        "src/kvcache/replay.py",
+        "src/kvcache/models.py",
+        "src/kvcache/bank.py",
+        "scripts/run_grid.py",
+        "scripts/run_replay.py",
+        "scripts/run_grid_pp.py",
+        "scripts/run_replay_pp.py",
+        "scripts/pp_smoke.py",
+    ),
     "dacc": (
         "src/kvcache/generation.py",
         "src/kvcache/presses/__init__.py",

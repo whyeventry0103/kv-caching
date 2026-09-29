@@ -1,0 +1,19 @@
+name: readout_math500_pp1024_s1
+stage: replay
+mode: readout
+# Amendment S.1: forward readout of the full-cache reference traces under
+# PROMPT-PROTECTED presses, budget 1024. Runs through scripts/run_replay_pp.py.
+prompt_protected: true
+reference_run_name: math500-fc-powered-merged
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+subset:
+  math500: 100
+presses: [random_pp, streamingllm_pp]
+budgets: [1024]
+seeds: [11, 23, 47, 89]
+compression_interval: 64
+max_answer_tokens: 2048
+estimated_generation_count: 0
+estimated_replay_count: 800
+scale_authorized: true

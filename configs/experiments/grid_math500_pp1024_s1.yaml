@@ -1,0 +1,21 @@
+name: grid_math500_pp1024_s1
+stage: grid
+# Amendment S.1: free-running grid under PROMPT-PROTECTED presses, budget 1024.
+# Matched to the unprotected budget-1024 cell in every other respect (same 100
+# problems, frozen seeds, cap and interval), so prompt protection is the only
+# axis moving. Runs through scripts/run_grid_pp.py; gated on pp-smoke.
+prompt_protected: true
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+subset:
+  math500: 100
+presses: [random_pp, streamingllm_pp]
+budgets: [1024]
+seeds: [11, 23, 47, 89]
+max_new_tokens:
+  math500: 16384
+compression_interval: 64
+estimated_generation_count: 800
+scale_authorized: true
+remote_only: true
+store_token_ids: true

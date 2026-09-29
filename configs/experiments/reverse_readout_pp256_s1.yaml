@@ -1,0 +1,19 @@
+name: reverse_readout_pp256_s1
+stage: replay
+mode: readout
+# Amendment S.1: the prompt-protected free-run traces read out under the FULL
+# cache (the reverse endpoint of the bracket). The reader is unprotected by
+# construction, so this runs through scripts/run_replay.py itself.
+reference_run_name: grid-pp256
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+subset:
+  math500: 100
+presses: [fullcache]
+budgets: [256]
+seeds: [11, 23, 47, 89]
+compression_interval: 64
+max_answer_tokens: 2048
+estimated_generation_count: 0
+estimated_replay_count: 800
+scale_authorized: true

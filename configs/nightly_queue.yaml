@@ -1078,6 +1078,78 @@ jobs:
     est_output_gb: 0.03
     requires: capture-llama8b-smoke
 
+  # Amendment S.1: the decomposition under PROMPT-PROTECTED presses
+  # (random_pp, streamingllm_pp), budgets 256 and 1024. None of the unprotected
+  # presses keeps the prompt, so the residual is open to a prompt-loss reading
+  # until these cells are read. Gated on a real-model smoke of the presses.
+  - name: pp-smoke
+    command: ppsmoke
+    config: configs/experiments/pp_smoke_s1.yaml
+    run_name: pp-smoke
+    total: 1
+    seeds: [11]
+    min_free_gb: 28
+    progress_kind: marker
+    marker: pp-smoke-PASS.json
+    est_output_gb: 0.01
+    gate: pp_smoke
+    requires: null
+
+  - name: grid-pp256
+    command: grid_pp
+    config: configs/experiments/grid_math500_pp256_s1.yaml
+    run_name: grid-pp256
+    total: 800
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 24
+    progress_kind: grid
+    est_output_gb: 0.06
+    requires: pp-smoke
+
+  - name: readout-pp256
+    command: replay_pp
+    config: configs/experiments/readout_math500_pp256_s1.yaml
+    run_name: readout-pp256
+    total: 800
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 24
+    progress_kind: readout
+    est_output_gb: 0.01
+    requires: grid-pp256
+
+  - name: reverse-readout-pp256
+    command: replay
+    config: configs/experiments/reverse_readout_pp256_s1.yaml
+    run_name: reverse-readout-pp256
+    total: 800
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 28
+    progress_kind: readout
+    est_output_gb: 0.01
+    requires: readout-pp256
+
+  - name: grid-pp1024
+    command: grid_pp
+    config: configs/experiments/grid_math500_pp1024_s1.yaml
+    run_name: grid-pp1024
+    total: 800
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 24
+    progress_kind: grid
+    est_output_gb: 0.04
+    requires: reverse-readout-pp256
+
+  - name: readout-pp1024
+    command: replay_pp
+    config: configs/experiments/readout_math500_pp1024_s1.yaml
+    run_name: readout-pp1024
+    total: 800
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 24
+    progress_kind: readout
+    est_output_gb: 0.01
+    requires: grid-pp1024
+
   # ======================================================================
   # R.14 postprocessing: CPU stages run inline by every orchestrator tick
   # (never given a GPU; also at the 10:50 tick). Each runs its registered
