@@ -40,6 +40,7 @@ case "$COMMAND" in
   capture2) PY_SCRIPT="scripts/run_capture_v2.py" ;;
   exactlag) PY_SCRIPT="scripts/run_exact_lag.py" ;;
   restore2) PY_SCRIPT="scripts/run_restore_v2.py" ;;
+  restore3) PY_SCRIPT="scripts/run_restore_v3.py" ;;
   grid_pp) PY_SCRIPT="scripts/run_grid_pp.py" ;;
   replay_pp) PY_SCRIPT="scripts/run_replay_pp.py" ;;
   ppsmoke) PY_SCRIPT="scripts/pp_smoke.py" ;;

@@ -1,0 +1,21 @@
+name: restore_v3_math500_s2
+stage: restore3
+# Amendment S.2: restoration by origin. The same traces, policies, budget,
+# interval, trigger and window as restore-v2 (R.17.2.3). Four arms applied
+# before forward e+1, eviction off in every arm: frozen (nothing returned),
+# prompt (every evicted prompt entry), trace (as many evicted trace entries,
+# drawn uniformly), full (every evicted entry).
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+subset:
+  math500: 25
+presses: [random, streamingllm]
+budgets: [256]
+seeds: [11, 23, 47, 89]
+reference_run_name: math500-fc-powered-merged
+compression_interval: 64
+trigger_step: 1024
+window: 200
+arms: [frozen, prompt, trace, full]
+scale_authorized: true
+remote_only: true

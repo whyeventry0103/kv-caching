@@ -238,7 +238,7 @@ def expected_run_identity(
             ),
             "ok",
         )
-    if kind in ("exact_lag", "fork", "restore_v2"):
+    if kind in ("exact_lag", "fork", "restore_v2", "restore_v3"):
         return (
             identity(
                 kind,

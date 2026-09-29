@@ -1150,6 +1150,21 @@ jobs:
     est_output_gb: 0.01
     requires: grid-pp1024
 
+  # Amendment S.2: restoration by origin. Same traces, policies, budget and
+  # trigger as restore-v2; arms frozen / prompt / trace / full, eviction off in
+  # every arm. 25 problems x 4 seeds x 2 policies = 200 rows. Last in order, so
+  # it takes a GPU only when the S.1 cells cannot use it.
+  - name: restore-v3
+    command: restore3
+    config: configs/experiments/restore_v3_math500_s2.yaml
+    run_name: restore-v3
+    total: 200
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 28
+    progress_kind: grid
+    est_output_gb: 0.01
+    requires: null
+
   # ======================================================================
   # R.14 postprocessing: CPU stages run inline by every orchestrator tick
   # (never given a GPU; also at the 10:50 tick). Each runs its registered
