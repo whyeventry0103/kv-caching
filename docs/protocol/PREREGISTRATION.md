@@ -4188,3 +4188,11 @@ weights; storage re-measured at **41.952 GiB** of 72. The `blocked:` line on
 `fc-qwen3-4b` is removed; the bank job downloads the pinned revision on its
 first launch and the chain (bank → grid → readout → reverse readout) follows.
 Nothing else in S.4 changed.
+
+**R.16.6, fourth owner-requested early start (2026-09-30 21:33 Dubai).**
+"start the run right now." Same mechanism as the three before: tmux
+`manual-ticks` runs `~/manual_ticks_0930.sh` (sha256 `97025b9f…81c`, copied to
+`docs/results/meeting3_evidence/`), ticking the unchanged orchestrator every
+10 min with `--max-hours-override` until 2026-10-01 01:40, when cron takes
+over; every job stops at 10:43. First launch: q6-basis-fit-llama8b on GPU 0 at
+21:31. One-time bypass, not a change to the nightly policy.
