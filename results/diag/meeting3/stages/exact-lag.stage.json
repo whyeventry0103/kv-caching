@@ -1,14 +1,14 @@
 {
-  "analysis_id": "18d9bc4ba85fa811c883e37a282db34d8b803405d19807245793a7f98c98363a",
-  "attempt": "results/diag/meeting3/attempts/exact-lag-20260926T215509Z-3118712",
+  "analysis_id": "04e6b1a1d0ceff17fea24ea64c9406142099c292029970b7a343f3ce5df7f4b2",
+  "attempt": "results/diag/meeting3/attempts/exact-lag-20260929T214512Z-3312399",
   "finalized": true,
   "gate_outcome": null,
   "generation_digest": "b3389198776ecf93d9b47e6ed9c32915c198f2c485f52a40b934c11d90aa25ea",
   "manifest_exit": 0,
   "outputs": {
     "results/diag/meeting3/exact_lag.conditions.tsv": "6a55f8439ec730fe64a4e30f0420e022b740e2a691e7cf6d8914f9eaafcd03e9",
-    "results/diag/meeting3/exact_lag.json": "294db4c68610339c010fee8ae7dec4a999e91137d482acb9869d3f4e6203d244",
-    "results/diag/meeting3/figures/meeting3_exact_lag.pdf": "51c9ccc8bd9034991e24ef2aef81dfb864f88fb48c19d51ff96c72967f6aa88c",
+    "results/diag/meeting3/exact_lag.json": "a592b0a04d88fe54edbe80348d12f5f728fffc49424f78b4bbe2e6c7f5397541",
+    "results/diag/meeting3/figures/meeting3_exact_lag.pdf": "c11136d6562aae0cdc8808b901e1abf30b757357ec6a90fa03f238cdca43c1f8",
     "results/diag/meeting3/figures/meeting3_exact_lag.png": "f9d1b72ec9347d6b2e1a3d4f674a4abcdf057ceac26378698856ea4f2b32efe5"
   },
   "passed": true,
@@ -18,10 +18,10 @@
     "random {'verdict': 'NON-MONOTONE', 'n_points': 5, 'lags': [1, 4, 16, 64, 256], 'effects': [0.0030755712052709726, 0.0008727689205712259, 0.001277837094129436, 0.003568802303427037, 0.004349812521777978], 'helps_at_lag': {'1': True, '4': False, '16': False, '64': False, '256': False}, 'monotone_decreasing': False}",
     "streamingllm {'verdict': 'FLAT-NULL', 'n_points': 5, 'lags': [1, 4, 16, 64, 256], 'effects': [-0.00036054766456421026, -0.0006848546960953791, -0.0011242562094848471, -0.0035004277462318944, -0.00023454229995452925], 'helps_at_lag': {'1': False, '4': False, '16': False, '64': False, '256': False}, 'monotone_decreasing': False}",
     "status FINAL; coverage COMPLETE",
-    "wrote /home/sk10741/kv-caching/results/diag/meeting3/attempts/exact-lag-20260926T215509Z-3118712/exact_lag.json"
+    "wrote /home/sk10741/kv-caching/results/diag/meeting3/attempts/exact-lag-20260929T214512Z-3312399/exact_lag.json"
   ],
   "stage": "exact-lag",
   "status": "FINAL",
   "terminal": true,
-  "timestamp": "20260926T215509Z"
+  "timestamp": "20260929T214512Z"
 }

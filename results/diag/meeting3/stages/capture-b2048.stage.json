@@ -1,14 +1,14 @@
 {
-  "analysis_id": "3cb8f8a9cd8157d1279fea026b2072709d8348511ab874166a703878d331c932",
-  "attempt": "results/diag/meeting3/attempts/capture-b2048-20260927T225001Z-3197989",
+  "analysis_id": "5de81e392882db311d612b559cd3bb3defadaf4f3fd70421b7987eb2a39c8b43",
+  "attempt": "results/diag/meeting3/attempts/capture-b2048-20260929T214505Z-3312267",
   "finalized": true,
   "gate_outcome": null,
   "generation_digest": "bb04909f682dab9573df7b64718eb8c9e6719bebb0b4e520f47f4ea3a809b912",
   "manifest_exit": 0,
   "outputs": {
     "results/diag/meeting3/capture_b2048.conditions.tsv": "7bc4f0dfc3954023597c975f131db6b0335cd942e509ccf9622add174779fda3",
-    "results/diag/meeting3/capture_b2048.json": "1cc2fc1bb57a61f9bcc5d3ba110dcd6a9ca290b7f8731411f29903338e3d8145",
-    "results/diag/meeting3/figures/meeting3_capture_b2048.pdf": "2cab8ca7b2523228a8f9defd754dc5d8eb3b72f657e431ccccbde498b8060ad2",
+    "results/diag/meeting3/capture_b2048.json": "3f79888d75b9b64fc6f1787cb190f825989010d709677543f15bb6eaf243207f",
+    "results/diag/meeting3/figures/meeting3_capture_b2048.pdf": "ba543b0f19f49e5a6048ffd244796bd607b846c8c76c3ef15b2f44f4f8e6f932",
     "results/diag/meeting3/figures/meeting3_capture_b2048.png": "cfd51c2536064d3f8db8a0f160309520d6514952c869e025ac4b8412fb5222e5"
   },
   "passed": true,
@@ -18,10 +18,10 @@
     "status FINAL; coverage COMPLETE (400/400, dup 0, unexpected 0); controls VALID; identity True",
     "collateral rkv - h2o: mean=0.0 ci=[0.0, 0.0] verdict=INCONCLUSIVE",
     "omega random - streamingllm: mean=0.22518876984126984 ci=[0.177986507936508, 0.27334365079365075] verdict=PREDICTED",
-    "wrote /home/sk10741/kv-caching/results/diag/meeting3/attempts/capture-b2048-20260927T225001Z-3197989/capture_b2048.json"
+    "wrote /home/sk10741/kv-caching/results/diag/meeting3/attempts/capture-b2048-20260929T214505Z-3312267/capture_b2048.json"
   ],
   "stage": "capture-b2048",
   "status": "FINAL",
   "terminal": true,
-  "timestamp": "20260927T225001Z"
+  "timestamp": "20260929T214505Z"
 }

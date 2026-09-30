@@ -1235,7 +1235,7 @@
     },
     "verdict": "PREDICTED"
   },
-  "reproduce": "python scripts/report_capture.py --runs-root <runs> --run capture-b2048 --config configs/experiments/capture_math500_b2048_r17.yaml --out /home/sk10741/kv-caching/results/diag/meeting3/attempts/capture-b2048-20260927T225001Z-3197989/capture_b2048.json --final",
+  "reproduce": "python scripts/report_capture.py --runs-root <runs> --run capture-b2048 --config configs/experiments/capture_math500_b2048_r17.yaml --out /home/sk10741/kv-caching/results/diag/meeting3/attempts/capture-b2048-20260929T214505Z-3312267/capture_b2048.json --final",
   "run": "capture-b2048",
   "status": "FINAL",
   "sufficient_statistics_sha256": "7bc4f0dfc3954023597c975f131db6b0335cd942e509ccf9622add174779fda3",

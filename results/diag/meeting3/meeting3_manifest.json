@@ -49,7 +49,7 @@
       "id": "T1.tv512",
       "note": "was BLOCKED on storage (~98 MiB/cell full profiles vs ~167 MiB deficit); R.12 runs it as registered with summary profiles (~3 KB/trace). Queue t1-tv512, last.",
       "output_sha256": {
-        "results/diag/meeting3/figures/fig8_budget_curve.pdf": "cf2db0ce64157579c521781c6b17a6c8a252e0e0f92e0259d866e786cd4ce012",
+        "results/diag/meeting3/figures/fig8_budget_curve.pdf": "91bc99a3eb60e1e34800fe4e6930e0909d6a531328a43e5d64068a25b6b19a2e",
         "results/diag/meeting3/t1_budget_curve.json": "78577f6b1a1ec1a21b216e9b1705630ac3c82db14d1f523bfe368741023011fc"
       },
       "outputs": [
@@ -75,7 +75,7 @@
       "id": "T1.tv1024",
       "note": "was BLOCKED on storage (~98 MiB/cell full profiles vs ~167 MiB deficit); R.12 runs it as registered with summary profiles (~3 KB/trace). Queue t1-tv1024, last.",
       "output_sha256": {
-        "results/diag/meeting3/figures/fig8_budget_curve.pdf": "cf2db0ce64157579c521781c6b17a6c8a252e0e0f92e0259d866e786cd4ce012",
+        "results/diag/meeting3/figures/fig8_budget_curve.pdf": "91bc99a3eb60e1e34800fe4e6930e0909d6a531328a43e5d64068a25b6b19a2e",
         "results/diag/meeting3/t1_budget_curve.json": "78577f6b1a1ec1a21b216e9b1705630ac3c82db14d1f523bfe368741023011fc"
       },
       "outputs": [
@@ -233,8 +233,8 @@
       "id": "Q2.dacc",
       "note": "gate implemented + CPU-validated (tests/test_onset_gate.py, tiny Qwen2, logit level, mutation-tested); queue: dacc-gate-smoke (real-model marker) -> dacc-t2048 -> dacc-t512 -> dacc-t0, ~7.2 h per cell on 2 GPUs, first window 2026-09-25 01:45. Comparator: 100 FC-bank rows (pids verified identical to Q.2's 25). R.8 records the B=2048 occupancy caveat.",
       "output_sha256": {
-        "results/diag/meeting3/dacc.json": "93b0253a1aae878b971e3d5d95a0b806d431facc0a7147765306ceebea7cc706",
-        "results/diag/meeting3/figures/meeting3_dacc.pdf": "7d9519d8930dc0aef22791b843584cdcb6bcf80b2a2634a625c2d329959d1ee5"
+        "results/diag/meeting3/dacc.json": "49a9c9e7ae99dedd4162c86b38b51958a42edf84dd4d919dcffdc9d44c5b48f2",
+        "results/diag/meeting3/figures/meeting3_dacc.pdf": "dee31efa8e9ef042bda52432bca161edf77dcfa07a7acc50fa81dcd5283b8894"
       },
       "outputs": [
         "results/diag/meeting3/dacc.json",
@@ -258,7 +258,7 @@
       "id": "Q3.algebra_control",
       "note": "R.9: validated in float64 on synthetic inputs (tests/test_capture.py channel_stats identity) and live at every event as layer-0 Delta <= 1e-5 (same q, same retained keys); full/full control exactly 0. Real-model check = capture-smoke gate.",
       "output_sha256": {
-        "results/diag/meeting3/capture_b256.json": "74c2745f80e3e89176ece857124760bd736d56b387b8b276e43aa6ab0fdd1678"
+        "results/diag/meeting3/capture_b256.json": "a11c8b2397377f1685e0437fe7d609c04e8b4393ed0f73a7b54b19eb66023e8b"
       },
       "outputs": [
         "results/diag/meeting3/capture_b256.json"
@@ -284,8 +284,8 @@
       "id": "Q3.capture",
       "note": "R.9 combined capture with Q.6; CPU-validated on tiny Qwen2 for all 4 policies (live gather/position-map/pre-eviction checks, mutation-tested); queue q6-basis-fit -> capture-smoke -> capture-b256 (primary) ... b2048 last.",
       "output_sha256": {
-        "results/diag/meeting3/capture_b256.json": "74c2745f80e3e89176ece857124760bd736d56b387b8b276e43aa6ab0fdd1678",
-        "results/diag/meeting3/figures/meeting3_capture_b256.pdf": "f3cccdcb94c0c08026f165a5a96c939208789870fafb286d3cd71ddd3416d098"
+        "results/diag/meeting3/capture_b256.json": "a11c8b2397377f1685e0437fe7d609c04e8b4393ed0f73a7b54b19eb66023e8b",
+        "results/diag/meeting3/figures/meeting3_capture_b256.pdf": "37660fc477af4147574bba1c5a800350c77c4cb9ff6f654e4203a74c03cfb1c7"
       },
       "outputs": [
         "results/diag/meeting3/capture_b256.json",
@@ -312,8 +312,8 @@
       "id": "Q3.capture_b2048",
       "note": "R.9 combined capture with Q.6; CPU-validated on tiny Qwen2 for all 4 policies (live gather/position-map/pre-eviction checks, mutation-tested); queue q6-basis-fit -> capture-smoke -> capture-b256 (primary) ... b2048 last.",
       "output_sha256": {
-        "results/diag/meeting3/capture_b2048.json": "1cc2fc1bb57a61f9bcc5d3ba110dcd6a9ca290b7f8731411f29903338e3d8145",
-        "results/diag/meeting3/figures/meeting3_capture_b2048.pdf": "2cab8ca7b2523228a8f9defd754dc5d8eb3b72f657e431ccccbde498b8060ad2"
+        "results/diag/meeting3/capture_b2048.json": "3f79888d75b9b64fc6f1787cb190f825989010d709677543f15bb6eaf243207f",
+        "results/diag/meeting3/figures/meeting3_capture_b2048.pdf": "ba543b0f19f49e5a6048ffd244796bd607b846c8c76c3ef15b2f44f4f8e6f932"
       },
       "outputs": [
         "results/diag/meeting3/capture_b2048.json",
@@ -350,8 +350,8 @@
       "id": "Q5.exact_lag",
       "note": "kvcache.exact_lag + scripts/run_exact_lag.py / report_exact_lag.py; tiny-Qwen2 tests (deterministic snapshots, exact applied step, gate) pass; queue exact-lag-r5 requires capture-smoke; ~5 h on 2 GPUs.",
       "output_sha256": {
-        "results/diag/meeting3/exact_lag.json": "294db4c68610339c010fee8ae7dec4a999e91137d482acb9869d3f4e6203d244",
-        "results/diag/meeting3/figures/meeting3_exact_lag.pdf": "51c9ccc8bd9034991e24ef2aef81dfb864f88fb48c19d51ff96c72967f6aa88c"
+        "results/diag/meeting3/exact_lag.json": "a592b0a04d88fe54edbe80348d12f5f728fffc49424f78b4bbe2e6c7f5397541",
+        "results/diag/meeting3/figures/meeting3_exact_lag.pdf": "c11136d6562aae0cdc8808b901e1abf30b757357ec6a90fa03f238cdca43c1f8"
       },
       "outputs": [
         "results/diag/meeting3/exact_lag.json",
@@ -396,8 +396,8 @@
       "id": "Q6.project",
       "note": "same capture cells as Q3.capture (R.9).",
       "output_sha256": {
-        "results/diag/meeting3/capture_b256.json": "74c2745f80e3e89176ece857124760bd736d56b387b8b276e43aa6ab0fdd1678",
-        "results/diag/meeting3/figures/meeting3_capture_b256.pdf": "f3cccdcb94c0c08026f165a5a96c939208789870fafb286d3cd71ddd3416d098"
+        "results/diag/meeting3/capture_b256.json": "a11c8b2397377f1685e0437fe7d609c04e8b4393ed0f73a7b54b19eb66023e8b",
+        "results/diag/meeting3/figures/meeting3_capture_b256.pdf": "37660fc477af4147574bba1c5a800350c77c4cb9ff6f654e4203a74c03cfb1c7"
       },
       "outputs": [
         "results/diag/meeting3/capture_b256.json",
@@ -424,8 +424,8 @@
       "id": "Q6.project_b2048",
       "note": "same capture cells as Q3.capture (R.9).",
       "output_sha256": {
-        "results/diag/meeting3/capture_b2048.json": "1cc2fc1bb57a61f9bcc5d3ba110dcd6a9ca290b7f8731411f29903338e3d8145",
-        "results/diag/meeting3/figures/meeting3_capture_b2048.pdf": "2cab8ca7b2523228a8f9defd754dc5d8eb3b72f657e431ccccbde498b8060ad2"
+        "results/diag/meeting3/capture_b2048.json": "3f79888d75b9b64fc6f1787cb190f825989010d709677543f15bb6eaf243207f",
+        "results/diag/meeting3/figures/meeting3_capture_b2048.pdf": "ba543b0f19f49e5a6048ffd244796bd607b846c8c76c3ef15b2f44f4f8e6f932"
       },
       "outputs": [
         "results/diag/meeting3/capture_b2048.json",
@@ -450,7 +450,7 @@
     "transformers": "4.56.2"
   },
   "schema": "meeting3-manifest-v1",
-  "source_tree_sha256": "a9186546c47d9a8b8ad6c7192f61c0b66e364aa9832510972e98ba4b839f57b4",
+  "source_tree_sha256": "371ff1d5247156bcccb4c4158777c5e399f2faeee58f79c976e50624516810f7",
   "status_counts": {
     "ANALYZED": 3,
     "BLOCKED": 0,

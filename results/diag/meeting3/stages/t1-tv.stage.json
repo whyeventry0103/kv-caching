@@ -1,12 +1,12 @@
 {
-  "analysis_id": "01ad9500f6ed447f4003406e562db9324368b037522b81d66b5b16af1cdd42b8",
-  "attempt": "results/diag/meeting3/attempts/t1-tv-20260928T195143Z-3242271",
+  "analysis_id": "0e0af37a89a831d5fcff1d84c784bfe3935f9cb1e1c358369f9e2fc068ef1427",
+  "attempt": "results/diag/meeting3/attempts/t1-tv-20260929T214524Z-3312529",
   "finalized": true,
   "gate_outcome": null,
   "generation_digest": "429adcbfbe5deaa7c79beaed5fbc63845eb6a6254fe1c841022491fceb639557",
   "manifest_exit": 0,
   "outputs": {
-    "results/diag/meeting3/figures/fig8_budget_curve.pdf": "cf2db0ce64157579c521781c6b17a6c8a252e0e0f92e0259d866e786cd4ce012",
+    "results/diag/meeting3/figures/fig8_budget_curve.pdf": "91bc99a3eb60e1e34800fe4e6930e0909d6a531328a43e5d64068a25b6b19a2e",
     "results/diag/meeting3/figures/fig8_budget_curve.png": "f3eac74b86ff52374223f02e40a86b066e472f0ef703141e679015f11ad83dbf",
     "results/diag/meeting3/t1_budget_curve.json": "78577f6b1a1ec1a21b216e9b1705630ac3c82db14d1f523bfe368741023011fc"
   },
@@ -19,10 +19,10 @@
     " streamingllm  1024 ratio= 24.41% total=-0.198 [-0.268, -0.138] lost=0.205 gained=0.007 n=400",
     "       random  2048 ratio= 58.18% total=-0.035 [-0.062, -0.013] lost=0.037 gained=0.003 n=400",
     " streamingllm  2048 ratio= 55.11% total=-0.077 [-0.125, -0.04] lost=0.087 gained=0.010 n=400",
-    "wrote /home/sk10741/kv-caching/results/diag/meeting3/attempts/t1-tv-20260928T195143Z-3242271/t1_budget_curve.json"
+    "wrote /home/sk10741/kv-caching/results/diag/meeting3/attempts/t1-tv-20260929T214524Z-3312529/t1_budget_curve.json"
   ],
   "stage": "t1-tv",
   "status": "FINAL",
   "terminal": true,
-  "timestamp": "20260928T195143Z"
+  "timestamp": "20260929T214524Z"
 }

@@ -1299,7 +1299,7 @@
     },
     "verdict": "PREDICTED"
   },
-  "reproduce": "python scripts/report_capture.py --runs-root <runs> --run capture-b256 --config configs/experiments/capture_math500_b256_r9.yaml --out /home/sk10741/kv-caching/results/diag/meeting3/attempts/capture-b256-20260926T215502Z-3118575/capture_b256.json --final",
+  "reproduce": "python scripts/report_capture.py --runs-root <runs> --run capture-b256 --config configs/experiments/capture_math500_b256_r9.yaml --out /home/sk10741/kv-caching/results/diag/meeting3/attempts/capture-b256-20260929T214501Z-3312200/capture_b256.json --final",
   "run": "capture-b256",
   "status": "FINAL",
   "sufficient_statistics_sha256": "3ccd9f3971fa0dc1551017af04457bb1d9dbcc423c33b322c576b6386a1418c5",

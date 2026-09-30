@@ -1894,7 +1894,7 @@
   "identity_consistent_within_arms": true,
   "n_cells_read": 12,
   "provenance_failures": [],
-  "reproduce": "python scripts/report_dacc.py --runs-root <runs> --arms 0=dacc-t0 512=dacc-t512 2048=dacc-t2048 --design configs/experiments/grid_math500_dacc_t0_r3.yaml --out /home/sk10741/kv-caching/results/diag/meeting3/attempts/dacc-20260926T215505Z-3118644/dacc.json --final",
+  "reproduce": "python scripts/report_dacc.py --runs-root <runs> --arms 0=dacc-t0 512=dacc-t512 2048=dacc-t2048 --design configs/experiments/grid_math500_dacc_t0_r3.yaml --out /home/sk10741/kv-caching/results/diag/meeting3/attempts/dacc-20260929T214508Z-3312333/dacc.json --final",
   "status": "FINAL",
   "sufficient_statistics_sha256": "15442e72895dd04337f43449419d04d139701f7d154847c1cf29e88204fcca7f",
   "sufficient_statistics_tsv": "dacc.conditions.tsv"
