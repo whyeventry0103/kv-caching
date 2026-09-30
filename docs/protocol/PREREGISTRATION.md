@@ -4182,3 +4182,9 @@ exist; the 14B weights; the Tier 3 release.**
 - *Tier 3 release:* the three `blocked:` lines were removed 2026-09-30 after
   the owner granted permission; addendum E's conditions had held since
   2026-09-29 03:15.
+
+**S addendum B, release (2026-09-30 21:25 Dubai).** The owner deleted the 14B
+weights; storage re-measured at **41.952 GiB** of 72. The `blocked:` line on
+`fc-qwen3-4b` is removed; the bank job downloads the pinned revision on its
+first launch and the chain (bank → grid → readout → reverse readout) follows.
+Nothing else in S.4 changed.

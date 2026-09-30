@@ -24,6 +24,11 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-09-30 21:25 Dubai — Qwen3-4B RELEASED.** Owner deleted the
+  14B weights; storage 41.952/72 GiB. fc-qwen3-4b unblocked (downloads ~8 GB
+  at the pinned revision on first launch). Queue order now: Llama Tier 3 →
+  S.1 pp cells → restore-v3 → Qwen3-4b chain. No owner action pending.
+
   **★★★★★ 2026-09-30 21:30 Dubai — pending work closed out (owner: "you have
   the permission to do all of these").** Night 1 of Amendment S: grid-pp256
   391/800, restore-v3 100/200, no errors; next window 01:45. Tier 3 Llama

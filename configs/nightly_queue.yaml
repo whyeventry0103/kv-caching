@@ -1171,7 +1171,6 @@ jobs:
     command: bank
     config: configs/experiments/bank_math500_qwen3_4b.yaml
     run_name: fc-qwen3-4b
-    blocked: "Amendment S.4 - held until the 14B weights are deleted and storage is re-measured; released by hand"
     total: 200
     seeds: [11, 23, 47, 89]
     min_free_gb: 20
