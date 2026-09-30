@@ -1554,6 +1554,136 @@ def build_catalogue() -> list[Entry]:
             f"{_m2r} :: excluded_no_measured_event.random",
             "b2048 traces per policy with no eviction event (unavailable, R.4)",
         )
+    if _md2.exists():
+        add(
+            "m3.h3_2048.mean",
+            _m2d["H3"]["mean"],
+            f"{_m2r} :: H3.mean",
+            "M(H2O-style) - M(Random), b2048 (confirmatory, R.17.1.5)",
+        )
+        for _i, _b in enumerate(_m2d["H3"]["ci95"]):
+            add(
+                f"m3.h3_2048.ci{'lo' if _i == 0 else 'hi'}",
+                _b,
+                f"{_m2r} :: H3.ci95[{_i}]",
+                "H3 b2048 CI bound",
+            )
+        add(
+            "m3.cap2048.realized_ratio_pct",
+            100 * _m2d["realized_ratio"]["ratio"],
+            f"100 * {_m2r} :: realized_ratio.ratio",
+            "budget 2048 as a percentage of mean prompt + mean trace tokens",
+            kind="derived",
+        )
+        for _f in ("M", "Delta"):
+            add(
+                f"m3.h2_2048.{_f}.spread",
+                _m2d["H2"][_f]["spread"],
+                f"{_m2r} :: H2.{_f}.spread",
+                f"H2 b2048 spread of {_f} across the four policies",
+            )
+    _cb2 = M3 / "capture_b2048.json"
+    if _cb2.exists():
+        _cbd, _cbr = _load(_cb2), _cb2.relative_to(PROJECT_ROOT)
+        _q6 = _cbd["q6_registered_contrast"]
+        add(
+            "m3.cap2048.omega_contrast.mean",
+            _q6["mean"],
+            f"{_cbr} :: q6_registered_contrast.mean",
+            "omega(Random) - omega(StreamingLLM), b2048 replication (R.17.1.5)",
+        )
+        for _i, _b in enumerate(_q6["ci95"]):
+            add(
+                f"m3.cap2048.omega_contrast.ci{'lo' if _i == 0 else 'hi'}",
+                _b,
+                f"{_cbr} :: q6_registered_contrast.ci95[{_i}]",
+                "omega contrast b2048 CI bound",
+            )
+        add(
+            "m3.cap2048.n_problems",
+            _q6["n_problems"],
+            f"{_cbr} :: q6_registered_contrast.n_problems",
+            "problems with a measured event at b2048",
+        )
+        add(
+            "m3.cap2048.n_pairs",
+            _q6["n_pairs"],
+            f"{_cbr} :: q6_registered_contrast.n_pairs",
+            "paired traces at b2048",
+        )
+    _ex = R17 / "capture_v2_extras_capture-b2048.json"
+    if _ex.exists():
+        _exd, _exr = _load(_ex), _ex.relative_to(PROJECT_ROOT)
+        for _k, _v in _exd["omega_by_k_random_minus_slm"]["per_k"].items():
+            add(
+                f"m3.omega_k.{_k}.mean",
+                _v["contrast"]["mean"],
+                f"{_exr} :: omega_by_k_random_minus_slm.per_k.{_k}.contrast.mean",
+                f"omega contrast at nested k={_k}, b2048 (R.17.1.7)",
+            )
+            for _i, _b in enumerate(_v["contrast"]["ci95"]):
+                add(
+                    f"m3.omega_k.{_k}.ci{'lo' if _i == 0 else 'hi'}",
+                    _b,
+                    f"{_exr} :: omega_by_k_random_minus_slm.per_k.{_k}"
+                    f".contrast.ci95[{_i}]",
+                    f"omega contrast CI bound at k={_k}",
+                )
+    _co = R17 / "collapse.json"
+    if _co.exists():
+        _cod, _cor = _load(_co), _co.relative_to(PROJECT_ROOT)
+        for _press in ("random", "streamingllm"):
+            _pp = _cod["per_policy"][_press]["pooled"]
+            add(
+                f"m3.collapse.{_press}.delta_r2",
+                _pp["delta_r2_budget_after_r"],
+                f"{_cor} :: per_policy.{_press}.pooled.delta_r2_budget_after_r",
+                f"collapse test: R^2 gain of budget after log r, {_press} (R.17.1.1)",
+            )
+            for _i, _b in enumerate(_pp["delta_r2_ci95"]):
+                add(
+                    f"m3.collapse.{_press}.delta_r2.ci{'lo' if _i == 0 else 'hi'}",
+                    _b,
+                    f"{_cor} :: per_policy.{_press}.pooled.delta_r2_ci95[{_i}]",
+                    f"collapse test delta R^2 CI bound, {_press}",
+                )
+            add(
+                f"m3.collapse.{_press}.n_problems",
+                _cod["per_policy"][_press]["n_problems"],
+                f"{_cor} :: per_policy.{_press}.n_problems",
+                f"collapse test panel problems, {_press}",
+            )
+    _rv = R17 / "restore_v2.json"
+    if _rv.exists():
+        _rvd, _rvr = _load(_rv), _rv.relative_to(PROJECT_ROOT)
+        for _press in ("random", "streamingllm"):
+            _fs = _rvd["per_policy"][_press]["full_restore"]["R_fs"]
+            add(
+                f"m3.restore2.{_press}.R_fs",
+                _fs["ratio"],
+                f"{_rvr} :: per_policy.{_press}.full_restore.R_fs.ratio",
+                f"restore-v2 full self-restoration ratio R_fs, {_press} (R.17.2.3)",
+            )
+            for _i, _b in enumerate(_fs["ci95"]):
+                add(
+                    f"m3.restore2.{_press}.R_fs.ci{'lo' if _i == 0 else 'hi'}",
+                    _b,
+                    f"{_rvr} :: per_policy.{_press}.full_restore.R_fs.ci95[{_i}]",
+                    f"R_fs CI bound, {_press}",
+                )
+        _el = _rvd["per_policy"]["random"]["eligibility"]["eligible"]
+        add(
+            "m3.restore2.eligible.n_problems",
+            _el["n_problems"],
+            f"{_rvr} :: per_policy.random.eligibility.eligible.n_problems",
+            "restore-v2 eligible problems",
+        )
+        add(
+            "m3.restore2.eligible.fc_accuracy",
+            _el["fc_accuracy"]["mean"],
+            f"{_rvr} :: per_policy.random.eligibility.eligible.fc_accuracy.mean",
+            "restore-v2 eligible subset full-cache accuracy",
+        )
     _dr = R17 / "dacc_restricted.json"
     if _dr.exists():
         _drd, _drr = _load(_dr), _dr.relative_to(PROJECT_ROOT)

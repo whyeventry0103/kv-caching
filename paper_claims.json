@@ -398,85 +398,85 @@
       "key": "rkv256.rkv.trunc"
     },
     {
-      "context": "| Random | 0.422 | 0.765 | **−0.337** | [−0.337, −0.282] |",
+      "context": "| Random | 0.422 | 0.765 | **\u22120.337** | [\u22120.337, \u22120.282] |",
       "literal": "0.422",
       "key": "diss256.random.free",
       "document": "README.md"
     },
     {
-      "context": "| Random | 0.422 | 0.765 | **−0.337** | [−0.337, −0.282] |",
+      "context": "| Random | 0.422 | 0.765 | **\u22120.337** | [\u22120.337, \u22120.282] |",
       "literal": "0.765",
       "key": "diss256.random.readout",
       "document": "README.md"
     },
     {
-      "context": "| Random | 0.422 | 0.765 | **−0.337** | [−0.337, −0.282] |",
+      "context": "| Random | 0.422 | 0.765 | **\u22120.337** | [\u22120.337, \u22120.282] |",
       "literal": "0.337",
       "key": "diss256.random.residual",
       "document": "README.md"
     },
     {
-      "context": "| Random | 0.422 | 0.765 | **−0.337** | [−0.337, −0.282] |",
+      "context": "| Random | 0.422 | 0.765 | **\u22120.337** | [\u22120.337, \u22120.282] |",
       "literal": "0.282",
       "key": "diss256.random.bracket1",
       "document": "README.md"
     },
     {
-      "context": "| StreamingLLM | 0.237 | 0.584 | **−0.344** | [−0.470, −0.344] |",
+      "context": "| StreamingLLM | 0.237 | 0.584 | **\u22120.344** | [\u22120.470, \u22120.344] |",
       "literal": "0.237",
       "key": "diss256.streamingllm.free",
       "document": "README.md"
     },
     {
-      "context": "| StreamingLLM | 0.237 | 0.584 | **−0.344** | [−0.470, −0.344] |",
+      "context": "| StreamingLLM | 0.237 | 0.584 | **\u22120.344** | [\u22120.470, \u22120.344] |",
       "literal": "0.584",
       "key": "diss256.streamingllm.readout",
       "document": "README.md"
     },
     {
-      "context": "| StreamingLLM | 0.237 | 0.584 | **−0.344** | [−0.470, −0.344] |",
+      "context": "| StreamingLLM | 0.237 | 0.584 | **\u22120.344** | [\u22120.470, \u22120.344] |",
       "literal": "0.470",
       "key": "diss256.streamingllm.bracket0",
       "document": "README.md"
     },
     {
-      "context": "| H2O-style | 0.247 | 0.597 | **−0.344** | [−0.478, −0.344] |",
+      "context": "| H2O-style | 0.247 | 0.597 | **\u22120.344** | [\u22120.478, \u22120.344] |",
       "literal": "0.247",
       "key": "h2o256.h2o.free",
       "document": "README.md"
     },
     {
-      "context": "| H2O-style | 0.247 | 0.597 | **−0.344** | [−0.478, −0.344] |",
+      "context": "| H2O-style | 0.247 | 0.597 | **\u22120.344** | [\u22120.478, \u22120.344] |",
       "literal": "0.597",
       "key": "h2o256.h2o.readout",
       "document": "README.md"
     },
     {
-      "context": "| H2O-style | 0.247 | 0.597 | **−0.344** | [−0.478, −0.344] |",
+      "context": "| H2O-style | 0.247 | 0.597 | **\u22120.344** | [\u22120.478, \u22120.344] |",
       "literal": "0.478",
       "key": "h2o256.h2o.bracket0",
       "document": "README.md"
     },
     {
-      "context": "| R-KV (certified port) | 0.520 | 0.798 | **−0.268** | [−0.268, −0.251] |",
+      "context": "| R-KV (certified port) | 0.520 | 0.798 | **\u22120.268** | [\u22120.268, \u22120.251] |",
       "literal": "0.520",
       "key": "rkv256.rkv.free",
       "document": "README.md"
     },
     {
-      "context": "| R-KV (certified port) | 0.520 | 0.798 | **−0.268** | [−0.268, −0.251] |",
+      "context": "| R-KV (certified port) | 0.520 | 0.798 | **\u22120.268** | [\u22120.268, \u22120.251] |",
       "literal": "0.798",
       "key": "rkv256.rkv.readout",
       "document": "README.md"
     },
     {
-      "context": "| R-KV (certified port) | 0.520 | 0.798 | **−0.268** | [−0.268, −0.251] |",
+      "context": "| R-KV (certified port) | 0.520 | 0.798 | **\u22120.268** | [\u22120.268, \u22120.251] |",
       "literal": "0.268",
       "key": "rkv256.rkv.residual",
       "document": "README.md"
     },
     {
-      "context": "| R-KV (certified port) | 0.520 | 0.798 | **−0.268** | [−0.268, −0.251] |",
+      "context": "| R-KV (certified port) | 0.520 | 0.798 | **\u22120.268** | [\u22120.268, \u22120.251] |",
       "literal": "0.251",
       "key": "rkv256.rkv.bracket1",
       "document": "README.md"
@@ -851,6 +851,181 @@
       "context": "restores nothing beyond a random draw at any lag, on $8$ of $25$ problems that",
       "literal": "8",
       "key": "m3.el.eligible.n_problems"
+    },
+    {
+      "context": "mean per-step total variation of $0.006$ (Amendment R.17.0.5)",
+      "literal": "0.006",
+      "key": "m3.fp.floor_all_steps.mean"
+    },
+    {
+      "context": "one arm of six by a ratio of $2.006$ against $2.0$",
+      "literal": "2.006",
+      "key": "m3.fp.random-i256.ratio"
+    },
+    {
+      "context": "across cells, budget adds an $R^2$ of $0.029$ (CI $[0.004, 0.073]$) for Random",
+      "literal": "0.029",
+      "key": "m3.collapse.random.delta_r2"
+    },
+    {
+      "context": "across cells, budget adds an $R^2$ of $0.029$ (CI $[0.004, 0.073]$) for Random",
+      "literal": "0.004",
+      "key": "m3.collapse.random.delta_r2.cilo"
+    },
+    {
+      "context": "across cells, budget adds an $R^2$ of $0.029$ (CI $[0.004, 0.073]$) for Random",
+      "literal": "0.073",
+      "key": "m3.collapse.random.delta_r2.cihi"
+    },
+    {
+      "context": "$0.033$ ($[0.003, 0.082]$) for StreamingLLM beyond $\\log r$",
+      "literal": "0.033",
+      "key": "m3.collapse.streamingllm.delta_r2"
+    },
+    {
+      "context": "$0.033$ ($[0.003, 0.082]$) for StreamingLLM beyond $\\log r$",
+      "literal": "0.003",
+      "key": "m3.collapse.streamingllm.delta_r2.cilo"
+    },
+    {
+      "context": "$0.033$ ($[0.003, 0.082]$) for StreamingLLM beyond $\\log r$",
+      "literal": "0.082",
+      "key": "m3.collapse.streamingllm.delta_r2.cihi"
+    },
+    {
+      "context": "panel of $10$ problems with a full window at every budget and position",
+      "literal": "10",
+      "key": "m3.collapse.random.n_problems"
+    },
+    {
+      "context": "on the $21$ problems whose traces are ever compressed at that budget",
+      "literal": "21",
+      "key": "m3.cap2048.n_problems"
+    },
+    {
+      "context": "H2O-style loses less mass than Random by $0.119$ (CI\n$[-0.139, -0.097]$)",
+      "literal": "0.119",
+      "key": "m3.h3_2048.mean"
+    },
+    {
+      "context": "H2O-style loses less mass than Random by $0.119$ (CI\n$[-0.139, -0.097]$)",
+      "literal": "-0.139",
+      "key": "m3.h3_2048.cilo"
+    },
+    {
+      "context": "H2O-style loses less mass than Random by $0.119$ (CI\n$[-0.139, -0.097]$)",
+      "literal": "-0.097",
+      "key": "m3.h3_2048.cihi"
+    },
+    {
+      "context": "$\\Delta$ values spread by $0.027$ against $0.119$ for $M$",
+      "literal": "0.027",
+      "key": "m3.h2_2048.Delta.spread"
+    },
+    {
+      "context": "$\\Delta$ values spread by $0.027$ against $0.119$ for $M$",
+      "literal": "0.119",
+      "key": "m3.h2_2048.M.spread"
+    },
+    {
+      "context": "replication at budget $2048$ gives $+0.225$\n($[0.178, 0.273]$) on $69$ paired traces",
+      "literal": "0.225",
+      "key": "m3.cap2048.omega_contrast.mean"
+    },
+    {
+      "context": "replication at budget $2048$ gives $+0.225$\n($[0.178, 0.273]$) on $69$ paired traces",
+      "literal": "0.178",
+      "key": "m3.cap2048.omega_contrast.cilo"
+    },
+    {
+      "context": "replication at budget $2048$ gives $+0.225$\n($[0.178, 0.273]$) on $69$ paired traces",
+      "literal": "0.273",
+      "key": "m3.cap2048.omega_contrast.cihi"
+    },
+    {
+      "context": "replication at budget $2048$ gives $+0.225$\n($[0.178, 0.273]$) on $69$ paired traces",
+      "literal": "69",
+      "key": "m3.cap2048.n_pairs"
+    },
+    {
+      "context": "at every size from $k = 8$ ($+1.079$, $[0.863, 1.288]$)",
+      "literal": "1.079",
+      "key": "m3.omega_k.8.mean"
+    },
+    {
+      "context": "at every size from $k = 8$ ($+1.079$, $[0.863, 1.288]$)",
+      "literal": "0.863",
+      "key": "m3.omega_k.8.cilo"
+    },
+    {
+      "context": "at every size from $k = 8$ ($+1.079$, $[0.863, 1.288]$)",
+      "literal": "1.288",
+      "key": "m3.omega_k.8.cihi"
+    },
+    {
+      "context": "to $k = 256$ ($+0.067$,\n$[0.050, 0.082]$)",
+      "literal": "0.067",
+      "key": "m3.omega_k.256.mean"
+    },
+    {
+      "context": "to $k = 256$ ($+0.067$,\n$[0.050, 0.082]$)",
+      "literal": "0.050",
+      "key": "m3.omega_k.256.cilo"
+    },
+    {
+      "context": "to $k = 256$ ($+0.067$,\n$[0.050, 0.082]$)",
+      "literal": "0.082",
+      "key": "m3.omega_k.256.cihi"
+    },
+    {
+      "context": "which makes $24$ of $25$ problems eligible\n(full-cache accuracy $0.844$)",
+      "literal": "24",
+      "key": "m3.restore2.eligible.n_problems"
+    },
+    {
+      "context": "which makes $24$ of $25$ problems eligible\n(full-cache accuracy $0.844$)",
+      "literal": "0.844",
+      "key": "m3.restore2.eligible.fc_accuracy"
+    },
+    {
+      "context": "forwards falls to $0.338$ (CI $[0.320, 0.358]$) of its uncorrected level for\nRandom",
+      "literal": "0.338",
+      "key": "m3.restore2.random.R_fs"
+    },
+    {
+      "context": "forwards falls to $0.338$ (CI $[0.320, 0.358]$) of its uncorrected level for\nRandom",
+      "literal": "0.320",
+      "key": "m3.restore2.random.R_fs.cilo"
+    },
+    {
+      "context": "forwards falls to $0.338$ (CI $[0.320, 0.358]$) of its uncorrected level for\nRandom",
+      "literal": "0.358",
+      "key": "m3.restore2.random.R_fs.cihi"
+    },
+    {
+      "context": "and $0.297$ ($[0.279, 0.317]$) for StreamingLLM, so about two thirds",
+      "literal": "0.297",
+      "key": "m3.restore2.streamingllm.R_fs"
+    },
+    {
+      "context": "and $0.297$ ($[0.279, 0.317]$) for StreamingLLM, so about two thirds",
+      "literal": "0.279",
+      "key": "m3.restore2.streamingllm.R_fs.cilo"
+    },
+    {
+      "context": "and $0.297$ ($[0.279, 0.317]$) for StreamingLLM, so about two thirds",
+      "literal": "0.317",
+      "key": "m3.restore2.streamingllm.R_fs.cihi"
+    },
+    {
+      "context": "($31$ of\n$100$ traces per policy never exceed it",
+      "literal": "31",
+      "key": "m3.cap2048.n_no_event_per_policy"
+    },
+    {
+      "context": "registered; budget $2048$ ($46.16\\%$ realized cache) is their confirmatory test",
+      "literal": "46.16",
+      "key": "m3.cap2048.realized_ratio_pct"
     }
   ]
 }

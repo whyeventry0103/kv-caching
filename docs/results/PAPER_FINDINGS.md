@@ -1551,6 +1551,43 @@ cohort," never "restoration works" or "eviction is reversible". Scope: one
 model, one benchmark, budget 256, exploratory. These literals enter the paper
 only with catalogue entries.
 
+### 5h. Amendment S: prompt protection becomes a required control; the mechanism draft carries every landed read (2026-09-30)
+
+No new measurement is read here. Three things moved.
+
+**1. The scoop-watch verdict narrowed the paper's exposure, not its claim.**
+arXiv:2609.03430 (Random Attention) attributes most of the gap between
+eviction selectors to whether the prompt is kept. None of our presses keeps
+the prompt (verified on the host: `RandomPress` scores every position,
+`StreamingLLMPress` keeps four sinks and the recent window). Until the
+prompt-protected cells are read, every residual in this paper is open to a
+prompt-loss reading. Amendment S registers the cells and the three paper-level
+branches, including the one where the residual is attributable to prompt loss.
+The Amendment S smoke passed on 2026-09-30 with its identity control exactly
+equal, which also confirms on the real model that the unprotected StreamingLLM
+cells are four sinks plus recency (PREREGISTRATION S addendum A, fact 1).
+
+**2. The mechanism-section draft now states every landed read** (still
+`\iffalse`, every literal pinned): the measured precision floor and the
+gate's FAIL by a hair; the collapse test (StreamingLLM collapses onto the
+realized ratio, Random misses the rule by a hair, a residual absolute-budget
+effect suggested and not established); the budget-2048 confirmatory reads (H3
+holds, H2 neither, ω replicates and holds at every nested k); and restore-v2
+(about two thirds of the divergence restorable, a third carried in the drifted
+state, the recent cohort restoring nothing). The pending Amendment S cells are
+named as pending. Numbers and CIs: `docs/results/MEETING3_RESULTS.md` §2b, §3c,
+§3d, §4a.
+
+**3. Framing rules added.**
+- The residual is reported beside the prompt-protected residual once that
+  exists; until then the paper says it is "open to a prompt-loss reading" in
+  Threats, never that it survives prompt protection.
+- "Random beats recency" is no longer ours alone (VaSE, Random Attention).
+  State it as corroborated, with the prompt-protection caveat.
+- Restoration wording: "restorable in aggregate, not by the most recent
+  cohort" (§5g); after S.2 is read, "by origin" replaces "in aggregate" only
+  if PROMPT CARRIES IT and PROMPT-SPECIFIC both hold.
+
 ## 5. Framing discipline (non-negotiable — apply throughout)
 - **Divergence ≠ damage.** ADD / TV / residual are "behavioral-fidelity loss," never "damage."
   Correctness is the only quality arbiter. Carry the **signed flip-mass** (gained vs lost correct

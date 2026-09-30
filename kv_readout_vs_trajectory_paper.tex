@@ -350,21 +350,28 @@ Third, undefined-boundary reverse rows could be \emph{informative} missingness: 
 %% claims what it can: a localization of the divergence, and the consequence
 %% for where readout evaluation looks.
 %% ======================================================================
-%% R.17 P.1 MECHANISM SECTION DRAFT (2026-09-27) -- NOT COMPILED (\iffalse).
+%% R.17 P.1 MECHANISM SECTION DRAFT (2026-09-27; updated 2026-09-30 with the
+%% landed reads: budget-2048 confirmatory, the collapse test, the precision
+%% floor, restore-v2) -- NOT COMPILED (\iffalse).
 %% Target venue: proposed ICML 2027, pending supervisor confirmation.
 %% Intended to replace S4.5 "Where the divergence is..." (label sec:mechanism)
 %% and S4.8 "Follow-up probes" when adopted. The instruction said "S4.4"; in
 %% the compiled PDF S4.4 is the reverse-replay bracket, which this draft does
 %% NOT replace (PAPER_FINDINGS 5e records the discrepancy). Every literal is
 %% pinned in paper_claims.json; only registered reads that have been read are
-%% stated, and every pending cell is named as pending.
+%% stated, and every pending cell is named as pending (Amendment S).
 %% ======================================================================
 \iffalse
 \subsection{Mechanism: dose, attention and geometry}
 \label{sec:mechanism-r17}
-Every divergence number in this section is subject to a numeric precision
-floor that has not yet been measured (Amendment R.17); until it is, they are
-reported as measured and not as exceeding numerics.
+Every divergence number in this section is read against a measured numeric
+precision floor: teacher forcing the same trace in bf16 and fp32 differs by a
+mean per-step total variation of $0.006$ (Amendment R.17.0.5). Its validity
+gate, which demands that no fork-control arm exceed twice the floor, fails on
+one arm of six by a ratio of $2.006$ against $2.0$, so we carry the floor
+explicitly: budget-$256$ divergence is an order of magnitude above it, while
+budget-$2048$ divergence and every restoration effect below $0.006$ are not
+established above numerics.
 
 \textbf{Dose, not horizon.} Under a fixed budget $B$ the cache covers a
 shrinking fraction $r = B/(p + t)$ of a trace of prompt $p$ at position $t$, so
@@ -380,9 +387,16 @@ Free-running, a later onset appears to reduce damage at budget $256$
 whose full-cache reference exceeds $2304$ tokens, a pre-treatment covariate that
 removes the generations never compressed in the late arm, leaves the Random contrast at
 $-0.048$ (CI $[-0.184, 0.075]$) and $+0.026$ ($[-0.066, 0.118]$) for StreamingLLM: the onset
-effect on accuracy is not established. Whether divergence at matched $r$
-depends on budget or position is a collapse test registered in Amendment R.17;
-it awaits divergence at budgets $512$ and $1024$.
+effect on accuracy is not established. The registered collapse test then asks
+whether divergence at matched $r$ still depends on the absolute budget, on a
+panel of $10$ problems with a full window at every budget and position: pairs
+two-fold apart in budget and $2048$ positions apart, matched on $r$, differ by
+amounts whose intervals all include zero, and StreamingLLM collapses onto $r$
+by the registered rule while Random misses it by $0.0002$ on one pair. Pooled
+across cells, budget adds an $R^2$ of $0.029$ (CI $[0.004, 0.073]$) for Random and
+$0.033$ ($[0.003, 0.082]$) for StreamingLLM beyond $\log r$: a residual
+absolute-budget effect is suggested, and not established at this $n$. Dose
+carries most of the divergence.
 
 \textbf{Attention: lost mass and shape distortion.} At the first forward after
 each eviction, $M$ is the full model's attention mass on the evicted positions
@@ -395,9 +409,15 @@ $\Delta = 0.238$ ($[0.217, 0.257]$). The H2O-style press (ObservedAttentionPress
 no recency reservation) loses the least mass, with $M$ lower than Random's by $0.315$ (CI
 $[-0.330, -0.298]$ for the signed difference), yet it has the larger free-running loss at this
 budget ($-0.637$ against $-0.463$ total change): the quantity its retention rule
-optimises is not the one that governs damage. These budget-$256$ reads are
+optimises is not the one that governs damage. The budget-$256$ reads are
 exploratory, because their means were printed before the hypotheses were
-registered; budget $2048$ is their confirmatory test and has not yet run. GQA
+registered; budget $2048$ ($46.16\%$ realized cache) is their confirmatory test,
+on the $21$ problems whose traces are ever compressed at that budget ($31$ of
+$100$ traces per policy never exceed it, and are unavailable rather than zero).
+There the ordering holds: H2O-style loses less mass than Random by $0.119$ (CI
+$[-0.139, -0.097]$), confirming the registered hypothesis, and the four policies'
+$\Delta$ values spread by $0.027$ against $0.119$ for $M$, so shape distortion
+does not mirror the near-constant accuracy residual either. GQA
 collateral, a position one head needed that the group mean ranked out of the
 cache, is zero at budget $256$ in all $400$ conditions. A positive control shows
 the instrument can return a non-zero value, so the zero is a property of this
@@ -409,7 +429,10 @@ frozen $64$-dimensional full-cache basis, $\omega = \|\delta_\perp\|/\|\delta_\p
 is larger for Random than for StreamingLLM by $+0.200$ (CI $[0.159, 0.234]$), as
 pre-registered. The contrast is carried by proportionally larger off-subspace
 displacement, a log-ratio difference of $+0.080$ ($[0.064, 0.092]$), not by smaller in-subspace
-displacement. It is exploratory: one model, one benchmark, one budget. No
+displacement. The registered replication at budget $2048$ gives $+0.225$
+($[0.178, 0.273]$) on $69$ paired traces, and with nested bases the ordering holds
+at every size from $k = 8$ ($+1.079$, $[0.863, 1.288]$) to $k = 256$ ($+0.067$,
+$[0.050, 0.082]$). It remains exploratory: one model, one benchmark. No
 fine-scale quantity predicts a coarse outcome within a cell: the teacher-forced
 per-trace $\omega$, $\Delta$ and $M$ do not predict whether the same condition
 truncates when run free (AUROC $0.478$ to $0.659$; the smallest
@@ -418,10 +441,18 @@ Benjamini--Hochberg $q$ over the six tests is $0.165$).
 \textbf{Restoration.} The earlier restoration result is retracted
 (\cref{sec:followups}). With the stash repaired, returning the evicted cohort
 restores nothing beyond a random draw at any lag, on $8$ of $25$ problems that
-are long-prompt and low-accuracy. A redesigned probe, with a later trigger that
-makes every long-enough trace eligible and a full self-restoration arm that
-separates missing mass from state drift directly, is registered and has not yet
-run.
+are long-prompt and low-accuracy. The redesigned probe triggers at the first
+eviction after step $1024$, which makes $24$ of $25$ problems eligible
+(full-cache accuracy $0.844$), and adds a full self-restoration arm: every
+evicted entry is returned and eviction stops. Divergence over the next $200$
+forwards falls to $0.338$ (CI $[0.320, 0.358]$) of its uncorrected level for
+Random and $0.297$ ($[0.279, 0.317]$) for StreamingLLM, so about two thirds of
+the divergence is restorable and a third is carried in the drifted state; the
+registered read is mixed for both policies, neither missing mass nor drift
+dominating. Returning only the most recently evicted cohort again restores
+nothing at any lag. Which evicted entries carry the restorable part, and
+whether the residual survives when the prompt is never evicted, are the
+Amendment S cells, running at the time of writing.
 \fi
 %% ===== END R.17 P.1 DRAFT =====
 

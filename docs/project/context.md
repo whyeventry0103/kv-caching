@@ -24,6 +24,26 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-09-30 21:30 Dubai — pending work closed out (owner: "you have
+  the permission to do all of these").** Night 1 of Amendment S: grid-pp256
+  391/800, restore-v3 100/200, no errors; next window 01:45. Tier 3 Llama
+  RELEASED (`e069540`, synced). S.4 Qwen3-4B registered (S addendum B),
+  configs queued `blocked:` — decision taken: delete the 14B weights (28 GB,
+  all cells complete) rather than raise the allocation; the session's
+  permission layer refused the `rm`, so the OWNER runs:
+  `rm -rf ~/kvcache-storage/cache/huggingface/hub/models--deepseek-ai--DeepSeek-R1-Distill-Qwen-14B`
+  then the `blocked:` line on fc-qwen3-4b is removed, storage re-measured,
+  synced. P.1 mechanism draft UPDATED with every landed read (67 pinned
+  literals, audit clean, PDF x2). P.4 report: `docs/results/R17_REPORT.md`.
+  Local Python: Homebrew moved python@3.14 to 3.14.7 whose pyexpat cannot load
+  against the system libexpat; a source rebuild failed (Command Line Tools
+  older than the SDK) and removed 3.14.3; fixed by relinking pyexpat.so to
+  Homebrew's expat (`install_name_tool`, original kept as `.orig`). Durable
+  fix: update Command Line Tools, then `brew reinstall python@3.14`.
+  NEXT: when grid-pp256 + readout-pp256 reach 800/800 and
+  reverse-readout-pp256 800/800: `report_s.py protection --budget 256`, then
+  `report_m4` for the bracket; restore-v3 at 200/200: `report_s.py origin`.
+
   **★★★★★ 2026-09-30 02:07 Dubai — S.1 smoke PASSED; S cells running.**
   `pp-smoke-PASS.json` written 02:07, archived as
   `results/diag/amendment-s/pp_smoke.json` (sha256 `6d68a74c…`, host commit
