@@ -1,0 +1,21 @@
+name: bank_math500_qwen3_4b
+stage: bank
+# Amendment S.4: full-cache reference bank for the native-reasoning check
+# (Qwen/Qwen3-4B, thinking mode; revision pinned in configs/models.yaml).
+# Same shape as the scale-axis banks: first 50 MATH-500 problems x 4 seeds =
+# 200 generations, 16384 cap, token-ID sidecars. Pinned FC reference for the
+# qwen3-4b cells ONLY. The trace carries its own <think> ... </think>, which
+# the answer-boundary detector reads (last </think>).
+models: [qwen3_4b]
+benchmarks: [math500]
+subset:
+  math500: 50
+seeds: [11, 23, 47, 89]
+max_new_tokens:
+  math500: 16384
+presses: [fullcache]
+budgets: [full]
+estimated_generation_count: 200
+store_token_ids: true
+scale_authorized: true
+remote_only: true

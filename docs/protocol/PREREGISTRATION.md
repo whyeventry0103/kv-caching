@@ -4144,3 +4144,41 @@ found while building.**
   therefore the template's design, not a rendering fault. What remains for
   S.4 is storage, and a full-cache pilot to confirm the answer-boundary
   detector on traces that carry their own `<think>`.
+
+**S addendum B (2026-09-30): the S.4 cell, registered before any of its rows
+exist; the 14B weights; the Tier 3 release.**
+- *Owner decisions (2026-09-30):* "you have the permission to do all of these";
+  the storage choice was delegated. Decision taken: **delete the 14B weights**
+  (28 GB at the pinned revision `1df85071…`, re-downloadable; every 14B cell
+  is complete: fc-q14b 200/200, grid/readout/reverse-readout 400/400 each,
+  all read in PAPER_FINDINGS §4t) rather than ask for a larger allocation.
+  The session's permission layer refused the deletion; the owner runs it. The
+  Qwen3 bank job stays `blocked:` until the deletion and a storage re-measure.
+- *Model:* `Qwen/Qwen3-4B`, the revision already pinned in `configs/models.yaml`
+  (`1cfa9a72…`), thinking mode. A model trained to reason natively, against a
+  paper whose every model so far is an R1 distillation. Not cross-architecture
+  (Qwen base); the cross-architecture check remains Llama-8B.
+- *Template (settled, addendum A fact 3):* the trace carries its own
+  `<think> … </think>`; the tags are not special tokens, so they survive
+  decoding and the answer-boundary detector (last `</think>`) applies
+  unchanged. Verified offline from the cached tokenizer.
+- *Cells:* the subset-scale shape of Amendment J: full-cache bank
+  `fc-qwen3-4b` (first 50 MATH-500 problems × 4 seeds, cap 16,384, token-ID
+  sidecars); then grid, forward readout and reverse readout at budget 256 for
+  Random and StreamingLLM (R-KV is not certified on this model). Sampling as
+  every other cell (temperature 0.6, top-p 0.95).
+- *Bank gate (soft band, as Amendment J):* full-cache accuracy in
+  **[0.85, 0.99]**. The one published figure checked for this setting is
+  arXiv:2609.03430's full-attention MATH500 accuracy for Qwen3-4B, 0.939 (their
+  cap and sampling, not ours). Outside the band → STOP, investigate before
+  any cell is read.
+- *Pre-committed read, per press (Amendment J wording):* **REPLICATES** if the
+  residual's CI and the bracket both exclude zero; **DEGENERATE** if free-run
+  accuracy is at the floor (both channels floored, as Llama-Random); anything
+  else is reported verbatim with no forcing into a branch. The residual is
+  reported with its realized ratio.
+- *Footprint:* weights ≈ 8 GB plus ≈ 0.05 GiB of rows, against 69.45 GiB
+  measured before the deletion and 72 GiB approved.
+- *Tier 3 release:* the three `blocked:` lines were removed 2026-09-30 after
+  the owner granted permission; addendum E's conditions had held since
+  2026-09-29 03:15.

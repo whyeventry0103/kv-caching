@@ -1043,7 +1043,6 @@ jobs:
     command: basisfit
     config: configs/experiments/basis_fit_q6_llama8b_r17.yaml
     run_name: q6-basis-fit-llama8b
-    blocked: "Amendment R.17.3 (addendum E) - runs only after every Tier 2 cell is complete and storage is re-measured; released by hand"
     total: 1
     seeds: [11]
     min_free_gb: 28
@@ -1057,7 +1056,6 @@ jobs:
     command: capture2
     config: configs/experiments/capture_math500_llama8b_smoke_r17.yaml
     run_name: capture-llama8b-smoke
-    blocked: "Amendment R.17.3 (addendum E) - runs only after every Tier 2 cell is complete and storage is re-measured; released by hand"
     total: 1
     seeds: [11]
     min_free_gb: 32
@@ -1070,7 +1068,6 @@ jobs:
     command: capture2
     config: configs/experiments/capture_math500_llama8b_b256_r17.yaml
     run_name: capture-llama8b-b256
-    blocked: "Amendment R.17.3 (addendum E) - runs only after every Tier 2 cell is complete and storage is re-measured; released by hand"
     total: 400
     seeds: [11, 23, 47, 89]
     min_free_gb: 32
@@ -1164,6 +1161,57 @@ jobs:
     progress_kind: grid
     est_output_gb: 0.01
     requires: null
+
+  # Amendment S.4: a model trained to reason natively (Qwen3-4B, thinking
+  # mode) through the budget-256 decomposition. Every model in the paper so
+  # far is an R1 distillation. HELD until the 14B weights (28 GB; every 14B
+  # cell is complete) are deleted so the ~8 GB download fits under the 72 GiB
+  # approval; the bank job then downloads the pinned revision.
+  - name: fc-qwen3-4b
+    command: bank
+    config: configs/experiments/bank_math500_qwen3_4b.yaml
+    run_name: fc-qwen3-4b
+    blocked: "Amendment S.4 - held until the 14B weights are deleted and storage is re-measured; released by hand"
+    total: 200
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 20
+    progress_kind: grid
+    est_output_gb: 8.2
+    requires: null
+    extra_args: ["--allow-model-download"]  # ~8 GB, first fetch of the pinned revision
+
+  - name: grid-diss256-qwen3-4b
+    command: grid
+    config: configs/experiments/grid_math500_diss256_qwen3_4b.yaml
+    run_name: grid-diss256-qwen3-4b
+    total: 400
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 20
+    progress_kind: grid
+    est_output_gb: 0.03
+    requires: fc-qwen3-4b
+
+  - name: readout-diss256-qwen3-4b
+    command: replay
+    config: configs/experiments/readout_math500_diss256_qwen3_4b.yaml
+    run_name: readout-diss256-qwen3-4b
+    total: 400
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 20
+    progress_kind: readout
+    est_output_gb: 0.01
+    requires: fc-qwen3-4b
+
+  - name: reverse-readout-diss256-qwen3-4b
+    command: replay
+    config: configs/experiments/reverse_readout_diss256_qwen3_4b.yaml
+    run_name: reverse-readout-diss256-qwen3-4b
+    total: 400
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 20
+    progress_kind: readout
+    est_output_gb: 0.01
+    requires: grid-diss256-qwen3-4b
 
   # ======================================================================
   # R.14 postprocessing: CPU stages run inline by every orchestrator tick

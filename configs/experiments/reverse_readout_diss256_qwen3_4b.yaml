@@ -1,0 +1,18 @@
+name: reverse_readout_diss256_qwen3_4b
+stage: replay
+mode: readout
+# Amendment S.4: the Qwen3-4B compressed free-run traces read out under the
+# full cache (the reverse endpoint of the bracket).
+reference_run_name: grid-diss256-qwen3-4b
+models: [qwen3_4b]
+benchmarks: [math500]
+subset:
+  math500: 50
+presses: [fullcache]
+budgets: [256]
+seeds: [11, 23, 47, 89]
+compression_interval: 64
+max_answer_tokens: 2048
+estimated_generation_count: 0
+estimated_replay_count: 400
+scale_authorized: true

@@ -1,0 +1,20 @@
+name: grid_math500_diss256_qwen3_4b
+stage: grid
+# Amendment S.4: the budget-256 free-run cell on Qwen3-4B (native reasoning,
+# not an R1 distillation). Random and StreamingLLM, the two presses of the
+# primary cell; R-KV is not certified on this model. Matched to the primary
+# cell in cap, interval and seeds; 50 problems as the other subset-scale checks.
+models: [qwen3_4b]
+benchmarks: [math500]
+subset:
+  math500: 50
+presses: [streamingllm, random]
+budgets: [256]
+seeds: [11, 23, 47, 89]
+max_new_tokens:
+  math500: 16384
+compression_interval: 64
+estimated_generation_count: 400
+scale_authorized: true
+remote_only: true
+store_token_ids: true

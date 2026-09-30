@@ -40,7 +40,11 @@ models:
     system_prompt: null
     role: cross-training-paradigm within Qwen family
     pilot_enabled: false
-    note: Deferred from pilot pending rendered thinking-template verification.
+    # 2026-09-30 (Amendment S.4): the template renders no <think> prefix BY
+    # DESIGN with enable_thinking true; the model emits <think> itself and the
+    # tags survive decoding, so the answer-boundary detector (last </think>)
+    # applies unchanged. Verified offline from the cached tokenizer.
+    note: Deferred from pilot pending rendered thinking-template verification (resolved 2026-09-30, see S addendum B).
     chat_template_kwargs:
       enable_thinking: true
 backend:
