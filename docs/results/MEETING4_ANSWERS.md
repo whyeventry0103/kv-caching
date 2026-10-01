@@ -222,10 +222,13 @@ reported, not read.
 
 ## Reproduce
 
+The scripts are archived as `.py.txt` (evidence copies, outside the lint
+gate, like the tick scripts). Copy them to the host and run:
+
 ```bash
+for f in audit_accuracies audit_readouts audit_by_length; do
+  scp docs/results/meeting4_evidence/$f.py.txt kvcache-gpu:/tmp/$f.py; done
 ssh kvcache-gpu 'cd ~/kv-caching && export HF_HUB_OFFLINE=1 HF_DATASETS_OFFLINE=1 \
   HF_HOME=~/kvcache-storage/cache/huggingface REMOTE_DATA_ROOT=~/kvcache-storage/data && \
-  .venv/bin/python docs/results/meeting4_evidence/audit_accuracies.py && \
-  .venv/bin/python docs/results/meeting4_evidence/audit_readouts.py && \
-  .venv/bin/python docs/results/meeting4_evidence/audit_by_length.py'
+  for f in audit_accuracies audit_readouts audit_by_length; do .venv/bin/python /tmp/$f.py; done'
 ```
