@@ -1,0 +1,34 @@
+## audit_acc
+FC matched rows 400 acc 0.8850
+grid-diss256-tok   random        B=256   n=400 dup=0 missing_gold=0 acc_stored=0.4225 acc_rescored=0.4225 mismatch=0 trunc=0.233 finish={'marker': 307, 'length': 93} fc_on_same_keys=0.8850 mean_tok=8044 median_tok=3586 mean_ratio=0.119
+grid-diss256-tok   streamingllm  B=256   n=400 dup=0 missing_gold=0 acc_stored=0.2375 acc_rescored=0.2375 mismatch=0 trunc=0.070 finish={'marker': 365, 'eos': 7, 'length': 28} fc_on_same_keys=0.8850 mean_tok=5274 median_tok=2705 mean_ratio=0.133
+grid-diss256-h2o   h2o           B=256   n=400 dup=0 missing_gold=0 acc_stored=0.2475 acc_rescored=0.2475 mismatch=0 trunc=0.105 finish={'marker': 358, 'length': 42} fc_on_same_keys=0.8850 mean_tok=4359 median_tok=3710 mean_ratio=0.110
+grid-diss256-rkv   rkv           B=256   n=400 dup=0 missing_gold=0 acc_stored=0.5200 acc_rescored=0.5200 mismatch=0 trunc=0.135 finish={'marker': 346, 'length': 54} fc_on_same_keys=0.8850 mean_tok=8033 median_tok=6084 mean_ratio=0.101
+grid-diss1024      random        B=1024  n=400 dup=0 missing_gold=0 acc_stored=0.8000 acc_rescored=0.8000 mismatch=0 trunc=0.033 finish={'marker': 386, 'length': 13, 'eos': 1} fc_on_same_keys=0.8850 mean_tok=3635 median_tok=2130 mean_ratio=0.493
+grid-diss1024      streamingllm  B=1024  n=400 dup=0 missing_gold=0 acc_stored=0.6875 acc_rescored=0.6875 mismatch=0 trunc=0.045 finish={'marker': 380, 'length': 18, 'eos': 2} fc_on_same_keys=0.8850 mean_tok=4129 median_tok=2017 mean_ratio=0.492
+grid-diss2048-tok  random        B=2048  n=400 dup=0 missing_gold=0 acc_stored=0.8500 acc_rescored=0.8500 mismatch=0 trunc=0.030 finish={'marker': 388, 'length': 12} fc_on_same_keys=0.8850 mean_tok=3454 median_tok=2311 mean_ratio=0.748
+grid-diss2048-tok  streamingllm  B=2048  n=400 dup=0 missing_gold=0 acc_stored=0.8075 acc_rescored=0.8075 mismatch=0 trunc=0.028 finish={'marker': 389, 'length': 11} fc_on_same_keys=0.8850 mean_tok=3650 median_tok=2332 mean_ratio=0.748
+## audit_ro
+== forward readout
+  ('h2o', '256') n=400 dup=0 defined=392 acc=0.5969 rescored_mismatch=0 fc_on_defined=0.9031 comp_on_defined=0.25255102040816324 -> residual(comp-readout)=-0.3444
+  ('random', '256') n=400 dup=0 defined=392 acc=0.7653 rescored_mismatch=0 fc_on_defined=0.9031 comp_on_defined=0.42857142857142855 -> residual(comp-readout)=-0.3367
+  ('rkv', '256') n=400 dup=0 defined=392 acc=0.7985 rescored_mismatch=0 fc_on_defined=0.9031 comp_on_defined=0.5306122448979592 -> residual(comp-readout)=-0.2679
+  ('streamingllm', '256') n=400 dup=0 defined=392 acc=0.5842 rescored_mismatch=0 fc_on_defined=0.9031 comp_on_defined=0.23979591836734693 -> residual(comp-readout)=-0.3444
+== reverse readout
+  ('h2o', '256') n=400 dup=0 defined=360 acc=0.4194 rescored_mismatch=0 fc_on_defined=0.8972 comp_on_defined=None -> residual(comp-readout)=None
+  ('random', '256') n=400 dup=0 defined=308 acc=0.6364 rescored_mismatch=0 fc_on_defined=0.9188 comp_on_defined=None -> residual(comp-readout)=None
+  ('rkv', '256') n=400 dup=0 defined=346 acc=0.6618 rescored_mismatch=0 fc_on_defined=0.9133 comp_on_defined=None -> residual(comp-readout)=None
+  ('streamingllm', '256') n=400 dup=0 defined=372 acc=0.4167 rescored_mismatch=0 fc_on_defined=0.8871 comp_on_defined=None -> residual(comp-readout)=None
+## audit_len
+forward readout accuracy by reference trace length (tokens), budget 256; n per bin
+  [    0, 1000) n= 33 fc=0.939  random=0.909  streamingllm=0.879  h2o=0.909  rkv=0.939
+  [ 1000, 2000) n=132 fc=0.992  random=0.924  streamingllm=0.803  h2o=0.712  rkv=0.985
+  [ 2000, 4000) n=137 fc=0.891  random=0.701  streamingllm=0.482  h2o=0.562  rkv=0.788
+  [ 4000, 8000) n= 65 fc=0.862  random=0.677  streamingllm=0.308  h2o=0.400  rkv=0.538
+  [ 8000,20000) n= 25 fc=0.560  random=0.320  streamingllm=0.320  h2o=0.280  rkv=0.360
+free-run accuracy / mean generated tokens / truncation by full-cache reference length
+  [    0, 1000) n= 33 fc=0.939 | random acc=0.970 tok=  671 tr=0.00 | streamingllm acc=0.727 tok=  891 tr=0.00 | h2o acc=0.848 tok=  981 tr=0.03 | rkv acc=0.970 tok=  755 tr=0.00
+  [ 1000, 2000) n=132 fc=0.992 | random acc=0.697 tok= 4356 tr=0.08 | streamingllm acc=0.348 tok= 3530 tr=0.04 | h2o acc=0.318 tok= 3416 tr=0.05 | rkv acc=0.818 tok= 3713 tr=0.02
+  [ 2000, 4000) n=137 fc=0.891 | random acc=0.255 tok=10300 tr=0.34 | streamingllm acc=0.124 tok= 6245 tr=0.07 | h2o acc=0.168 tok= 4709 tr=0.09 | rkv acc=0.416 tok= 9680 tr=0.15
+  [ 4000, 8000) n= 65 fc=0.862 | random acc=0.123 tok=12132 tr=0.38 | streamingllm acc=0.077 tok= 7486 tr=0.12 | h2o acc=0.092 tok= 6184 tr=0.22 | rkv acc=0.138 tok=13797 tr=0.31
+  [ 8000,20000) n= 33 fc=0.424 | random acc=0.061 tok=12746 tr=0.33 | streamingllm acc=0.091 tok= 8242 tr=0.15 | h2o acc=0.000 tok= 6460 tr=0.27 | rkv acc=0.061 tok=14394 tr=0.33
