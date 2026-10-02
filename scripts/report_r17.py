@@ -415,19 +415,83 @@ def restore(runs: Path, a: argparse.Namespace) -> dict[str, Any]:
     sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
     from report_exact_lag import read_rows
 
+    from kvcache.read_validation import (
+        FINAL,
+        INVALID,
+        design_keys,
+        final_status,
+        in_unit_interval,
+        provenance_v1_summary,
+        validate_population,
+    )
+
     rows = _rows(runs / "restore-v2")
     fc = _fc(runs)
+    # 2026-10-02 (review of f69dce3): the same validation boundary as the S
+    # readers. Coverage against the frozen design over EVERY row, provenance-v1
+    # identity, passed gates, finite TV; the branch label is withheld unless FINAL.
+    cfg2 = "configs/experiments/restore_v2_math500_r17.yaml"
+    _design, expected = design_keys(cfg2, root=PROJECT_ROOT)
+    pop = validate_population(
+        rows,
+        key=lambda r: (
+            str(r["press"]),
+            str(r["budget"]),
+            str(r["pid"]),
+            int(r["seed"]),
+        ),
+        expected=expected,
+        required=("pid", "seed", "press", "budget", "status", "provenance"),
+    )
+    for r in rows:
+        if r.get("status") != "READ":
+            continue
+        k = repr((r["press"], r["pid"], r["seed"]))
+        probs = []
+        fs = r.get("full_restore") or {}
+        if fs.get("eligible"):
+            if not (fs.get("gate") or {}).get("passed"):
+                probs.append("full_restore gate not passed")
+            for f in ("window_mean_tv", "none_window_mean_tv"):
+                if not in_unit_interval(fs.get(f)):
+                    probs.append(f"full_restore.{f} not in [0, 1]")
+        for lag, blk in (r.get("lags") or {}).items():
+            if not blk.get("eligible"):
+                continue
+            if not all(g.get("passed") for g in (blk.get("gates") or {}).values()):
+                probs.append(f"lag {lag}: an arm gate did not pass")
+            for arm in ("none", "matched", "random", "relaxed"):
+                if not in_unit_interval(blk.get(arm)):
+                    probs.append(f"lag {lag}: {arm} TV not in [0, 1]")
+        if probs:
+            pop["malformed"][k] = probs
+            pop["status"] = INVALID
+    controls = {
+        "provenance_restore_v2": provenance_v1_summary(
+            rows,
+            kind="restore_v2",
+            config=cfg2,
+            runs_root=runs,
+            key=lambda r: (r["pid"], int(r["seed"])),
+            root=PROJECT_ROOT,
+        )
+    }
+    read_status = final_status(pop, controls)
     status = {}
     for r in rows:
         status.setdefault(r["press"], []).append(r["status"])
     out: dict[str, Any] = {
         "read": "R.17.2.3 restoration redesigned",
+        "status": read_status,
+        "validation": {"population": pop, "controls": controls},
         "n_rows": len(rows),
         "status_counts": {
             p: {s: v.count(s) for s in set(v)} for p, v in sorted(status.items())
         },
         "per_policy": {},
     }
+    if read_status == INVALID:
+        return out
     for press in sorted(status):
         rs = [r for r in rows if r["press"] == press]
         read = [r for r in rs if r["status"] == "READ"]
@@ -477,7 +541,11 @@ def restore(runs: Path, a: argparse.Namespace) -> dict[str, Any]:
             "full_restore": {
                 "n_traces": len(fs),
                 "R_fs": ratio,
-                "branch": r17.restoration_branch(ratio["ci95"]) if ratio else None,
+                "branch": (
+                    r17.restoration_branch(ratio["ci95"])
+                    if ratio and read_status == FINAL
+                    else f"WITHHELD: read is {read_status}"
+                ),
             },
             "cohort_arms": read_rows(read, n_resamples=a.n_resamples, seed=a.seed).get(
                 press
@@ -638,6 +706,7 @@ READS = {
 
 
 def main() -> int:
+    global OUT
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--runs-root", type=Path, required=True)
     ap.add_argument("--capture-run", default="capture-b256")
@@ -645,14 +714,21 @@ def main() -> int:
     ap.add_argument("--n-resamples", type=int, default=2000)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--out-dir", type=Path, default=OUT, help="tests redirect it")
     ap.add_argument("read", choices=sorted(READS))
     a = ap.parse_args()
+    OUT = a.out_dir
     if a.dry_run:
         print(json.dumps({"command": "r17", "read": a.read, "out": str(OUT)}))
         return 0
     stem, fn = READS[a.read]
     name = stem if a.capture_run == "capture-b256" else f"{stem}_{a.capture_run}"
-    _write(name, fn(a.runs_root, a), sys.argv[1:])
+    payload = fn(a.runs_root, a)
+    _write(name, payload, sys.argv[1:])
+    status = payload.get("status")
+    if status in ("PARTIAL", "INVALID"):
+        print(f"{status}: exit {3 if status == 'PARTIAL' else 2}", file=sys.stderr)
+        return 3 if status == "PARTIAL" else 2
     return 0
 
 

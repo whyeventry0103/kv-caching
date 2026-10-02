@@ -133,6 +133,7 @@ dryrun:
 	$(PYTHON) scripts/pp_smoke.py --config configs/experiments/pp_smoke_s1.yaml --dry-run
 	$(PYTHON) scripts/report_s.py --runs-root runs --dry-run protection
 	$(PYTHON) scripts/report_s.py --runs-root runs --dry-run origin
+	$(PYTHON) scripts/audit_meeting4.py --dry-run retention
 	$(PYTHON) scripts/run_grid_pp.py --config configs/experiments/grid_math500_pp256_s1.yaml --dry-run
 	$(PYTHON) scripts/run_grid_pp.py --config configs/experiments/grid_math500_pp1024_s1.yaml --dry-run
 	$(PYTHON) scripts/run_replay_pp.py --config configs/experiments/readout_math500_pp256_s1.yaml --dry-run

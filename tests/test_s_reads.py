@@ -7,8 +7,6 @@ computed by hand on tables small enough to do so.
 
 from __future__ import annotations
 
-import json
-import sys
 from pathlib import Path
 
 import pytest
@@ -20,8 +18,9 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def test_residual_and_effect_labels_at_their_boundaries():
     assert s.residual_label([-0.30, -0.01]) == "RESIDUAL PERSISTS"
-    assert s.residual_label([-0.30, 0.0]) == "RESIDUAL NOT DETECTED"
-    assert s.residual_label([-0.05, 0.05]) == "RESIDUAL NOT DETECTED"
+    assert s.residual_label([-0.30, 0.0]) == s.NOT_DETECTED
+    assert s.residual_label([-0.05, 0.05]) == s.NOT_DETECTED
+    assert "not evidence of absence" in s.NOT_DETECTED
     assert s.residual_label([0.01, 0.05]).startswith("EXCLUDES ZERO, POSITIVE")
     assert s.protection_effect_label([0.01, 0.2]) == "SHRINKS"
     assert s.protection_effect_label([-0.2, -0.01]) == "GROWS"
@@ -37,6 +36,9 @@ def test_rho_labels_at_their_boundaries():
     assert s.rho_label([0.20, 0.49]) == "INDETERMINATE"
 
 
+REF = {("a", 1): True, ("a", 2): True, ("b", 1): True, ("b", 2): True}
+
+
 def _tables():
     # two problems, two seeds each; readout undefined for ("b", 2)
     keys = [("a", 1), ("a", 2), ("b", 1), ("b", 2)]
@@ -50,7 +52,9 @@ def _tables():
 
 def test_protection_contrasts_match_hand_computation():
     free_pp, free_base, ro_pp, ro_base = _tables()
-    out = s.protection_contrasts(free_pp, free_base, ro_pp, ro_base, n_resamples=200)
+    out = s.protection_contrasts(
+        free_pp, free_base, ro_pp, ro_base, reference=REF, n_resamples=200
+    )
     # free: a = (1+1)/2, b = (0+1)/2 -> 0.75 ; base a = 0.5, b = 0 -> 0.25
     assert out["free_accuracy_pp"]["mean"] == pytest.approx(0.75)
     assert out["delta_free"]["mean"] == pytest.approx(0.5)
@@ -68,7 +72,13 @@ def test_protection_contrasts_match_hand_computation():
 def test_sensitivity_read_drops_the_problem_from_both_arms():
     free_pp, free_base, ro_pp, ro_base = _tables()
     out = s.protection_contrasts(
-        free_pp, free_base, ro_pp, ro_base, exclude_pids=["b"], n_resamples=50
+        free_pp,
+        free_base,
+        ro_pp,
+        ro_base,
+        reference=REF,
+        exclude_pids=["b"],
+        n_resamples=50,
     )
     assert out["n_conditions"] == 2 and out["excluded_problems"] == ["b"]
     assert out["residual_pp"]["mean"] == pytest.approx(0.0)
@@ -83,9 +93,12 @@ def test_mismatched_populations_are_refused():
             free_base,
             ro_pp,
             ro_base,
+            reference=REF,
         )
     with pytest.raises(ValueError, match="answer boundary"):
-        s.protection_contrasts(free_pp, free_base, {**ro_pp, ("b", 2): True}, ro_base)
+        s.protection_contrasts(
+            free_pp, free_base, {**ro_pp, ("b", 2): True}, ro_base, reference=REF
+        )
 
 
 def test_flip_masses_are_over_the_whole_cell():
@@ -106,6 +119,9 @@ def test_paper_consequence_covers_every_registered_branch():
     assert s.paper_consequence(both(P, P)).startswith("A:")
     assert s.paper_consequence(both(P, N)).startswith("B:")
     assert s.paper_consequence(both(N, N)).startswith("C:")
+    assert "not established" in s.paper_consequence(both(N, N))
+    U = "UNINFORMATIVE: floor (both channels at or below 0.05)"
+    assert s.paper_consequence(both(U, P)).startswith("UNINFORMATIVE")
     assert s.paper_consequence(both(N, P)).startswith("FITS NO BRANCH")
     mixed = {"random_pp": {256: P, 1024: P}, "streamingllm_pp": {256: N, 1024: N}}
     assert s.paper_consequence(mixed).startswith("PRESSES DISAGREE")
@@ -160,121 +176,14 @@ def test_determinism_control_stops_on_any_difference_or_missing_row():
     assert not s.determinism_control({}, v2)["passed"]
 
 
-# ------------------------------------------------------------- the script
-def _write(path: Path, rows: list[dict]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text("".join(json.dumps(r) + "\n" for r in rows))
+# The script-level tests moved to tests/test_s_acceptance.py, which drives the
+# real CLI on complete fixtures and the reviewed mutations (2026-10-02).
 
 
-def _script():
-    import importlib.util
-
-    sys.path.insert(0, str(ROOT / "scripts"))
-    spec = importlib.util.spec_from_file_location(
-        "report_s_t", ROOT / "scripts" / "report_s.py"
-    )
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
-
-
-def _synthetic_runs(tmp: Path, n_pp: int) -> Path:
-    runs = tmp / "runs"
-    keys = [(f"p{i:03d}", sd) for i in range(100) for sd in (11, 23, 47, 89)]
-
-    def grid(name, presses, budget, correct, n):
-        rows, toks = [], []
-        for press in presses:
-            for pid, sd in keys[:n]:
-                rows.append(
-                    {
-                        "pid": pid,
-                        "press": press,
-                        "budget": budget,
-                        "correct": correct(press, pid),
-                        "decoding": {"seed": sd},
-                    }
-                )
-                plen = 353 if pid == "p000" else 50
-                toks.append({"pid": pid, "prompt_token_ids": [0] * plen})
-        _write(runs / name / "math500" / "m" / "rows.jsonl", rows)
-        _write(runs / name / "token_ids" / "math500" / "m" / "t.jsonl", toks)
-
-    def readout(name, presses, budget, correct, n):
-        rows = [
-            {
-                "reference_key": ["math500", pid, "m", "fullcache", "full", sd],
-                "condition": {"press": press, "budget": budget},
-                "readout_correct": None if pid == "p099" else correct(press, pid),
-            }
-            for press in presses
-            for pid, sd in keys[:n]
-        ]
-        _write(runs / name / "readout" / "r.jsonl", rows)
-
-    _write(
-        runs / "math500-fc-powered-merged" / "math500" / "fc.jsonl",
-        [{"pid": p, "correct": True, "decoding": {"seed": sd}} for p, sd in keys],
-    )
-    base, pp = ["random", "streamingllm"], ["random_pp", "streamingllm_pp"]
-
-    def half(_press, pid):
-        return int(pid[1:]) % 2 == 0
-
-    grid("grid-diss256-tok", base, 256, lambda *_: False, 400)
-    grid("grid-pp256", pp, 256, half, n_pp)
-    readout("readout-diss256-g0", base, 256, lambda *_: True, 200)
-    readout("readout-diss256-g1", base, 256, lambda *_: True, 400)
-    readout("readout-pp256", pp, 256, lambda *_: True, n_pp)
-    return runs
-
-
-def test_protection_read_end_to_end_on_synthetic_rows(tmp_path, monkeypatch):
-    mod = _script()
-    monkeypatch.setattr(mod, "OUT", tmp_path / "out")
-    runs = _synthetic_runs(tmp_path, 400)
-    # readout-diss256-g0 and -g1 overlap on the first 200 conditions
-    monkeypatch.setattr(
-        "sys.argv",
-        ["report_s", "--runs-root", str(runs), "protection", "--budget", "256"],
-    )
-    with pytest.raises(ValueError, match="duplicate readout row"):
-        mod.main()
-    (runs / "readout-diss256-g0" / "readout" / "r.jsonl").write_text("")
-    assert mod.main() == 0
-    d = json.loads((tmp_path / "out" / "protection_b256.json").read_text())
-    assert d["status"] == "FINAL" and d["budget_relaxed_problems"] == ["p000"]
-    block = d["per_press"]["random_pp"]
-    # readout is defined on p000..p098 and always right; free is right on the
-    # 50 even problems and wrong on the 49 odd ones: residual = -49/99
-    assert block["primary"]["residual_pp"]["mean"] == pytest.approx(-49 / 99)
-    assert block["primary"]["residual_label"] == "RESIDUAL PERSISTS"
-    assert block["primary"]["delta_free"]["mean"] == pytest.approx(0.5)
-    assert block["primary"]["protection_effect"] == "SHRINKS"
-    assert block["sensitivity_without_budget_relaxed"]["n_conditions"] == 396
-    assert block["flip_mass_pp"] == {"harmful": 0.5, "beneficial": 0.0}
-
-
-def test_an_incomplete_cell_is_refused_and_a_partial_read_has_no_label(
-    tmp_path, monkeypatch
-):
-    mod = _script()
-    monkeypatch.setattr(mod, "OUT", tmp_path / "out")
-    runs = _synthetic_runs(tmp_path, 300)
-    (runs / "readout-diss256-g0" / "readout" / "r.jsonl").write_text("")
-    argv = ["report_s", "--runs-root", str(runs), "protection", "--budget", "256"]
-    monkeypatch.setattr("sys.argv", argv)
-    with pytest.raises(SystemExit, match="incomplete"):
-        mod.main()
-    monkeypatch.setattr("sys.argv", [*argv, "--partial"])
-    assert mod.main() == 0
-    d = json.loads((tmp_path / "out" / "protection_b256_partial.json").read_text())
-    assert d["status"] == "PARTIAL"
-    assert (
-        d["per_press"]["random_pp"]["primary"]["residual_label"] == "PARTIAL: no label"
-    )
-    monkeypatch.setattr(
-        "sys.argv", ["report_s", "--runs-root", str(runs), "consequence"]
-    )
-    with pytest.raises(SystemExit, match="has not been read"):
-        mod.main()
+def test_informativeness_rule_is_explicit_and_exploratory():
+    assert s.informativeness(0.0, 0.0, 0.9).startswith("UNINFORMATIVE: floor")
+    assert s.informativeness(0.05, 0.05, 0.9).startswith("UNINFORMATIVE: floor")
+    assert s.informativeness(0.06, 0.0, 0.9) == "INFORMATIVE"
+    assert s.informativeness(0.9, 0.95, 0.9).startswith("UNINFORMATIVE: ceiling")
+    assert s.informativeness(0.4, 0.7, 0.9) == "INFORMATIVE"
+    assert s.UNINFORMATIVE_FLOOR == 0.05

@@ -30,6 +30,14 @@ RHO_CARRIES = 0.50
 RHO_MINOR = 0.20
 DETERMINISM_TOL = 1e-6
 ORIGIN_ARMS = ("frozen", "prompt", "trace", "full")
+NOT_DETECTED = "RESIDUAL NOT DETECTED (CI includes 0; not evidence of absence)"
+# Floor/ceiling rule (S.1 text: "at the floor or the ceiling ... uninformative").
+# The numeric floor is EXPLORATORY, set 2026-10-02 after the review of f69dce3,
+# not registered: a cell whose protected free-run AND readout accuracies are
+# both at or below it has no accuracy left to attribute; a cell whose protected
+# free-run accuracy is not below the full cache has nothing to explain.
+UNINFORMATIVE_FLOOR = 0.05
+UNINFORMATIVE = "UNINFORMATIVE"
 
 
 # ------------------------------------------------------------------ S.1
@@ -40,7 +48,7 @@ def residual_label(ci: Sequence[float]) -> str:
         return "RESIDUAL PERSISTS"
     if lo > 0:
         return "EXCLUDES ZERO, POSITIVE (fits no registered branch)"
-    return "RESIDUAL NOT DETECTED"
+    return NOT_DETECTED
 
 
 def protection_effect_label(ci: Sequence[float]) -> str:
@@ -53,6 +61,21 @@ def protection_effect_label(ci: Sequence[float]) -> str:
     return "UNCHANGED"
 
 
+def informativeness(
+    free_acc: float,
+    readout_acc: float,
+    fc_acc: float,
+    *,
+    floor: float = UNINFORMATIVE_FLOOR,
+) -> str:
+    """ "INFORMATIVE", "UNINFORMATIVE: floor" or "UNINFORMATIVE: ceiling"."""
+    if free_acc <= floor and readout_acc <= floor:
+        return f"{UNINFORMATIVE}: floor (both channels at or below {floor})"
+    if free_acc >= fc_acc:
+        return f"{UNINFORMATIVE}: ceiling (no accuracy lost against the full cache)"
+    return "INFORMATIVE"
+
+
 def _restrict(table: Mapping[Key, Any], drop: Collection[str]) -> dict[Key, Any]:
     return {k: v for k, v in table.items() if k[0] not in drop}
 
@@ -63,6 +86,7 @@ def protection_contrasts(
     readout_pp: Mapping[Key, bool],
     readout_base: Mapping[Key, bool],
     *,
+    reference: Mapping[Key, bool],
     exclude_pids: Collection[str] = (),
     n_resamples: int = 2000,
     seed: int = 0,
@@ -86,7 +110,13 @@ def protection_contrasts(
         )
     if not set(rp) <= set(fp):
         raise ValueError("readout rows outside the cell population")
+    if not set(fp) <= set(reference):
+        raise ValueError("cell conditions absent from the full-cache reference")
     kw = {"n_resamples": n_resamples, "seed": seed}
+    fc_free = statistics.fmean(float(reference[k]) for k in fp)
+    free_acc_pp = statistics.fmean(float(v) for v in fp.values())
+    ro_acc_pp = statistics.fmean(float(v) for v in rp.values()) if rp else 0.0
+    info = informativeness(free_acc_pp, ro_acc_pp, fc_free)
     res_p = {k: float(fp[k]) - float(rp[k]) for k in rp}
     res_b = {k: float(fb[k]) - float(rb[k]) for k in rb}
     residual_pp = equal_problem_bootstrap(res_p, **kw)
@@ -107,9 +137,15 @@ def protection_contrasts(
         "readout_accuracy_base": equal_problem_bootstrap(
             {k: float(v) for k, v in rb.items()}, **kw
         ),
+        "fc_accuracy_on_cell": fc_free,
         "residual_pp": residual_pp,
         "residual_base": equal_problem_bootstrap(res_b, **kw),
-        "residual_label": residual_label(residual_pp["ci95"]),
+        "informativeness": info,
+        "informativeness_rule": f"exploratory floor {UNINFORMATIVE_FLOOR}, set "
+        "2026-10-02; ceiling = protected free-run not below the full cache",
+        "residual_label": (
+            residual_label(residual_pp["ci95"]) if info == "INFORMATIVE" else info
+        ),
         "delta_free": paired_equal_problem(
             {k: float(v) for k, v in fp.items()},
             {k: float(v) for k, v in fb.items()},
@@ -142,9 +178,16 @@ def flip_masses(
 def paper_consequence(labels: Mapping[str, Mapping[int, str]]) -> str:
     """The S.1 paper-level branch from per-press, per-budget residual labels."""
     per_press = {}
+    if set(labels) != {"random_pp", "streamingllm_pp"}:
+        return "INCOMPLETE: both presses are needed"
     for press, by_budget in labels.items():
         if set(by_budget) != {256, 1024}:
             return "INCOMPLETE: both budgets are needed"
+        if any(v.startswith(UNINFORMATIVE) for v in by_budget.values()):
+            return (
+                f"{UNINFORMATIVE}: {press} has a floor or ceiling cell; no branch "
+                "is reached from an uninformative cell"
+            )
         if any(v.startswith("EXCLUDES ZERO, POSITIVE") for v in by_budget.values()):
             return "FITS NO BRANCH: reported plainly"
         p256 = by_budget[256] == "RESIDUAL PERSISTS"
@@ -161,8 +204,8 @@ def paper_consequence(labels: Mapping[str, Mapping[int, str]]) -> str:
         "A": "A: PERSISTS at both budgets; the headline stands",
         "B": "B: PERSISTS at 256 only; the 4x regime is not established under "
         "prompt protection",
-        "C": "C: NOT DETECTED at both budgets; attributable to prompt loss at "
-        "this scope",
+        "C": "C: NOT DETECTED at both budgets; consistent with prompt loss at "
+        "this scope, not established (a CI including zero is not equivalence)",
         "FITS NO BRANCH": "FITS NO BRANCH: reported plainly",
     }[found.pop()]
 
@@ -202,11 +245,16 @@ def origin_ratios(
     equal-problem means. The difference is bootstrapped on the SAME problem
     draws as the two ratios, so it is a paired interval.
     """
+    from kvcache.read_validation import in_unit_interval
+
     if set(tv) != set(ORIGIN_ARMS):
         raise ValueError(f"need exactly the arms {ORIGIN_ARMS}")
     keys = set(tv["frozen"])
     if any(set(tv[a]) != keys for a in ORIGIN_ARMS) or not keys:
         raise ValueError("the four arms must cover the same, non-empty conditions")
+    bad = [(a, k) for a in ORIGIN_ARMS for k in keys if not in_unit_interval(tv[a][k])]
+    if bad:
+        raise ValueError(f"TV not a finite number in [0, 1]: {bad[:5]}")
     per = _problems(keys)
     pids = sorted(per)
     gap = {k: tv["frozen"][k] - tv["full"][k] for k in keys}
@@ -274,17 +322,28 @@ def determinism_control(
     Each map is key -> {"full": .., "none": ..}. A READ restore-v3 condition
     with no restore-v2 counterpart fails the control: it cannot be checked.
     """
+    from kvcache.read_validation import in_unit_interval
+
     missing = sorted(set(v3) - set(v2))
     worst = {"full": 0.0, "none": 0.0}
-    for k in set(v3) & set(v2):
+    bad: list[str] = []
+    for k in sorted(set(v3) & set(v2)):
         for f in worst:
-            worst[f] = max(worst[f], abs(float(v3[k][f]) - float(v2[k][f])))
-    passed = not missing and bool(v3) and all(v <= tol for v in worst.values())
+            a, b = v3[k].get(f), v2[k].get(f)
+            # fail closed: NaN, infinities and out-of-domain TV never compare equal
+            if not (in_unit_interval(a) and in_unit_interval(b)):
+                bad.append(f"{k} {f}: {a!r} vs {b!r}")
+                continue
+            worst[f] = max(worst[f], abs(float(a) - float(b)))
+    passed = (
+        not missing and not bad and bool(v3) and all(v <= tol for v in worst.values())
+    )
     return {
         "passed": passed,
         "tolerance": tol,
         "max_abs_diff": worst,
         "n_compared": len(set(v3) & set(v2)),
         "missing_in_restore_v2": [list(k) for k in missing],
+        "non_finite_or_out_of_domain": bad[:20],
         "on_failure": "STOP: an instrument bug, not a result",
     }
