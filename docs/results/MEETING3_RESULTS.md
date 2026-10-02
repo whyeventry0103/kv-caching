@@ -8,6 +8,14 @@ artifact when this file was written. Review evidence (gate outputs, remote test 
 parity, queue dry-run, remote-only data list):
 [`meeting3_evidence/`](meeting3_evidence/README.md).
 
+**Status, 2026-10-02 17:00 Dubai.** The readers now sit behind one validation
+boundary (`kvcache.read_validation`, after the independent review of
+`f69dce3`): FINAL / PARTIAL / INVALID, labels only on FINAL. Re-read with it:
+restore-v2 FINAL (unchanged), **restore-v3 FINAL (§3e: Random PARTIAL and
+PROMPT-SPECIFIC; StreamingLLM INDETERMINATE and NON-SPECIFIC)**, S.1 budget
+256 PARTIAL (free-run 800/800 complete, forward readout pending; no label).
+Llama-8B capture 400/400 (not yet read); Qwen3-4B bank 150/200.
+
 **Status, 2026-09-29 03:20 Dubai. Tier 2 is complete.**
 - restore-v2 FINAL at 200/200: full self-restoration is **MIXED** for both
   policies (R_fs 0.338 Random, 0.297 StreamingLLM), and the cohort arms repeat
@@ -804,6 +812,60 @@ TV (positive = divergence reduced), trace-level bootstrap.
 - What cannot be restored, about a third, is carried in the drifted state.
 
 One model, one benchmark, budget 256; exploratory at this scope.
+
+## 3e. Task 2 — restoration by origin, restore-v3 (Amendment S.2; FINAL)
+
+Read 2026-10-02 16:40 Dubai by the repaired reader (`scripts/report_s.py
+origin`, validation boundary of 2026-10-02). Artifacts:
+`results/diag/amendment-s/origin.json`, `origin.conditions.tsv` (sha256 in
+the JSON). **Status FINAL:** 200/200 rows against the frozen design, 0
+malformed; provenance-v1 identity verified on every restore-v3 and restore-v2
+row; every arm gate passed; the determinism control against restore-v2 holds
+exactly (max |ΔTV| = 0.0 on all 91 + 91 compared conditions, eligible sets
+identical).
+
+**Eligibility** (identical for both policies): 91 READ traces from 24
+problems (full-cache accuracy 0.844 [0.708, 0.958]); 8 traces never reach the
+trigger and 1 is too short for the window. The Random `prompt` arm needed
+padding (every head returns all of its evicted prompt entries and is padded
+to the largest count with its most recently evicted trace entries): median
+63 prompt entries returned per head against a median prompt of 64 tokens,
+and up to 25 pad entries in the heads that had kept more of the prompt.
+StreamingLLM needed no padding (every head evicts the same positions).
+
+**Registered read.** ρ_arm = (TV_frozen − TV_arm) / (TV_frozen − TV_full),
+window-mean TV over the 200 forwards after the trigger, eviction off in every
+arm, equal-problem means, problem-cluster bootstrap CI (91 traces, 24
+problems).
+
+| Policy | TV frozen | TV full | TV prompt | TV trace | ρ_prompt | ρ_trace | ρ_prompt − ρ_trace | Label | Specificity |
+|---|---|---|---|---|---|---|---|---|---|
+| Random | 0.1005 [0.0891, 0.1132] | 0.0377 [0.0336, 0.0419] | 0.0775 [0.0694, 0.0856] | 0.0867 [0.0772, 0.0970] | **0.367 [0.310, 0.419]** | 0.220 [0.162, 0.278] | **+0.147 [+0.083, +0.200]** | **PARTIAL** | **PROMPT-SPECIFIC** |
+| StreamingLLM | 0.0867 [0.0752, 0.0995] | 0.0292 [0.0253, 0.0334] | 0.0728 [0.0642, 0.0813] | 0.0711 [0.0616, 0.0803] | 0.242 [0.184, 0.295] | 0.272 [0.200, 0.340] | −0.030 [−0.090, +0.025] | **INDETERMINATE** | **NON-SPECIFIC** |
+
+- The restorable gap TV_frozen − TV_full is 0.0629 [0.0545, 0.0722] for Random
+  and 0.0575 [0.0492, 0.0665] for StreamingLLM: both CIs lie above 0, so the
+  ratios are defined. Every TV here is an order of magnitude above the
+  precision floor's mean per-step TV (0.0062, §4a).
+- **Random:** returning the prompt entries (about 63 per head, plus pad)
+  recovers 37% of what returning all ~830 stashed entries recovers; an
+  equal-sized random draw of trace entries recovers 22%. Prompt entries carry
+  more per entry than trace entries (the difference's CI excludes 0), and
+  they do not carry most of the restorable divergence (PARTIAL, not PROMPT
+  CARRIES IT). The pad is material (up to 25 of ~88 returned entries in some
+  heads), so "prompt-specific" means "prompt entries plus a minority of the
+  most recently evicted trace entries, against an equal-count random trace
+  draw".
+- **StreamingLLM:** the prompt entries recover no more than an equal number of
+  trace entries (the difference's CI includes 0). The ρ_prompt CI straddles
+  the 0.20 threshold, so the registered label is INDETERMINATE.
+- **What this does and does not say.** This is divergence under teacher
+  forcing, not accuracy. Full restoration here, unlike restore-v2's R_fs,
+  is compared against a `frozen` arm in which eviction is also stopped, so
+  "stopping eviction" is held constant; the remaining difference between the
+  arms is what the returned entries contribute. The prompt-information
+  account of the Random-vs-StreamingLLM accuracy gap is supported for Random
+  only in part, and not for StreamingLLM, at this scope.
 
 ## 4. Controls
 

@@ -24,6 +24,27 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-10-02 17:30 Dubai — reader repair after the independent
+  review of f69dce3; S.2 READ (FINAL).** One validation boundary
+  (`kvcache.read_validation`) behind `report_s.py` (protection / origin /
+  consequence) and `report_r17.py restore`: expected keys from committed
+  configs + frozen pid lists (`configs/meeting3/grid100_pids.json` added),
+  coverage over every row, provenance, gates, finite values, FINAL / PARTIAL
+  / INVALID, exit 0/3/2, stale outputs retired. The five reviewed failures
+  are reproduced in `tests/test_s_acceptance.py` (real CLI) and fail closed.
+  Re-read on the host: restore-v2 FINAL (unchanged), **restore-v3 FINAL:
+  Random ρ_prompt 0.367 [0.310, 0.419] PARTIAL, ρ_prompt−ρ_trace +0.147
+  [+0.083, +0.200] PROMPT-SPECIFIC; StreamingLLM 0.242 [0.184, 0.295]
+  INDETERMINATE, −0.030 [−0.090, +0.025] NON-SPECIFIC** (MEETING3_RESULTS
+  §3e); S.1 b256 PARTIAL (grid 800/800, readout pending). MEETING4_ANSWERS
+  corrected (paired contrasts, matched keys, Llama arithmetic, 3,200 rows,
+  retention sim committed with device). Jobs: capture-llama8b-b256 400/400
+  (NOT read yet: run `report_capture` with the Llama config and
+  `report_r17 --capture-run capture-llama8b-b256`), fc-qwen3-4b 150/200
+  (bank gate [0.85, 0.99] before any Qwen cell is read). NEXT: readout-pp256
+  → `report_s.py protection --budget 256` (FINAL), reverse, 1024, then
+  `consequence`.
+
   **★★★★★ 2026-09-30 21:25 Dubai — Qwen3-4B RELEASED.** Owner deleted the
   14B weights; storage 41.952/72 GiB. fc-qwen3-4b unblocked (downloads ~8 GB
   at the pinned revision on first launch). Queue order now: Llama Tier 3 →

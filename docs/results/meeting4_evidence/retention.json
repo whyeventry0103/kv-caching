@@ -1,0 +1,155 @@
+{
+  "design": {
+    "budget": 256,
+    "device": "cuda",
+    "dtype_name": "bfloat16",
+    "interval": 64,
+    "n_kv": 4,
+    "prompt_len": 94,
+    "seed": 0,
+    "steps": 4096
+  },
+  "implementation": {
+    "device": "cuda",
+    "dtype": "bfloat16",
+    "generator_seed": 0,
+    "note": "the CUDA and CPU generators give different score vectors; the structure (fixed slot pattern) is the same on both",
+    "python": "3.11.15",
+    "reseeded_every_prune": true,
+    "torch": "2.7.1+cu126"
+  },
+  "policies": {
+    "random": {
+      "cohort_survival_entering_at_1024": {
+        "1024": [
+          0.0312,
+          0.0156,
+          0.0312,
+          0.0469
+        ],
+        "128": [
+          0.4688,
+          0.5469,
+          0.5,
+          0.4375
+        ],
+        "2048": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "256": [
+          0.3125,
+          0.3281,
+          0.3281,
+          0.2656
+        ],
+        "512": [
+          0.1562,
+          0.1406,
+          0.125,
+          0.1406
+        ],
+        "64": [
+          0.6562,
+          0.7031,
+          0.625,
+          0.6875
+        ]
+      },
+      "summary": {
+        "distinct_positions_union": 566,
+        "last_64_kept_per_head": [
+          48,
+          54,
+          52,
+          55
+        ],
+        "median_age": 197.5,
+        "n_prunes": 62,
+        "older_than_1024_per_head": [
+          21,
+          6,
+          13,
+          16
+        ],
+        "p90_age": 757,
+        "prompt_kept_per_head": [
+          3,
+          1,
+          1,
+          2
+        ],
+        "union_over_budget": 2.2109375
+      }
+    },
+    "streamingllm": {
+      "cohort_survival_entering_at_1024": {
+        "1024": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "128": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "2048": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "256": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "512": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "64": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "summary": {
+        "distinct_positions_union": 256,
+        "last_64_kept_per_head": [
+          64,
+          64,
+          64,
+          64
+        ],
+        "median_age": 127.5,
+        "n_prunes": 62,
+        "older_than_1024_per_head": [
+          4,
+          4,
+          4,
+          4
+        ],
+        "p90_age": 230,
+        "prompt_kept_per_head": [
+          4,
+          4,
+          4,
+          4
+        ],
+        "union_over_budget": 1.0
+      }
+    }
+  },
+  "read": "exact slot-dynamics simulation of the presses (no model)",
+  "reproduce": "python scripts/audit_meeting4.py --device cuda --out-dir /tmp/m4 retention"
+}

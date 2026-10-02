@@ -1,0 +1,116 @@
+{
+  "cells": [
+    {
+      "acc_rescored": 0.4225,
+      "acc_stored": 0.4225,
+      "budget": "256",
+      "duplicates": 0,
+      "fc_on_same_keys": 0.885,
+      "mean_tokens": 8043.7075,
+      "mismatches": 0,
+      "n": 400,
+      "press": "random",
+      "run": "grid-diss256-tok",
+      "truncation": 0.2325
+    },
+    {
+      "acc_rescored": 0.2375,
+      "acc_stored": 0.2375,
+      "budget": "256",
+      "duplicates": 0,
+      "fc_on_same_keys": 0.885,
+      "mean_tokens": 5273.74,
+      "mismatches": 0,
+      "n": 400,
+      "press": "streamingllm",
+      "run": "grid-diss256-tok",
+      "truncation": 0.07
+    },
+    {
+      "acc_rescored": 0.2475,
+      "acc_stored": 0.2475,
+      "budget": "256",
+      "duplicates": 0,
+      "fc_on_same_keys": 0.885,
+      "mean_tokens": 4358.7825,
+      "mismatches": 0,
+      "n": 400,
+      "press": "h2o",
+      "run": "grid-diss256-h2o",
+      "truncation": 0.105
+    },
+    {
+      "acc_rescored": 0.52,
+      "acc_stored": 0.52,
+      "budget": "256",
+      "duplicates": 0,
+      "fc_on_same_keys": 0.885,
+      "mean_tokens": 8032.5425,
+      "mismatches": 0,
+      "n": 400,
+      "press": "rkv",
+      "run": "grid-diss256-rkv",
+      "truncation": 0.135
+    },
+    {
+      "acc_rescored": 0.8,
+      "acc_stored": 0.8,
+      "budget": "1024",
+      "duplicates": 0,
+      "fc_on_same_keys": 0.885,
+      "mean_tokens": 3635.145,
+      "mismatches": 0,
+      "n": 400,
+      "press": "random",
+      "run": "grid-diss1024",
+      "truncation": 0.0325
+    },
+    {
+      "acc_rescored": 0.6875,
+      "acc_stored": 0.6875,
+      "budget": "1024",
+      "duplicates": 0,
+      "fc_on_same_keys": 0.885,
+      "mean_tokens": 4128.9825,
+      "mismatches": 0,
+      "n": 400,
+      "press": "streamingllm",
+      "run": "grid-diss1024",
+      "truncation": 0.045
+    },
+    {
+      "acc_rescored": 0.85,
+      "acc_stored": 0.85,
+      "budget": "2048",
+      "duplicates": 0,
+      "fc_on_same_keys": 0.885,
+      "mean_tokens": 3454.13,
+      "mismatches": 0,
+      "n": 400,
+      "press": "random",
+      "run": "grid-diss2048-tok",
+      "truncation": 0.03
+    },
+    {
+      "acc_rescored": 0.8075,
+      "acc_stored": 0.8075,
+      "budget": "2048",
+      "duplicates": 0,
+      "fc_on_same_keys": 0.885,
+      "mean_tokens": 3649.7025,
+      "mismatches": 0,
+      "n": 400,
+      "press": "streamingllm",
+      "run": "grid-diss2048-tok",
+      "truncation": 0.0275
+    }
+  ],
+  "fc_matched": {
+    "accuracy": 0.885,
+    "n": 400
+  },
+  "grader": "kvcache.grading.is_equiv (Hendrycks) on extract_answer of the raw trace",
+  "n_rows_rescored": 3200,
+  "read": "re-scored free-run accuracies, budget 256 and the dose cells",
+  "reproduce": "python scripts/audit_meeting4.py --runs-root /home/sk10741/kvcache-storage/runs --out-dir /tmp/m4 accuracies"
+}

@@ -4196,3 +4196,28 @@ Nothing else in S.4 changed.
 10 min with `--max-hours-override` until 2026-10-01 01:40, when cron takes
 over; every job stops at 10:43. First launch: q6-basis-fit-llama8b on GPU 0 at
 21:31. One-time bypass, not a change to the nightly policy.
+
+## Amendment S.2, result (2026-10-02): Random PARTIAL and PROMPT-SPECIFIC; StreamingLLM INDETERMINATE and NON-SPECIFIC
+
+Read FINAL by the repaired reader (coverage 200/200 against the frozen
+design, provenance-v1 verified on every row, all gates passed, determinism
+against restore-v2 exact). ρ_prompt = 0.367 [0.310, 0.419] (Random; PARTIAL)
+and 0.242 [0.184, 0.295] (StreamingLLM; INDETERMINATE, straddles 0.20);
+ρ_prompt − ρ_trace = +0.147 [+0.083, +0.200] (PROMPT-SPECIFIC) and −0.030
+[−0.090, +0.025] (NON-SPECIFIC). Numbers: MEETING3_RESULTS §3e. The Random
+prompt arm carried a material pad (up to 25 trace entries per head), reported
+there; the registered specificity contrast is unchanged. No accuracy claim
+follows.
+
+**Reader repair, recorded (2026-10-02).** The independent review of f69dce3
+reproduced five acceptance defects in the S readers (a label from one row; a
+determinism gate that passed NaN; a row count standing in for coverage;
+silent loss of the prompt metadata; a floor reaching the prompt-loss branch).
+All five are reproduced in `tests/test_s_acceptance.py` through the real CLI
+and now fail closed behind `kvcache.read_validation`. One rule was added that
+the registration had named but not quantified: a cell is UNINFORMATIVE when
+both protected channels are at or below an **exploratory floor of 0.05**, or
+when the protected free-run is not below the full cache. The floor is a
+2026-10-02 choice, not a registered threshold; the registered estimands are
+unchanged. "NOT DETECTED" is reported as "CI includes 0; not evidence of
+absence", and branch C as "consistent with prompt loss, not established".

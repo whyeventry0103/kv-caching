@@ -1541,6 +1541,7 @@
   },
   "read": "R.17.2.3 restoration redesigned",
   "reproduce": "python scripts/report_r17.py --runs-root /home/sk10741/kvcache-storage/runs restore",
+  "status": "FINAL",
   "status_counts": {
     "random": {
       "INELIGIBLE: no eviction at or after the trigger": 8,
@@ -1549,6 +1550,39 @@
     "streamingllm": {
       "INELIGIBLE: no eviction at or after the trigger": 8,
       "READ": 92
+    }
+  },
+  "validation": {
+    "controls": {
+      "provenance_restore_v2": {
+        "expected_identity": {
+          "basis_npz_sha256": null,
+          "config_name": "restore_v2_math500_r17",
+          "config_sha256": "45dc442e93ac204c8eeb54eb4e204e73d7d6feb2b675a5073f5aa927f96b8863",
+          "implementation_id": "5d0e8a0e11d569b057dcd20b100d5e9b02fa0aa96ecf63d6bada9fb0fd565ba8",
+          "input_manifest_sha256": "c9df04ea43c4d3ca05cbb7322a47105c26f1407e8e081d01bd70acb173ce87fd",
+          "kind": "restore_v2",
+          "model_revision": "916b56a44061fd5cd7d6a8fb632557ed4f724f60",
+          "reference_run": "math500-fc-powered-merged",
+          "schema": "provenance-v1"
+        },
+        "expected_identity_reason": "ok",
+        "failing": {},
+        "n_failing": 0,
+        "n_rows": 200,
+        "passed": true,
+        "schema": "provenance-v1"
+      }
+    },
+    "population": {
+      "duplicated": [],
+      "malformed": {},
+      "missing": [],
+      "n_expected": 200,
+      "n_rows": 200,
+      "n_unique_expected_present": 200,
+      "status": "COMPLETE",
+      "unexpected": []
     }
   }
 }

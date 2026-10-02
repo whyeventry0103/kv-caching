@@ -1588,6 +1588,40 @@ named as pending. Numbers and CIs: `docs/results/MEETING3_RESULTS.md` §2b, §3c
   cohort" (§5g); after S.2 is read, "by origin" replaces "in aggregate" only
   if PROMPT CARRIES IT and PROMPT-SPECIFIC both hold.
 
+### 5i. Amendment S.2 read (restoration by origin) and the reader repair after the independent review (2026-10-02)
+
+**S.2, FINAL** (MEETING3_RESULTS §3e): for Random, returning the evicted
+prompt entries recovers a PARTIAL share of what full restoration recovers,
+and more than an equal-sized random draw of trace entries (PROMPT-SPECIFIC);
+for StreamingLLM the prompt entries recover no more than trace entries
+(NON-SPECIFIC, INDETERMINATE). Divergence, not accuracy. Numbers and CIs in
+§3e; the Random prompt arm's pad is reported there and qualifies the word
+"prompt-specific".
+
+**Reader repair.** The independent review of `f69dce3` reproduced five
+acceptance defects in the Amendment S readers (PREREGISTRATION, "Reader
+repair, recorded"). They are fixed behind one validation boundary
+(`kvcache.read_validation`), reproduced in `tests/test_s_acceptance.py`
+through the real CLI, and the existing rows were re-read with it: restore-v2
+FINAL, restore-v3 FINAL, S.1 budget 256 PARTIAL. The R.17 restoration reader
+has the same boundary.
+
+**Framing rules added.**
+- The residual is a descriptive decomposition. Policy differences in it are
+  reported as paired contrasts with CIs; a CI including zero is "not
+  detected", never "equal" or "the same mechanism".
+- "Random" names kvpress's `RandomPress` with per-prune reseeding: a fixed
+  per-slot pattern (soft recency with a long tail), simulated exactly in
+  `docs/results/meeting4_evidence/retention.json` on the GPU host's CUDA
+  device. Never "memoryless uniform eviction".
+- Restoration: restore-v2's R_fs compares full restoration (which also stops
+  eviction) against continued eviction; only restore-v3's `frozen` arm holds
+  the stop constant. Say "returns entries and stops eviction" for R_fs.
+- ω: "a predictive association is not established", never "shown not to
+  predict". ΔR² in the collapse test is descriptive.
+- Collateral = 0 is not head agreement; on Llama-8B (4-to-1) the group-mean
+  bound is tighter (1/400), not looser.
+
 ## 5. Framing discipline (non-negotiable — apply throughout)
 - **Divergence ≠ damage.** ADD / TV / residual are "behavioral-fidelity loss," never "damage."
   Correctness is the only quality arbiter. Carry the **signed flip-mass** (gained vs lost correct

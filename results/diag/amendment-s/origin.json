@@ -1,0 +1,742 @@
+{
+  "amendment": "S",
+  "controls": {
+    "determinism_random": {
+      "eligible_sets_equal": true,
+      "max_abs_diff": {
+        "full": 0.0,
+        "none": 0.0
+      },
+      "missing_in_restore_v2": [],
+      "n_compared": 91,
+      "non_finite_or_out_of_domain": [],
+      "on_failure": "STOP: an instrument bug, not a result",
+      "passed": true,
+      "tolerance": 1e-06
+    },
+    "determinism_streamingllm": {
+      "eligible_sets_equal": true,
+      "max_abs_diff": {
+        "full": 0.0,
+        "none": 0.0
+      },
+      "missing_in_restore_v2": [],
+      "n_compared": 91,
+      "non_finite_or_out_of_domain": [],
+      "on_failure": "STOP: an instrument bug, not a result",
+      "passed": true,
+      "tolerance": 1e-06
+    },
+    "provenance_restore_v2": {
+      "expected_identity": {
+        "basis_npz_sha256": null,
+        "config_name": "restore_v2_math500_r17",
+        "config_sha256": "45dc442e93ac204c8eeb54eb4e204e73d7d6feb2b675a5073f5aa927f96b8863",
+        "implementation_id": "5d0e8a0e11d569b057dcd20b100d5e9b02fa0aa96ecf63d6bada9fb0fd565ba8",
+        "input_manifest_sha256": "c9df04ea43c4d3ca05cbb7322a47105c26f1407e8e081d01bd70acb173ce87fd",
+        "kind": "restore_v2",
+        "model_revision": "916b56a44061fd5cd7d6a8fb632557ed4f724f60",
+        "reference_run": "math500-fc-powered-merged",
+        "schema": "provenance-v1"
+      },
+      "expected_identity_reason": "ok",
+      "failing": {},
+      "n_failing": 0,
+      "n_rows": 200,
+      "passed": true,
+      "schema": "provenance-v1"
+    },
+    "provenance_restore_v3": {
+      "expected_identity": {
+        "basis_npz_sha256": null,
+        "config_name": "restore_v3_math500_s2",
+        "config_sha256": "feeeb420a1ac44c8edce955d1ecb7a953b1cf5ed3a6183292bebb063e7bcdebe",
+        "implementation_id": "b2d483d4a424e00df61aadf0757c22368872fa17186ca609dabbfeea36b7201f",
+        "input_manifest_sha256": "c9df04ea43c4d3ca05cbb7322a47105c26f1407e8e081d01bd70acb173ce87fd",
+        "kind": "restore_v3",
+        "model_revision": "916b56a44061fd5cd7d6a8fb632557ed4f724f60",
+        "reference_run": "math500-fc-powered-merged",
+        "schema": "provenance-v1"
+      },
+      "expected_identity_reason": "ok",
+      "failing": {},
+      "n_failing": 0,
+      "n_rows": 200,
+      "passed": true,
+      "schema": "provenance-v1"
+    },
+    "restore_v2_coverage": {
+      "duplicated": [],
+      "malformed": {},
+      "missing": [],
+      "n_expected": 200,
+      "n_rows": 200,
+      "n_unique_expected_present": 200,
+      "passed": true,
+      "status": "COMPLETE",
+      "unexpected": []
+    }
+  },
+  "design": {
+    "budgets": [
+      "256"
+    ],
+    "n_problems": 25,
+    "presses": [
+      "random",
+      "streamingllm"
+    ],
+    "seeds": [
+      11,
+      23,
+      47,
+      89
+    ]
+  },
+  "inputs": {
+    "config": "configs/experiments/restore_v3_math500_s2.yaml",
+    "restore_v2": "restore-v2",
+    "restore_v3": "restore-v3"
+  },
+  "inputs_sha256": "a49cee63ef147a4c7a0f683fbf91c915d3e54d61e488661eef4e80bd83398be0",
+  "per_policy": {
+    "random": {
+      "eligible": {
+        "fc_accuracy": {
+          "ci95": [
+            0.7083333333333334,
+            0.9583333333333334
+          ],
+          "estimator": "equal-problem (seeds within problem, then problems)",
+          "mean": 0.84375,
+          "n_problems": 24,
+          "n_resamples": 2000,
+          "n_values": 91,
+          "seed": 0,
+          "seeds_per_problem": {
+            "test/algebra/1098.json": 4,
+            "test/algebra/1349.json": 4,
+            "test/algebra/1837.json": 4,
+            "test/algebra/2036.json": 3,
+            "test/algebra/2193.json": 4,
+            "test/algebra/2427.json": 4,
+            "test/algebra/2584.json": 4,
+            "test/geometry/434.json": 4,
+            "test/intermediate_algebra/1000.json": 4,
+            "test/intermediate_algebra/1197.json": 4,
+            "test/intermediate_algebra/134.json": 4,
+            "test/intermediate_algebra/1994.json": 4,
+            "test/intermediate_algebra/607.json": 4,
+            "test/number_theory/1032.json": 4,
+            "test/number_theory/515.json": 4,
+            "test/number_theory/572.json": 4,
+            "test/number_theory/737.json": 4,
+            "test/prealgebra/1139.json": 4,
+            "test/prealgebra/1622.json": 2,
+            "test/precalculus/1199.json": 4,
+            "test/precalculus/1303.json": 4,
+            "test/precalculus/807.json": 2,
+            "test/precalculus/927.json": 4,
+            "test/precalculus/990.json": 4
+          }
+        },
+        "n_problems": 24,
+        "n_traces": 91
+      },
+      "n_prompt_return": [
+        16,
+        17,
+        18,
+        19,
+        24,
+        26,
+        27,
+        28,
+        29,
+        30,
+        33,
+        34,
+        38,
+        39,
+        45,
+        49,
+        50,
+        51,
+        52,
+        62,
+        63,
+        64,
+        67,
+        69,
+        71,
+        74,
+        75,
+        76,
+        105,
+        106,
+        107,
+        111,
+        112,
+        113,
+        115,
+        116,
+        130,
+        131,
+        132,
+        148,
+        149,
+        150,
+        151,
+        152,
+        154,
+        155,
+        179,
+        181,
+        182,
+        183,
+        212,
+        213,
+        214,
+        341,
+        342,
+        343
+      ],
+      "pad_max": 25,
+      "ratios": {
+        "label": "PARTIAL",
+        "n_problems": 24,
+        "n_resamples_used": 2000,
+        "n_traces": 91,
+        "restorable_gap": {
+          "ci95": [
+            0.05452143434079823,
+            0.07217114547162905
+          ],
+          "estimator": "equal-problem (seeds within problem, then problems)",
+          "mean": 0.0628826270572402,
+          "n_problems": 24,
+          "n_resamples": 2000,
+          "n_values": 91,
+          "seed": 0,
+          "seeds_per_problem": {
+            "test/algebra/1098.json": 4,
+            "test/algebra/1349.json": 4,
+            "test/algebra/1837.json": 4,
+            "test/algebra/2036.json": 3,
+            "test/algebra/2193.json": 4,
+            "test/algebra/2427.json": 4,
+            "test/algebra/2584.json": 4,
+            "test/geometry/434.json": 4,
+            "test/intermediate_algebra/1000.json": 4,
+            "test/intermediate_algebra/1197.json": 4,
+            "test/intermediate_algebra/134.json": 4,
+            "test/intermediate_algebra/1994.json": 4,
+            "test/intermediate_algebra/607.json": 4,
+            "test/number_theory/1032.json": 4,
+            "test/number_theory/515.json": 4,
+            "test/number_theory/572.json": 4,
+            "test/number_theory/737.json": 4,
+            "test/prealgebra/1139.json": 4,
+            "test/prealgebra/1622.json": 2,
+            "test/precalculus/1199.json": 4,
+            "test/precalculus/1303.json": 4,
+            "test/precalculus/807.json": 2,
+            "test/precalculus/927.json": 4,
+            "test/precalculus/990.json": 4
+          }
+        },
+        "rho_prompt": {
+          "ci95": [
+            0.3100843435982484,
+            0.4189706818376257
+          ],
+          "ratio": 0.36672659568689553
+        },
+        "rho_prompt_minus_trace": {
+          "ci95": [
+            0.08300144624917222,
+            0.19988122366909858
+          ],
+          "mean": 0.14662604604237894
+        },
+        "rho_trace": {
+          "ci95": [
+            0.16220654298302725,
+            0.2775003284105838
+          ],
+          "ratio": 0.22010054964451659
+        },
+        "specificity": "PROMPT-SPECIFIC",
+        "window_mean_tv": {
+          "frozen": {
+            "ci95": [
+              0.08909251329348315,
+              0.11323674913810317
+            ],
+            "estimator": "equal-problem (seeds within problem, then problems)",
+            "mean": 0.10054719584494998,
+            "n_problems": 24,
+            "n_resamples": 2000,
+            "n_values": 91,
+            "seed": 0,
+            "seeds_per_problem": {
+              "test/algebra/1098.json": 4,
+              "test/algebra/1349.json": 4,
+              "test/algebra/1837.json": 4,
+              "test/algebra/2036.json": 3,
+              "test/algebra/2193.json": 4,
+              "test/algebra/2427.json": 4,
+              "test/algebra/2584.json": 4,
+              "test/geometry/434.json": 4,
+              "test/intermediate_algebra/1000.json": 4,
+              "test/intermediate_algebra/1197.json": 4,
+              "test/intermediate_algebra/134.json": 4,
+              "test/intermediate_algebra/1994.json": 4,
+              "test/intermediate_algebra/607.json": 4,
+              "test/number_theory/1032.json": 4,
+              "test/number_theory/515.json": 4,
+              "test/number_theory/572.json": 4,
+              "test/number_theory/737.json": 4,
+              "test/prealgebra/1139.json": 4,
+              "test/prealgebra/1622.json": 2,
+              "test/precalculus/1199.json": 4,
+              "test/precalculus/1303.json": 4,
+              "test/precalculus/807.json": 2,
+              "test/precalculus/927.json": 4,
+              "test/precalculus/990.json": 4
+            }
+          },
+          "full": {
+            "ci95": [
+              0.033550957289809474,
+              0.04191020752970004
+            ],
+            "estimator": "equal-problem (seeds within problem, then problems)",
+            "mean": 0.03766456878770979,
+            "n_problems": 24,
+            "n_resamples": 2000,
+            "n_values": 91,
+            "seed": 0,
+            "seeds_per_problem": {
+              "test/algebra/1098.json": 4,
+              "test/algebra/1349.json": 4,
+              "test/algebra/1837.json": 4,
+              "test/algebra/2036.json": 3,
+              "test/algebra/2193.json": 4,
+              "test/algebra/2427.json": 4,
+              "test/algebra/2584.json": 4,
+              "test/geometry/434.json": 4,
+              "test/intermediate_algebra/1000.json": 4,
+              "test/intermediate_algebra/1197.json": 4,
+              "test/intermediate_algebra/134.json": 4,
+              "test/intermediate_algebra/1994.json": 4,
+              "test/intermediate_algebra/607.json": 4,
+              "test/number_theory/1032.json": 4,
+              "test/number_theory/515.json": 4,
+              "test/number_theory/572.json": 4,
+              "test/number_theory/737.json": 4,
+              "test/prealgebra/1139.json": 4,
+              "test/prealgebra/1622.json": 2,
+              "test/precalculus/1199.json": 4,
+              "test/precalculus/1303.json": 4,
+              "test/precalculus/807.json": 2,
+              "test/precalculus/927.json": 4,
+              "test/precalculus/990.json": 4
+            }
+          },
+          "prompt": {
+            "ci95": [
+              0.06944822561888901,
+              0.08561773252194303
+            ],
+            "estimator": "equal-problem (seeds within problem, then problems)",
+            "mean": 0.07748646409639963,
+            "n_problems": 24,
+            "n_resamples": 2000,
+            "n_values": 91,
+            "seed": 0,
+            "seeds_per_problem": {
+              "test/algebra/1098.json": 4,
+              "test/algebra/1349.json": 4,
+              "test/algebra/1837.json": 4,
+              "test/algebra/2036.json": 3,
+              "test/algebra/2193.json": 4,
+              "test/algebra/2427.json": 4,
+              "test/algebra/2584.json": 4,
+              "test/geometry/434.json": 4,
+              "test/intermediate_algebra/1000.json": 4,
+              "test/intermediate_algebra/1197.json": 4,
+              "test/intermediate_algebra/134.json": 4,
+              "test/intermediate_algebra/1994.json": 4,
+              "test/intermediate_algebra/607.json": 4,
+              "test/number_theory/1032.json": 4,
+              "test/number_theory/515.json": 4,
+              "test/number_theory/572.json": 4,
+              "test/number_theory/737.json": 4,
+              "test/prealgebra/1139.json": 4,
+              "test/prealgebra/1622.json": 2,
+              "test/precalculus/1199.json": 4,
+              "test/precalculus/1303.json": 4,
+              "test/precalculus/807.json": 2,
+              "test/precalculus/927.json": 4,
+              "test/precalculus/990.json": 4
+            }
+          },
+          "trace": {
+            "ci95": [
+              0.07717672146151262,
+              0.0970407321952872
+            ],
+            "estimator": "equal-problem (seeds within problem, then problems)",
+            "mean": 0.08670669506656026,
+            "n_problems": 24,
+            "n_resamples": 2000,
+            "n_values": 91,
+            "seed": 0,
+            "seeds_per_problem": {
+              "test/algebra/1098.json": 4,
+              "test/algebra/1349.json": 4,
+              "test/algebra/1837.json": 4,
+              "test/algebra/2036.json": 3,
+              "test/algebra/2193.json": 4,
+              "test/algebra/2427.json": 4,
+              "test/algebra/2584.json": 4,
+              "test/geometry/434.json": 4,
+              "test/intermediate_algebra/1000.json": 4,
+              "test/intermediate_algebra/1197.json": 4,
+              "test/intermediate_algebra/134.json": 4,
+              "test/intermediate_algebra/1994.json": 4,
+              "test/intermediate_algebra/607.json": 4,
+              "test/number_theory/1032.json": 4,
+              "test/number_theory/515.json": 4,
+              "test/number_theory/572.json": 4,
+              "test/number_theory/737.json": 4,
+              "test/prealgebra/1139.json": 4,
+              "test/prealgebra/1622.json": 2,
+              "test/precalculus/1199.json": 4,
+              "test/precalculus/1303.json": 4,
+              "test/precalculus/807.json": 2,
+              "test/precalculus/927.json": 4,
+              "test/precalculus/990.json": 4
+            }
+          }
+        }
+      },
+      "status_counts": {
+        "INELIGIBLE: no eviction at or after the trigger": 8,
+        "INELIGIBLE: the read window does not fit the trace": 1,
+        "READ": 91
+      }
+    },
+    "streamingllm": {
+      "eligible": {
+        "fc_accuracy": {
+          "ci95": [
+            0.7083333333333334,
+            0.9583333333333334
+          ],
+          "estimator": "equal-problem (seeds within problem, then problems)",
+          "mean": 0.84375,
+          "n_problems": 24,
+          "n_resamples": 2000,
+          "n_values": 91,
+          "seed": 0,
+          "seeds_per_problem": {
+            "test/algebra/1098.json": 4,
+            "test/algebra/1349.json": 4,
+            "test/algebra/1837.json": 4,
+            "test/algebra/2036.json": 3,
+            "test/algebra/2193.json": 4,
+            "test/algebra/2427.json": 4,
+            "test/algebra/2584.json": 4,
+            "test/geometry/434.json": 4,
+            "test/intermediate_algebra/1000.json": 4,
+            "test/intermediate_algebra/1197.json": 4,
+            "test/intermediate_algebra/134.json": 4,
+            "test/intermediate_algebra/1994.json": 4,
+            "test/intermediate_algebra/607.json": 4,
+            "test/number_theory/1032.json": 4,
+            "test/number_theory/515.json": 4,
+            "test/number_theory/572.json": 4,
+            "test/number_theory/737.json": 4,
+            "test/prealgebra/1139.json": 4,
+            "test/prealgebra/1622.json": 2,
+            "test/precalculus/1199.json": 4,
+            "test/precalculus/1303.json": 4,
+            "test/precalculus/807.json": 2,
+            "test/precalculus/927.json": 4,
+            "test/precalculus/990.json": 4
+          }
+        },
+        "n_problems": 24,
+        "n_traces": 91
+      },
+      "n_prompt_return": [
+        13,
+        15,
+        20,
+        24,
+        26,
+        29,
+        30,
+        35,
+        42,
+        48,
+        60,
+        67,
+        72,
+        104,
+        111,
+        114,
+        128,
+        150,
+        151,
+        179,
+        212,
+        340
+      ],
+      "pad_max": 0,
+      "ratios": {
+        "label": "INDETERMINATE",
+        "n_problems": 24,
+        "n_resamples_used": 2000,
+        "n_traces": 91,
+        "restorable_gap": {
+          "ci95": [
+            0.04924076731305988,
+            0.06650875721659502
+          ],
+          "estimator": "equal-problem (seeds within problem, then problems)",
+          "mean": 0.057480564046470096,
+          "n_problems": 24,
+          "n_resamples": 2000,
+          "n_values": 91,
+          "seed": 0,
+          "seeds_per_problem": {
+            "test/algebra/1098.json": 4,
+            "test/algebra/1349.json": 4,
+            "test/algebra/1837.json": 4,
+            "test/algebra/2036.json": 3,
+            "test/algebra/2193.json": 4,
+            "test/algebra/2427.json": 4,
+            "test/algebra/2584.json": 4,
+            "test/geometry/434.json": 4,
+            "test/intermediate_algebra/1000.json": 4,
+            "test/intermediate_algebra/1197.json": 4,
+            "test/intermediate_algebra/134.json": 4,
+            "test/intermediate_algebra/1994.json": 4,
+            "test/intermediate_algebra/607.json": 4,
+            "test/number_theory/1032.json": 4,
+            "test/number_theory/515.json": 4,
+            "test/number_theory/572.json": 4,
+            "test/number_theory/737.json": 4,
+            "test/prealgebra/1139.json": 4,
+            "test/prealgebra/1622.json": 2,
+            "test/precalculus/1199.json": 4,
+            "test/precalculus/1303.json": 4,
+            "test/precalculus/807.json": 2,
+            "test/precalculus/927.json": 4,
+            "test/precalculus/990.json": 4
+          }
+        },
+        "rho_prompt": {
+          "ci95": [
+            0.18371804043345635,
+            0.29519400510995497
+          ],
+          "ratio": 0.24235646722464052
+        },
+        "rho_prompt_minus_trace": {
+          "ci95": [
+            -0.08989953871096332,
+            0.025040361642954173
+          ],
+          "mean": -0.029800764398846075
+        },
+        "rho_trace": {
+          "ci95": [
+            0.20034237623959525,
+            0.3397934890639513
+          ],
+          "ratio": 0.2721572316234866
+        },
+        "specificity": "NON-SPECIFIC",
+        "window_mean_tv": {
+          "frozen": {
+            "ci95": [
+              0.07522718789604327,
+              0.09948276332924899
+            ],
+            "estimator": "equal-problem (seeds within problem, then problems)",
+            "mean": 0.08671577634398785,
+            "n_problems": 24,
+            "n_resamples": 2000,
+            "n_values": 91,
+            "seed": 0,
+            "seeds_per_problem": {
+              "test/algebra/1098.json": 4,
+              "test/algebra/1349.json": 4,
+              "test/algebra/1837.json": 4,
+              "test/algebra/2036.json": 3,
+              "test/algebra/2193.json": 4,
+              "test/algebra/2427.json": 4,
+              "test/algebra/2584.json": 4,
+              "test/geometry/434.json": 4,
+              "test/intermediate_algebra/1000.json": 4,
+              "test/intermediate_algebra/1197.json": 4,
+              "test/intermediate_algebra/134.json": 4,
+              "test/intermediate_algebra/1994.json": 4,
+              "test/intermediate_algebra/607.json": 4,
+              "test/number_theory/1032.json": 4,
+              "test/number_theory/515.json": 4,
+              "test/number_theory/572.json": 4,
+              "test/number_theory/737.json": 4,
+              "test/prealgebra/1139.json": 4,
+              "test/prealgebra/1622.json": 2,
+              "test/precalculus/1199.json": 4,
+              "test/precalculus/1303.json": 4,
+              "test/precalculus/807.json": 2,
+              "test/precalculus/927.json": 4,
+              "test/precalculus/990.json": 4
+            }
+          },
+          "full": {
+            "ci95": [
+              0.02528469835466962,
+              0.033424226180318435
+            ],
+            "estimator": "equal-problem (seeds within problem, then problems)",
+            "mean": 0.029235212297517747,
+            "n_problems": 24,
+            "n_resamples": 2000,
+            "n_values": 91,
+            "seed": 0,
+            "seeds_per_problem": {
+              "test/algebra/1098.json": 4,
+              "test/algebra/1349.json": 4,
+              "test/algebra/1837.json": 4,
+              "test/algebra/2036.json": 3,
+              "test/algebra/2193.json": 4,
+              "test/algebra/2427.json": 4,
+              "test/algebra/2584.json": 4,
+              "test/geometry/434.json": 4,
+              "test/intermediate_algebra/1000.json": 4,
+              "test/intermediate_algebra/1197.json": 4,
+              "test/intermediate_algebra/134.json": 4,
+              "test/intermediate_algebra/1994.json": 4,
+              "test/intermediate_algebra/607.json": 4,
+              "test/number_theory/1032.json": 4,
+              "test/number_theory/515.json": 4,
+              "test/number_theory/572.json": 4,
+              "test/number_theory/737.json": 4,
+              "test/prealgebra/1139.json": 4,
+              "test/prealgebra/1622.json": 2,
+              "test/precalculus/1199.json": 4,
+              "test/precalculus/1303.json": 4,
+              "test/precalculus/807.json": 2,
+              "test/precalculus/927.json": 4,
+              "test/precalculus/990.json": 4
+            }
+          },
+          "prompt": {
+            "ci95": [
+              0.06423405072762521,
+              0.08126878431839876
+            ],
+            "estimator": "equal-problem (seeds within problem, then problems)",
+            "mean": 0.07278498990760567,
+            "n_problems": 24,
+            "n_resamples": 2000,
+            "n_values": 91,
+            "seed": 0,
+            "seeds_per_problem": {
+              "test/algebra/1098.json": 4,
+              "test/algebra/1349.json": 4,
+              "test/algebra/1837.json": 4,
+              "test/algebra/2036.json": 3,
+              "test/algebra/2193.json": 4,
+              "test/algebra/2427.json": 4,
+              "test/algebra/2584.json": 4,
+              "test/geometry/434.json": 4,
+              "test/intermediate_algebra/1000.json": 4,
+              "test/intermediate_algebra/1197.json": 4,
+              "test/intermediate_algebra/134.json": 4,
+              "test/intermediate_algebra/1994.json": 4,
+              "test/intermediate_algebra/607.json": 4,
+              "test/number_theory/1032.json": 4,
+              "test/number_theory/515.json": 4,
+              "test/number_theory/572.json": 4,
+              "test/number_theory/737.json": 4,
+              "test/prealgebra/1139.json": 4,
+              "test/prealgebra/1622.json": 2,
+              "test/precalculus/1199.json": 4,
+              "test/precalculus/1303.json": 4,
+              "test/precalculus/807.json": 2,
+              "test/precalculus/927.json": 4,
+              "test/precalculus/990.json": 4
+            }
+          },
+          "trace": {
+            "ci95": [
+              0.061571897688199366,
+              0.08029034412168494
+            ],
+            "estimator": "equal-problem (seeds within problem, then problems)",
+            "mean": 0.07107202516094403,
+            "n_problems": 24,
+            "n_resamples": 2000,
+            "n_values": 91,
+            "seed": 0,
+            "seeds_per_problem": {
+              "test/algebra/1098.json": 4,
+              "test/algebra/1349.json": 4,
+              "test/algebra/1837.json": 4,
+              "test/algebra/2036.json": 3,
+              "test/algebra/2193.json": 4,
+              "test/algebra/2427.json": 4,
+              "test/algebra/2584.json": 4,
+              "test/geometry/434.json": 4,
+              "test/intermediate_algebra/1000.json": 4,
+              "test/intermediate_algebra/1197.json": 4,
+              "test/intermediate_algebra/134.json": 4,
+              "test/intermediate_algebra/1994.json": 4,
+              "test/intermediate_algebra/607.json": 4,
+              "test/number_theory/1032.json": 4,
+              "test/number_theory/515.json": 4,
+              "test/number_theory/572.json": 4,
+              "test/number_theory/737.json": 4,
+              "test/prealgebra/1139.json": 4,
+              "test/prealgebra/1622.json": 2,
+              "test/precalculus/1199.json": 4,
+              "test/precalculus/1303.json": 4,
+              "test/precalculus/807.json": 2,
+              "test/precalculus/927.json": 4,
+              "test/precalculus/990.json": 4
+            }
+          }
+        }
+      },
+      "status_counts": {
+        "INELIGIBLE: no eviction at or after the trigger": 8,
+        "INELIGIBLE: the read window does not fit the trace": 1,
+        "READ": 91
+      }
+    }
+  },
+  "population": {
+    "duplicated": [],
+    "malformed": {},
+    "missing": [],
+    "n_expected": 200,
+    "n_rows": 200,
+    "n_unique_expected_present": 200,
+    "status": "COMPLETE",
+    "unexpected": []
+  },
+  "read": "S.2 restoration by origin",
+  "reproduce": "python scripts/report_s.py --runs-root /home/sk10741/kvcache-storage/runs origin",
+  "retired_previous_output": null,
+  "status": "FINAL",
+  "sufficient_statistics_sha256": "e4486e12fefd005babb7823766e1194e9b867110dff1162eb9e47dc187c422c7",
+  "sufficient_statistics_tsv": "origin.conditions.tsv"
+}
