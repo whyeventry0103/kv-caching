@@ -24,6 +24,14 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-10-02 18:45 Dubai — Llama-8B capture READ: ω REVERSED
+  (−0.355 [−0.453, −0.275]), H3 HOLDS (−0.577), H2 NEITHER; the R.17 capture
+  reads now validate behind the boundary (b256/b2048 re-read FINAL, labels
+  unchanged).** Acceptance report: `docs/results/REVIEW_REPAIR_REPORT.md`.
+  Mechanism draft updated (Llama reversal pinned; "not established rather than
+  ruled out" for the bridge). NEXT unchanged: readout-pp256 → protection
+  FINAL; Qwen bank gate before any Qwen cell.
+
   **★★★★★ 2026-10-02 17:30 Dubai — reader repair after the independent
   review of f69dce3; S.2 READ (FINAL).** One validation boundary
   (`kvcache.read_validation`) behind `report_s.py` (protection / origin /

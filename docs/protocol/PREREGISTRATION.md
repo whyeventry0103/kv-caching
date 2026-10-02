@@ -4221,3 +4221,14 @@ when the protected free-run is not below the full cache. The floor is a
 2026-10-02 choice, not a registered threshold; the registered estimands are
 unchanged. "NOT DETECTED" is reported as "CI includes 0; not evidence of
 absence", and branch C as "consistent with prompt loss, not established".
+
+## Amendment R.17.3, result (2026-10-02): on Llama-8B the ω contrast is REVERSED; H3 HOLDS; H2 NEITHER
+
+Read FINAL by the strict capture reader and the R.17 reads behind the
+2026-10-02 validation boundary (400/400, provenance against the Llama
+manifest and verified basis, controls VALID). ω(Random) − ω(StreamingLLM) =
+−0.355 [−0.453, −0.275]: **REVERSED**, reported as such with no post-hoc
+reinterpretation (R.6). H3 −0.577 [−0.602, −0.543] HOLDS. H2 NEITHER.
+Collateral 0, reported not read. Numbers: MEETING3_RESULTS §3f. The Qwen ω
+result is therefore one-architecture; its exploratory scope stands and no
+generality claim is made for it.

@@ -2873,7 +2873,47 @@
     "n_traces": 100,
     "ratio": 0.05769482143903505
   },
-  "reproduce": "python scripts/report_r17.py --runs-root /home/sk10741/kvcache-storage/runs mdelta",
+  "reproduce": "python scripts/report_r17.py --runs-root /home/sk10741/kvcache-storage/runs --capture-run capture-b256 mdelta",
+  "status": "FINAL",
   "status_on_this_run": "EXPLORATORY: per-policy means were printed before R.17",
-  "stored": "per-(layer, KV group) sums over events; per-query-head values are computed and averaged within the group, not stored (capture-v1)"
+  "stored": "per-(layer, KV group) sums over events; per-query-head values are computed and averaged within the group, not stored (capture-v1)",
+  "validation": {
+    "config": "configs/experiments/capture_math500_b256_r9.yaml",
+    "controls": {
+      "live_controls": {
+        "n_rows_with_nonfinite": 0,
+        "passed": true
+      },
+      "provenance": {
+        "expected_identity": {
+          "basis_npz_sha256": "68546e59839537cb30d162533baa7eff7fbb4f10a177a9bf8a9dbe596e9ae222",
+          "config_name": "capture_math500_b256_r9",
+          "config_sha256": "c5857099e6fa21e6b64d6fa7536bf6c3fd9295de6d50e3306b4d7d60d683f8dd",
+          "implementation_id": "2143e52d83068f2cb0033626402b4a6911b5e78c6f784b12c13bd92d088f70c4",
+          "input_manifest_sha256": "c9df04ea43c4d3ca05cbb7322a47105c26f1407e8e081d01bd70acb173ce87fd",
+          "kind": "capture",
+          "model_revision": "916b56a44061fd5cd7d6a8fb632557ed4f724f60",
+          "reference_run": "math500-fc-powered-merged",
+          "schema": "provenance-v1"
+        },
+        "expected_identity_reason": "ok",
+        "failing": {},
+        "n_failing": 0,
+        "n_rows": 400,
+        "passed": true,
+        "schema": "provenance-v1"
+      }
+    },
+    "kind": "capture",
+    "population": {
+      "duplicated": [],
+      "malformed": {},
+      "missing": [],
+      "n_expected": 400,
+      "n_rows": 400,
+      "n_unique_expected_present": 400,
+      "status": "COMPLETE",
+      "unexpected": []
+    }
+  }
 }

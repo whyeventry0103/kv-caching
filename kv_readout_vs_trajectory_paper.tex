@@ -417,7 +417,8 @@ $100$ traces per policy never exceed it, and are unavailable rather than zero).
 There the ordering holds: H2O-style loses less mass than Random by $0.119$ (CI
 $[-0.139, -0.097]$), confirming the registered hypothesis, and the four policies'
 $\Delta$ values spread by $0.027$ against $0.119$ for $M$, so shape distortion
-does not mirror the near-constant accuracy residual either. GQA
+does not mirror the near-constant accuracy residual either. On Llama-8B the
+same hypothesis holds by a larger margin, $-0.577$ ($[-0.602, -0.543]$). GQA
 collateral, a position one head needed that the group mean ranked out of the
 cache, is zero at budget $256$ in all $400$ conditions. A positive control shows
 the instrument can return a non-zero value, so the zero is a property of this
@@ -432,11 +433,15 @@ displacement, a log-ratio difference of $+0.080$ ($[0.064, 0.092]$), not by smal
 displacement. The registered replication at budget $2048$ gives $+0.225$
 ($[0.178, 0.273]$) on $69$ paired traces, and with nested bases the ordering holds
 at every size from $k = 8$ ($+1.079$, $[0.863, 1.288]$) to $k = 256$ ($+0.067$,
-$[0.050, 0.082]$). It remains exploratory: one model, one benchmark. No
-fine-scale quantity predicts a coarse outcome within a cell: the teacher-forced
-per-trace $\omega$, $\Delta$ and $M$ do not predict whether the same condition
-truncates when run free (AUROC $0.478$ to $0.659$; the smallest
-Benjamini--Hochberg $q$ over the six tests is $0.165$).
+$[0.050, 0.082]$). On DeepSeek-R1-Distill-Llama-8B the registered replication
+reverses, $-0.355$ (CI $[-0.453, -0.275]$), so the ordering is a property of
+this architecture, not of eviction: it remains exploratory, one architecture,
+one benchmark. Within a cell no fine-scale quantity is shown to predict a
+coarse outcome: the teacher-forced per-trace $\omega$, $\Delta$ and $M$ do not
+detectably predict whether the same condition truncates when run free (AUROC
+$0.478$ to $0.659$; the smallest Benjamini--Hochberg $q$ over the six tests is
+$0.165$), which leaves a predictive association not established rather than
+ruled out.
 
 \textbf{Restoration.} The earlier restoration result is retracted
 (\cref{sec:followups}). With the stash repaired, returning the evicted cohort

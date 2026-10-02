@@ -1622,6 +1622,21 @@ has the same boundary.
 - Collateral = 0 is not head agreement; on Llama-8B (4-to-1) the group-mean
   bound is tighter (1/400), not looser.
 
+### 5j. Llama-8B capture read: the ω contrast REVERSES; H3 holds (2026-10-02)
+
+Registered replication (addendum E), read FINAL. Numbers: MEETING3_RESULTS
+§3f. The Qwen latent-geometry result (Random more off-subspace than
+StreamingLLM) reverses on Llama-8B with a CI well clear of zero; H3 (the
+attention-mass objective is not the damage objective) holds on Llama by a
+larger margin; H2 is NEITHER on both architectures.
+
+**Framing consequence.** The mechanism draft's latent-geometry paragraph
+must say "on Qwen-7B; reversed on Llama-8B", and no sentence may present ω
+as an architecture-general account. The paper's cross-architecture claim
+stays what it was: the readout-invisible residual replicates on Llama for
+StreamingLLM; the policy ordering and the geometry do not. Catalogue entries
+`m3.llama.*` carry the literals.
+
 ## 5. Framing discipline (non-negotiable — apply throughout)
 - **Divergence ≠ damage.** ADD / TV / residual are "behavioral-fidelity loss," never "damage."
   Correctness is the only quality arbiter. Carry the **signed flip-mass** (gained vs lost correct

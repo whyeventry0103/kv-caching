@@ -1,0 +1,6 @@
+{
+  "amendment": "R.17",
+  "n_rows": 400,
+  "reproduce": "python scripts/report_r17.py --runs-root /home/sk10741/kvcache-storage/runs --capture-run capture-llama8b-b256 capture-v2",
+  "status": "PENDING or not a capture-v2 run"
+}

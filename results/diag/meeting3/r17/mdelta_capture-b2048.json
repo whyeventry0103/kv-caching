@@ -2874,6 +2874,46 @@
     "ratio": 0.4615585715122804
   },
   "reproduce": "python scripts/report_r17.py --runs-root /home/sk10741/kvcache-storage/runs --capture-run capture-b2048 mdelta",
+  "status": "FINAL",
   "status_on_this_run": "CONFIRMATORY (R.17.1.5)",
-  "stored": "per-(layer, KV group) sums over events; per-query-head values are computed and averaged within the group, not stored (capture-v1)"
+  "stored": "per-(layer, KV group) sums over events; per-query-head values are computed and averaged within the group, not stored (capture-v1)",
+  "validation": {
+    "config": "configs/experiments/capture_math500_b2048_r17.yaml",
+    "controls": {
+      "live_controls": {
+        "n_rows_with_nonfinite": 0,
+        "passed": true
+      },
+      "provenance": {
+        "expected_identity": {
+          "basis_npz_sha256": "68546e59839537cb30d162533baa7eff7fbb4f10a177a9bf8a9dbe596e9ae222",
+          "config_name": "capture_math500_b2048_r17",
+          "config_sha256": "76a89dd95c8e567e8d963f60b729a6b3703a59a22f98cc0d7eb341ba05902d4b",
+          "implementation_id": "4f7ac47fffa11ae42f7f158ec53e81e484c12f71bfd3d1e95f9e69a4d4705fde",
+          "input_manifest_sha256": "c9df04ea43c4d3ca05cbb7322a47105c26f1407e8e081d01bd70acb173ce87fd",
+          "kind": "capture_v2",
+          "model_revision": "916b56a44061fd5cd7d6a8fb632557ed4f724f60",
+          "reference_run": "math500-fc-powered-merged",
+          "schema": "provenance-v1"
+        },
+        "expected_identity_reason": "ok",
+        "failing": {},
+        "n_failing": 0,
+        "n_rows": 400,
+        "passed": true,
+        "schema": "provenance-v1"
+      }
+    },
+    "kind": "capture_v2",
+    "population": {
+      "duplicated": [],
+      "malformed": {},
+      "missing": [],
+      "n_expected": 400,
+      "n_rows": 400,
+      "n_unique_expected_present": 400,
+      "status": "COMPLETE",
+      "unexpected": []
+    }
+  }
 }

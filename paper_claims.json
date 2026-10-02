@@ -833,17 +833,17 @@
       "key": "m3.omega.log_perp_over_par.cihi"
     },
     {
-      "context": "truncates when run free (AUROC $0.478$ to $0.659$; the smallest",
+      "context": "detectably predict whether the same condition truncates when run free (AUROC\n$0.478$ to $0.659$; the smallest Benjamini--Hochberg $q$ over the six tests is",
       "literal": "0.478",
       "key": "m3.bridge.auroc_min"
     },
     {
-      "context": "truncates when run free (AUROC $0.478$ to $0.659$; the smallest",
+      "context": "detectably predict whether the same condition truncates when run free (AUROC\n$0.478$ to $0.659$; the smallest Benjamini--Hochberg $q$ over the six tests is",
       "literal": "0.659",
       "key": "m3.bridge.auroc_max"
     },
     {
-      "context": "Benjamini--Hochberg $q$ over the six tests is $0.165$).",
+      "context": "$0.165$), which leaves a predictive association not established rather than",
       "literal": "0.165",
       "key": "m3.bridge.q_min"
     },
@@ -1026,6 +1026,36 @@
       "context": "registered; budget $2048$ ($46.16\\%$ realized cache) is their confirmatory test",
       "literal": "46.16",
       "key": "m3.cap2048.realized_ratio_pct"
+    },
+    {
+      "context": "reverses, $-0.355$ (CI $[-0.453, -0.275]$), so the ordering is a property of",
+      "literal": "-0.355",
+      "key": "m3.llama.omega_contrast.mean"
+    },
+    {
+      "context": "reverses, $-0.355$ (CI $[-0.453, -0.275]$), so the ordering is a property of",
+      "literal": "-0.453",
+      "key": "m3.llama.omega_contrast.cilo"
+    },
+    {
+      "context": "reverses, $-0.355$ (CI $[-0.453, -0.275]$), so the ordering is a property of",
+      "literal": "-0.275",
+      "key": "m3.llama.omega_contrast.cihi"
+    },
+    {
+      "context": "same hypothesis holds by a larger margin, $-0.577$ ($[-0.602, -0.543]$).",
+      "literal": "-0.577",
+      "key": "m3.llama.h3.mean"
+    },
+    {
+      "context": "same hypothesis holds by a larger margin, $-0.577$ ($[-0.602, -0.543]$).",
+      "literal": "-0.602",
+      "key": "m3.llama.h3.cilo"
+    },
+    {
+      "context": "same hypothesis holds by a larger margin, $-0.577$ ($[-0.602, -0.543]$).",
+      "literal": "-0.543",
+      "key": "m3.llama.h3.cihi"
     }
   ]
 }

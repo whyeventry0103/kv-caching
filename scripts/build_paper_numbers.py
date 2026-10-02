@@ -1684,6 +1684,54 @@ def build_catalogue() -> list[Entry]:
             f"{_rvr} :: per_policy.random.eligibility.eligible.fc_accuracy.mean",
             "restore-v2 eligible subset full-cache accuracy",
         )
+    _cl = M3 / "capture_llama8b_b256.json"
+    if _cl.exists():
+        _cld, _clr = _load(_cl), _cl.relative_to(PROJECT_ROOT)
+        _q6l = _cld["q6_registered_contrast"]
+        add(
+            "m3.llama.omega_contrast.mean",
+            _q6l["mean"],
+            f"{_clr} :: q6_registered_contrast.mean",
+            "omega(Random) - omega(StreamingLLM) on Llama-8B, b256 (R.17.3; REVERSED)",
+        )
+        for _i, _b in enumerate(_q6l["ci95"]):
+            add(
+                f"m3.llama.omega_contrast.ci{'lo' if _i == 0 else 'hi'}",
+                _b,
+                f"{_clr} :: q6_registered_contrast.ci95[{_i}]",
+                "Llama omega contrast CI bound",
+            )
+        for _p in ("random", "streamingllm", "h2o", "rkv"):
+            for _f in ("M", "Delta", "omega"):
+                add(
+                    f"m3.llama.{_f}.{_p}.mean",
+                    _cld["descriptive"][_f][_p]["mean"],
+                    f"{_clr} :: descriptive.{_f}.{_p}.mean",
+                    f"Llama-8B b256 {_f} for {_p} (descriptive)",
+                )
+    _mdl = R17 / "mdelta_capture-llama8b-b256.json"
+    if _mdl.exists():
+        _mdld, _mdlr = _load(_mdl), _mdl.relative_to(PROJECT_ROOT)
+        add(
+            "m3.llama.h3.mean",
+            _mdld["H3"]["mean"],
+            f"{_mdlr} :: H3.mean",
+            "H3 on Llama-8B b256 (confirmatory)",
+        )
+        for _i, _b in enumerate(_mdld["H3"]["ci95"]):
+            add(
+                f"m3.llama.h3.ci{'lo' if _i == 0 else 'hi'}",
+                _b,
+                f"{_mdlr} :: H3.ci95[{_i}]",
+                "H3 Llama CI bound",
+            )
+        add(
+            "m3.llama.realized_ratio_pct",
+            100 * _mdld["realized_ratio"]["ratio"],
+            f"100 * {_mdlr} :: realized_ratio.ratio",
+            "budget 256 as a percentage of mean prompt + trace tokens on Llama-8B",
+            kind="derived",
+        )
     _dr = R17 / "dacc_restricted.json"
     if _dr.exists():
         _drd, _drr = _load(_dr), _dr.relative_to(PROJECT_ROOT)

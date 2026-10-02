@@ -58,6 +58,88 @@ def _seed(r: dict[str, Any]) -> int:
     return int(r["seed"] if "seed" in r else r["decoding"]["seed"])
 
 
+CAPTURE_CONFIGS = {
+    "capture-b256": "configs/experiments/capture_math500_b256_r9.yaml",
+    "capture-b2048": "configs/experiments/capture_math500_b2048_r17.yaml",
+    "capture-llama8b-b256": "configs/experiments/capture_math500_llama8b_b256_r17.yaml",
+}
+CAPTURE_KIND = {
+    "capture-b256": "capture",
+    "capture-b2048": "capture_v2",
+    "capture-llama8b-b256": "capture_v2",
+}
+
+
+def _validated_capture(runs: Path, a: argparse.Namespace) -> dict[str, Any]:
+    """2026-10-02: the capture rows a read is about to use, behind the boundary.
+
+    Coverage against the config's frozen design (all four policies), every
+    row's provenance-v1 identity against the identity derived from the
+    committed config, model revision, frozen manifest and VERIFIED basis
+    (``gates.expected_run_identity``), plus the capture's own control flags.
+    """
+    from kvcache.read_validation import (
+        design_keys,
+        final_status,
+        provenance_v1_summary,
+        validate_population,
+    )
+
+    cfg = CAPTURE_CONFIGS[a.capture_run]
+    kind = CAPTURE_KIND[a.capture_run]
+    _design, expected = design_keys(cfg, root=PROJECT_ROOT)
+    rows = _rows(runs / a.capture_run)
+
+    def key(r: dict[str, Any]) -> tuple:
+        return (str(r["press"]), str(r["budget"]), str(r["pid"]), _seed(r))
+
+    pop = validate_population(
+        rows,
+        key=key,
+        expected=expected,
+        required=("pid", "press", "budget", "provenance", "checks"),
+    )
+    controls = {
+        "provenance": provenance_v1_summary(
+            rows,
+            kind=kind,
+            config=cfg,
+            runs_root=runs,
+            key=lambda r: (r["pid"], _seed(r)),
+            root=PROJECT_ROOT,
+        ),
+        "live_controls": {
+            "passed": all(
+                (r.get("checks") or {}).get("n_nonfinite", 1) == 0 for r in rows
+            )
+            and bool(rows),
+            "n_rows_with_nonfinite": sum(
+                1 for r in rows if (r.get("checks") or {}).get("n_nonfinite", 1)
+            ),
+        },
+    }
+    return {
+        "rows": rows,
+        "status": final_status(pop, controls),
+        "validation": {
+            "config": cfg,
+            "kind": kind,
+            "population": pop,
+            "controls": controls,
+        },
+    }
+
+
+def _withhold(payload: dict[str, Any], status: str) -> dict[str, Any]:
+    """Replace every label with WITHHELD when the read is not FINAL."""
+    if status == "FINAL":
+        return payload
+    for blk in ("H2", "H3"):
+        if isinstance(payload.get(blk), dict) and "label" in payload[blk]:
+            payload[blk]["label"] = f"WITHHELD: read is {status}"
+    return payload
+
+
 def _write(name: str, payload: dict[str, Any], argv: list[str]) -> Path:
     payload = {
         "amendment": "R.17",
@@ -163,7 +245,8 @@ def _capture_ratio(rows: list[dict[str, Any]]) -> dict[str, Any]:
 
 
 def mdelta(runs: Path, a: argparse.Namespace) -> dict[str, Any]:
-    rows = _rows(runs / a.capture_run)
+    cap = _validated_capture(runs, a)
+    rows = cap["rows"]
     per: dict[str, dict[tuple[str, int], dict[str, Any]]] = {p: {} for p in POLICIES}
     for r in rows:
         per[r["press"]][(r["pid"], _seed(r))] = r
@@ -220,35 +303,43 @@ def mdelta(runs: Path, a: argparse.Namespace) -> dict[str, Any]:
         }
         for f in stats
     }
-    return {
-        "read": "R.17.1.5 H2/H3 (b256: exploratory) and the M/Delta report (0.6)",
-        "status_on_this_run": (
-            "EXPLORATORY: per-policy means were printed before R.17"
-            if a.capture_run == "capture-b256"
-            else "CONFIRMATORY (R.17.1.5)"
-        ),
-        "inputs": {"capture_run": a.capture_run, "n_rows": len(rows)},
-        "realized_ratio": _capture_ratio(rows),
-        "per_policy": brief,
-        "excluded_no_measured_event": excluded,
-        "per_layer": layers,
-        "H2": {"M": m_read, "Delta": d_read, "label": r17.h2_label(m_read, d_read)},
-        "H3": {"contrast": "M(H2O-style) - M(Random)", **h3},
-        "first_prune_self_control": ctrl,
-        "stored": "per-(layer, KV group) sums over events; per-query-head "
-        "values are computed and averaged within the group, not stored "
-        "(capture-v1)",
-    }
+    return _withhold(
+        {
+            "read": "R.17.1.5 H2/H3 (b256: exploratory) and the M/Delta report (0.6)",
+            "status": cap["status"],
+            "validation": cap["validation"],
+            "status_on_this_run": (
+                "EXPLORATORY: per-policy means were printed before R.17"
+                if a.capture_run == "capture-b256"
+                else "CONFIRMATORY (R.17.1.5)"
+            ),
+            "inputs": {"capture_run": a.capture_run, "n_rows": len(rows)},
+            "realized_ratio": _capture_ratio(rows),
+            "per_policy": brief,
+            "excluded_no_measured_event": excluded,
+            "per_layer": layers,
+            "H2": {"M": m_read, "Delta": d_read, "label": r17.h2_label(m_read, d_read)},
+            "H3": {"contrast": "M(H2O-style) - M(Random)", **h3},
+            "first_prune_self_control": ctrl,
+            "stored": "per-(layer, KV group) sums over events; per-query-head "
+            "values are computed and averaged within the group, not stored "
+            "(capture-v1)",
+        },
+        cap["status"],
+    )
 
 
 def omega_layers(runs: Path, a: argparse.Namespace) -> dict[str, Any]:
-    rows = _rows(runs / a.capture_run)
+    cap = _validated_capture(runs, a)
+    rows = cap["rows"]
     out: dict[str, Any] = {}
     for p in ("random", "streamingllm"):
         lat = {(r["pid"], _seed(r)): r["latent"] for r in rows if r["press"] == p}
         out[p] = r17.per_layer_omega(lat, n_resamples=a.n_resamples, seed=a.seed)
     return {
         "read": "R.17.1.7 per-layer omega (descriptive)",
+        "status": cap["status"],
+        "validation": cap["validation"],
         "inputs": {"capture_run": a.capture_run},
         "estimator": "trace omega_layer = sum_omega / n_finite; equal-problem mean",
         "k_sensitivity": "not computable: capture-v1 stores per-step per-layer "
@@ -657,7 +748,8 @@ def fork_precision(runs: Path, a: argparse.Namespace) -> dict[str, Any]:
 
 def capture_v2(runs: Path, a: argparse.Namespace) -> dict[str, Any]:
     """R.17.1.6/1.7 on capture-v2 rows: nested-k omega and per-head dispersion."""
-    rows = _rows(runs / a.capture_run)
+    cap = _validated_capture(runs, a)
+    rows = cap["rows"]
     if not rows or "latent_nested" not in rows[0]:
         return {"status": "PENDING or not a capture-v2 run", "n_rows": len(rows)}
     by = {
@@ -672,6 +764,8 @@ def capture_v2(runs: Path, a: argparse.Namespace) -> dict[str, Any]:
     acc = {r.get("nested_acceptance", {}).get("passed") for r in rows}
     return {
         "read": "R.17.1.6/1.7 capture-v2 extras",
+        "status": cap["status"],
+        "validation": cap["validation"],
         "inputs": {"capture_run": a.capture_run, "n_rows": len(rows)},
         "nested_acceptance_passed": sorted(map(str, acc)),
         "omega_by_k_random_minus_slm": r17.omega_by_k(

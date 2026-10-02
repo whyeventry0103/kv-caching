@@ -8,6 +8,9 @@ artifact when this file was written. Review evidence (gate outputs, remote test 
 parity, queue dry-run, remote-only data list):
 [`meeting3_evidence/`](meeting3_evidence/README.md).
 
+**Status, 2026-10-02 18:30 Dubai.** Llama-8B capture READ (§3f): **ω contrast
+REVERSED** (−0.355 [−0.453, −0.275]); H3 HOLDS; H2 NEITHER; collateral 0.
+
 **Status, 2026-10-02 17:00 Dubai.** The readers now sit behind one validation
 boundary (`kvcache.read_validation`, after the independent review of
 `f69dce3`): FINAL / PARTIAL / INVALID, labels only on FINAL. Re-read with it:
@@ -866,6 +869,56 @@ problems).
   arms is what the returned entries contribute. The prompt-information
   account of the Random-vs-StreamingLLM accuracy gap is supported for Random
   only in part, and not for StreamingLLM, at this scope.
+
+## 3f. Tasks 2/3 on DeepSeek-R1-Distill-Llama-8B (R.17.3 / addendum E; FINAL)
+
+Read 2026-10-02 18:30 Dubai. Artifacts: `results/diag/meeting3/capture_llama8b_b256.json`
+(+ `.conditions.tsv`), `r17/mdelta_capture-llama8b-b256.json`,
+`r17/omega_layers_capture-llama8b-b256.json`. Both readers FINAL: 400/400
+against the frozen design, 0 provenance failures against the Llama manifest
+and the verified Llama basis, controls VALID (layer-0 Δ, no non-finite
+values). Budget 256 is a **6.08%** realized cache (mean prompt 91.5 + trace
+4,115.9). Llama-8B has 32 query heads over 8 KV heads (4 to 1). No nested
+basis was fitted for Llama, so there is no k-sensitivity here.
+
+**Registered replications (confirmatory for Llama).**
+
+| Read | Result | Label |
+|---|---|---|
+| ω(Random) − ω(StreamingLLM) | **−0.355 [−0.453, −0.275]** (100 pairs, 25 problems) | **REVERSED** |
+| H3: M(H2O-style) − M(Random) | −0.577 [−0.602, −0.543] | HOLDS |
+| H2 | spread(M) 0.577 vs half-width 0.015; spread(Δ) 0.361 vs 0.011 | NEITHER |
+| Q.3 collateral R-KV − H2O-style | 0 in every condition | INCONCLUSIVE (reported, not read) |
+
+- **The ω contrast reverses on Llama.** As registered (R.6): reported as
+  such, with no post-hoc reinterpretation of which direction the geometry
+  predicted. The Qwen result (+0.200 at 256, +0.225 at 2048) does not
+  generalise across architectures; the exploratory scope statement was
+  correct and the claim stays exploratory, one model.
+- **H3 holds on Llama too**, by a much larger margin: the attention-mass
+  objective is not the damage objective on either architecture.
+
+**Descriptive (mean [95% CI], 25 problems).**
+
+| Policy | M | Δ | ω |
+|---|---|---|---|
+| Random | 0.680 [0.633, 0.717] | 0.441 [0.417, 0.459] | 3.376 [3.300, 3.446] |
+| StreamingLLM | 0.128 [0.113, 0.140] | 0.091 [0.081, 0.099] | 3.731 [3.665, 3.799] |
+| H2O-style | 0.104 [0.088, 0.117] | 0.081 [0.069, 0.092] | 3.823 [3.756, 3.895] |
+| R-KV (port not certified on Llama) | 0.123 [0.106, 0.138] | 0.080 [0.069, 0.091] | 3.826 [3.762, 3.896] |
+
+- On Llama, Random evicts 5–7× the attended mass of the structured policies
+  and reshapes attention 5× more; on Qwen the ratios were about 2× and 1.5×.
+  This is the same model on which Random's free run collapses into filler
+  loops (PAPER_FINDINGS §4o). Whether the two facts are connected is not
+  tested here.
+- ω is lowest for Random on Llama, highest on Qwen. The latent-geometry
+  ordering is therefore architecture-dependent, which is what REVERSED
+  records.
+- Collateral: 0 in all 400 conditions, with 2.96M evicted instances wanted
+  by some head under Random (of 100.3M checked). With 4 query heads per KV
+  head the group-mean bound is tighter (1/400), so this is the structurally
+  expected zero (MEETING4_ANSWERS Q3).
 
 ## 4. Controls
 

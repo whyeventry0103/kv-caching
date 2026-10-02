@@ -199,12 +199,22 @@ def provenance_v1_summary(
     root: Path,
 ) -> dict[str, Any]:
     """R.15 per-row identity check against the identity derived from committed specs."""
+    import yaml
+
     from kvcache.gates import expected_run_identity, validate_rows
 
     expected, why = expected_run_identity(kind, config, runs_root, root=root)
-    bad = validate_rows(rows, kind=kind, expected=expected, key=key)
+    # a config that names its own frozen manifest (a second model, R.17.3) is
+    # checked against THAT manifest, as the gates do
+    manifest_path = yaml.safe_load(
+        (Path(root) / config).read_text(encoding="utf-8")
+    ).get("input_manifest")
+    bad = validate_rows(
+        rows, kind=kind, expected=expected, key=key, manifest_path=manifest_path
+    )
     return {
         "schema": "provenance-v1",
+        "input_manifest": manifest_path or "configs/meeting3/input_manifest.json",
         "expected_identity": expected,
         "expected_identity_reason": why,
         "n_rows": len(rows),
