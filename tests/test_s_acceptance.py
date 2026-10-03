@@ -328,8 +328,32 @@ def s2_fixture(tmp: Path) -> Path:
                 "budget": 256,
                 "n_trace_tokens": 3000,
                 "prompt_len": 50,
+                "trigger_step": 1024,
             }
+            if s == 89 and p == PIDS25[1]:
+                # as in the real data: the trace reaches the trigger, but the
+                # 200-forward window does not fit (1024 + 200 > 1074)
+                short = {**base, "n_trace_tokens": 1075, "cohort_step": 1024}
+                v3.append(
+                    {
+                        **short,
+                        "status": "INELIGIBLE: the read window does not fit the trace",
+                        "arms": {},
+                        "provenance": {**id3, "inputs_sha256": inp},
+                    }
+                )
+                v2.append(
+                    {
+                        **short,
+                        "status": "READ",
+                        "full_restore": {"eligible": False},
+                        "lags": {},
+                        "provenance": {**id2, "inputs_sha256": inp},
+                    }
+                )
+                continue
             if s == 89 and p == PIDS25[0]:
+                base = {**base, "n_trace_tokens": 900}
                 v3.append(
                     {
                         **base,
@@ -404,7 +428,8 @@ def test_origin_final_on_a_complete_valid_cell(tmp_path):
     assert r["rho_prompt"]["ratio"] == pytest.approx(0.75)
     assert d["per_policy"]["random"]["status_counts"] == {
         "INELIGIBLE: no eviction at or after the trigger": 1,
-        "READ": 99,
+        "INELIGIBLE: the read window does not fit the trace": 1,
+        "READ": 98,
     }
 
 
@@ -524,3 +549,359 @@ def test_r17_restore_reader_has_the_same_boundary(tmp_path):
     d = json.loads((tmp_path / "out/restore_v2.json").read_text())
     assert d["status"] == "PARTIAL"
     assert d["per_policy"]["random"]["full_restore"]["branch"].startswith("WITHHELD")
+
+
+# =====================================================================
+# Second review (of 49c572c), 2026-10-03: the three remaining boundary gaps,
+# each reproduced through the real CLI before the fix.
+# =====================================================================
+def _rows_of(path: Path) -> list[dict]:
+    return [json.loads(line) for line in path.read_text().splitlines()]
+
+
+# ---- issue 1: statuses, legitimate exclusions, eligible sets, v2 gates
+def test_issue1_injected_failed_status_is_invalid(tmp_path):
+    runs = s2_fixture(tmp_path)
+    path = runs / "restore-v3/math500/m/rows.jsonl"
+    rows = _rows_of(path)
+    victim = next(r for r in rows if r["press"] == "random" and r["status"] == "READ")
+    victim["status"] = "FAILED: injected"
+    _write(path, rows)
+    code, log = _run(runs, tmp_path / "out", "origin")
+    assert code == 2, log
+    d = json.loads((tmp_path / "out/origin.json").read_text())
+    assert d["status"] == "INVALID"
+    assert any(
+        "not one restore_v3 emits" in p
+        for ps in d["population"]["malformed"].values()
+        for p in ps
+    )
+    assert "PROMPT CARRIES IT" not in json.dumps(d)
+
+
+def test_issue1_illegitimate_exclusion_is_invalid(tmp_path):
+    runs = s2_fixture(tmp_path)
+    path = runs / "restore-v3/math500/m/rows.jsonl"
+    rows = _rows_of(path)
+    # a 3000-token trace cannot lack a prune after step 1024
+    victim = next(r for r in rows if r["press"] == "random" and r["status"] == "READ")
+    victim.update(status="INELIGIBLE: no eviction at or after the trigger", arms={})
+    victim["cohort_step"] = None
+    _write(path, rows)
+    code, log = _run(runs, tmp_path / "out", "origin")
+    assert code == 2, log
+    d = json.loads((tmp_path / "out/origin.json").read_text())
+    assert d["status"] == "INVALID"
+    assert any(
+        "reaches a prune" in p
+        for ps in d["population"]["malformed"].values()
+        for p in ps
+    )
+
+
+def test_issue1_eligible_set_mismatch_in_a_complete_read_is_invalid(tmp_path):
+    runs = s2_fixture(tmp_path)
+    # each row individually valid; the v2 comparator's trace is too short for
+    # the window, so its eligible set differs from v3's
+    path = runs / "restore-v2/math500/m/rows.jsonl"
+    rows = _rows_of(path)
+    victim = next(
+        r for r in rows if r["press"] == "random" and r["full_restore"]["eligible"]
+    )
+    victim["n_trace_tokens"] = 1100
+    victim["full_restore"] = {"eligible": False}
+    _write(path, rows)
+    code, log = _run(runs, tmp_path / "out", "origin")
+    assert code == 2, log
+    d = json.loads((tmp_path / "out/origin.json").read_text())
+    det = d["controls"]["determinism_random"]
+    assert d["status"] == "INVALID" and not det["eligible_sets_equal"]
+    assert not det["passed"] and det["only_in_v3"]
+    assert d["per_policy"]["random"]["ratios"].startswith("WITHHELD")
+
+
+def test_issue1_failed_v2_comparator_gate_is_invalid(tmp_path):
+    runs = s2_fixture(tmp_path)
+    path = runs / "restore-v2/math500/m/rows.jsonl"
+    rows = _rows_of(path)
+    victim = next(
+        r for r in rows if r["press"] == "random" and r["full_restore"]["eligible"]
+    )
+    victim["full_restore"]["gate"] = {"passed": False}
+    _write(path, rows)
+    code, log = _run(runs, tmp_path / "out", "origin")
+    assert code == 2, log
+    d = json.loads((tmp_path / "out/origin.json").read_text())
+    assert d["status"] == "INVALID"
+    assert not d["controls"]["restore_v2_rows"]["passed"]
+    # and the R.17 reader of the same rows agrees
+    code, log = _run_r17(runs, tmp_path / "out17", "restore")
+    assert code == 2, log
+
+
+# ---- issue 2: failures retire old outputs; one dependency fingerprint
+def test_issue2_truncated_json_after_final_leaves_no_final(tmp_path):
+    runs = s1_fixture(tmp_path)
+    out = tmp_path / "out"
+    assert _run(runs, out, "protection", "--budget", "256")[0] == 0
+    with (runs / "readout-pp256/readout/r.jsonl").open("a") as fh:
+        fh.write('{"reference_key": ["math500", "x"')  # torn write
+    code, log = _run(runs, out, "protection", "--budget", "256")
+    assert code == 2, log
+    d = json.loads((out / "protection_b256.json").read_text())
+    assert d["status"] == "INVALID" and "JSONDecodeError" in d["error"]
+    assert not (out / "protection_b256.conditions.tsv").exists()
+    assert list(out.glob("protection_b256.json.superseded-*"))
+
+
+def test_issue2_schema_failure_is_invalid_evidence_not_a_crash(tmp_path):
+    runs = s1_fixture(tmp_path)
+    path = runs / "readout-diss256-g0/readout/r.jsonl"
+    rows = _rows_of(path)
+    del rows[0]["condition"]
+    _write(path, rows)
+    code, log = _run(runs, tmp_path / "out", "protection", "--budget", "256")
+    assert code == 2, log
+    d = json.loads((tmp_path / "out/protection_b256.json").read_text())
+    assert d["status"] == "INVALID"
+
+
+def _both_budgets_and_consequence(tmp_path):
+    runs = s1_fixture(tmp_path)
+    runs1024 = s1_fixture(tmp_path / "b", budget=1024)
+    for name in ("grid-pp1024", "readout-pp1024", "grid-diss1024", "readout-diss1024"):
+        (runs / name).symlink_to(runs1024 / name)
+    out = tmp_path / "out"
+    assert _run(runs, out, "protection", "--budget", "256")[0] == 0
+    assert _run(runs, out, "protection", "--budget", "1024")[0] == 0
+    code, log = _run(runs, out, "consequence")
+    assert code == 0, log
+    assert json.loads((out / "consequence.json").read_text())["status"] == "FINAL"
+    return runs, out
+
+
+@pytest.mark.parametrize(
+    "mutate,group",
+    [
+        (
+            lambda r: (r / "grid-pp256/token_ids/math500/m/t.jsonl").unlink(),
+            "grid_pp_sidecars",
+        ),
+        (
+            lambda r: _write(
+                r / "math500-fc-powered-merged/math500/fc.jsonl",
+                [
+                    {**x, "correct": False}
+                    for x in _rows_of(r / "math500-fc-powered-merged/math500/fc.jsonl")
+                ],
+            ),
+            "full_cache_bank",
+        ),
+    ],
+    ids=["deleted_prompt_sidecar", "changed_full_cache_comparator"],
+)
+def test_issue2_consequence_refuses_changed_dependencies(tmp_path, mutate, group):
+    runs, out = _both_budgets_and_consequence(tmp_path)
+    mutate(runs)
+    code, log = _run(runs, out, "consequence")
+    assert code == 2, log
+    c = json.loads((out / "consequence.json").read_text())
+    assert c["status"] == "INVALID" and group in c["error"]
+    assert list(out.glob("consequence.json.superseded-*"))
+
+
+def test_issue2_changed_analysis_code_invalidates_stored_reads(tmp_path):
+    import shutil
+
+    repo = tmp_path / "repo"
+    for d in ("scripts", "src", "configs"):
+        shutil.copytree(
+            ROOT / d, repo / d, ignore=shutil.ignore_patterns("__pycache__")
+        )
+    runs = s1_fixture(tmp_path / "data")
+    runs1024 = s1_fixture(tmp_path / "data1024", budget=1024)
+    for name in ("grid-pp1024", "readout-pp1024", "grid-diss1024", "readout-diss1024"):
+        (runs / name).symlink_to(runs1024 / name)
+    out = tmp_path / "out"
+
+    def run(*args):
+        p = subprocess.run(
+            [
+                sys.executable,
+                str(repo / "scripts/report_s.py"),
+                "--runs-root",
+                str(runs),
+                "--out-dir",
+                str(out),
+                "--n-resamples",
+                "50",
+                *args,
+            ],
+            capture_output=True,
+            text=True,
+            cwd=repo,
+        )
+        return p.returncode, p.stdout + p.stderr
+
+    assert run("protection", "--budget", "256")[0] == 0
+    assert run("protection", "--budget", "1024")[0] == 0
+    assert run("consequence")[0] == 0
+    with (repo / "src/kvcache/metrics/s_reads.py").open("a") as fh:
+        fh.write("\n# an analysis change\n")
+    code, log = run("consequence")
+    assert code == 2 and "analysis_code" in log, log
+
+
+def test_issue2_origin_fingerprint_covers_v2_and_full_cache(tmp_path):
+    runs = s2_fixture(tmp_path)
+    assert _run(runs, tmp_path / "out", "origin")[0] == 0
+    first = json.loads((tmp_path / "out/origin.json").read_text())["dependencies"]
+    path = runs / "math500-fc-powered-merged/math500/fc.jsonl"
+    rows = _rows_of(path)
+    rows[0]["n_tokens"] = 1
+    _write(path, rows)
+    assert _run(runs, tmp_path / "out", "origin")[0] == 0
+    second = json.loads((tmp_path / "out/origin.json").read_text())["dependencies"]
+    assert first["groups"]["full_cache_bank"] != second["groups"]["full_cache_bank"]
+    assert first["groups"]["restore_v2_rows"] == second["groups"]["restore_v2_rows"]
+    assert first["sha256"] != second["sha256"]
+
+
+# ---- issue 3: the R.17 capture reads use the strict capture controls
+def capture_fixture(tmp: Path) -> Path:
+    import hashlib
+
+    from kvcache.gates import _revision, _yaml
+    from kvcache.provenance import identity
+
+    runs = tmp / "runs"
+    cfg_path = "configs/experiments/capture_math500_b256_r9.yaml"
+    cfg = _yaml(ROOT / cfg_path)
+    basis_cfg_path = cfg.get("basis_config", "configs/experiments/basis_fit_q6_r9.yaml")
+    bcfg = _yaml(ROOT / basis_cfg_path)
+    bident = identity(
+        "basis",
+        bcfg,
+        model_revision=_revision(bcfg, ROOT),
+        reference_run=bcfg["reference_run_name"],
+    )
+    bdir = runs / cfg["basis_run"] / "basis"
+    bdir.mkdir(parents=True)
+    (bdir / "q6_basis.npz").write_bytes(b"b")
+    (bdir / "q6_basis.json").write_text(
+        json.dumps(
+            {
+                "passed": True,
+                "status": "FROZEN",
+                "npz": "q6_basis.npz",
+                "npz_sha256": hashlib.sha256(b"b").hexdigest(),
+                "identity": bident,
+            }
+        )
+    )
+    ident, why = expected_run_identity("capture", cfg_path, runs, root=ROOT)
+    assert ident is not None, why
+    manifest = load_input_manifest()
+    m_by = {"random": 0.5, "streamingllm": 0.27, "h2o": 0.2, "rkv": 0.26}
+    rows = []
+    for press, m in m_by.items():
+        for p in PIDS25:
+            for s in SEEDS:
+                rows.append(
+                    {
+                        "pid": p,
+                        "seed": s,
+                        "press": press,
+                        "budget": 256,
+                        "prompt_tokens": 90,
+                        "n_trace_tokens": 4000,
+                        "checks": {"layer0_delta_max": 0.0, "n_nonfinite": 0},
+                        "n_events": 5,
+                        "M_mean": m,
+                        "Delta_mean": m / 2,
+                        "M_event_mean": m / 3,
+                        "sum_by_layer_group": {
+                            "M": [[m * 5, m * 5], [m * 5, m * 5]],
+                            "Delta": [[m * 2.5, m * 2.5], [m * 2.5, m * 2.5]],
+                            "M_event": [[m, m], [m, m]],
+                        },
+                        "n_measured_by_layer_group": [[5, 5], [5, 5]],
+                        "latent": {
+                            "omega_trace": 3.0,
+                            "sum_omega": [30.0, 30.0],
+                            "n_finite": [10, 10],
+                            "sum_par": [1.0, 1.0],
+                            "sum_perp": [3.0, 3.0],
+                        },
+                        "provenance": {
+                            **ident,
+                            "inputs_sha256": expected_inputs(manifest, "capture", p, s),
+                        },
+                    }
+                )
+    _write(runs / "capture-b256/math500/m/rows.jsonl", rows)
+    return runs
+
+
+def test_issue3_complete_capture_fixture_is_final(tmp_path):
+    runs = capture_fixture(tmp_path)
+    code, log = _run_r17(
+        runs, tmp_path / "out", "--capture-run", "capture-b256", "mdelta"
+    )
+    assert code == 0, log
+    d = json.loads((tmp_path / "out/mdelta.json").read_text())
+    assert d["status"] == "FINAL" and d["H3"]["label"] == "HOLDS"
+
+
+@pytest.mark.parametrize(
+    "field,value,needle",
+    [
+        ("layer0", 1.0, "layer0_delta_max 1.0"),
+        ("M_mean", float("nan"), "M_mean"),
+        ("M_mean", 1.7, "M_mean"),
+        ("omega", -1.0, "omega_trace"),
+    ],
+    ids=["layer0_failure", "nonfinite_metric", "out_of_domain_M", "negative_omega"],
+)
+def test_issue3_capture_controls_and_metrics_fail_closed(
+    tmp_path, field, value, needle
+):
+    runs = capture_fixture(tmp_path)
+    path = runs / "capture-b256/math500/m/rows.jsonl"
+    rows = _rows_of(path)
+    if field == "layer0":
+        rows[0]["checks"]["layer0_delta_max"] = value
+    elif field == "omega":
+        rows[0]["latent"]["omega_trace"] = value
+    else:
+        rows[0][field] = value
+    _write(path, rows)
+    code, log = _run_r17(
+        runs, tmp_path / "out", "--capture-run", "capture-b256", "mdelta"
+    )
+    assert code == 2, log
+    d = json.loads((tmp_path / "out/mdelta.json").read_text())
+    assert d["status"] == "INVALID"
+    assert d["H3"]["label"].startswith("WITHHELD")
+    malformed = d["validation"]["population"]["malformed"]
+    assert any(needle in p for ps in malformed.values() for p in ps), malformed
+
+
+def test_issue3_mass_rounding_tolerance_accepts_fp32_noise_not_real_violations():
+    from kvcache.read_validation import MASS_ROUNDING_TOL, capture_metric_problems
+
+    def row(m_sum):
+        return {
+            "n_events": 5,
+            "M_mean": 0.001,
+            "Delta_mean": 0.001,
+            "sum_by_layer_group": {"M": [[m_sum, 0.1]], "Delta": [[0.1, 0.1]]},
+            "n_measured_by_layer_group": [[5, 5]],
+        }
+
+    # the real b2048 worst case: -2.7e-6 per measurement
+    assert capture_metric_problems(row(-2.7e-6 * 5)) == []
+    assert capture_metric_problems(row(-MASS_ROUNDING_TOL * 5)) == []
+    assert capture_metric_problems(row(-2 * MASS_ROUNDING_TOL * 5))
+    assert capture_metric_problems(row(-1.0))
+    assert capture_metric_problems(row(6.0))  # mean 1.2 > 1

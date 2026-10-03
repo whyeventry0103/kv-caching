@@ -139,14 +139,15 @@ it (`by_length.json`): StreamingLLM 0.80 / 0.48 / 0.31 against Random
 hypothesis about accuracy, with two direct tests registered in Amendment S:
 
 - **S.2 restoration by origin: read, FINAL** (MEETING3_RESULTS §3e). For
-  Random, returning the evicted prompt entries recovers 37% [31%, 42%] of
-  what returning every evicted entry recovers, against 22% [16%, 28%] for an
-  equal-sized random draw of trace entries: prompt entries carry more per
-  entry (PROMPT-SPECIFIC), and they do not carry most of it (PARTIAL). For
-  StreamingLLM the prompt entries recover no more than an equal number of
-  trace entries (NON-SPECIFIC). Divergence, not accuracy; and the Random
-  prompt arm carried a material pad of trace entries in some heads (up to
-  25), reported in §3e.
+  Random, the prompt arm (every evicted prompt entry, padded in every one
+  of the 91 rows with 1 to 25 recently evicted trace entries to keep the
+  cache rectangular) recovers 37% [31%, 42%] of what returning every evicted
+  entry recovers, against 22% [16%, 28%] for an equal-size random draw of
+  trace entries. The prompt-plus-padding arm outperforms the random-trace
+  arm; a per-entry advantage of prompt entries alone is not isolated by this
+  contrast. It does not carry most of the restorable divergence (PARTIAL).
+  For StreamingLLM a difference between the arms is not detected
+  (−0.030 [−0.090, +0.025]). Divergence, not accuracy.
 - **S.1 prompt-protected decomposition: running.** Free-run at budget 256 is
   complete; the forward readout is pending, so the read is PARTIAL and
   carries no label. The accuracy question is answered there, not here.
@@ -155,8 +156,9 @@ hypothesis about accuracy, with two direct tests registered in Amendment S:
 policies by per-step disturbance; accuracy ranks them by what survives, and
 the two rankings part in the readout channel (paired difference CI excludes
 0) while the residual difference is not detected. Whether the surviving
-*prompt* is the reason is being tested directly; the divergence-level test
-says it is part of the answer for Random and not for StreamingLLM.
+*prompt* is the reason is being tested directly. The divergence-level test
+is consistent with a partial role for Random (with the padding caveat) and
+detects none for StreamingLLM; the accuracy-scale test is S.1.
 
 **Paper wording to change.** Our "Random" is kvpress's `RandomPress` with
 per-prune reseeding: a fixed per-slot pattern that behaves as a soft-recency

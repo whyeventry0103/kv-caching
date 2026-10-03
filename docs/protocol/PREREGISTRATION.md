@@ -4232,3 +4232,28 @@ reinterpretation (R.6). H3 −0.577 [−0.602, −0.543] HOLDS. H2 NEITHER.
 Collateral 0, reported not read. Numbers: MEETING3_RESULTS §3f. The Qwen ω
 result is therefore one-architecture; its exploratory scope stands and no
 generality claim is made for it.
+
+**Wording corrections to the S.2 and R.17.3 result records (2026-10-03,
+after the independent review of 49c572c).** No estimate or label changes;
+the records above stand as written and are qualified here.
+- S.2 Random: all 91 eligible rows' prompt arms were padded with 1–25
+  recently evicted trace entries. PROMPT-SPECIFIC is the registered label of
+  "prompt-plus-padding arm > equal-size random trace draw"; it does not
+  isolate a per-entry advantage of prompt entries.
+- S.2 StreamingLLM: NON-SPECIFIC means a difference was not detected, not
+  that the prompt contributes nothing.
+- R.17.3: REVERSED shows the Qwen ω ordering does not generalise to this
+  second model and setup; "one-architecture" in the result record above
+  should be read as "one model"; the cause of the reversal is not isolated.
+  H3 on Llama is the registered mass contrast only; its damage-objective
+  reading is not supported there (H2O-style not run free on Llama; Random,
+  losing the most mass, has the lowest accuracy).
+- Reader repair, second pass: restoration statuses and exclusions are
+  validated against the producers and each row's trace; the complete-read
+  eligible-set control is enforced; v2 comparators are validated; outputs
+  are retired before analysis; one dependency fingerprint covers rows,
+  sidecars, comparators, specs and code; the R.17 capture reads reuse the
+  strict capture controls. A per-measurement rounding tolerance of 1e-5 on
+  attention-mass sums (the registered layer-0 Δ tolerance) was set after
+  counting fp32 rounding at budget 2048 (worst −2.7e-6); it is not a
+  registered threshold.

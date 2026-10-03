@@ -24,6 +24,7 @@ from typing import Any
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
+sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
 
 from kvcache.coverage import equal_problem_bootstrap
 from kvcache.metrics import r17_reads as r17
@@ -78,7 +79,11 @@ def _validated_capture(runs: Path, a: argparse.Namespace) -> dict[str, Any]:
     committed config, model revision, frozen manifest and VERIFIED basis
     (``gates.expected_run_identity``), plus the capture's own control flags.
     """
+    from report_capture import control_failures
+
     from kvcache.read_validation import (
+        INVALID,
+        capture_metric_problems,
         design_keys,
         final_status,
         provenance_v1_summary,
@@ -99,6 +104,17 @@ def _validated_capture(runs: Path, a: argparse.Namespace) -> dict[str, Any]:
         expected=expected,
         required=("pid", "press", "budget", "provenance", "checks"),
     )
+    # the strict capture reader's own per-row controls (layer-0 Delta <= 1e-5,
+    # no non-finite value) plus domain checks on every metric the reads consume
+    for i, r in enumerate(rows):
+        probs = [*control_failures(r), *capture_metric_problems(r)]
+        if probs:
+            try:
+                k = repr(key(r))
+            except (KeyError, TypeError, ValueError):
+                k = f"<row {i}>"
+            pop["malformed"][k] = pop["malformed"].get(k, []) + probs
+            pop["status"] = INVALID
     controls = {
         "provenance": provenance_v1_summary(
             rows,
@@ -109,13 +125,10 @@ def _validated_capture(runs: Path, a: argparse.Namespace) -> dict[str, Any]:
             root=PROJECT_ROOT,
         ),
         "live_controls": {
-            "passed": all(
-                (r.get("checks") or {}).get("n_nonfinite", 1) == 0 for r in rows
-            )
-            and bool(rows),
-            "n_rows_with_nonfinite": sum(
-                1 for r in rows if (r.get("checks") or {}).get("n_nonfinite", 1)
-            ),
+            "passed": bool(rows) and not any(control_failures(r) for r in rows),
+            "validator": "report_capture.control_failures (layer-0 Delta and "
+            "non-finite count, the strict capture reader's own)",
+            "n_rows_failing": sum(1 for r in rows if control_failures(r)),
         },
     }
     return {
@@ -511,7 +524,6 @@ def restore(runs: Path, a: argparse.Namespace) -> dict[str, Any]:
         INVALID,
         design_keys,
         final_status,
-        in_unit_interval,
         provenance_v1_summary,
         validate_population,
     )
@@ -534,27 +546,21 @@ def restore(runs: Path, a: argparse.Namespace) -> dict[str, Any]:
         expected=expected,
         required=("pid", "seed", "press", "budget", "status", "provenance"),
     )
+    import yaml
+
+    from kvcache.read_validation import restoration_row_problems
+
+    c2 = yaml.safe_load((PROJECT_ROOT / cfg2).read_text(encoding="utf-8"))
     for r in rows:
-        if r.get("status") != "READ":
-            continue
-        k = repr((r["press"], r["pid"], r["seed"]))
-        probs = []
-        fs = r.get("full_restore") or {}
-        if fs.get("eligible"):
-            if not (fs.get("gate") or {}).get("passed"):
-                probs.append("full_restore gate not passed")
-            for f in ("window_mean_tv", "none_window_mean_tv"):
-                if not in_unit_interval(fs.get(f)):
-                    probs.append(f"full_restore.{f} not in [0, 1]")
-        for lag, blk in (r.get("lags") or {}).items():
-            if not blk.get("eligible"):
-                continue
-            if not all(g.get("passed") for g in (blk.get("gates") or {}).values()):
-                probs.append(f"lag {lag}: an arm gate did not pass")
-            for arm in ("none", "matched", "random", "relaxed"):
-                if not in_unit_interval(blk.get(arm)):
-                    probs.append(f"lag {lag}: {arm} TV not in [0, 1]")
+        probs = restoration_row_problems(
+            r,
+            family="restore_v2",
+            trigger=int(c2["trigger_step"]),
+            interval=int(c2["compression_interval"]),
+            window=int(c2["window"]),
+        )
         if probs:
+            k = repr((r.get("press"), r.get("pid"), r.get("seed")))
             pop["malformed"][k] = probs
             pop["status"] = INVALID
     controls = {
@@ -817,7 +823,17 @@ def main() -> int:
         return 0
     stem, fn = READS[a.read]
     name = stem if a.capture_run == "capture-b256" else f"{stem}_{a.capture_run}"
-    payload = fn(a.runs_root, a)
+    from kvcache.read_validation import retire_stale
+
+    # retire the previous output BEFORE the read can fail (review of 49c572c)
+    retire_stale(OUT / f"{name}.json")
+    try:
+        payload = fn(a.runs_root, a)
+    except (SystemExit, Exception) as exc:  # noqa: BLE001 -- evidence, then exit 2
+        if isinstance(exc, SystemExit) and exc.code in (0, None):
+            raise
+        msg = str(exc.code) if isinstance(exc, SystemExit) else repr(exc)
+        payload = {"read": a.read, "status": "INVALID", "error": msg}
     _write(name, payload, sys.argv[1:])
     status = payload.get("status")
     if status in ("PARTIAL", "INVALID"):

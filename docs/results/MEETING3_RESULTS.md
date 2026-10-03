@@ -8,6 +8,11 @@ artifact when this file was written. Review evidence (gate outputs, remote test 
 parity, queue dry-run, remote-only data list):
 [`meeting3_evidence/`](meeting3_evidence/README.md).
 
+**Status, 2026-10-03 12:30 Dubai.** Readers hardened after a second
+independent review; every read re-run, estimates and labels unchanged. §3e
+and §3f wording narrowed (prompt-plus-padding arm; "not detected"; Llama ω
+does not generalise to this model/setup; Llama H3 is a mass contrast only).
+
 **Status, 2026-10-02 18:30 Dubai.** Llama-8B capture READ (§3f): **ω contrast
 REVERSED** (−0.355 [−0.453, −0.275]); H3 HOLDS; H2 NEITHER; collateral 0.
 
@@ -15,7 +20,7 @@ REVERSED** (−0.355 [−0.453, −0.275]); H3 HOLDS; H2 NEITHER; collateral 0.
 boundary (`kvcache.read_validation`, after the independent review of
 `f69dce3`): FINAL / PARTIAL / INVALID, labels only on FINAL. Re-read with it:
 restore-v2 FINAL (unchanged), **restore-v3 FINAL (§3e: Random PARTIAL and
-PROMPT-SPECIFIC; StreamingLLM INDETERMINATE and NON-SPECIFIC)**, S.1 budget
+PROMPT-SPECIFIC, label of a prompt-plus-padding arm; StreamingLLM INDETERMINATE and NON-SPECIFIC)**, S.1 budget
 256 PARTIAL (free-run 800/800 complete, forward readout pending; no label).
 Llama-8B capture 400/400 (not yet read); Qwen3-4B bank 150/200.
 
@@ -850,18 +855,21 @@ problems).
   and 0.0575 [0.0492, 0.0665] for StreamingLLM: both CIs lie above 0, so the
   ratios are defined. Every TV here is an order of magnitude above the
   precision floor's mean per-step TV (0.0062, §4a).
-- **Random:** returning the prompt entries (about 63 per head, plus pad)
-  recovers 37% of what returning all ~830 stashed entries recovers; an
-  equal-sized random draw of trace entries recovers 22%. Prompt entries carry
-  more per entry than trace entries (the difference's CI excludes 0), and
-  they do not carry most of the restorable divergence (PARTIAL, not PROMPT
-  CARRIES IT). The pad is material (up to 25 of ~88 returned entries in some
-  heads), so "prompt-specific" means "prompt entries plus a minority of the
-  most recently evicted trace entries, against an equal-count random trace
-  draw".
-- **StreamingLLM:** the prompt entries recover no more than an equal number of
-  trace entries (the difference's CI includes 0). The ρ_prompt CI straddles
-  the 0.20 threshold, so the registered label is INDETERMINATE.
+- **Random:** the `prompt` arm (every evicted prompt entry, about 63 per
+  head, padded with each head's most recently evicted trace entries to a
+  common count) recovers 37% of what returning all ~830 stashed entries
+  recovers; an equal-sized uniform draw of evicted trace entries recovers 22%.
+  Every one of the 91 eligible Random rows needed padding (1 to 25 trace entries in the most-padded head), so the arm is prompt-plus-recent-trace, not prompt alone. What the
+  registered contrast shows is that **the prompt-plus-padding arm outperforms
+  an equal-size random draw of trace entries** (PROMPT-SPECIFIC is the
+  registered label for that contrast); it does not isolate a per-entry
+  advantage of prompt entries over trace entries. The arm does not carry
+  most of the restorable divergence (PARTIAL, not PROMPT CARRIES IT).
+  (Wording corrected 2026-10-03 after the review of `49c572c`.)
+- **StreamingLLM:** a difference between the prompt and trace arms is **not
+  detected** (−0.030, CI includes 0); this is not evidence that the prompt
+  contributes nothing. No padding was needed. The ρ_prompt CI straddles the
+  0.20 threshold, so the registered label is INDETERMINATE.
 - **What this does and does not say.** This is divergence under teacher
   forcing, not accuracy. Full restoration here, unlike restore-v2's R_fs,
   is compared against a `frozen` arm in which eviction is also stopped, so
@@ -892,11 +900,20 @@ basis was fitted for Llama, so there is no k-sensitivity here.
 
 - **The ω contrast reverses on Llama.** As registered (R.6): reported as
   such, with no post-hoc reinterpretation of which direction the geometry
-  predicted. The Qwen result (+0.200 at 256, +0.225 at 2048) does not
-  generalise across architectures; the exploratory scope statement was
-  correct and the claim stays exploratory, one model.
-- **H3 holds on Llama too**, by a much larger margin: the attention-mass
-  objective is not the damage objective on either architecture.
+  predicted. The Qwen ordering (+0.200 at 256, +0.225 at 2048) does not
+  generalise to this second model and setup. Model, base architecture,
+  tokenizer, prompt lengths and the fitted basis all differ between the two
+  cells, so the reversal does not isolate architecture as its cause. The
+  claim stays exploratory, one model.
+- **H3, the registered attention-mass contrast, holds on Llama** (H2O-style
+  loses less mass than Random). It is a mass statistic only. On Qwen it was
+  read beside the accuracy evidence that H2O-style damages more than Random
+  at budget 256; on Llama there is no such evidence: H2O-style was never run
+  free on Llama, and on the 25 capture problems Random, which loses the most
+  mass, also has the lowest free-run accuracy (0.00 against StreamingLLM's
+  0.16; `grid-diss256-llama`). So on Llama the "mass is not the damage
+  objective" interpretation is **not supported**; for the pair that was
+  measured, mass and damage rank the same way. (Corrected 2026-10-03.)
 
 **Descriptive (mean [95% CI], 25 problems).**
 
@@ -913,8 +930,8 @@ basis was fitted for Llama, so there is no k-sensitivity here.
   loops (PAPER_FINDINGS §4o). Whether the two facts are connected is not
   tested here.
 - ω is lowest for Random on Llama, highest on Qwen. The latent-geometry
-  ordering is therefore architecture-dependent, which is what REVERSED
-  records.
+  ordering therefore depends on the model and setup, which is what REVERSED
+  records; which difference between the two drives it is not tested.
 - Collateral: 0 in all 400 conditions, with 2.96M evicted instances wanted
   by some head under Random (of 100.3M checked). With 4 query heads per KV
   head the group-mean bound is tighter (1/400), so this is the structurally

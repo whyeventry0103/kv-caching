@@ -2,6 +2,7 @@
   "amendment": "S",
   "controls": {
     "determinism_random": {
+      "eligible_set_rule": "complete read: v3 READ set == v2 eligible set",
       "eligible_sets_equal": true,
       "max_abs_diff": {
         "full": 0.0,
@@ -11,10 +12,13 @@
       "n_compared": 91,
       "non_finite_or_out_of_domain": [],
       "on_failure": "STOP: an instrument bug, not a result",
+      "only_in_v2": [],
+      "only_in_v3": [],
       "passed": true,
       "tolerance": 1e-06
     },
     "determinism_streamingllm": {
+      "eligible_set_rule": "complete read: v3 READ set == v2 eligible set",
       "eligible_sets_equal": true,
       "max_abs_diff": {
         "full": 0.0,
@@ -24,6 +28,8 @@
       "n_compared": 91,
       "non_finite_or_out_of_domain": [],
       "on_failure": "STOP: an instrument bug, not a result",
+      "only_in_v2": [],
+      "only_in_v3": [],
       "passed": true,
       "tolerance": 1e-06
     },
@@ -41,6 +47,7 @@
       },
       "expected_identity_reason": "ok",
       "failing": {},
+      "input_manifest": "configs/meeting3/input_manifest.json",
       "n_failing": 0,
       "n_rows": 200,
       "passed": true,
@@ -60,6 +67,7 @@
       },
       "expected_identity_reason": "ok",
       "failing": {},
+      "input_manifest": "configs/meeting3/input_manifest.json",
       "n_failing": 0,
       "n_rows": 200,
       "passed": true,
@@ -75,7 +83,38 @@
       "passed": true,
       "status": "COMPLETE",
       "unexpected": []
+    },
+    "restore_v2_rows": {
+      "checked": "status, legitimate exclusion, full_restore and lag gates, TV domain, window fit (the same validator restore-v2 is read with)",
+      "failing": {},
+      "n_failing": 0,
+      "passed": true
     }
+  },
+  "dependencies": {
+    "groups": {
+      "analysis_code": {
+        "n_files": 8,
+        "sha256": "67421a6af6009467afd028a154e49f2e0b283bc08496d3c199d3dd2ad98b4fec"
+      },
+      "full_cache_bank": {
+        "n_files": 8,
+        "sha256": "fe824625ea3d83c7023ce8cbb131dad9844f81da37d78596eb42cd0a10253199"
+      },
+      "restore_v2_rows": {
+        "n_files": 8,
+        "sha256": "4a94e6163deca9e27ee3e6a75947c335f25341524642c02e622d563669731694"
+      },
+      "restore_v3_rows": {
+        "n_files": 8,
+        "sha256": "9a08ef57ece0b5f1df5c27351ff3d0c001e33523af83ebbc926d29244a5123bb"
+      },
+      "specs": {
+        "n_files": 6,
+        "sha256": "9440629336faee66823efeade19115d72d4256033d6beddbeea04c45976a65e5"
+      }
+    },
+    "sha256": "0210030db5bc90869f315b5d141068246fbc24bfb87ae99cd1fbcfdd66a6d789"
   },
   "design": {
     "budgets": [
@@ -98,7 +137,6 @@
     "restore_v2": "restore-v2",
     "restore_v3": "restore-v3"
   },
-  "inputs_sha256": "a49cee63ef147a4c7a0f683fbf91c915d3e54d61e488661eef4e80bd83398be0",
   "per_policy": {
     "random": {
       "eligible": {

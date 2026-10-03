@@ -1568,6 +1568,7 @@
         },
         "expected_identity_reason": "ok",
         "failing": {},
+        "input_manifest": "configs/meeting3/input_manifest.json",
         "n_failing": 0,
         "n_rows": 200,
         "passed": true,

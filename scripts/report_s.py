@@ -47,14 +47,15 @@ from kvcache.read_validation import (
     FINAL,
     INVALID,
     PARTIAL,
+    dependency_fingerprint,
     design_keys,
     exit_code,
-    files_sha256,
     final_status,
-    in_unit_interval,
     legacy_provenance_summary,
     provenance_v1_summary,
+    restoration_row_problems,
     retire_stale,
+    tree_files,
     validate_population,
 )
 
@@ -81,6 +82,93 @@ CELLS = {
 }
 ORIGIN_CONFIG = "configs/experiments/restore_v3_math500_s2.yaml"
 RESTORE2_CONFIG = "configs/experiments/restore_v2_math500_r17.yaml"
+# Everything the reads import or read besides rows: a change to any of these
+# invalidates a stored read (review of 49c572c, issue 2).
+ANALYSIS_CODE = (
+    "scripts/report_s.py",
+    "scripts/report_m4.py",
+    "src/kvcache/metrics/s_reads.py",
+    "src/kvcache/read_validation.py",
+    "src/kvcache/coverage.py",
+    "src/kvcache/presses/prompt_protect.py",
+    "src/kvcache/provenance.py",
+    "src/kvcache/gates.py",
+)
+FROZEN_SPECS = (
+    "configs/meeting3/grid100_pids.json",
+    "configs/meeting3/q2_subset_pids.json",
+    "configs/meeting3/input_manifest.json",
+    "configs/models.yaml",
+)
+
+
+def _project_files(paths: tuple[str, ...] | list[str]) -> list[Path]:
+    return [PROJECT_ROOT / p for p in paths]
+
+
+def protection_dependencies(runs: Path, budget: int) -> dict[str, Any]:
+    """Every input the protection read consumes, one fingerprint (shared with
+    ``consequence``, which recomputes it before accepting a stored read)."""
+    cell = CELLS[budget]
+    return dependency_fingerprint(
+        {
+            "grid_pp_rows": (runs, tree_files(runs / cell["grid_pp"], BENCH)),
+            "grid_pp_sidecars": (
+                runs,
+                tree_files(runs / cell["grid_pp"], "token_ids", token_ids=None),
+            ),
+            "grid_base_rows": (runs, tree_files(runs / cell["grid_base"], BENCH)),
+            "grid_base_sidecars": (
+                runs,
+                tree_files(runs / cell["grid_base"], "token_ids", token_ids=None),
+            ),
+            "readout_pp_rows": (
+                runs,
+                [
+                    f
+                    for r in cell["readout_pp"]
+                    for f in tree_files(runs / r, "readout")
+                ],
+            ),
+            "readout_base_rows": (
+                runs,
+                [
+                    f
+                    for r in cell["readout_base"]
+                    for f in tree_files(runs / r, "readout")
+                ],
+            ),
+            "full_cache_bank": (runs, tree_files(runs / FC_RUN, BENCH)),
+            "specs": (
+                PROJECT_ROOT,
+                _project_files(
+                    [cell["grid_pp_config"], cell["grid_base_config"], *FROZEN_SPECS]
+                ),
+            ),
+            "analysis_code": (PROJECT_ROOT, _project_files(ANALYSIS_CODE)),
+        }
+    )
+
+
+def origin_dependencies(runs: Path) -> dict[str, Any]:
+    return dependency_fingerprint(
+        {
+            "restore_v3_rows": (runs, tree_files(runs / "restore-v3", BENCH)),
+            "restore_v2_rows": (runs, tree_files(runs / "restore-v2", BENCH)),
+            "full_cache_bank": (runs, tree_files(runs / FC_RUN, BENCH)),
+            "specs": (
+                PROJECT_ROOT,
+                _project_files([ORIGIN_CONFIG, RESTORE2_CONFIG, *FROZEN_SPECS]),
+            ),
+            "analysis_code": (PROJECT_ROOT, _project_files(ANALYSIS_CODE)),
+        }
+    )
+
+
+def _cfg(path: str) -> dict[str, Any]:
+    import yaml
+
+    return yaml.safe_load((PROJECT_ROOT / path).read_text(encoding="utf-8"))
 
 
 # ------------------------------------------------------------------ loading
@@ -256,18 +344,13 @@ def protection(runs: Path, a: argparse.Namespace) -> tuple[dict[str, Any], str]:
     relaxed = sorted(
         p for p, n in prompt_len.items() if effective_budget(a.budget, n)[1]
     )
-    inputs = files_sha256(
-        _row_files(runs / cell["grid_pp"], BENCH)
-        + _row_files(runs / cell["grid_base"], BENCH)
-        + [p for r in cell["readout_pp"] for p in _row_files(runs / r, "readout")]
-        + [p for r in cell["readout_base"] for p in _row_files(runs / r, "readout")]
-    )
+    deps = protection_dependencies(runs, a.budget)
     out: dict[str, Any] = {
         "read": "S.1 prompt-protected decomposition",
         "status": status,
         "budget": a.budget,
         "inputs": {k: v for k, v in cell.items()},
-        "inputs_sha256": inputs,
+        "dependencies": deps,
         "design": {
             "n_problems": len(pids),
             "seeds": seeds,
@@ -402,19 +485,20 @@ def consequence(runs: Path, a: argparse.Namespace) -> tuple[dict[str, Any], str]
         d = json.loads(path.read_text(encoding="utf-8"))
         if d["status"] != FINAL:
             raise SystemExit(f"REFUSED: {path.name} is {d['status']}, not FINAL")
-        cell = CELLS[budget]
-        current = files_sha256(
-            _row_files(runs / cell["grid_pp"], BENCH)
-            + _row_files(runs / cell["grid_base"], BENCH)
-            + [p for r in cell["readout_pp"] for p in _row_files(runs / r, "readout")]
-            + [p for r in cell["readout_base"] for p in _row_files(runs / r, "readout")]
-        )
-        if current != d["inputs_sha256"]:
-            raise SystemExit(
-                f"REFUSED: the rows behind {path.name} changed since it was read; "
-                "re-run the protection read"
+        current = protection_dependencies(runs, budget)
+        stored = (d.get("dependencies") or {}).get("sha256")
+        if current["sha256"] != stored:
+            changed = sorted(
+                g
+                for g, v in current["groups"].items()
+                if v != ((d.get("dependencies") or {}).get("groups") or {}).get(g)
             )
-        checks[str(budget)] = {"inputs_sha256": current, "status": d["status"]}
+            raise SystemExit(
+                f"REFUSED: inputs behind {path.name} changed since it was read "
+                f"({', '.join(changed) or 'fingerprint absent'}); re-run the "
+                "protection read"
+            )
+        checks[str(budget)] = {"dependencies_sha256": stored, "status": d["status"]}
         for press, block in d["per_press"].items():
             labels.setdefault(press, {})[budget] = block["primary"]["residual_label"]
     return {
@@ -434,31 +518,26 @@ def origin(runs: Path, a: argparse.Namespace) -> tuple[dict[str, Any], str]:
     v2_rows = _rows(runs / "restore-v2", BENCH)
     fc = {_run_key(r): bool(r["correct"]) for r in _rows(runs / FC_RUN, BENCH)}
     arms = list(s_reads.ORIGIN_ARMS)
-    read_rows = [r for r in rows if r.get("status") == "READ"]
+    cfg3, cfg2 = _cfg(ORIGIN_CONFIG), _cfg(RESTORE2_CONFIG)
     pop = validate_population(
         rows,
         key=_origin_key,
         expected=keys,
         required=("pid", "seed", "press", "budget", "status", "provenance"),
     )
-    # READ rows must carry every arm, finite TV in [0, 1], and passed gates
-    for r in read_rows:
-        k = repr(_origin_key(r))
-        probs = []
-        for arm in arms:
-            blk = (r.get("arms") or {}).get(arm)
-            if not blk:
-                probs.append(f"arm {arm} missing")
-                continue
-            if not in_unit_interval(blk.get("window_mean_tv")):
-                probs.append(
-                    f"arm {arm}: TV {blk.get('window_mean_tv')!r} not in [0, 1]"
-                )
-            if not (blk.get("gate") or {}).get("passed"):
-                probs.append(f"arm {arm}: gate not passed")
-        if not in_unit_interval(r.get("none_window_mean_tv")):
-            probs.append("none_window_mean_tv not in [0, 1]")
+    # EVERY row: a status the producer emits, a legitimate exclusion given the
+    # row's own trace length / cohort and the config, and for READ rows passed
+    # gates and in-domain TV (read_validation.restoration_row_problems)
+    for r in rows:
+        probs = restoration_row_problems(
+            r,
+            family="restore_v3",
+            trigger=int(cfg3["trigger_step"]),
+            interval=int(cfg3["compression_interval"]),
+            window=int(cfg3["window"]),
+        )
         if probs:
+            k = repr(_origin_key(r)) if "press" in r else repr(r.get("pid"))
             pop["malformed"][k] = pop["malformed"].get(k, []) + probs
             pop["status"] = INVALID
     controls = {
@@ -485,7 +564,28 @@ def origin(runs: Path, a: argparse.Namespace) -> tuple[dict[str, Any], str]:
         expected=design_keys(RESTORE2_CONFIG, root=PROJECT_ROOT)[1],
         required=("pid", "seed", "press", "status"),
     )
-    controls["restore_v2_coverage"] = {**v2_cov, "passed": v2_cov["status"] == COMPLETE}
+    v2_bad: dict[str, list[str]] = {}
+    for r in v2_rows:
+        probs = restoration_row_problems(
+            r,
+            family="restore_v2",
+            trigger=int(cfg2["trigger_step"]),
+            interval=int(cfg2["compression_interval"]),
+            window=int(cfg2["window"]),
+        )
+        if probs:
+            v2_bad[repr(_origin_key(r))] = probs
+    controls["restore_v2_coverage"] = {
+        **v2_cov,
+        "passed": v2_cov["status"] == COMPLETE,
+    }
+    controls["restore_v2_rows"] = {
+        "passed": not v2_bad,
+        "n_failing": len(v2_bad),
+        "failing": dict(list(v2_bad.items())[:20]),
+        "checked": "status, legitimate exclusion, full_restore and lag gates, "
+        "TV domain, window fit (the same validator restore-v2 is read with)",
+    }
     per_policy: dict[str, Any] = {}
     tsv_rows: list[list[Any]] = []
     for press in design["presses"]:
@@ -512,6 +612,16 @@ def origin(runs: Path, a: argparse.Namespace) -> tuple[dict[str, Any], str]:
         }
         det = s_reads.determinism_control(v3, v2)
         det["eligible_sets_equal"] = set(v3) == set(v2)
+        # the eligible-set relationship is part of the control: a complete read
+        # must have exactly restore-v2's eligible set; an incomplete one a subset
+        if pop["status"] == COMPLETE:
+            det["eligible_set_rule"] = "complete read: v3 READ set == v2 eligible set"
+            det["passed"] = bool(det["passed"]) and det["eligible_sets_equal"]
+        else:
+            # determinism_control already fails on a v3 key absent from v2
+            det["eligible_set_rule"] = "incomplete read: v3 READ set within v2's"
+        det["only_in_v3"] = [list(k) for k in sorted(set(v3) - set(v2))][:20]
+        det["only_in_v2"] = [list(k) for k in sorted(set(v2) - set(v3))][:20]
         controls[f"determinism_{press}"] = det
         per_policy[press] = {
             "status_counts": {
@@ -566,7 +676,7 @@ def origin(runs: Path, a: argparse.Namespace) -> tuple[dict[str, Any], str]:
             "restore_v2": "restore-v2",
             "config": ORIGIN_CONFIG,
         },
-        "inputs_sha256": files_sha256(_row_files(runs / "restore-v3", BENCH)),
+        "dependencies": origin_dependencies(runs),
         "design": {k: v for k, v in design.items() if k != "pids"}
         | {"n_problems": len(design["pids"])},
         "population": pop,
@@ -638,8 +748,19 @@ def main() -> int:
     if a.dry_run:
         print(json.dumps({"command": "report_s", "read": a.read, "out": str(OUT)}))
         return 0
-    payload, status = READS[a.read](a.runs_root, a)
     name = f"protection_b{a.budget}" if a.read == "protection" else a.read
+    # Retire the previous output BEFORE anything can fail, so a crash, a parse
+    # error or a refusal never leaves an old FINAL standing as current.
+    retire_stale(OUT / f"{name}.json")
+    retire_stale(OUT / f"{name}.conditions.tsv")
+    try:
+        payload, status = READS[a.read](a.runs_root, a)
+    except (SystemExit, Exception) as exc:  # noqa: BLE001 -- evidence, then exit 2
+        if isinstance(exc, SystemExit) and exc.code in (0, None):
+            raise
+        msg = str(exc.code) if isinstance(exc, SystemExit) else repr(exc)
+        payload, status = {"read": a.read, "status": INVALID, "error": msg}, INVALID
+        print(f"INVALID: {msg}", file=sys.stderr)
     _write(name, payload, sys.argv[1:])
     code = exit_code(status, partial_ok=a.partial)
     if code:

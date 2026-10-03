@@ -2881,8 +2881,9 @@
     "config": "configs/experiments/capture_math500_b256_r9.yaml",
     "controls": {
       "live_controls": {
-        "n_rows_with_nonfinite": 0,
-        "passed": true
+        "n_rows_failing": 0,
+        "passed": true,
+        "validator": "report_capture.control_failures (layer-0 Delta and non-finite count, the strict capture reader's own)"
       },
       "provenance": {
         "expected_identity": {
@@ -2898,6 +2899,7 @@
         },
         "expected_identity_reason": "ok",
         "failing": {},
+        "input_manifest": "configs/meeting3/input_manifest.json",
         "n_failing": 0,
         "n_rows": 400,
         "passed": true,

@@ -1028,32 +1028,32 @@
       "key": "m3.cap2048.realized_ratio_pct"
     },
     {
-      "context": "reverses, $-0.355$ (CI $[-0.453, -0.275]$), so the ordering is a property of",
+      "context": "reverses, $-0.355$ (CI $[-0.453, -0.275]$): the ordering does not generalise to",
       "literal": "-0.355",
       "key": "m3.llama.omega_contrast.mean"
     },
     {
-      "context": "reverses, $-0.355$ (CI $[-0.453, -0.275]$), so the ordering is a property of",
+      "context": "reverses, $-0.355$ (CI $[-0.453, -0.275]$): the ordering does not generalise to",
       "literal": "-0.453",
       "key": "m3.llama.omega_contrast.cilo"
     },
     {
-      "context": "reverses, $-0.355$ (CI $[-0.453, -0.275]$), so the ordering is a property of",
+      "context": "reverses, $-0.355$ (CI $[-0.453, -0.275]$): the ordering does not generalise to",
       "literal": "-0.275",
       "key": "m3.llama.omega_contrast.cihi"
     },
     {
-      "context": "same hypothesis holds by a larger margin, $-0.577$ ($[-0.602, -0.543]$).",
+      "context": "registered mass contrast also holds, $-0.577$ ($[-0.602, -0.543]$), but there it",
       "literal": "-0.577",
       "key": "m3.llama.h3.mean"
     },
     {
-      "context": "same hypothesis holds by a larger margin, $-0.577$ ($[-0.602, -0.543]$).",
+      "context": "registered mass contrast also holds, $-0.577$ ($[-0.602, -0.543]$), but there it",
       "literal": "-0.602",
       "key": "m3.llama.h3.cilo"
     },
     {
-      "context": "same hypothesis holds by a larger margin, $-0.577$ ($[-0.602, -0.543]$).",
+      "context": "registered mass contrast also holds, $-0.577$ ($[-0.602, -0.543]$), but there it",
       "literal": "-0.543",
       "key": "m3.llama.h3.cihi"
     }

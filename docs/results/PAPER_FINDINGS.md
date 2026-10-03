@@ -1590,13 +1590,15 @@ named as pending. Numbers and CIs: `docs/results/MEETING3_RESULTS.md` §2b, §3c
 
 ### 5i. Amendment S.2 read (restoration by origin) and the reader repair after the independent review (2026-10-02)
 
-**S.2, FINAL** (MEETING3_RESULTS §3e): for Random, returning the evicted
-prompt entries recovers a PARTIAL share of what full restoration recovers,
-and more than an equal-sized random draw of trace entries (PROMPT-SPECIFIC);
-for StreamingLLM the prompt entries recover no more than trace entries
-(NON-SPECIFIC, INDETERMINATE). Divergence, not accuracy. Numbers and CIs in
-§3e; the Random prompt arm's pad is reported there and qualifies the word
-"prompt-specific".
+**S.2, FINAL** (MEETING3_RESULTS §3e): for Random, the prompt-plus-padding
+arm recovers a PARTIAL share of what full restoration recovers and more than
+an equal-size random draw of trace entries (registered label
+PROMPT-SPECIFIC). Every eligible Random row was padded with recently evicted
+trace entries (counts in MEETING3_RESULTS §3e), so this does not isolate a
+per-entry advantage of prompt entries.
+For StreamingLLM a difference between the prompt and trace arms is not
+detected (NON-SPECIFIC, INDETERMINATE). Divergence, not accuracy. Wording
+corrected 2026-10-03.
 
 **Reader repair.** The independent review of `f69dce3` reproduced five
 acceptance defects in the Amendment S readers (PREREGISTRATION, "Reader
@@ -1622,17 +1624,23 @@ has the same boundary.
 - Collateral = 0 is not head agreement; on Llama-8B (4-to-1) the group-mean
   bound is tighter (1/400), not looser.
 
-### 5j. Llama-8B capture read: the ω contrast REVERSES; H3 holds (2026-10-02)
+### 5j. Llama-8B capture read: the ω contrast REVERSES; the H3 mass contrast holds (2026-10-02; wording corrected 2026-10-03)
 
 Registered replication (addendum E), read FINAL. Numbers: MEETING3_RESULTS
-§3f. The Qwen latent-geometry result (Random more off-subspace than
-StreamingLLM) reverses on Llama-8B with a CI well clear of zero; H3 (the
-attention-mass objective is not the damage objective) holds on Llama by a
-larger margin; H2 is NEITHER on both architectures.
+§3f. The Qwen latent-geometry ordering (Random more off-subspace than
+StreamingLLM) reverses on Llama-8B with a CI well clear of zero: it does not
+generalise to this second model and setup, and the comparison does not
+isolate architecture as the cause. The registered H3 statistic (M(H2O-style)
+− M(Random), an attention-mass contrast) holds on Llama. Its "mass is not the
+damage objective" reading is supported on Qwen by accuracy evidence and is
+**not supported on Llama**: H2O-style was never run free on Llama, and the
+policy losing the most mass there (Random) also has the lowest accuracy.
+H2 is NEITHER on both models.
 
 **Framing consequence.** The mechanism draft's latent-geometry paragraph
 must say "on Qwen-7B; reversed on Llama-8B", and no sentence may present ω
-as an architecture-general account. The paper's cross-architecture claim
+as a model-general account or attribute the reversal to architecture. H3 on
+Llama is stated as a mass contrast only. The paper's cross-architecture claim
 stays what it was: the readout-invisible residual replicates on Llama for
 StreamingLLM; the policy ordering and the geometry do not. Catalogue entries
 `m3.llama.*` carry the literals.

@@ -24,6 +24,19 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-10-03 12:30 Dubai — second review (of 49c572c) closed.**
+  Three boundary gaps fixed and tested through the real CLI (restoration
+  statuses/exclusions/eligible sets/v2 comparators; retire-before-analysis +
+  one dependency fingerprint; strict capture controls in the R.17 reads).
+  Re-read: every estimate and label unchanged (0 of ~6,500 numeric fields).
+  Wording narrowed: S.2 Random = prompt-plus-padding arm; StreamingLLM "not
+  detected"; Llama ω "does not generalise to this model/setup"; Llama H3 is
+  a mass contrast only (Llama Random 0.00 vs StreamingLLM 0.16 free-run on
+  the capture keys). Report: `docs/results/REVIEW_REPAIR_REPORT.md` (second
+  section). Jobs: readout-pp256 789/800; reverse-pp256, pp1024 queued;
+  fc-qwen3-4b 150/200. NEXT: readout-pp256 → `report_s.py protection
+  --budget 256` (FINAL expected), then reverse and 1024, then `consequence`.
+
   **★★★★★ 2026-10-02 18:45 Dubai — Llama-8B capture READ: ω REVERSED
   (−0.355 [−0.453, −0.275]), H3 HOLDS (−0.577), H2 NEITHER; the R.17 capture
   reads now validate behind the boundary (b256/b2048 re-read FINAL, labels

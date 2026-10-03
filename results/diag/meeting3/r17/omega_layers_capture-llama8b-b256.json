@@ -651,8 +651,9 @@
     "config": "configs/experiments/capture_math500_llama8b_b256_r17.yaml",
     "controls": {
       "live_controls": {
-        "n_rows_with_nonfinite": 0,
-        "passed": true
+        "n_rows_failing": 0,
+        "passed": true,
+        "validator": "report_capture.control_failures (layer-0 Delta and non-finite count, the strict capture reader's own)"
       },
       "provenance": {
         "expected_identity": {
