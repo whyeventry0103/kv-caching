@@ -129,7 +129,7 @@ positive control), then fixed. All tests are in `tests/test_s_acceptance.py`.
 | 1d | failed v2 `full_restore` gate accepted by origin | every v2 comparator row through the same validator the v2 reader uses | `test_issue1_failed_v2_comparator_gate_is_invalid` (origin and `report_r17 restore`) | restore-v2 rows control passed |
 | 2a | torn JSON after a FINAL: exit 1, old FINAL left in place | output (JSON and TSV) retired before analysis; failures caught, INVALID evidence written, exit 2 (both readers) | `test_issue2_truncated_json_after_final_leaves_no_final`, `test_issue2_schema_failure_is_invalid_evidence_not_a_crash` | — |
 | 2b | consequence FINAL after a prompt sidecar was deleted | one dependency fingerprint (`read_validation.dependency_fingerprint`): rows, token sidecars, full-cache bank, v2 comparators, configs, frozen pid lists and manifest, models.yaml, analysis code; protection stores it, consequence recomputes it and names the changed group | `test_issue2_consequence_refuses_changed_dependencies[deleted_prompt_sidecar, changed_full_cache_comparator]`, `test_issue2_changed_analysis_code_invalidates_stored_reads`, `test_issue2_origin_fingerprint_covers_v2_and_full_cache` | protection_b256 and origin carry fingerprints |
-| 3 | R.17 capture read FINAL / H3 HOLDS with `layer0_delta_max = 1.0` | `_validated_capture` reuses `report_capture.control_failures` (the strict reader's own) and adds domain checks on every consumed metric | `test_issue3_capture_controls_and_metrics_fail_closed[layer0_failure, nonfinite_metric, out_of_domain_M, negative_omega]`, `test_issue3_complete_capture_fixture_is_final` | see below |
+| 3 | R.17 capture read FINAL / H3 HOLDS with `layer0_delta_max = 1.0` | `_validated_capture` reuses `report_capture.control_failures` (the strict reader's own) and adds metric domain checks (incomplete as first committed: M_event and array shapes were missed; closed in the third review below) | `test_issue3_capture_controls_and_metrics_fail_closed[layer0_failure, nonfinite_metric, out_of_domain_M, negative_omega]`, `test_issue3_complete_capture_fixture_is_final` | see below |
 
 **Found while re-reading (issue 3).** The first real-data run of the new
 metric checks marked capture-b2048 INVALID: 148 rows carried slightly
@@ -176,3 +176,52 @@ accept, not what they compute.
    which still FAILS (Random I=256, 2.006 vs 2.0).
 6. restore-v2 counts: per policy 92 READ (91 with the full window) + 8
    ineligible, not "109 ineligible".
+
+
+---
+
+# Third review (of `8a84107`), closed 2026-10-03
+
+The review confirmed the second pass and found one remaining gap in the
+capture validator: `capture_metric_problems` checked M and Delta but not
+**M_event**, and an inner `zip(..., strict=False)` let arrays of unmatched
+length through. So the earlier sentence "every consumed metric is
+validated" was inaccurate, and it is withdrawn above.
+
+| Counterexample (real CLI, `report_r17.py mdelta`) | Before (on `8a84107`) | Now |
+|---|---|---|
+| `M_event_mean = NaN` | exit 0, FINAL, NaN in the output | INVALID, exit 2 |
+| negative `M_event` sum | FINAL | INVALID, exit 2 |
+| extra unchecked entry in an M row | FINAL | INVALID, exit 2 (shape mismatch named) |
+| ragged count matrix (added) | FINAL | INVALID, exit 2 |
+| latent per-layer arrays of different lengths (added) | FINAL | INVALID, exit 2 |
+
+The fix: M_event mean and sums are validated like M and Delta; every
+per-(layer, group) sum matrix must have exactly the shape of its count
+matrix; counts must be non-negative integers; per-(layer, head) sums must
+align with the per-layer counts; latent per-layer arrays must share one
+length. Tests: `test_review3_m_event_and_shapes_fail_closed[...]` (5 cases)
+in `tests/test_s_acceptance.py`. All five fail on `8a84107` and pass now;
+`test_issue3_complete_capture_fixture_is_final` (the valid fixture) still
+passes. The full suite: 638 passed, 77 skipped.
+
+**Re-read of the existing capture data (CPU, 2026-10-03):** mdelta and
+omega-layers for b256, b2048 and Llama, and capture-v2 extras for b2048, all
+FINAL; 5,472 numeric fields compared with the committed outputs, **0
+changed, 0 label or string fields changed, 0 non-finite values**. The Llama
+capture-v2 extras read stays "not applicable" (no nested basis was fitted for
+Llama).
+
+**Qwen3-4B bank, inspected rather than waited on.** It is at 150/200 because
+seed 89 has never been launched, not because anything failed. Seeds 11/47
+ran 2026-10-02 04:10 and seed 23 ran 08:00. The run log ends `Finished:
+fc-qwen3-4b` with no error. On 2026-10-03 both GPUs were held by the
+protected readout (queued ahead of it), and every tick logged `fc-qwen3-4b:
+no free GPU >= 20GB (occupied=[0, 1])`. The readout is at 789/800. When one
+of its shards finishes tonight, the jobs queued between it and the bank
+(reverse readout, the 1024 cells) are dependency-blocked on that readout, so
+the scheduler's tail-fill should give the freed GPU to the bank's seed 89.
+No change was made to the queue.
+
+The experimental validity gate (R.17.0.5) remains FAIL (Random I=256, 2.006
+vs 2.0) and stays disclosed with every divergence number.

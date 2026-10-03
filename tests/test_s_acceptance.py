@@ -895,7 +895,12 @@ def test_issue3_mass_rounding_tolerance_accepts_fp32_noise_not_real_violations()
             "n_events": 5,
             "M_mean": 0.001,
             "Delta_mean": 0.001,
-            "sum_by_layer_group": {"M": [[m_sum, 0.1]], "Delta": [[0.1, 0.1]]},
+            "M_event_mean": 0.001,
+            "sum_by_layer_group": {
+                "M": [[m_sum, 0.1]],
+                "Delta": [[0.1, 0.1]],
+                "M_event": [[0.1, 0.1]],
+            },
             "n_measured_by_layer_group": [[5, 5]],
         }
 
@@ -905,3 +910,58 @@ def test_issue3_mass_rounding_tolerance_accepts_fp32_noise_not_real_violations()
     assert capture_metric_problems(row(-2 * MASS_ROUNDING_TOL * 5))
     assert capture_metric_problems(row(-1.0))
     assert capture_metric_problems(row(6.0))  # mean 1.2 > 1
+
+
+# ---- third review (of 8a84107): M_event and exact shapes
+def _mutate_m_event_nan(r):
+    r["M_event_mean"] = float("nan")
+
+
+def _mutate_m_event_negative_sum(r):
+    r["sum_by_layer_group"]["M_event"][0][0] = -3.0
+
+
+def _mutate_extra_m_entry(r):
+    # an extra, unmatched entry in one M row (a negative mass)
+    r["sum_by_layer_group"]["M"][0].append(-3.0)
+
+
+def _mutate_ragged_counts(r):
+    r["n_measured_by_layer_group"][1] = [5]
+
+
+def _mutate_latent_lengths(r):
+    r["latent"]["sum_omega"].append(30.0)
+
+
+@pytest.mark.parametrize(
+    "mutate,needle",
+    [
+        (_mutate_m_event_nan, "M_event_mean"),
+        (_mutate_m_event_negative_sum, "sum_by_layer_group.M_event"),
+        (_mutate_extra_m_entry, "sum_by_layer_group.M shape"),
+        (_mutate_ragged_counts, "n_measured_by_layer_group"),
+        (_mutate_latent_lengths, "latent per-layer arrays"),
+    ],
+    ids=[
+        "m_event_nan",
+        "negative_m_event_sum",
+        "extra_unchecked_m_entry",
+        "ragged_counts",
+        "latent_length_mismatch",
+    ],
+)
+def test_review3_m_event_and_shapes_fail_closed(tmp_path, mutate, needle):
+    runs = capture_fixture(tmp_path)
+    path = runs / "capture-b256/math500/m/rows.jsonl"
+    rows = _rows_of(path)
+    mutate(rows[0])
+    _write(path, rows)
+    code, log = _run_r17(
+        runs, tmp_path / "out", "--capture-run", "capture-b256", "mdelta"
+    )
+    assert code == 2, log
+    d = json.loads((tmp_path / "out/mdelta.json").read_text())
+    assert d["status"] == "INVALID" and d["H3"]["label"].startswith("WITHHELD")
+    malformed = d["validation"]["population"]["malformed"]
+    assert any(needle in p for ps in malformed.values() for p in ps), malformed

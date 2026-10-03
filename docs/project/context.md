@@ -24,6 +24,14 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-10-03 13:15 Dubai — third review (of 8a84107) closed.**
+  capture_metric_problems now validates M_event and exact array shapes and
+  integer counts (5 CLI regression cases); capture reads re-read FINAL, 0 of
+  5,472 numeric fields changed. Qwen3-4B bank 150/200 diagnosed: seed 89 never
+  launched because readout-pp256 held both GPUs (queue order), not a failure;
+  expect tail-fill to start it tonight. NEXT unchanged: readout-pp256 FINAL
+  read, then reverse and 1024 cells; Qwen bank gate before any Qwen cell.
+
   **★★★★★ 2026-10-03 12:30 Dubai — second review (of 49c572c) closed.**
   Three boundary gaps fixed and tested through the real CLI (restoration
   statuses/exclusions/eligible sets/v2 comparators; retire-before-analysis +

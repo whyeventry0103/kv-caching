@@ -410,6 +410,23 @@ def _mean_ok(v: Any) -> bool:
     )
 
 
+def _matrix_shape(x: Any) -> tuple[int, int] | None:
+    """(rows, cols) of a rectangular list of lists, else None."""
+    if not isinstance(x, list) or not all(isinstance(r, list) for r in x):
+        return None
+    widths = {len(r) for r in x}
+    if len(widths) > 1:
+        return None
+    return (len(x), widths.pop() if widths else 0)
+
+
+def _all_count(x: Any) -> bool:
+    """Every leaf a non-negative int (bools excluded)."""
+    if isinstance(x, list):
+        return all(_all_count(v) for v in x)
+    return isinstance(x, int) and not isinstance(x, bool) and x >= 0
+
+
 def _finite_nonneg_nested(x: Any) -> bool:
     if isinstance(x, list):
         return all(_finite_nonneg_nested(v) for v in x)
@@ -421,17 +438,22 @@ def capture_metric_problems(row: Mapping[str, Any]) -> list[str]:
 
     The strict per-row controls (layer-0 Delta, non-finite count) are
     ``report_capture.control_failures``, reused by the caller; this adds the
-    metric values: M and Delta means in [0, 1] (within MASS_ROUNDING_TOL) when an
-    event was measured and absent (unavailable, not zero) when none was;
-    per-(layer, group) and per-(layer, head) sums finite and, as means over
-    their counts, in [0, 1] within the tolerance; latent and nested latent sums
-    finite and non-negative; omega finite and non-negative or absent.
+    metric values: M, Delta and M_event means in [0, 1] (within
+    MASS_ROUNDING_TOL) when an event was measured and absent (unavailable, not
+    zero) when none was; per-(layer, group) sums of all three channels with
+    EXACTLY the shape of their count matrix and, as means over their counts,
+    in [0, 1] within the tolerance; counts non-negative ints; per-(layer, head)
+    sums aligned with the per-layer counts; latent per-layer arrays of one
+    length, finite and non-negative; omega finite and non-negative or absent.
+    (M_event and the strict shapes added 2026-10-03 after the review of
+    8a84107, which found both missing.)
     """
     out: list[str] = []
     n_ev = row.get("n_events")
     if not isinstance(n_ev, int) or n_ev < 0:
         return [f"n_events {n_ev!r} not a non-negative int"]
-    for f in ("M_mean", "Delta_mean"):
+    # every mass/shape channel the reads consume, means and sums alike
+    for f in ("M_mean", "Delta_mean", "M_event_mean"):
         v = row.get(f)
         if n_ev >= 1 and not _mean_ok(v):
             out.append(f"{f} {v!r} not in [0, 1] with {n_ev} events")
@@ -439,31 +461,34 @@ def capture_metric_problems(row: Mapping[str, Any]) -> list[str]:
             out.append(f"{f} {v!r} reported with no event (must be unavailable)")
     sums = row.get("sum_by_layer_group") or {}
     counts = row.get("n_measured_by_layer_group")
-    for f in ("M", "Delta"):
-        s = sums.get(f)
-        if (
-            not isinstance(s, list)
-            or not isinstance(counts, list)
-            or len(s) != len(counts)
-        ):
-            out.append(f"sum_by_layer_group.{f} missing or misshapen")
-            continue
-        bad = [
-            (li, gi)
-            for li, (sl, cl) in enumerate(zip(s, counts, strict=True))
-            for gi, (v, c) in enumerate(zip(sl, cl, strict=False))
-            if not _mass_ok(v, c)
-        ]
-        if bad:
-            out.append(f"sum_by_layer_group.{f} outside [0, count] at {bad[:3]}")
+    shape = _matrix_shape(counts)
+    if shape is None or not _all_count(counts):
+        out.append("n_measured_by_layer_group not a rectangular matrix of counts")
+    else:
+        for f in ("M", "Delta", "M_event"):
+            s = sums.get(f)
+            if _matrix_shape(s) != shape:
+                out.append(
+                    f"sum_by_layer_group.{f} shape {_matrix_shape(s)} != counts {shape}"
+                )
+                continue
+            bad = [
+                (li, gi)
+                for li, (sl, cl) in enumerate(zip(s, counts, strict=True))
+                for gi, (v, c) in enumerate(zip(sl, cl, strict=True))
+                if not _mass_ok(v, c)
+            ]
+            if bad:
+                out.append(f"sum_by_layer_group.{f} outside [0, count] at {bad[:3]}")
     per_layer = row.get("n_measured_by_layer")
-    for f, v in (row.get("sum_by_layer_head") or {}).items():
-        if (
-            not isinstance(v, list)
-            or not isinstance(per_layer, list)
-            or len(v) != len(per_layer)
-        ):
-            out.append(f"sum_by_layer_head.{f} misshapen")
+    head = row.get("sum_by_layer_head") or {}
+    if head and not (isinstance(per_layer, list) and _all_count(per_layer)):
+        out.append("n_measured_by_layer not a list of counts")
+        head = {}
+    for f, v in head.items():
+        sh = _matrix_shape(v)
+        if sh is None or sh[0] != len(per_layer):
+            out.append(f"sum_by_layer_head.{f} shape {sh} misaligned with layers")
             continue
         bad = [
             (li, hi)
@@ -477,6 +502,15 @@ def capture_metric_problems(row: Mapping[str, Any]) -> list[str]:
     for f in ("sum_omega", "sum_par", "sum_perp", "n_finite"):
         if f in lat and not _finite_nonneg_nested(lat[f]):
             out.append(f"latent.{f} non-finite or negative")
+    lens = {
+        f: len(lat[f])
+        for f in ("sum_omega", "sum_par", "sum_perp", "n_finite")
+        if isinstance(lat.get(f), list)
+    }
+    if len(set(lens.values())) > 1:
+        out.append(f"latent per-layer arrays differ in length {lens}")
+    if isinstance(lat.get("n_finite"), list) and not _all_count(lat["n_finite"]):
+        out.append("latent.n_finite not a list of counts")
     om = lat.get("omega_trace")
     if om is not None and not (is_finite_number(om) and float(om) >= 0.0):
         out.append(f"latent.omega_trace {om!r} not finite and non-negative")
