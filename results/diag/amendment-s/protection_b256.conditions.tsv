@@ -382,23 +382,23 @@ random_pp	256	test/prealgebra/1646.json	89	False	False	False	False	1	353	True
 random_pp	256	test/precalculus/34.json	11	True	True	True	True	1	84	False
 random_pp	256	test/precalculus/34.json	23	True	False	True	False	1	84	False
 random_pp	256	test/precalculus/34.json	47	True	True	True	True	1	84	False
-random_pp	256	test/precalculus/34.json	89	False	True			1	84	False
+random_pp	256	test/precalculus/34.json	89	False	True	True	True	1	84	False
 random_pp	256	test/intermediate_algebra/662.json	11	False	False	False	False	0	113	False
 random_pp	256	test/intermediate_algebra/662.json	23	False	False			0	113	False
 random_pp	256	test/intermediate_algebra/662.json	47	False	False	False	False	0	113	False
-random_pp	256	test/intermediate_algebra/662.json	89	False	False			0	113	False
+random_pp	256	test/intermediate_algebra/662.json	89	False	False	False	False	0	113	False
 random_pp	256	test/prealgebra/105.json	11	False	False	False	False	0	50	False
 random_pp	256	test/prealgebra/105.json	23	False	False	False	False	0	50	False
 random_pp	256	test/prealgebra/105.json	47	True	True	False	True	1	50	False
-random_pp	256	test/prealgebra/105.json	89	True	True			0	50	False
+random_pp	256	test/prealgebra/105.json	89	True	True	True	False	0	50	False
 random_pp	256	test/prealgebra/1924.json	11	True	True	True	True	1	23	False
 random_pp	256	test/prealgebra/1924.json	23	True	True	True	True	1	23	False
 random_pp	256	test/prealgebra/1924.json	47	True	True	True	True	1	23	False
-random_pp	256	test/prealgebra/1924.json	89	True	True			1	23	False
+random_pp	256	test/prealgebra/1924.json	89	True	True	True	True	1	23	False
 random_pp	256	test/precalculus/1300.json	11	False	False	False	False	0	101	False
 random_pp	256	test/precalculus/1300.json	23	False	False	False	False	0	101	False
 random_pp	256	test/precalculus/1300.json	47	False	False	False	False	0	101	False
-random_pp	256	test/precalculus/1300.json	89	False	False			0	101	False
+random_pp	256	test/precalculus/1300.json	89	False	False	False	False	0	101	False
 streamingllm_pp	256	test/precalculus/807.json	11	True	True	True	True	1	52	False
 streamingllm_pp	256	test/precalculus/807.json	23	True	True	True	True	1	52	False
 streamingllm_pp	256	test/precalculus/807.json	47	True	True	True	True	1	52	False
@@ -778,24 +778,24 @@ streamingllm_pp	256	test/algebra/873.json	89	True	False	True	False	1	48	False
 streamingllm_pp	256	test/prealgebra/1646.json	11	False	False	False	False	0	353	True
 streamingllm_pp	256	test/prealgebra/1646.json	23	False	False	False	False	0	353	True
 streamingllm_pp	256	test/prealgebra/1646.json	47	False	False	False	False	0	353	True
-streamingllm_pp	256	test/prealgebra/1646.json	89	False	False			1	353	True
+streamingllm_pp	256	test/prealgebra/1646.json	89	False	False	False	True	1	353	True
 streamingllm_pp	256	test/precalculus/34.json	11	False	False	True	False	1	84	False
 streamingllm_pp	256	test/precalculus/34.json	23	False	False	True	False	1	84	False
 streamingllm_pp	256	test/precalculus/34.json	47	True	True	True	False	1	84	False
-streamingllm_pp	256	test/precalculus/34.json	89	False	False			1	84	False
+streamingllm_pp	256	test/precalculus/34.json	89	False	False	True	False	1	84	False
 streamingllm_pp	256	test/intermediate_algebra/662.json	11	False	False	False	False	0	113	False
 streamingllm_pp	256	test/intermediate_algebra/662.json	23	False	False			0	113	False
 streamingllm_pp	256	test/intermediate_algebra/662.json	47	False	False	False	False	0	113	False
-streamingllm_pp	256	test/intermediate_algebra/662.json	89	False	False			0	113	False
+streamingllm_pp	256	test/intermediate_algebra/662.json	89	False	False	False	False	0	113	False
 streamingllm_pp	256	test/prealgebra/105.json	11	True	False	False	False	0	50	False
 streamingllm_pp	256	test/prealgebra/105.json	23	False	False	False	False	0	50	False
 streamingllm_pp	256	test/prealgebra/105.json	47	False	False	True	False	1	50	False
-streamingllm_pp	256	test/prealgebra/105.json	89	True	False			0	50	False
+streamingllm_pp	256	test/prealgebra/105.json	89	True	False	False	False	0	50	False
 streamingllm_pp	256	test/prealgebra/1924.json	11	True	True	True	True	1	23	False
 streamingllm_pp	256	test/prealgebra/1924.json	23	True	True	True	True	1	23	False
 streamingllm_pp	256	test/prealgebra/1924.json	47	True	True	True	True	1	23	False
-streamingllm_pp	256	test/prealgebra/1924.json	89	True	True			1	23	False
+streamingllm_pp	256	test/prealgebra/1924.json	89	True	True	True	True	1	23	False
 streamingllm_pp	256	test/precalculus/1300.json	11	False	False	False	False	0	101	False
 streamingllm_pp	256	test/precalculus/1300.json	23	False	False	False	False	0	101	False
 streamingllm_pp	256	test/precalculus/1300.json	47	False	False	False	False	0	101	False
-streamingllm_pp	256	test/precalculus/1300.json	89	False	False			0	101	False
+streamingllm_pp	256	test/precalculus/1300.json	89	False	False	False	False	0	101	False

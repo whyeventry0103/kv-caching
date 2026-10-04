@@ -48,6 +48,7 @@ scripts are in this directory with their sha256:
 | 2026-09-26 11:39 Dubai ("one time bypass from our nightly runs") | `manual_ticks_20260926.sh.txt` (host `~/manual_ticks_0926.sh`) | `286e487f…4480` |
 | 2026-09-28 20:51 Dubai ("can you start the runs right now") | `manual_ticks_20260928.sh.txt` (host `~/manual_ticks_0928.sh`) | `b152a9d7…e8e` |
 | 2026-09-30 21:33 Dubai ("start the run right now") | `manual_ticks_20260930.sh.txt` (host `~/manual_ticks_0930.sh`) | `97025b9f…81c` |
+| 2026-10-04 21:03 Dubai ("can you start any remaining runs right now") | `manual_ticks_20261004.sh.txt` (host `~/manual_ticks_1004.sh`) | `b547204a…719` |
 
 The log shows 113 `[manual tick …]` lines in total. The first loop ended with
 `[manual ticks done 01:45] cron takes over`. The second runs until 2026-09-27

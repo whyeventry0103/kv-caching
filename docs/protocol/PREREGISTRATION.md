@@ -4257,3 +4257,45 @@ the records above stand as written and are qualified here.
   attention-mass sums (the registered layer-0 Δ tolerance) was set after
   counting fp32 rounding at budget 2048 (worst −2.7e-6); it is not a
   registered threshold.
+
+**R.16.6, fifth owner-requested early start (2026-10-04 21:03 Dubai).**
+"can you start any remaining runs right now." Same mechanism: tmux
+`manual-ticks` runs `~/manual_ticks_1004.sh` (sha256 `b547204a…719`, copied
+to `docs/results/meeting3_evidence/`) until 2026-10-05 01:40, then cron; every
+job stops at 10:43. First launch 21:01: reverse-readout-pp256 seeds 47 (GPU 0)
+and 89 (GPU 1). One-time bypass, not a change to the nightly policy.
+
+## Amendment S.1, result at budget 256 (2026-10-04): RESIDUAL PERSISTS and SHRINKS, both presses
+
+Read FINAL (MEETING3_RESULTS §3g). Protected residual −0.056 [−0.098,
+−0.016] (Random) and −0.078 [−0.125, −0.034] (StreamingLLM), against −0.332
+and −0.338 unprotected; Δ residual +0.276 [+0.204, +0.349] and +0.259
+[+0.182, +0.339]. Both registered labels: RESIDUAL PERSISTS, SHRINKS. Both
+cells INFORMATIVE. The sensitivity read without the three relaxed-budget
+problems agrees. The paper-level consequence (A/B/C) waits for budget 1024.
+
+## Amendment S.4, bank gate (2026-10-04): 0.845, just outside [0.85, 0.99] — STOP before any Qwen cell is read
+
+`fc-qwen3-4b` complete (200/200, 50 problems × 4 seeds, truncation 0.020,
+mean 5,000 tokens). Full-cache accuracy 0.845 (169/200); the band's lower
+edge is 170/200. Per the registered rule the Qwen cells are not read until
+this is investigated. Investigation so far (raw traces of the 31 incorrect
+rows):
+- 4 rows answer "Evelyn" against the gold `\text{Evelyn}` (one problem, all
+  four seeds): the Hendrycks `is_equiv` does not strip `\text{}` here. These
+  look like grader false negatives.
+- 2 rows give the set in another order ("-2, 1" for "1,-2").
+- 6 rows (2 problems) appear to box each part of a multi-part answer
+  separately; `extract_answer` keeps the last box ("7" for "3, 5, 7",
+  "1" for "1,-2"). Its rate on the R1 distillations was not checked.
+- 4 rows "52" for "52_8" (base subscript dropped by the model).
+- 11 rows never close `</think>` (4 truncated, 7 boxed inside the thinking).
+- 4 rows are plainly wrong values (3 × geometry/434, 1 × counting/134).
+  Total 4 + 2 + 6 + 4 + 11 + 4 = 31.
+The grader is frozen and is NOT changed to pass the gate. Options for the
+owner/supervisor: (a) accept the bank as is with this note (the gate is a
+sanity band, and the shortfall is one generation, apparently from the
+grader-format mismatch); (b) register a Qwen-specific grader sensitivity read
+(scored twice, frozen grader as primary) before any Qwen cell is read. The
+Qwen generation cells may run meanwhile; scoring is from raw traces and can
+be redone.

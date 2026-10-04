@@ -1,0 +1,15 @@
+#!/bin/bash
+# Owner-requested one-time early start (2026-10-04 21:03 Dubai): orchestrator
+# ticks every 10 min until 2026-10-05 01:40, when the regular cron window takes
+# over. Same code path as cron; --max-hours-override only bypasses the window
+# check, and every job still stops at 2026-10-05 10:43.
+cd ~/kv-caching || exit 1
+stop=$(TZ=Asia/Dubai date -d "2026-10-05 10:43" +%s)
+until=$(TZ=Asia/Dubai date -d "2026-10-05 01:40" +%s)
+while [ "$(date +%s)" -lt "$until" ]; do
+  H=$(python3 -c "import time;print(round(($stop-time.time())/3600,2))")
+  echo "[manual tick $(TZ=Asia/Dubai date +%H:%M)] max-hours $H" >> logs/nightly_autorun.log
+  .venv/bin/python scripts/nightly_autorun.py --max-hours-override "$H" >> logs/nightly_autorun.log 2>&1
+  sleep 600
+done
+echo "[manual ticks done $(TZ=Asia/Dubai date +%H:%M)] cron takes over" >> logs/nightly_autorun.log

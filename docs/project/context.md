@@ -24,6 +24,17 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-10-04 21:15 Dubai — fifth owner-requested early start
+  (tick loop ~/manual_ticks_1004.sh until 01:40, jobs stop 10:43); S.1 b256
+  READ FINAL: residual −0.056 (Random) / −0.078 (SLM) protected vs −0.332 /
+  −0.338 unprotected, PERSISTS + SHRINKS (MEETING3_RESULTS §3g, PAPER_FINDINGS
+  §5k).** Qwen3-4B bank 0.845, just below [0.85, 0.99]: STOP before any Qwen
+  cell read; investigation in PREREGISTRATION (grader false negatives on
+  \text{Evelyn}, set order, separately boxed parts). Owner decision needed:
+  accept with note, or register a Qwen grader-sensitivity read. Running now:
+  reverse-readout-pp256 (600/800). Then grid/readout-pp1024, Qwen cells.
+  NOT synced (docs only; host source unchanged while jobs run).
+
   **★★★★★ 2026-10-03 13:15 Dubai — third review (of 8a84107) closed.**
   capture_metric_problems now validates M_event and exact array shapes and
   integer counts (5 CLI regression cases); capture reads re-read FINAL, 0 of

@@ -8,6 +8,12 @@ artifact when this file was written. Review evidence (gate outputs, remote test 
 parity, queue dry-run, remote-only data list):
 [`meeting3_evidence/`](meeting3_evidence/README.md).
 
+**Status, 2026-10-04 21:15 Dubai.** **S.1 at budget 256 FINAL (§3g): prompt
+protection shrinks the residual from −0.332 to −0.056 (Random) and from
+−0.338 to −0.078 (StreamingLLM); it still excludes zero.** Qwen3-4B bank
+complete at 0.845, just below its registered band [0.85, 0.99]: STOP before
+reading any Qwen cell (investigation recorded in PREREGISTRATION).
+
 **Status, 2026-10-03 12:30 Dubai.** Readers hardened after a second
 independent review; every read re-run, estimates and labels unchanged. §3e
 and §3f wording narrowed (prompt-plus-padding arm; "not detected"; Llama ω
@@ -936,6 +942,43 @@ basis was fitted for Llama, so there is no k-sensitivity here.
   by some head under Random (of 100.3M checked). With 4 query heads per KV
   head the group-mean bound is tighter (1/400), so this is the structurally
   expected zero (MEETING4_ANSWERS Q3).
+
+## 3g. Amendment S.1 at budget 256 — prompt-protected decomposition (FINAL)
+
+Read 2026-10-04 21:10 Dubai (`scripts/report_s.py protection --budget 256`).
+Artifacts: `results/diag/amendment-s/protection_b256.json`,
+`protection_b256.conditions.tsv` (sha256 `69d6fe2379f2…`; dependency fingerprint
+`ad670247238f…`). **Status FINAL:** all four row sets COMPLETE against the frozen
+100-problem × 4-seed design; prompt metadata, reference coverage and legacy
+provenance controls passed. 400 free-run pairs and 392 readout pairs per
+press (the 8 conditions without an answer boundary are the same in both
+cells). Budget-relaxed problems (P > 192): 3, as registered.
+
+Protected vs unprotected, equal-problem means, problem-cluster bootstrap CI;
+Δ = protected − unprotected, paired by (problem, seed):
+
+| Press | Free-run (pp vs base) | Readout (pp vs base) | Residual (pp vs base) | Δ free | Δ readout | Δ residual | Registered labels | Sensitivity residual (relaxed problems removed) |
+|---|---|---|---|---|---|---|---|---|
+| random_pp | +0.662 [+0.575, +0.748] vs +0.422 [+0.345, +0.500] | +0.718 [+0.642, +0.791] vs +0.752 [+0.687, +0.813] | **-0.056 [-0.098, -0.016]** vs -0.332 [-0.404, -0.262] | +0.240 [+0.180, +0.307] | -0.033 [-0.094, +0.024] | **+0.276 [+0.204, +0.349]** | RESIDUAL PERSISTS, SHRINKS | -0.058 [-0.104, -0.017] (RESIDUAL PERSISTS) |
+| streamingllm_pp | +0.610 [+0.522, +0.700] vs +0.237 [+0.175, +0.302] | +0.688 [+0.607, +0.766] vs +0.573 [+0.497, +0.645] | **-0.078 [-0.125, -0.034]** vs -0.338 [-0.405, -0.270] | +0.372 [+0.297, +0.450] | +0.116 [+0.063, +0.177] | **+0.259 [+0.182, +0.339]** | RESIDUAL PERSISTS, SHRINKS | -0.081 [-0.128, -0.037] (RESIDUAL PERSISTS) |
+
+- **The residual persists, and most of it goes away.** Under prompt
+  protection the free-run minus readout residual is −0.056 (Random) and
+  −0.078 (StreamingLLM), against −0.332 and −0.338 unprotected: roughly
+  four-fifths of the budget-256 residual is attributable, within this design,
+  to the prompt being evicted. What remains still excludes zero for both
+  presses. The sensitivity read without the three relaxed-budget problems
+  agrees.
+- **Where the gain is.** Free-run accuracy rises by +0.240 (Random) and
+  +0.372 (StreamingLLM). Readout barely moves for Random (−0.033, CI includes
+  0) and rises for StreamingLLM (+0.116): StreamingLLM's teacher-forced
+  answer also needed the prompt; Random's did not.
+- Harmful flip mass falls from 0.468 to 0.225 (Random) and from 0.650 to
+  0.280 (StreamingLLM); full-cache accuracy on these conditions is 0.885.
+- **Not yet a paper-level branch.** The registered consequence needs the
+  budget-1024 cells (queued). The bracket for the protected cell needs the
+  reverse readout (600/800 at the time of reading). Scope: one model, one
+  benchmark, exploratory.
 
 ## 4. Controls
 

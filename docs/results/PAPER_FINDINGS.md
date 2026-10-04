@@ -1645,6 +1645,22 @@ stays what it was: the readout-invisible residual replicates on Llama for
 StreamingLLM; the policy ordering and the geometry do not. Catalogue entries
 `m3.llama.*` carry the literals.
 
+### 5k. Prompt protection removes most of the budget-256 residual (2026-10-04)
+
+S.1 at budget 256, FINAL (numbers: MEETING3_RESULTS §3g). With the prompt
+never evicted, the residual remains distinguishable from zero for both
+presses but is a small fraction of its unprotected size; free-run accuracy
+rises sharply.
+
+**Framing consequence, effective now.** The paper's headline residual at
+budget 256 can no longer be presented as a trajectory effect of eviction in
+general: within this design most of it is attributable to losing the prompt.
+What survives prompt protection is the claim that a readout-invisible
+residual exists; its size is the protected number, not the unprotected one.
+The registered paper-level branch (A/B/C) is decided only after budget 1024.
+No abstract or headline edit is made until then; the mechanism draft gains a
+pending note.
+
 ## 5. Framing discipline (non-negotiable — apply throughout)
 - **Divergence ≠ damage.** ADD / TV / residual are "behavioral-fidelity loss," never "damage."
   Correctness is the only quality arbiter. Carry the **signed flip-mass** (gained vs lost correct
