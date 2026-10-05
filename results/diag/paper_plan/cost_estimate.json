@@ -5,6 +5,15 @@
       "low": 0.3,
       "note": "GSM8K traces are shorter; unmeasured until the pilot"
     },
+    "overhead": {
+      "new_family_multiplier": {
+        "high": 1.5,
+        "low": 1.0,
+        "note": "ASSUMPTION until the pilot: per-prune Python selection and host/device copies"
+      },
+      "setup_hours_per_launch": 0.1,
+      "shards_per_cell": 2
+    },
     "readout_over_free_ratio": {
       "high": 1.0,
       "low": 0.6,
@@ -26,7 +35,7 @@
         },
         {
           "bytes": 3120000,
-          "cell": "h2o_style_pp_v1 forward",
+          "cell": "h2o_style_pp_v1 forward (reads FC traces)",
           "conditions": 400,
           "gpu_hours": [
             6.3,
@@ -35,7 +44,7 @@
         },
         {
           "bytes": 3120000,
-          "cell": "h2o_style_pp_v1 reverse",
+          "cell": "h2o_style_pp_v1 reverse (reads its traces)",
           "conditions": 400,
           "gpu_hours": [
             9.3,
@@ -53,7 +62,7 @@
         },
         {
           "bytes": 3120000,
-          "cell": "uniform_fresh_pp_v1 forward",
+          "cell": "uniform_fresh_pp_v1 forward (reads FC traces)",
           "conditions": 400,
           "gpu_hours": [
             6.3,
@@ -62,7 +71,7 @@
         },
         {
           "bytes": 3120000,
-          "cell": "uniform_fresh_pp_v1 reverse",
+          "cell": "uniform_fresh_pp_v1 reverse (reads its traces)",
           "conditions": 400,
           "gpu_hours": [
             9.7,
@@ -81,15 +90,24 @@
       ],
       "gib_with_reserve": 0.096,
       "gpu_hours": [
+        74.0,
+        142.0
+      ],
+      "gpu_hours_core": [
         72.6,
         93.7
       ],
+      "new_family_multiplier": [
+        1.0,
+        1.5
+      ],
       "nights_at_full_capacity": [
-        4.0,
-        5.2
-      ]
+        4.1,
+        7.9
+      ],
+      "setup_hours": 1.4
     },
-    "WP6 confirm_q7_gsm8k_v1 (N=100, 2 seeds), high": {
+    "WP6 q7 gsm8k N=100 x 2 seeds, high": {
       "bytes": 66360000,
       "cells": [
         {
@@ -121,43 +139,52 @@
         },
         {
           "bytes": 3120000,
-          "cell": "forward b256 x2",
-          "conditions": 400,
-          "gpu_hours": [
-            5.8,
-            9.7
-          ]
-        },
-        {
-          "bytes": 3120000,
-          "cell": "forward b1024 x2",
-          "conditions": 400,
-          "gpu_hours": [
-            3.5,
-            5.8
-          ]
-        },
-        {
-          "bytes": 3120000,
-          "cell": "reverse b256 x2",
+          "cell": "forward b256 x2 (reads FC traces)",
           "conditions": 400,
           "gpu_hours": [
             3.8,
             6.3
           ]
+        },
+        {
+          "bytes": 3120000,
+          "cell": "forward b1024 x2 (reads FC traces)",
+          "conditions": 400,
+          "gpu_hours": [
+            3.8,
+            6.3
+          ]
+        },
+        {
+          "bytes": 3120000,
+          "cell": "reverse b256 x2 (reads b256 traces)",
+          "conditions": 400,
+          "gpu_hours": [
+            5.8,
+            9.7
+          ]
         }
       ],
       "gib_with_reserve": 0.093,
       "gpu_hours": [
-        31.8,
-        40.6
+        33.3,
+        62.9
+      ],
+      "gpu_hours_core": [
+        32.1,
+        41.1
+      ],
+      "new_family_multiplier": [
+        1.0,
+        1.5
       ],
       "nights_at_full_capacity": [
         1.8,
-        2.3
-      ]
+        3.5
+      ],
+      "setup_hours": 1.2
     },
-    "WP6 confirm_q7_gsm8k_v1 (N=100, 2 seeds), low": {
+    "WP6 q7 gsm8k N=100 x 2 seeds, low": {
       "bytes": 66360000,
       "cells": [
         {
@@ -189,43 +216,360 @@
         },
         {
           "bytes": 3120000,
-          "cell": "forward b256 x2",
-          "conditions": 400,
-          "gpu_hours": [
-            2.9,
-            4.9
-          ]
-        },
-        {
-          "bytes": 3120000,
-          "cell": "forward b1024 x2",
-          "conditions": 400,
-          "gpu_hours": [
-            1.7,
-            2.9
-          ]
-        },
-        {
-          "bytes": 3120000,
-          "cell": "reverse b256 x2",
+          "cell": "forward b256 x2 (reads FC traces)",
           "conditions": 400,
           "gpu_hours": [
             1.9,
             3.2
           ]
+        },
+        {
+          "bytes": 3120000,
+          "cell": "forward b1024 x2 (reads FC traces)",
+          "conditions": 400,
+          "gpu_hours": [
+            1.9,
+            3.2
+          ]
+        },
+        {
+          "bytes": 3120000,
+          "cell": "reverse b256 x2 (reads b256 traces)",
+          "conditions": 400,
+          "gpu_hours": [
+            2.9,
+            4.9
+          ]
         }
       ],
       "gib_with_reserve": 0.093,
       "gpu_hours": [
-        15.9,
-        20.3
+        17.3,
+        31.9
+      ],
+      "gpu_hours_core": [
+        16.1,
+        20.5
+      ],
+      "new_family_multiplier": [
+        1.0,
+        1.5
       ],
       "nights_at_full_capacity": [
-        0.9,
-        1.1
-      ]
+        1.0,
+        1.8
+      ],
+      "setup_hours": 1.2
     },
-    "WP6 confirm_qwen3_4b_math500_v1 (N=100, 2 seeds)": {
+    "WP6 q7 gsm8k N=300 x 2 seeds, high": {
+      "bytes": 199080000,
+      "cells": [
+        {
+          "bytes": 34200000,
+          "cell": "full-cache bank",
+          "conditions": 600,
+          "gpu_hours": [
+            9.5,
+            9.5
+          ]
+        },
+        {
+          "bytes": 68400000,
+          "cell": "free b256 x2 policies",
+          "conditions": 1200,
+          "gpu_hours": [
+            29.2,
+            29.2
+          ]
+        },
+        {
+          "bytes": 68400000,
+          "cell": "free b1024 x2 policies",
+          "conditions": 1200,
+          "gpu_hours": [
+            17.5,
+            17.5
+          ]
+        },
+        {
+          "bytes": 9360000,
+          "cell": "forward b256 x2 (reads FC traces)",
+          "conditions": 1200,
+          "gpu_hours": [
+            11.4,
+            18.9
+          ]
+        },
+        {
+          "bytes": 9360000,
+          "cell": "forward b1024 x2 (reads FC traces)",
+          "conditions": 1200,
+          "gpu_hours": [
+            11.4,
+            18.9
+          ]
+        },
+        {
+          "bytes": 9360000,
+          "cell": "reverse b256 x2 (reads b256 traces)",
+          "conditions": 1200,
+          "gpu_hours": [
+            17.5,
+            29.2
+          ]
+        }
+      ],
+      "gib_with_reserve": 0.278,
+      "gpu_hours": [
+        97.6,
+        186.0
+      ],
+      "gpu_hours_core": [
+        96.4,
+        123.2
+      ],
+      "new_family_multiplier": [
+        1.0,
+        1.5
+      ],
+      "nights_at_full_capacity": [
+        5.4,
+        10.3
+      ],
+      "setup_hours": 1.2
+    },
+    "WP6 q7 gsm8k N=300 x 2 seeds, low": {
+      "bytes": 199080000,
+      "cells": [
+        {
+          "bytes": 34200000,
+          "cell": "full-cache bank",
+          "conditions": 600,
+          "gpu_hours": [
+            4.7,
+            4.7
+          ]
+        },
+        {
+          "bytes": 68400000,
+          "cell": "free b256 x2 policies",
+          "conditions": 1200,
+          "gpu_hours": [
+            14.6,
+            14.6
+          ]
+        },
+        {
+          "bytes": 68400000,
+          "cell": "free b1024 x2 policies",
+          "conditions": 1200,
+          "gpu_hours": [
+            8.7,
+            8.7
+          ]
+        },
+        {
+          "bytes": 9360000,
+          "cell": "forward b256 x2 (reads FC traces)",
+          "conditions": 1200,
+          "gpu_hours": [
+            5.7,
+            9.5
+          ]
+        },
+        {
+          "bytes": 9360000,
+          "cell": "forward b1024 x2 (reads FC traces)",
+          "conditions": 1200,
+          "gpu_hours": [
+            5.7,
+            9.5
+          ]
+        },
+        {
+          "bytes": 9360000,
+          "cell": "reverse b256 x2 (reads b256 traces)",
+          "conditions": 1200,
+          "gpu_hours": [
+            8.8,
+            14.6
+          ]
+        }
+      ],
+      "gib_with_reserve": 0.278,
+      "gpu_hours": [
+        49.4,
+        93.6
+      ],
+      "gpu_hours_core": [
+        48.2,
+        61.6
+      ],
+      "new_family_multiplier": [
+        1.0,
+        1.5
+      ],
+      "nights_at_full_capacity": [
+        2.7,
+        5.2
+      ],
+      "setup_hours": 1.2
+    },
+    "WP6 q7 gsm8k N=300 x 4 seeds, high": {
+      "bytes": 398160000,
+      "cells": [
+        {
+          "bytes": 68400000,
+          "cell": "full-cache bank",
+          "conditions": 1200,
+          "gpu_hours": [
+            18.9,
+            18.9
+          ]
+        },
+        {
+          "bytes": 136800000,
+          "cell": "free b256 x2 policies",
+          "conditions": 2400,
+          "gpu_hours": [
+            58.4,
+            58.4
+          ]
+        },
+        {
+          "bytes": 136800000,
+          "cell": "free b1024 x2 policies",
+          "conditions": 2400,
+          "gpu_hours": [
+            34.9,
+            34.9
+          ]
+        },
+        {
+          "bytes": 18720000,
+          "cell": "forward b256 x2 (reads FC traces)",
+          "conditions": 2400,
+          "gpu_hours": [
+            22.7,
+            37.9
+          ]
+        },
+        {
+          "bytes": 18720000,
+          "cell": "forward b1024 x2 (reads FC traces)",
+          "conditions": 2400,
+          "gpu_hours": [
+            22.7,
+            37.9
+          ]
+        },
+        {
+          "bytes": 18720000,
+          "cell": "reverse b256 x2 (reads b256 traces)",
+          "conditions": 2400,
+          "gpu_hours": [
+            35.0,
+            58.4
+          ]
+        }
+      ],
+      "gib_with_reserve": 0.556,
+      "gpu_hours": [
+        194.0,
+        370.8
+      ],
+      "gpu_hours_core": [
+        192.8,
+        246.4
+      ],
+      "new_family_multiplier": [
+        1.0,
+        1.5
+      ],
+      "nights_at_full_capacity": [
+        10.8,
+        20.6
+      ],
+      "setup_hours": 1.2
+    },
+    "WP6 q7 gsm8k N=300 x 4 seeds, low": {
+      "bytes": 398160000,
+      "cells": [
+        {
+          "bytes": 68400000,
+          "cell": "full-cache bank",
+          "conditions": 1200,
+          "gpu_hours": [
+            9.5,
+            9.5
+          ]
+        },
+        {
+          "bytes": 136800000,
+          "cell": "free b256 x2 policies",
+          "conditions": 2400,
+          "gpu_hours": [
+            29.2,
+            29.2
+          ]
+        },
+        {
+          "bytes": 136800000,
+          "cell": "free b1024 x2 policies",
+          "conditions": 2400,
+          "gpu_hours": [
+            17.5,
+            17.5
+          ]
+        },
+        {
+          "bytes": 18720000,
+          "cell": "forward b256 x2 (reads FC traces)",
+          "conditions": 2400,
+          "gpu_hours": [
+            11.4,
+            18.9
+          ]
+        },
+        {
+          "bytes": 18720000,
+          "cell": "forward b1024 x2 (reads FC traces)",
+          "conditions": 2400,
+          "gpu_hours": [
+            11.4,
+            18.9
+          ]
+        },
+        {
+          "bytes": 18720000,
+          "cell": "reverse b256 x2 (reads b256 traces)",
+          "conditions": 2400,
+          "gpu_hours": [
+            17.5,
+            29.2
+          ]
+        }
+      ],
+      "gib_with_reserve": 0.556,
+      "gpu_hours": [
+        97.6,
+        186.0
+      ],
+      "gpu_hours_core": [
+        96.4,
+        123.2
+      ],
+      "new_family_multiplier": [
+        1.0,
+        1.5
+      ],
+      "nights_at_full_capacity": [
+        5.4,
+        10.3
+      ],
+      "setup_hours": 1.2
+    },
+    "WP6 qwen3_4b math500 N=100 x 2 seeds": {
       "bytes": 66360000,
       "cells": [
         {
@@ -257,46 +601,235 @@
         },
         {
           "bytes": 3120000,
-          "cell": "forward b256 x2",
-          "conditions": 400,
-          "gpu_hours": [
-            20.2,
-            33.6
-          ]
-        },
-        {
-          "bytes": 3120000,
-          "cell": "forward b1024 x2",
-          "conditions": 400,
-          "gpu_hours": [
-            12.1,
-            20.1
-          ]
-        },
-        {
-          "bytes": 3120000,
-          "cell": "reverse b256 x2",
+          "cell": "forward b256 x2 (reads FC traces)",
           "conditions": 400,
           "gpu_hours": [
             8.9,
             14.8
           ]
+        },
+        {
+          "bytes": 3120000,
+          "cell": "forward b1024 x2 (reads FC traces)",
+          "conditions": 400,
+          "gpu_hours": [
+            8.9,
+            14.8
+          ]
+        },
+        {
+          "bytes": 3120000,
+          "cell": "reverse b256 x2 (reads b256 traces)",
+          "conditions": 400,
+          "gpu_hours": [
+            20.2,
+            33.6
+          ]
         }
       ],
       "gib_with_reserve": 0.093,
       "gpu_hours": [
-        102.2,
-        129.6
+        100.3,
+        187.8
+      ],
+      "gpu_hours_core": [
+        99.1,
+        124.4
+      ],
+      "new_family_multiplier": [
+        1.0,
+        1.5
       ],
       "nights_at_full_capacity": [
-        5.7,
-        7.2
-      ]
+        5.6,
+        10.4
+      ],
+      "setup_hours": 1.2
+    },
+    "WP6 qwen3_4b math500 N=300 x 2 seeds": {
+      "bytes": 199080000,
+      "cells": [
+        {
+          "bytes": 34200000,
+          "cell": "full-cache bank",
+          "conditions": 600,
+          "gpu_hours": [
+            22.3,
+            22.3
+          ]
+        },
+        {
+          "bytes": 68400000,
+          "cell": "free b256 x2 policies",
+          "conditions": 1200,
+          "gpu_hours": [
+            100.8,
+            100.8
+          ]
+        },
+        {
+          "bytes": 68400000,
+          "cell": "free b1024 x2 policies",
+          "conditions": 1200,
+          "gpu_hours": [
+            60.3,
+            60.3
+          ]
+        },
+        {
+          "bytes": 9360000,
+          "cell": "forward b256 x2 (reads FC traces)",
+          "conditions": 1200,
+          "gpu_hours": [
+            26.7,
+            44.5
+          ]
+        },
+        {
+          "bytes": 9360000,
+          "cell": "forward b1024 x2 (reads FC traces)",
+          "conditions": 1200,
+          "gpu_hours": [
+            26.7,
+            44.5
+          ]
+        },
+        {
+          "bytes": 9360000,
+          "cell": "reverse b256 x2 (reads b256 traces)",
+          "conditions": 1200,
+          "gpu_hours": [
+            60.5,
+            100.8
+          ]
+        }
+      ],
+      "gib_with_reserve": 0.278,
+      "gpu_hours": [
+        298.5,
+        561.0
+      ],
+      "gpu_hours_core": [
+        297.3,
+        373.2
+      ],
+      "new_family_multiplier": [
+        1.0,
+        1.5
+      ],
+      "nights_at_full_capacity": [
+        16.6,
+        31.2
+      ],
+      "setup_hours": 1.2
+    },
+    "WP6 qwen3_4b math500 N=300 x 4 seeds": {
+      "bytes": 398160000,
+      "cells": [
+        {
+          "bytes": 68400000,
+          "cell": "full-cache bank",
+          "conditions": 1200,
+          "gpu_hours": [
+            44.5,
+            44.5
+          ]
+        },
+        {
+          "bytes": 136800000,
+          "cell": "free b256 x2 policies",
+          "conditions": 2400,
+          "gpu_hours": [
+            201.6,
+            201.6
+          ]
+        },
+        {
+          "bytes": 136800000,
+          "cell": "free b1024 x2 policies",
+          "conditions": 2400,
+          "gpu_hours": [
+            120.5,
+            120.5
+          ]
+        },
+        {
+          "bytes": 18720000,
+          "cell": "forward b256 x2 (reads FC traces)",
+          "conditions": 2400,
+          "gpu_hours": [
+            53.4,
+            89.1
+          ]
+        },
+        {
+          "bytes": 18720000,
+          "cell": "forward b1024 x2 (reads FC traces)",
+          "conditions": 2400,
+          "gpu_hours": [
+            53.4,
+            89.1
+          ]
+        },
+        {
+          "bytes": 18720000,
+          "cell": "reverse b256 x2 (reads b256 traces)",
+          "conditions": 2400,
+          "gpu_hours": [
+            121.0,
+            201.6
+          ]
+        }
+      ],
+      "gib_with_reserve": 0.556,
+      "gpu_hours": [
+        595.7,
+        1120.8
+      ],
+      "gpu_hours_core": [
+        594.5,
+        746.4
+      ],
+      "new_family_multiplier": [
+        1.0,
+        1.5
+      ],
+      "nights_at_full_capacity": [
+        33.1,
+        62.3
+      ],
+      "setup_hours": 1.2
     }
   },
+  "conditions_scaling_note": "at fixed stages, conditions scale with problems x seeds: 300x4 is 6x the conditions of 100x2 (1200 vs 200 per arm), not 3x; no reuse is assumed",
+  "engineering_pilot_proposal": {
+    "cap_gpu_hours": 6.0,
+    "design": {
+      "cap_gpu_hours": 6.0,
+      "families": [
+        "h2o_style_pp_v1",
+        "uniform_fresh_pp_v1"
+      ],
+      "problems": 8,
+      "seeds": 1
+    },
+    "excluded_from_claims": true,
+    "purpose": "measure per-row wallclock of the NEW selector families (Python selection and host/device transfers at each prune) before any campaign is costed for approval",
+    "rows": 48,
+    "stages": [
+      "free",
+      "forward",
+      "reverse"
+    ]
+  },
   "inputs": "configs/paper/cost_inputs.yaml",
-  "note": "Qwen3 b1024 free cost scaled from Qwen-7B's b1024/b256 ratio (assumption). Readout cost uses the source trace's free-run rate x [0.6, 1.0]. Storage counts each row once plus token-ID sidecars for free runs, times 1.5 reserve.",
+  "note": "Qwen3 b1024 free cost scaled from Qwen-7B's b1024/b256 ratio (assumption). Readout cost uses the SOURCE trace's free-run rate x [0.6, 1.0]. New-family multiplier applies to every row of a campaign that uses a new selector (conservative). Storage counts each row once plus token-ID sidecars for free runs, times 1.5 reserve.",
   "read": "cost estimate for the HELD paper campaigns",
   "reproduce": "python scripts/plan_paper_sample_size.py cost",
-  "status": "ESTIMATE; nothing here is authorized"
+  "status": "ESTIMATE from measured historical rates plus stated assumptions; not a cap; nothing here is authorized",
+  "wp4_smoke": {
+    "cap_gpu_hours": 2.0,
+    "design": "3 traces (longest / median / shortest prompt) x 3 families x (1 free run + 1 forward readout), plus the h2o_style_pp_v1 identity control",
+    "rows": 21
+  }
 }

@@ -109,6 +109,21 @@ GENERATION_SOURCES: dict[str, tuple[str, ...]] = {
         "scripts/run_replay_pp.py",
         "scripts/pp_smoke.py",
     ),
+    # Execution plan WP4 (prepared 2026-10-05, HELD): protected H2O-style and
+    # fresh-uniform selectors; the unprotected runners run unchanged inside.
+    "protected_selectors": (
+        "src/kvcache/presses/protected_selectors.py",
+        "src/kvcache/presses/prompt_protect.py",
+        "src/kvcache/presses/__init__.py",
+        "src/kvcache/generation.py",
+        "src/kvcache/replay.py",
+        "src/kvcache/models.py",
+        "src/kvcache/bank.py",
+        "scripts/run_grid.py",
+        "scripts/run_replay.py",
+        "scripts/run_grid_protected.py",
+        "scripts/run_replay_protected.py",
+    ),
     "dacc": (
         "src/kvcache/generation.py",
         "src/kvcache/presses/__init__.py",

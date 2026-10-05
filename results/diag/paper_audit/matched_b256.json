@@ -157,6 +157,48 @@
       }
     }
   },
+  "accuracy_population": {
+    "h2o": {
+      "duplicated": [],
+      "malformed": {},
+      "missing": [],
+      "n_expected": 100,
+      "n_rows": 100,
+      "n_unique_expected_present": 100,
+      "status": "COMPLETE",
+      "unexpected": []
+    },
+    "random": {
+      "duplicated": [],
+      "malformed": {},
+      "missing": [],
+      "n_expected": 100,
+      "n_rows": 100,
+      "n_unique_expected_present": 100,
+      "status": "COMPLETE",
+      "unexpected": []
+    },
+    "rkv": {
+      "duplicated": [],
+      "malformed": {},
+      "missing": [],
+      "n_expected": 100,
+      "n_rows": 100,
+      "n_unique_expected_present": 100,
+      "status": "COMPLETE",
+      "unexpected": []
+    },
+    "streamingllm": {
+      "duplicated": [],
+      "malformed": {},
+      "missing": [],
+      "n_expected": 100,
+      "n_rows": 100,
+      "n_unique_expected_present": 100,
+      "status": "COMPLETE",
+      "unexpected": []
+    }
+  },
   "capture_validation": {
     "config": "configs/experiments/capture_math500_b256_r9.yaml",
     "controls": {
@@ -220,7 +262,7 @@
         "n_resamples": 2000,
         "seed": 0
       },
-      "joint": "MISMATCH ESTABLISHED (higher accuracy, more loss)",
+      "joint": "MISMATCH ESTABLISHED (first policy: higher accuracy, more loss)",
       "metric": {
         "ci90": [
           0.07969457299999999,
@@ -351,7 +393,7 @@
         "n_resamples": 2000,
         "seed": 0
       },
-      "joint": "MISMATCH ESTABLISHED (higher accuracy, more loss)",
+      "joint": "MISMATCH ESTABLISHED (first policy: higher accuracy, more loss)",
       "metric": {
         "ci90": [
           0.301235324,
@@ -460,7 +502,30 @@
       }
     }
   },
+  "declared_metric_exclusions": [],
+  "dependencies": {
+    "groups": {
+      "analysis_code": {
+        "n_files": 14,
+        "sha256": "781b3f2cef928150325e0eab9c791c8ce7e890ddef558a8301e8ec1696e7ac23"
+      },
+      "capture_rows": {
+        "n_files": 16,
+        "sha256": "2cd4186be0509b8515e0e85fe1fbeea8f60c21e7447b178e255a58a03f665d81"
+      },
+      "free_run_rows": {
+        "n_files": 16,
+        "sha256": "46c7290994c4fde8f978d8d09c8d67754dc7823a04f99760aeab3883b2800805"
+      },
+      "specs": {
+        "n_files": 5,
+        "sha256": "58a2bef2c5a8f4e965196a6587c6f7738596af8295bbc618c32f271c50f1652e"
+      }
+    },
+    "sha256": "fce5237c5bb49297155aa800513e087a3285207bbaf7e78f7a241a0cc052cffd"
+  },
   "n_conditions": 100,
+  "n_design_conditions": 100,
   "n_problems": 25,
   "read": "matched-key policy contrasts: free-run accuracy and lost mass",
   "registration": "NEW ANALYSIS 2026-10-05 (execution plan WP3); descriptive, four policies cannot establish a per-trace predictor",
@@ -469,5 +534,5 @@
   "status": "FINAL",
   "sufficient_statistics_sha256": "2d033c2287be6e6e2ed808913b76de1acfc23eb3fcd869fc25be65393e54a8ca",
   "sufficient_statistics_tsv": "matched_b256.conditions.tsv",
-  "support": "capture keys with M and Delta defined for every policy"
+  "support": "the frozen capture design minus declared metric exclusions"
 }

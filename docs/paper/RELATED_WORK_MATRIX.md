@@ -35,7 +35,7 @@ Compiled 2026-10-05.
 
 - **Random Attention** shows that prompt protection removes most of the *selector* gap in free-running accuracy. It never holds a trace fixed. So it cannot say how much of a policy's loss a held-trace evaluation sees, before or after protection.
   - What we add is not "the prompt matters", which is theirs and Pitfalls'. It is what protection does to the *gap between evaluation protocols*.
-  - At B=256 protection shrinks that gap by 83%/77% in the forward direction but only by 51%/57% in the reverse direction (A4/A5 in the claim ledger).
+  - At B=256 protection improves both directions. For Random the forward improvement is larger (+0.239 against +0.161, difference +0.078 [+0.007, +0.149]); for StreamingLLM a difference was not detected (+0.271 against +0.278). Ledger A5.
   - After protection the two replay directions disagree significantly (interaction +0.130 / +0.127, A6).
 - **evidence2026** has the forward instrument, but:
   - its free-running and fixed-trace numbers are at different budgets (2048 vs 256);
@@ -53,7 +53,7 @@ Compiled 2026-10-05.
 - that fixed-trace replay exists as an instrument (evidence2026);
 - that conditioning on reference rather than self-generated trajectories biases evaluation (exposure bias / DAgger literature).
 
-**One falsifying experiment.** Run the protected 2×2 at B=1024 (queued) plus protected H2O-style and fresh-uniform random at B=256 (WP5, held).
+**One falsifying experiment.** Run the protected 2×2 at B=1024 (forward arm queued; the reverse arm is proposal P1, held) plus protected H2O-style and fresh-uniform random at B=256 (WP5, held).
 - *Falsified:* our answer is falsified if, under matched protection, the forward residual and the reverse trajectory contrast both fall inside ±3 points with TOST support at B=1024 and for the fair selectors. Held-trace evaluation would then be practically adequate once the prompt is protected, and the contribution would shrink to a replication note.
 - *Survives:* if a practically meaningful gap persists in either direction, or the directions keep disagreeing, the audit question survives.
 
@@ -67,3 +67,19 @@ Compiled 2026-10-05.
 - It must be rechecked once:
   - B=1024 is read;
   - before the WP6 confirmation spend.
+
+## 3. Evidence record for the evidence2026 budget claim (added after the review of fbf869f)
+
+The independent reviewer could not retrieve arXiv:2608.01631. Evidence preserved here:
+- **Version.** v1, submitted 2026-08-03. arXiv lists no other version as of 2026-10-05.
+- **Source.** `https://arxiv.org/html/2608.01631v1`, fetched 2026-10-05. SHA-256 of the HTML: `800fc9b5e85d718aeb7beb9494d90e910a605358ac823e2ce57cbdb51bc8ddc1`. Identical to the unversioned URL fetched the same day.
+- **Verbatim caption:** "Table 10: Qwen3-8B AIME26 end-to-end KV-compression results at budget 2048, compared with our fixed-trace baseline at KV budget 256."
+- **Rows (verbatim numbers):**
+  - AdaKV: Fixed-trace (256) 40.0, End-to-end (2048) 23.3.
+  - SnapKV: Fixed-trace (256) 40.0, End-to-end (2048) 26.7.
+  - HeadKV: 46.7 / 26.7.
+  - StreamingLLM: 20.0 / 6.7.
+  - Full-KV: 56.7.
+- **Section 4 text:** "we additionally run end-to-end checks on AIME26 (Table 2)". Table 2 carries the same end-to-end numbers without a budget in its caption.
+
+A finite matrix does not guarantee novelty. The second pass at the submission freeze still stands.

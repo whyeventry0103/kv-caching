@@ -27,7 +27,7 @@ The two estimators are never mixed under one label.
 | A2 | "Protecting the prompt at the same total budget shrinks the forward residual to −0.056 (Random) and −0.078 (StreamingLLM); a residual persists." | same, `residual_pp`, `residual_label` = RESIDUAL PERSISTS | 392 | EP; [−0.098, −0.016] / [−0.125, −0.034]; sensitivity without the 3 budget-relaxed problems −0.058 / −0.081, also PERSISTS | same, B=256 only | CONFIRMED-SCOPED (S.1) | B=1024 is separate (PENDING). Not "most of the residual was prompt loss" (RETIRED wording). |
 | A3 | "The paired change in the forward residual is +0.276 (Random) and +0.259 (StreamingLLM)." | same, `delta_residual`, label SHRINKS | 392 pairs | EP paired; [+0.204, +0.349] / [+0.182, +0.339] | same | CONFIRMED-SCOPED (S.1) | — |
 | A4 | "Forward residual magnitude shrinks by about 83% (Random) and 77% (StreamingLLM)." | `results/diag/paper_audit/decision_b256.json` `per_press.*.shrinkage` | 392 | Joint EP bootstrap of `1 − abs(R_pp)/abs(R_base)`: 0.832 [0.709, 0.949] / 0.768 [0.624, 0.898]; base near zero in 0% of replicates | same | SENSITIVITY (ratio of point estimates, not a causal share) | Must be paired with A5 wherever it appears |
-| A5 | "Under the reverse comparison (compressed trace read out with the full cache), protection shrinks the trajectory contrast by only about half: 0.51 (Random) and 0.57 (StreamingLLM)." | `results/diag/paper_audit/reverse_b256.json` `protection_by_direction` | 298 conditions / 92 problems (Random), 335 / 98 (SLM): all four arms defined in both cells | Joint EP; Random 0.507 [0.309, 0.687], abs +0.161 [+0.087, +0.236]; SLM 0.570 [0.447, 0.691], abs +0.278 [+0.211, +0.344] | same | SENSITIVITY (new 2×2 analysis, 2026-10-05) | The four-arm support is selected: undefined reverse rows are post-treatment |
+| A5 | "On the four-arm support, protection improves the forward residual by +0.239 (Random) and +0.271 (StreamingLLM), and the reverse trajectory contrast by +0.161 and +0.278. The forward improvement is larger for Random (difference +0.078 [+0.007, +0.149]); for StreamingLLM a difference was not detected (−0.007 [−0.081, +0.069]). As ratios of each direction's own unprotected value: 0.82/0.78 forward, 0.51/0.57 reverse." | `results/diag/paper_audit/reverse_b256.json` `protection_by_direction` (incl. `difference_of_improvements`) | 298 conditions / 92 problems (Random), 335 / 98 (SLM): all four arms defined in both cells | Joint EP; ratios Random 0.817 [0.655, 0.968] / 0.507 [0.309, 0.687], SLM 0.778 [0.622, 0.910] / 0.570 [0.447, 0.691] | same | SENSITIVITY (new 2×2 analysis, 2026-10-05; difference added after the review of fbf869f) | Percentages use different denominators: never read "mainly forward" off them. The four-arm support is selected (undefined reverse rows are post-treatment) |
 | A6 | "After protection, the two replay directions disagree: the trajectory contrast is −0.049 under compressed readout but −0.179 under full-cache readout (Random; interaction +0.130)." | `reverse_b256.json` `per_policy.random_pp.common_support` | 376 common-support conditions (Random-pp), 355 (SLM-pp) | Joint EP; interaction Random-pp +0.130 [+0.078, +0.185], SLM-pp +0.127 [+0.065, +0.197]; full-population worst-case bounds [+0.067, +0.127] / [+0.022, +0.140] | same | SENSITIVITY | Unprotected Random shows no detected interaction (+0.029 [−0.026, +0.084]); unprotected SLM +0.146 [+0.068, +0.227] |
 | A7 | "At budget 256 the held-trace readout is itself already lossy: no 'false reassurance' (readout within m of full cache while free-run is not) at m = 1, 3 or 5 points." | `decision_b256.json` `practical_*` | 392 | Bonferroni pair of one-sided 97.5% bounds; R_loss protected 0.169 [0.114, 0.227] (Random), 0.199 [0.138, 0.274] (SLM) | same | SENSITIVITY (margins proposed after the B=256 result) | The "near-lossless certification" story needs B=1024/2048 evidence; at B=256 it is underestimation, not false certification |
 | A8 | "Free-running accuracy rises with protection from 0.422 to 0.662 (Random) and from 0.237 to 0.610 (StreamingLLM), still well below the full cache." | `protection_b256.json` `free_accuracy_*`, `delta_free` | 400 | EP; Δfree +0.240 [+0.180, +0.307] / +0.372 [+0.297, +0.450] | same | CONFIRMED-SCOPED | — |
@@ -50,7 +50,7 @@ The two estimators are never mixed under one label.
 | ID | Sentence | Source | Status |
 |---|---|---|---|
 | C1 | "Under the frozen grader the Qwen3-4B full-cache bank scores 169/200 = 0.845, just below the registered band [0.85, 0.99]; the gate FAILS." | `results/diag/qwen_scoring/bank_audit_qwen3_4b.json` `primary` (0 recompute mismatches) | CONFIRMED (gate FAIL stands) |
-| C2 | "A post-inspection, format-aware secondary score gives 0.905 (bounds 0.90–0.96 over 12 ambiguous rows); the same scorer moves the Qwen-7B anchor from 0.885 to 0.92 (bounds 0.92–0.93)." | same, plus `bank_audit_r1_qwen7b.json` | SENSITIVITY (never a gate input) |
+| C2 | "A post-inspection, format-aware secondary score (v2) gives 0.905, with an AMBIGUITY RANGE of 0.900–0.960 over 12 ambiguous rows (not a confidence interval); the same scorer moves the Qwen-7B anchor from 0.885 to 0.920 (range 0.920–0.930)." | same, plus `bank_audit_r1_qwen7b.json` | SENSITIVITY (never a gate input) |
 | C3 | Any Qwen3 decomposition result | — | PENDING (cells incomplete; gate disposition needs the owner and supervisor) |
 
 ## D. Fork-precision gate: scope of the FAIL (WP0 item 6)
@@ -87,7 +87,8 @@ No software gate substitutes for this instrument gate.
 
 | Retired | Replacement in use |
 |---|---|
-| "Most of the residual was prompt loss." | "Prompt protection reduces the measured forward residual magnitude by about 83%/77% in this setting; under the reverse comparison by about 51%/57%." (A4 + A5 together) |
+| "Most of the residual was prompt loss." | "Prompt protection reduces the measured forward residual magnitude by about 83%/77% in this setting" — always with A5 and A6 beside it |
+| "Protection works mainly in the forward direction" (said in chat, 2026-10-05) | A5's paired difference: larger forward improvement for Random only; not detected for StreamingLLM. Keep the significant post-protection interaction (A6) a separate statement |
 | "Random's readout did not need the prompt." | "A readout effect was not detected for Random; its CI includes both negative and positive changes." (A9) |
 | "The prompt is not special for StreamingLLM." | "The prompt-versus-trace restoration contrast was not detected." (B5) |
 | "ω proves the mechanism." | "ω describes a model-dependent geometric difference; the accuracy connection is not established." (B4) |
@@ -102,3 +103,14 @@ No software gate substitutes for this instrument gate.
 2. **B=1024/2048 near-lossless readout.** Is there a cell where readout is within 3 points of the full cache while free running is not? This is the only form of the "false certification" story the plan allows. Status: not measured under protection.
 3. **H2O-style under protection, and a fresh-uniform random baseline.** Do B1–B3 survive equal prompt protection? This needs WP5, which is held for authorization.
 4. **Qwen3 gate disposition.** This is the owner's and supervisor's decision; see `docs/protocol/QWEN_SCORING_SENSITIVITY.md`.
+
+## G. Review of fbf869f (2026-10-05): what changed in this ledger
+
+- A5 rewritten: absolute improvements and their paired difference replace a
+  reading based on percentages with different denominators.
+- C2: "bounds" renamed ambiguity range; secondary scorer is v2 (0 rows changed
+  vs v1 in either bank).
+- Reader validation repaired (R1); every affected read re-read on the host:
+  0 numeric changes in protection_b256, origin, reverse_b256, matched_b256,
+  decision_b256. matched joint labels reworded by the sign-table fix (R4), same
+  classification.

@@ -152,3 +152,42 @@ def test_h2o_style_identity_control_matches_stable_topk():
     press.base_press.compress(_fake_module(0, 4), None, k, k.clone(), None, {})
     kept = sorted(press.protect.maps[0][0].tolist())
     assert kept == sorted(scores[0, 0].topk(4).indices.tolist())  # {1, 3, 5, 6}
+
+
+# ------------------------------------------------------------ promotion gate
+def _cfg(**over):
+    cfg = {
+        "protected_selector": True,
+        "presses": ["h2o_style_pp_v1", "uniform_fresh_pp_v1"],
+        "mode": "readout",
+    }
+    cfg.update(over)
+    return cfg
+
+
+def test_gate_allows_dry_runs_of_held_configs():
+    ps.require_protected_config(_cfg(held=True), dry_run=True)
+
+
+def test_gate_refuses_real_runs_while_held_or_without_smoke(tmp_path):
+    with pytest.raises(SystemExit, match="HELD"):
+        ps.require_protected_config(_cfg(held=True), dry_run=False, runs_root=tmp_path)
+    with pytest.raises(SystemExit, match="HELD"):  # absent flag means held
+        ps.require_protected_config(_cfg(), dry_run=False, runs_root=tmp_path)
+    with pytest.raises(SystemExit, match="smoke"):
+        ps.require_protected_config(_cfg(held=False), dry_run=False, runs_root=tmp_path)
+    (tmp_path / ps.SMOKE_MARKER).write_text("{}")
+    ps.require_protected_config(_cfg(held=False), dry_run=False, runs_root=tmp_path)
+
+
+@pytest.mark.parametrize(
+    "over, match",
+    [
+        ({"protected_selector": False}, "protected_selector"),
+        ({"presses": ["random_pp"]}, "not a protected-selector family"),
+        ({"restoration": {}}, "not registered"),
+    ],
+)
+def test_gate_refuses_non_protected_configs(over, match):
+    with pytest.raises(SystemExit, match=match):
+        ps.require_protected_config(_cfg(**over), dry_run=True)

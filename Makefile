@@ -138,6 +138,9 @@ dryrun:
 	$(PYTHON) scripts/report_protocol_audit.py --runs-root runs --dry-run matched
 	$(PYTHON) scripts/audit_qwen_scoring.py --runs-root runs --bank qwen3_4b --dry-run
 	$(PYTHON) scripts/plan_paper_sample_size.py --dry-run cost
+	$(PYTHON) scripts/run_grid_protected.py --config configs/experiments/grid_math500_protsel256_wp5.yaml --dry-run
+	$(PYTHON) scripts/run_replay_protected.py --config configs/experiments/readout_math500_protsel256_wp5.yaml --dry-run
+	$(PYTHON) scripts/run_replay.py --config configs/experiments/reverse_readout_pp1024_s1x.yaml --dry-run
 	$(PYTHON) scripts/audit_meeting4.py --dry-run retention
 	$(PYTHON) scripts/run_grid_pp.py --config configs/experiments/grid_math500_pp256_s1.yaml --dry-run
 	$(PYTHON) scripts/run_grid_pp.py --config configs/experiments/grid_math500_pp1024_s1.yaml --dry-run

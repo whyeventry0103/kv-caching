@@ -1,0 +1,23 @@
+name: grid_math500_protsel256_wp5
+stage: grid
+# Execution plan WP5 (PROPOSED, HELD 2026-10-05): free-running grid under the
+# protected-selector families at budget 256, matched to the S.1 cells (same 100
+# problems, seeds, cap, interval, total-budget rule). Runs through
+# scripts/run_grid_protected.py, which refuses real execution while `held` is
+# set or before protected-selectors-smoke-PASS.json exists. NOT in the queue.
+protected_selector: true
+held: true
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+subset:
+  math500: 100
+presses: [h2o_style_pp_v1, uniform_fresh_pp_v1]
+budgets: [256]
+seeds: [11, 23, 47, 89]
+max_new_tokens:
+  math500: 16384
+compression_interval: 64
+estimated_generation_count: 800
+scale_authorized: false
+remote_only: true
+store_token_ids: true

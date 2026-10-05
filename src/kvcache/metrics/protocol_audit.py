@@ -295,6 +295,30 @@ def protection_by_direction(
         out[name] = shrinkage_ratio(
             per_key(protected), per_key(base), n_resamples=n_resamples, seed=seed
         )
+    # Review of fbf869f: percentages use different baseline denominators, so
+    # "protection works mainly in one direction" needs the paired difference of
+    # the ABSOLUTE improvements: (fwd_pp - fwd_base) - (rev_pp - rev_base).
+    # Algebraically this equals interaction_pp - interaction_base.
+    f, r = CONTRASTS["residual_forward"], CONTRASTS["trajectory_under_full_readout"]
+
+    def val(cell: Mapping[str, Mapping[Key, bool]], coefs: Mapping[str, int], k: Key):
+        return sum(c * float(cell[a][k]) for a, c in coefs.items())
+
+    series = {
+        "d": {
+            k: (val(protected, f, k) - val(base, f, k))
+            - (val(protected, r, k) - val(base, r, k))
+            for k in keys
+        }
+    }
+    point, reps = joint_draws(series, n_resamples=n_resamples, seed=seed)
+    out["difference_of_improvements"] = {
+        **summarize(
+            point["d"], [x["d"] for x in reps], n_resamples=n_resamples, seed=seed
+        ),
+        "definition": "(forward improvement) - (reverse improvement), paired, on "
+        "the four-arm support; equals interaction(protected) - interaction(base)",
+    }
     return out
 
 
@@ -402,6 +426,29 @@ def shrinkage_ratio(
     }
 
 
+def _sign(lo: float, hi: float) -> int:
+    """+1 / -1 when the interval excludes zero on that side, else 0."""
+    return 1 if lo > 0 else (-1 if hi < 0 else 0)
+
+
+def joint_label(*, acc_sign: int, met_sign: int) -> str:
+    """Accuracy difference (a - b) against loss-metric difference (a - b).
+
+    The metric is loss-type, so a metric that ranks policies correctly has
+    OPPOSITE signs (more loss, lower accuracy). Same signs are a mismatch in
+    either orientation. Fixed 2026-10-05 (review of fbf869f, R4): the old table
+    called two negative differences "aligned".
+    """
+    if acc_sign == 0 or met_sign == 0:
+        return "NOT ESTABLISHED"
+    first = (
+        f"first policy: {'higher' if acc_sign > 0 else 'lower'} accuracy, "
+        f"{'more' if met_sign > 0 else 'less'} loss"
+    )
+    kind = "MISMATCH" if acc_sign == met_sign else "ALIGNED"
+    return f"{kind} ESTABLISHED ({first})"
+
+
 def policy_contrasts(
     accuracy: Mapping[str, Mapping[Key, float]],
     metric: Mapping[str, Mapping[Key, float]] | None,
@@ -445,12 +492,9 @@ def policy_contrasts(
             block["metric"] = diff(f"met:{a}", f"met:{b}")
             acc_lo, acc_hi = block["accuracy"]["ci_family"]
             met_lo, met_hi = block["metric"]["ci_family"]
-            if acc_lo > 0 and met_lo > 0:
-                block["joint"] = "MISMATCH ESTABLISHED (higher accuracy, more loss)"
-            elif acc_hi < 0 and met_hi < 0:
-                block["joint"] = "ALIGNED ESTABLISHED (lower accuracy, more loss)"
-            else:
-                block["joint"] = "NOT ESTABLISHED"
+            block["joint"] = joint_label(
+                acc_sign=_sign(acc_lo, acc_hi), met_sign=_sign(met_lo, met_hi)
+            )
         out[f"{a} - {b}"] = block
     return out
 

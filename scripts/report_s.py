@@ -43,6 +43,7 @@ from kvcache.coverage import COMPLETE, equal_problem_bootstrap
 from kvcache.metrics import s_reads
 from kvcache.presses.prompt_protect import PP_BASES, PP_SUFFIX, effective_budget
 from kvcache.provenance import write_json_atomic
+from kvcache.read_checks import validate_rows
 from kvcache.read_validation import (
     FINAL,
     INVALID,
@@ -89,6 +90,7 @@ ANALYSIS_CODE = (
     "scripts/report_m4.py",
     "src/kvcache/metrics/s_reads.py",
     "src/kvcache/read_validation.py",
+    "src/kvcache/read_checks.py",
     "src/kvcache/coverage.py",
     "src/kvcache/presses/prompt_protect.py",
     "src/kvcache/provenance.py",
@@ -271,38 +273,32 @@ def protection(runs: Path, a: argparse.Namespace) -> tuple[dict[str, Any], str]:
         if str(r["condition"]["budget"]) == budget
     ]
     fc_rows = _rows(runs / FC_RUN, BENCH)
-    grid_required = ("pid", "press", "budget", "decoding.seed", "correct", "trace")
-    ro_required = ("reference_key", "condition", "readout_defined")
+    # Review of fbf869f (R1): values are checked BEFORE any bool() conversion
+    # ("False" and NaN are truthy), and readout flags must agree with values.
+    grid_required = ("pid", "press", "budget", "decoding.seed", "trace")
+    ro_required = ("reference_key", "condition")
+    gkw = {"required": grid_required, "bool_fields": ("correct",)}
+    rkw = {"required": ro_required, "readout": True}
     pop = {
-        "grid_pp": validate_population(
-            grid_pp, key=_grid_key, expected=pp_keys, required=grid_required
-        ),
-        "grid_base": validate_population(
-            grid_base, key=_grid_key, expected=base_keys, required=grid_required
-        ),
-        "readout_pp": validate_population(
-            ro_pp, key=_readout_key, expected=pp_keys, required=ro_required
-        ),
-        "readout_base": validate_population(
-            ro_base, key=_readout_key, expected=base_keys, required=ro_required
+        "grid_pp": validate_rows(grid_pp, key=_grid_key, expected=pp_keys, **gkw),
+        "grid_base": validate_rows(grid_base, key=_grid_key, expected=base_keys, **gkw),
+        "readout_pp": validate_rows(ro_pp, key=_readout_key, expected=pp_keys, **rkw),
+        "readout_base": validate_rows(
+            ro_base, key=_readout_key, expected=base_keys, **rkw
         ),
     }
-    for name, rows in (("readout_pp", ro_pp), ("readout_base", ro_base)):
-        bad = [
-            repr(_readout_key(r))
-            for r in rows
-            if r.get("readout_defined")
-            and not isinstance(r.get("readout_correct"), bool)
-        ]
-        if bad:
-            pop[name]["status"] = INVALID
-            pop[name]["malformed"].update(
-                {k: ["defined readout without a bool"] for k in bad}
-            )
 
-    # controls
-    fc = {_run_key(r): bool(r["correct"]) for r in fc_rows}
+    # controls; the bank is an allowed superset, its relevant rows are checked
     fc_keys = {(p, s) for p in pids for s in seeds}
+    fc_rel = [r for r in fc_rows if _run_key(r) in fc_keys]
+    pop["full_cache"] = validate_rows(
+        fc_rel,
+        key=_run_key,
+        expected=fc_keys,
+        required=("pid", "decoding.seed"),
+        bool_fields=("correct",),
+    )
+    fc = {_run_key(r): r["correct"] for r in fc_rel}
     controls: dict[str, dict[str, Any]] = {
         "reference_covers_design": {
             "passed": fc_keys <= set(fc),
@@ -516,7 +512,10 @@ def origin(runs: Path, a: argparse.Namespace) -> tuple[dict[str, Any], str]:
     design, keys = design_keys(ORIGIN_CONFIG, root=PROJECT_ROOT)
     rows = _rows(runs / "restore-v3", BENCH)
     v2_rows = _rows(runs / "restore-v2", BENCH)
-    fc = {_run_key(r): bool(r["correct"]) for r in _rows(runs / FC_RUN, BENCH)}
+    fc_rows = _rows(runs / FC_RUN, BENCH)
+    if any(not isinstance(r.get("correct"), bool) for r in fc_rows):
+        raise SystemExit("REFUSED: a full-cache row's correct is not a boolean")
+    fc = {_run_key(r): r["correct"] for r in fc_rows}
     arms = list(s_reads.ORIGIN_ARMS)
     cfg3, cfg2 = _cfg(ORIGIN_CONFIG), _cfg(RESTORE2_CONFIG)
     pop = validate_population(

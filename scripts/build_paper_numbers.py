@@ -1928,6 +1928,31 @@ def build_catalogue() -> list[Entry]:
                         f"{_rvp} :: protection_by_direction.{_pp}.{_c}.ci95[{_i}]",
                         f"protection shrinkage CI bound, {_c}, {_pp}",
                     )
+            _di = _blk["difference_of_improvements"]
+            add(
+                f"audit.b256.{_pp}.difference_of_improvements.mean",
+                _di["mean"],
+                f"{_rvp} :: protection_by_direction.{_pp}"
+                ".difference_of_improvements.mean",
+                f"forward minus reverse protection improvement, {_pp}",
+            )
+            for _i, _b in enumerate(_di["ci95"]):
+                _end = "lo" if _i == 0 else "hi"
+                add(
+                    f"audit.b256.{_pp}.difference_of_improvements.ci{_end}",
+                    _b,
+                    f"{_rvp} :: protection_by_direction.{_pp}"
+                    f".difference_of_improvements.ci95[{_i}]",
+                    f"difference of protection improvements CI bound, {_pp}",
+                )
+            for _c in ("residual_forward", "trajectory_under_full_readout"):
+                add(
+                    f"audit.b256.{_pp}.{_c}.improvement",
+                    _blk[_c]["absolute_change"]["mean"],
+                    f"{_rvp} :: protection_by_direction.{_pp}.{_c}"
+                    ".absolute_change.mean",
+                    f"absolute protection improvement, {_c}, {_pp}",
+                )
             add(
                 f"audit.b256.{_pp}.four_arm.n",
                 _blk["n_conditions"],

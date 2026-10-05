@@ -1705,6 +1705,22 @@ budget residual. Paper §2 sentence and catalogue entries corrected; what it
 changes: the novelty distance is wider (they never form a matched-budget
 difference), the "they already have our numbers" framing is retired.
 
+### 5n. Review of fbf869f: readers repaired, numbers unchanged; one interpretation corrected (2026-10-05)
+
+An independent review reproduced every §5l estimate from the committed tables and found four bounded defects. All four are repaired:
+- reader validation (non-boolean `correct`, readout flag consistency, duplicate bank keys, silently shrinking cohorts);
+- two secondary-grader holes;
+- planner and cost errors;
+- a sign-table bug.
+
+After the repairs every affected read was re-run on the host. There were **0 numeric changes** (protection_b256, origin, reverse_b256, matched_b256, decision_b256), and v2 scoring changed 0 rows in either bank.
+
+**Corrected interpretation.** Shrinkage percentages use different denominators, so they cannot show which direction protection helps more. The paired difference of absolute improvements (forward − reverse, four-arm support) is:
+- Random: +0.078 [+0.007, +0.149]. Forward improvement larger.
+- StreamingLLM: −0.007 [−0.081, +0.069]. Not detected: protection improves both directions by about the same amount (+0.271 / +0.278).
+
+The significant post-protection interaction (§5l) is a separate statement and stands. "Protection works mainly in the forward direction" is retired.
+
 ## 5. Framing discipline (non-negotiable — apply throughout)
 - **Divergence ≠ damage.** ADD / TV / residual are "behavioral-fidelity loss," never "damage."
   Correctness is the only quality arbiter. Carry the **signed flip-mass** (gained vs lost correct

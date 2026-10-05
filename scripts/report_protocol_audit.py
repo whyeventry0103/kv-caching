@@ -44,15 +44,16 @@ sys.path.insert(0, str(PROJECT_ROOT / "src"))
 sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
 
 import report_s as rs
-from report_m4 import _run_key
 
 from kvcache.coverage import equal_problem_bootstrap, equal_problem_mean
 from kvcache.metrics import protocol_audit as pa
 from kvcache.presses.prompt_protect import PP_BASES, PP_SUFFIX
 from kvcache.provenance import write_json_atomic
+from kvcache.read_checks import validate_rows
 from kvcache.read_validation import (
     FINAL,
     INVALID,
+    PARTIAL,
     dependency_fingerprint,
     design_keys,
     exit_code,
@@ -60,7 +61,6 @@ from kvcache.read_validation import (
     legacy_provenance_summary,
     retire_stale,
     tree_files,
-    validate_population,
 )
 
 OUT = PROJECT_ROOT / "results" / "diag" / "paper_audit"
@@ -86,6 +86,10 @@ def _reverse_key(r: dict[str, Any]) -> tuple:
     """(source policy, budget, pid, seed) of the compressed trace read out."""
     ref = r["reference_key"]
     return (str(ref[3]), str(ref[4]), str(ref[1]), int(ref[5]))
+
+
+def _fc_key(r: dict[str, Any]) -> tuple[str, int]:
+    return (str(r["pid"]), int(r["decoding"]["seed"]))
 
 
 def reverse_dependencies(runs: Path, budget: int) -> dict[str, Any]:
@@ -189,54 +193,51 @@ def reverse(runs: Path, a: argparse.Namespace) -> tuple[dict[str, Any], str]:
     rev_base = rs._rows(runs / rev["reverse_base"], "readout")
     fc_rows = rs._rows(runs / rs.FC_RUN, rs.BENCH)
 
-    grid_req = ("pid", "press", "budget", "decoding.seed", "correct", "trace")
-    ro_req = ("reference_key", "condition", "readout_defined")
+    grid_req = ("pid", "press", "budget", "decoding.seed", "trace")
+    ro_req = ("reference_key", "condition")
+    gkw = {"required": grid_req, "bool_fields": ("correct",)}
+    rkw = {"required": ro_req, "readout": True}
     pop = {
-        "grid_pp": validate_population(
-            grid_pp, key=rs._grid_key, expected=pp_keys, required=grid_req
+        "grid_pp": validate_rows(grid_pp, key=rs._grid_key, expected=pp_keys, **gkw),
+        "grid_base": validate_rows(
+            grid_base, key=rs._grid_key, expected=base_keys, **gkw
         ),
-        "grid_base": validate_population(
-            grid_base, key=rs._grid_key, expected=base_keys, required=grid_req
+        "readout_pp": validate_rows(
+            ro_pp, key=rs._readout_key, expected=pp_keys, **rkw
         ),
-        "readout_pp": validate_population(
-            ro_pp, key=rs._readout_key, expected=pp_keys, required=ro_req
+        "readout_base": validate_rows(
+            ro_base, key=rs._readout_key, expected=base_keys, **rkw
         ),
-        "readout_base": validate_population(
-            ro_base, key=rs._readout_key, expected=base_keys, required=ro_req
-        ),
-        "reverse_pp": validate_population(
-            rev_pp, key=_reverse_key, expected=pp_keys, required=ro_req
-        ),
-        "reverse_base": validate_population(
-            rev_base, key=_reverse_key, expected=base_keys, required=ro_req
+        "reverse_pp": validate_rows(rev_pp, key=_reverse_key, expected=pp_keys, **rkw),
+        "reverse_base": validate_rows(
+            rev_base, key=_reverse_key, expected=base_keys, **rkw
         ),
     }
     for name, rows, keyf in (
-        ("readout_pp", ro_pp, rs._readout_key),
-        ("readout_base", ro_base, rs._readout_key),
         ("reverse_pp", rev_pp, _reverse_key),
         ("reverse_base", rev_base, _reverse_key),
     ):
         bad = {
-            repr(keyf(r)): ["defined readout without a bool"]
+            repr(keyf(r)): ["reverse readout not under the full cache"]
             for r in rows
-            if r.get("readout_defined")
-            and not isinstance(r.get("readout_correct"), bool)
+            if (r.get("condition") or {}).get("press") != "fullcache"
         }
-        if name.startswith("reverse"):
-            bad.update(
-                {
-                    repr(keyf(r)): ["reverse readout not under the full cache"]
-                    for r in rows
-                    if (r.get("condition") or {}).get("press") != "fullcache"
-                }
-            )
         if bad:
             pop[name]["status"] = INVALID
             pop[name]["malformed"].update(bad)
 
-    fc = {_run_key(r): bool(r["correct"]) for r in fc_rows}
+    # The bank is an allowed SUPERSET of the design; the relevant rows must
+    # still be unique, boolean and complete.
     design = {(p, s) for p in pids for s in seeds}
+    fc_rel = [r for r in fc_rows if _fc_key(r) in design]
+    pop["full_cache"] = validate_rows(
+        fc_rel,
+        key=_fc_key,
+        expected=design,
+        required=("pid", "decoding.seed"),
+        bool_fields=("correct",),
+    )
+    fc = {_fc_key(r): r["correct"] for r in fc_rel}
     controls: dict[str, dict[str, Any]] = {
         "reference_covers_design": {
             "passed": design <= set(fc),
@@ -270,11 +271,7 @@ def reverse(runs: Path, a: argparse.Namespace) -> tuple[dict[str, Any], str]:
         return out, status
 
     def free(rows: list[dict[str, Any]], press: str) -> dict[tuple, bool]:
-        return {
-            k[2:]: bool(r["correct"])
-            for r in rows
-            if (k := rs._grid_key(r))[0] == press
-        }
+        return {k[2:]: r["correct"] for r in rows if (k := rs._grid_key(r))[0] == press}
 
     def readout(rows: list[dict[str, Any]], keyf, press: str) -> dict[tuple, bool]:
         return {
@@ -381,7 +378,9 @@ def decision(runs: Path | None, a: argparse.Namespace) -> tuple[dict[str, Any], 
     for pp in sorted({r["press"] for r in rows}):
         sub = [r for r in rows if r["press"] == pp]
         key = [(r["pid"], int(r["seed"])) for r in sub]
-        ff = {k: bool(_tsv_bool(r["fc"])) for k, r in zip(key, sub, strict=True)}
+        ff = {k: _tsv_bool(r["fc"]) for k, r in zip(key, sub, strict=True)}
+        if any(v is None for v in ff.values()):
+            raise SystemExit("REFUSED: a condition has no full-cache reference")
         arms = {}
         for col in ("free_pp", "free_base", "readout_pp", "readout_base"):
             arms[col] = {
@@ -429,62 +428,145 @@ def decision(runs: Path | None, a: argparse.Namespace) -> tuple[dict[str, Any], 
 MATCHED_PAIRS = (("random", "h2o"), ("random", "streamingllm"), ("random", "rkv"))
 
 
+MATCHED_GRID_RUNS = {
+    "random": "grid-diss256-tok",
+    "streamingllm": "grid-diss256-tok",
+    "h2o": "grid-diss256-h2o",
+    "rkv": "grid-diss256-rkv",
+}
+MATCHED_CAPTURE_RUN = "capture-b256"
+MATCHED_CODE = (
+    *ANALYSIS_CODE,
+    "scripts/report_r17.py",
+    "scripts/report_capture.py",
+    "src/kvcache/read_checks.py",
+)
+
+
+def matched_dependencies(runs: Path) -> dict[str, Any]:
+    import report_r17
+
+    return dependency_fingerprint(
+        {
+            "capture_rows": (runs, tree_files(runs / MATCHED_CAPTURE_RUN, rs.BENCH)),
+            "free_run_rows": (
+                runs,
+                [
+                    f
+                    for run in sorted(set(MATCHED_GRID_RUNS.values()))
+                    for f in tree_files(runs / run, rs.BENCH)
+                ],
+            ),
+            "specs": (
+                PROJECT_ROOT,
+                rs._project_files(
+                    [report_r17.CAPTURE_CONFIGS[MATCHED_CAPTURE_RUN], *rs.FROZEN_SPECS]
+                ),
+            ),
+            "analysis_code": (PROJECT_ROOT, rs._project_files(MATCHED_CODE)),
+        }
+    )
+
+
 def matched(runs: Path, a: argparse.Namespace) -> tuple[dict[str, Any], str]:
     """WP3: paired accuracy and lost-mass contrasts on the 25 capture problems.
 
     Accuracy is the budget-256 free run; the metric is the capture row's
     ``M_mean`` (lost attention mass, teacher-forced on the full-cache trace),
     with ``Delta_mean`` as a secondary shape metric. Both come from ONE joint
-    problem draw per metric. The capture rows pass the R.17 validation boundary
-    first; anything short of FINAL withholds every contrast.
+    problem draw per metric.
+
+    Validation (review of fbf869f, R1): the capture rows pass the R.17
+    boundary; the free-run rows are validated against the SAME frozen design
+    before any dictionary is built (the grids are an allowed superset of the
+    25 problems; relevant duplicates are INVALID, non-boolean ``correct`` is
+    INVALID, a missing condition is PARTIAL). A capture row whose metric is
+    absent is a declared exclusion and is listed; a missing accuracy row never
+    shrinks the cohort silently. Anything short of FINAL withholds every label.
     """
     import report_r17
-    from audit_meeting4 import _tables
 
     cap = report_r17._validated_capture(
-        runs, argparse.Namespace(capture_run="capture-b256")
+        runs, argparse.Namespace(capture_run=MATCHED_CAPTURE_RUN)
+    )
+    _design, expected = design_keys(
+        report_r17.CAPTURE_CONFIGS[MATCHED_CAPTURE_RUN], root=PROJECT_ROOT
+    )
+    policies = sorted({p for pair in MATCHED_PAIRS for p in pair})
+    acc_pop: dict[str, Any] = {}
+    acc: dict[str, dict[tuple, float]] = {}
+    for press in policies:
+        exp = {k for k in expected if k[0] == press}
+        pids = {k[2] for k in exp}
+        rows = [
+            r
+            for r in rs._rows(runs / MATCHED_GRID_RUNS[press], rs.BENCH)
+            if r.get("press") == press
+            and str(r.get("budget")) == "256"
+            and r.get("pid") in pids
+        ]
+        acc_pop[press] = validate_rows(
+            rows,
+            key=rs._grid_key,
+            expected=exp,
+            required=("pid", "press", "budget", "decoding.seed"),
+            bool_fields=("correct",),
+        )
+        acc[press] = {rs._grid_key(r)[2:]: float(r["correct"]) for r in rows}
+    statuses = [cap["status"]] + [
+        FINAL if b["status"] == "COMPLETE" else b["status"] for b in acc_pop.values()
+    ]
+    status = (
+        INVALID if INVALID in statuses else (PARTIAL if PARTIAL in statuses else FINAL)
     )
     out: dict[str, Any] = {
         "read": "matched-key policy contrasts: free-run accuracy and lost mass",
         "registration": "NEW ANALYSIS 2026-10-05 (execution plan WP3); "
         "descriptive, four policies cannot establish a per-trace predictor",
-        "status": cap["status"],
+        "status": status,
+        "dependencies": matched_dependencies(runs),
         "capture_validation": cap["validation"],
+        "accuracy_population": acc_pop,
     }
-    if cap["status"] != FINAL:
-        out["contrasts"] = f"WITHHELD: capture read is {cap['status']}"
-        return out, cap["status"]
-    free, _ro = _tables(runs)
-    rows = cap["rows"]
+    if status != FINAL:
+        for blk in ("contrasts_M", "contrasts_Delta", "accuracy_by_policy"):
+            out[blk] = f"WITHHELD: read is {status}"
+        return out, status
     metric: dict[str, dict[str, dict[tuple, float]]] = {"M_mean": {}, "Delta_mean": {}}
-    for r in rows:
+    declared: list[list[Any]] = []
+    for r in cap["rows"]:
         k = (str(r["pid"]), int(r["seed"]))
         for m in metric:
-            if r.get(m) is not None:
+            if r.get(m) is None:
+                declared.append([str(r["press"]), *k, m])
+            else:
                 metric[m].setdefault(str(r["press"]), {})[k] = float(r[m])
-    policies = sorted({p for pair in MATCHED_PAIRS for p in pair})
-    keys = set.intersection(*(set(metric["M_mean"].get(p, {})) for p in policies))
-    keys &= set.intersection(*(set(metric["Delta_mean"].get(p, {})) for p in policies))
-    keys &= set.intersection(*(set(free[p]) for p in policies))
-    keys_sorted = sorted(keys)
-    acc = {p: {k: float(free[p][k]) for k in keys_sorted} for p in policies}
+    design = sorted({k[2:] for k in expected})
+    keys_sorted = [
+        k
+        for k in design
+        if all(k in metric[m].get(p, {}) for m in metric for p in policies)
+    ]
+    accd = {p: {k: acc[p][k] for k in keys_sorted} for p in policies}
     kw = {"n_resamples": a.n_resamples, "seed": a.seed}
     out.update(
         {
             "n_conditions": len(keys_sorted),
             "n_problems": len({k[0] for k in keys_sorted}),
-            "support": "capture keys with M and Delta defined for every policy",
+            "n_design_conditions": len(design),
+            "declared_metric_exclusions": declared,
+            "support": "the frozen capture design minus declared metric exclusions",
             "accuracy_by_policy": {
-                p: equal_problem_bootstrap(acc[p], **kw) for p in policies
+                p: equal_problem_bootstrap(accd[p], **kw) for p in policies
             },
             "contrasts_M": pa.policy_contrasts(
-                acc,
+                accd,
                 {p: {k: metric["M_mean"][p][k] for k in keys_sorted} for p in policies},
                 MATCHED_PAIRS,
                 **kw,
             ),
             "contrasts_Delta": pa.policy_contrasts(
-                acc,
+                accd,
                 {
                     p: {k: metric["Delta_mean"][p][k] for k in keys_sorted}
                     for p in policies
@@ -499,7 +581,7 @@ def matched(runs: Path, a: argparse.Namespace) -> tuple[dict[str, Any], str]:
             p,
             k[0],
             k[1],
-            int(acc[p][k]),
+            int(accd[p][k]),
             metric["M_mean"][p][k],
             metric["Delta_mean"][p][k],
         ]

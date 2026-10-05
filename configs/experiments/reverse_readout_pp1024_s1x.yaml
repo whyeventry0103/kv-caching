@@ -1,0 +1,24 @@
+name: reverse_readout_pp1024_s1x
+stage: replay
+mode: readout
+# PROPOSED, HELD (2026-10-05; review of fbf869f recommends it as the
+# highest-priority new experiment). The prompt-protected budget-1024 free-run
+# traces read out under the FULL cache: the reverse arm that lets the
+# forward/reverse interaction be read at 1024 as at 256. Not part of the
+# registered S.1 design ("s1x" = extension); needs a dated registration and an
+# approved budget before it is queued. Runs through scripts/run_replay.py.
+# Depends on grid-pp1024 being complete (its traces are the source).
+held: true
+reference_run_name: grid-pp1024
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+subset:
+  math500: 100
+presses: [fullcache]
+budgets: [1024]
+seeds: [11, 23, 47, 89]
+compression_interval: 64
+max_answer_tokens: 2048
+estimated_generation_count: 0
+estimated_replay_count: 800
+scale_authorized: false

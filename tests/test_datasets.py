@@ -75,3 +75,50 @@ def test_aime24_problems_raw_gold_and_deterministic_order():
     # leading-zero answers survive raw (is_equiv handles equivalence at grade time)
     full = _aime_problems(rows, None, name="aime24")
     assert full[2].gold_answer == "025"
+
+
+def test_gsm8k_gold_parsing_and_refusals():
+    import pytest
+
+    from kvcache.datasets import gsm8k_gold
+
+    assert gsm8k_gold("Natalia sold 48/2 = 24 clips.\n#### 72") == "72"
+    assert gsm8k_gold("... #### 1,250") == "1250"
+    assert gsm8k_gold("#### -3.5") == "-3.5"
+    with pytest.raises(ValueError, match="marker"):
+        gsm8k_gold("no marker 72")
+    with pytest.raises(ValueError, match="not numeric"):
+        gsm8k_gold("#### seventy")
+
+
+def test_gsm8k_problems_seeded_sample_is_frozen_and_raw():
+    from kvcache.datasets import _gsm8k_problems
+
+    data = [{"question": f"q{i}", "answer": f"w\n#### {i * 10}"} for i in range(50)]
+    a = _gsm8k_problems(data, {"count": 5, "seed": 11})
+    b = _gsm8k_problems(data, {"count": 5, "seed": 11})
+    assert [p.pid for p in a] == [p.pid for p in b]
+    assert [p.pid for p in a] == sorted(
+        [p.pid for p in a], key=lambda x: int(x.split("/")[-1])
+    )
+    i = int(a[0].pid.split("/")[-1])
+    assert a[0].question == f"q{i}" and a[0].gold_answer == str(i * 10)
+    assert [p.pid for p in _gsm8k_problems(data, 3)] == [
+        "gsm8k/test/0",
+        "gsm8k/test/1",
+        "gsm8k/test/2",
+    ]
+
+
+def test_gsm8k_load_refuses_without_a_pinned_revision(monkeypatch, tmp_path):
+    import pytest
+    import yaml
+
+    from kvcache.datasets import load_benchmark
+
+    monkeypatch.setenv("REMOTE_DATA_ROOT", str(tmp_path))
+    (tmp_path / "datasets").mkdir()
+    cfg = yaml.safe_load(open("configs/benchmarks.yaml"))["benchmarks"]["gsm8k"]
+    assert "revision" not in cfg  # a human pins it (TODO(human) rule)
+    with pytest.raises(RuntimeError, match="pinned"):
+        load_benchmark("gsm8k", cfg, subset=3)

@@ -38,6 +38,9 @@ OUT = PROJECT_ROOT / "results" / "diag" / "paper_plan"
 S1_TSV = (
     PROJECT_ROOT / "results" / "diag" / "amendment-s" / "protection_b256.conditions.tsv"
 )
+REVERSE_TSV = (
+    PROJECT_ROOT / "results" / "diag" / "paper_audit" / ("reverse_b256.conditions.tsv")
+)
 COSTS = PROJECT_ROOT / "configs" / "paper" / "cost_inputs.yaml"
 N_GRID = (100, 200, 300, 400, 500)
 SEEDS_GRID = (2, 4)
@@ -86,6 +89,52 @@ def sample_size(a: argparse.Namespace) -> dict[str, Any]:
                 "normal_n_for_half_width_0.025": sp.normal_n(sd, TARGET_HALF_WIDTH),
                 "simulations": sims,
             }
+    # The forward/reverse interaction on the common support (review of
+    # fbf869f, R3): now central to the proposed contribution, so planned too.
+    with REVERSE_TSV.open(encoding="utf-8") as fh:
+        rv = list(csv.DictReader(fh, delimiter="\t"))
+    for press in ("random_pp", "streamingllm_pp"):
+        vals = {
+            (r["pid"], int(r["seed"])): float(r["cc"])
+            - float(r["fc"])
+            - float(r["cf"])
+            + float(r["ff"])
+            for r in rv
+            if r["press"] == press and r["fc"] != "" and r["cf"] != ""
+        }
+        pp = sp.per_problem_values(vals)
+        sd = sp.problem_sd(pp)
+        out["quantities"][f"{press}:protected_interaction"] = {
+            "problem_sd": sd,
+            "normal_n_for_half_width_0.025": sp.normal_n(sd, TARGET_HALF_WIDTH),
+            "source": str(REVERSE_TSV.relative_to(PROJECT_ROOT)),
+            "simulations": [
+                sp.simulate(pp, n_problems=n, n_seeds=s_, effect=e, reps=a.reps, seed=0)
+                for n in N_GRID
+                for s_ in SEEDS_GRID
+                for e in EFFECTS
+            ],
+        }
+    out["endpoint_summary"] = {
+        q: {
+            "normal_n_for_half_width_0.025": v["normal_n_for_half_width_0.025"],
+            "at_300x4": {
+                f"effect_{x['effect']}": {
+                    "half_width": round(x["mean_half_width"], 4),
+                    "share_excluding_zero": x["share_excluding_zero"],
+                }
+                for x in v["simulations"]
+                if x["n_problems"] == 300 and x["n_seeds"] == 4
+            },
+        }
+        for q, v in out["quantities"].items()
+    }
+    out["reading"] = (
+        "Precision is ENDPOINT-SPECIFIC: about 300 problems x 4 seeds reaches a "
+        "~0.025 half-width for the protected forward residual only; the free-run "
+        "gap needs far more problems than MATH-500 offers for that precision. "
+        "Choose the primary endpoint first, then size the design for it."
+    )
     return out
 
 
@@ -144,51 +193,117 @@ def cost(a: argparse.Namespace) -> dict[str, Any]:
     )
 
     def confirm(
-        n: int, fc_s: float, free256: float, free1024: float, scale: float = 1.0
-    ):
-        s = 2
-        return block(
+        n: int,
+        seeds: int,
+        fc_s: float,
+        free256: float,
+        free1024: float,
+        scale: float = 1.0,
+        new_family: tuple[float, float] = (1.0, 1.0),
+    ) -> dict[str, Any]:
+        """Two policies x two budgets; a readout is priced at its SOURCE trace's
+        rate (forward reads the full-cache trace, reverse the compressed one).
+        Fixed 2026-10-05 (review of fbf869f, R3): the rates were swapped."""
+        k = n * seeds
+        base = block(
             [
-                ("full-cache bank", n * s, fc_s * scale, "free"),
-                ("free b256 x2 policies", 2 * n * s, free256 * scale, "free"),
-                ("free b1024 x2 policies", 2 * n * s, free1024 * scale, "free"),
-                ("forward b256 x2", 2 * n * s, free256 * scale, "readout"),
-                ("forward b1024 x2", 2 * n * s, free1024 * scale, "readout"),
-                ("reverse b256 x2", 2 * n * s, fc_s * scale, "readout"),
+                ("full-cache bank", k, fc_s * scale, "free"),
+                ("free b256 x2 policies", 2 * k, free256 * scale, "free"),
+                ("free b1024 x2 policies", 2 * k, free1024 * scale, "free"),
+                ("forward b256 x2 (reads FC traces)", 2 * k, fc_s * scale, "readout"),
+                ("forward b1024 x2 (reads FC traces)", 2 * k, fc_s * scale, "readout"),
+                (
+                    "reverse b256 x2 (reads b256 traces)",
+                    2 * k,
+                    free256 * scale,
+                    "readout",
+                ),
             ]
         )
+        return with_overhead(base, n_cells=6, new_family=new_family)
 
+    ov = c["overhead"]
+
+    def with_overhead(
+        b: dict[str, Any], *, n_cells: int, new_family: tuple[float, float]
+    ) -> dict[str, Any]:
+        """Add job-launch setup per cell x shard and the new-family multiplier
+        (Python selection + host transfers at each prune; unmeasured)."""
+        setup = n_cells * ov["shards_per_cell"] * ov["setup_hours_per_launch"]
+        lo, hi = b["gpu_hours"]
+        b["gpu_hours_core"] = [lo, hi]
+        b["setup_hours"] = round(setup, 1)
+        b["new_family_multiplier"] = list(new_family)
+        b["gpu_hours"] = [
+            round(lo * new_family[0] + setup, 1),
+            round(hi * new_family[1] + setup, 1),
+        ]
+        cap = c["capacity"]["window_hours_per_night"] * c["capacity"]["gpus"]
+        b["nights_at_full_capacity"] = [
+            round(b["gpu_hours"][0] / cap, 1),
+            round(b["gpu_hours"][1] / cap, 1),
+        ]
+        return b
+
+    nf = (ov["new_family_multiplier"]["low"], ov["new_family_multiplier"]["high"])
+    wp5 = with_overhead(
+        block(
+            [
+                ("h2o_style_pp_v1 free", 400, fh2o, "free"),
+                ("h2o_style_pp_v1 forward (reads FC traces)", 400, fcq, "readout"),
+                ("h2o_style_pp_v1 reverse (reads its traces)", 400, fh2o, "readout"),
+                ("uniform_fresh_pp_v1 free", 400, f256, "free"),
+                ("uniform_fresh_pp_v1 forward (reads FC traces)", 400, fcq, "readout"),
+                (
+                    "uniform_fresh_pp_v1 reverse (reads its traces)",
+                    400,
+                    f256,
+                    "readout",
+                ),
+                ("capture x3 policies", 300, cap, "capture"),
+            ]
+        ),
+        n_cells=7,
+        new_family=nf,
+    )
+    q3_1024 = q3free * f1024 / f256
+    campaigns: dict[str, Any] = {"WP5 protected_selector_q7_math_b256_v1": wp5}
+    for n, sd in ((100, 2), (300, 2), (300, 4)):
+        campaigns[f"WP6 qwen3_4b math500 N={n} x {sd} seeds"] = confirm(
+            n, sd, q3fc, q3free, q3_1024, new_family=nf
+        )
+        for tag, sc in (("low", g_lo), ("high", g_hi)):
+            campaigns[f"WP6 q7 gsm8k N={n} x {sd} seeds, {tag}"] = confirm(
+                n, sd, fcq, f256, f1024, sc, new_family=nf
+            )
+    pilot = c["pilot"]
+    pilot_rows = pilot["problems"] * pilot["seeds"] * len(pilot["families"])
     out: dict[str, Any] = {
         "read": "cost estimate for the HELD paper campaigns",
-        "status": "ESTIMATE; nothing here is authorized",
+        "status": "ESTIMATE from measured historical rates plus stated "
+        "assumptions; not a cap; nothing here is authorized",
         "inputs": str(COSTS.relative_to(PROJECT_ROOT)),
-        "assumptions": asum,
-        "campaigns": {
-            "WP5 protected_selector_q7_math_b256_v1": block(
-                [
-                    ("h2o_style_pp_v1 free", 400, fh2o, "free"),
-                    ("h2o_style_pp_v1 forward", 400, fcq, "readout"),
-                    ("h2o_style_pp_v1 reverse", 400, fh2o, "readout"),
-                    ("uniform_fresh_pp_v1 free", 400, f256, "free"),
-                    ("uniform_fresh_pp_v1 forward", 400, fcq, "readout"),
-                    ("uniform_fresh_pp_v1 reverse", 400, f256, "readout"),
-                    ("capture x3 policies", 300, cap, "capture"),
-                ]
-            ),
-            "WP6 confirm_qwen3_4b_math500_v1 (N=100, 2 seeds)": confirm(
-                100, q3fc, q3free, q3free * f1024 / f256
-            ),
-            "WP6 confirm_q7_gsm8k_v1 (N=100, 2 seeds), low": confirm(
-                100, fcq, f256, f1024, g_lo
-            ),
-            "WP6 confirm_q7_gsm8k_v1 (N=100, 2 seeds), high": confirm(
-                100, fcq, f256, f1024, g_hi
-            ),
+        "assumptions": {**asum, "overhead": ov},
+        "conditions_scaling_note": "at fixed stages, conditions scale with "
+        "problems x seeds: 300x4 is 6x the conditions of 100x2 (1200 vs 200 per "
+        "arm), not 3x; no reuse is assumed",
+        "engineering_pilot_proposal": {
+            "purpose": "measure per-row wallclock of the NEW selector families "
+            "(Python selection and host/device transfers at each prune) before "
+            "any campaign is costed for approval",
+            "design": pilot,
+            "rows": pilot_rows * 3,
+            "stages": ["free", "forward", "reverse"],
+            "cap_gpu_hours": pilot["cap_gpu_hours"],
+            "excluded_from_claims": True,
         },
+        "wp4_smoke": c["wp4_smoke"],
+        "campaigns": campaigns,
         "note": "Qwen3 b1024 free cost scaled from Qwen-7B's b1024/b256 ratio "
-        "(assumption). Readout cost uses the source trace's free-run rate x "
-        "[0.6, 1.0]. Storage counts each row once plus token-ID sidecars for "
-        "free runs, times 1.5 reserve.",
+        "(assumption). Readout cost uses the SOURCE trace's free-run rate x "
+        "[0.6, 1.0]. New-family multiplier applies to every row of a campaign "
+        "that uses a new selector (conservative). Storage counts each row once "
+        "plus token-ID sidecars for free runs, times 1.5 reserve.",
     }
     return out
 

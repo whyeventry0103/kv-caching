@@ -88,8 +88,8 @@
   "dependencies": {
     "groups": {
       "analysis_code": {
-        "n_files": 8,
-        "sha256": "f318c1fd65982e22626c9a510ad4f7f641bb34fcc25f8f85521c404c52b3c0a0"
+        "n_files": 9,
+        "sha256": "a4ceae2ec4d6c18a94554620171f7b57cae5340fe5210c30115060448a11bab5"
       },
       "full_cache_bank": {
         "n_files": 8,
@@ -124,7 +124,7 @@
         "sha256": "2e1a247312ab4b318b50e74b82c6f2fbd102fc86c9a527c1c869260297a68746"
       }
     },
-    "sha256": "ad670247238f9f0b1c1aea51d01cf216ce7fae4a66f28fb59cb95b1ce4f69644"
+    "sha256": "e53985ff4eff78c202319bbe23b391b81635433273bd23a2ab076fba6cd00bb6"
   },
   "design": {
     "n_problems": 100,
@@ -4331,6 +4331,16 @@
     }
   },
   "population": {
+    "full_cache": {
+      "duplicated": [],
+      "malformed": {},
+      "missing": [],
+      "n_expected": 400,
+      "n_rows": 400,
+      "n_unique_expected_present": 400,
+      "status": "COMPLETE",
+      "unexpected": []
+    },
     "grid_base": {
       "duplicated": [],
       "malformed": {},

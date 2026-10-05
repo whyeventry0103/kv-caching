@@ -24,6 +24,25 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-10-05 ~20:00 Dubai — review of fbf869f: bounded repair applied.**
+
+  **R1, readers.** Values are now checked before `bool()`, in both `report_protocol_audit` and `report_s`. `matched` validates accuracy rows against the frozen design and carries a fingerprint. Host re-read: **0 numeric changes** in five reads.
+
+  **R2, secondary grader v2.** Positive unordered wording is now required, and the multi-box check reads the whole suffix. 0 rows changed in either bank. Review sheet: `human_review_v2.tsv` (42 rows).
+
+  **R3, planning.**
+  - Readouts are priced at their source trace; seeds are parameterised.
+  - The interaction is an endpoint: about 470/660 problems for ±0.025.
+  - 300×4 is 6× the conditions of 100×2.
+
+  **R4, sign table.** Fixed.
+
+  **Interpretation.** The difference of protection improvements is +0.078 [+0.007, +0.149] for Random and −0.007 [−0.081, +0.069] for StreamingLLM. "Mainly forward" is retired.
+
+  **Prepared and HELD.** WP4 runner adapters, provenance family, the B=1024 reverse config (P1, ~12–19 GPU-h), and a GSM8K adapter plus revision proposal (`740312a`, human pin).
+
+  **NEXT.** Normal window: grid-pp1024, then readout-pp1024. Then `report_s.py protection --budget 1024`, `consequence`, and the margins read. Owner decisions are listed in `docs/paper/EXECUTION_STATUS.md`.
+
   **★★★★★ 2026-10-05 12:00 Dubai — execution plan v1.0 adopted
   (`docs/paper/EXECUTION_PLAN.md`); WP0–WP3 done, WP4 code ready, WP5/WP6 held.**
   Status table: `docs/paper/EXECUTION_STATUS.md`; claims: `CLAIM_LEDGER.md`.

@@ -1,0 +1,21 @@
+name: readout_math500_protsel256_wp5
+stage: replay
+mode: readout
+# Execution plan WP5 (PROPOSED, HELD 2026-10-05): forward readout of the
+# full-cache reference traces under the protected-selector families, budget
+# 256. Runs through scripts/run_replay_protected.py (same held/smoke refusal).
+protected_selector: true
+held: true
+reference_run_name: math500-fc-powered-merged
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+subset:
+  math500: 100
+presses: [h2o_style_pp_v1, uniform_fresh_pp_v1]
+budgets: [256]
+seeds: [11, 23, 47, 89]
+compression_interval: 64
+max_answer_tokens: 2048
+estimated_generation_count: 0
+estimated_replay_count: 800
+scale_authorized: false

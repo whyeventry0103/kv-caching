@@ -6,6 +6,11 @@
     "closed_with_answer": 187,
     "truncated_no_answer": 4
   },
+  "changes_vs_previous": {
+    "n_changed": 0,
+    "previous": "bank_audit_qwen3_4b_v1.conditions.tsv",
+    "rows": []
+  },
   "coverage": {
     "duplicates": [],
     "missing": [],
@@ -31,8 +36,8 @@
     "unclosed thinking": 11,
     "wrong value or other": 4
   },
-  "reproduce": "python scripts/audit_qwen_scoring.py --runs-root /home/sk10741/kvcache-storage/runs --bank qwen3_4b",
-  "retired_previous_output": "bank_audit_qwen3_4b.json.superseded-1791185346",
+  "reproduce": "python scripts/audit_qwen_scoring.py --runs-root /home/sk10741/kvcache-storage/runs --bank qwen3_4b --previous results/diag/qwen_scoring/bank_audit_qwen3_4b_v1.conditions.tsv",
+  "retired_previous_output": "bank_audit_qwen3_4b.json.superseded-1791214953",
   "run": "fc-qwen3-4b",
   "secondary_SENSITIVITY": {
     "bounds_accuracy": [
@@ -43,7 +48,7 @@
     "note": "ambiguous rows keep their primary score in the point estimate; bounds score all of them incorrect / correct. Not a gate input: the registered gate is read on the primary score only.",
     "point_accuracy": 0.905,
     "point_correct": 181,
-    "version": "format-aware-v1"
+    "version": "format-aware-v2"
   },
   "status": "FINAL",
   "sufficient_statistics_sha256": "0d9f183127285023d2f934e99bc420e5aae2dcd9b1840dd7d34a62f13e302dc5",

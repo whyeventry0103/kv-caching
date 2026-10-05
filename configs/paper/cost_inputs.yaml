@@ -22,3 +22,16 @@ capacity:
   window_hours_per_night: 9.0      # 01:45-10:43 Dubai
   gpus: 2
   note: "upper bound; model load, gates and gaps are not subtracted"
+overhead:
+  setup_hours_per_launch: 0.1      # ASSUMPTION: process start, model load, gates; logs show ~3 s of shard loading alone
+  shards_per_cell: 2               # one job per GPU per cell (seed-sharded)
+  new_family_multiplier: {low: 1.0, high: 1.5, note: "ASSUMPTION until the pilot: per-prune Python selection and host/device copies"}
+wp4_smoke:
+  design: "3 traces (longest / median / shortest prompt) x 3 families x (1 free run + 1 forward readout), plus the h2o_style_pp_v1 identity control"
+  rows: 21
+  cap_gpu_hours: 2.0
+pilot:
+  problems: 8                      # fixed engineering pilot, excluded from every claim
+  seeds: 1
+  families: [h2o_style_pp_v1, uniform_fresh_pp_v1]
+  cap_gpu_hours: 6.0

@@ -4325,3 +4325,16 @@ its artifact and in `docs/paper/CLAIM_LEDGER.md`.
   `configs/paper/`. Each needs its own dated registration with frozen N,
   seeds, margins, multiplicity and stopping rule before any row exists.
 
+## Execution-plan analyses, review repairs (2026-10-05, evening): readers and secondary grader v2
+
+These follow the independent review of fbf869f. No registered analysis, estimator or label changed.
+- **Readers.** `report_protocol_audit.py` and `report_s.py` (protection, origin) check values before conversion (`kvcache.read_checks`). Each read was re-run; numbers are unchanged.
+- **New descriptive contrast.** "Difference of protection improvements" (forward − reverse, paired), labelled SENSITIVITY.
+- **Secondary Qwen scoring v2** (post-inspection): positive unordered semantics required; whole-suffix multi-box check. Primary grader, 0.845 and the gate FAIL unchanged.
+- **Prepared and HELD, not registered:**
+  - protected-selector runner adapters and family `protected_selectors`;
+  - B=1024 reverse readout design (`reverse_readout_pp1024_s1x.yaml`);
+  - GSM8K adapter. The revision stays unpinned and needs a human.
+
+Each needs its own dated registration before any row exists.
+

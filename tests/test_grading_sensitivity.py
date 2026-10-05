@@ -45,7 +45,9 @@ def test_unordered_only_when_the_problem_asks_for_an_unordered_list():
     r = _row(trace, "1,-2", problem=ASK_ALL)
     assert (r["secondary_verdict"], r["secondary_rule"]) == (True, "UNORDERED_LIST")
     assert _row(trace, "1,-2", problem=ASK_ORDERED)["secondary_verdict"] is False
-    assert _row(trace, "1,-2", problem="Compute x and y.")["secondary_verdict"] is False
+    # v2: no positive unordered wording -> ambiguous, never a rescue
+    r = _row(trace, "1,-2", problem="Compute x and y.")
+    assert (r["secondary_verdict"], r["secondary_rule"]) == (None, "ORDER_UNCERTAIN")
     # a tuple keeps its order even when the problem says "all"
     r = _row("<think>..</think> \\boxed{(2, 1)}", "(1,2)", problem=ASK_ALL)
     assert r["secondary_verdict"] is False
@@ -104,3 +106,44 @@ def test_unordered_wording_is_not_read_as_ordered():
     ask = "Enter all the solutions, separated by commas, in any (unordered) form."
     r = _row("<think>..</think> \\boxed{-2, 1}", "1,-2", problem=ask)
     assert r["secondary_verdict"] is True
+
+
+# ---------------------------------------------- v2 (review of fbf869f, R2)
+@pytest.mark.parametrize(
+    "problem",
+    [
+        "Find x and y, separated by commas.",
+        "Give the coordinates x,y separated by commas.",
+        "Give the numerator and denominator separated by commas.",
+    ],
+)
+def test_v2_commas_alone_never_make_order_irrelevant(problem):
+    verdict, rule = gs.secondary_equiv("1,2", "2,1", problem_text=problem)
+    assert verdict is not True
+    if "coordinates" in problem or "numerator" in problem:
+        assert (verdict, rule) == (False, "ORDER_REQUIRED")
+    else:
+        assert (verdict, rule) == (None, "ORDER_UNCERTAIN")
+
+
+def test_v2_positive_unordered_wording_still_rescues():
+    verdict, rule = gs.secondary_equiv(
+        "1,-2", "-2, 1", problem_text="Find all integers n. Enter all the solutions."
+    )
+    assert (verdict, rule) == (True, "UNORDERED_LIST")
+
+
+def test_v2_later_correction_blocks_the_multibox_rescue():
+    trace = (
+        "<think>x</think> \\boxed{3}, \\boxed{5}, \\boxed{7}.\n\n"
+        "Actually that list was a mistake. Final answer: 11."
+    )
+    assert gs.secondary_extract(trace) == (None, "MULTIBOX_NOT_TERMINAL")
+    r = _row(trace, "3, 5, 7", problem=ASK_ALL, primary=False)
+    assert r["secondary_verdict"] is None
+    assert r["transition"] == "AMBIGUOUS" and r["secondary_point"] is False
+
+
+def test_v2_terminal_block_with_only_delimiters_after_it_is_still_joined():
+    trace = "<think>x</think> $$ \\boxed{3}, \\boxed{5}, \\boxed{7} $$\n"
+    assert gs.secondary_extract(trace) == ("3, 5, 7", "TERMINAL_BOX_BLOCK")

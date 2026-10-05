@@ -27,6 +27,15 @@ Three questions are kept separate, as the execution plan (Section 8) requires:
    AMBIGUOUS (``BASE_SUBSCRIPT``): whether the bare numeral answers the
    question is a semantic judgement this rule list does not make.
 
+v2 (2026-10-05, after the independent review of fbf869f; still a
+post-inspection sensitivity): order-insensitive matching needs POSITIVE
+unordered wording ("all solutions/values/roots...", "enter all"); ordered-role
+wording (coordinates, numerator/denominator, respectively, in the form...)
+makes a reordered list incorrect (``ORDER_REQUIRED``); neither makes it
+AMBIGUOUS (``ORDER_UNCERTAIN``). A multi-box block followed by ANY further
+text in the final region is AMBIGUOUS (``MULTIBOX_NOT_TERMINAL``), because a
+later paragraph can retract it.
+
 Ambiguous rows keep their primary score in the point estimate and are reported
 as sensitivity bounds (all ambiguous incorrect / all correct). No rule looks at
 the gold to decide how to extract, and no per-problem exception exists.
@@ -41,7 +50,7 @@ from kvcache.canonicalize import extract_answer
 from kvcache.generation import has_answer_marker
 from kvcache.grading import is_equiv
 
-SECONDARY_VERSION = "format-aware-v1"
+SECONDARY_VERSION = "format-aware-v2"
 THINK_CLOSE = "</think>"
 
 _BOX = r"\boxed{"
@@ -54,13 +63,19 @@ _SEPARATOR = re.compile(
 )
 # Trailing text allowed after the last box of the region (closing delimiters).
 _TAIL = re.compile(r"^(?:\s|\$|\\\)|\\\]|\.|!)*$")
+# v2 (review of fbf869f, R2): POSITIVE unordered semantics only. "separated
+# by commas" alone says nothing about order (x and y, coordinates, numerator
+# and denominator are ordered roles listed with commas).
 _UNORDERED_ASK = re.compile(
-    r"separated by commas|all (?:the )?(?:possible |real |integer |complex )?"
-    r"(?:solutions|values|roots|zeros|numbers|integers)|enter all",
+    r"\ball (?:of )?(?:the )?(?:possible |real |integer |integral |complex "
+    r"|distinct )?(?:solutions|values|roots|zeros|numbers|integers|answers)\b"
+    r"|\benter all\b|\blist all\b",
     re.I,
 )
 _ORDERED_ASK = re.compile(
-    r"in order|\bordered|increasing|decreasing|from (?:least|smallest)", re.I
+    r"in order|\bordered|increasing|decreasing|from (?:least|smallest)"
+    r"|coordinate|numerator|denominator|respectively|in that order|in the form",
+    re.I,
 )
 _BASE_SUB = re.compile(r"^(.*?)_\{?(\d+)\}?$")
 
@@ -112,8 +127,11 @@ def secondary_extract(trace: str) -> tuple[str | None, str]:
         block.insert(0, prev)
     if len(block) == 1:
         return block[0][2], "LAST_BOX"
-    if not _TAIL.match(region[block[-1][1] :].split("\n\n")[0]):
-        return block[-1][2], "LAST_BOX"
+    # v2: the WHOLE remaining region must be closing delimiters; a later
+    # paragraph (e.g. a correction) makes the multi-box reading ambiguous
+    # rather than falling back to a confident pick.
+    if not _TAIL.match(region[block[-1][1] :]):
+        return None, "MULTIBOX_NOT_TERMINAL"
     return ", ".join(b[2] for b in block), "TERMINAL_BOX_BLOCK"
 
 
@@ -165,14 +183,12 @@ def secondary_equiv(
     if g.strip().lower() == p.strip().lower() and g.strip() and g.isalpha():
         return True, "TEXT_WRAPPER"
     gl, pl = _bare_list(g), _bare_list(p)
-    if (
-        gl is not None
-        and pl is not None
-        and _UNORDERED_ASK.search(problem_text)
-        and not _ORDERED_ASK.search(problem_text)
-        and _multiset_equiv(gl, pl)
-    ):
-        return True, "UNORDERED_LIST"
+    if gl is not None and pl is not None and _multiset_equiv(gl, pl):
+        if _ORDERED_ASK.search(problem_text):
+            return False, "ORDER_REQUIRED"
+        if _UNORDERED_ASK.search(problem_text):
+            return True, "UNORDERED_LIST"
+        return None, "ORDER_UNCERTAIN"
     m = _BASE_SUB.match(g.replace(" ", ""))
     if m and is_equiv(m.group(1), p):
         return None, "BASE_SUBSCRIPT"
@@ -188,6 +204,8 @@ def score_row(
     answer, extraction = secondary_extract(trace)
     if status == "answer_inside_unclosed_thinking":
         verdict, rule = None, "UNCLOSED_THINKING"
+    elif extraction == "MULTIBOX_NOT_TERMINAL":
+        verdict, rule = None, extraction
     elif answer is None:
         verdict, rule = False, extraction
     else:

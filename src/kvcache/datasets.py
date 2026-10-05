@@ -129,6 +129,53 @@ def _aime_problems(
     ]
 
 
+def gsm8k_gold(solution: str) -> str:
+    """The number after GSM8K's ``####`` marker, thousands separators removed.
+
+    Raises when the marker is absent or the remainder is not a number: a
+    malformed gold must stop the load, never become an empty string.
+    """
+    if "####" not in solution:
+        raise ValueError("GSM8K solution without a #### answer marker")
+    gold = solution.rsplit("####", 1)[1].strip().replace(",", "")
+    try:
+        float(gold)
+    except ValueError:
+        raise ValueError(f"GSM8K gold is not numeric: {gold!r}") from None
+    return gold
+
+
+def _gsm8k_problems(
+    dataset: Any, subset: int | dict[str, Any] | None, *, name: str = "gsm8k"
+) -> list[Problem]:
+    """GSM8K rows (openai/gsm8k ``main`` schema: question/answer).
+
+    Prepared 2026-10-05 for the held WP6 task-transfer design; loading still
+    requires a human-pinned revision (``load_dataset_guarded`` refuses
+    otherwise). pids are the split index. ``subset`` as an int takes the first
+    n rows (engineering pilot only); as {"count", "seed"} it draws a fixed
+    seeded sample without replacement, frozen before any outcome exists.
+    """
+    rows = list(dataset)
+    idx = list(range(len(rows)))
+    if isinstance(subset, dict):
+        import random
+
+        count = min(int(subset["count"]), len(rows))
+        idx = sorted(random.Random(int(subset["seed"])).sample(idx, count))
+    elif isinstance(subset, int):
+        idx = idx[: min(subset, len(rows))]
+    return [
+        Problem(
+            pid=f"{name}/test/{i}",
+            question=str(rows[i]["question"]),
+            gold_answer=gsm8k_gold(str(rows[i]["answer"])),
+            meta={"gold_canon": canonicalize(gsm8k_gold(str(rows[i]["answer"])))},
+        )
+        for i in idx
+    ]
+
+
 def _rsp_problems(subset: int | None) -> list[Problem]:
     count = subset or 3
     problems = []
@@ -153,12 +200,12 @@ def load_benchmark(
     subset: int | dict[str, Any] | None = None,
     allow_download: bool = False,
 ) -> list[Problem]:
-    """Load the implemented benchmarks: MATH-500, AIME-24, and synthetic RSP."""
+    """Load the implemented benchmarks: MATH-500, AIME-24, GSM8K and synthetic RSP."""
     if name == "rsp":
         if isinstance(subset, dict):
             subset = int(subset["count"])
         return _rsp_problems(subset)
-    if name not in {"math500", "aime24"}:
+    if name not in {"math500", "aime24", "gsm8k"}:
         raise NotImplementedError(f"benchmark not implemented for pilot: {name}")
     dataset = load_dataset_guarded(
         str(benchmark_cfg["handle"]),
@@ -169,4 +216,6 @@ def load_benchmark(
     )
     if name == "aime24":
         return _aime_problems(dataset, subset, name=name)
+    if name == "gsm8k":
+        return _gsm8k_problems(dataset, subset, name=name)
     return _math500_problems(dataset, subset)

@@ -10,10 +10,10 @@
 
 | Piece | Path |
 |---|---|
-| Rules | `src/kvcache/grading_sensitivity.py` (`SECONDARY_VERSION = "format-aware-v1"`) |
+| Rules | `src/kvcache/grading_sensitivity.py` (`SECONDARY_VERSION = "format-aware-v2"` since the review of fbf869f; v1 described in §2, changes in §5) |
 | Tests | `tests/test_grading_sensitivity.py`: a positive and an adversarial negative per rule, both transition directions |
 | Audit runner | `scripts/audit_qwen_scoring.py --runs-root <runs> --bank {qwen3_4b,r1_qwen7b}` |
-| Outputs | `results/diag/qwen_scoring/bank_audit_{bank}.json` and `.conditions.tsv` |
+| Outputs | `results/diag/qwen_scoring/bank_audit_{bank}.json` and `.conditions.tsv` (v2); `bank_audit_{bank}_v1.*` (v1) |
 
 Each TSV row has:
 - the stored and recomputed primary score;
@@ -23,7 +23,7 @@ Each TSV row has:
 - the trace sha256;
 - the last 400 characters of the trace, enough to check the score without the server.
 
-## 2. Rules (fixed list, applied identically to every row of every compared arm)
+## 2. Rules, v1 (fixed list, applied identically to every row of every compared arm; superseded in two places by §5)
 
 Three questions are kept separate.
 
@@ -56,7 +56,7 @@ An answer that appears only inside unclosed `<think>` is never treated as final.
 
 **Ambiguous rows.**
 - In the point estimate they keep their primary score.
-- They are reported as bounds: all ambiguous incorrect / all ambiguous correct.
+- They are reported as an ambiguity range: all ambiguous incorrect / all ambiguous correct. This is not a confidence interval.
 
 **Not added, on purpose.**
 - Symbolic or numeric equivalence beyond `is_equiv`: `crosscheck_equiv` exists but has documented false negatives on structured answers.
@@ -65,7 +65,7 @@ An answer that appears only inside unclosed `<think>` is never treated as final.
 
 ## 3. Results (FINAL; `reproduce` lines are inside each JSON)
 
-| Bank | Primary (frozen) | Recompute mismatches | Secondary point | Bounds | Ambiguous | Correct→incorrect |
+| Bank | Primary (frozen) | Recompute mismatches | Secondary point (v1; v2 identical, §5) | Ambiguity range (not a CI) | Ambiguous | Correct→incorrect |
 |---|---|---|---|---|---|---|
 | Qwen3-4B, 50 problems × 4 seeds | 169/200 = **0.845, gate FAIL** | 0 | 181/200 = 0.905 | [0.900, 0.960] | 12 (8 unclosed thinking, 4 base subscript) | 0 |
 | Qwen-7B R1-Distill anchor, grid100 × 4 seeds | 354/400 = 0.885 (in band) | 0 | 368/400 = 0.920 | [0.920, 0.930] | 4 (2 + 2) | 0 |
@@ -109,3 +109,34 @@ Either way:
 - The anchor comparison uses the same grader on both sides.
 
 Until the owner chooses, the Qwen3 cells may keep generating (already authorized). Nothing dependent on them is read.
+
+## 5. Version 2 (2026-10-05, after the independent review of fbf869f)
+
+v2 is still a post-inspection sensitivity. The primary grader, 169/200 and the gate FAIL are unchanged.
+
+**Two holes in v1, found by the review:**
+1. *Commas were read as unordered.* v1 treated "separated by commas" as evidence that order does not matter. But x and y, coordinates, and numerator/denominator are ordered roles listed with commas.
+2. *Later corrections were ignored.* v1's multi-box guard read only up to the first blank line, so a later paragraph that corrected the boxes was missed.
+
+**v2 rules:**
+- `UNORDERED_LIST` needs POSITIVE unordered wording: "all solutions/values/roots/zeros/numbers/integers/answers", "enter all", "list all".
+- Ordered-role wording makes a reordered list incorrect (`ORDER_REQUIRED`): in order, ordered, increasing, decreasing, coordinate, numerator, denominator, respectively, in that order, in the form.
+- With neither kind of wording, the row is ambiguous (`ORDER_UNCERTAIN`).
+- A multi-box block counts as the answer only if nothing but closing delimiters follows it in the WHOLE final region. Otherwise the row is ambiguous (`MULTIBOX_NOT_TERMINAL`), never a confident fallback.
+
+**Tests.** `tests/test_grading_sensitivity.py` covers the reviewer's cases verbatim (x/y, coordinates, numerator/denominator, the later "Actually … 11" correction). On the v1 code 5 tests fail; on v2 all 19 pass.
+
+**Rescore (both banks, on the host, `--previous` = the v1 table).**
+
+| Bank | Frozen grader | v2 point | Ambiguity range (not a CI) | Rows changed vs v1 |
+|---|---|---|---|---|
+| Qwen3-4B | 169/200 = 0.845, FAIL | 181/200 = 0.905 | [0.900, 0.960] | **0** |
+| Qwen-7B anchor | 354/400 = 0.885 | 368/400 = 0.920 | [0.920, 0.930] | **0** |
+
+Neither hole touched these banks. They mattered for future outputs.
+
+**Artifacts.** The v1 artifacts are kept as `bank_audit_*_v1.*`. v2 is `bank_audit_*.json`, which carries `changes_vs_previous`.
+
+**Human review sheet.** `results/diag/qwen_scoring/human_review_v2.tsv` lists every rescued or ambiguous row of both banks: 42 rows (Qwen3: 12 rescued, 12 ambiguous; anchor: 14 rescued, 4 ambiguous). Each row has its gold, both answers, the rule, the trace hash and the trace tail, plus blank reviewer columns. Secondary scores support substantive claims only after a person fills it in.
+
+**Gate disposition.** Unchanged and still the owner's decision (§4). The independent review also recommends option (a), recorded as a documented exception, not a passed gate.

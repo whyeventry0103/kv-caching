@@ -1076,6 +1076,16 @@
       "context": "and from $-0.338$ to $-0.078$ (StreamingLLM",
       "literal": "0.338",
       "key": "s1.b256.streamingllm_pp.residual_base.mean"
+    },
+    {
+      "context": "(interaction $+0.130$ for Random",
+      "literal": "0.130",
+      "key": "audit.b256.random_pp.common.interaction.mean"
+    },
+    {
+      "context": "and $+0.127$ for StreamingLLM on their common",
+      "literal": "0.127",
+      "key": "audit.b256.streamingllm_pp.common.interaction.mean"
     }
   ]
 }

@@ -192,3 +192,40 @@ def test_protection_by_direction_pairs_on_the_four_arm_support():
     assert out["residual_forward"]["ratio"] is None
     with pytest.raises(ValueError, match="all four arms"):
         pa.protection_by_direction(prot, {**base, "cf": {}}, n_resamples=10)
+
+
+@pytest.mark.parametrize(
+    "acc,met,want",
+    [
+        (1, 1, "MISMATCH ESTABLISHED (first policy: higher accuracy, more loss)"),
+        (-1, -1, "MISMATCH ESTABLISHED (first policy: lower accuracy, less loss)"),
+        (1, -1, "ALIGNED ESTABLISHED (first policy: higher accuracy, less loss)"),
+        (-1, 1, "ALIGNED ESTABLISHED (first policy: lower accuracy, more loss)"),
+        (0, 1, "NOT ESTABLISHED"),
+        (1, 0, "NOT ESTABLISHED"),
+    ],
+)
+def test_joint_label_all_sign_quadrants(acc, met, want):
+    assert pa.joint_label(acc_sign=acc, met_sign=met) == want
+
+
+def test_policy_contrasts_label_is_invariant_to_pair_order():
+    keys = _keys(40)
+    acc = {"a": {k: 1.0 for k in keys}, "b": {k: 0.0 for k in keys}}
+    loss = {"a": {k: 0.9 for k in keys}, "b": {k: 0.1 for k in keys}}
+    ab = pa.policy_contrasts(acc, loss, [("a", "b")], n_resamples=100)["a - b"]
+    ba = pa.policy_contrasts(acc, loss, [("b", "a")], n_resamples=100)["b - a"]
+    assert ab["joint"].startswith("MISMATCH") and ba["joint"].startswith("MISMATCH")
+
+
+def test_difference_of_improvements_by_hand():
+    keys = _keys(3)
+    one = {k: True for k in keys}
+    zero = {k: False for k in keys}
+    # base: FF 1, FC 0, CC 0, CF 0 -> fwd residual 0, reverse traj -1
+    base = {"ff": one, "fc": zero, "cc": zero, "cf": zero}
+    # protected: FF 1, FC 1, CC 1, CF 1 -> fwd 0, rev 0
+    prot = {"ff": one, "fc": one, "cc": one, "cf": one}
+    out = pa.protection_by_direction(prot, base, n_resamples=50)
+    # fwd improvement 0 - 0 = 0; rev improvement 0 - (-1) = 1 -> difference -1
+    assert out["difference_of_improvements"]["mean"] == pytest.approx(-1.0)

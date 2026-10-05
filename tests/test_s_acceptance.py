@@ -965,3 +965,18 @@ def test_review3_m_event_and_shapes_fail_closed(tmp_path, mutate, needle):
     assert d["status"] == "INVALID" and d["H3"]["label"].startswith("WITHHELD")
     malformed = d["validation"]["population"]["malformed"]
     assert any(needle in p for ps in malformed.values() for p in ps), malformed
+
+
+@pytest.mark.parametrize("value", ["False", float("nan")], ids=["str", "nan"])
+def test_fbf869f_r1_non_bool_correct_makes_protection_invalid(tmp_path, value):
+    """Review of fbf869f, R1 (applied to the S.1 reader too): bool("False") and
+    bool(nan) are True, so these rows used to read FINAL with a raised accuracy."""
+    runs = s1_fixture(tmp_path)
+    path = runs / "grid-pp256/math500/m/rows.jsonl"
+    rows = _rows_of(path)
+    rows[3]["correct"] = value
+    path.write_text("".join(json.dumps(r) + "\n" for r in rows))
+    code, log = _run(runs, tmp_path / "out", "protection", "--budget", "256")
+    assert code == 2, log
+    d = json.loads((tmp_path / "out/protection_b256.json").read_text())
+    assert d["status"] == "INVALID"

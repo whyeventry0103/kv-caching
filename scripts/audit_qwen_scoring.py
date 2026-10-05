@@ -192,12 +192,45 @@ def audit(runs: Path, bank: str) -> tuple[dict[str, Any], list[list[Any]]]:
     return summary, tsv
 
 
+def _diff(old_tsv: Path, new_tsv: Path) -> dict[str, Any]:
+    """Rows whose secondary verdict or rule differ between two versions."""
+
+    def load(p: Path) -> dict[tuple[str, str], dict[str, str]]:
+        with p.open(encoding="utf-8") as fh:
+            return {
+                (r["pid"], r["seed"]): r for r in csv.DictReader(fh, delimiter="\t")
+            }
+
+    old, new = load(old_tsv), load(new_tsv)
+    if set(old) != set(new):
+        raise SystemExit("REFUSED: the previous table covers different rows")
+    fields = ("secondary_verdict", "secondary_rule", "transition")
+    changed = [
+        {
+            "pid": k[0],
+            "seed": k[1],
+            **{f"{f}_old": old[k][f] for f in fields},
+            **{f"{f}_new": new[k][f] for f in fields},
+        }
+        for k in sorted(old)
+        if any(old[k][f] != new[k][f] for f in fields)
+    ]
+    return {"previous": old_tsv.name, "n_changed": len(changed), "rows": changed}
+
+
 def main() -> int:
     global OUT
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--runs-root", type=Path, required=True)
     ap.add_argument("--bank", choices=sorted(BANKS), required=True)
     ap.add_argument("--out-dir", type=Path, default=OUT)
+    ap.add_argument(
+        "--previous",
+        type=Path,
+        default=None,
+        help="an earlier version's conditions.tsv: record every row whose "
+        "secondary verdict or rule changed (version-to-version transition diff)",
+    )
     ap.add_argument("--dry-run", action="store_true")
     a = ap.parse_args()
     OUT = a.out_dir
@@ -238,6 +271,8 @@ def main() -> int:
                 ]
             )
             w.writerows(tsv)
+        if a.previous is not None:
+            summary["changes_vs_previous"] = _diff(a.previous, path)
         summary["sufficient_statistics_tsv"] = path.name
         summary["sufficient_statistics_sha256"] = hashlib.sha256(
             path.read_bytes()

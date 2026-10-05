@@ -130,6 +130,53 @@ def select_keep(
     return sorted(kept, key=lambda i: positions[i])
 
 
+SMOKE_MARKER = "protected-selectors-smoke-PASS.json"
+
+
+def require_protected_config(
+    config: dict[str, Any],
+    *,
+    dry_run: bool,
+    runs_root: Any = None,
+    replay: bool = False,
+) -> None:
+    """Refuse a config that is not a protected-selector cell, and refuse REAL
+    execution while the config is held or before the smoke gate has passed.
+
+    The families are outside ``kvcache.presses``'s eligibility tiers, so this is
+    their promotion mechanism: a PASS marker written by the (not yet run)
+    real-generation smoke, plus a config whose ``held`` flag was removed by an
+    authorized registration. Dry runs are always allowed.
+    """
+    from pathlib import Path
+
+    if config.get("protected_selector") is not True:
+        raise SystemExit("REFUSED: config must set protected_selector: true")
+    for name in config["presses"]:
+        try:
+            family(str(name))
+        except KeyError as exc:
+            raise SystemExit(f"REFUSED: {exc.args[0]}") from None
+    for key in ("compression_start_step", "matched_ratio", "restoration"):
+        if key in config:
+            raise SystemExit(f"REFUSED: {key} is not registered for these cells")
+    if replay and config.get("mode") != "readout":
+        raise SystemExit("REFUSED: protected-selector replay is registered for readout")
+    if dry_run:
+        return
+    if config.get("held", True):
+        raise SystemExit(
+            "REFUSED: config is HELD (not authorized); remove `held` only with a "
+            "dated registration and an approved budget"
+        )
+    root = Path(runs_root) if runs_root is not None else None
+    if root is None or not (root / SMOKE_MARKER).exists():
+        raise SystemExit(
+            f"REFUSED: {SMOKE_MARKER} is absent; the real-generation smoke must "
+            "pass before any analysis row"
+        )
+
+
 def build_protected_selector_press(
     name: str,
     *,
