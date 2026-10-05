@@ -1,0 +1,473 @@
+{
+  "accuracy_by_policy": {
+    "h2o": {
+      "ci95": [
+        0.08,
+        0.3
+      ],
+      "estimator": "equal-problem (seeds within problem, then problems)",
+      "mean": 0.18,
+      "n_problems": 25,
+      "n_resamples": 2000,
+      "n_values": 100,
+      "seed": 0,
+      "seeds_per_problem": {
+        "test/algebra/1098.json": 4,
+        "test/algebra/1349.json": 4,
+        "test/algebra/1837.json": 4,
+        "test/algebra/2036.json": 4,
+        "test/algebra/2193.json": 4,
+        "test/algebra/2427.json": 4,
+        "test/algebra/2584.json": 4,
+        "test/geometry/248.json": 4,
+        "test/geometry/434.json": 4,
+        "test/intermediate_algebra/1000.json": 4,
+        "test/intermediate_algebra/1197.json": 4,
+        "test/intermediate_algebra/134.json": 4,
+        "test/intermediate_algebra/1994.json": 4,
+        "test/intermediate_algebra/607.json": 4,
+        "test/number_theory/1032.json": 4,
+        "test/number_theory/515.json": 4,
+        "test/number_theory/572.json": 4,
+        "test/number_theory/737.json": 4,
+        "test/prealgebra/1139.json": 4,
+        "test/prealgebra/1622.json": 4,
+        "test/precalculus/1199.json": 4,
+        "test/precalculus/1303.json": 4,
+        "test/precalculus/807.json": 4,
+        "test/precalculus/927.json": 4,
+        "test/precalculus/990.json": 4
+      }
+    },
+    "random": {
+      "ci95": [
+        0.22,
+        0.54
+      ],
+      "estimator": "equal-problem (seeds within problem, then problems)",
+      "mean": 0.37,
+      "n_problems": 25,
+      "n_resamples": 2000,
+      "n_values": 100,
+      "seed": 0,
+      "seeds_per_problem": {
+        "test/algebra/1098.json": 4,
+        "test/algebra/1349.json": 4,
+        "test/algebra/1837.json": 4,
+        "test/algebra/2036.json": 4,
+        "test/algebra/2193.json": 4,
+        "test/algebra/2427.json": 4,
+        "test/algebra/2584.json": 4,
+        "test/geometry/248.json": 4,
+        "test/geometry/434.json": 4,
+        "test/intermediate_algebra/1000.json": 4,
+        "test/intermediate_algebra/1197.json": 4,
+        "test/intermediate_algebra/134.json": 4,
+        "test/intermediate_algebra/1994.json": 4,
+        "test/intermediate_algebra/607.json": 4,
+        "test/number_theory/1032.json": 4,
+        "test/number_theory/515.json": 4,
+        "test/number_theory/572.json": 4,
+        "test/number_theory/737.json": 4,
+        "test/prealgebra/1139.json": 4,
+        "test/prealgebra/1622.json": 4,
+        "test/precalculus/1199.json": 4,
+        "test/precalculus/1303.json": 4,
+        "test/precalculus/807.json": 4,
+        "test/precalculus/927.json": 4,
+        "test/precalculus/990.json": 4
+      }
+    },
+    "rkv": {
+      "ci95": [
+        0.21,
+        0.56
+      ],
+      "estimator": "equal-problem (seeds within problem, then problems)",
+      "mean": 0.37,
+      "n_problems": 25,
+      "n_resamples": 2000,
+      "n_values": 100,
+      "seed": 0,
+      "seeds_per_problem": {
+        "test/algebra/1098.json": 4,
+        "test/algebra/1349.json": 4,
+        "test/algebra/1837.json": 4,
+        "test/algebra/2036.json": 4,
+        "test/algebra/2193.json": 4,
+        "test/algebra/2427.json": 4,
+        "test/algebra/2584.json": 4,
+        "test/geometry/248.json": 4,
+        "test/geometry/434.json": 4,
+        "test/intermediate_algebra/1000.json": 4,
+        "test/intermediate_algebra/1197.json": 4,
+        "test/intermediate_algebra/134.json": 4,
+        "test/intermediate_algebra/1994.json": 4,
+        "test/intermediate_algebra/607.json": 4,
+        "test/number_theory/1032.json": 4,
+        "test/number_theory/515.json": 4,
+        "test/number_theory/572.json": 4,
+        "test/number_theory/737.json": 4,
+        "test/prealgebra/1139.json": 4,
+        "test/prealgebra/1622.json": 4,
+        "test/precalculus/1199.json": 4,
+        "test/precalculus/1303.json": 4,
+        "test/precalculus/807.json": 4,
+        "test/precalculus/927.json": 4,
+        "test/precalculus/990.json": 4
+      }
+    },
+    "streamingllm": {
+      "ci95": [
+        0.12,
+        0.4
+      ],
+      "estimator": "equal-problem (seeds within problem, then problems)",
+      "mean": 0.25,
+      "n_problems": 25,
+      "n_resamples": 2000,
+      "n_values": 100,
+      "seed": 0,
+      "seeds_per_problem": {
+        "test/algebra/1098.json": 4,
+        "test/algebra/1349.json": 4,
+        "test/algebra/1837.json": 4,
+        "test/algebra/2036.json": 4,
+        "test/algebra/2193.json": 4,
+        "test/algebra/2427.json": 4,
+        "test/algebra/2584.json": 4,
+        "test/geometry/248.json": 4,
+        "test/geometry/434.json": 4,
+        "test/intermediate_algebra/1000.json": 4,
+        "test/intermediate_algebra/1197.json": 4,
+        "test/intermediate_algebra/134.json": 4,
+        "test/intermediate_algebra/1994.json": 4,
+        "test/intermediate_algebra/607.json": 4,
+        "test/number_theory/1032.json": 4,
+        "test/number_theory/515.json": 4,
+        "test/number_theory/572.json": 4,
+        "test/number_theory/737.json": 4,
+        "test/prealgebra/1139.json": 4,
+        "test/prealgebra/1622.json": 4,
+        "test/precalculus/1199.json": 4,
+        "test/precalculus/1303.json": 4,
+        "test/precalculus/807.json": 4,
+        "test/precalculus/927.json": 4,
+        "test/precalculus/990.json": 4
+      }
+    }
+  },
+  "capture_validation": {
+    "config": "configs/experiments/capture_math500_b256_r9.yaml",
+    "controls": {
+      "live_controls": {
+        "n_rows_failing": 0,
+        "passed": true,
+        "validator": "report_capture.control_failures (layer-0 Delta and non-finite count, the strict capture reader's own)"
+      },
+      "provenance": {
+        "expected_identity": {
+          "basis_npz_sha256": "68546e59839537cb30d162533baa7eff7fbb4f10a177a9bf8a9dbe596e9ae222",
+          "config_name": "capture_math500_b256_r9",
+          "config_sha256": "c5857099e6fa21e6b64d6fa7536bf6c3fd9295de6d50e3306b4d7d60d683f8dd",
+          "implementation_id": "2143e52d83068f2cb0033626402b4a6911b5e78c6f784b12c13bd92d088f70c4",
+          "input_manifest_sha256": "c9df04ea43c4d3ca05cbb7322a47105c26f1407e8e081d01bd70acb173ce87fd",
+          "kind": "capture",
+          "model_revision": "916b56a44061fd5cd7d6a8fb632557ed4f724f60",
+          "reference_run": "math500-fc-powered-merged",
+          "schema": "provenance-v1"
+        },
+        "expected_identity_reason": "ok",
+        "failing": {},
+        "input_manifest": "configs/meeting3/input_manifest.json",
+        "n_failing": 0,
+        "n_rows": 400,
+        "passed": true,
+        "schema": "provenance-v1"
+      }
+    },
+    "kind": "capture",
+    "population": {
+      "duplicated": [],
+      "malformed": {},
+      "missing": [],
+      "n_expected": 400,
+      "n_rows": 400,
+      "n_unique_expected_present": 400,
+      "status": "COMPLETE",
+      "unexpected": []
+    }
+  },
+  "contrasts_Delta": {
+    "random - h2o": {
+      "accuracy": {
+        "ci90": [
+          0.09,
+          0.29000000000000004
+        ],
+        "ci95": [
+          0.06999999999999998,
+          0.31
+        ],
+        "ci_family": [
+          0.04000000000000001,
+          0.33999999999999997
+        ],
+        "estimator": "equal-problem, joint problem-cluster bootstrap",
+        "excludes_zero": true,
+        "family": "Bonferroni over 3 pairs",
+        "mean": 0.19,
+        "n_resamples": 2000,
+        "seed": 0
+      },
+      "joint": "MISMATCH ESTABLISHED (higher accuracy, more loss)",
+      "metric": {
+        "ci90": [
+          0.07969457299999999,
+          0.091454643
+        ],
+        "ci95": [
+          0.078645945,
+          0.09239361000000001
+        ],
+        "ci_family": [
+          0.07645723799999998,
+          0.093596546
+        ],
+        "estimator": "equal-problem, joint problem-cluster bootstrap",
+        "excludes_zero": true,
+        "family": "Bonferroni over 3 pairs",
+        "mean": 0.08576671999999996,
+        "n_resamples": 2000,
+        "seed": 0
+      }
+    },
+    "random - rkv": {
+      "accuracy": {
+        "ci90": [
+          -0.10000000000000003,
+          0.09000000000000008
+        ],
+        "ci95": [
+          -0.12,
+          0.11000000000000004
+        ],
+        "ci_family": [
+          -0.14,
+          0.14
+        ],
+        "estimator": "equal-problem, joint problem-cluster bootstrap",
+        "excludes_zero": false,
+        "family": "Bonferroni over 3 pairs",
+        "mean": 0.0,
+        "n_resamples": 2000,
+        "seed": 0
+      },
+      "joint": "NOT ESTABLISHED",
+      "metric": {
+        "ci90": [
+          0.091943623,
+          0.104375089
+        ],
+        "ci95": [
+          0.090672684,
+          0.10567655199999995
+        ],
+        "ci_family": [
+          0.08906465199999997,
+          0.10685568599999999
+        ],
+        "estimator": "equal-problem, joint problem-cluster bootstrap",
+        "excludes_zero": true,
+        "family": "Bonferroni over 3 pairs",
+        "mean": 0.09841772799999998,
+        "n_resamples": 2000,
+        "seed": 0
+      }
+    },
+    "random - streamingllm": {
+      "accuracy": {
+        "ci90": [
+          0.04000000000000001,
+          0.20000000000000007
+        ],
+        "ci95": [
+          0.020000000000000018,
+          0.22
+        ],
+        "ci_family": [
+          0.0,
+          0.24000000000000002
+        ],
+        "estimator": "equal-problem, joint problem-cluster bootstrap",
+        "excludes_zero": true,
+        "family": "Bonferroni over 3 pairs",
+        "mean": 0.12,
+        "n_resamples": 2000,
+        "seed": 0
+      },
+      "joint": "NOT ESTABLISHED",
+      "metric": {
+        "ci90": [
+          0.068743688,
+          0.085731375
+        ],
+        "ci95": [
+          0.066715615,
+          0.08712593499999999
+        ],
+        "ci_family": [
+          0.06463127899999999,
+          0.089000308
+        ],
+        "estimator": "equal-problem, joint problem-cluster bootstrap",
+        "excludes_zero": true,
+        "family": "Bonferroni over 3 pairs",
+        "mean": 0.077685335,
+        "n_resamples": 2000,
+        "seed": 0
+      }
+    }
+  },
+  "contrasts_M": {
+    "random - h2o": {
+      "accuracy": {
+        "ci90": [
+          0.09,
+          0.29000000000000004
+        ],
+        "ci95": [
+          0.06999999999999998,
+          0.31
+        ],
+        "ci_family": [
+          0.04000000000000001,
+          0.33999999999999997
+        ],
+        "estimator": "equal-problem, joint problem-cluster bootstrap",
+        "excludes_zero": true,
+        "family": "Bonferroni over 3 pairs",
+        "mean": 0.19,
+        "n_resamples": 2000,
+        "seed": 0
+      },
+      "joint": "MISMATCH ESTABLISHED (higher accuracy, more loss)",
+      "metric": {
+        "ci90": [
+          0.301235324,
+          0.327484632
+        ],
+        "ci95": [
+          0.298085508,
+          0.329460464
+        ],
+        "ci_family": [
+          0.293843424,
+          0.33221672399999996
+        ],
+        "estimator": "equal-problem, joint problem-cluster bootstrap",
+        "excludes_zero": true,
+        "family": "Bonferroni over 3 pairs",
+        "mean": 0.3147223799999999,
+        "n_resamples": 2000,
+        "seed": 0
+      }
+    },
+    "random - rkv": {
+      "accuracy": {
+        "ci90": [
+          -0.10000000000000003,
+          0.09000000000000008
+        ],
+        "ci95": [
+          -0.12,
+          0.11000000000000004
+        ],
+        "ci_family": [
+          -0.14,
+          0.14
+        ],
+        "estimator": "equal-problem, joint problem-cluster bootstrap",
+        "excludes_zero": false,
+        "family": "Bonferroni over 3 pairs",
+        "mean": 0.0,
+        "n_resamples": 2000,
+        "seed": 0
+      },
+      "joint": "NOT ESTABLISHED",
+      "metric": {
+        "ci90": [
+          0.25409382999999996,
+          0.28356952
+        ],
+        "ci95": [
+          0.25064512999999994,
+          0.28588776000000005
+        ],
+        "ci_family": [
+          0.24642133000000005,
+          0.288186764
+        ],
+        "estimator": "equal-problem, joint problem-cluster bootstrap",
+        "excludes_zero": true,
+        "family": "Bonferroni over 3 pairs",
+        "mean": 0.26926735399999996,
+        "n_resamples": 2000,
+        "seed": 0
+      }
+    },
+    "random - streamingllm": {
+      "accuracy": {
+        "ci90": [
+          0.04000000000000001,
+          0.20000000000000007
+        ],
+        "ci95": [
+          0.020000000000000018,
+          0.22
+        ],
+        "ci_family": [
+          0.0,
+          0.24000000000000002
+        ],
+        "estimator": "equal-problem, joint problem-cluster bootstrap",
+        "excludes_zero": true,
+        "family": "Bonferroni over 3 pairs",
+        "mean": 0.12,
+        "n_resamples": 2000,
+        "seed": 0
+      },
+      "joint": "NOT ESTABLISHED",
+      "metric": {
+        "ci90": [
+          0.24859204000000001,
+          0.2737004699999999
+        ],
+        "ci95": [
+          0.2448728089999999,
+          0.27581672000000007
+        ],
+        "ci_family": [
+          0.24115821999999998,
+          0.278365383
+        ],
+        "estimator": "equal-problem, joint problem-cluster bootstrap",
+        "excludes_zero": true,
+        "family": "Bonferroni over 3 pairs",
+        "mean": 0.2613296929999999,
+        "n_resamples": 2000,
+        "seed": 0
+      }
+    }
+  },
+  "n_conditions": 100,
+  "n_problems": 25,
+  "read": "matched-key policy contrasts: free-run accuracy and lost mass",
+  "registration": "NEW ANALYSIS 2026-10-05 (execution plan WP3); descriptive, four policies cannot establish a per-trace predictor",
+  "reproduce": "python scripts/report_protocol_audit.py --runs-root /home/sk10741/kvcache-storage/runs matched",
+  "retired_previous_output": null,
+  "status": "FINAL",
+  "sufficient_statistics_sha256": "2d033c2287be6e6e2ed808913b76de1acfc23eb3fcd869fc25be65393e54a8ca",
+  "sufficient_statistics_tsv": "matched_b256.conditions.tsv",
+  "support": "capture keys with M and Delta defined for every policy"
+}

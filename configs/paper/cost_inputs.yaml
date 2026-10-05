@@ -1,0 +1,24 @@
+# Measured per-row costs (seconds per condition on one GPU), 2026-10-05, from
+# completed rows' wallclock_s on the remote (scripts in the session log).
+# Readout rows carry no wallclock field: their cost is an ASSUMPTION, bounded.
+measured:
+  free_q7_b256_pp:      {mean: 146.0, p50: 60.1, p90: 380.4, source: "runs/grid-pp256 (800 rows)"}
+  free_q7_b256_h2o:     {mean: 140.2, p50: 98.6, p90: 200.4, source: "runs/grid-diss256-h2o (400 rows, eager attention)"}
+  free_q7_b1024:        {mean: 87.3,  p50: 46.7, p90: 268.4, source: "runs/grid-diss1024 (800 rows)"}
+  fullcache_q7:         {mean: 94.7,  p50: 60.2, p90: 205.8, source: "runs/math500-fc-powered-merged (2000 rows)"}
+  capture_q7_b256:      {mean: 108.7, p50: 66.8, p90: 265.3, source: "runs/capture-b256 (400 rows)"}
+  fullcache_qwen3_4b:   {mean: 133.6, p50: 93.6, p90: 381.3, source: "runs/fc-qwen3-4b (200 rows)"}
+  free_qwen3_4b_b256:   {mean: 302.4, p50: 486.9, p90: 492.6, source: "runs/grid-diss256-qwen3-4b (138 rows so far; long traces)"}
+assumed:
+  readout_over_free_ratio: {low: 0.6, high: 1.0, note: "teacher-forced replay of the source trace token by token plus the answer; no wallclock recorded in readout rows"}
+  gsm8k_over_math500_ratio: {low: 0.3, high: 0.6, note: "GSM8K traces are shorter; unmeasured until the pilot"}
+storage_bytes_per_row:
+  free: 23000          # grid rows ~19-23 KiB plus token-ID sidecars ~33 KiB per row
+  token_ids: 34000
+  readout: 7800
+  capture: 34400
+planning_reserve_multiplier: 1.5
+capacity:
+  window_hours_per_night: 9.0      # 01:45-10:43 Dubai
+  gpus: 2
+  note: "upper bound; model load, gates and gaps are not subtracted"

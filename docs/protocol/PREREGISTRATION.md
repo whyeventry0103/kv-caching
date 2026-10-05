@@ -4299,3 +4299,29 @@ grader-format mismatch); (b) register a Qwen-specific grader sensitivity read
 (scored twice, frozen grader as primary) before any Qwen cell is read. The
 Qwen generation cells may run meanwhile; scoring is from raw traces and can
 be redone.
+
+## Execution-plan analyses (2026-10-05): post-hoc, separately named — registered analyses unchanged
+
+Adopted with `docs/paper/EXECUTION_PLAN.md` (baseline 1b644dc). None of these
+relabels an Amendment S read; each is labelled SENSITIVITY or EXPLORATORY in
+its artifact and in `docs/paper/CLAIM_LEDGER.md`.
+- **Protocol 2×2** (`kvcache.metrics.protocol_audit`,
+  `scripts/report_protocol_audit.py reverse`): forward and reverse readout on
+  the common support, each on its own support, worst-case bounds; the
+  interaction I. Read at B=256 after the reverse cell completed; its outcome
+  (interaction +0.130 / +0.127 after protection) was not predicted.
+- **Practical margins** 0.01/0.03/0.05 (0.03 declared primary for NEW designs
+  only) and the shrinkage-ratio interval (`decision`): set after B=256 was
+  seen, so a sensitivity for B=256.
+- **Matched-key contrasts** (`matched`): Bonferroni over the three pairs.
+- **Qwen3 secondary scoring** `format-aware-v1`: specified after the 31 bank
+  errors were inspected, before any dependent Qwen3 cell was read
+  (`docs/protocol/QWEN_SCORING_SENSITIVITY.md`). Primary grader, 0.845 and the
+  S.4 gate FAIL unchanged. Disposition of the gate is the owner's and
+  supervisor's (memo §4).
+- **Prepared, NOT registered, NOT run:** `h2o_style_pp_v1`,
+  `uniform_fresh_pp_v1`, `uniform_fresh_pp_r64_v1`
+  (`kvcache.presses.protected_selectors`) and the held manifests in
+  `configs/paper/`. Each needs its own dated registration with frozen N,
+  seeds, margins, multiplicity and stopping rule before any row exists.
+

@@ -1,0 +1,429 @@
+{
+  "budget": 256,
+  "inputs": {
+    "s1_dependencies_sha256": "ad670247238f9f0b1c1aea51d01cf216ce7fae4a66f28fb59cb95b1ce4f69644",
+    "s1_read": "protection_b256.json",
+    "s1_tsv_sha256": "69d6fe2379f2d106069c82f2144577ebfb20af55001d38866932cc38d92f7864"
+  },
+  "per_press": {
+    "random_pp": {
+      "practical_protected": {
+        "F_loss": {
+          "ci90": [
+            0.1625,
+            0.29
+          ],
+          "ci95": [
+            0.1525,
+            0.3025
+          ],
+          "estimator": "equal-problem, joint problem-cluster bootstrap",
+          "excludes_zero": true,
+          "mean": 0.225,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "R_loss": {
+          "ci90": [
+            0.1225,
+            0.21916666666666668
+          ],
+          "ci95": [
+            0.11416666666666667,
+            0.22666666666666668
+          ],
+          "estimator": "equal-problem, joint problem-cluster bootstrap",
+          "excludes_zero": true,
+          "mean": 0.1691666666666667,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "margin_status": "SENSITIVITY: margins proposed 2026-10-05 after the B=256 result was seen; 0.03 is the declared primary for NEW designs only",
+        "margins": {
+          "0.01": {
+            "false_reassurance": false,
+            "free_run_loss_exceeds_margin": true,
+            "readout_already_lossy": true,
+            "residual_equivalent_within_margin": false
+          },
+          "0.03": {
+            "false_reassurance": false,
+            "free_run_loss_exceeds_margin": true,
+            "readout_already_lossy": true,
+            "residual_equivalent_within_margin": false
+          },
+          "0.05": {
+            "false_reassurance": false,
+            "free_run_loss_exceeds_margin": true,
+            "readout_already_lossy": true,
+            "residual_equivalent_within_margin": false
+          }
+        },
+        "n_conditions": 392,
+        "n_problems": 100,
+        "residual": {
+          "ci90": [
+            -0.09166666666666666,
+            -0.0225
+          ],
+          "ci95": [
+            -0.09833333333333334,
+            -0.01583333333333333
+          ],
+          "estimator": "equal-problem, joint problem-cluster bootstrap",
+          "excludes_zero": true,
+          "mean": -0.05583333333333333,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "support": "forward-readout defined"
+      },
+      "practical_unprotected": {
+        "F_loss": {
+          "ci90": [
+            0.4,
+            0.5375
+          ],
+          "ci95": [
+            0.385,
+            0.55
+          ],
+          "estimator": "equal-problem, joint problem-cluster bootstrap",
+          "excludes_zero": true,
+          "mean": 0.4675,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "R_loss": {
+          "ci90": [
+            0.09916666666666667,
+            0.1775
+          ],
+          "ci95": [
+            0.09333333333333334,
+            0.18333333333333332
+          ],
+          "estimator": "equal-problem, joint problem-cluster bootstrap",
+          "excludes_zero": true,
+          "mean": 0.13583333333333333,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "margin_status": "SENSITIVITY: margins proposed 2026-10-05 after the B=256 result was seen; 0.03 is the declared primary for NEW designs only",
+        "margins": {
+          "0.01": {
+            "false_reassurance": false,
+            "free_run_loss_exceeds_margin": true,
+            "readout_already_lossy": true,
+            "residual_equivalent_within_margin": false
+          },
+          "0.03": {
+            "false_reassurance": false,
+            "free_run_loss_exceeds_margin": true,
+            "readout_already_lossy": true,
+            "residual_equivalent_within_margin": false
+          },
+          "0.05": {
+            "false_reassurance": false,
+            "free_run_loss_exceeds_margin": true,
+            "readout_already_lossy": true,
+            "residual_equivalent_within_margin": false
+          }
+        },
+        "n_conditions": 392,
+        "n_problems": 100,
+        "residual": {
+          "ci90": [
+            -0.3925,
+            -0.2725
+          ],
+          "ci95": [
+            -0.4041666666666666,
+            -0.26166666666666666
+          ],
+          "estimator": "equal-problem, joint problem-cluster bootstrap",
+          "excludes_zero": true,
+          "mean": -0.33166666666666667,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "support": "forward-readout defined"
+      },
+      "reproduces_s1": {
+        "match": true,
+        "residual_base": [
+          -0.33166666666666667,
+          -0.33166666666666667
+        ],
+        "residual_pp": [
+          -0.05583333333333333,
+          -0.05583333333333333
+        ]
+      },
+      "shrinkage": {
+        "absolute_change": {
+          "ci90": [
+            0.21749999999999997,
+            0.3358333333333333
+          ],
+          "ci95": [
+            0.20416666666666666,
+            0.3491666666666667
+          ],
+          "estimator": "equal-problem, joint problem-cluster bootstrap",
+          "excludes_zero": true,
+          "mean": 0.2758333333333333,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "ci95": [
+          0.7086092715231789,
+          0.948905109489051
+        ],
+        "estimand": "ratio of equal-problem point estimates; descriptive, not a causal share",
+        "n_undefined_replicates": 0,
+        "ratio": 0.8316582914572864,
+        "share_base_near_zero": 0.0,
+        "share_sign_flipped": 0.001
+      },
+      "shrinkage_without_budget_relaxed": {
+        "absolute_change": {
+          "ci90": [
+            0.21563573883161508,
+            0.33591065292096217
+          ],
+          "ci95": [
+            0.2036082474226804,
+            0.34621993127147765
+          ],
+          "estimator": "equal-problem, joint problem-cluster bootstrap",
+          "excludes_zero": true,
+          "mean": 0.2740549828178694,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "ci95": [
+          0.6997389033942558,
+          0.9463414634146341
+        ],
+        "estimand": "ratio of equal-problem point estimates; descriptive, not a causal share",
+        "n_undefined_replicates": 0,
+        "ratio": 0.8264248704663213,
+        "share_base_near_zero": 0.0,
+        "share_sign_flipped": 0.002
+      }
+    },
+    "streamingllm_pp": {
+      "practical_protected": {
+        "F_loss": {
+          "ci90": [
+            0.21,
+            0.3475
+          ],
+          "ci95": [
+            0.1975,
+            0.36
+          ],
+          "estimator": "equal-problem, joint problem-cluster bootstrap",
+          "excludes_zero": true,
+          "mean": 0.2775,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "R_loss": {
+          "ci90": [
+            0.145,
+            0.2583333333333333
+          ],
+          "ci95": [
+            0.1375,
+            0.27416666666666667
+          ],
+          "estimator": "equal-problem, joint problem-cluster bootstrap",
+          "excludes_zero": true,
+          "mean": 0.1991666666666667,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "margin_status": "SENSITIVITY: margins proposed 2026-10-05 after the B=256 result was seen; 0.03 is the declared primary for NEW designs only",
+        "margins": {
+          "0.01": {
+            "false_reassurance": false,
+            "free_run_loss_exceeds_margin": true,
+            "readout_already_lossy": true,
+            "residual_equivalent_within_margin": false
+          },
+          "0.03": {
+            "false_reassurance": false,
+            "free_run_loss_exceeds_margin": true,
+            "readout_already_lossy": true,
+            "residual_equivalent_within_margin": false
+          },
+          "0.05": {
+            "false_reassurance": false,
+            "free_run_loss_exceeds_margin": true,
+            "readout_already_lossy": true,
+            "residual_equivalent_within_margin": false
+          }
+        },
+        "n_conditions": 392,
+        "n_problems": 100,
+        "residual": {
+          "ci90": [
+            -0.11833333333333335,
+            -0.0425
+          ],
+          "ci95": [
+            -0.125,
+            -0.034166666666666665
+          ],
+          "estimator": "equal-problem, joint problem-cluster bootstrap",
+          "excludes_zero": true,
+          "mean": -0.07833333333333332,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "support": "forward-readout defined"
+      },
+      "practical_unprotected": {
+        "F_loss": {
+          "ci90": [
+            0.5875,
+            0.715
+          ],
+          "ci95": [
+            0.575,
+            0.7275
+          ],
+          "estimator": "equal-problem, joint problem-cluster bootstrap",
+          "excludes_zero": true,
+          "mean": 0.6525,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "R_loss": {
+          "ci90": [
+            0.2575,
+            0.375
+          ],
+          "ci95": [
+            0.2475,
+            0.3875
+          ],
+          "estimator": "equal-problem, joint problem-cluster bootstrap",
+          "excludes_zero": true,
+          "mean": 0.315,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "margin_status": "SENSITIVITY: margins proposed 2026-10-05 after the B=256 result was seen; 0.03 is the declared primary for NEW designs only",
+        "margins": {
+          "0.01": {
+            "false_reassurance": false,
+            "free_run_loss_exceeds_margin": true,
+            "readout_already_lossy": true,
+            "residual_equivalent_within_margin": false
+          },
+          "0.03": {
+            "false_reassurance": false,
+            "free_run_loss_exceeds_margin": true,
+            "readout_already_lossy": true,
+            "residual_equivalent_within_margin": false
+          },
+          "0.05": {
+            "false_reassurance": false,
+            "free_run_loss_exceeds_margin": true,
+            "readout_already_lossy": true,
+            "residual_equivalent_within_margin": false
+          }
+        },
+        "n_conditions": 392,
+        "n_problems": 100,
+        "residual": {
+          "ci90": [
+            -0.39,
+            -0.2825
+          ],
+          "ci95": [
+            -0.405,
+            -0.27
+          ],
+          "estimator": "equal-problem, joint problem-cluster bootstrap",
+          "excludes_zero": true,
+          "mean": -0.3375,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "support": "forward-readout defined"
+      },
+      "reproduces_s1": {
+        "match": true,
+        "residual_base": [
+          -0.3375,
+          -0.3375
+        ],
+        "residual_pp": [
+          -0.07833333333333332,
+          -0.07833333333333332
+        ]
+      },
+      "shrinkage": {
+        "absolute_change": {
+          "ci90": [
+            0.19249999999999998,
+            0.32666666666666666
+          ],
+          "ci95": [
+            0.18166666666666664,
+            0.3391666666666666
+          ],
+          "estimator": "equal-problem, joint problem-cluster bootstrap",
+          "excludes_zero": true,
+          "mean": 0.2591666666666667,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "ci95": [
+          0.6235011990407674,
+          0.8979591836734694
+        ],
+        "estimand": "ratio of equal-problem point estimates; descriptive, not a causal share",
+        "n_undefined_replicates": 0,
+        "ratio": 0.7679012345679013,
+        "share_base_near_zero": 0.0,
+        "share_sign_flipped": 0.0005
+      },
+      "shrinkage_without_budget_relaxed": {
+        "absolute_change": {
+          "ci90": [
+            0.19072164948453607,
+            0.3238831615120275
+          ],
+          "ci95": [
+            0.17783505154639173,
+            0.34020618556701027
+          ],
+          "estimator": "equal-problem, joint problem-cluster bootstrap",
+          "excludes_zero": true,
+          "mean": 0.25945017182130586,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "ci95": [
+          0.6082725060827252,
+          0.8943661971830986
+        ],
+        "estimand": "ratio of equal-problem point estimates; descriptive, not a causal share",
+        "n_undefined_replicates": 0,
+        "ratio": 0.7626262626262627,
+        "share_base_near_zero": 0.0,
+        "share_sign_flipped": 0.0
+      }
+    }
+  },
+  "read": "practical margins and shrinkage ratio over the S.1 conditions",
+  "registration": "SENSITIVITY 2026-10-05 (execution plan Section 4.3/9.4); margins proposed after the B=256 result was seen",
+  "reproduce": "python scripts/report_protocol_audit.py decision",
+  "retired_previous_output": null,
+  "status": "FINAL"
+}

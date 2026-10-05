@@ -235,7 +235,16 @@ def test_the_real_catalogue_has_no_two_entries_sharing_an_exact_value_and_rule()
     # coincidence between unrelated quantities; the draft's 0.165 is pinned to
     # the bridge key by a claim. (m3.dacc.onset.random.unrestricted.cilo joined
     # the existing 0.03 group; that group is not new.)
-    assert len(collisions) <= 130, (
+    #
+    # 130 -> 139 on 2026-10-05 (S.1 and protocol-audit entries), examined. Two
+    # identities: s1...streamingllm_pp.residual_base.cilo == diss256.streamingllm
+    # .residual_ci0 (-0.405; same rows, estimand and bootstrap) and
+    # audit.matched.random_minus_h2o.metric.mean == m3.h2.M.spread (same
+    # contrast on the same 25 problems). Seven coincidences on the k/100 and
+    # k/400 accuracy lattices (0.19, 0.31, 0.14, 0.22, 0.315, 0.4675, -0.0783);
+    # the abstract's 0.078 is pinned to its S.1 key by a claim. (-0.125, -0.27,
+    # 0.0 and 0.898 gained members; those groups are not new.)
+    assert len(collisions) <= 139, (
         f"{len(collisions)} exact-value collisions in the catalogue; if this "
         "grew, a new derived quantity is duplicating an existing one"
     )

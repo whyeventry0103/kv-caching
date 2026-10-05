@@ -24,6 +24,23 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-10-05 13:30 Dubai — execution plan v1.0 adopted
+  (`docs/paper/EXECUTION_PLAN.md`); WP0–WP3 done, WP4 code ready, WP5/WP6 held.**
+  Status table: `docs/paper/EXECUTION_STATUS.md`; claims: `CLAIM_LEDGER.md`.
+  Protected reverse b256 READ (new 2×2, `results/diag/paper_audit/`): after
+  protection the replay directions disagree — interaction +0.130 [+0.078,
+  +0.185] Random, +0.127 [+0.065, +0.197] SLM; protection shrinks the forward
+  trajectory contrast ~80% but the reverse one only ~51%/57%. "Most of the
+  residual was prompt loss" RETIRED. Qwen3 bank audit FINAL: primary 169/200
+  reproduced (0 mismatches), 31-error split reproduced, secondary 0.905 [0.90,
+  0.96] (anchor 0.885→0.92); gate FAIL kept, disposition memo awaits owner.
+  CORRECTION: arXiv:2608.01631's free-run numbers are at budget 2048 not 256
+  (PAPER_FINDINGS §5m). Paper: causal "bracket" wording replaced (13 edits),
+  abstract qualified, title retired. Remote: GPUs idle (window); grid-pp1024
+  474/800, readout-pp1024 0, Qwen3 grid 138/400. NEXT: tonight's cron runs
+  pp1024; then `report_s.py protection --budget 1024`, `report_s.py
+  consequence`, and a b1024 protocol read (needs a reverse cell — not queued).
+
   **★★★★★ 2026-10-04 21:15 Dubai — fifth owner-requested early start
   (tick loop ~/manual_ticks_1004.sh until 01:40, jobs stop 10:43); S.1 b256
   READ FINAL: residual −0.056 (Random) / −0.078 (SLM) protected vs −0.332 /

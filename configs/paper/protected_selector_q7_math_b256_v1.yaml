@@ -1,0 +1,45 @@
+design_id: protected_selector_q7_math_b256_v1
+status: PROPOSED_HELD          # not authorized; not in configs/nightly_queue.yaml
+dated: 2026-10-05
+scope: discovery_extension     # same 100 problems already inspected: NOT held-out confirmation
+question: >
+  Under equal prompt protection, does the policy-level mismatch between lost
+  attention mass and free-running accuracy (claim ledger B1-B3) survive, and
+  does fresh-uniform random behave like the legacy fixed-pattern Random?
+inference_family: >
+  Primary: protected forward residual and protected 2x2 interaction per new
+  family (EP estimator, joint problem bootstrap, Holm over the 2 families).
+  Secondary: matched-key accuracy/M contrasts vs random_pp (Bonferroni over pairs).
+model: r1_distill_qwen_7b      # revision pinned in configs/models.yaml
+benchmark: math500
+problem_manifest: configs/meeting3/grid100_pids.json
+capture_problem_manifest: configs/meeting3/q2_subset_pids.json
+seeds: [11, 23, 47, 89]        # the historical four-seed design, for pairing
+budget_total_after_prune: 256
+compression_interval: 64
+prompt_protection: all_prompt_positions
+min_trace_slots: 64
+budget_relaxation: prompt_length_plus_min_trace_slots
+policies:
+  h2o_style_pp_v1:          {module: kvcache.presses.protected_selectors, attn: eager}
+  uniform_fresh_pp_v1:      {module: kvcache.presses.protected_selectors}
+optional_policies:
+  uniform_fresh_pp_r64_v1:  {module: kvcache.presses.protected_selectors, note: "RA-matched recency convention; run only if cost allows"}
+existing_comparators: [random_pp, streamingllm_pp, h2o, random, streamingllm]
+full_cache_reference: math500-fc-powered-merged
+stages:
+  free:     {conditions_per_policy: 400}
+  forward:  {conditions_per_policy: 400, source: full-cache reference traces}
+  reverse:  {conditions_per_policy: 400, source: this design's free-run traces, eligibility: answer boundary}
+  capture:  {conditions_per_policy: 100, policies: [random_pp, h2o_style_pp_v1, uniform_fresh_pp_v1], basis: frozen Qwen basis (R.9)}
+expected_conditions: "2 policies x (400 free + 400 forward + 400 reverse) + 3 x 100 capture = 2400 + 300"
+missingness_rule: undefined readouts stay in the population; common support plus worst-case bounds (kvcache.metrics.protocol_audit)
+primary_practical_margin: 0.03
+secondary_margins: [0.01, 0.05]
+gates_before_launch:
+  - CPU tests tests/test_protected_selectors.py pass on the remote stack (DONE 2026-10-05, 36 passed incl. prompt_protect)
+  - real-generation smoke on 3 traces (longest/median/shortest prompt): prompt retained every prune, no duplicate positions, target cardinality exact, identity control (h2o_style_pp_v1 with forced_prompt_len=0 reproduces h2o selections)
+  - runner adapter scripts/run_grid_protected.py + run_replay_protected.py (to write; swap-in like run_grid_pp.py) registered in make dryrun
+  - generation family `protected_selectors` added to provenance GENERATION_SOURCES (an identity change: do it while no family that shares those files is running)
+stopping_rule: fixed design; read only when every planned cell is FINAL
+authorization: REQUIRED (new GPU campaign; see results/diag/paper_plan/cost_estimate.json)

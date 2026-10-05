@@ -1,0 +1,24 @@
+design_id: confirm_qwen3_4b_math500_v1
+status: PROPOSED_HELD
+dated: 2026-10-05
+scope: model_transfer          # native reasoning model; problem list must avoid the 50 bank problems or be labelled prospective replication on inspected material
+question: >
+  Does a practically meaningful held-trace/free-generation discrepancy survive
+  matched prompt protection on a natively trained reasoning model?
+model: qwen3_4b                # revision pinned in configs/models.yaml
+benchmark: math500
+problem_manifest: TO_FREEZE    # N fixed by scripts/plan_paper_sample_size.py BEFORE outcomes; exclude the 100 grid + 50 Qwen3-bank problems for a clean holdout
+seeds: [11, 23]
+budgets: [256, 1024]
+policies: [uniform_fresh_pp_v1, streamingllm_pp]
+stages:
+  full_cache_bank: {conditions: "N x 2"}
+  free:    {per_policy_budget: "N x 2"}
+  forward: {per_policy_budget: "N x 2"}
+  reverse: {budgets: [256], per_policy: "N x 2"}
+scheduled_conditions_at_N100: 2200
+grader: primary frozen hendrycks-is-equiv-v1; secondary format-aware-v1 reported as sensitivity on BOTH arms
+blockers:
+  - S.4 gate disposition (docs/protocol/QWEN_SCORING_SENSITIVITY.md section 4) - owner/supervisor
+  - novelty gate N recheck after the protected B=1024 read
+authorization: REQUIRED

@@ -1056,6 +1056,26 @@
       "context": "registered mass contrast also holds, $-0.577$ ($[-0.602, -0.543]$), but there it",
       "literal": "-0.543",
       "key": "m3.llama.h3.cihi"
+    },
+    {
+      "context": "from $-0.332$ to $-0.056$ (Random)",
+      "literal": "0.056",
+      "key": "s1.b256.random_pp.residual_pp.mean"
+    },
+    {
+      "context": "from $-0.338$ to $-0.078$ (StreamingLLM",
+      "literal": "0.078",
+      "key": "s1.b256.streamingllm_pp.residual_pp.mean"
+    },
+    {
+      "context": "budget 256 shrinks from $-0.332$ to $-0.056$",
+      "literal": "0.332",
+      "key": "s1.b256.random_pp.residual_base.mean"
+    },
+    {
+      "context": "and from $-0.338$ to $-0.078$ (StreamingLLM",
+      "literal": "0.338",
+      "key": "s1.b256.streamingllm_pp.residual_base.mean"
     }
   ]
 }

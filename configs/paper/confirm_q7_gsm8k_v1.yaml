@@ -1,0 +1,25 @@
+design_id: confirm_q7_gsm8k_v1
+status: PROPOSED_HELD
+dated: 2026-10-05
+scope: task_transfer
+question: >
+  Does the protected held-trace/free-generation discrepancy transfer from
+  MATH-500 to GSM8K on the anchor model?
+model: r1_distill_qwen_7b
+benchmark: gsm8k
+problem_manifest: TO_FREEZE    # sampled with a fixed seed from the pinned test split before any compressed outcome
+seeds: [11, 23]
+budgets: [256, 1024]
+policies: [uniform_fresh_pp_v1, streamingllm_pp]
+scheduled_conditions_at_N100: 2200
+task_pilot: >
+  Verify adapter, answer format (hash_numeric extraction) and full-cache
+  accuracy on a fixed 8-problem engineering pilot excluded from claims; freeze
+  failure criteria and grader rules first. Do not swap tasks after a
+  disappointing outcome.
+blockers:
+  - configs/benchmarks.yaml gsm8k has NO pinned revision: a human pins it (TODO(human) rule; Claude must not guess)
+  - no GSM8K loader in src/kvcache/datasets.py yet (CPU work, can be prepared)
+  - dataset not on the remote: download needs --allow-dataset-download and owner authorization
+  - GSM8K traces at budget 1024 may be shorter than the budget (no eviction): check realized compression ratio on the pilot before freezing budgets
+authorization: REQUIRED

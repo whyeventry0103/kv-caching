@@ -1092,20 +1092,22 @@ def build_catalogue() -> list[Entry]:
             "evidence2026.adakv_gap",
             -0.167,
             "evidence2026",
-            "Table 2 (AIME26, Qwen3-8B, budget 256): end-to-end 23.3% minus "
-            "fixed-trace 40.0%",
-            "the residual implicit in the nearest neighbour's own table, for "
-            "AdaKV. DERIVED by us from two of their reported accuracies; they "
-            "never form this difference. VERIFIED 2026-09-12 against the paper.",
+            "Table 10 (AIME26, Qwen3-8B): end-to-end 23.3% at budget 2048 minus "
+            "fixed-trace 40.0% at budget 256",
+            "free-running minus fixed-trace for AdaKV in the nearest neighbour's "
+            "table, at UNMATCHED budgets (2048 vs 256), so NOT our residual. "
+            "DERIVED by us. CORRECTED 2026-10-05: the 2026-09-12 check missed "
+            "Table 10's caption ('end-to-end ... at budget 2048, compared with "
+            "our fixed-trace baseline at KV budget 256').",
         ),
         (
             "evidence2026.snapkv_gap",
             -0.133,
             "evidence2026",
-            "Table 2 (AIME26, Qwen3-8B, budget 256): end-to-end 26.7% minus "
-            "fixed-trace 40.0%",
-            "the same implicit residual for SnapKV. DERIVED by us from two of "
-            "their reported accuracies. VERIFIED 2026-09-12 against the paper.",
+            "Table 10 (AIME26, Qwen3-8B): end-to-end 26.7% at budget 2048 minus "
+            "fixed-trace 40.0% at budget 256",
+            "the same unmatched-budget difference for SnapKV (2048 vs 256). "
+            "DERIVED by us. CORRECTED 2026-10-05 (see the AdaKV entry).",
         ),
     ):
         external(key, value, cite, locator, desc)
@@ -1883,6 +1885,128 @@ def build_catalogue() -> list[Entry]:
             "smallest Benjamini-Hochberg q of the six bridge tests",
             kind="derived",
         )
+
+    # Amendment S.1 (2026-10-04) and the execution-plan protocol audit
+    # (2026-10-05): protected residuals and the paired direction contrasts.
+    _s1 = DIAG / "amendment-s" / "protection_b256.json"
+    if _s1.exists():
+        _s1d, _s1r = _load(_s1), _s1.relative_to(PROJECT_ROOT)
+        for _pp, _blk in _s1d["per_press"].items():
+            _pr = _blk["primary"]
+            for _f in ("residual_pp", "residual_base", "delta_residual"):
+                add(
+                    f"s1.b256.{_pp}.{_f}.mean",
+                    _pr[_f]["mean"],
+                    f"{_s1r} :: per_press.{_pp}.primary.{_f}.mean",
+                    f"S.1 b256 {_f} for {_pp} (equal-problem)",
+                )
+                for _i, _b in enumerate(_pr[_f]["ci95"]):
+                    add(
+                        f"s1.b256.{_pp}.{_f}.ci{'lo' if _i == 0 else 'hi'}",
+                        _b,
+                        f"{_s1r} :: per_press.{_pp}.primary.{_f}.ci95[{_i}]",
+                        f"S.1 b256 {_f} CI bound, {_pp}",
+                    )
+    _rv = DIAG / "paper_audit" / "reverse_b256.json"
+    if _rv.exists():
+        _rvd, _rvp = _load(_rv), _rv.relative_to(PROJECT_ROOT)
+        for _pp, _blk in _rvd["protection_by_direction"].items():
+            for _c in ("residual_forward", "trajectory_under_full_readout"):
+                add(
+                    f"audit.b256.{_pp}.{_c}.shrinkage",
+                    _blk[_c]["ratio"],
+                    f"{_rvp} :: protection_by_direction.{_pp}.{_c}.ratio",
+                    f"protection shrinkage ratio of {_c}, {_pp}, four-arm support",
+                )
+        for _pp, _blk in _rvd["protection_by_direction"].items():
+            for _c in ("residual_forward", "trajectory_under_full_readout"):
+                for _i, _b in enumerate(_blk[_c]["ci95"]):
+                    _end = "lo" if _i == 0 else "hi"
+                    add(
+                        f"audit.b256.{_pp}.{_c}.shrinkage.ci{_end}",
+                        _b,
+                        f"{_rvp} :: protection_by_direction.{_pp}.{_c}.ci95[{_i}]",
+                        f"protection shrinkage CI bound, {_c}, {_pp}",
+                    )
+            add(
+                f"audit.b256.{_pp}.four_arm.n",
+                _blk["n_conditions"],
+                f"{_rvp} :: protection_by_direction.{_pp}.n_conditions",
+                f"four-arm paired support, {_pp}",
+            )
+        for _pp, _blk in _rvd["per_policy"].items():
+            _cs = _blk["common_support"]
+            add(
+                f"audit.b256.{_pp}.common.n",
+                _cs["n_conditions"],
+                f"{_rvp} :: per_policy.{_pp}.common_support.n_conditions",
+                f"2x2 common support size, {_pp}",
+            )
+            for _c in (
+                "residual_forward",
+                "trajectory_under_full_readout",
+                "interaction",
+            ):
+                add(
+                    f"audit.b256.{_pp}.common.{_c}.mean",
+                    _cs[_c]["mean"],
+                    f"{_rvp} :: per_policy.{_pp}.common_support.{_c}.mean",
+                    f"2x2 {_c} on the common support, {_pp}",
+                )
+                for _i, _b in enumerate(_cs[_c]["ci95"]):
+                    add(
+                        f"audit.b256.{_pp}.common.{_c}.ci{'lo' if _i == 0 else 'hi'}",
+                        _b,
+                        f"{_rvp} :: per_policy.{_pp}.common_support.{_c}.ci95[{_i}]",
+                        f"2x2 {_c} CI bound, {_pp}",
+                    )
+    _dc = DIAG / "paper_audit" / "decision_b256.json"
+    if _dc.exists():
+        _dcd, _dcp = _load(_dc), _dc.relative_to(PROJECT_ROOT)
+        for _pp, _blk in _dcd["per_press"].items():
+            _sh = _blk["shrinkage"]
+            add(
+                f"audit.decision.{_pp}.shrinkage",
+                _sh["ratio"],
+                f"{_dcp} :: per_press.{_pp}.shrinkage.ratio",
+                f"S.1 forward shrinkage ratio, {_pp}",
+            )
+            for _i, _b in enumerate(_sh["ci95"]):
+                add(
+                    f"audit.decision.{_pp}.shrinkage.ci{'lo' if _i == 0 else 'hi'}",
+                    _b,
+                    f"{_dcp} :: per_press.{_pp}.shrinkage.ci95[{_i}]",
+                    f"S.1 forward shrinkage CI bound, {_pp}",
+                )
+            for _arm in ("practical_protected", "practical_unprotected"):
+                for _q in ("R_loss", "F_loss"):
+                    add(
+                        f"audit.decision.{_pp}.{_arm}.{_q}",
+                        _blk[_arm][_q]["mean"],
+                        f"{_dcp} :: per_press.{_pp}.{_arm}.{_q}.mean",
+                        f"{_q} ({_arm}), {_pp}",
+                    )
+    _mk = DIAG / "paper_audit" / "matched_b256.json"
+    if _mk.exists():
+        _mkd, _mkp = _load(_mk), _mk.relative_to(PROJECT_ROOT)
+        for _pair, _blk in _mkd["contrasts_M"].items():
+            _tag = _pair.replace(" - ", "_minus_")
+            for _f in ("accuracy", "metric"):
+                add(
+                    f"audit.matched.{_tag}.{_f}.mean",
+                    _blk[_f]["mean"],
+                    f"{_mkp} :: contrasts_M[{_pair!r}].{_f}.mean",
+                    f"matched-key {_f} contrast, {_pair}",
+                )
+                for _ci in ("ci95", "ci_family"):
+                    for _i, _b in enumerate(_blk[_f][_ci]):
+                        _end = "lo" if _i == 0 else "hi"
+                        add(
+                            f"audit.matched.{_tag}.{_f}.{_ci}{_end}",
+                            _b,
+                            f"{_mkp} :: contrasts_M[{_pair!r}].{_f}.{_ci}[{_i}]",
+                            f"matched-key {_f} {_ci} bound, {_pair}",
+                        )
 
     _fc = _load(P / "m3_INVALID_floor_collapse.json")
     add(

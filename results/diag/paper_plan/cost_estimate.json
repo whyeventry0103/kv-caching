@@ -1,0 +1,302 @@
+{
+  "assumptions": {
+    "gsm8k_over_math500_ratio": {
+      "high": 0.6,
+      "low": 0.3,
+      "note": "GSM8K traces are shorter; unmeasured until the pilot"
+    },
+    "readout_over_free_ratio": {
+      "high": 1.0,
+      "low": 0.6,
+      "note": "teacher-forced replay of the source trace token by token plus the answer; no wallclock recorded in readout rows"
+    }
+  },
+  "campaigns": {
+    "WP5 protected_selector_q7_math_b256_v1": {
+      "bytes": 68400000,
+      "cells": [
+        {
+          "bytes": 22800000,
+          "cell": "h2o_style_pp_v1 free",
+          "conditions": 400,
+          "gpu_hours": [
+            15.6,
+            15.6
+          ]
+        },
+        {
+          "bytes": 3120000,
+          "cell": "h2o_style_pp_v1 forward",
+          "conditions": 400,
+          "gpu_hours": [
+            6.3,
+            10.5
+          ]
+        },
+        {
+          "bytes": 3120000,
+          "cell": "h2o_style_pp_v1 reverse",
+          "conditions": 400,
+          "gpu_hours": [
+            9.3,
+            15.6
+          ]
+        },
+        {
+          "bytes": 22800000,
+          "cell": "uniform_fresh_pp_v1 free",
+          "conditions": 400,
+          "gpu_hours": [
+            16.2,
+            16.2
+          ]
+        },
+        {
+          "bytes": 3120000,
+          "cell": "uniform_fresh_pp_v1 forward",
+          "conditions": 400,
+          "gpu_hours": [
+            6.3,
+            10.5
+          ]
+        },
+        {
+          "bytes": 3120000,
+          "cell": "uniform_fresh_pp_v1 reverse",
+          "conditions": 400,
+          "gpu_hours": [
+            9.7,
+            16.2
+          ]
+        },
+        {
+          "bytes": 10320000,
+          "cell": "capture x3 policies",
+          "conditions": 300,
+          "gpu_hours": [
+            9.1,
+            9.1
+          ]
+        }
+      ],
+      "gib_with_reserve": 0.096,
+      "gpu_hours": [
+        72.6,
+        93.7
+      ],
+      "nights_at_full_capacity": [
+        4.0,
+        5.2
+      ]
+    },
+    "WP6 confirm_q7_gsm8k_v1 (N=100, 2 seeds), high": {
+      "bytes": 66360000,
+      "cells": [
+        {
+          "bytes": 11400000,
+          "cell": "full-cache bank",
+          "conditions": 200,
+          "gpu_hours": [
+            3.2,
+            3.2
+          ]
+        },
+        {
+          "bytes": 22800000,
+          "cell": "free b256 x2 policies",
+          "conditions": 400,
+          "gpu_hours": [
+            9.7,
+            9.7
+          ]
+        },
+        {
+          "bytes": 22800000,
+          "cell": "free b1024 x2 policies",
+          "conditions": 400,
+          "gpu_hours": [
+            5.8,
+            5.8
+          ]
+        },
+        {
+          "bytes": 3120000,
+          "cell": "forward b256 x2",
+          "conditions": 400,
+          "gpu_hours": [
+            5.8,
+            9.7
+          ]
+        },
+        {
+          "bytes": 3120000,
+          "cell": "forward b1024 x2",
+          "conditions": 400,
+          "gpu_hours": [
+            3.5,
+            5.8
+          ]
+        },
+        {
+          "bytes": 3120000,
+          "cell": "reverse b256 x2",
+          "conditions": 400,
+          "gpu_hours": [
+            3.8,
+            6.3
+          ]
+        }
+      ],
+      "gib_with_reserve": 0.093,
+      "gpu_hours": [
+        31.8,
+        40.6
+      ],
+      "nights_at_full_capacity": [
+        1.8,
+        2.3
+      ]
+    },
+    "WP6 confirm_q7_gsm8k_v1 (N=100, 2 seeds), low": {
+      "bytes": 66360000,
+      "cells": [
+        {
+          "bytes": 11400000,
+          "cell": "full-cache bank",
+          "conditions": 200,
+          "gpu_hours": [
+            1.6,
+            1.6
+          ]
+        },
+        {
+          "bytes": 22800000,
+          "cell": "free b256 x2 policies",
+          "conditions": 400,
+          "gpu_hours": [
+            4.9,
+            4.9
+          ]
+        },
+        {
+          "bytes": 22800000,
+          "cell": "free b1024 x2 policies",
+          "conditions": 400,
+          "gpu_hours": [
+            2.9,
+            2.9
+          ]
+        },
+        {
+          "bytes": 3120000,
+          "cell": "forward b256 x2",
+          "conditions": 400,
+          "gpu_hours": [
+            2.9,
+            4.9
+          ]
+        },
+        {
+          "bytes": 3120000,
+          "cell": "forward b1024 x2",
+          "conditions": 400,
+          "gpu_hours": [
+            1.7,
+            2.9
+          ]
+        },
+        {
+          "bytes": 3120000,
+          "cell": "reverse b256 x2",
+          "conditions": 400,
+          "gpu_hours": [
+            1.9,
+            3.2
+          ]
+        }
+      ],
+      "gib_with_reserve": 0.093,
+      "gpu_hours": [
+        15.9,
+        20.3
+      ],
+      "nights_at_full_capacity": [
+        0.9,
+        1.1
+      ]
+    },
+    "WP6 confirm_qwen3_4b_math500_v1 (N=100, 2 seeds)": {
+      "bytes": 66360000,
+      "cells": [
+        {
+          "bytes": 11400000,
+          "cell": "full-cache bank",
+          "conditions": 200,
+          "gpu_hours": [
+            7.4,
+            7.4
+          ]
+        },
+        {
+          "bytes": 22800000,
+          "cell": "free b256 x2 policies",
+          "conditions": 400,
+          "gpu_hours": [
+            33.6,
+            33.6
+          ]
+        },
+        {
+          "bytes": 22800000,
+          "cell": "free b1024 x2 policies",
+          "conditions": 400,
+          "gpu_hours": [
+            20.1,
+            20.1
+          ]
+        },
+        {
+          "bytes": 3120000,
+          "cell": "forward b256 x2",
+          "conditions": 400,
+          "gpu_hours": [
+            20.2,
+            33.6
+          ]
+        },
+        {
+          "bytes": 3120000,
+          "cell": "forward b1024 x2",
+          "conditions": 400,
+          "gpu_hours": [
+            12.1,
+            20.1
+          ]
+        },
+        {
+          "bytes": 3120000,
+          "cell": "reverse b256 x2",
+          "conditions": 400,
+          "gpu_hours": [
+            8.9,
+            14.8
+          ]
+        }
+      ],
+      "gib_with_reserve": 0.093,
+      "gpu_hours": [
+        102.2,
+        129.6
+      ],
+      "nights_at_full_capacity": [
+        5.7,
+        7.2
+      ]
+    }
+  },
+  "inputs": "configs/paper/cost_inputs.yaml",
+  "note": "Qwen3 b1024 free cost scaled from Qwen-7B's b1024/b256 ratio (assumption). Readout cost uses the source trace's free-run rate x [0.6, 1.0]. Storage counts each row once plus token-ID sidecars for free runs, times 1.5 reserve.",
+  "read": "cost estimate for the HELD paper campaigns",
+  "reproduce": "python scripts/plan_paper_sample_size.py cost",
+  "status": "ESTIMATE; nothing here is authorized"
+}

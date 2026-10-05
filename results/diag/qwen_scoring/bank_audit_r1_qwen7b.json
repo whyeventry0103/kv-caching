@@ -1,0 +1,60 @@
+{
+  "bank": "r1_qwen7b",
+  "boundary_status": {
+    "answer_inside_unclosed_thinking": 2,
+    "closed_with_answer": 390,
+    "truncated_no_answer": 8
+  },
+  "coverage": {
+    "duplicates": [],
+    "missing": [],
+    "n_expected": 400,
+    "n_rows": 400
+  },
+  "primary": {
+    "accuracy": 0.885,
+    "band": [
+      0.85,
+      0.99
+    ],
+    "correct": 354,
+    "gate": "PASS",
+    "grader": "hendrycks-is-equiv-v1 on extract_answer(trace) (FROZEN)",
+    "recompute_mismatches": []
+  },
+  "primary_incorrect_categories": {
+    "base subscript": 2,
+    "multi-box": 6,
+    "set order": 2,
+    "text wrapper": 6,
+    "unclosed thinking": 10,
+    "wrong value or other": 20
+  },
+  "reproduce": "python scripts/audit_qwen_scoring.py --runs-root /home/sk10741/kvcache-storage/runs --bank r1_qwen7b",
+  "retired_previous_output": "bank_audit_r1_qwen7b.json.superseded-1791185347",
+  "run": "math500-fc-powered-merged",
+  "secondary_SENSITIVITY": {
+    "bounds_accuracy": [
+      0.92,
+      0.93
+    ],
+    "n_ambiguous": 4,
+    "note": "ambiguous rows keep their primary score in the point estimate; bounds score all of them incorrect / correct. Not a gate input: the registered gate is read on the primary score only.",
+    "point_accuracy": 0.92,
+    "point_correct": 368,
+    "version": "format-aware-v1"
+  },
+  "status": "FINAL",
+  "sufficient_statistics_sha256": "5d2b1560426eb0a5d93f64dead497b1f7b6ce2b680453b50e9b10a10d586d911",
+  "sufficient_statistics_tsv": "bank_audit_r1_qwen7b.conditions.tsv",
+  "transitions": {
+    "AMBIGUOUS:BASE_SUBSCRIPT": 2,
+    "AMBIGUOUS:UNCLOSED_THINKING": 2,
+    "INCORRECT_TO_CORRECT:IS_EQUIV": 5,
+    "INCORRECT_TO_CORRECT:TEXT_WRAPPER": 6,
+    "INCORRECT_TO_CORRECT:UNORDERED_LIST": 3,
+    "UNCHANGED:IS_EQUIV": 354,
+    "UNCHANGED:NOT_EQUIVALENT": 20,
+    "UNCHANGED:NO_CLOSED_REASONING": 8
+  }
+}

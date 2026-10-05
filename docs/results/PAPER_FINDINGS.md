@@ -1645,7 +1645,7 @@ stays what it was: the readout-invisible residual replicates on Llama for
 StreamingLLM; the policy ordering and the geometry do not. Catalogue entries
 `m3.llama.*` carry the literals.
 
-### 5k. Prompt protection removes most of the budget-256 residual (2026-10-04)
+### 5k. Prompt protection removes most of the budget-256 FORWARD residual (2026-10-04; title qualified 2026-10-05, see §5l)
 
 S.1 at budget 256, FINAL (numbers: MEETING3_RESULTS §3g). With the prompt
 never evicted, the residual remains distinguishable from zero for both
@@ -1660,6 +1660,50 @@ residual exists; its size is the protected number, not the unprotected one.
 The registered paper-level branch (A/B/C) is decided only after budget 1024.
 No abstract or headline edit is made until then; the mechanism draft gains a
 pending note.
+
+**Qualification, 2026-10-05.** "Most of it is attributable to losing the
+prompt" holds only in the forward (registered) direction. Under the reverse
+comparison protection shrinks the trajectory contrast by about half (§5l), so
+the sentence above is RETIRED in favour of the claim-ledger wording (A4 + A5
+together, `docs/paper/CLAIM_LEDGER.md`).
+
+### 5l. Protocol audit at budget 256: the two replay directions disagree after protection (2026-10-05)
+
+New, separately named analyses (execution plan WP1/WP3; PREREGISTRATION entry
+of 2026-10-05). They relabel nothing. Artifacts: `results/diag/paper_audit/`
+`reverse_b256.json`, `decision_b256.json`, `matched_b256.json` (each carries
+its `reproduce` line and dependency fingerprint; reverse and matched were run
+on the GPU host and copied back).
+- Common-support 2×2 (EP, joint bootstrap): protected Random — forward
+  residual −0.049 [−0.091, −0.011], trajectory under full-cache readout −0.179
+  [−0.250, −0.113], interaction +0.130 [+0.078, +0.185] (376 conditions);
+  protected StreamingLLM −0.068 / −0.195 / +0.127 [+0.065, +0.197] (355).
+  Unprotected Random interaction +0.029 [−0.026, +0.084] (304); unprotected
+  StreamingLLM +0.146 [+0.068, +0.227] (364).
+- Paired protection effect on the four-arm support: forward shrinkage 0.817
+  [0.655, 0.968] (Random), 0.778 [0.622, 0.910] (SLM); reverse 0.507 [0.309,
+  0.687] and 0.570 [0.447, 0.691]. On the 392-condition forward support the
+  S.1 ratios are 0.832 [0.709, 0.949] and 0.768 [0.624, 0.898]
+  (`decision_b256.json`, reproduces S.1 exactly).
+- Practical margins (SENSITIVITY, set after seeing B=256): readout itself is
+  lossy at every margin (protected R_loss 0.169 / 0.199), so B=256 shows
+  underestimation, not false near-lossless certification.
+- Matched keys (25 capture problems, unprotected): Random − H2O-style accuracy
+  +0.190 (Bonferroni-3 [+0.040, +0.340]) with M +0.315 → mismatch established;
+  Random − StreamingLLM +0.120, adjusted [0.000, +0.240] → not established.
+
+### 5m. CORRECTION: the nearest neighbour's gap is not at a matched budget (2026-10-05)
+
+§1 (2026-09-12 note) and the paper said arXiv:2608.01631's AIME26 table shows
+AdaKV 0.233 free-running vs 0.400 fixed-trace "at budget 256", i.e. our
+residual. Its Table 10 caption reads "end-to-end KV-compression results at
+budget 2048, compared with our fixed-trace baseline at KV budget 256" (raw
+HTML, v1, the only version). Old: "differences −0.167 / −0.133 are exactly
+the quantity this paper is about". New: the free run there had an 8× larger
+cache and was still lower — corroboration of the phenomenon, not a matched-
+budget residual. Paper §2 sentence and catalogue entries corrected; what it
+changes: the novelty distance is wider (they never form a matched-budget
+difference), the "they already have our numbers" framing is retired.
 
 ## 5. Framing discipline (non-negotiable — apply throughout)
 - **Divergence ≠ damage.** ADD / TV / residual are "behavioral-fidelity loss," never "damage."
