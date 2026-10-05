@@ -2,7 +2,7 @@
 
 Specification: `docs/paper/EXECUTION_PLAN.md` (v1.0, baseline `1b644dc`).
 Claims: `docs/paper/CLAIM_LEDGER.md`.
-Snapshot: **2026-10-05 13:30 Dubai.** The remotes were fetched; origin and backup were both at `1b644dc` with no newer commits.
+Snapshot: **2026-10-05 12:00 Dubai.** The remotes were fetched; origin and backup were both at `1b644dc` with no newer commits.
 Server at 11:07: both GPUs idle (outside the 01:45–10:43 window); storage 49.6 GiB of 72.
 
 | WP | Owner | Depends on | State | Artifacts | Command | Actual resource use | Next action |

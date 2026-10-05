@@ -24,7 +24,7 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
-  **★★★★★ 2026-10-05 13:30 Dubai — execution plan v1.0 adopted
+  **★★★★★ 2026-10-05 12:00 Dubai — execution plan v1.0 adopted
   (`docs/paper/EXECUTION_PLAN.md`); WP0–WP3 done, WP4 code ready, WP5/WP6 held.**
   Status table: `docs/paper/EXECUTION_STATUS.md`; claims: `CLAIM_LEDGER.md`.
   Protected reverse b256 READ (new 2×2, `results/diag/paper_audit/`): after
