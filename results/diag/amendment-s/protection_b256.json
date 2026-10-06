@@ -89,7 +89,7 @@
     "groups": {
       "analysis_code": {
         "n_files": 9,
-        "sha256": "a4ceae2ec4d6c18a94554620171f7b57cae5340fe5210c30115060448a11bab5"
+        "sha256": "32d2824e1f6fc2a62a56f4c19261c40f6a67691afc10062c39de073f61f688e5"
       },
       "full_cache_bank": {
         "n_files": 8,
@@ -124,7 +124,7 @@
         "sha256": "2e1a247312ab4b318b50e74b82c6f2fbd102fc86c9a527c1c869260297a68746"
       }
     },
-    "sha256": "e53985ff4eff78c202319bbe23b391b81635433273bd23a2ab076fba6cd00bb6"
+    "sha256": "7b5df244e04b56bd425cfcefd4a72b46a5b240055317b7e7c74fd8d4cf815680"
   },
   "design": {
     "n_problems": 100,

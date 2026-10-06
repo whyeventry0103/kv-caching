@@ -123,6 +123,7 @@ GENERATION_SOURCES: dict[str, tuple[str, ...]] = {
         "scripts/run_replay.py",
         "scripts/run_grid_protected.py",
         "scripts/run_replay_protected.py",
+        "scripts/protected_selectors_smoke.py",
     ),
     "dacc": (
         "src/kvcache/generation.py",

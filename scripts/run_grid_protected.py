@@ -28,6 +28,7 @@ import run_grid
 from kvcache.cli import load_config
 from kvcache.presses.protected_selectors import (
     build_protected_selector_press,
+    needs_eager_attention,
     require_protected_config,
 )
 
@@ -38,9 +39,10 @@ def main() -> int:
     require_protected_config(
         config,
         dry_run=bool(getattr(args, "dry_run", False)),
-        runs_root=os.environ.get("REMOTE_RUNS_ROOT"),
+        runs_root=os.environ.get("KVCACHE_BASE_RUNS_ROOT"),
     )
     run_grid.build_press = build_protected_selector_press
+    run_grid.press_needs_eager_attention = needs_eager_attention
     return run_grid.main()
 
 

@@ -23,7 +23,8 @@
   - Multiplicity: two policies, Holm.
   - Stopping: read only when 800/800 FINAL.
 - **Cost.** 800 readouts of b1024 traces. At the measured b1024 free-run rate (87.3 s/row) × 0.6–1.0: **≈ 11.6–19.4 GPU-h + ~0.2 h setup, ≈ 1 night.** Storage ≈ 6 MB.
-- **Approval needed.** Yes (new cell outside S.1).
+- **Analysis path (ready, 2026-10-06).** `report_protocol_audit.py reverse --budget 1024` reads the protected 2×2 alone. The protected-vs-unprotected comparison is withheld as NOT AVAILABLE, because no unprotected 1024 reverse arm exists. CLI tests: complete → FINAL; incomplete → PARTIAL.
+- **Approval needed.** Yes (new cell outside S.1). The review recommends a 20 GPU-h total cap in normal windows.
 
 ## P2 — WP4 real-generation smoke (needed before any WP5 row)
 
@@ -33,7 +34,10 @@
   - Checks at every prune: prompt (and buffer) retained, no duplicate positions, exact target cardinality.
   - On pass: write `protected-selectors-smoke-PASS.json`.
 - **Cap.** 2 GPU-h.
-- **Code still to write.** The smoke runner (pattern: `scripts/pp_smoke.py`). CPU work, not started.
+- **Code (ready, 2026-10-06).** `scripts/protected_selectors_smoke.py` with config `protsel_smoke_wp4.yaml` (held; dry-run in `make dryrun`).
+  - The H2O-style identity control is live: with nothing protected, the selection must equal kvpress's top-k on the same attention scores, in every head, at every prune.
+  - The run adapters accept only a PASS record via `verify_smoke`: `passed: true`, `status: PASS`, no failures, and an identity equal to the one computed at launch (generation code, smoke config, model revision, input manifest, reference run). The run's families, model, budgets and interval must all have been tested.
+  - An empty marker, a failed record, a stale identity or an uncovered run is refused (tests). Protected H2O now loads eager attention through both adapters (tests).
 
 ## P3 — engineering pilot (timing)
 

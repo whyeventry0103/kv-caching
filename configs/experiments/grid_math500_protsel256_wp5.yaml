@@ -7,6 +7,7 @@ stage: grid
 # set or before protected-selectors-smoke-PASS.json exists. NOT in the queue.
 protected_selector: true
 held: true
+smoke_config: configs/experiments/protsel_smoke_wp4.yaml
 models: [r1_distill_qwen_7b]
 benchmarks: [math500]
 subset:

@@ -69,12 +69,19 @@ REVERSE = {
     256: {
         "reverse_pp": "reverse-readout-pp256",
         "reverse_base": "reverse-readout-diss256",
-    }
+    },
+    # Proposal P1 (HELD): only the PROTECTED reverse arm exists at 1024, so the
+    # read gives the protected 2 x 2 and withholds the protected-vs-unprotected
+    # comparison instead of inventing an arm.
+    1024: {"reverse_pp": "reverse-readout-pp1024", "reverse_base": None},
 }
-REVERSE_CONFIGS = (
-    "configs/experiments/reverse_readout_pp256_s1.yaml",
-    "configs/experiments/reverse_readout_diss256.yaml",
-)
+REVERSE_CONFIGS = {
+    256: (
+        "configs/experiments/reverse_readout_pp256_s1.yaml",
+        "configs/experiments/reverse_readout_diss256.yaml",
+    ),
+    1024: ("configs/experiments/reverse_readout_pp1024_s1x.yaml",),
+}
 ANALYSIS_CODE = (
     "scripts/report_protocol_audit.py",
     "src/kvcache/metrics/protocol_audit.py",
@@ -117,7 +124,11 @@ def reverse_dependencies(runs: Path, budget: int) -> dict[str, Any]:
             runs,
             [
                 *tree_files(runs / rev["reverse_pp"], "readout"),
-                *tree_files(runs / rev["reverse_base"], "readout"),
+                *(
+                    tree_files(runs / rev["reverse_base"], "readout")
+                    if rev["reverse_base"]
+                    else []
+                ),
             ],
         ),
         "specs": (
@@ -126,7 +137,7 @@ def reverse_dependencies(runs: Path, budget: int) -> dict[str, Any]:
                 [
                     cell["grid_pp_config"],
                     cell["grid_base_config"],
-                    *REVERSE_CONFIGS,
+                    *REVERSE_CONFIGS[budget],
                     *rs.FROZEN_SPECS,
                 ]
             ),
@@ -190,7 +201,10 @@ def reverse(runs: Path, a: argparse.Namespace) -> tuple[dict[str, Any], str]:
         if str(r["condition"]["budget"]) == budget
     ]
     rev_pp = rs._rows(runs / rev["reverse_pp"], "readout")
-    rev_base = rs._rows(runs / rev["reverse_base"], "readout")
+    has_base = rev["reverse_base"] is not None
+    if not has_base:
+        grid_base, ro_base = [], []
+    rev_base = rs._rows(runs / rev["reverse_base"], "readout") if has_base else []
     fc_rows = rs._rows(runs / rs.FC_RUN, rs.BENCH)
 
     grid_req = ("pid", "press", "budget", "decoding.seed", "trace")
@@ -213,6 +227,9 @@ def reverse(runs: Path, a: argparse.Namespace) -> tuple[dict[str, Any], str]:
             rev_base, key=_reverse_key, expected=base_keys, **rkw
         ),
     }
+    if not has_base:
+        for name in ("grid_base", "readout_base", "reverse_base"):
+            del pop[name]
     for name, rows, keyf in (
         ("reverse_pp", rev_pp, _reverse_key),
         ("reverse_base", rev_base, _reverse_key),
@@ -252,7 +269,8 @@ def reverse(runs: Path, a: argparse.Namespace) -> tuple[dict[str, Any], str]:
         ("reverse_pp", rev_pp),
         ("reverse_base", rev_base),
     ):
-        controls[f"provenance_{name}"] = legacy_provenance_summary(rows)
+        if name in pop:
+            controls[f"provenance_{name}"] = legacy_provenance_summary(rows)
     status = final_status({"status": rs._combine(pop)}, controls)
     out: dict[str, Any] = {
         "read": "protocol audit: operational 2 x 2 (forward and reverse readout)",
@@ -285,10 +303,10 @@ def reverse(runs: Path, a: argparse.Namespace) -> tuple[dict[str, Any], str]:
     out["protection_by_direction"] = {}
     for base in PP_BASES:
         cells: dict[str, dict[str, dict[tuple, bool]]] = {}
-        for press, grid, ro, rv in (
-            (base + PP_SUFFIX, grid_pp, ro_pp, rev_pp),
-            (base, grid_base, ro_base, rev_base),
-        ):
+        arms = [(base + PP_SUFFIX, grid_pp, ro_pp, rev_pp)]
+        if has_base:
+            arms.append((base, grid_base, ro_base, rev_base))
+        for press, grid, ro, rv in arms:
             cc = free(grid, press)
             fcm = readout(ro, rs._readout_key, press)
             cfm = readout(rv, _reverse_key, press)
@@ -320,11 +338,16 @@ def reverse(runs: Path, a: argparse.Namespace) -> tuple[dict[str, Any], str]:
                 ]
                 for k in population
             )
-        out["protection_by_direction"][base + PP_SUFFIX] = pa.protection_by_direction(
-            cells[base + PP_SUFFIX],
-            cells[base],
-            n_resamples=a.n_resamples,
-            seed=a.seed,
+        out["protection_by_direction"][base + PP_SUFFIX] = (
+            pa.protection_by_direction(
+                cells[base + PP_SUFFIX],
+                cells[base],
+                n_resamples=a.n_resamples,
+                seed=a.seed,
+            )
+            if has_base
+            else "NOT AVAILABLE: no unprotected reverse arm at this budget "
+            "(not registered); the protected 2 x 2 is reported alone"
         )
     out.update(
         _write_tsv(

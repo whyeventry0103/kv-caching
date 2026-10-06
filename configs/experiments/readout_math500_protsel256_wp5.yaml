@@ -6,6 +6,7 @@ mode: readout
 # 256. Runs through scripts/run_replay_protected.py (same held/smoke refusal).
 protected_selector: true
 held: true
+smoke_config: configs/experiments/protsel_smoke_wp4.yaml
 reference_run_name: math500-fc-powered-merged
 models: [r1_distill_qwen_7b]
 benchmarks: [math500]

@@ -1,0 +1,26 @@
+name: protsel_smoke_wp4
+stage: protselsmoke
+# Execution plan WP4 gate (PROPOSED, HELD 2026-10-05; proposal P2, cap 2 GPU-h):
+# real-model smoke of the protected-selector families before any WP5 row.
+# Writes protected-selectors-smoke-PASS.json only if every check in
+# kvcache.presses.protected_selectors.smoke_failures holds; the run adapters
+# accept only a PASS whose identity matches the code, model, this config and
+# the inputs at launch time (verify_smoke).
+protected_selector: true
+held: true
+reference_run_name: math500-fc-powered-merged
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+subset:
+  math500: 100
+presses: [h2o_style_pp_v1, uniform_fresh_pp_v1, uniform_fresh_pp_r64_v1]
+budgets: [256]
+seeds: [11]
+compression_interval: 64
+min_trace_tokens: 1024
+replay_tokens: 1536
+generation_cap: 700
+identity_family: h2o_style_pp_v1
+estimated_generation_count: 3
+scale_authorized: false
+remote_only: true

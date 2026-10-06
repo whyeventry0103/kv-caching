@@ -24,6 +24,17 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-10-06 19:40 Dubai — review of 8e1e81a: R1–R4 closed; the two runner blockers are fixed on CPU.**
+
+  - **Eager attention.** Protected H2O now loads eager attention, through both adapters.
+  - **Smoke gate.** It now accepts only an identity-matched PASS record (an empty or failed marker is refused).
+  - **Smoke runner and B=1024.** The smoke runner is written (held), and the reverse reader supports B=1024 (protected 2×2 alone).
+  - **Re-reads.** 0 numeric changes.
+
+  **Last night produced nothing for B=1024.** A co-tenant held about 26 GB per GPU at 01:45. `grid-pp1024` needs 24 GB free, so the Qwen3 grid (needs 20 GB) took both GPUs. `grid-pp1024` is still at 474/800; Qwen3 is at 281/400.
+
+  **Owner decisions pending:** Qwen3 gate option; P1 (B=1024 reverse, review suggests a 20 GPU-h cap); P2 + P3 (2 + 6 GPU-h); GSM8K pin `740312a` and download; how to prioritise B=1024 against Qwen3 tonight.
+
   **★★★★★ 2026-10-05 ~20:00 Dubai — review of fbf869f: bounded repair applied.**
 
   **R1, readers.** Values are now checked before `bool()`, in both `report_protocol_audit` and `report_s`. `matched` validates accuracy rows against the frozen design and carries a fingerprint. Host re-read: **0 numeric changes** in five reads.

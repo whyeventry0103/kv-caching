@@ -228,3 +228,45 @@ def test_matched_duplicate_accuracy_key_is_invalid(tmp_path):
     assert code == 2, log
     d = json.loads((tmp_path / "out/matched_b256.json").read_text())
     assert d["status"] == "INVALID"
+
+
+# ------------------------------------------------- B=1024 (proposal P1, held)
+def reverse_fixture_1024(tmp: Path, *, drop: int = 0) -> Path:
+    runs = s1_fixture(tmp, budget=1024)
+    rows = [
+        {
+            "reference_key": ["math500", p, "m", press, 1024, s],
+            "condition": {"press": "fullcache", "budget": 1024},
+            "readout_defined": True,
+            "readout_correct": PIDS100.index(p) % 2 == 0,
+            **RUNMETA,
+        }
+        for press in ("random_pp", "streamingllm_pp")
+        for p in PIDS100
+        for s in SEEDS
+    ]
+    _write(runs / "reverse-readout-pp1024/readout/r.jsonl", rows[drop:])
+    return runs
+
+
+def test_reverse_1024_reads_the_protected_2x2_alone(tmp_path):
+    runs = reverse_fixture_1024(tmp_path)
+    code, log = _run(runs, tmp_path / "out", "reverse", "--budget", "1024")
+    assert code == 0, log
+    d = json.loads((tmp_path / "out/reverse_b1024.json").read_text())
+    assert d["status"] == "FINAL"
+    assert sorted(d["per_policy"]) == ["random_pp", "streamingllm_pp"]
+    assert all(
+        str(v).startswith("NOT AVAILABLE")
+        for v in d["protection_by_direction"].values()
+    )
+    assert "reverse_base" not in d["population"]
+
+
+def test_reverse_1024_incomplete_reverse_arm_is_partial(tmp_path):
+    runs = reverse_fixture_1024(tmp_path, drop=3)
+    code, log = _run(runs, tmp_path / "out", "reverse", "--budget", "1024")
+    assert code == 3, log
+    d = json.loads((tmp_path / "out/reverse_b1024.json").read_text())
+    assert d["status"] == "PARTIAL"
+    assert str(d["per_policy"]).startswith("WITHHELD")

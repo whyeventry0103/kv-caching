@@ -169,15 +169,24 @@ def test_gate_allows_dry_runs_of_held_configs():
     ps.require_protected_config(_cfg(held=True), dry_run=True)
 
 
-def test_gate_refuses_real_runs_while_held_or_without_smoke(tmp_path):
+def test_gate_refuses_real_runs_while_held_or_without_a_valid_smoke(tmp_path):
     with pytest.raises(SystemExit, match="HELD"):
         ps.require_protected_config(_cfg(held=True), dry_run=False, runs_root=tmp_path)
     with pytest.raises(SystemExit, match="HELD"):  # absent flag means held
         ps.require_protected_config(_cfg(), dry_run=False, runs_root=tmp_path)
-    with pytest.raises(SystemExit, match="smoke"):
+    with pytest.raises(SystemExit, match="no smoke_config"):
         ps.require_protected_config(_cfg(held=False), dry_run=False, runs_root=tmp_path)
+    # 8e1e81a accepted any existing file; an empty record is now refused
     (tmp_path / ps.SMOKE_MARKER).write_text("{}")
-    ps.require_protected_config(_cfg(held=False), dry_run=False, runs_root=tmp_path)
+    cfg = _cfg(
+        held=False,
+        smoke_config=SMOKE_CFG,
+        models=["r1_distill_qwen_7b"],
+        budgets=[256],
+        compression_interval=64,
+    )
+    with pytest.raises(SystemExit, match="does not record a PASS"):
+        ps.require_protected_config(cfg, dry_run=False, runs_root=tmp_path)
 
 
 @pytest.mark.parametrize(
@@ -191,3 +200,159 @@ def test_gate_refuses_real_runs_while_held_or_without_smoke(tmp_path):
 def test_gate_refuses_non_protected_configs(over, match):
     with pytest.raises(SystemExit, match=match):
         ps.require_protected_config(_cfg(**over), dry_run=True)
+
+
+# ---------------------------------------- review of 8e1e81a: eager + smoke gate
+import json  # noqa: E402
+import os  # noqa: E402
+import subprocess  # noqa: E402
+import sys  # noqa: E402
+from pathlib import Path  # noqa: E402
+
+import yaml  # noqa: E402
+
+ROOT = Path(__file__).resolve().parents[1]
+SMOKE_CFG = "configs/experiments/protsel_smoke_wp4.yaml"
+GRID_CFG = "configs/experiments/grid_math500_protsel256_wp5.yaml"
+READOUT_CFG = "configs/experiments/readout_math500_protsel256_wp5.yaml"
+
+
+def test_needs_eager_maps_families_to_their_base():
+    assert ps.needs_eager_attention("h2o_style_pp_v1") is True
+    assert ps.needs_eager_attention("uniform_fresh_pp_v1") is False
+    assert ps.needs_eager_attention("uniform_fresh_pp_r64_v1") is False
+    assert ps.needs_eager_attention("h2o") is True  # registry names pass through
+
+
+@pytest.mark.parametrize(
+    "adapter, runner, cfg",
+    [
+        ("run_grid_protected", "run_grid", GRID_CFG),
+        ("run_replay_protected", "run_replay", READOUT_CFG),
+    ],
+)
+def test_both_adapters_select_eager_for_protected_h2o(
+    monkeypatch, adapter, runner, cfg
+):
+    """Through the real adapter: after it patches the runner, the runner's own
+    eager decision for this config must be True (it was False at 8e1e81a)."""
+    monkeypatch.syspath_prepend(str(ROOT / "scripts"))
+    mod = __import__(adapter)
+    run = __import__(runner)
+    seen = {}
+
+    def fake_main():
+        presses = yaml.safe_load((ROOT / cfg).read_text())["presses"]
+        seen["eager"] = any(run.press_needs_eager_attention(p) for p in presses)
+        return 0
+
+    monkeypatch.setattr(run, "main", fake_main)
+    monkeypatch.setattr(
+        sys, "argv", [adapter, "--config", str(ROOT / cfg), "--dry-run"]
+    )
+    assert mod.main() == 0
+    assert seen["eager"] is True
+
+
+def _run_cfg(**over):
+    cfg = yaml.safe_load((ROOT / GRID_CFG).read_text())
+    cfg.update(over)
+    return cfg
+
+
+def _valid_marker(tmp_path, **over):
+    smoke = yaml.safe_load((ROOT / SMOKE_CFG).read_text())
+    rec = {
+        "passed": True,
+        "status": "PASS",
+        "failures": [],
+        "identity": ps.smoke_identity(smoke),
+        "families_tested": sorted(smoke["presses"]),
+    }
+    rec.update(over)
+    (tmp_path / ps.SMOKE_MARKER).write_text(json.dumps(rec))
+
+
+def test_verify_smoke_accepts_a_valid_pass(tmp_path):
+    _valid_marker(tmp_path)
+    assert ps.verify_smoke(tmp_path, _run_cfg()) == (True, "verified")
+
+
+@pytest.mark.parametrize(
+    "content, why",
+    [
+        ("", "absent, empty or unreadable"),
+        ('{"passed": false, "status": "FAIL"}', "does not record a PASS"),
+        ('{"passed": true}', "does not record a PASS"),
+        ("[1, 2]", "not a record"),
+    ],
+    ids=["empty", "failed_record", "no_status", "not_a_dict"],
+)
+def test_verify_smoke_refuses_the_review_counterexamples(tmp_path, content, why):
+    (tmp_path / ps.SMOKE_MARKER).write_text(content)
+    ok, msg = ps.verify_smoke(tmp_path, _run_cfg())
+    assert not ok and why in msg
+
+
+def test_verify_smoke_refuses_stale_listed_failures_and_uncovered_runs(tmp_path):
+    _valid_marker(tmp_path, failures=["x"])
+    assert "lists failures" in ps.verify_smoke(tmp_path, _run_cfg())[1]
+    smoke = yaml.safe_load((ROOT / SMOKE_CFG).read_text())
+    stale = dict(ps.smoke_identity(smoke), implementation_id="0" * 64)
+    _valid_marker(tmp_path, identity=stale)
+    assert "stale" in ps.verify_smoke(tmp_path, _run_cfg())[1]
+    _valid_marker(tmp_path, families_tested=["uniform_fresh_pp_v1"])
+    assert "every family" in ps.verify_smoke(tmp_path, _run_cfg())[1]
+    _valid_marker(tmp_path)
+    assert "every budget" in ps.verify_smoke(tmp_path, _run_cfg(budgets=[1024]))[1]
+    assert "interval" in ps.verify_smoke(tmp_path, _run_cfg(compression_interval=32))[1]
+    assert (
+        "no smoke_config" in ps.verify_smoke(tmp_path, _run_cfg(smoke_config=None))[1]
+    )
+
+
+def test_gate_refuses_a_failed_marker_through_the_real_adapter(tmp_path):
+    cfg = _run_cfg(held=False)
+    path = tmp_path / "cfg.yaml"
+    path.write_text(yaml.safe_dump(cfg))
+    (tmp_path / ps.SMOKE_MARKER).write_text('{"passed": false, "status": "FAIL"}')
+    p = subprocess.run(
+        [
+            sys.executable,
+            str(ROOT / "scripts/run_grid_protected.py"),
+            "--config",
+            str(path),
+            "--i-understand",
+        ],
+        capture_output=True,
+        text=True,
+        cwd=ROOT,
+        env={**os.environ, "KVCACHE_BASE_RUNS_ROOT": str(tmp_path)},
+    )
+    assert p.returncode != 0
+    assert "smoke gate" in p.stderr and "does not record a PASS" in p.stderr
+
+
+def test_smoke_failures_identity_and_generation_checks():
+    ok_identity = {
+        "kind": "identity",
+        "press": "h2o_style_pp_v1",
+        "pid": "p",
+        "identity_prunes": 5,
+        "identity_mismatched_heads": 0,
+    }
+    assert ps.smoke_failures([ok_identity]) == []
+    bad = dict(ok_identity, identity_mismatched_heads=2)
+    assert "differ from kvpress top-k" in ps.smoke_failures([bad])[0]
+    none = dict(ok_identity, identity_prunes=0)
+    assert "checked no prune" in ps.smoke_failures([none])[0]
+    gen = {
+        "kind": "generation",
+        "press": "uniform_fresh_pp_v1",
+        "pid": "p",
+        "prompt_len": 50,
+        "n_tokens": 700,
+        "protect": {"prompt_len": 50, "n_prunes": 0},
+    }
+    assert "no prune" in ps.smoke_failures([gen])[0]
+    assert ps.smoke_failures([]) == ["no smoke record"]

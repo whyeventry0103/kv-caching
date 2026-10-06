@@ -130,7 +130,95 @@ def select_keep(
     return sorted(kept, key=lambda i: positions[i])
 
 
+def needs_eager_attention(name: str) -> bool:
+    """Attention backend for a press name, mapping each protected family to its
+    base policy (review of 8e1e81a: ``h2o_style_pp_v1`` scores observed
+    attention, so it needs eager attention exactly as ``h2o`` does; the
+    registry's ``press_needs_eager_attention`` does not know the family)."""
+    from kvcache.presses import press_needs_eager_attention
+
+    key = name.lower()
+    if key in FAMILIES:
+        return press_needs_eager_attention(FAMILIES[key].base)
+    return press_needs_eager_attention(name)
+
+
 SMOKE_MARKER = "protected-selectors-smoke-PASS.json"
+SMOKE_KIND = "protected_selectors"
+
+
+def smoke_identity(smoke_cfg: dict[str, Any], *, root: Any = None) -> dict[str, Any]:
+    """The identity a smoke PASS must carry: generation code of the family
+    (``implementation_id``), the smoke config's bytes, the pinned model
+    revision, the frozen input manifest and the reference run. Computed from
+    committed files, never read from the marker."""
+    from pathlib import Path
+
+    import yaml
+
+    from kvcache.provenance import PROJECT_ROOT, identity
+
+    base = Path(root) if root is not None else PROJECT_ROOT
+    models = yaml.safe_load((base / "configs/models.yaml").read_text())["models"]
+    return identity(
+        SMOKE_KIND,
+        smoke_cfg,
+        model_revision=str(models[smoke_cfg["models"][0]]["revision"]),
+        reference_run=smoke_cfg.get("reference_run_name"),
+        root=base,
+        manifest_path=smoke_cfg.get("input_manifest"),
+    )
+
+
+def verify_smoke(
+    runs_root: Any, run_config: dict[str, Any], *, root: Any = None
+) -> tuple[bool, str]:
+    """Is there a VALID smoke PASS for this run config? (review of 8e1e81a)
+
+    Required: the marker parses to a mapping that says ``passed: true``,
+    ``status: "PASS"`` and has no failures; its identity equals the identity
+    computed now (so a generation-code, model, smoke-config or input change
+    makes it stale); and the run config is covered by what the smoke tested
+    (every family, the model, every budget, the interval).
+    """
+    import json
+    from pathlib import Path
+
+    import yaml
+
+    from kvcache.provenance import PROJECT_ROOT, same_identity
+
+    base = Path(root) if root is not None else PROJECT_ROOT
+    if not run_config.get("smoke_config"):
+        return False, "run config names no smoke_config"
+    smoke_cfg = yaml.safe_load((base / run_config["smoke_config"]).read_text())
+    marker = Path(runs_root) / SMOKE_MARKER
+    try:
+        d = json.loads(marker.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return False, f"{SMOKE_MARKER} absent, empty or unreadable"
+    if not isinstance(d, dict):
+        return False, f"{SMOKE_MARKER} is not a record"
+    if d.get("passed") is not True or d.get("status") != "PASS":
+        return False, f"{SMOKE_MARKER} does not record a PASS"
+    if d.get("failures"):
+        return False, f"{SMOKE_MARKER} lists failures"
+    if not same_identity(d.get("identity"), smoke_identity(smoke_cfg, root=base)):
+        return False, f"{SMOKE_MARKER} is stale: its identity differs from now"
+    tested = set(d.get("families_tested") or [])
+    if not {str(p).lower() for p in run_config["presses"]} <= tested:
+        return False, "the smoke did not test every family of this run"
+    if run_config["models"] != smoke_cfg["models"]:
+        return False, "the smoke tested a different model"
+    if not {str(b) for b in run_config["budgets"]} <= {
+        str(b) for b in smoke_cfg["budgets"]
+    }:
+        return False, "the smoke did not test every budget of this run"
+    if int(run_config["compression_interval"]) != int(
+        smoke_cfg["compression_interval"]
+    ):
+        return False, "the smoke used another compression interval"
+    return True, "verified"
 
 
 def require_protected_config(
@@ -141,15 +229,13 @@ def require_protected_config(
     replay: bool = False,
 ) -> None:
     """Refuse a config that is not a protected-selector cell, and refuse REAL
-    execution while the config is held or before the smoke gate has passed.
+    execution while the config is held or without a VALID smoke PASS.
 
     The families are outside ``kvcache.presses``'s eligibility tiers, so this is
-    their promotion mechanism: a PASS marker written by the (not yet run)
-    real-generation smoke, plus a config whose ``held`` flag was removed by an
-    authorized registration. Dry runs are always allowed.
+    their promotion mechanism: a verified PASS record (``verify_smoke``) plus a
+    config whose ``held`` flag was removed by an authorized registration. Dry
+    runs are always allowed.
     """
-    from pathlib import Path
-
     if config.get("protected_selector") is not True:
         raise SystemExit("REFUSED: config must set protected_selector: true")
     for name in config["presses"]:
@@ -169,12 +255,67 @@ def require_protected_config(
             "REFUSED: config is HELD (not authorized); remove `held` only with a "
             "dated registration and an approved budget"
         )
-    root = Path(runs_root) if runs_root is not None else None
-    if root is None or not (root / SMOKE_MARKER).exists():
-        raise SystemExit(
-            f"REFUSED: {SMOKE_MARKER} is absent; the real-generation smoke must "
-            "pass before any analysis row"
-        )
+    if runs_root is None:
+        raise SystemExit("REFUSED: no runs root to find the smoke marker in")
+    ok, why = verify_smoke(runs_root, config)
+    if not ok:
+        raise SystemExit(f"REFUSED: smoke gate: {why}")
+
+
+def smoke_failures(records: list[dict[str, Any]]) -> list[str]:
+    """Every registered WP4 smoke check that did not hold (empty = PASS).
+
+    Replay records: the press read the true prompt length; target and every
+    post-prune size equal the effective target; every layer pruned;
+    pre-eviction TV exactly 0; the live retention check never raised. Identity
+    records (h2o_style_pp_v1, nothing protected): at least one prune checked
+    and zero heads whose selection differs from kvpress's top-k. Generation
+    records: the prompt length was read and at least one prune happened.
+    """
+    fails: list[str] = []
+    if not records:
+        return ["no smoke record"]
+    for r in records:
+        tag = f"{r['kind']} {r['press']} {r['pid']}"
+        if "raised" in r:
+            fails.append(f"{tag}: raised: {r['raised']}")
+            continue
+        if r["kind"] == "identity":
+            if r["identity_prunes"] < 1:
+                fails.append(f"{tag}: identity control checked no prune")
+            if r["identity_mismatched_heads"] != 0:
+                fails.append(
+                    f"{tag}: {r['identity_mismatched_heads']} head selections "
+                    "differ from kvpress top-k"
+                )
+            continue
+        protect = r["protect"]
+        if protect["prompt_len"] != r["prompt_len"]:
+            fails.append(
+                f"{tag}: press read prompt length {protect['prompt_len']}, "
+                f"true length {r['prompt_len']}"
+            )
+        if r["kind"] == "generation":
+            if protect["n_prunes"] < 1:
+                fails.append(f"{tag}: no prune in {r['n_tokens']} generated tokens")
+            continue
+        if protect["target"] != r["expected_target"]:
+            fails.append(f"{tag}: target {protect['target']} != {r['expected_target']}")
+        if r["first_effective_prune"] is None:
+            fails.append(f"{tag}: no effective prune")
+            continue
+        if protect["n_layers_pruned"] != r["n_layers"]:
+            fails.append(
+                f"{tag}: pruned {protect['n_layers_pruned']} of {r['n_layers']} layers"
+            )
+        if r["pre_eviction_max_tv"] != 0.0:
+            fails.append(f"{tag}: pre-eviction TV {r['pre_eviction_max_tv']} != 0")
+        if r["post_prune_sizes"] != [r["expected_target"]]:
+            fails.append(
+                f"{tag}: post-prune sizes {r['post_prune_sizes']} != "
+                f"[{r['expected_target']}]"
+            )
+    return fails
 
 
 def build_protected_selector_press(
@@ -219,6 +360,8 @@ def build_protected_selector_press(
     state = ProtectState(base=fam.name, budget=int(budget), min_trace_slots=min_slots)
     press.protect = state
     prunes: dict[int, int] = {}
+    identity_check = {"prunes": 0, "mismatched_heads": 0}
+    press.identity_check = identity_check
 
     def set_prompt(prompt_len: int) -> None:
         state.prompt_len = int(prompt_len)
@@ -270,6 +413,7 @@ def build_protected_selector_press(
         prune = prunes.get(layer, 0)
         logical_len = int(before.max()) + 1
         recent_from = logical_len - fam.recent if fam.recent else None
+        ref = None
         if fam.fresh_uniform:
             per_head = [
                 fresh_uniform_scores(
@@ -280,6 +424,11 @@ def build_protected_selector_press(
         else:
             s = scorer.score(module, hidden_states, keys, values, attentions, kwargs)
             per_head = s[0].float().cpu().tolist()
+            ref = (
+                s[0].topk(n_keep, dim=-1).indices.cpu().tolist()
+                if int(state.prompt_len) == 0 and not fam.recent
+                else None
+            )
         pos = before.tolist()
         idx = [
             select_keep(
@@ -291,6 +440,13 @@ def build_protected_selector_press(
             )
             for h in range(n_kv)
         ]
+        if not fam.fresh_uniform and ref is not None:
+            # Identity control (smoke): nothing protected, so the selection
+            # must equal kvpress's own top-k on the SAME live scores.
+            identity_check["prunes"] += 1
+            identity_check["mismatched_heads"] += sum(
+                set(ref[h]) != set(idx[h]) for h in range(n_kv)
+            )
         index = torch.tensor(idx, dtype=torch.long)
         after = before.gather(1, index)
         _check(state, fam, before, after, layer, recent_from)

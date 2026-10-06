@@ -44,6 +44,9 @@ case "$COMMAND" in
   grid_pp) PY_SCRIPT="scripts/run_grid_pp.py" ;;
   replay_pp) PY_SCRIPT="scripts/run_replay_pp.py" ;;
   ppsmoke) PY_SCRIPT="scripts/pp_smoke.py" ;;
+  grid_protsel) PY_SCRIPT="scripts/run_grid_protected.py" ;;
+  replay_protsel) PY_SCRIPT="scripts/run_replay_protected.py" ;;
+  protselsmoke) PY_SCRIPT="scripts/protected_selectors_smoke.py" ;;
   forkcontrol) PY_SCRIPT="scripts/run_fork_control.py" ;;
   forkprecision) PY_SCRIPT="scripts/run_fork_precision.py" ;;
   metrics) PY_SCRIPT="scripts/run_metrics.py" ;;
