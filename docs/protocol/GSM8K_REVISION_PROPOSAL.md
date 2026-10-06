@@ -32,3 +32,15 @@
 - **Frozen sample.** Size from `results/diag/paper_plan/sample_size.json` for the chosen primary endpoint; seed recorded in the registration.
 - **Pilot.** Fixed 8-problem pilot, excluded from claims, run first.
 - **Budgets.** GSM8K traces are short, so a 1024 budget may never evict. Check the realized compression ratio on the pilot before freezing budgets.
+
+## Outcome (2026-10-06)
+
+**Pin.** The owner pinned `740312add88f781978c0658806c59bc2815b9866` in session. It is recorded in `configs/benchmarks.yaml` and PREREGISTRATION.
+
+**Download.** Downloaded on the remote through the guarded loader (`load_benchmark(..., allow_download=True)`, KVCACHE_REMOTE=1):
+- 1,319 test rows, matching the official card;
+- 4.5 MB on disk;
+- the offline reload works;
+- the first gold answer is `18`.
+
+No GSM8K generation is authorized.

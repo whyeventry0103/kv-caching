@@ -170,28 +170,22 @@ def smoke_identity(smoke_cfg: dict[str, Any], *, root: Any = None) -> dict[str, 
     )
 
 
-def verify_smoke(
-    runs_root: Any, run_config: dict[str, Any], *, root: Any = None
+def smoke_record_ok(
+    runs_root: Any, smoke_cfg: dict[str, Any], *, root: Any = None
 ) -> tuple[bool, str]:
-    """Is there a VALID smoke PASS for this run config? (review of 8e1e81a)
+    """Is the marker under ``runs_root`` a valid PASS for ``smoke_cfg``?
 
-    Required: the marker parses to a mapping that says ``passed: true``,
-    ``status: "PASS"`` and has no failures; its identity equals the identity
-    computed now (so a generation-code, model, smoke-config or input change
-    makes it stale); and the run config is covered by what the smoke tested
-    (every family, the model, every budget, the interval).
+    It must parse to a mapping saying ``passed: true`` and ``status: "PASS"``,
+    list no failures, and carry an identity equal to ``smoke_identity`` computed
+    now, so a generation-code, model, smoke-config or input change makes it
+    stale. Shared by the run adapters (``verify_smoke``) and the scheduler's
+    typed gate (``kvcache.gates`` kind ``protsel_smoke``).
     """
     import json
     from pathlib import Path
 
-    import yaml
+    from kvcache.provenance import same_identity
 
-    from kvcache.provenance import PROJECT_ROOT, same_identity
-
-    base = Path(root) if root is not None else PROJECT_ROOT
-    if not run_config.get("smoke_config"):
-        return False, "run config names no smoke_config"
-    smoke_cfg = yaml.safe_load((base / run_config["smoke_config"]).read_text())
     marker = Path(runs_root) / SMOKE_MARKER
     try:
         d = json.loads(marker.read_text(encoding="utf-8"))
@@ -203,10 +197,40 @@ def verify_smoke(
         return False, f"{SMOKE_MARKER} does not record a PASS"
     if d.get("failures"):
         return False, f"{SMOKE_MARKER} lists failures"
-    if not same_identity(d.get("identity"), smoke_identity(smoke_cfg, root=base)):
+    if not same_identity(d.get("identity"), smoke_identity(smoke_cfg, root=root)):
         return False, f"{SMOKE_MARKER} is stale: its identity differs from now"
-    tested = set(d.get("families_tested") or [])
-    if not {str(p).lower() for p in run_config["presses"]} <= tested:
+    if set(d.get("families_tested") or []) != {
+        str(p).lower() for p in smoke_cfg["presses"]
+    }:
+        return False, f"{SMOKE_MARKER} does not list the configured families"
+    return True, "verified"
+
+
+def verify_smoke(
+    runs_root: Any, run_config: dict[str, Any], *, root: Any = None
+) -> tuple[bool, str]:
+    """Is there a VALID smoke PASS for this run config? (review of 8e1e81a)
+
+    ``smoke_record_ok`` on the run's smoke config, and the run config covered
+    by what the smoke tested (every family, the model, every budget, the
+    interval).
+    """
+    from pathlib import Path
+
+    import yaml
+
+    from kvcache.provenance import PROJECT_ROOT
+
+    base = Path(root) if root is not None else PROJECT_ROOT
+    if not run_config.get("smoke_config"):
+        return False, "run config names no smoke_config"
+    smoke_cfg = yaml.safe_load((base / run_config["smoke_config"]).read_text())
+    ok, why = smoke_record_ok(runs_root, smoke_cfg, root=base)
+    if not ok:
+        return ok, why
+    if not {str(p).lower() for p in run_config["presses"]} <= {
+        str(p).lower() for p in smoke_cfg["presses"]
+    }:
         return False, "the smoke did not test every family of this run"
     if run_config["models"] != smoke_cfg["models"]:
         return False, "the smoke tested a different model"

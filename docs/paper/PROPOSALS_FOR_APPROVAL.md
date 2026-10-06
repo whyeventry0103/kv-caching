@@ -67,3 +67,14 @@
 | Protected free-run gap | 0.042 / 0.045 | 63% / 56% | 853 / 998 (exceeds MATH-500) |
 
 **Choose the primary endpoint first, then the design.** These numbers borrow Qwen-7B/MATH-500 variance and are not promises for Qwen3 or GSM8K.
+
+## Decisions (2026-10-06, owner, in session)
+
+**P1, P2 and P3 approved** within their caps (20, 2 and 6 GPU-h), in normal windows only. Registered in PREREGISTRATION and queued:
+- `reverse-readout-pp1024`, after `grid-pp1024`;
+- `protsel-smoke`, with typed gate `protsel_smoke`;
+- `protsel-pilot-{grid,readout,reverse}`, after the smoke.
+
+The scheduler does not enforce GPU-hour caps. Claude checks usage after each window and holds a job whose projection exceeds its cap.
+
+**Still held:** WP5 and WP6 campaigns, the GSM8K campaign, and the unprotected B=1024 reverse arm.

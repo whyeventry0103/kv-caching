@@ -104,7 +104,7 @@
     "groups": {
       "analysis_code": {
         "n_files": 11,
-        "sha256": "3a60ce44cbb7f9950f16c0266051856814a09ca72530a7a2492c42b2e622d36b"
+        "sha256": "eb5ac99b273b3d32f585c3e09af06b704c45b639ea2e847cd40d342f65a2b1d9"
       },
       "protection_inputs": {
         "n_files": 40,
@@ -119,7 +119,7 @@
         "sha256": "cd68be70229183cdcb51c6b7189fb859e39a7e9b0a048eeeefed8d707247b7b8"
       }
     },
-    "sha256": "c080622da943c4b079983fd81b42382fcba9c624ef273924ea4d1cc70fa24add"
+    "sha256": "43a6953af647d73534c906273ac011e20a44d9a2d52fd1515d4e0ca20185b4bd"
   },
   "inputs": {
     "grid_base": "grid-diss256-tok",

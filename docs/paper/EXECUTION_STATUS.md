@@ -17,12 +17,20 @@ Snapshot **2026-10-05, about 20:00 Dubai** (host clock 19:39 when checked). The 
 | WP6 confirmation | **Held** | Manifests; `sample_size.json` (endpoint-specific, includes the interaction); `cost_estimate.json` (corrected readout pricing, seeds parameterised, overheads) | Choose the primary endpoint, then N. Qwen3 at 300×4 is about 600–1,100 GPU-h, which does not fit the nightly windows |
 | WP7 writing | **Drafting** | `DRAFT_METHODS_RELATED_FIGURES.md` | Figures 2 and 5 from existing B=256 data |
 
-## Decisions that need a person
+## Decisions (made by the owner on 2026-10-06)
 
-1. **Qwen3 gate disposition** (memo §4).
-2. **P1, B=1024 reverse readout:** about 12–19 GPU-h, roughly one night. The review rates it the highest-priority new experiment.
-3. **P2 smoke and P3 timing pilot:** ≤2 and ≤6 GPU-h, needed before any WP5 costing.
-4. **GSM8K:** pin the revision (`docs/protocol/GSM8K_REVISION_PROPOSAL.md`; candidate `740312a…`) and authorize the download.
+1. **Qwen3 gate:** option (a). Exploratory; FAIL kept; secondary only after the human review sheet is done.
+2. **P1** (B=1024 reverse, ≤20 GPU-h), **P2** (smoke, ≤2 GPU-h) and **P3** (pilot, ≤6 GPU-h): approved and queued.
+3. **GSM8K:** pinned and downloaded (1,319 rows). Preparation only.
+4. **Priority:** the three Qwen3 jobs are held until `grid-pp1024` and `readout-pp1024` are complete. Lift the `blocked:` lines then.
+
+**Queue order from 2026-10-07 01:45:**
+1. grid-pp1024 (seeds 23 and 89 remaining)
+2. readout-pp1024 and reverse-readout-pp1024
+3. protsel-smoke
+4. the pilots
+
+Simulated on the host: with 22 GB free the scheduler waits; with free GPUs it launches grid-pp1024.
 
 ## Review of fbf869f: repairs and their effect
 

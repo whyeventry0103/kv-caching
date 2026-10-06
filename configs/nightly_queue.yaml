@@ -1147,6 +1147,74 @@ jobs:
     est_output_gb: 0.01
     requires: grid-pp1024
 
+  # P1, APPROVED by the owner 2026-10-06 (cap 20 GPU-h total, normal windows):
+  # the protected budget-1024 traces read out under the FULL cache, so the
+  # forward/reverse interaction can be read at 1024 (report_protocol_audit
+  # reverse --budget 1024). Full-cache teacher forcing -> 28 GB like the 256
+  # reverse cell. Registered in PREREGISTRATION 2026-10-06.
+  - name: reverse-readout-pp1024
+    command: replay
+    config: configs/experiments/reverse_readout_pp1024_s1x.yaml
+    run_name: reverse-readout-pp1024
+    total: 800
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 28
+    progress_kind: readout
+    est_output_gb: 0.01
+    requires: grid-pp1024
+
+  # P2, APPROVED 2026-10-06 (cap 2 GPU-h): real-generation smoke of the
+  # protected-selector families. Typed gate protsel_smoke: complete only for an
+  # identity-matched PASS record -- the same check the run adapters apply
+  # before any row (kvcache.presses.protected_selectors.smoke_record_ok).
+  - name: protsel-smoke
+    command: protselsmoke
+    config: configs/experiments/protsel_smoke_wp4.yaml
+    run_name: protsel-smoke
+    total: 1
+    seeds: [11]
+    min_free_gb: 28
+    progress_kind: marker
+    marker: protected-selectors-smoke-PASS.json
+    est_output_gb: 0.01
+    gate: protsel_smoke
+    requires: null
+
+  # P3, APPROVED 2026-10-06 (cap 6 GPU-h for all three): timing pilot, first 8
+  # problems x seed 11 x 2 families. EXCLUDED FROM EVERY CLAIM.
+  - name: protsel-pilot-grid
+    command: grid_protsel
+    config: configs/experiments/grid_math500_protsel_pilot.yaml
+    run_name: grid-protsel-pilot
+    total: 16
+    seeds: [11]
+    min_free_gb: 28
+    progress_kind: grid
+    est_output_gb: 0.01
+    requires: protsel-smoke
+
+  - name: protsel-pilot-readout
+    command: replay_protsel
+    config: configs/experiments/readout_math500_protsel_pilot.yaml
+    run_name: readout-protsel-pilot
+    total: 16
+    seeds: [11]
+    min_free_gb: 28
+    progress_kind: readout
+    est_output_gb: 0.01
+    requires: protsel-smoke
+
+  - name: protsel-pilot-reverse
+    command: replay
+    config: configs/experiments/reverse_readout_protsel_pilot.yaml
+    run_name: reverse-readout-protsel-pilot
+    total: 16
+    seeds: [11]
+    min_free_gb: 28
+    progress_kind: readout
+    est_output_gb: 0.01
+    requires: protsel-pilot-grid
+
   # Amendment S.2: restoration by origin. Same traces, policies, budget and
   # trigger as restore-v2; arms frozen / prompt / trace / full, eviction off in
   # every arm. 25 problems x 4 seeds x 2 policies = 200 rows. Last in order, so
@@ -1180,6 +1248,7 @@ jobs:
     extra_args: ["--allow-model-download"]  # ~8 GB, first fetch of the pinned revision
 
   - name: grid-diss256-qwen3-4b
+    blocked: "Owner decision 2026-10-06: held until grid-pp1024 and readout-pp1024 are complete (B=1024 is the scientific priority; a co-tenant left <24 GB free on 2026-10-06, so this job took both GPUs). Remove this line then."
     command: grid
     config: configs/experiments/grid_math500_diss256_qwen3_4b.yaml
     run_name: grid-diss256-qwen3-4b
@@ -1191,6 +1260,7 @@ jobs:
     requires: fc-qwen3-4b
 
   - name: readout-diss256-qwen3-4b
+    blocked: "Owner decision 2026-10-06: held until grid-pp1024 and readout-pp1024 are complete (B=1024 is the scientific priority; a co-tenant left <24 GB free on 2026-10-06, so this job took both GPUs). Remove this line then."
     command: replay
     config: configs/experiments/readout_math500_diss256_qwen3_4b.yaml
     run_name: readout-diss256-qwen3-4b
@@ -1202,6 +1272,7 @@ jobs:
     requires: fc-qwen3-4b
 
   - name: reverse-readout-diss256-qwen3-4b
+    blocked: "Owner decision 2026-10-06: held until grid-pp1024 and readout-pp1024 are complete (B=1024 is the scientific priority; a co-tenant left <24 GB free on 2026-10-06, so this job took both GPUs). Remove this line then."
     command: replay
     config: configs/experiments/reverse_readout_diss256_qwen3_4b.yaml
     run_name: reverse-readout-diss256-qwen3-4b

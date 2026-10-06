@@ -16,6 +16,10 @@ must match it field for field.
   bytes of the VERIFIED basis.
 * ``pp_smoke`` (Amendment S.1): ``pp-smoke-PASS.json`` says ``passed: true`` and
   its identity equals the prompt-protected smoke's expected identity.
+* ``protsel_smoke`` (WP4, 2026-10-06): ``protected-selectors-smoke-PASS.json``
+  is a PASS record (status PASS, no failures, the configured families) whose
+  identity equals the protected-selector smoke's expected identity
+  (``kvcache.presses.protected_selectors.smoke_record_ok``).
 
 A generation-code change therefore invalidates a gate (the smoke must rerun),
 while reader, figure or documentation edits do not.
@@ -147,6 +151,12 @@ def gate_status(
         )
     elif kind == "fork_precision":
         return _fork_precision_status(runs_root, cfg, root)
+    elif kind == "protsel_smoke":
+        # Execution plan WP4 (P2, approved 2026-10-06): the same record check
+        # the run adapters apply, so the queue and the runners agree.
+        from kvcache.presses.protected_selectors import smoke_record_ok
+
+        return smoke_record_ok(runs_root, cfg, root=root)
     else:
         raise ValueError(f"unknown gate kind {kind!r}")
     d = _read(marker)

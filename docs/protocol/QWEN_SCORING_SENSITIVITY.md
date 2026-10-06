@@ -140,3 +140,13 @@ Neither hole touched these banks. They mattered for future outputs.
 **Human review sheet.** `results/diag/qwen_scoring/human_review_v2.tsv` lists every rescued or ambiguous row of both banks: 42 rows (Qwen3: 12 rescued, 12 ambiguous; anchor: 14 rescued, 4 ambiguous). Each row has its gold, both answers, the rule, the trace hash and the trace tail, plus blank reviewer columns. Secondary scores support substantive claims only after a person fills it in.
 
 **Gate disposition.** Unchanged and still the owner's decision (§4). The independent review also recommends option (a), recorded as a documented exception, not a passed gate.
+
+## 6. Decision recorded (2026-10-06)
+
+**The owner chose option (a)** in session. It is recorded in PREREGISTRATION ("Owner decisions and registrations, 2026-10-06").
+
+- Qwen3 cells are read under the frozen grader as EXPLORATORY.
+- The gate FAIL (0.845) is stated beside every Qwen3 result.
+- The v2 secondary score appears only after a person completes `human_review_v2.tsv`.
+
+Qwen3 generation is held behind B=1024 (queue `blocked:`).

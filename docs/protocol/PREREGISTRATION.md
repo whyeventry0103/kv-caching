@@ -4338,3 +4338,35 @@ These follow the independent review of fbf869f. No registered analysis, estimato
 
 Each needs its own dated registration before any row exists.
 
+## Owner decisions and registrations (2026-10-06): Qwen3 disposition (a); P1, P2, P3 approved; GSM8K pinned; Qwen3 generation held behind B=1024
+
+All decided by the owner in session on 2026-10-06, after the independent review of 8e1e81a recommended each.
+
+**1. S.4 Qwen3 bank gate: disposition (a).** This is a documented exception, not a passed gate.
+- The primary bank score remains 169/200 = 0.845, gate FAIL, and is recorded beside every Qwen3 result.
+- Qwen3 cells are read under the frozen grader as EXPLORATORY.
+- The v2 secondary score is reported alongside as a sensitivity, but only after a person completes `results/diag/qwen_scoring/human_review_v2.tsv`.
+- No Qwen3 result may be called confirmatory.
+
+**2. P1: protected B=1024 reverse readout, registered before any row exists.**
+- Config `reverse_readout_pp1024_s1x.yaml`, queue job `reverse-readout-pp1024`, which requires `grid-pp1024`.
+- Scope: 100 problems × 4 seeds × 2 protected policies = 800 rows.
+- Primary: the protected interaction per policy on the common support. EP estimator, joint 2000-resample problem bootstrap, seed 0; Holm over the two policies.
+- Secondary:
+  - worst-case completion bounds over the population;
+  - both one-direction contrasts;
+  - practical margins (0.03 primary for new designs, with 0.01 and 0.05).
+- No protected-vs-unprotected comparison: the unprotected 1024 reverse arm is not registered, and the read reports it as NOT AVAILABLE.
+- Read: `report_protocol_audit.py reverse --budget 1024`, only when 800/800 rows are FINAL.
+- Cap: 20 GPU-h in total, normal windows only. If the projection exceeds the cap, the job is held and reported.
+
+**3. P2 smoke (cap 2 GPU-h) and P3 timing pilot (cap 6 GPU-h)**
+- Configs: `protsel_smoke_wp4.yaml` and `*_protsel_pilot.yaml`.
+- The pilot covers the first 8 MATH-500 problems at seed 11, under `h2o_style_pp_v1` and `uniform_fresh_pp_v1`, in three stages (free, forward, reverse), 48 rows in all.
+- Its rows are EXCLUDED FROM EVERY CLAIM; their only use is per-row cost.
+- WP5/WP6 stay held until the pilot timings and the B=1024 result are read.
+
+**4. GSM8K.** Revision `740312add88f781978c0658806c59bc2815b9866` is pinned by the owner. The download is authorized for dataset preparation only; no GSM8K generation campaign is authorized.
+
+**5. Priority.** The three Qwen3 generation jobs are held (`blocked:`) until `grid-pp1024` and `readout-pp1024` are complete. No memory threshold was changed.
+

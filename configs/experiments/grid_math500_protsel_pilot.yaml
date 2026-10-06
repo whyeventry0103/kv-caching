@@ -1,0 +1,26 @@
+name: grid_math500_protsel_pilot
+stage: grid
+# Proposal P3, APPROVED by the owner 2026-10-06 (cap 6 GPU-h for the whole
+# pilot, normal windows). Engineering timing pilot of the protected-selector
+# families: the first 8 MATH-500 problems x seed 11 x 2 families. EXCLUDED
+# FROM EVERY CLAIM; its only output is per-row cost. Runs through
+# scripts/run_grid_protected.py, which still requires an identity-matched
+# smoke PASS (protsel_smoke_wp4.yaml) before any row.
+protected_selector: true
+held: false
+smoke_config: configs/experiments/protsel_smoke_wp4.yaml
+pilot_excluded_from_claims: true
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+subset:
+  math500: 8
+presses: [h2o_style_pp_v1, uniform_fresh_pp_v1]
+budgets: [256]
+seeds: [11]
+max_new_tokens:
+  math500: 16384
+compression_interval: 64
+estimated_generation_count: 16
+scale_authorized: true
+remote_only: true
+store_token_ids: true

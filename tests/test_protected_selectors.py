@@ -302,7 +302,7 @@ def test_verify_smoke_refuses_stale_listed_failures_and_uncovered_runs(tmp_path)
     _valid_marker(tmp_path, identity=stale)
     assert "stale" in ps.verify_smoke(tmp_path, _run_cfg())[1]
     _valid_marker(tmp_path, families_tested=["uniform_fresh_pp_v1"])
-    assert "every family" in ps.verify_smoke(tmp_path, _run_cfg())[1]
+    assert "configured families" in ps.verify_smoke(tmp_path, _run_cfg())[1]
     _valid_marker(tmp_path)
     assert "every budget" in ps.verify_smoke(tmp_path, _run_cfg(budgets=[1024]))[1]
     assert "interval" in ps.verify_smoke(tmp_path, _run_cfg(compression_interval=32))[1]

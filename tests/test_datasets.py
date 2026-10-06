@@ -119,6 +119,8 @@ def test_gsm8k_load_refuses_without_a_pinned_revision(monkeypatch, tmp_path):
     monkeypatch.setenv("REMOTE_DATA_ROOT", str(tmp_path))
     (tmp_path / "datasets").mkdir()
     cfg = yaml.safe_load(open("configs/benchmarks.yaml"))["benchmarks"]["gsm8k"]
-    assert "revision" not in cfg  # a human pins it (TODO(human) rule)
+    # pinned by the owner 2026-10-06; an unpinned copy must still be refused
+    assert cfg["revision"] == "740312add88f781978c0658806c59bc2815b9866"
+    unpinned = {k: v for k, v in cfg.items() if k != "revision"}
     with pytest.raises(RuntimeError, match="pinned"):
-        load_benchmark("gsm8k", cfg, subset=3)
+        load_benchmark("gsm8k", unpinned, subset=3)

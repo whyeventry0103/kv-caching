@@ -7,7 +7,7 @@ stage: protselsmoke
 # accept only a PASS whose identity matches the code, model, this config and
 # the inputs at launch time (verify_smoke).
 protected_selector: true
-held: true
+held: false              # APPROVED by the owner 2026-10-06 (P2, cap 2 GPU-h)
 reference_run_name: math500-fc-powered-merged
 models: [r1_distill_qwen_7b]
 benchmarks: [math500]
@@ -22,5 +22,5 @@ replay_tokens: 1536
 generation_cap: 700
 identity_family: h2o_style_pp_v1
 estimated_generation_count: 3
-scale_authorized: false
+scale_authorized: true
 remote_only: true

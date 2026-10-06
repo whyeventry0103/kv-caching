@@ -18,6 +18,11 @@ benchmarks:
     extraction: boxed_or_numeric
   gsm8k:
     handle: openai/gsm8k
+    # Pinned by the OWNER's in-session decision, 2026-10-06 (TODO(human) rule):
+    # HF main sha; official card lists 1,319 test rows, MIT license
+    # (docs/protocol/GSM8K_REVISION_PROPOSAL.md). Dataset preparation only;
+    # no GSM8K generation campaign is authorized by this pin.
+    revision: 740312add88f781978c0658806c59bc2815b9866
     config: main
     split: test
     extraction: hash_numeric

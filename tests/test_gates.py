@@ -204,3 +204,29 @@ def test_fork_precision_gate_needs_every_registered_part(tmp_path):
         runs = tmp_path / str(len(list(tmp_path.iterdir())))
         _fork_precision_output(runs, **bad)
         assert not _done(runs, "fork-precision"), bad
+
+
+def test_protsel_smoke_gate_requires_an_identity_matched_pass(tmp_path):
+    """WP4 (2026-10-06): the queue's typed gate for the protected-selector smoke
+    applies the same record check as the run adapters."""
+    from kvcache.gates import gate_status
+    from kvcache.presses.protected_selectors import SMOKE_MARKER, smoke_identity
+
+    cfg_path = BY["protsel-smoke"].config
+    cfg = _yaml(ROOT / cfg_path)
+    marker = tmp_path / SMOKE_MARKER
+    assert not gate_status("protsel_smoke", tmp_path, cfg_path)[0]
+    for bad in ("", "{}", '{"passed": false, "status": "FAIL"}'):
+        marker.write_text(bad)
+        assert not gate_status("protsel_smoke", tmp_path, cfg_path)[0]
+    good = {
+        "passed": True,
+        "status": "PASS",
+        "failures": [],
+        "identity": smoke_identity(cfg),
+        "families_tested": sorted(cfg["presses"]),
+    }
+    marker.write_text(json.dumps(good))
+    assert gate_status("protsel_smoke", tmp_path, cfg_path) == (True, "verified")
+    marker.write_text(json.dumps({**good, "families_tested": ["h2o_style_pp_v1"]}))
+    assert not gate_status("protsel_smoke", tmp_path, cfg_path)[0]

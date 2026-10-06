@@ -24,6 +24,25 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-10-06 22:00 Dubai — owner decisions recorded.**
+
+  - **Qwen3:** option (a), exploratory.
+  - **GPU work:** P1, P2 and P3 approved within their caps (20, 2 and 6 GPU-h) and queued.
+  - **GSM8K:** pinned and downloaded (1,319 rows, 4.5 MB). Preparation only.
+  - **Priority:** Qwen3 generation is held behind B=1024.
+
+  **Changes.**
+  - New typed gate `protsel_smoke` in `gates.py`, sharing `smoke_record_ok` with the run adapters.
+  - Re-read on the host after the `gates.py` change: 0 numeric changes.
+  - Host tests: 67 passed. Local gate: 726 passed.
+
+  **NEXT.** Tonight, `grid-pp1024` resumes if the co-tenant leaves ≥24 GB free; otherwise the scheduler waits.
+  - **After each window:** check GPU-hours against the caps.
+  - **When grid-pp1024 and readout-pp1024 are complete:**
+    - lift the Qwen3 `blocked:` lines;
+    - run `report_s.py protection --budget 1024`, `consequence`, and the margins read.
+  - **When reverse-readout-pp1024 is 800/800:** `report_protocol_audit.py reverse --budget 1024`.
+
   **★★★★★ 2026-10-06 19:40 Dubai — review of 8e1e81a: R1–R4 closed; the two runner blockers are fixed on CPU.**
 
   - **Eager attention.** Protected H2O now loads eager attention, through both adapters.
