@@ -24,6 +24,26 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-10-13 22:30 Dubai — status check, no code changes.**
+
+  **Server, nights of 7–12 Oct.** Preflight refused every launch: the shared disk had less than 30 GB free (177 refusals, caused by other users; our footprint is about 50 of 72 GB). Launches resumed 2026-10-12 09:10.
+
+  **grid-pp1024: 796/800.** Missing 4 rows (streamingllm_pp seed 89). The rows come from two commits (474 from 1123ad0, 322 from dbdf831) whose generation-path files are byte-identical, so they are one implementation.
+
+  **protsel-smoke: PASS (2026-10-13 09:30).**
+  - Pre-eviction TV exactly 0.
+  - Every post-prune size on target (256, or 417 when the prompt relaxes the budget).
+  - H2O identity control: 0 mismatched heads in 1,764 layer-level prunes.
+  - The typed gate accepted it, so the pilot is launchable.
+
+  **Not started yet:** readout-pp1024, reverse-readout-pp1024, the pilots. Qwen3 remains held.
+
+  **Report.** Progress report for the reviewer published at https://claude.ai/artifact/Uy6XizAJpZ2kPvgLTZ4Ydc.
+
+  **NEXT.**
+  - Unchanged: finish B=1024 → S.1 1024 read, consequence, margins, reverse 1024 read → lift the Qwen3 hold.
+  - Owner questions are listed in the report: unprotected 1024 reverse arm, WP5 timing, WP6 endpoint, human scoring review, disk, venue.
+
   **★★★★★ 2026-10-06 22:00 Dubai — owner decisions recorded.**
 
   - **Qwen3:** option (a), exploratory.

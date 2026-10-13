@@ -50,3 +50,10 @@ Simulated on the host: with 22 GB free the scheduler waits; with free GPUs it la
 - **B=1024 reverse reader.** `report_protocol_audit.py reverse --budget 1024` gives the protected 2×2 alone and withholds the protected-vs-unprotected comparison (no base arm). CLI tests cover FINAL and PARTIAL.
 - **Gates.** Full local gate: 725 passed, 79 skipped. Host CPU torch tests: 52 passed. Re-read of all five stored reads: FINAL, 0 numeric changes.
 - **Queue contention, 2026-10-06 01:45.** A co-tenant held about 26 GB on each 48 GB GPU, leaving 22.2 and 22.7 GB free. `grid-pp1024` needs 24 GB free (a 7B protected job measured about 15–17 GB, so the threshold carries about 7 GB of margin), so the scheduler launched the Qwen3 grid (needs 20 GB) on both GPUs for the whole window. `grid-pp1024` is still at 474/800 and Qwen3 is at 281/400. Owner decision needed: see the final message of 2026-10-06.
+
+## Snapshot 2026-10-13 22:30 Dubai
+
+- **WP1.** grid-pp1024 796/800 (the shared-disk floor blocked launches 7–12 Oct). Readouts and the pilot are next in the queue.
+- **WP4.** Real-generation smoke PASS (P2). Approved GPU time used so far: about 0.3 GPU-h.
+- **Report.** Progress report for the reviewer: https://claude.ai/artifact/Uy6XizAJpZ2kPvgLTZ4Ydc
+
