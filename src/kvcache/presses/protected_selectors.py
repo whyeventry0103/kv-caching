@@ -203,7 +203,30 @@ def smoke_record_ok(
         str(p).lower() for p in smoke_cfg["presses"]
     }:
         return False, f"{SMOKE_MARKER} does not list the configured families"
+    missing = smoke_coverage_problems(d, smoke_cfg)
+    if missing:
+        return False, f"{SMOKE_MARKER} does not cover the design: {missing[:3]}"
     return True, "verified"
+
+
+def smoke_coverage_problems(
+    record: dict[str, Any], smoke_cfg: dict[str, Any]
+) -> list[str]:
+    """The registered smoke design (2026-10-14, 21 records for 3 traces x 3
+    families): replay and free generation for every (selected trace, family),
+    and the identity control on every selected trace."""
+    have = {
+        (r.get("kind"), str(r.get("pid")), str(r.get("press")))
+        for r in record.get("records") or []
+    }
+    pids = [str(t["pid"]) for t in record.get("selected") or []]
+    if len(pids) != 3:
+        return [f"{len(pids)} selected traces, expected 3"]
+    fams = [str(p) for p in smoke_cfg["presses"]]
+    need = [("replay", p, f) for p in pids for f in fams]
+    need += [("generation", p, f) for p in pids for f in fams]
+    need += [("identity", p, str(smoke_cfg["identity_family"])) for p in pids]
+    return [f"missing {k}" for k in need if k not in have]
 
 
 def verify_smoke(

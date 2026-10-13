@@ -2,6 +2,27 @@
 set -euo pipefail
 
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+# Meeting 5 review G0.2: a launch the scheduler charged to a campaign carries
+# KVCACHE_LAUNCH_ID. Record its start now and its end on ANY exit (including
+# the refusals below), so the campaign ledger settles actual elapsed GPU time.
+# Absent the variable, nothing changes.
+if [[ -n "${KVCACHE_LAUNCH_ID:-}" ]]; then
+  LAUNCH_REC_DIR="$PROJECT_ROOT/logs/launches"
+  mkdir -p "$LAUNCH_REC_DIR"
+  LAUNCH_START="$(date +%s)"
+  printf '{"launch_id": "%s", "start_epoch": %s}\n' "$KVCACHE_LAUNCH_ID" \
+    "$LAUNCH_START" > "$LAUNCH_REC_DIR/$KVCACHE_LAUNCH_ID.json"
+  _kvcache_write_end() {
+    local rc=$?
+    printf '{"launch_id": "%s", "start_epoch": %s, "end_epoch": %s, "rc": %d}\n' \
+      "$KVCACHE_LAUNCH_ID" "$LAUNCH_START" "$(date +%s)" "$rc" \
+      > "$LAUNCH_REC_DIR/$KVCACHE_LAUNCH_ID.json.tmp"
+    mv "$LAUNCH_REC_DIR/$KVCACHE_LAUNCH_ID.json.tmp" \
+      "$LAUNCH_REC_DIR/$KVCACHE_LAUNCH_ID.json"
+  }
+  trap _kvcache_write_end EXIT
+fi
 CONFIRM="${1:-}"
 COMMAND="${2:-}"
 CONFIG="${3:-}"

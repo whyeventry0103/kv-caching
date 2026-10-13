@@ -1,0 +1,18 @@
+# Cumulative allocated-GPU-hour caps for approved campaigns (Meeting 5 review G0.2).
+# Enforced before launch by scripts/nightly_autorun.py via kvcache.campaign_budget;
+# a queue job joins a campaign with `campaign: <ID>`. Caps are TOTAL allocated GPU
+# time (summed over GPUs, including model loading, failures and retries), not
+# per-night limits. Normal 01:45-10:43 Dubai windows only.
+campaigns:
+  P1:
+    cap_gpu_hours: 20
+    approved: 2026-10-06
+    scope: protected B=1024 reverse readout (reverse-readout-pp1024, 800 rows)
+  P2:
+    cap_gpu_hours: 2
+    approved: 2026-10-06
+    scope: protected-selector real-generation smoke (protsel-smoke)
+  P3:
+    cap_gpu_hours: 6
+    approved: 2026-10-06
+    scope: protected-selector timing pilot, all three stages combined (48 rows)

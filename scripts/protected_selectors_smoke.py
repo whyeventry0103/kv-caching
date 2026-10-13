@@ -16,8 +16,8 @@ longest-, median- and shortest-prompt problems among those with at least
 2. identity control for ``identity_family`` (H2O-style): with nothing
    protected, its selection equals kvpress's own top-k on the same live
    attention scores at every prune, in every head;
-3. one free-running generation per family: prompt length read, at least one
-   prune.
+3. one free-running generation per family on each of the three traces
+   (9 records): prompt length read, at least one prune.
 
 Writes ``<KVCACHE_BASE_RUNS_ROOT>/protected-selectors-smoke-PASS.json`` only if
 every check holds, otherwise ``...-FAIL.json`` with the failures (the opposite
@@ -250,8 +250,10 @@ def main() -> int:
         records.append(out)
         print(json.dumps(out, sort_keys=True), flush=True)
 
-    gen_case = chosen[len(chosen) // 2]
-    for name in cfg["presses"]:
+    # 2026-10-14 (Meeting 5 review G0.1): free generation on EVERY selected
+    # trace (longest, median and shortest prompt), the 21-record design the P2
+    # approval described; the first run (dbdf831) covered the median trace only.
+    for gen_case, name in [(c, n) for c in chosen for n in cfg["presses"]]:
         out = {"kind": "generation", "pid": gen_case["pid"], "press": name}
         t0 = time.monotonic()
         try:

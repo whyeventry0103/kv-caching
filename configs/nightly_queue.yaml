@@ -1153,6 +1153,7 @@ jobs:
   # reverse --budget 1024). Full-cache teacher forcing -> 28 GB like the 256
   # reverse cell. Registered in PREREGISTRATION 2026-10-06.
   - name: reverse-readout-pp1024
+    campaign: P1   # cumulative cap enforced before launch (configs/campaigns.yaml)
     command: replay
     config: configs/experiments/reverse_readout_pp1024_s1x.yaml
     run_name: reverse-readout-pp1024
@@ -1168,6 +1169,7 @@ jobs:
   # identity-matched PASS record -- the same check the run adapters apply
   # before any row (kvcache.presses.protected_selectors.smoke_record_ok).
   - name: protsel-smoke
+    campaign: P2   # cumulative cap enforced before launch (configs/campaigns.yaml)
     command: protselsmoke
     config: configs/experiments/protsel_smoke_wp4.yaml
     run_name: protsel-smoke
@@ -1183,6 +1185,7 @@ jobs:
   # P3, APPROVED 2026-10-06 (cap 6 GPU-h for all three): timing pilot, first 8
   # problems x seed 11 x 2 families. EXCLUDED FROM EVERY CLAIM.
   - name: protsel-pilot-grid
+    campaign: P3   # cumulative cap enforced before launch (configs/campaigns.yaml)
     command: grid_protsel
     config: configs/experiments/grid_math500_protsel_pilot.yaml
     run_name: grid-protsel-pilot
@@ -1194,6 +1197,7 @@ jobs:
     requires: protsel-smoke
 
   - name: protsel-pilot-readout
+    campaign: P3   # cumulative cap enforced before launch (configs/campaigns.yaml)
     command: replay_protsel
     config: configs/experiments/readout_math500_protsel_pilot.yaml
     run_name: readout-protsel-pilot
@@ -1205,6 +1209,7 @@ jobs:
     requires: protsel-smoke
 
   - name: protsel-pilot-reverse
+    campaign: P3   # cumulative cap enforced before launch (configs/campaigns.yaml)
     command: replay
     config: configs/experiments/reverse_readout_protsel_pilot.yaml
     run_name: reverse-readout-protsel-pilot

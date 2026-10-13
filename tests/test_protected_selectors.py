@@ -260,14 +260,31 @@ def _run_cfg(**over):
     return cfg
 
 
+def _full_records(smoke):
+    pids = ["p/a", "p/b", "p/c"]
+    recs = [
+        {"kind": k, "pid": p, "press": f}
+        for k in ("replay", "generation")
+        for p in pids
+        for f in smoke["presses"]
+    ]
+    recs += [
+        {"kind": "identity", "pid": p, "press": smoke["identity_family"]} for p in pids
+    ]
+    return [{"pid": p} for p in pids], recs
+
+
 def _valid_marker(tmp_path, **over):
     smoke = yaml.safe_load((ROOT / SMOKE_CFG).read_text())
+    selected, records = _full_records(smoke)
     rec = {
         "passed": True,
         "status": "PASS",
         "failures": [],
         "identity": ps.smoke_identity(smoke),
         "families_tested": sorted(smoke["presses"]),
+        "selected": selected,
+        "records": records,
     }
     rec.update(over)
     (tmp_path / ps.SMOKE_MARKER).write_text(json.dumps(rec))
@@ -356,3 +373,21 @@ def test_smoke_failures_identity_and_generation_checks():
     }
     assert "no prune" in ps.smoke_failures([gen])[0]
     assert ps.smoke_failures([]) == ["no smoke record"]
+
+
+def test_gate_requires_the_full_21_record_design(tmp_path):
+    """2026-10-14 (Meeting 5 review G0.1): a PASS that ran free generation on
+    the median trace only (the first, 15-record execution) does not cover the
+    registered design."""
+    smoke = yaml.safe_load((ROOT / SMOKE_CFG).read_text())
+    selected, records = _full_records(smoke)
+    assert len(records) == 21
+    partial = [
+        r for r in records if not (r["kind"] == "generation" and r["pid"] != "p/b")
+    ]
+    assert len(partial) == 15
+    _valid_marker(tmp_path, records=partial)
+    ok, why = ps.verify_smoke(tmp_path, _run_cfg())
+    assert not ok and "does not cover the design" in why
+    _valid_marker(tmp_path)
+    assert ps.verify_smoke(tmp_path, _run_cfg()) == (True, "verified")

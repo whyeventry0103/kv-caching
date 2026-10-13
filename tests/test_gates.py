@@ -219,12 +219,21 @@ def test_protsel_smoke_gate_requires_an_identity_matched_pass(tmp_path):
     for bad in ("", "{}", '{"passed": false, "status": "FAIL"}'):
         marker.write_text(bad)
         assert not gate_status("protsel_smoke", tmp_path, cfg_path)[0]
+    pids = ["p/a", "p/b", "p/c"]
+    recs = [
+        {"kind": k, "pid": p, "press": f}
+        for k in ("replay", "generation")
+        for p in pids
+        for f in cfg["presses"]
+    ] + [{"kind": "identity", "pid": p, "press": cfg["identity_family"]} for p in pids]
     good = {
         "passed": True,
         "status": "PASS",
         "failures": [],
         "identity": smoke_identity(cfg),
         "families_tested": sorted(cfg["presses"]),
+        "selected": [{"pid": p} for p in pids],
+        "records": recs,
     }
     marker.write_text(json.dumps(good))
     assert gate_status("protsel_smoke", tmp_path, cfg_path) == (True, "verified")

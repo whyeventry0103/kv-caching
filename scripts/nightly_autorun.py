@@ -37,6 +37,9 @@ STOP_HOUR = 10  # window stop 10:45 Dubai (start 01:45 is enforced by the cron s
 STOP_MINUTE = 45
 QUEUE_DEFAULT = PROJECT_ROOT / "configs" / "nightly_queue.yaml"
 STATE_PATH = PROJECT_ROOT / "logs" / "nightly_state.json"
+CAMPAIGNS_PATH = PROJECT_ROOT / "configs" / "campaigns.yaml"
+LEDGER_PATH = PROJECT_ROOT / "logs" / "campaign_ledger.json"
+LAUNCH_RECORDS = PROJECT_ROOT / "logs" / "launches"
 MAX_FAILS = 3  # consecutive no-progress launches before a job is marked stuck + skipped
 REMOTE_STORAGE = Path("/home/sk10741/kvcache-storage")
 
@@ -87,6 +90,10 @@ class Job:
     # Amendment R.7: a held cell. Never launched while set; logged as BLOCKED
     # with this reason every tick, so a hold is visible rather than silent.
     blocked: str | None = None
+    # Meeting 5 review G0.2: an approved campaign whose CUMULATIVE allocated
+    # GPU-hours are capped (configs/campaigns.yaml). Enforced before launch by
+    # kvcache.campaign_budget; None = not a capped campaign.
+    campaign: str | None = None
 
 
 # Amendment Q storage guard. Disk, not GPU memory: min_free_gb is a VRAM
@@ -321,10 +328,30 @@ def load_queue(path: Path) -> tuple[bool, list[Job]]:
             cpu_only=bool(j.get("cpu_only", False)),
             requires_all=tuple(j.get("requires_all") or ()),
             gate=j.get("gate"),
+            campaign=j.get("campaign"),
         )
         for j in data["jobs"]
     ]
+    caps = load_campaign_caps()
+    unknown = sorted(
+        {j.campaign for j in jobs if j.campaign and j.campaign not in caps}
+    )
+    if unknown:
+        raise SystemExit(f"REFUSED: queue names unknown campaign(s) {unknown}")
     return enabled, jobs
+
+
+def load_campaign_caps(path: Path | None = None) -> dict[str, float]:
+    import yaml
+
+    p = path or CAMPAIGNS_PATH
+    if not p.exists():
+        return {}
+    data = yaml.safe_load(p.read_text(encoding="utf-8")) or {}
+    return {
+        str(k): float(v["cap_gpu_hours"])
+        for k, v in (data.get("campaigns") or {}).items()
+    }
 
 
 def parse_nvidia_smi(text: str) -> list[GpuState]:
@@ -835,6 +862,18 @@ def main() -> int:
         return 0
 
     runs_root = Path(BASE_ENV["REMOTE_RUNS_ROOT"])
+    caps = load_campaign_caps()
+    if caps and not args.dry_run:
+        # G0.2: settle finished campaign shards before any new reservation.
+        from kvcache import campaign_budget as cb
+
+        for note in cb.reconcile(
+            LEDGER_PATH,
+            caps,
+            live_sessions=tmux_session_names(),
+            end_records_dir=LAUNCH_RECORDS,
+        ):
+            log(f"campaign ledger: {note}")
     # R.14: analysis stages first, every tick, independent of the GPU window.
     run_cpu_stages(runs_root, jobs, log, dry_run=args.dry_run)
     state = load_state()
@@ -924,6 +963,19 @@ def main() -> int:
                     log("ABORT: preflight failed -> no launch")
                     return 0
 
+        if job.campaign and args.dry_run:
+            from kvcache import campaign_budget as cb
+
+            rem = cb.summary(LEDGER_PATH, caps)[job.campaign]["remaining"]
+            per, why = cb.plan_reservation(rem, len(specs), max_hours)
+            log(
+                f"campaign {job.campaign}: remaining {rem:.3f} GPU-h -> "
+                + (
+                    f"would reserve {len(specs)} x {per:.3f}"
+                    if per
+                    else f"WOULD REFUSE: {why}"
+                )
+            )
         if args.dry_run:
             log("DRY-RUN would launch:")
             for spec in specs:
@@ -957,10 +1009,45 @@ def main() -> int:
             )
             continue
 
+        launch_ids: dict[str, str] = {}
+        if job.campaign:
+            from kvcache import campaign_budget as cb
+
+            granted, why = cb.reserve(
+                LEDGER_PATH,
+                caps,
+                campaign=job.campaign,
+                job=job.name,
+                shards=[cb.Shard(s.session, s.gpu_index) for s in specs],
+                window_hours=max_hours,
+                now=datetime.now(),
+            )
+            if granted is None:
+                log(f"CAP {job.name}: {why} -> skip")
+                continue
+            log(f"campaign ledger: {why}")
+            for spec, (lid, bound) in zip(specs, granted.items(), strict=True):
+                spec.env["KVCACHE_LAUNCH_ID"] = lid
+                spec.env["KVCACHE_MAX_HOURS"] = str(min(max_hours, bound))
+                launch_ids[spec.session] = lid
         for spec in specs:
             write_runner(spec)
-            launch_session(spec)
-            log(f"launched {spec.session} (gpu {spec.gpu_index}, seeds {spec.seeds})")
+            try:
+                launch_session(spec)
+            except subprocess.CalledProcessError:
+                if spec.session in launch_ids:
+                    cb.release_unlaunched(LEDGER_PATH, caps, launch_ids[spec.session])
+                log(f"launch FAILED for {spec.session}; nothing started")
+                continue
+            log(
+                f"launched {spec.session} (gpu {spec.gpu_index}, seeds {spec.seeds}"
+                + (
+                    f", campaign {job.campaign} bound {spec.env['KVCACHE_MAX_HOURS']} h"
+                    if job.campaign
+                    else ""
+                )
+                + ")"
+            )
         shards = state.get(job.name, {}).get("shards", {})
         job_live = live.get(job.run_name, set())
         new_shards = {str(g): shards[str(g)] for g in job_live if str(g) in shards}

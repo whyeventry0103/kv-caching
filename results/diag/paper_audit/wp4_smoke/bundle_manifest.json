@@ -1,0 +1,39 @@
+{
+  "bundle": "WP4 protected-selector real-generation smoke (proposal P2), first execution",
+  "schema": "smoke-bundle-v1",
+  "created": "2026-10-14",
+  "files_sha256": {
+    "protected-selectors-smoke-PASS.json": "1fdb2dd2d9173aa9519f3c6f41d4787dfe8a214813abadd858ebcb049ce2c3e5",
+    "protsel-smoke.log": "91ad6be7b09265343e21d4074d4143688058461bb54975fb7d8cce6b200a196b",
+    "protsel-smoke-g0.runner.sh": "9b9e7763c32f82c8828fc480225db567cb81e490f0dbd1c9511a4b4b1385cf21"
+  },
+  "producing_commit": "dbdf8311ab2f92df8b59101f805255701a43b7fd",
+  "config": "configs/experiments/protsel_smoke_wp4.yaml",
+  "server_marker_path": "~/kvcache-storage/runs/protected-selectors-smoke-PASS.json (host); copied verbatim here",
+  "timing": {
+    "start": "2026-10-13T09:30:05.338000+04:00",
+    "end": "2026-10-13T09:45:35.635000+04:00",
+    "source": "runner.sh mtime (launch) and run-log mtime (exit); scheduler log: launched protsel-smoke-g0 2026-10-13 09:30:05",
+    "gpus": 1,
+    "allocated_gpu_hours": 0.2584,
+    "includes": "process start, model load, all records, marker write"
+  },
+  "environment": {
+    "python": "3.11.15",
+    "torch": "2.7.1+cu126",
+    "cuda": "12.6",
+    "transformers": "4.56.2",
+    "kvpress": "0.5.3",
+    "gpu": "NVIDIA RTX 6000 Ada Generation",
+    "driver": "570.207",
+    "note": "python/torch/cuda/transformers read from the host venv on 2026-10-14 (same venv as the run); kvpress 0.5.3 from the `versions` field stamped on result rows by the same venv (pip metadata absent for kvpress)"
+  },
+  "design_executed": {
+    "replay": 9,
+    "identity": 3,
+    "generation": 3,
+    "total": 15,
+    "note": "Executed design = 3 traces x 3 families teacher-forced replay + 3 identity controls + free generation for 3 families on the MEDIAN-prompt trace only. The approval proposal (P2) described 21 records (free generation on all three traces). This run is recorded as executed; it is NOT relabelled as 21. Reconciliation: the runner is extended to the 21-record design and the complete smoke is rerun under the new identity (see PREREGISTRATION 2026-10-14)."
+  },
+  "validate": "python scripts/validate_smoke_bundle.py --bundle results/diag/paper_audit/wp4_smoke"
+}
