@@ -256,6 +256,13 @@ Do not compare states; compare **where the displacement points**.
 have occupied. `δ⊥` means it moved somewhere the full model never goes —
 degenerate, off-distribution, the regime of non-termination and repetition.
 
+> **Interpretation corrected 2026-10-14 (Meeting 5 review).** The paragraph above
+> overinterprets the split. U_k is a finite PCA subspace explaining 21–41% of
+> per-layer variance, so δ⊥ is "outside the dominant full-cache subspace", not
+> "a state the full model never reaches" or an impossible reasoning state. A
+> larger ω need not mean larger total displacement or more answer-relevant damage;
+> ω is a ratio, not a fraction bounded by 1. Stored measurements are unchanged.
+
 ### 3.3 The falsifiable prediction, and the estimand fixed in advance
 
 Verified against the artifacts 2026-09-12 (`add-256-*.json`, and truncation from

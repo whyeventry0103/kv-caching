@@ -270,3 +270,29 @@ def test_reverse_1024_incomplete_reverse_arm_is_partial(tmp_path):
     d = json.loads((tmp_path / "out/reverse_b1024.json").read_text())
     assert d["status"] == "PARTIAL"
     assert str(d["per_policy"]).startswith("WITHHELD")
+
+
+def test_reverse_1024_carries_the_registered_holm_block(tmp_path):
+    runs = reverse_fixture_1024(tmp_path)
+    code, log = _run(runs, tmp_path / "out", "reverse", "--budget", "1024")
+    assert code == 0, log
+    d = json.loads((tmp_path / "out/reverse_b1024.json").read_text())
+    ri = d["registered_inference"]
+    assert ri["status"].startswith("REGISTERED")
+    assert ri["family_size"] == 2
+    assert set(ri["members"]) == {"random_pp", "streamingllm_pp"}
+    for m in ri["members"].values():
+        assert m["status"] in (
+            "TESTED",
+            "NOT TESTABLE (zero or undefined standard error)",
+        )
+        if m["status"] == "TESTED":
+            assert m["p_holm"] >= m["p"]
+
+
+def test_reverse_256_labels_the_test_exploratory(tmp_path):
+    runs = reverse_fixture(tmp_path)
+    code, log = _run(runs, tmp_path / "out", "reverse", "--budget", "256")
+    assert code == 0, log
+    d = json.loads((tmp_path / "out/reverse_b256.json").read_text())
+    assert d["registered_inference"]["status"].startswith("EXPLORATORY")

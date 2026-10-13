@@ -1,21 +1,25 @@
-# Execution status (one row per work package)
+# Execution status
 
-Specification: `docs/paper/EXECUTION_PLAN.md` (v1.0, baseline `1b644dc`).
-Claims: `docs/paper/CLAIM_LEDGER.md`.
-Approvals pending: `docs/paper/PROPOSALS_FOR_APPROVAL.md`.
+Specifications:
+- `docs/paper/EXECUTION_PLAN.md` (v1.0, baseline `1b644dc`);
+- `docs/paper/MEETING5_REVIEW_AND_PLAN.md` (Meeting 5 review of `fd77d40`, adopted 2026-10-14).
 
-Snapshot **2026-10-05, about 20:00 Dubai** (host clock 19:39 when checked). The bounded repair of the independent review of `fbf869f` is applied. Both GPUs are idle and no jobs are running; the next cron window opens at 01:45.
+Claims: `docs/paper/CLAIM_LEDGER.md`. Approvals and caps: `docs/paper/PROPOSALS_FOR_APPROVAL.md` and `configs/campaigns.yaml`.
 
-| WP | State | Artifacts | Remaining |
-|---|---|---|---|
-| WP0 freeze + single status | Documentation landed. **The paper remains a draft.** | This file; the ledger; paper edits (title, 13 bracket-wording edits, sub-floor TV qualification, abstract now states the interaction) | Rewrite the abstract's structure around the final question after B=1024 (do not just append caveats) |
-| WP1 existing queue | **In progress** | Protected reverse b256 (`reverse_b256.json`, FINAL) | grid-pp1024 (474/800) then readout-pp1024 (0/800), both in the normal window. Then `report_s.py protection --budget 1024`, `consequence`, and the practical-margin read at 1024 |
-| WP2 Qwen3 scoring | **Audit done (v2); human review and disposition open** | `grading_sensitivity.py` v2; `bank_audit_*` (v2), `*_v1.*`; `human_review_v2.tsv` (42 rows) | A person fills in the review sheet. Owner and supervisor choose option (a)/(b)/(c); the memo and the review both recommend (a) as a documented exception |
-| WP3 no-GPU analysis | **Done, repaired** | `decision_b256`, `matched_b256`, `reverse_b256` (re-read after R1/R4: 0 numeric changes); `RELATED_WORK_MATRIX.md` (with a verbatim evidence record) | Recheck novelty gate N after B=1024 |
-| WP4 new capability | **CPU-complete (2026-10-06); needs only the approved smoke (P2)** | `protected_selectors.py`; runner adapters `run_grid_protected.py` and `run_replay_protected.py` (they refuse real runs while held or without the smoke marker); provenance family `protected_selectors`; held configs, dry-run in `make dryrun` | Smoke runner written and dry-run (`protected_selectors_smoke.py`); eager attention fixed for protected H2O; the gate accepts only an identity-matched PASS record. Real-generation smoke = P2, needs approval |
-| WP5 protected selectors | **Held** | Manifest, held configs | After P2 (smoke) and P3 (timing pilot) |
-| WP6 confirmation | **Held** | Manifests; `sample_size.json` (endpoint-specific, includes the interaction); `cost_estimate.json` (corrected readout pricing, seeds parameterised, overheads) | Choose the primary endpoint, then N. Qwen3 at 300×4 is about 600–1,100 GPU-h, which does not fit the nightly windows |
-| WP7 writing | **Drafting** | `DRAFT_METHODS_RELATED_FIGURES.md` | Figures 2 and 5 from existing B=256 data |
+## Current state (2026-10-14)
+
+| Item | State | Evidence / next |
+|---|---|---|
+| Meeting 5 G0 closeout | **In progress (CPU parts done)** | Smoke bundle + validator (VALID from a fresh clone). Smoke design reconciled to 21 records; the rerun is pending under P2. Cumulative caps enforced before launch. B=1024 interaction inference frozen (t test + Holm). Qwen ordering explicit. Latent-basis wording corrected |
+| WP1 protected B=1024 | **Running in normal windows** | grid-pp1024 796/800 → readout-pp1024 (S.1, registered) → reverse-readout-pp1024 (P1, cap 20 GPU-h). Reads when FINAL: `report_s.py protection --budget 1024`, `consequence`, `report_protocol_audit.py decision/reverse --budget 1024` |
+| P2 smoke | **First run VALID but superseded** | 15-record run on 2026-10-13 (0.2584 GPU-h, bundled). The full 21-record smoke reruns within the remaining 1.7416 GPU-h |
+| P3 timing pilot | **Queued behind the new smoke** | Cap 6 GPU-h, shared by all three stages |
+| Qwen3 | **Held behind B=1024** | Gate FAIL 0.845 kept. Disposition (a), exploratory. The 42-row human scoring review is still unassigned (owner/supervisor) |
+| Fork-precision gate | **FAIL (scoped)** | Constrains next-token TV claims only, not accuracy (ledger §D) |
+| Meeting 5 CPU preparation | **In progress** | Protocol, related work, protected R-KV, finite-channel instrument, replication manifests, cost model, single approval request |
+| Old WP5/WP6 | **Superseded** | Replaced by Meeting 5 manifests. The old manifests are kept as history |
+
+## History (dated; superseded statements are kept as they were)
 
 ## Decisions (made by the owner on 2026-10-06)
 

@@ -1,4 +1,9 @@
-# Proposals for approval (prepared 2026-10-05; nothing here is authorized)
+# Proposals for approval
+
+Prepared 2026-10-05. Current state (2026-10-14):
+- **P1, P2 and P3 approved** on 2026-10-06. Their cumulative GPU-hour caps are now **enforced before launch** (`configs/campaigns.yaml`, `kvcache.campaign_budget`).
+- The **campaign estimates below are superseded** by the Meeting 5 manifests and cost model.
+- Every other item here is unapproved history.
 
 **Costs.** From `results/diag/paper_plan/cost_estimate.json`. They are estimates built from measured historical rates plus stated assumptions (readout at 0.6–1.0× its source trace's free-run rate; new-family overhead 1.0–1.5×; 0.1 h setup per job launch). They are not caps with measured safety coverage.
 
@@ -24,7 +29,7 @@
   - Stopping: read only when 800/800 FINAL.
 - **Cost.** 800 readouts of b1024 traces. At the measured b1024 free-run rate (87.3 s/row) × 0.6–1.0: **≈ 11.6–19.4 GPU-h + ~0.2 h setup, ≈ 1 night.** Storage ≈ 6 MB.
 - **Analysis path (ready, 2026-10-06).** `report_protocol_audit.py reverse --budget 1024` reads the protected 2×2 alone. The protected-vs-unprotected comparison is withheld as NOT AVAILABLE, because no unprotected 1024 reverse arm exists. CLI tests: complete → FINAL; incomplete → PARTIAL.
-- **Approval needed.** Yes (new cell outside S.1). The review recommends a 20 GPU-h total cap in normal windows.
+- **Approval.** GRANTED 2026-10-06 (cap 20 GPU-h, enforced since 2026-10-14).
 
 ## P2 — WP4 real-generation smoke (needed before any WP5 row)
 

@@ -514,3 +514,63 @@ def by_key(
         if v is not None:
             out[k] = bool(v)
     return out
+
+
+NOT_TESTABLE = "NOT TESTABLE (zero or undefined standard error)"
+
+
+def problem_level_t_tests(
+    family: Mapping[str, Mapping[Key, float]], *, alpha: float = 0.05
+) -> dict[str, Any]:
+    """Registered inference for a family of paired contrasts (Meeting 5 review,
+    frozen 2026-10-14 before the B=1024 reverse data exist).
+
+    Per member: average its eligible seed-level values within each problem, then
+    a two-sided one-sample t test of the problem-level contrasts against 0
+    (an approximate population-mean test over problems; df = N - 1). Holm's
+    step-down adjustment runs over the WHOLE family size, so a member that is
+    not testable (fewer than two problems, or zero standard error) still counts
+    toward the family and never receives an invented p-value.
+    """
+    import math
+
+    from scipy import stats
+
+    m = len(family)
+    rows: dict[str, dict[str, Any]] = {}
+    for name, values in family.items():
+        means = list(_problem_means(values).values())
+        n = len(means)
+        row: dict[str, Any] = {"n_problems": n, "n_conditions": len(values)}
+        if n < 2:
+            row.update(mean=means[0] if means else None, se=None, status=NOT_TESTABLE)
+            rows[name] = row
+            continue
+        mean = statistics.fmean(means)
+        sd = statistics.stdev(means)
+        se = sd / math.sqrt(n)
+        row.update(mean=mean, sd=sd, se=se, df=n - 1)
+        if se == 0.0 or not math.isfinite(se):
+            row["status"] = NOT_TESTABLE
+        else:
+            t = mean / se
+            row.update(t=t, p=float(2 * stats.t.sf(abs(t), df=n - 1)), status="TESTED")
+        rows[name] = row
+    tested = sorted(
+        (r["p"], name) for name, r in rows.items() if r["status"] == "TESTED"
+    )
+    running = 0.0
+    for rank, (p, name) in enumerate(tested):
+        adj = min(1.0, (m - rank) * p)
+        running = max(running, adj)
+        rows[name]["p_holm"] = running
+        rows[name]["reject_at_alpha"] = bool(running < alpha)
+    return {
+        "procedure": "two-sided one-sample t test of problem-level contrasts "
+        "(seeds averaged within problem), Holm over the family",
+        "family_size": m,
+        "alpha": alpha,
+        "members": rows,
+        "note": "bootstrap CIs elsewhere in this read are DESCRIPTIVE; this "
+        "block is the registered family-level test",
+    }

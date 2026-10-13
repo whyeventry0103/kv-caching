@@ -1,4 +1,5 @@
-"""On-manifold / off-manifold displacement split (Amendment Q.6).
+"""In-subspace / out-of-subspace displacement split (Amendment Q.6; historically
+called on/off-manifold).
 
 Admitted only by the Q.0 scope widening (2026-09-12), which replaced Amendment
 P.4's "Latent-state divergence is out of scope" with a dated, limited admission.
@@ -13,11 +14,16 @@ scalar predicts nothing. The refinement is to stop comparing states and compare
 **where the displacement points** relative to the subspace the full-cache model
 actually moves in.
 
-``delta_parallel`` means the compressed model moved to a state the full model
-could plausibly have occupied -- a different reasoning step, but a structurally
-valid one. ``delta_perp`` means it moved somewhere the full model never goes:
-off-distribution, the regime of repetition loops and non-termination. ``omega``
-is the ratio, and it is the quantity Amendment Q.6 pre-commits a prediction on.
+``delta_parallel`` is the part of the (whitened) displacement inside the span of
+the top-k directions fitted on full-cache states; ``delta_perp`` is the part
+outside that FINITE subspace. ``omega`` is their ratio, the quantity Amendment
+Q.6 pre-commits a prediction on. Interpretation is limited (corrected
+2026-10-14, Meeting 5 review): the basis explains only part of the variance
+(21-41% per layer at k = 64), so a displacement outside it does NOT show that
+the model entered an impossible or invalid reasoning state, nor that it moved
+"somewhere the full model never goes"; a larger omega need not mean a larger
+total displacement or more answer-relevant damage. omega is a ratio, not a
+fraction bounded by 1.
 
 **Circularity is a stop condition, not a caveat.** The whitening statistics and
 the basis are fitted on the FULL-CACHE condition only and frozen before any

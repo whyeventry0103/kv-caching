@@ -301,6 +301,7 @@ def reverse(runs: Path, a: argparse.Namespace) -> tuple[dict[str, Any], str]:
     tsv: list[list[Any]] = []
     population = sorted(design)
     out["protection_by_direction"] = {}
+    protected_cells: dict[str, dict[str, dict[tuple, bool]]] = {}
     for base in PP_BASES:
         cells: dict[str, dict[str, dict[tuple, bool]]] = {}
         arms = [(base + PP_SUFFIX, grid_pp, ro_pp, rev_pp)]
@@ -338,6 +339,7 @@ def reverse(runs: Path, a: argparse.Namespace) -> tuple[dict[str, Any], str]:
                 ]
                 for k in population
             )
+        protected_cells[base + PP_SUFFIX] = cells[base + PP_SUFFIX]
         out["protection_by_direction"][base + PP_SUFFIX] = (
             pa.protection_by_direction(
                 cells[base + PP_SUFFIX],
@@ -349,6 +351,30 @@ def reverse(runs: Path, a: argparse.Namespace) -> tuple[dict[str, Any], str]:
             else "NOT AVAILABLE: no unprotected reverse arm at this budget "
             "(not registered); the protected 2 x 2 is reported alone"
         )
+    # Registered family-level inference (frozen 2026-10-14, PREREGISTRATION):
+    # per protected policy, the 2 x 2 interaction per common-support condition,
+    # averaged within problem; two-sided t test; Holm over the two policies.
+    family = {
+        press: {
+            k: float(c["cc"][k])
+            - float(c["fc"][k])
+            - float(c["cf"][k])
+            + float(c["ff"][k])
+            for k in sorted(set(c["fc"]) & set(c["cf"]))
+        }
+        for press, c in protected_cells.items()
+    }
+    out["registered_inference"] = {
+        "status": (
+            "REGISTERED (procedure frozen 2026-10-14 before these data existed)"
+            if a.budget == 1024
+            else "EXPLORATORY (procedure frozen 2026-10-14, after this budget's "
+            "data were read)"
+        ),
+        "estimand": "protected forward/reverse interaction on the declared common "
+        "support; missing-readout bounds are reported separately",
+        **pa.problem_level_t_tests(family),
+    }
     out.update(
         _write_tsv(
             f"reverse_b{a.budget}",

@@ -51,7 +51,7 @@ The two estimators are never mixed under one label.
 |---|---|---|---|
 | C1 | "Under the frozen grader the Qwen3-4B full-cache bank scores 169/200 = 0.845, just below the registered band [0.85, 0.99]; the gate FAILS." | `results/diag/qwen_scoring/bank_audit_qwen3_4b.json` `primary` (0 recompute mismatches) | CONFIRMED (gate FAIL stands) |
 | C2 | "A post-inspection, format-aware secondary score (v2) gives 0.905, with an AMBIGUITY RANGE of 0.900–0.960 over 12 ambiguous rows (not a confidence interval); the same scorer moves the Qwen-7B anchor from 0.885 to 0.920 (range 0.920–0.930)." | same, plus `bank_audit_r1_qwen7b.json` | SENSITIVITY (never a gate input) |
-| C3 | Any Qwen3 decomposition result | — | PENDING (cells incomplete; gate disposition needs the owner and supervisor) |
+| C3 | Any Qwen3 decomposition result | — | PENDING. Cells incomplete and held behind B=1024. Disposition (a) chosen 2026-10-06: exploratory only, gate FAIL shown beside every result, secondary score unusable until the 42-row human review is done |
 
 ## D. Fork-precision gate: scope of the FAIL (WP0 item 6)
 
@@ -99,7 +99,7 @@ No software gate substitutes for this instrument gate.
 
 ## F. Open questions this ledger cannot close yet
 
-1. **B=1024 (protected free run + forward readout).** Does a practically meaningful protected residual persist? This decides the budget scope of A2. Status: PENDING.
+1. **B=1024 (protected free run + forward readout).** Does a practically meaningful protected residual persist? This decides the budget scope of A2. Status: PENDING (grid 796/800 on 2026-10-14). The forward/reverse interaction at 1024 has a registered t-test + Holm procedure, frozen 2026-10-14 before the data.
 2. **B=1024/2048 near-lossless readout.** Is there a cell where readout is within 3 points of the full cache while free running is not? This is the only form of the "false certification" story the plan allows. Status: not measured under protection.
 3. **H2O-style under protection, and a fresh-uniform random baseline.** Do B1–B3 survive equal prompt protection? This needs WP5, which is held for authorization.
 4. **Qwen3 gate disposition.** This is the owner's and supervisor's decision; see `docs/protocol/QWEN_SCORING_SENSITIVITY.md`.

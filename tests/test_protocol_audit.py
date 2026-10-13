@@ -229,3 +229,49 @@ def test_difference_of_improvements_by_hand():
     out = pa.protection_by_direction(prot, base, n_resamples=50)
     # fwd improvement 0 - 0 = 0; rev improvement 0 - (-1) = 1 -> difference -1
     assert out["difference_of_improvements"]["mean"] == pytest.approx(-1.0)
+
+
+def test_problem_level_t_tests_by_hand_and_holm():
+    # member a: problem means 0.1, 0.2, 0.3 (two seeds each, averaged first)
+    a = {
+        ("p1", 1): 0.0,
+        ("p1", 2): 0.2,
+        ("p2", 1): 0.2,
+        ("p2", 2): 0.2,
+        ("p3", 1): 0.3,
+        ("p3", 2): 0.3,
+    }
+    # member b: problem means 0.5, 0.5, 0.5 -> zero SE -> not testable
+    b = {(p, s): 0.5 for p in ("p1", "p2", "p3") for s in (1, 2)}
+    out = pa.problem_level_t_tests({"a": a, "b": b})
+    ra, rb = out["members"]["a"], out["members"]["b"]
+    assert ra["n_problems"] == 3 and ra["mean"] == pytest.approx(0.2)
+    assert ra["se"] == pytest.approx(0.1 / 3**0.5)  # sd 0.1, n 3
+    assert ra["t"] == pytest.approx(0.2 / (0.1 / 3**0.5))
+    from scipy import stats
+
+    p = 2 * stats.t.sf(ra["t"], df=2)
+    assert ra["p"] == pytest.approx(p)
+    # Holm over the FULL family (m = 2) even though b is not testable
+    assert ra["p_holm"] == pytest.approx(min(1.0, 2 * p))
+    assert rb["status"] == pa.NOT_TESTABLE and "p" not in rb
+
+
+def test_holm_step_down_is_monotone():
+    import random
+
+    rng = random.Random(0)
+    fam = {
+        name: {(f"p{i}", 1): rng.gauss(mu, 0.3) for i in range(30)}
+        for name, mu in (("x", 0.3), ("y", 0.05), ("z", 0.15))
+    }
+    out = pa.problem_level_t_tests(fam)["members"]
+    order = sorted(out, key=lambda k: out[k]["p"])
+    adj = [out[k]["p_holm"] for k in order]
+    assert adj == sorted(adj)
+    assert all(out[k]["p_holm"] >= out[k]["p"] for k in out)
+
+
+def test_single_problem_member_is_not_testable():
+    out = pa.problem_level_t_tests({"a": {("p1", 1): 0.4, ("p1", 2): 0.2}})
+    assert out["members"]["a"]["status"] == pa.NOT_TESTABLE

@@ -4370,3 +4370,29 @@ All decided by the owner in session on 2026-10-06, after the independent review 
 
 **5. Priority.** The three Qwen3 generation jobs are held (`blocked:`) until `grid-pp1024` and `readout-pp1024` are complete. No memory threshold was changed.
 
+## Meeting 5 review, G0 closeout (2026-10-14): frozen B=1024 inference, smoke reconciliation, campaign caps, Qwen ordering, latent-basis wording
+
+These were frozen before any protected B=1024 reverse row exists (reverse-readout-pp1024: 0/800) and before the B=1024 forward readout (0/800).
+
+**1. B=1024 interaction inference, registered.**
+- *What is tested.* For each protected policy (random_pp, streamingllm_pp), the 2×2 interaction I = A_CC − A_FC − A_CF + A_FF on its declared common-support conditions (forward and reverse readout both defined).
+- *Within problem.* The eligible seed-level values are averaged within each problem.
+- *Test.* A two-sided one-sample t test of these problem-level contrasts against 0: an approximate population-mean test with df = N − 1. N and the standard error are reported.
+- *Multiplicity.* Holm over the family of two policies, α = 0.05. A member with fewer than two problems, or a zero or undefined standard error, is NOT TESTABLE: it gets no p-value but still counts in the Holm family size.
+- *Descriptive outputs.* The existing equal-problem bootstrap CIs are descriptive. The worst-case missing-readout bounds stay separate from sampling intervals.
+- *Selection.* The undefined-readout selection is not repaired: the estimand remains the declared common-support population.
+- *Code and B=256 label.* Implemented in `kvcache.metrics.protocol_audit.problem_level_t_tests` and reported as `registered_inference` by `report_protocol_audit.py reverse`. At B=256 the same block is labelled EXPLORATORY, because those data were read before this freeze.
+
+**2. Smoke reconciliation (P2).**
+- *Executed run.* The 2026-10-13 run executed 15 records: 9 replay, 3 identity, and 3 free generations on the median-prompt trace only. The P2 proposal described 21, with free generation on all three traces. The 15-record run is recorded as executed and bundled with a CPU validator; it is not relabelled.
+- *Runner and gate.* The runner now generates on all three traces, and the gate requires 21-record coverage.
+- *Rerun.* The changed identity makes the old PASS stale, so the complete smoke reruns under one identity within the remaining P2 allowance (2 − 0.2584 = 1.7416 GPU-h).
+
+**3. Campaign caps.**
+- *Limits.* P1 20, P2 2 and P3 6 allocated GPU-hours, cumulative across nights and GPUs. Loading, failures and retries are all charged.
+- *Enforcement.* Caps are enforced before launch (`kvcache.campaign_budget`, `configs/campaigns.yaml`).
+
+**4. Qwen ordering.** The three Qwen3 generation jobs stay held until the protected B=1024 grid, forward readout and reverse readout are complete and the B=1024 reads are FINAL. The earlier queue text (grid and forward only) and the progress report's wording differed; this entry settles it.
+
+**5. Latent-basis interpretation (Q.6), clarified.** δ⊥ is the part of the whitened displacement outside a finite PCA subspace (21–41% of per-layer variance at k = 64). It does not show an impossible or never-visited reasoning state. ω is a ratio, not a bounded fraction, and a larger ω need not mean larger total displacement or more answer-relevant damage. The Q.6 text above is left as registered; stored measurements are unchanged.
+
