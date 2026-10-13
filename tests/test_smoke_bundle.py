@@ -53,7 +53,7 @@ def _rehash(b: Path) -> None:
 
 def test_a_changed_byte_is_a_hash_mismatch(tmp_path):
     b = _copy(tmp_path)
-    (b / "protsel-smoke.log").write_text("edited")
+    (b / "protsel-smoke.run_log.txt").write_text("edited")
     code, v = _run(b)
     assert code == 2 and any("hash mismatch" in p for p in v["problems"])
 

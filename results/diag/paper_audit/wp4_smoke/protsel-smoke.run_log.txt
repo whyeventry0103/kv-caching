@@ -1,0 +1,45 @@
+{
+  "benchmarks": [
+    "math500"
+  ],
+  "budgets": [
+    256
+  ],
+  "command": "protselsmoke",
+  "config": "configs/experiments/protsel_smoke_wp4.yaml",
+  "estimated_generation_count": 3,
+  "models": [
+    "r1_distill_qwen_7b"
+  ],
+  "name": "protsel_smoke_wp4",
+  "presses": [
+    "h2o_style_pp_v1",
+    "uniform_fresh_pp_v1",
+    "uniform_fresh_pp_r64_v1"
+  ],
+  "seeds": [
+    11
+  ]
+}
+{"budget": 256, "replay_tokens": 1536, "identity_family": "h2o_style_pp_v1", "eager_attention": true}
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:01<00:01,  1.18s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:02<00:00,  1.02s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:02<00:00,  1.04s/it]
+{"expected_target": 417, "first_effective_prune": 128, "kind": "replay", "mean_tv": 0.10777368103796918, "n_layers": 28, "n_replayed": 1536, "pid": "test/prealgebra/1646.json", "post_prune_sizes": [417], "pre_eviction_max_tv": 0.0, "press": "h2o_style_pp_v1", "prompt_len": 353, "protect": {"base": "h2o_style_pp_v1", "budget": 256, "budget_relaxed": true, "n_layers_pruned": 28, "n_prunes": 616, "prompt_len": 353, "prompt_len_forced": false, "target": 417}, "wallclock_s": 72.57647029310465}
+{"expected_target": 417, "first_effective_prune": 128, "kind": "replay", "mean_tv": 0.1199868863170902, "n_layers": 28, "n_replayed": 1536, "pid": "test/prealgebra/1646.json", "post_prune_sizes": [417], "pre_eviction_max_tv": 0.0, "press": "uniform_fresh_pp_v1", "prompt_len": 353, "protect": {"base": "uniform_fresh_pp_v1", "budget": 256, "budget_relaxed": true, "n_layers_pruned": 28, "n_prunes": 616, "prompt_len": 353, "prompt_len_forced": false, "target": 417}, "wallclock_s": 72.21902990341187}
+{"expected_target": 417, "first_effective_prune": 128, "kind": "replay", "mean_tv": 0.12091856952014225, "n_layers": 28, "n_replayed": 1536, "pid": "test/prealgebra/1646.json", "post_prune_sizes": [417], "pre_eviction_max_tv": 0.0, "press": "uniform_fresh_pp_r64_v1", "prompt_len": 353, "protect": {"base": "uniform_fresh_pp_r64_v1", "budget": 256, "budget_relaxed": true, "n_layers_pruned": 28, "n_prunes": 616, "prompt_len": 353, "prompt_len_forced": false, "target": 417}, "wallclock_s": 72.29346678219736}
+{"identity_mismatched_heads": 0, "identity_prunes": 644, "kind": "identity", "pid": "test/prealgebra/1646.json", "press": "h2o_style_pp_v1"}
+{"expected_target": 256, "first_effective_prune": 256, "kind": "replay", "mean_tv": 0.038665552436356145, "n_layers": 28, "n_replayed": 1536, "pid": "test/algebra/2584.json", "post_prune_sizes": [256], "pre_eviction_max_tv": 0.0, "press": "h2o_style_pp_v1", "prompt_len": 52, "protect": {"base": "h2o_style_pp_v1", "budget": 256, "budget_relaxed": false, "n_layers_pruned": 28, "n_prunes": 560, "prompt_len": 52, "prompt_len_forced": false, "target": 256}, "wallclock_s": 71.77672307193279}
+{"expected_target": 256, "first_effective_prune": 256, "kind": "replay", "mean_tv": 0.04759747712795823, "n_layers": 28, "n_replayed": 1536, "pid": "test/algebra/2584.json", "post_prune_sizes": [256], "pre_eviction_max_tv": 0.0, "press": "uniform_fresh_pp_v1", "prompt_len": 52, "protect": {"base": "uniform_fresh_pp_v1", "budget": 256, "budget_relaxed": false, "n_layers_pruned": 28, "n_prunes": 560, "prompt_len": 52, "prompt_len_forced": false, "target": 256}, "wallclock_s": 71.79791837744415}
+{"expected_target": 256, "first_effective_prune": 256, "kind": "replay", "mean_tv": 0.04592125059100786, "n_layers": 28, "n_replayed": 1536, "pid": "test/algebra/2584.json", "post_prune_sizes": [256], "pre_eviction_max_tv": 0.0, "press": "uniform_fresh_pp_r64_v1", "prompt_len": 52, "protect": {"base": "uniform_fresh_pp_r64_v1", "budget": 256, "budget_relaxed": false, "n_layers_pruned": 28, "n_prunes": 560, "prompt_len": 52, "prompt_len_forced": false, "target": 256}, "wallclock_s": 71.71858144551516}
+{"identity_mismatched_heads": 0, "identity_prunes": 560, "kind": "identity", "pid": "test/algebra/2584.json", "press": "h2o_style_pp_v1"}
+{"expected_target": 256, "first_effective_prune": 256, "kind": "replay", "mean_tv": 0.055580580601504344, "n_layers": 28, "n_replayed": 1536, "pid": "test/algebra/1098.json", "post_prune_sizes": [256], "pre_eviction_max_tv": 0.0, "press": "h2o_style_pp_v1", "prompt_len": 17, "protect": {"base": "h2o_style_pp_v1", "budget": 256, "budget_relaxed": false, "n_layers_pruned": 28, "n_prunes": 560, "prompt_len": 17, "prompt_len_forced": false, "target": 256}, "wallclock_s": 71.88907102309167}
+{"expected_target": 256, "first_effective_prune": 256, "kind": "replay", "mean_tv": 0.05889421973738146, "n_layers": 28, "n_replayed": 1536, "pid": "test/algebra/1098.json", "post_prune_sizes": [256], "pre_eviction_max_tv": 0.0, "press": "uniform_fresh_pp_v1", "prompt_len": 17, "protect": {"base": "uniform_fresh_pp_v1", "budget": 256, "budget_relaxed": false, "n_layers_pruned": 28, "n_prunes": 560, "prompt_len": 17, "prompt_len_forced": false, "target": 256}, "wallclock_s": 71.79567316174507}
+{"expected_target": 256, "first_effective_prune": 256, "kind": "replay", "mean_tv": 0.05703345562000401, "n_layers": 28, "n_replayed": 1536, "pid": "test/algebra/1098.json", "post_prune_sizes": [256], "pre_eviction_max_tv": 0.0, "press": "uniform_fresh_pp_r64_v1", "prompt_len": 17, "protect": {"base": "uniform_fresh_pp_r64_v1", "budget": 256, "budget_relaxed": false, "n_layers_pruned": 28, "n_prunes": 560, "prompt_len": 17, "prompt_len_forced": false, "target": 256}, "wallclock_s": 71.72931389510632}
+{"identity_mismatched_heads": 0, "identity_prunes": 560, "kind": "identity", "pid": "test/algebra/1098.json", "press": "h2o_style_pp_v1"}
+Setting `pad_token_id` to `eos_token_id`:151643 for open-end generation.
+{"kind": "generation", "n_tokens": 700, "pid": "test/algebra/2584.json", "press": "h2o_style_pp_v1", "prompt_len": 52, "protect": {"base": "h2o_style_pp_v1", "budget": 256, "budget_relaxed": false, "n_layers_pruned": 28, "n_prunes": 196, "prompt_len": 52, "prompt_len_forced": false, "target": 256}, "wallclock_s": 18.68196725845337}
+Setting `pad_token_id` to `eos_token_id`:151643 for open-end generation.
+{"kind": "generation", "n_tokens": 700, "pid": "test/algebra/2584.json", "press": "uniform_fresh_pp_v1", "prompt_len": 52, "protect": {"base": "uniform_fresh_pp_v1", "budget": 256, "budget_relaxed": false, "n_layers_pruned": 28, "n_prunes": 196, "prompt_len": 52, "prompt_len_forced": false, "target": 256}, "wallclock_s": 18.562366174533963}
+Setting `pad_token_id` to `eos_token_id`:151643 for open-end generation.
+{"kind": "generation", "n_tokens": 700, "pid": "test/algebra/2584.json", "press": "uniform_fresh_pp_r64_v1", "prompt_len": 52, "protect": {"base": "uniform_fresh_pp_r64_v1", "budget": 256, "budget_relaxed": false, "n_layers_pruned": 28, "n_prunes": 196, "prompt_len": 52, "prompt_len_forced": false, "target": 256}, "wallclock_s": 18.800817906856537}
+PASS: wrote /home/sk10741/kvcache-storage/runs/protected-selectors-smoke-PASS.json
+Finished: protsel-smoke
