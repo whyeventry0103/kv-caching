@@ -1,0 +1,188 @@
+{
+  "absent_runs": [],
+  "benchmark": {
+    "n": 30,
+    "name": "aime24",
+    "revision": "2fe88a2f1091d5048c0f36abc874fb997b3dd99a"
+  },
+  "cells": [
+    {
+      "bench": "aime24",
+      "budget": "full",
+      "complete": true,
+      "config": "configs/experiments/bank_aime24_fc.yaml",
+      "model": "r1_distill_qwen_7b",
+      "n_covered": 240,
+      "n_duplicates": 0,
+      "n_expected": 240,
+      "n_foreign": 0,
+      "n_rows": 240,
+      "n_truncated": 53,
+      "press": "fullcache",
+      "run": "fc-aime24",
+      "wallclock_s": {
+        "mean": 208.72292779542963,
+        "median": 194.59756156103685,
+        "n": 240.0,
+        "q1": 103.78354958098498,
+        "q3": 332.6288775735011
+      }
+    },
+    {
+      "bench": "aime24",
+      "budget": "2048",
+      "complete": true,
+      "config": "configs/experiments/grid_aime24_2048.yaml",
+      "model": "r1_distill_qwen_7b",
+      "n_covered": 120,
+      "n_duplicates": 0,
+      "n_expected": 120,
+      "n_foreign": 0,
+      "n_rows": 120,
+      "n_truncated": 37,
+      "press": "random",
+      "run": "grid-aime24-2048",
+      "wallclock_s": {
+        "mean": 293.0711117348663,
+        "median": 306.89954304293497,
+        "n": 120.0,
+        "q1": 132.1781428590475,
+        "q3": 364.7791237789206
+      }
+    },
+    {
+      "bench": "aime24",
+      "budget": "2048",
+      "complete": true,
+      "config": "configs/experiments/grid_aime24_2048.yaml",
+      "model": "r1_distill_qwen_7b",
+      "n_covered": 120,
+      "n_duplicates": 0,
+      "n_expected": 120,
+      "n_foreign": 0,
+      "n_rows": 120,
+      "n_truncated": 54,
+      "press": "rkv",
+      "run": "grid-aime24-2048",
+      "wallclock_s": {
+        "mean": 288.1109704674338,
+        "median": 371.9485253925668,
+        "n": 120.0,
+        "q1": 131.10072260870948,
+        "q3": 372.8891484409687
+      }
+    },
+    {
+      "bench": "aime24",
+      "budget": "2048",
+      "complete": true,
+      "config": "configs/experiments/grid_aime24_2048.yaml",
+      "model": "r1_distill_qwen_7b",
+      "n_covered": 120,
+      "n_duplicates": 0,
+      "n_expected": 120,
+      "n_foreign": 0,
+      "n_rows": 120,
+      "n_truncated": 28,
+      "press": "streamingllm",
+      "run": "grid-aime24-2048",
+      "wallclock_s": {
+        "mean": 255.85118429198627,
+        "median": 243.44638156605652,
+        "n": 120.0,
+        "q1": 109.98060654304572,
+        "q3": 363.3580536606896
+      }
+    },
+    {
+      "budget": "2048",
+      "complete": true,
+      "config": "configs/experiments/readout_aime24_2048.yaml",
+      "kind": "readout",
+      "model": "r1_distill_qwen_7b",
+      "n_covered": 120,
+      "n_defined": 93,
+      "n_duplicates": 0,
+      "n_expected": 120,
+      "n_foreign": 0,
+      "n_rows": 120,
+      "press": "random",
+      "run": "readout-aime24-2048"
+    },
+    {
+      "budget": "2048",
+      "complete": true,
+      "config": "configs/experiments/readout_aime24_2048.yaml",
+      "kind": "readout",
+      "model": "r1_distill_qwen_7b",
+      "n_covered": 120,
+      "n_defined": 93,
+      "n_duplicates": 0,
+      "n_expected": 120,
+      "n_foreign": 0,
+      "n_rows": 120,
+      "press": "rkv",
+      "run": "readout-aime24-2048"
+    },
+    {
+      "budget": "2048",
+      "complete": true,
+      "config": "configs/experiments/readout_aime24_2048.yaml",
+      "kind": "readout",
+      "model": "r1_distill_qwen_7b",
+      "n_covered": 120,
+      "n_defined": 93,
+      "n_duplicates": 0,
+      "n_expected": 120,
+      "n_foreign": 0,
+      "n_rows": 120,
+      "press": "streamingllm",
+      "run": "readout-aime24-2048"
+    },
+    {
+      "bench": "aime24",
+      "budget": "full",
+      "complete": true,
+      "config": "configs/experiments/bank_aime24_llama8b.yaml",
+      "model": "r1_distill_llama_8b",
+      "n_covered": 120,
+      "n_duplicates": 0,
+      "n_expected": 120,
+      "n_foreign": 0,
+      "n_rows": 120,
+      "n_truncated": 9,
+      "press": "fullcache",
+      "run": "fc-aime24-llama8b-cap32768",
+      "wallclock_s": {
+        "mean": 362.2931877638213,
+        "median": 282.8816605452448,
+        "n": 120.0,
+        "q1": 148.07993302727118,
+        "q3": 523.4866887509124
+      }
+    },
+    {
+      "bench": "aime24",
+      "budget": "2048",
+      "complete": false,
+      "config": "configs/experiments/grid_aime24_rkv_published.yaml",
+      "model": "r1_distill_llama_8b",
+      "n_covered": 47,
+      "n_duplicates": 0,
+      "n_expected": 120,
+      "n_foreign": 0,
+      "n_rows": 47,
+      "n_truncated": 4,
+      "press": "rkv",
+      "run": "grid-aime24-rkv-published-cap32768",
+      "wallclock_s": {
+        "mean": 405.85502075220637,
+        "median": 351.1494860355742,
+        "n": 47.0,
+        "q1": 171.91031813807786,
+        "q3": 633.2362411217764
+      }
+    }
+  ],
+  "schema": "meeting5-aime-inventory-v1"
+}

@@ -1,0 +1,25 @@
+name: m5a_read
+# Meeting 5 M5-A read spec (PREPARED 2026-10-14, before any protected H2O-style or
+# R-KV row). Consumed by scripts/report_policy_replication.py. Run names of the
+# NEW arms are proposals until their registration; an absent run reads PARTIAL.
+reference: random
+pairings: [h2o, streamingllm]   # the two scientific pairings (Holm over 2)
+descriptive: [rkv]              # declared third comparison, descriptive
+seeds: [11, 23, 47, 89]
+cohort_source: configs/meeting5/strict_fit_b256.json   # frozen from the inventory
+arms:
+  random:
+    unprotected: [grid-diss256-tok, random, "256"]
+    protected: [grid-pp256, random_pp, "256"]
+  streamingllm:
+    unprotected: [grid-diss256-tok, streamingllm, "256"]
+    protected: [grid-pp256, streamingllm_pp, "256"]
+  h2o:
+    unprotected: [grid-diss256-h2o, h2o, "256"]
+    protected: [grid-h2opp256-m5, h2o_style_pp_v1, "256"]
+  rkv:
+    unprotected: [grid-diss256-rkv, rkv, "256"]
+    protected: [grid-rkvpp256-m5, rkv_pp_v1, "256"]
+# Whole-cohort read only: unprotected rows of the 3 relaxed problems at the
+# protected arm's effective budget (manifest M5A-CAPMATCH; not yet generated).
+capmatch_run: grid-capmatch-m5

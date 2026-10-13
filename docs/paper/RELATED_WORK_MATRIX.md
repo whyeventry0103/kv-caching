@@ -83,3 +83,85 @@ The independent reviewer could not retrieve arXiv:2608.01631. Evidence preserved
 - **Section 4 text:** "we additionally run end-to-end checks on AIME26 (Table 2)". Table 2 carries the same end-to-end numbers without a budget in its caption.
 
 A finite matrix does not guarantee novelty. The second pass at the submission freeze still stands.
+
+## 4. Meeting 5 update (2026-10-14): information-theoretic and protection precedents
+
+**How these were read.** Every source below was read from its primary text on
+2026-10-14:
+- arXiv HTML for CapKV, K-VEC, InfoKV, Random Attention, evidence2026, Garcia
+  and Prefix Sliding;
+- the PMLR page and the GitHub README for CapKV;
+- the PDFs for Xu et al., Hewitt et al. and McAllester & Stratos.
+
+The quotes were checked against local text extracts. "Not found" means not
+found in the text read.
+
+### 4.1 Matrix
+
+| Source | Quantity or design | Models / tasks | Relation to Meeting 5 |
+|---|---|---|---|
+| **CapKV**: Yang, Tang, Zhen, Lv, "Rethinking KV Cache Eviction via a Unified Information-Theoretic Objective", ICML 2026 (PMLR 306), arXiv:2604.25975v1 | `I(q; Y \| Z_C)`: information about the future *query* q in the attention output, under a linear-Gaussian surrogate ("adopted solely for analytical tractability"). Closed form `½ log det(I + Σ⁻¹ U K Λ Kᵀ Uᵀ)`. Leverage-score eviction. K-, U- and KU-capacity proxies "used solely as diagnostic indicators", validated by Spearman ρ ≈ 0.73–0.87 against accuracy | Qwen3-8B/14B, LongBench; Nemotron-7B on AIME25 (decoding) | An MI objective for KV eviction already exists, so "first information-theoretic view" is unavailable. Its MI is query-to-output capacity under a Gaussian surrogate, not task information about a randomized fact through the model's answer channel. Its proxies enter M5-D as labelled *surrogate capacity* comparators. No random baseline, prompt protection, planted fact or nuisance variable found |
+| **K-VEC**: Roy, Zhai, Hajimirsadeghi, Samei, "Coverage-Driven KV Cache Eviction…", arXiv:2606.29563v1 | Token coverage. The bound `I(T;X) ≤ α log C` is *assumed* ("token contributions are additive… equally informative"); MI is not measured. Evidence is a coverage–F1 correlation | Llama-3.1-8B, Qwen2.5-7B; LongBench, NIAH (prefill) | Coverage is a competing explanation and enters as a predictor (M5-D), not as measured information |
+| **InfoKV**: Kai, Xiao, Birch, Lin, "Information-Aware KV Cache Compression for Long Reasoning", arXiv:2606.26875v1 | "Forward Influence": deletion KL on a fixed continuation. Score = predictive entropy × layer representation distance, mixed with attention. No mutual information appears in the text | R1-Distill-Qwen-7B and Llama-8B; AIME24, IFEval, LiveCodeBench | Entropy-weighted importance in long reasoning is taken. It has no randomized target, finite channel or protection factorial |
+| **Random Attention**: Wang et al., arXiv:2609.03430v2 | Matched prompt protection for four selectors plus random (§5.1; "separates the score from the protection"). Planted-fact probe (§5.2): a 4-digit value in a fixed 16-token box inside real MATH500 traces, teacher-forced through the decode path; the query is always kept; the fact span is pinned per (layer, head); graded recall by log-probabilities. Retrieval probe (§5.3) | Qwen3-4B/14B/32B, Phi-4-reasoning; probes on Qwen3-4B only | **Precedent for both our protected comparison and a decode-path planted fact with span pinning.** Not found: MI, nuisance variable, enumeration over a finite answer set, equal-budget nuisance-span control, forward/reverse readout |
+| **evidence2026**: Ai, He, Guo, arXiv:2608.01631v1 | Fixed-trace replay with question protection; answer–evidence faithfulness; perturbation fidelity | Qwen3-8B etc.; AIME, GPQA-D | Precedent for the forward instrument (see §3). No MI, no protection factorial, no random baseline |
+| **Garcia**, "Protection Is (Nearly) All You Need: Structural Protection Dominates Scoring in Globally Capped KV Eviction", arXiv:2605.18053v1 (independent researcher) | Seven policies (LRU, H2O, SnapKV, StreamingLLM-style, Ada-KV, QUEST, **Random**), each with and without boundary protection at the same global cap C: ⌈ρC⌉ prefix + suffix slots, ρ = 0.10. Without protection, quality collapses (F1 ≤ 0.064). Random+prot reaches F1 0.250 against 0.282–0.290. TOST with Δ = 0.02 and Holm | Ten models, 1.5B–27B; LongBench QA (N = 162), NIAH; not reasoning traces | **Precedent for the protection × policy cross with Random at a matched cap.** Its protection is positional (boundary slots), not the prompt as such and not a content span. Not found: MI, nuisance, span interventions, fixed-trace readout |
+| **Prefix Sliding**: Muennighoff et al., arXiv:2608.26070v1 | Keeps the prefix (system + prompt) plus a recency window, as a kernel mask | Qwen3-1.7B (7B in the RL appendix); GPQA, MATH500, AIME25 | Precedent for prompt + recency protection in reasoning. No factorial, no random baseline, no information analysis |
+| **Xu et al.**, "A Theory of Usable Information Under Computational Constraints", ICLR 2020, arXiv:2002.10689 | `I_V(X→Y) = H_V(Y\|∅) − H_V(Y\|X)`, with `H_V` an infimum over a predictive family; equals Shannon MI when V is all models; can violate data processing | — | Our 2 − cross-entropy *reader score* is a fixed-reader quantity in this spirit. It is not an infimum over a family, and it is labelled a declared-reader score |
+| **Hewitt et al.**, "Conditional probing: measuring usable information beyond a baseline", EMNLP 2021 | `I_V(φ(X)→Y \| B) = H_V(Y\|B) − H_V(Y\|B, φ(X))` | — | The template for any optional probe beyond a baseline (protocol H4). Decodability by a probe is not use by the model |
+| **McAllester & Stratos**, "Formal Limitations on the Measurement of Mutual Information", AISTATS 2020 (PMLR 108) | A distribution-free high-confidence lower bound on MI from N samples "cannot be larger than O(ln N)" (Thm 1.1: ≤ 2 ln N + 5) | — | Why MINE, kNN and critic-based estimates over cache activations are not the headline. Our channel is computed exactly from the model's output distribution for every one of the 16 inputs, is bounded by log₂ 4 = 2 bits, and its only sampling uncertainty is across contexts. The limitation targets a different estimation problem, and this is stated rather than assumed |
+
+### 4.2 What this does to the Meeting 5 claim
+
+**Not novel, and never to be claimed:**
+- crossing prompt or boundary protection with eviction policies, Random
+  included, at a matched budget (Garcia, Random Attention);
+- that protection removes most selector differences (both);
+- an information-theoretic objective or capacity for KV eviction (CapKV);
+- coverage as an information motivation (K-VEC);
+- entropy-informed importance for reasoning (InfoKV);
+- planting a fact in a reasoning trace, feeding it through the decode path and
+  pinning its span (Random Attention §5.2);
+- fixed-trace replay (evidence2026).
+
+Our M5-A protected comparison is therefore a **replication and extension**:
+reasoning traces, the four historical policies, R-KV included, B = 256 with
+capacity matching. It is not a new design.
+
+**Candidate increment.** Each part is "not found" in every source above, which
+is not proof of absence:
+1. Exact information through a finite answer channel (4 symbols + OTHER) about
+   a randomized target S, with an independent nuisance N enumerated and
+   marginalized. It is reported with log loss, OTHER mass and accuracy, and
+   the task-switch query reads the same cache.
+2. An equal-budget contrast between protecting the target span and protecting
+   an equal nuisance span, with a placebo span.
+3. The forward/reverse readout (§2 above).
+4. The link between them: does an earlier channel measurement predict later
+   free-running accuracy beyond M/Δ/ω, occupancy and exposure (protocol H2)?
+
+Without (4), items 1–2 are a characterization instrument, not an explanation.
+
+**What the channel number is.** At a fixed context u and eviction seed R, the
+readout draws Z from the cache alone, so S → C_π → Z and
+I(S; Z | u, R) ≤ I(S; C_π | u, R). The output-channel MI is a **lower bound**
+on the cache's information about S, never an estimate of it. The reader score
+2 − CE is a Barber–Agakov-type lower bound for that one fixed reader.
+Differences of lower bounds do not bound differences of cache MI (review §10.2).
+
+**Alternative explanations to rule out before any mechanistic sentence:**
+- prompt loss: already established by others;
+- capacity differences: hence B_eff matching and the strict-fit cohort;
+- recency and position: hence counterbalanced ages and the placebo span;
+- coverage (K-VEC) and surrogate capacity (CapKV): entered as competing
+  predictors;
+- trace length and exposure;
+- numerical artifacts: the full/full identity and the pre-eviction TV = 0
+  controls.
+
+**Verdict, 2026-10-14.**
+- The gate passes for a **measurement contribution**: the forward/reverse
+  audit, plus the target/nuisance finite channel as an *instrument*.
+- It does **not** pass for "protection explains it" (precedented), "Random
+  wins" (precedented), or any mechanism claim before G3.
+- Recheck it after the M5-C calibration and at the submission freeze.

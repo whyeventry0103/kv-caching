@@ -1,0 +1,105 @@
+name: meeting5_manifest
+# Meeting 5 manifest (PREPARED 2026-10-14; PROPOSED, nothing here is approved).
+# Replaces the WP5 block budget (docs/paper/PROPOSALS_FOR_APPROVAL.md, kept as
+# history). REUSE cells must be complete in the inventory or the ledger refuses;
+# NEW rows are counted from their configs and priced from measured comparable
+# cells (scripts/plan_meeting5_cost.py; kvcache.meeting5_inventory).
+status: PROPOSED
+cohort:
+  model: r1_distill_qwen_7b
+  bench: math500
+  budget: "256"
+  seeds: [11, 23, 47, 89]
+  fullcache_run: math500-fc-powered-merged
+  strict_fit_budgets: [256, 1024]
+inventory_runs:
+  - math500-fc-powered-merged
+  - grid-math500-dissociation-v1
+  - grid-diss256-tok
+  - grid-diss256-h2o
+  - grid-diss256-rkv
+  - grid-pp256
+  - grid-diss1024
+  - grid-pp1024
+# Cells of this run duplicate the canonical grid-diss256-tok rows; excluded from
+# the rate band so Random and StreamingLLM are not counted twice.
+rate_runs_exclude: [grid-math500-dissociation-v1]
+# Filled 2026-10-14 from results/diag/meeting5/inventory.json (all complete,
+# 400/400 frozen keys, no duplicates). grid-diss256-tok is the canonical
+# unprotected Random/StreamingLLM run (the readers use it; PAPER_FINDINGS
+# records its exact agreement with grid-math500-dissociation-v1).
+reuse:
+  - {label: full cache, run: math500-fc-powered-merged, press: fullcache, budget: full}
+  - {label: "Random (historical fixed-slot), unprotected", run: grid-diss256-tok, press: random, budget: 256}
+  - {label: StreamingLLM, unprotected, run: grid-diss256-tok, press: streamingllm, budget: 256}
+  - {label: "H2O-style / current-attention, unprotected", run: grid-diss256-h2o, press: h2o, budget: 256}
+  - {label: R-KV (certified port), unprotected, run: grid-diss256-rkv, press: rkv, budget: 256}
+  - {label: "Random (historical fixed-slot), protected", run: grid-pp256, press: random_pp, budget: 256}
+  - {label: StreamingLLM, protected, run: grid-pp256, press: streamingllm_pp, budget: 256}
+new:
+  # --- M5-A: first request -------------------------------------------------
+  - id: M5A-RKVPP-SMOKE
+    what: protected R-KV real-model smoke (9 records; gate before any rkv_pp_v1 row)
+    config: configs/experiments/rkvpp_smoke_m5.yaml
+    rows: 0
+    measured_gpu_hours: 0.26   # the protected-selector smoke's measured 0.2584 h (15 records)
+    proposed_cap: 1
+    stage: gate
+  - id: M5A-H2OPP
+    what: H2O-style protected free runs, B=256, 100 problems x 4 seeds
+    config: configs/experiments/grid_math500_h2opp256_m5.yaml
+    rows: 400
+    price: comparable
+    stage: essential
+    prerequisite: protected-selector smoke PASS under the 21-record design (P2, approved)
+  - id: M5A-RKVPP
+    what: R-KV protected free runs, B=256, 100 problems x 4 seeds
+    config: configs/experiments/grid_math500_rkvpp256_m5.yaml
+    rows: 400
+    price: comparable
+    stage: essential
+    prerequisite: M5A-RKVPP-SMOKE PASS
+  - id: M5A-UFPP
+    what: fresh-uniform protected free runs (separately named sensitivity)
+    config: configs/experiments/grid_math500_ufpp256_m5.yaml
+    rows: 400
+    price: comparable
+    stage: sensitivity
+    prerequisite: protected-selector smoke PASS (P2)
+  - id: M5A-CAPMATCH
+    what: >-
+      unprotected comparators at the protected arm's effective budget for the 3
+      relaxed problems (algebra/1349 @408, prealgebra/1646 @417,
+      precalculus/1199 @280) x 4 policies x 4 seeds; none exist (inventory)
+    rows: 48
+    price: comparable
+    launches: 3
+    stage: essential-for-whole-cohort
+    prerequisite: >-
+      a pid-filter grid adapter (NOT implemented: run_grid.py selects by subset
+      count, and changing it would alter the generation identity of pending cells)
+  # --- later stages, listed so the request is complete (not in the first ask) --
+  - id: M5A-READOUT
+    what: forward readout for H2O-style-pp and R-KV-pp (400 + 400)
+    rows: 800
+    stage: after-G1
+  - id: M5A-CAPTURE-PP
+    what: protected M/Delta/omega on the capture cohort (same traces, keys, layers)
+    stage: after-G1
+    prerequisite: protected capture adapter (not implemented)
+  - id: M5B-GSM8K-PROTECTED
+    what: protected four-policy + full cache, 200 problems x 2 seeds
+    rows: 2000
+    stage: after-calibration
+    prerequisite: GSM8K full-cache calibration timing and grader freeze (no 7B GSM8K timing exists)
+  - id: M5B-BBH-PROTECTED
+    what: same design on BBH logical_deduction_five_objects
+    rows: 2000
+    stage: after-calibration
+    prerequisite: human pin of the BBH revision (proposed 9ee07bd...); loader and option scorer
+  - id: M5C-CALIBRATION
+    what: information-channel calibration, 4 blocks x 16 combos x 5 caches
+    prefix_executions: 320
+    proposed_cap: 4
+    stage: separate-request
+    prerequisite: scripts/run_information_probe.py (not implemented; generator and reader are)

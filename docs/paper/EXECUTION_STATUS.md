@@ -16,7 +16,8 @@ Claims: `docs/paper/CLAIM_LEDGER.md`. Approvals and caps: `docs/paper/PROPOSALS_
 | P3 timing pilot | **Queued behind the new smoke** | Cap 6 GPU-h, shared by all three stages |
 | Qwen3 | **Held behind B=1024** | Gate FAIL 0.845 kept. Disposition (a), exploratory. The 42-row human scoring review is still unassigned (owner/supervisor) |
 | Fork-precision gate | **FAIL (scoped)** | Constrains next-token TV claims only, not accuracy (ledger §D) |
-| Meeting 5 CPU preparation | **In progress** | Protocol, related work, protected R-KV, finite-channel instrument, replication manifests, cost model, single approval request |
+| Meeting 5 CPU preparation | **Bundle ready for review (2026-10-14)** | Protected R-KV `rkv_pp_v1`: own provenance, gate, smoke and held adapters; real-model CPU parity PASS (`results/diag/meeting5/rkv_pp_cpu_parity/`). Finite-channel instrument (`task_information.py`, `information_tasks.py`) and reader CLI. Protocol draft v0.1 (`docs/protocol/MEETING5_INFORMATION_PROTOCOL.md`). Related work rechecked from primary sources; Garcia 2026 precedents the protection × policy cross. Inventory, strict-fit cohort (97), AIME inventory, frozen GSM8K/BBH graders and manifests. M5-A reader (PARTIAL today). Not yet written: information-probe GPU runner, pid-filter adapter for CAPMATCH, protected capture adapter |
+| Meeting 5 approval request | **Awaiting the owner** | `docs/paper/MEETING5_APPROVAL_REQUEST.md`: 1,248 rows, 50.5 / 62.8 / 83.3 GPU-h, caps totalling 89 (essential pair plus smoke: cap 57). BBH pin and the ±0.05 margin are owner decisions. Nothing is queued |
 | Old WP5/WP6 | **Superseded** | Replaced by Meeting 5 manifests. The old manifests are kept as history |
 
 ## History (dated; superseded statements are kept as they were)

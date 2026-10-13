@@ -1,0 +1,221 @@
+{
+  "manifest": "configs/meeting5/m5_manifest.yaml",
+  "new": [
+    {
+      "config": "configs/experiments/rkvpp_smoke_m5.yaml",
+      "gpu_hours": {
+        "central": 0.26,
+        "lower": 0.26,
+        "upper": 0.26
+      },
+      "id": "M5A-RKVPP-SMOKE",
+      "measured_gpu_hours": 0.26,
+      "proposed_cap": 1,
+      "rows": 0,
+      "stage": "gate",
+      "what": "protected R-KV real-model smoke (9 records; gate before any rkv_pp_v1 row)"
+    },
+    {
+      "config": "configs/experiments/grid_math500_h2opp256_m5.yaml",
+      "gpu_hours": {
+        "central": 20.01,
+        "lower": 16.06,
+        "upper": 26.55
+      },
+      "id": "M5A-H2OPP",
+      "prerequisite": "protected-selector smoke PASS under the 21-record design (P2, approved)",
+      "price": "comparable",
+      "rows": 400,
+      "stage": "essential",
+      "what": "H2O-style protected free runs, B=256, 100 problems x 4 seeds"
+    },
+    {
+      "config": "configs/experiments/grid_math500_rkvpp256_m5.yaml",
+      "gpu_hours": {
+        "central": 20.01,
+        "lower": 16.06,
+        "upper": 26.55
+      },
+      "id": "M5A-RKVPP",
+      "prerequisite": "M5A-RKVPP-SMOKE PASS",
+      "price": "comparable",
+      "rows": 400,
+      "stage": "essential",
+      "what": "R-KV protected free runs, B=256, 100 problems x 4 seeds"
+    },
+    {
+      "config": "configs/experiments/grid_math500_ufpp256_m5.yaml",
+      "gpu_hours": {
+        "central": 20.01,
+        "lower": 16.06,
+        "upper": 26.55
+      },
+      "id": "M5A-UFPP",
+      "prerequisite": "protected-selector smoke PASS (P2)",
+      "price": "comparable",
+      "rows": 400,
+      "stage": "sensitivity",
+      "what": "fresh-uniform protected free runs (separately named sensitivity)"
+    },
+    {
+      "gpu_hours": {
+        "central": 2.55,
+        "lower": 2.08,
+        "upper": 3.34
+      },
+      "id": "M5A-CAPMATCH",
+      "launches": 3,
+      "prerequisite": "a pid-filter grid adapter (NOT implemented: run_grid.py selects by subset count, and changing it would alter the generation identity of pending cells)",
+      "price": "comparable",
+      "rows": 48,
+      "stage": "essential-for-whole-cohort",
+      "what": "unprotected comparators at the protected arm's effective budget for the 3 relaxed problems (algebra/1349 @408, prealgebra/1646 @417, precalculus/1199 @280) x 4 policies x 4 seeds; none exist (inventory)"
+    },
+    {
+      "gpu_hours": null,
+      "id": "M5A-READOUT",
+      "rows": 800,
+      "stage": "after-G1",
+      "what": "forward readout for H2O-style-pp and R-KV-pp (400 + 400)"
+    },
+    {
+      "gpu_hours": null,
+      "id": "M5A-CAPTURE-PP",
+      "prerequisite": "protected capture adapter (not implemented)",
+      "stage": "after-G1",
+      "what": "protected M/Delta/omega on the capture cohort (same traces, keys, layers)"
+    },
+    {
+      "gpu_hours": null,
+      "id": "M5B-GSM8K-PROTECTED",
+      "prerequisite": "GSM8K full-cache calibration timing and grader freeze (no 7B GSM8K timing exists)",
+      "rows": 2000,
+      "stage": "after-calibration",
+      "what": "protected four-policy + full cache, 200 problems x 2 seeds"
+    },
+    {
+      "gpu_hours": null,
+      "id": "M5B-BBH-PROTECTED",
+      "prerequisite": "human pin of the BBH revision (proposed 9ee07bd...); loader and option scorer",
+      "rows": 2000,
+      "stage": "after-calibration",
+      "what": "same design on BBH logical_deduction_five_objects"
+    },
+    {
+      "gpu_hours": null,
+      "id": "M5C-CALIBRATION",
+      "prefix_executions": 320,
+      "prerequisite": "scripts/run_information_probe.py (not implemented; generator and reader are)",
+      "proposed_cap": 4,
+      "stage": "separate-request",
+      "what": "information-channel calibration, 4 blocks x 16 combos x 5 caches"
+    }
+  ],
+  "rates_from": {
+    "cells": [
+      "grid-diss256-h2o:h2o",
+      "grid-diss256-rkv:rkv",
+      "grid-diss256-tok:random",
+      "grid-diss256-tok:streamingllm",
+      "grid-pp256:random_pp",
+      "grid-pp256:streamingllm_pp"
+    ],
+    "central_s": 162.8094697100341,
+    "lower_s": 130.51708635343354,
+    "upper_s": 216.356311080507
+  },
+  "reuse": [
+    {
+      "budget": "full",
+      "label": "full cache",
+      "n_rows": 2000,
+      "n_truncated": 38,
+      "press": "fullcache",
+      "run": "math500-fc-powered-merged"
+    },
+    {
+      "budget": 256,
+      "label": "Random (historical fixed-slot), unprotected",
+      "n_rows": 400,
+      "n_truncated": 93,
+      "press": "random",
+      "run": "grid-diss256-tok"
+    },
+    {
+      "budget": 256,
+      "label": "StreamingLLM",
+      "n_rows": 400,
+      "n_truncated": 28,
+      "press": "streamingllm",
+      "run": "grid-diss256-tok",
+      "unprotected": null
+    },
+    {
+      "budget": 256,
+      "label": "H2O-style / current-attention, unprotected",
+      "n_rows": 400,
+      "n_truncated": 42,
+      "press": "h2o",
+      "run": "grid-diss256-h2o"
+    },
+    {
+      "budget": 256,
+      "label": "R-KV (certified port)",
+      "n_rows": 400,
+      "n_truncated": 54,
+      "press": "rkv",
+      "run": "grid-diss256-rkv",
+      "unprotected": null
+    },
+    {
+      "budget": 256,
+      "label": "Random (historical fixed-slot), protected",
+      "n_rows": 400,
+      "n_truncated": 18,
+      "press": "random_pp",
+      "run": "grid-pp256"
+    },
+    {
+      "budget": 256,
+      "label": "StreamingLLM",
+      "n_rows": 400,
+      "n_truncated": 39,
+      "press": "streamingllm_pp",
+      "protected": null,
+      "run": "grid-pp256"
+    }
+  ],
+  "schema": "meeting5-ledger-v1",
+  "strict_fit": {
+    "1024": {
+      "budget": 1024,
+      "min_trace_slots": 64,
+      "n_problems": 100,
+      "n_strict_fit": 100,
+      "relaxed_effective_budgets": {}
+    },
+    "256": {
+      "budget": 256,
+      "min_trace_slots": 64,
+      "n_problems": 100,
+      "n_strict_fit": 97,
+      "relaxed_effective_budgets": {
+        "test/algebra/1349.json": 408,
+        "test/prealgebra/1646.json": 417,
+        "test/precalculus/1199.json": 280
+      }
+    }
+  },
+  "total_priced_gpu_hours": {
+    "central": 62.84,
+    "lower": 50.52,
+    "upper": 83.25
+  },
+  "unpriced": [
+    "M5A-READOUT",
+    "M5A-CAPTURE-PP",
+    "M5B-GSM8K-PROTECTED",
+    "M5B-BBH-PROTECTED",
+    "M5C-CALIBRATION"
+  ]
+}

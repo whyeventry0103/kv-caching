@@ -4396,3 +4396,61 @@ These were frozen before any protected B=1024 reverse row exists (reverse-readou
 
 **5. Latent-basis interpretation (Q.6), clarified.** δ⊥ is the part of the whitened displacement outside a finite PCA subspace (21–41% of per-layer variance at k = 64). It does not show an impossible or never-visited reasoning state. ω is a ratio, not a bounded fraction, and a larger ω need not mean larger total displacement or more answer-relevant damage. The Q.6 text above is left as registered; stored measurements are unchanged.
 
+
+## Meeting 5 preparation (2026-10-14, later): pre-outcome freezes for M5-A/B/C — nothing approved or run
+
+All of the following were frozen before any Meeting 5 row existed. Every M5
+config is `held: true`, and no M5 job is queued. The design document is
+`docs/protocol/MEETING5_INFORMATION_PROTOCOL.md` (DRAFT v0.1). Until the first
+M5 read it changes only by its own dated §9 entries; after that, only by an
+amendment here.
+
+1. **M5-A cohorts and endpoints.**
+   - Primary cohort: the strict-fit cohort of 97 problems with P + 64 ≤ 256,
+     frozen in `configs/meeting5/strict_fit_b256.json`.
+   - Relaxed problems: test/algebra/1349 @ 408, test/prealgebra/1646 @ 417 and
+     test/precalculus/1199 @ 280. They enter the whole cohort only with
+     capacity-matched unprotected comparators.
+   - Scientific pairings: Random − H2O-style and Random − StreamingLLM.
+     Random − R-KV is descriptive.
+   - Inference: the protection-by-policy interaction uses the registered
+     problem-level t test with Holm over the two pairings.
+   - "Vanishes" means TOST inside ±0.05. This margin is proposed and needs the
+     owner's confirmation before any M5 read.
+   - Reader: `scripts/report_policy_replication.py`.
+2. **GSM8K primary grader.**
+   - `kvcache.task_graders.gsm8k_grade` is applied at read time to the stored
+     trace. The in-row `correct` field (the MATH grader) is NOT the GSM8K
+     primary.
+   - Reason, observed 2026-10-14 before any GSM8K generation: the MATH grader
+     marks `\boxed{1,250}`, `\boxed{18.00}` and `\boxed{72 clips}` wrong.
+   - The boxed-only variant is a declared sensitivity.
+   - BBH: `kvcache.task_graders.bbh_grade`, exactly one option.
+3. **Problem manifests.** Selection is by SHA-256 order only, salt
+   `meeting5-2026-10-14`, file `configs/meeting5/problem_manifests.json`:
+
+   | Dataset | Calibration | Confirmation | Notes |
+   |---|---|---|---|
+   | MATH-500 | — | 200 | from the 400 problems outside the discovery cohort |
+   | GSM8K | 24 | 200 | |
+   | BBH | 25 | 200 | example indices; the revision stays TODO(human) |
+
+4. **M5-C instrument.**
+   - Exact output-channel MI over 4 symbols + OTHER, with no renormalization,
+     N marginalized over all 16 combinations, and log loss from
+     log-probabilities.
+   - The rounding tolerance SUM_TOL = 1e-6 is declared before any outcome.
+   - A missing variant makes the read PARTIAL; a duplicate or invalid row
+     makes it INVALID.
+   - Code: `kvcache.task_information`, `kvcache.information_tasks`,
+     `scripts/report_information_probe.py`.
+   - Primary regime: 1,024 body tokens at B = 256, facts at offsets 64 and
+     768, order alternating by block.
+5. **Protected R-KV** (`rkv_pp_v1`, `kvcache.presses.rkv_prompt_protect`).
+   - Mandatory set: prompt ∪ recent-8. The rest of the selection is
+     `scores.topk` plus the K/V gather, exactly as the base press.
+   - It has its own provenance family `rkv_pp`, smoke marker
+     `rkv-pp-smoke-PASS.json` and gate.
+   - CPU parity PASS on the 1.5B model: base-identical K/V with protection
+     off.
+   - It is not promoted: promotion needs the GPU smoke, which is not approved.

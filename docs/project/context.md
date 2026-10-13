@@ -24,6 +24,30 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-10-14 ~01:00 Dubai — Meeting 5 CPU bundle complete; one approval request awaits the owner.**
+  - **No GPU used, and nothing new queued.** The approved P1/P2/P3 run in normal windows under the ledger. Ledger now: P1 20.0 h left, P2 1.7416, P3 6.0. grid-pp1024 is at 796/800; readout-pp1024 and reverse-readout-pp1024 are at 0/800.
+  - **Protected R-KV `rkv_pp_v1`.**
+    - Code: `src/kvcache/presses/rkv_prompt_protect.py`, with its own provenance `rkv_pp`, gate, smoke (`scripts/rkv_pp_smoke.py`) and held adapters `run_grid_rkv_pp.py` / `run_replay_rkv_pp.py`.
+    - Real-model CPU parity PASS on the 1.5B model with fc-q15b over 3 traces:
+      - protection off: 112/112 prunes per trace byte-identical to base R-KV, identical TV;
+      - protection on: target 408 for P = 344 (else 256), pre-eviction TV 0.
+    - Evidence: `results/diag/meeting5/rkv_pp_cpu_parity/`.
+  - **Information instrument.** `task_information.py` reproduces the review §10.3 table exactly. Also built: `information_tasks.py` (the generator), `scripts/report_information_probe.py` (the reader). The GPU runner is NOT written.
+  - **Protocol draft v0.1.** `docs/protocol/MEETING5_INFORMATION_PROTOCOL.md`, plus a PREREGISTRATION entry "Meeting 5 preparation".
+  - **Related work.** `RELATED_WORK_MATRIX.md` §4, from primary sources. **Garcia 2026 (arXiv:2605.18053) already crosses protection × 7 policies including Random at a matched cap**, so M5-A is a replication/extension, not a new design.
+  - **Inventory and manifests.**
+    - Inventory: `results/diag/meeting5/inventory.json`. The 7 reuse cells are complete. The strict-fit cohort is 97 problems (`configs/meeting5/strict_fit_b256.json`).
+    - AIME inventory: `aime_inventory.json`. There is no matched factorial.
+    - Graders: the MATH grader fails GSM8K formats, so `task_graders.py` adds a GSM8K numeric grader and a BBH option grader. BBH loader: `src/kvcache/bbh.py`, TODO(human) pin.
+    - Problem manifests: `configs/meeting5/problem_manifests.json`.
+    - M5-A reader: `scripts/report_policy_replication.py`, PARTIAL today.
+  - **Approval request.** `docs/paper/MEETING5_APPROVAL_REQUEST.md`: 1,248 rows, 50.5 / 62.8 / 83.3 GPU-h, caps totalling 89.
+  - **Next, depending on the owner:**
+    1. approve or reduce A1–A5;
+    2. pin the BBH revision;
+    3. confirm the ±0.05 margin.
+  - **Still to write before the remaining requests:** the information-probe runner, the CAPMATCH pid-filter adapter, and the protected capture adapter.
+
   **★★★★★ 2026-10-13 22:30 Dubai — status check, no code changes.**
 
   **Server, nights of 7–12 Oct.** Preflight refused every launch: the shared disk had less than 30 GB free (177 refusals, caused by other users; our footprint is about 50 of 72 GB). Launches resumed 2026-10-12 09:10.

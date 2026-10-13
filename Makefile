@@ -144,6 +144,16 @@ dryrun:
 	$(PYTHON) scripts/run_replay.py --config configs/experiments/reverse_readout_pp1024_s1x.yaml --dry-run
 	$(PYTHON) scripts/protected_selectors_smoke.py --config configs/experiments/protsel_smoke_wp4.yaml --dry-run
 	$(PYTHON) scripts/validate_smoke_bundle.py --bundle results/diag/paper_audit/wp4_smoke --dry-run
+	$(PYTHON) scripts/rkv_pp_cpu_parity.py --dry-run
+	$(PYTHON) scripts/rkv_pp_smoke.py --config configs/experiments/rkvpp_smoke_m5.yaml --dry-run
+	$(PYTHON) scripts/run_grid_rkv_pp.py --config configs/experiments/grid_math500_rkvpp256_m5.yaml --dry-run
+	$(PYTHON) scripts/run_replay_rkv_pp.py --config configs/experiments/readout_math500_rkvpp256_m5.yaml --dry-run
+	$(PYTHON) scripts/run_grid_protected.py --config configs/experiments/grid_math500_h2opp256_m5.yaml --dry-run
+	$(PYTHON) scripts/run_grid_protected.py --config configs/experiments/grid_math500_ufpp256_m5.yaml --dry-run
+	$(PYTHON) scripts/report_information_probe.py --self-check
+	$(PYTHON) scripts/plan_meeting5_cost.py --dry-run
+	$(PYTHON) scripts/report_policy_replication.py --cohort strict --dry-run
+	$(PYTHON) scripts/report_policy_replication.py --cohort whole --dry-run
 	$(PYTHON) scripts/audit_meeting4.py --dry-run retention
 	$(PYTHON) scripts/run_grid_pp.py --config configs/experiments/grid_math500_pp256_s1.yaml --dry-run
 	$(PYTHON) scripts/run_grid_pp.py --config configs/experiments/grid_math500_pp1024_s1.yaml --dry-run
