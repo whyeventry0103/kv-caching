@@ -1,0 +1,24 @@
+{
+  "what": "rkv_pp_v1 real-model CPU parity (engineering check, not a scientific row; does not promote rkv_pp_v1)",
+  "host": "kvcache-gpu, CPU only (CUDA_VISIBLE_DEVICES empty), nice 19, 8 threads, 2026-10-14",
+  "model": "r1_distill_qwen_1_5b @ ad9f0ae0864d7fbcd1cd905e3c6c5b069cc8b562 (local cache, offline)",
+  "reference_run": "fc-q15b, seed 11; traces by select_smoke_traces (longest/median/shortest prompt, >=320 trace tokens)",
+  "environment": {
+    "kvpress": "0.5.3",
+    "transformers": "4.56.2",
+    "torch": "2.7.1+cu126"
+  },
+  "result": "PASS",
+  "source_sha256_as_run": {
+    "src/kvcache/presses/rkv_prompt_protect.py": "4c1fde7abada2427bbd6f9fdbd66046ea0875bfbd863a6de986728149620a8e4",
+    "scripts/rkv_pp_cpu_parity.py": "690872776a4389ed428ff4b8102ad16c913ae892b4a097fa1c951e8ecdfeb36e",
+    "src/kvcache/presses/rkv.py": "7a99561dcd3ffec3059de1e2d9825d7a016d15b60ed843d847c4b20e318d1c33",
+    "src/kvcache/presses/prompt_protect.py": "b1fd56ff07f787f9dddea6773450254c14b27aeb7ada814912564cbabd74597f",
+    "src/kvcache/replay.py": "db6c7e57ab5030b3646dbf0b73920b19f06624cf56856512e22619613fbfa96a"
+  },
+  "files_sha256": {
+    "rkv_pp_cpu_parity.json": "4a06ab3fff5f7266662a0f11da873492043ebad77b91a032978ca68cb93ba23c",
+    "rkv_pp_cpu_parity.run_log.txt": "22305d485ae941ee7aa0df6f1dc402ebcbc80732fe807d993639fa98f33fcdc6"
+  },
+  "earlier_attempt": "a first run with a pre-refactor script (local checks instead of the package's smoke_failures) also PASSed with identical TV values; kept on the host as logs/rkv_pp_cpu_parity.v0.*, not archived"
+}

@@ -1,0 +1,153 @@
+{
+  "check": "rkv_pp_v1 real-model CPU parity (engineering check, not a row)",
+  "failures": [],
+  "finished_at": "2026-10-13T19:58:25.619494+00:00",
+  "passed": true,
+  "plan": {
+    "budget": 256,
+    "compression_interval": 64,
+    "device": "cpu",
+    "model": "r1_distill_qwen_1_5b",
+    "reference_run": "fc-q15b",
+    "replay_tokens": 320,
+    "threads": 8
+  },
+  "records": [
+    {
+      "first_kv_mismatch": null,
+      "kind": "identity",
+      "mean_tv": 0.05891474066056155,
+      "n_prunes_base": 112,
+      "n_prunes_protected_off": 112,
+      "n_replayed": 320,
+      "pid": "test/algebra/1349.json",
+      "prompt_len": 344,
+      "tv_identical": true,
+      "wallclock_s": 120.5
+    },
+    {
+      "expected_target": 408,
+      "first_effective_prune": 128,
+      "kind": "replay",
+      "mean_tv": 0.04957546962326402,
+      "n_effective_prunes": 84,
+      "n_layers": 28,
+      "n_replayed": 320,
+      "pid": "test/algebra/1349.json",
+      "post_prune_sizes": [
+        408
+      ],
+      "pre_eviction_max_tv": 0.0,
+      "prompt_len": 344,
+      "protect": {
+        "base": "rkv_pp_v1",
+        "budget": 256,
+        "budget_relaxed": true,
+        "n_layers_pruned": 28,
+        "n_prunes": 84,
+        "prompt_len": 344,
+        "prompt_len_forced": false,
+        "target": 408
+      },
+      "wallclock_s": 61.0
+    },
+    {
+      "first_kv_mismatch": null,
+      "kind": "identity",
+      "mean_tv": 0.0031581702857741535,
+      "n_prunes_base": 112,
+      "n_prunes_protected_off": 112,
+      "n_replayed": 320,
+      "pid": "test/precalculus/807.json",
+      "prompt_len": 52,
+      "tv_identical": true,
+      "wallclock_s": 77.7
+    },
+    {
+      "expected_target": 256,
+      "first_effective_prune": 256,
+      "kind": "replay",
+      "mean_tv": 0.0028000002565322702,
+      "n_effective_prunes": 28,
+      "n_layers": 28,
+      "n_replayed": 320,
+      "pid": "test/precalculus/807.json",
+      "post_prune_sizes": [
+        256
+      ],
+      "pre_eviction_max_tv": 0.0,
+      "prompt_len": 52,
+      "protect": {
+        "base": "rkv_pp_v1",
+        "budget": 256,
+        "budget_relaxed": false,
+        "n_layers_pruned": 28,
+        "n_prunes": 28,
+        "prompt_len": 52,
+        "prompt_len_forced": false,
+        "target": 256
+      },
+      "wallclock_s": 38.8
+    },
+    {
+      "first_kv_mismatch": null,
+      "kind": "identity",
+      "mean_tv": 0.0017884899692228561,
+      "n_prunes_base": 112,
+      "n_prunes_protected_off": 112,
+      "n_replayed": 320,
+      "pid": "test/prealgebra/1302.json",
+      "prompt_len": 15,
+      "tv_identical": true,
+      "wallclock_s": 72.8
+    },
+    {
+      "expected_target": 256,
+      "first_effective_prune": 256,
+      "kind": "replay",
+      "mean_tv": 0.0019261452364809917,
+      "n_effective_prunes": 28,
+      "n_layers": 28,
+      "n_replayed": 320,
+      "pid": "test/prealgebra/1302.json",
+      "post_prune_sizes": [
+        256
+      ],
+      "pre_eviction_max_tv": 0.0,
+      "prompt_len": 15,
+      "protect": {
+        "base": "rkv_pp_v1",
+        "budget": 256,
+        "budget_relaxed": false,
+        "n_layers_pruned": 28,
+        "n_prunes": 28,
+        "prompt_len": 15,
+        "prompt_len_forced": false,
+        "target": 256
+      },
+      "wallclock_s": 36.1
+    }
+  ],
+  "selected": [
+    {
+      "pid": "test/algebra/1349.json",
+      "prompt_len": 344,
+      "trace_len": 1654
+    },
+    {
+      "pid": "test/precalculus/807.json",
+      "prompt_len": 52,
+      "trace_len": 1171
+    },
+    {
+      "pid": "test/prealgebra/1302.json",
+      "prompt_len": 15,
+      "trace_len": 1814
+    }
+  ],
+  "status": "PASS",
+  "versions": {
+    "kvpress": null,
+    "torch": "2.7.1+cu126"
+  }
+}

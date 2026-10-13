@@ -1,0 +1,24 @@
+name: grid_math500_rkvpp256_m5
+stage: grid
+# Meeting 5 M5-A (PREPARED 2026-10-14, HELD): free-running grid under
+# prompt-protected R-KV at budget 256, matched to the S.1 and WP5 protected
+# cells (same 100 problems, seeds, cap, interval, total-budget rule). Runs
+# through scripts/run_grid_rkv_pp.py, which refuses real execution while `held`
+# is set or without a current rkv-pp-smoke-PASS.json. NOT in the queue.
+rkv_prompt_protected: true
+held: true
+smoke_config: configs/experiments/rkvpp_smoke_m5.yaml
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+subset:
+  math500: 100
+presses: [rkv_pp_v1]
+budgets: [256]
+seeds: [11, 23, 47, 89]
+max_new_tokens:
+  math500: 16384
+compression_interval: 64
+estimated_generation_count: 400
+scale_authorized: false
+remote_only: true
+store_token_ids: true

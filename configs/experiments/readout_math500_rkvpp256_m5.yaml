@@ -1,0 +1,23 @@
+name: readout_math500_rkvpp256_m5
+stage: replay
+mode: readout
+# Meeting 5 M5-A (PREPARED 2026-10-14, HELD): forward readout of the full-cache
+# reference traces under prompt-protected R-KV, budget 256. Runs through
+# scripts/run_replay_rkv_pp.py (same held/smoke refusal).
+rkv_prompt_protected: true
+held: true
+smoke_config: configs/experiments/rkvpp_smoke_m5.yaml
+reference_run_name: math500-fc-powered-merged
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+subset:
+  math500: 100
+presses: [rkv_pp_v1]
+budgets: [256]
+seeds: [11, 23, 47, 89]
+compression_interval: 64
+max_answer_tokens: 2048
+estimated_generation_count: 0
+estimated_replay_count: 400
+scale_authorized: false
+remote_only: true
