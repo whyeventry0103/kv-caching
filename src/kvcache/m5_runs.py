@@ -32,7 +32,11 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
-M5_SOURCES_EXTRA = ("scripts/run_grid_m5.py", "src/kvcache/m5_runs.py")
+M5_SOURCES_EXTRA = (
+    "scripts/run_grid_m5.py",
+    "src/kvcache/m5_runs.py",
+    "src/kvcache/m5_publish.py",
+)
 KIND_BY_FAMILY = {
     "rkv_pp_v1": "rkv_pp",
     "h2o_style_pp_v1": "m5_protsel",
@@ -143,8 +147,12 @@ def refuse_foreign_namespace(
     """Refuse (SystemExit) unless every existing row and sidecar belongs to this
     run. A torn trailing line is skipped here; the resume scan heals it.
     Returns how many records were checked."""
+    from kvcache.m5_publish import QUARANTINE
+
     n = 0
     for path in sorted(Path(runs_root).rglob("*.jsonl")):
+        if QUARANTINE in path.relative_to(runs_root).parts:
+            continue  # preserved evidence, not live records
         lines = [x for x in path.read_text(encoding="utf-8").splitlines() if x.strip()]
         for i, line in enumerate(lines):
             try:

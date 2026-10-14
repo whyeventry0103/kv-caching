@@ -56,13 +56,17 @@ def reference_bank(runs_root: Path, smoke_cfg: dict[str, Any], n: int = 6) -> No
     )
 
 
-def _replay(trace: dict[str, Any], press: str, target: int) -> dict[str, Any]:
+def _replay(
+    trace: dict[str, Any], press: str, target: int, n_replayed: int
+) -> dict[str, Any]:
     return {
         "kind": "replay",
         "pid": trace["pid"],
         "press": press,
         "prompt_len": trace["prompt_len"],
-        "n_replayed": 1536,
+        # review of 946c76a: min(configured prefix, trace length), as the
+        # smoke replays -- the old fixed 1536 exceeded these fixture traces
+        "n_replayed": n_replayed,
         "n_layers": 28,
         "inputs_sha256": trace["inputs_sha256"],
         "protect": {
@@ -120,7 +124,8 @@ def measured_marker(
     records = []
     for t in traces:
         for p in presses:
-            records += [_replay(t, p, target), _generation(t, p)]
+            n = min(int(smoke_cfg["replay_tokens"]), t["trace_len"])
+            records += [_replay(t, p, target, n), _generation(t, p)]
         records.append(
             {"kind": "identity", "pid": t["pid"], "press": ident_press, **ident}
         )

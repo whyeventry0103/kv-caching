@@ -1,0 +1,101 @@
+"""CPU-only independent review reproductions for commit 946c76a.
+
+Run: python review_946c76a_repros.py --repo /path/to/kv-caching
+Only temporary fixture runs are written; no real dataset or model is loaded.
+"""
+
+import argparse
+import contextlib
+import copy
+import io
+import json
+import os
+from pathlib import Path
+import sys
+import tempfile
+
+import pytest
+import yaml
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--repo", type=Path, required=True)
+    args = parser.parse_args()
+    root = args.repo.resolve()
+    os.chdir(root)
+    sys.path[:0] = [str(root / p) for p in ("src", "tests", "scripts")]
+    import smoke_fixtures as sfx
+    import test_run_grid_m5 as tm
+    from kvcache.presses import protected_selectors as ps
+    from kvcache.presses import rkv_prompt_protect as rp
+
+    observations = {}
+    with tempfile.TemporaryDirectory() as td:
+        base = Path(td)
+        families = [
+            ("selector", ps, "protsel_smoke_wp4.yaml", "grid_math500_h2opp256_m5.yaml"),
+            ("rkv", rp, "rkvpp_smoke_m5.yaml", "grid_math500_rkvpp256_m5.yaml"),
+        ]
+        for family, module, smoke_path, grid_path in families:
+            run = base / family
+            run.mkdir()
+            smoke = yaml.safe_load((root / "configs/experiments" / smoke_path).read_text())
+            grid = yaml.safe_load((root / "configs/experiments" / grid_path).read_text())
+            sfx.reference_bank(run, smoke)
+            marker = sfx.measured_marker(run, smoke, "protsel" if family == "selector" else "rkvpp")
+            observations[family + "_valid"] = module.verify_smoke(run, grid)
+            for case in ("nan_prunes", "wrong_target", "zero_layers"):
+                altered = copy.deepcopy(marker)
+                for row in altered["records"]:
+                    if case == "nan_prunes" and row["kind"] == "generation":
+                        row["protect"]["n_prunes"] = float("nan")
+                    if case == "wrong_target" and row["kind"] == "replay":
+                        row["expected_target"] = 255
+                        row["post_prune_sizes"] = [255]
+                        row["protect"]["target"] = 255
+                    if case == "zero_layers" and row["kind"] == "replay":
+                        row["n_layers"] = 0
+                        row["protect"]["n_layers_pruned"] = 0
+                sfx.write(run, module.SMOKE_MARKER, altered)
+                observations[family + "_" + case] = module.verify_smoke(run, grid)
+
+        # Interrupt the real runner between saving the result and saving its
+        # token sidecar. The model/generation are the repo's CPU test stubs.
+        with pytest.MonkeyPatch.context() as mp, contextlib.redirect_stdout(io.StringIO()):
+            config, out, calls = tm._setup(base / "interruption", mp)
+            original_append = tm.m5.append_token_ids
+
+            def interrupted_append(*args, **kwargs):
+                raise OSError("injected interruption before sidecar write")
+
+            mp.setattr(tm.m5, "append_token_ids", interrupted_append)
+            try:
+                tm._run(mp, config)
+            except OSError as error:
+                first_error = str(error)
+            before = {
+                "result_rows": len(tm._rows(out)),
+                "sidecars": len(tm._rows(out, "token_ids")),
+            }
+            mp.setattr(tm.m5, "append_token_ids", original_append)
+            try:
+                code = tm._run(mp, config, "--resume")
+                resumed = {"rc": code}
+            except Exception as error:
+                resumed = {"error_type": type(error).__name__, "error": str(error)}
+            observations["interrupted_pair_resume"] = {
+                "first_error": first_error,
+                "before_resume": before,
+                "resume": resumed,
+                "after_resume": {
+                    "result_rows": len(tm._rows(out)),
+                    "sidecars": len(tm._rows(out, "token_ids")),
+                    "model_loads": calls["model_loads"],
+                },
+            }
+    print(json.dumps(observations, indent=2))
+
+
+if __name__ == "__main__":
+    main()

@@ -407,7 +407,7 @@ def _corrupt(tmp_path, fn):
             "measurements fail",
         ),
         (lambda r: r["records"][0].update(mean_tv=float("nan")), "not a valid num"),
-        (lambda r: r["records"][0].update(n_layers=True), "not a valid int"),
+        (lambda r: r["records"][0].update(n_layers=True), "not a valid count"),
         (lambda r: r["records"].append(dict(r["records"][0])), "duplicated"),
         (lambda r: r["records"][0].update(inputs_sha256="0" * 64), "other inputs"),
         (lambda r: r["selected"][0].update(inputs_sha256="0" * 64), "input hashes"),

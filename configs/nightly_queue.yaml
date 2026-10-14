@@ -1250,7 +1250,7 @@ jobs:
     total: 400
     seeds: [11, 23, 47, 89]
     min_free_gb: 28
-    progress_kind: grid
+    progress_kind: grid_pairs   # complete row + sidecar pairs only
     est_output_gb: 0.05
     requires: null
     requires_all: [reverse-readout-pp1024, protsel-smoke, protsel-pilot-grid,
@@ -1264,7 +1264,7 @@ jobs:
     total: 400
     seeds: [11, 23, 47, 89]
     min_free_gb: 28
-    progress_kind: grid
+    progress_kind: grid_pairs   # complete row + sidecar pairs only
     est_output_gb: 0.05
     requires: rkvpp-smoke
     requires_all: [reverse-readout-pp1024, protsel-smoke, protsel-pilot-grid,

@@ -524,6 +524,12 @@ def count_progress(runs_root: Path, job: Job) -> int:
 
             return 1 if gate_status(job.gate, runs_root, job.config)[0] else 0
         return 1 if job.marker and _marker_ok(runs_root / job.marker) else 0
+    if job.progress_kind == "grid_pairs":
+        # Review of 946c76a (issue 2): M5 jobs publish row + sidecar pairs; only
+        # a COMPLETE pair counts, so an orphan row never completes a job.
+        from kvcache.m5_publish import complete_pairs
+
+        return len(complete_pairs(run_dir))
     if job.progress_kind == "grid":
         base = run_dir / job.bench
         paths = (
@@ -553,6 +559,13 @@ def count_per_seed(runs_root: Path, job: Job) -> dict[int, int]:
     if job.progress_kind == "marker":
         done = count_progress(runs_root, job)
         return {job.seeds[0]: done} if done else {}
+    if job.progress_kind == "grid_pairs":
+        from kvcache.m5_publish import complete_pairs
+
+        per: dict[int, int] = {}
+        for key in complete_pairs(runs_root / job.run_name):
+            per[key[3]] = per.get(key[3], 0) + 1
+        return per
     sub = job.bench if job.progress_kind == "grid" else "readout"
     base = runs_root / job.run_name / sub
     counts: dict[int, int] = {}

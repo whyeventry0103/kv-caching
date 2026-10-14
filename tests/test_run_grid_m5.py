@@ -54,7 +54,7 @@ def _setup(tmp_path, monkeypatch, *, cfg_over=None, bad_pid=None, smoke=True):
         sfx.reference_bank(base, smoke_cfg)
         sfx.measured_marker(base, smoke_cfg, "rkvpp")
     cfg = yaml.safe_load((ROOT / GRID).read_text())
-    cfg.update(seeds=[11], **(cfg_over or {}))
+    cfg.update({"seeds": [11], **(cfg_over or {})})
     cfg_path = tmp_path / "grid.yaml"
     cfg_path.write_text(yaml.safe_dump(cfg))
     calls = {"model_loads": 0}

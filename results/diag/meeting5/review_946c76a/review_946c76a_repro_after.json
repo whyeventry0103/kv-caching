@@ -1,0 +1,49 @@
+{
+  "selector_valid": [
+    true,
+    "verified"
+  ],
+  "selector_nan_prunes": [
+    false,
+    "protected-selectors-smoke-PASS.json: generation test/prealgebra/1622.json h2o_style_pp_v1 protect.n_prunes is not a valid count: nan"
+  ],
+  "selector_wrong_target": [
+    false,
+    "protected-selectors-smoke-PASS.json: replay test/prealgebra/1622.json h2o_style_pp_v1 target/sizes 255/255/[255] differ from the derived effective budget 256"
+  ],
+  "selector_zero_layers": [
+    false,
+    "protected-selectors-smoke-PASS.json: replay test/prealgebra/1622.json h2o_style_pp_v1 layers 0/0 differ from the pinned model's 28"
+  ],
+  "rkv_valid": [
+    true,
+    "verified"
+  ],
+  "rkv_nan_prunes": [
+    false,
+    "rkv-pp-smoke-PASS.json: generation test/prealgebra/1622.json rkv_pp_v1 protect.n_prunes is not a valid count: nan"
+  ],
+  "rkv_wrong_target": [
+    false,
+    "rkv-pp-smoke-PASS.json: replay test/prealgebra/1622.json rkv_pp_v1 target/sizes 255/255/[255] differ from the derived effective budget 256"
+  ],
+  "rkv_zero_layers": [
+    false,
+    "rkv-pp-smoke-PASS.json: replay test/prealgebra/1622.json rkv_pp_v1 layers 0/0 differ from the pinned model's 28"
+  ],
+  "interrupted_pair_resume": {
+    "first_error": "injected interruption before sidecar write",
+    "before_resume": {
+      "result_rows": 1,
+      "sidecars": 0
+    },
+    "resume": {
+      "rc": 0
+    },
+    "after_resume": {
+      "result_rows": 100,
+      "sidecars": 100,
+      "model_loads": 2
+    }
+  }
+}

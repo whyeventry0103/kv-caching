@@ -198,7 +198,10 @@ def test_verify_smoke_refuses_stale_failed_partial_and_uncovered(tmp_path):
             ),
             "not a valid bool",
         ),
-        (lambda r: r["records"][0].update(post_prune_sizes=[255]), "measurements fail"),
+        (
+            lambda r: r["records"][0].update(post_prune_sizes=[255]),
+            "derived effective budget",
+        ),
         (lambda r: r["records"][0].update(inputs_sha256="0" * 64), "other inputs"),
     ],
 )

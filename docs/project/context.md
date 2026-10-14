@@ -24,6 +24,12 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-10-14 ~14:30 Dubai — review of 946c76a: the two remaining execution issues are repaired (CPU only).**
+  - **Smoke gates.** They now check nested values (counts are exact integers) and derive the target, layers, replay length and generation length independently. Layers come from the frozen `configs/meeting5/model_metadata.json`. The real 10-13 smoke passes the new checks.
+  - **M5 runner.** It publishes row + sidecar pairs through an atomic journal (`kvcache.m5_publish`), with recovery limited to owned shards, quarantine of orphans and torn lines, and refusal of conflicts. M5 grid jobs count `grid_pairs`.
+  - **Evidence.** `docs/paper/MEETING5_REVIEW_946c76a_ACCEPTANCE.md`; `results/diag/meeting5/review_946c76a/`.
+  - **Unchanged.** Approvals, caps, the queue order and historical data.
+
   **★★★★★ 2026-10-14 ~13:30 Dubai — review of 6b409001 repaired; owner approved the M5 essential pair.**
   - **Owner decisions.**
     - A1–A3 approved: R-KV-pp smoke cap 1, H2O-pp cap 28, R-KV-pp cap 28 GPU-h. They are queued after P1/P2/P3 via `requires_all` (the scheduler now honours it for GPU jobs).

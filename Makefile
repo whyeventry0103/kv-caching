@@ -157,6 +157,7 @@ dryrun:
 	$(PYTHON) scripts/rescore_task_rows.py --bench gsm8k --revision x --dry-run
 	$(PYTHON) scripts/fetch_bbh.py --dry-run
 	$(PYTHON) scripts/run_information_probe.py --dry-run
+	$(PYTHON) scripts/freeze_model_metadata.py --dry-run
 	$(PYTHON) scripts/audit_meeting4.py --dry-run retention
 	$(PYTHON) scripts/run_grid_pp.py --config configs/experiments/grid_math500_pp256_s1.yaml --dry-run
 	$(PYTHON) scripts/run_grid_pp.py --config configs/experiments/grid_math500_pp1024_s1.yaml --dry-run

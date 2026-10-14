@@ -64,6 +64,7 @@ SOURCES = (
     "scripts/run_replay.py",
     "scripts/run_grid_m5.py",
     "src/kvcache/m5_runs.py",
+    "src/kvcache/m5_publish.py",
     "scripts/run_replay_rkv_pp.py",
     "scripts/rkv_pp_smoke.py",
 )
@@ -349,14 +350,26 @@ def smoke_design() -> Any:
             "replay": sv.REPLAY_SCHEMA,
             "generation": sv.GENERATION_SCHEMA,
             "identity": {
-                "n_prunes_base": sv.INT,
-                "n_prunes_protected_off": sv.INT,
+                "n_prunes_base": sv.COUNT,
+                "n_prunes_protected_off": sv.COUNT,
                 "first_kv_mismatch": sv.OPT_INT,
                 "tv_identical": sv.BOOL,
             },
         },
         failures=smoke_failures,
+        expected_target=smoke_expected_target,
+        nested={"replay": sv.REPLAY_PROTECT, "generation": sv.GENERATION_PROTECT},
     )
+
+
+def smoke_expected_target(press: str, prompt_len: int, smoke_cfg: Any) -> int:
+    """This family's rule, as the press applies it: max(B, P + slots) with
+    slots = max(64, the R-KV recent window)."""
+    return effective_budget(
+        int(smoke_cfg["budgets"][0]),
+        int(prompt_len),
+        max(MIN_TRACE_SLOTS, RKV_WINDOW_SIZE),
+    )[0]
 
 
 def smoke_record_ok(

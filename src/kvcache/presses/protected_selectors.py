@@ -182,12 +182,24 @@ def smoke_design() -> Any:
             "replay": sv.REPLAY_SCHEMA,
             "generation": sv.GENERATION_SCHEMA,
             "identity": {
-                "identity_prunes": sv.INT,
-                "identity_mismatched_heads": sv.INT,
+                "identity_prunes": sv.COUNT,
+                "identity_mismatched_heads": sv.COUNT,
             },
         },
         failures=smoke_failures,
+        expected_target=smoke_expected_target,
+        nested={"replay": sv.REPLAY_PROTECT, "generation": sv.GENERATION_PROTECT},
     )
+
+
+def smoke_expected_target(press: str, prompt_len: int, smoke_cfg: Any) -> int:
+    """The family's S.1 rule, as the smoke itself applies it: max(B, P + slots)
+    with slots = max(64, the family's recency buffer)."""
+    return effective_budget(
+        int(smoke_cfg["budgets"][0]),
+        int(prompt_len),
+        max(MIN_TRACE_SLOTS, FAMILIES[press].recent),
+    )[0]
 
 
 def smoke_record_ok(

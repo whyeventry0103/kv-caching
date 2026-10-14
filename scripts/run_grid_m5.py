@@ -34,18 +34,21 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
 
-from run_grid import _grid_done_keys, _parser, _yaml
+from run_grid import _parser, _yaml
 
-from kvcache.bank import append_result, build_result_row
+from kvcache.bank import build_result_row
 from kvcache.cli import load_config, plan
 from kvcache.datasets import load_benchmark
 from kvcache.generation import generate_compressed
+from kvcache.io_schema import validate_row
+from kvcache.m5_publish import complete_pairs, publish, recover, write_journal
 from kvcache.m5_runs import (
     expected_identity,
     family_kind,
     frozen_prompt_hash,
     refuse_foreign_namespace,
     retention_block,
+    row_identity_problems,
 )
 from kvcache.m5_runs import design_keys as m5_design_keys
 from kvcache.models import (
@@ -57,7 +60,7 @@ from kvcache.presses import press_seed
 from kvcache.provenance import inputs_sha256, load_input_manifest
 from kvcache.read_validation import frozen_pids
 from kvcache.runmeta import capture_runmeta
-from kvcache.token_ids import append_token_ids, build_token_ids_record
+from kvcache.token_ids import build_token_ids_record
 
 
 def family_api(kind: str) -> tuple[Any, Any, Any]:
@@ -116,6 +119,8 @@ def main() -> int:
         raise SystemExit("REFUSED: M5 grid config must set scale_authorized: true")
     if list(config["benchmarks"]) != ["math500"]:
         raise SystemExit("REFUSED: M5 grids are registered for math500 only")
+    if not config.get("store_token_ids"):
+        raise SystemExit("REFUSED: M5 grids publish row + token sidecar pairs")
 
     runs_root = Path(os.environ["REMOTE_RUNS_ROOT"])
     manifest = load_input_manifest(path=config.get("input_manifest"))
@@ -123,6 +128,23 @@ def main() -> int:
         runs_root, ident=ident, manifest=manifest, keys=keys
     )
     print(f"IDENTITY: {checked} existing records match this run")
+    seeds = [int(s) for s in config["seeds"]]
+    if args.seeds.strip():
+        shard = {int(s) for s in args.seeds.split(",")}
+        seeds = [s for s in seeds if s in shard]
+        if not seeds:
+            raise SystemExit(f"--seeds {args.seeds} disjoint from the config seeds")
+    # Review of 946c76a (issue 2): finish interrupted pair publications and
+    # quarantine orphans -- only in the seed shards this process owns -- BEFORE
+    # the model loads; then "done" means a complete row + sidecar pair.
+    stats = recover(
+        runs_root,
+        seeds=seeds,
+        validate=lambda rec: row_identity_problems(
+            rec, ident=ident, manifest=manifest, keys=keys
+        ),
+    )
+    print(f"RECOVERY: {json.dumps(stats, sort_keys=True)}")
 
     models_cfg = _yaml(PROJECT_ROOT / "configs/models.yaml")["models"]
     benchmarks_cfg = _yaml(PROJECT_ROOT / "configs/benchmarks.yaml")["benchmarks"]
@@ -134,14 +156,7 @@ def main() -> int:
         model_cfg, attn_implementation="eager" if eager else None
     )
     shape = _model_shape(model)
-    store_token_ids = bool(config.get("store_token_ids"))
-    seeds = [int(s) for s in config["seeds"]]
-    if args.seeds.strip():
-        shard = {int(s) for s in args.seeds.split(",")}
-        seeds = [s for s in seeds if s in shard]
-        if not seeds:
-            raise SystemExit(f"--seeds {args.seeds} disjoint from the config seeds")
-    done = _grid_done_keys(runs_root, store_token_ids) if args.resume else set()
+    done = complete_pairs(runs_root, seeds) if args.resume else set()
     counts = {"rows": 0, "truncated": 0, "skipped_resume": len(done)}
     interval = int(config["compression_interval"])
     max_new = int(config["max_new_tokens"]["math500"])
@@ -158,7 +173,7 @@ def main() -> int:
             for seed in seeds:
                 runmeta = capture_runmeta(config["name"], args.config, seed)
                 for problem in problems:
-                    key = ("math500", problem.pid, press_name, str(budget), seed)
+                    key = (press_name, str(budget), problem.pid, seed)
                     if key in done:
                         continue
                     press = build(
@@ -212,19 +227,20 @@ def main() -> int:
                         interval=interval,
                         **shape,
                     )
-                    output = append_result(runs_root, row)
-                    if store_token_ids:
-                        rec = build_token_ids_record(
-                            result_row=row,
-                            prompt_token_ids=generation.prompt_token_ids,
-                            trace_token_ids=generation.trace_token_ids,
-                            prompt_text=generation.prompt,
-                            trace_text=generation.trace,
-                            tokenizer=tokenizer,
-                            tokenizer_revision=str(model_cfg["revision"]),
-                        )
-                        rec["provenance"] = row["provenance"]
-                        append_token_ids(runs_root, rec)
+                    validate_row(row)
+                    side = build_token_ids_record(
+                        result_row=row,
+                        prompt_token_ids=generation.prompt_token_ids,
+                        trace_token_ids=generation.trace_token_ids,
+                        prompt_text=generation.prompt,
+                        trace_text=generation.trace,
+                        tokenizer=tokenizer,
+                        tokenizer_revision=str(model_cfg["revision"]),
+                    )
+                    side["provenance"] = row["provenance"]
+                    # both records validated -> one atomic envelope -> publish
+                    journal = write_journal(runs_root, row, side)
+                    output = publish(runs_root, journal)
                     counts["rows"] += 1
                     counts["truncated"] += int(row["truncated"])
                     print(f"wrote {output}: math500/{problem.pid}/s{seed}")

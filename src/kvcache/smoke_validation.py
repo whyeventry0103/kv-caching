@@ -22,7 +22,15 @@ records themselves, for every smoke family:
   are ints, not bools; floats are finite) and agrees with its trace's prompt
   length and input hash;
 * the family's measurement predicates (``smoke_failures``) are re-applied and
-  must return nothing.
+  must return nothing;
+* (review of 946c76a, issue 1) nested measurements are typed too (``protect``
+  fields and every post-prune size are exact non-negative integers; NaN or a
+  bool is never a count), and the values a record could otherwise vouch for
+  itself are DERIVED independently: the effective target from the smoke config,
+  the frozen trace's prompt length and the family's budget rule; the layer count
+  from the pinned model's frozen metadata (``configs/meeting5/model_metadata.json``,
+  no weight load); the replayed length from the configured prefix and the
+  trace. Records that agree with each other but not with the experiment fail.
 
 Each family supplies its schema and predicates; the boundary is shared so the
 two gates cannot drift apart.
@@ -45,6 +53,8 @@ LIST = "list"
 DICT = "dict"
 OPT_INT = "opt_int"  # int or None
 STR = "str"
+COUNT = "count"  # int >= 0, not bool
+MODEL_METADATA = "configs/meeting5/model_metadata.json"
 
 
 @dataclass(frozen=True)
@@ -56,6 +66,10 @@ class SmokeDesign:
     identity_kind: str  # the kind run once per trace with ``identity_press``
     schemas: Mapping[str, Mapping[str, str]]  # kind -> field -> type
     failures: Callable[[list[dict[str, Any]]], list[str]]
+    # (press, prompt_len, smoke_cfg) -> the effective target under the
+    # family's own budget rule
+    expected_target: Callable[[str, int, Mapping[str, Any]], int]
+    nested: Mapping[str, Mapping[str, str]]  # kind -> protect field -> type
 
 
 def _typed(v: Any, t: str) -> bool:
@@ -67,6 +81,8 @@ def _typed(v: Any, t: str) -> bool:
         )
     if t == INT:
         return isinstance(v, int) and not isinstance(v, bool)
+    if t == COUNT:
+        return isinstance(v, int) and not isinstance(v, bool) and v >= 0
     if t == OPT_INT:
         return v is None or (isinstance(v, int) and not isinstance(v, bool))
     if t == BOOL:
@@ -154,6 +170,64 @@ def reference_traces(
     ]
 
 
+def derived_problem(
+    r: Mapping[str, Any],
+    trace: Mapping[str, Any],
+    design: SmokeDesign,
+    smoke_cfg: Mapping[str, Any],
+    n_layers: int,
+) -> str | None:
+    """Nested typing and checks against values derived OUTSIDE the record."""
+    kind = r["kind"]
+    nested = design.nested.get(kind, {})
+    prot = r.get("protect", {})
+    for f, t in nested.items():
+        if f not in prot or not _typed(prot[f], t):
+            return f"protect.{f} is not a valid {t}: {prot.get(f)!r}"
+    if "prompt_len" in nested and prot["prompt_len"] != trace["prompt_len"]:
+        return "press read another prompt length than the frozen trace"
+    if "n_prunes" in nested and prot["n_prunes"] < 1:
+        return "no prune recorded (protect.n_prunes < 1)"
+    if kind == "replay":
+        sizes = r["post_prune_sizes"]
+        if not sizes or not all(_typed(x, COUNT) for x in sizes):
+            return f"post_prune_sizes are not exact counts: {sizes!r}"
+        want = design.expected_target(str(r["press"]), trace["prompt_len"], smoke_cfg)
+        if r["expected_target"] != want or prot["target"] != want or sizes != [want]:
+            return (
+                f"target/sizes {r['expected_target']}/{prot['target']}/{sizes} "
+                f"differ from the derived effective budget {want}"
+            )
+        if r["n_layers"] != n_layers or prot["n_layers_pruned"] != n_layers:
+            return (
+                f"layers {r['n_layers']}/{prot['n_layers_pruned']} differ from the "
+                f"pinned model's {n_layers}"
+            )
+        want_n = min(int(smoke_cfg["replay_tokens"]), int(trace["trace_len"]))
+        if r["n_replayed"] != want_n:
+            return f"replayed {r['n_replayed']} tokens, not the configured {want_n}"
+    if kind == "generation":
+        cap = int(smoke_cfg["generation_cap"])
+        if not 1 <= r["n_tokens"] <= cap:
+            return f"generated {r['n_tokens']} tokens, outside [1, {cap}]"
+    return None
+
+
+def model_layers(smoke_cfg: Mapping[str, Any], *, root: Path) -> int:
+    """Layer count of the smoke's pinned model, from frozen metadata (no
+    weights); refuses when the metadata is absent or for another revision."""
+    import yaml
+
+    meta = json.loads((Path(root) / MODEL_METADATA).read_text(encoding="utf-8"))
+    name = str(smoke_cfg["models"][0])
+    models = yaml.safe_load((Path(root) / "configs/models.yaml").read_text())
+    if name not in meta:
+        raise ValueError(f"no frozen metadata for model {name!r}")
+    if meta[name]["revision"] != str(models["models"][name]["revision"]):
+        raise ValueError(f"frozen metadata of {name!r} is for another revision")
+    return int(meta[name]["num_hidden_layers"])
+
+
 def claim_problem(record: Any, m: str) -> str | None:
     """The marker's own declaration, checked before anything is recomputed."""
     if not isinstance(record, dict):
@@ -173,6 +247,8 @@ def validate_marker(
     presses: Sequence[str],
     identity_press: str,
     expected_traces: Sequence[Mapping[str, Any]],
+    smoke_cfg: Mapping[str, Any],
+    n_layers: int,
 ) -> tuple[bool, str]:
     """Accept a marker only if its measurements, not its claim, pass."""
     from kvcache.provenance import same_identity
@@ -236,6 +312,9 @@ def validate_marker(
             return False, f"{m}: {tag} prompt length differs from its trace"
         if "inputs_sha256" in schema and r["inputs_sha256"] != trace["inputs_sha256"]:
             return False, f"{m}: {tag} replayed other inputs than its trace"
+        why = derived_problem(r, trace, design, smoke_cfg, n_layers)
+        if why:
+            return False, f"{m}: {tag} {why}"
 
     try:
         fails = design.failures(records)
@@ -247,18 +326,25 @@ def validate_marker(
 
 
 REPLAY_SCHEMA = {
-    "prompt_len": INT,
-    "n_replayed": INT,
-    "n_layers": INT,
+    "prompt_len": COUNT,
+    "n_replayed": COUNT,
+    "n_layers": COUNT,
     "protect": DICT,
-    "expected_target": INT,
+    "expected_target": COUNT,
     "first_effective_prune": OPT_INT,
     "pre_eviction_max_tv": NUM,
     "post_prune_sizes": LIST,
     "mean_tv": NUM,
     "inputs_sha256": STR,
 }
-GENERATION_SCHEMA = {"prompt_len": INT, "n_tokens": INT, "protect": DICT}
+GENERATION_SCHEMA = {"prompt_len": COUNT, "n_tokens": COUNT, "protect": DICT}
+REPLAY_PROTECT = {
+    "prompt_len": COUNT,
+    "target": COUNT,
+    "n_layers_pruned": COUNT,
+    "n_prunes": COUNT,
+}
+GENERATION_PROTECT = {"prompt_len": COUNT, "n_prunes": COUNT}
 
 
 def gate(
@@ -284,6 +370,10 @@ def gate(
         traces = reference_traces(Path(runs_root), smoke_cfg, root=root)
     except (OSError, ValueError, KeyError, SystemExit) as exc:
         return False, f"cannot recompute the smoke's frozen inputs: {exc}"
+    try:
+        n_layers = model_layers(smoke_cfg, root=root)
+    except (OSError, ValueError, KeyError) as exc:
+        return False, f"cannot establish the model's layer count: {exc}"
     return validate_marker(
         record,
         design=design,
@@ -291,4 +381,6 @@ def gate(
         presses=presses,
         identity_press=identity_press,
         expected_traces=traces,
+        smoke_cfg=smoke_cfg,
+        n_layers=n_layers,
     )
