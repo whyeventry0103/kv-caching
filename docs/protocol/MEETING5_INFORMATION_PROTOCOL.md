@@ -21,9 +21,14 @@ choice the review left open, it says so and gives the reason.
 | R | eviction randomness, keyed separately from generation sampling (`press_seed`, `draw_seed`) |
 | Z | finite readout output: 4 single-token answer symbols plus OTHER (all remaining vocabulary mass) |
 
-A subset argument C_π ⊂ C_F is used only at a common-history crop: M5-C
-readouts and forward readout. It is never applied across free-running
-trajectories.
+**Corrected 2026-10-14 (review of 6b409001):** a compressed cache is a literal
+subset of the full cache only at an **instantaneous crop of the same cached
+tensors**. Sequential eviction changes every later hidden state, and therefore
+every later K/V vector, even when the token sequence is teacher-forced and
+identical. "Same history" does not make forward replay or the decode-path M5-C
+body a subset of the full cache, and no cross-arm inequality between
+I(S; C_π) and I(S; C_F) is claimed. The per-arm data-processing bound of §6.5
+is unaffected; it does not compare arms.
 
 ## 2. Hypotheses and what would weaken them (review §7)
 
@@ -91,16 +96,29 @@ difference is not called equivalence.
 
 ### 4.3 Practical equivalence margin
 
-The margin is ±0.05 accuracy, frozen here. "The difference vanishes" means the
-two one-sided tests (α = 0.05 each, i.e. a 90% CI inside ±0.05) both reject. A
-CI that straddles the margin is reported as **inconclusive**, not as vanished.
+**Owner decision, 2026-10-14, before any M5 outcome:** the primary margin is
+**±0.03 accuracy**, with **±0.05** as a declared sensitivity. Both are frozen in
+`configs/meeting5/m5a_read.yaml`. The margin is chosen as the size of
+difference that is negligible for the paper's claim, not as what N = 97 can
+resolve.
 
-The review left the value open. 0.05 was chosen because it is the review's own
-example of a practically meaningful effect (§9.4, "a five-point superiority
-claim"), and because N = 97–100 with a paired SD near 0.3 gives a half-width
-of about 0.06. The margin is therefore at the edge of what this cohort can
-resolve. This is stated now so that an inconclusive result is not reread as
-equivalence.
+**Rules:**
+- "Equivalent within the stated margin" requires both one-sided tests to reject
+  at α = 0.05 (TOST) on the problem-level protected contrast. TOST p-values,
+  the margin and the 90% interval are reported.
+- Per-comparison equivalence claims are Holm-adjusted over the two scientific
+  pairings.
+- The joint claim "both scientific contrasts are within margin" is an
+  intersection–union test: every TOST p ≤ α.
+- A degenerate sampling estimate (zero standard error) is **NOT TESTABLE**, with
+  the observed difference reported descriptively. This is the same rule the
+  registered interaction helper uses.
+- A contrast that cannot be shown within the margin is **inconclusive**, never
+  "gone". TOST acceptance supports "equivalent within ±0.03", not exact
+  equality, and not proof of an exclusive mechanism.
+
+(v0.1 proposed ±0.05 as primary and justified it partly by what N = 97 can
+resolve. The review rejected that reasoning, and the owner chose ±0.03.)
 
 ### 4.4 Protected proxies
 
@@ -171,6 +189,11 @@ answer channel — not total cache MI."** The score 2 − cross-entropy is a
 declared-reader score, can be negative, and is not "bits in the cache."
 At a fixed u and eviction seed R, S → C_π → Z, so by data processing the
 channel MI is a **lower bound** on I(S; C_π | u, R), never an estimate of it.
+This needs the readout to depend on S only through the declared state. The
+state therefore includes **every persistent state the readout can see**: the
+retained K/V, absolute positions, and any press buffers. The readout runs with
+eviction off, on an independent clone. A difference between two arms' lower
+bounds is not the amount of cache information lost.
 
 ### 6.6 Reference cases
 
@@ -184,14 +207,67 @@ The reference cases are implemented and tested:
 | always OTHER | 0 | 0 |
 | copy-nuisance | 0 about S, 2 about N | — |
 
+### 6.6a Production rows (review of 6b409001, R3)
+
+Model readouts are read in `production` mode only. Each row must carry:
+- schema `info-readout-v1`;
+- the design's provenance: implementation id, model and tokenizer revision,
+  answer-alphabet hash, task-layout hash and design hash;
+- three passed controls: full/full identity, clone agreement and no readout
+  eviction;
+- the native top-1 log-probability, against which the declared greedy symbol is
+  checked.
+
+Integer keys must be integers. The analytic fixtures are a separate
+`reference` mode. The encodings were checked on the pinned tokenizer on
+2026-10-14:
+- values fox / owl / cat / dog are single tokens;
+- aliases zorp / quix / blen / vosk / pell / dral / mook each give a 5-token
+  fact.
+
 ### 6.7 Primary M5-C endpoints
 
 - Per policy: the paired per-context contrast of target-query MI against full
   cache.
-- The Random − H2O-style contrast of target-query MI.
+- The Random − H2O-style contrast of target-query MI. It is computed from
+  paired context-level values and resamples contexts; separately bootstrapped
+  intervals are never subtracted.
 - Uncertainty resamples contexts.
 - The confirmation-precision target is a 0.1-bit half-width. The final N is
   frozen after calibration, before any confirmation outcome.
+
+### 6.9 Earlier-information → later-answer bridge (frozen before confirmation)
+
+Immediate retrieval cannot explain later reasoning on its own: its greedy
+correctness and its MI come from the same answer distribution. The bridge
+adds a separately generated, later answer.
+
+- **Design.** Two independent 2-bit operands A and B, with all 16 (A, B) pairs
+  per block, are placed as facts in the body exactly as S and N are.
+  - At the checkpoint, auxiliary readouts on independent clones ask for A and
+    for B. This is operand access, measured **before** any answer exists.
+  - A **separate free continuation** from the same checkpoint (eviction still
+    on) is then asked for (A + B) mod 4, and is scored by the same 4-symbol
+    channel.
+  - The operands are individually independent of the result, so summed
+    per-operand relevance cannot stand in for joint information.
+- **Prediction (H2 in this task).** Earlier operand-channel log score predicts
+  later compositional correctness on **held-out blocks**. It must do so beyond:
+  - each operand span's retained fraction and age;
+  - occupancy and the prune count;
+  - the existing proxies where measured.
+
+  Evaluation uses grouped splits by block, preprocessing fitted inside
+  training folds, and held-out log loss as the primary metric.
+- **Intervention and task switch (§7).** At equal budget, operand-span
+  protection versus equal-length nuisance-span protection is applied. The
+  effect on the later answer should follow the operands, and should vanish
+  when the downstream task does not need them.
+- **If it fails.** The probe is reported as a retrieval diagnostic. It is not
+  claimed to explain the natural-dataset mismatch.
+
+The bridge is specified here. It is not built and not requested until the §6.8
+calibration passes (gate G2).
 
 ### 6.8 Calibration
 
@@ -259,3 +335,11 @@ predeclared body spans, and it is not built until the M5-C calibration passes
 ## 9. Dated changes
 
 - 2026-10-14: v0.1 drafted. No M5 outcome exists.
+- 2026-10-14 (later, after the review of 6b409001; still no M5 outcome):
+  - §1 cache-subset statement corrected (instantaneous crop only);
+  - §4.3 owner margin ±0.03 (±0.05 sensitivity), with the equivalence family
+    and degenerate-SE rules;
+  - §6.5 scope of the lower bound;
+  - §6.6a production-row contract and pinned-tokenizer check;
+  - §6.7 paired contrast;
+  - §6.9 bridge specified.

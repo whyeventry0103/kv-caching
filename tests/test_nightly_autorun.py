@@ -915,3 +915,21 @@ def test_default_storage_scope_is_both_trees_with_hardlinks_counted_once(tmp_pat
     both = M.storage_used_gb(roots=[a, b])
     assert both == pytest.approx(one + 2 / 1024, rel=0.2)  # hardlink not doubled
     assert M.BASE_ENV["KVCACHE_PERSONAL_FREE_GB"] == "72"
+
+
+def test_gpu_jobs_honour_requires_all(tmp_path):
+    """2026-10-14 (review of 6b409001, R2): a GPU job ordered after several jobs
+    via requires_all must wait for ALL of them. requires_all used to be read for
+    CPU stages only, so such a job was silently eligible at once."""
+    import dataclasses
+
+    gated = dataclasses.replace(_gen("m5"), requires_all=("a", "b"))
+    jobs = [_gen("a"), _gen("b"), gated]
+    _write(tmp_path / "a" / "math500" / "m" / "x-256-s11.jsonl", 2)  # a done
+    _write(tmp_path / "b" / "math500" / "m" / "x-256-s11.jsonl", 2)  # b done
+    assert M.select_job(tmp_path, jobs)[0].name == "m5"
+    (tmp_path / "b" / "math500" / "m" / "x-256-s11.jsonl").write_text("")  # b undone
+    assert M.select_job(tmp_path, jobs, skip={"a", "b"})[0] is None
+    cands, notes = M.launch_candidates(tmp_path, jobs, live={}, skip={"a", "b"})
+    assert [c[0].name for c in cands] == []
+    assert any("m5: dependency incomplete ['b']" in n for n in notes)

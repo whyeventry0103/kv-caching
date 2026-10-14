@@ -16,3 +16,18 @@ campaigns:
     cap_gpu_hours: 6
     approved: 2026-10-06
     scope: protected-selector timing pilot, all three stages combined (48 rows)
+  # Meeting 5 essential pair + smoke, APPROVED by the owner 2026-10-14
+  # (docs/paper/MEETING5_APPROVAL_REQUEST.md A1-A3). Fresh-uniform (A4) and the
+  # capacity comparators (A5) are NOT approved and have no campaign.
+  M5A-RKVPP-SMOKE:
+    cap_gpu_hours: 1
+    approved: 2026-10-14
+    scope: protected R-KV real-model smoke (rkvpp-smoke, 9 records)
+  M5A-H2OPP:
+    cap_gpu_hours: 28
+    approved: 2026-10-14
+    scope: H2O-style protected free runs, B=256, 100 problems x 4 seeds (400 rows)
+  M5A-RKVPP:
+    cap_gpu_hours: 28
+    approved: 2026-10-14
+    scope: R-KV protected free runs, B=256, 100 problems x 4 seeds (400 rows)

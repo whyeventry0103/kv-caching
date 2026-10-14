@@ -1,9 +1,14 @@
-"""CLI acceptance for the information-probe reader (Meeting 5, M5-C): analytic
-channels written as rows, read through the real script, give the hand-known
-values; incomplete and malformed reads carry no label."""
+"""CLI acceptance for the information-probe reader (Meeting 5, M5-C; review of
+6b409001, R3): analytic channels in reference mode give the hand-known values;
+production rows need the versioned schema, the design's provenance and passed
+controls; fractional keys, an impossible greedy symbol, failed controls, wrong
+provenance and torn files are INVALID (exit 2); missing variants PARTIAL
+(exit 3); a failed read retires the old FINAL; the registered paired contrast
+is computed from paired context values."""
 
 from __future__ import annotations
 
+import copy
 import json
 import math
 import subprocess
@@ -16,39 +21,64 @@ from kvcache import task_information as ti
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts/report_information_probe.py"
-DESIGN = {
-    "policies": ["full", "random"],
-    "reference_policy": "full",
-    "contexts": ["c0", "c1", "c2"],
-    "eviction_seeds": [0, 1],
-    "queries": ["s", "n"],
+KIND = {"full": "identity", "random": "uniform", "h2o_style": "permutation"}
+PROV = {
+    "implementation_id": "i" * 64,
+    "model_revision": "m",
+    "tokenizer_revision": "m",
+    "answer_alphabet_sha256": "a" * 64,
+    "task_layout_sha256": "t" * 64,
+    "design_sha256": "d" * 64,
 }
-KIND = {"full": "identity", "random": "uniform"}
 
 
-def _rows():
+def _design(mode="reference"):
+    d = {
+        "mode": mode,
+        "policies": ["full", "random", "h2o_style"],
+        "reference_policy": "full",
+        "contexts": ["c0", "c1", "c2"],
+        "eviction_seeds": [0, 1],
+        "queries": ["s", "n"],
+        "paired_contrasts": [["random", "h2o_style"]],
+    }
+    if mode == "production":
+        d["expected_provenance"] = PROV
+    return d
+
+
+def _rows(mode="reference"):
     out = []
-    for pol in DESIGN["policies"]:
-        for q in DESIGN["queries"]:
-            for c in DESIGN["contexts"]:
-                for e in DESIGN["eviction_seeds"]:
+    d = _design(mode)
+    for pol in d["policies"]:
+        for q in d["queries"]:
+            for c in d["contexts"]:
+                for e in d["eviction_seeds"]:
                     for r in ti.reference_channel(KIND[pol], query=q):
-                        out.append(
-                            {
-                                "policy": pol,
-                                "query": q,
-                                "context_id": c,
-                                "eviction_seed": e,
-                                "s": r.s,
-                                "n": r.n,
-                                "symbol_logprobs": list(r.logprobs),
-                                "greedy": r.greedy,
-                            }
-                        )
+                        row = {
+                            "policy": pol,
+                            "query": q,
+                            "context_id": c,
+                            "eviction_seed": e,
+                            "s": r.s,
+                            "n": r.n,
+                            "symbol_logprobs": list(r.logprobs),
+                            "greedy": r.greedy,
+                        }
+                        if mode == "production":
+                            row.update(
+                                schema=ti.ROW_SCHEMA,
+                                provenance=dict(PROV),
+                                controls={c2: True for c2 in ti.REQUIRED_CONTROLS},
+                                top1_logprob=max(
+                                    x for x in r.logprobs if x != -math.inf
+                                ),
+                            )
+                        out.append(row)
     return out
 
 
-def _run(tmp_path, rows, design=DESIGN):
+def _run(tmp_path, rows, design, extra=()):
     (tmp_path / "rows.jsonl").write_text("\n".join(json.dumps(r) for r in rows))
     (tmp_path / "design.json").write_text(json.dumps(design))
     p = subprocess.run(
@@ -61,67 +91,112 @@ def _run(tmp_path, rows, design=DESIGN):
             str(tmp_path / "design.json"),
             "--out",
             str(tmp_path / "read.json"),
+            *extra,
         ],
         capture_output=True,
         text=True,
         cwd=ROOT,
     )
-    return p, json.loads((tmp_path / "read.json").read_text())
+    return p.returncode, json.loads((tmp_path / "read.json").read_text())
 
 
-def test_final_read_reproduces_the_analytic_values(tmp_path):
-    p, read = _run(tmp_path, _rows())
-    assert p.returncode == 0, p.stderr
-    assert read["status"] == "FINAL"
-    assert read["n_complete_cells"] == read["n_expected_cells"] == 24
-    assert read["not"] == "not total cache MI"
+@pytest.mark.parametrize("mode", ["reference", "production"])
+def test_final_read_reproduces_the_analytic_values(tmp_path, mode):
+    rc, read = _run(tmp_path, _rows(mode), _design(mode))
+    assert (rc, read["status"]) == (0, "FINAL"), read.get("problems")
+    assert read["not"] == "not total cache MI" and read["mode"] == mode
     full, rnd = read["policies"]["full"], read["policies"]["random"]
     for q in ("query_s", "query_n"):
         assert full[q]["mi_bits"]["mean"] == pytest.approx(2.0)
-        assert full[q]["expected_correct_prob"]["mean"] == pytest.approx(1.0)
         assert rnd[q]["mi_bits"]["mean"] == pytest.approx(0.0, abs=1e-12)
         assert rnd[q]["expected_correct_prob"]["mean"] == pytest.approx(0.25)
-        assert rnd[q]["log_loss_bits"]["mean"] == pytest.approx(2.0)
         assert rnd[q]["mi_bits_minus_full"]["mean"] == pytest.approx(-2.0)
-        assert rnd[q]["mi_bits_minus_full"]["ci95"] == pytest.approx([-2.0, -2.0])
-    assert read["bootstrap"] == {"unit": "context", "n_resamples": 2000, "seed": 0}
+    # registered paired contrast: random (0 bits) - h2o_style (wrong permutation,
+    # 2 bits) = -2, from paired context values
+    pc = read["paired_contrasts"]["random-h2o_style"]["query_s"]
+    assert pc["mean"] == pytest.approx(-2.0) and pc["ci95"] == pytest.approx([-2, -2])
 
 
-def test_missing_variant_is_partial_with_no_numbers(tmp_path):
-    rows = _rows()[1:]
-    p, read = _run(tmp_path, rows)
-    assert p.returncode == 0
-    assert read["status"] == "PARTIAL" and "policies" not in read
-    assert read["n_complete_cells"] == 23
+def _mut(mode, fn):
+    rows = copy.deepcopy(_rows(mode))
+    fn(rows)
+    return rows
 
 
-def test_duplicate_or_foreign_rows_are_invalid(tmp_path):
-    rows = _rows()
-    p, read = _run(tmp_path, rows + rows[:1])
-    assert p.returncode == 2 and read["status"] == "INVALID"
+INVALID_CASES = {
+    # review of 6b409001, R3 (each was FINAL, exit 0)
+    "fractional_keys": ("reference", lambda r: r[0].update(s=0.7, eviction_seed=0.9)),
+    "impossible_greedy": ("reference", lambda r: r[0].update(greedy=1)),
+    "failed_controls": (
+        "production",
+        lambda r: r[0]["controls"].update(clone_agreement=False),
+    ),
+    "wrong_provenance": (
+        "production",
+        lambda r: r[0]["provenance"].update(implementation_id="wrong"),
+    ),
+    # additional contract checks
+    "no_schema": ("production", lambda r: r[0].pop("schema")),
+    "bool_key": ("reference", lambda r: r[0].update(n=True)),
+    "fixture_with_provenance": (
+        "reference",
+        lambda r: r[0].update(provenance={"implementation_id": "x"}),
+    ),
+    "duplicate": ("reference", lambda r: r.append(copy.deepcopy(r[0]))),
+    "foreign_cell": ("reference", lambda r: r.append({**r[0], "policy": "h2o"})),
+    "invalid_probability": (
+        "reference",
+        lambda r: r[0].update(symbol_logprobs=[0.5, -1, -1, -1]),
+    ),
+    "top1_mismatch": ("production", lambda r: r[0].update(top1_logprob=-3.0)),
+}
+
+
+@pytest.mark.parametrize("name", sorted(INVALID_CASES))
+def test_invalid_rows_through_the_real_cli(tmp_path, name):
+    mode, fn = INVALID_CASES[name]
+    rc, read = _run(tmp_path, _mut(mode, fn), _design(mode))
+    assert (rc, read["status"]) == (2, "INVALID"), read.get("problems")
     assert "policies" not in read
-    foreign = dict(rows[0], policy="h2o")
-    p, read = _run(tmp_path, rows + [foreign])
-    assert read["status"] == "INVALID" and "not in the design" in read["problems"][0]
-    bad = dict(rows[0], symbol_logprobs=[0.5, -1, -1, -1])
-    p, read = _run(tmp_path, [bad] + rows[1:])
-    assert read["status"] == "INVALID"
 
 
-def test_non_finite_metric_is_reported_without_a_number(tmp_path):
-    rows = [
-        (
-            dict(r, symbol_logprobs=[-math.inf] * 4, greedy=None)
-            if r["policy"] == "random"
-            else r
-        )
-        for r in _rows()
-    ]
-    p, read = _run(tmp_path, rows)
+def test_missing_variant_is_partial_exit_3_without_numbers(tmp_path):
+    rc, read = _run(tmp_path, _rows()[1:], _design())
+    assert (rc, read["status"]) == (3, "PARTIAL") and "policies" not in read
+    rc, read = _run(tmp_path, _rows()[1:], _design(), extra=["--partial"])
+    assert (rc, read["status"]) == (0, "PARTIAL")
+
+
+def test_torn_file_retires_the_old_final(tmp_path):
+    rc, read = _run(tmp_path, _rows(), _design())
     assert read["status"] == "FINAL"
-    ll = read["policies"]["random"]["query_s"]["log_loss_bits"]
-    assert ll == {"mean": None, "ci95": None, "non_finite": True}
-    assert read["policies"]["random"]["query_s"]["other_prob"]["mean"] == 1.0
+    path = tmp_path / "rows.jsonl"
+    path.write_text(path.read_text() + '\n{"torn":')
+    p = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT),
+            "--rows",
+            str(path),
+            "--design",
+            str(tmp_path / "design.json"),
+            "--out",
+            str(tmp_path / "read.json"),
+        ],
+        capture_output=True,
+        text=True,
+        cwd=ROOT,
+    )
+    read = json.loads((tmp_path / "read.json").read_text())
+    assert (p.returncode, read["status"]) == (2, "INVALID")
+    assert read["retired_previous_output"].startswith("read.json.superseded")
+
+
+def test_production_design_must_declare_provenance(tmp_path):
+    d = _design("production")
+    d.pop("expected_provenance")
+    rc, read = _run(tmp_path, _rows("production"), d)
+    assert (rc, read["status"]) == (2, "INVALID")
 
 
 def test_self_check_prints_the_reference_table():

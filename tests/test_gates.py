@@ -210,7 +210,7 @@ def test_protsel_smoke_gate_requires_an_identity_matched_pass(tmp_path):
     """WP4 (2026-10-06): the queue's typed gate for the protected-selector smoke
     applies the same record check as the run adapters."""
     from kvcache.gates import gate_status
-    from kvcache.presses.protected_selectors import SMOKE_MARKER, smoke_identity
+    from kvcache.presses.protected_selectors import SMOKE_MARKER
 
     cfg_path = BY["protsel-smoke"].config
     cfg = _yaml(ROOT / cfg_path)
@@ -219,23 +219,19 @@ def test_protsel_smoke_gate_requires_an_identity_matched_pass(tmp_path):
     for bad in ("", "{}", '{"passed": false, "status": "FAIL"}'):
         marker.write_text(bad)
         assert not gate_status("protsel_smoke", tmp_path, cfg_path)[0]
-    pids = ["p/a", "p/b", "p/c"]
-    recs = [
-        {"kind": k, "pid": p, "press": f}
-        for k in ("replay", "generation")
-        for p in pids
-        for f in cfg["presses"]
-    ] + [{"kind": "identity", "pid": p, "press": cfg["identity_family"]} for p in pids]
-    good = {
-        "passed": True,
-        "status": "PASS",
-        "failures": [],
-        "identity": smoke_identity(cfg),
-        "families_tested": sorted(cfg["presses"]),
-        "selected": [{"pid": p} for p in pids],
-        "records": recs,
-    }
-    marker.write_text(json.dumps(good))
+    sys.path.insert(0, str(ROOT / "tests"))
+    import smoke_fixtures as sfx
+
+    sfx.reference_bank(tmp_path, cfg)
+    good = sfx.measured_marker(tmp_path, cfg, "protsel")
     assert gate_status("protsel_smoke", tmp_path, cfg_path) == (True, "verified")
+    names_only = {
+        **good,
+        "records": [
+            {k: r[k] for k in ("kind", "pid", "press")} for r in good["records"]
+        ],
+    }
+    marker.write_text(json.dumps(names_only))  # review of 6b409001 R2
+    assert not gate_status("protsel_smoke", tmp_path, cfg_path)[0]
     marker.write_text(json.dumps({**good, "families_tested": ["h2o_style_pp_v1"]}))
     assert not gate_status("protsel_smoke", tmp_path, cfg_path)[0]

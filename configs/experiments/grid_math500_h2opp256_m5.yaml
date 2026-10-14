@@ -1,15 +1,18 @@
 name: grid_math500_h2opp256_m5
 stage: grid
-# Meeting 5 M5-A (PREPARED 2026-10-14, HELD; replaces the WP5 block, which is
+# Meeting 5 M5-A (prepared and APPROVED 2026-10-14; replaces the WP5 block, which is
 # kept as history): H2O-style / current-attention (ObservedAttentionPress),
 # prompt protected; NOT canonical accumulated H2O. Essential M5-A arm.
 # Free-running grid at budget 256 on the frozen 100-problem discovery cohort
 # and the four historical seeds, matched to S.1 (same cap, interval and
 # total-budget rule B_eff = max(B, P+64)). Runs through
-# scripts/run_grid_protected.py (refuses while held or without a current
-# protected-selectors smoke PASS). NOT in the queue.
+# scripts/run_grid_m5.py (refuses while held or without a current
+# protected-selectors smoke PASS). Queued as campaign M5A-H2OPP.
 protected_selector: true
-held: true
+# APPROVED by the owner 2026-10-14 (Meeting 5 essential pair, cap 28 GPU-h,
+# campaign M5A-H2OPP); runs only after its technical prerequisites pass, in
+# normal windows, after the approved P1/P2/P3 work (queue requires_all).
+held: false
 smoke_config: configs/experiments/protsel_smoke_wp4.yaml
 models: [r1_distill_qwen_7b]
 benchmarks: [math500]
@@ -22,6 +25,10 @@ max_new_tokens:
   math500: 16384
 compression_interval: 64
 estimated_generation_count: 400
-scale_authorized: false
+scale_authorized: true
 remote_only: true
 store_token_ids: true
+# Frozen prompt/trace hashes for all 100 discovery problems (built 2026-10-14
+# with scripts/build_input_manifest.py --pids grid100; agrees with the
+# Meeting-3 manifest on its 25 problems).
+input_manifest: configs/meeting5/input_manifest_m5.json

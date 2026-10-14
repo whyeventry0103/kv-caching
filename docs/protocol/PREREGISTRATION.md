@@ -4454,3 +4454,43 @@ amendment here.
    - CPU parity PASS on the 1.5B model: base-identical K/V with protection
      off.
    - It is not promoted: promotion needs the GPU smoke, which is not approved.
+
+## Owner decisions and review-of-6b409001 repairs (2026-10-14, before any M5 outcome)
+
+**Owner decisions, made in-session:**
+1. **Approved: the Meeting 5 essential pair and smoke.** Caps:
+   `M5A-RKVPP-SMOKE` 1, `M5A-H2OPP` 28 and `M5A-RKVPP` 28 GPU-h.
+   - They run only after the approved P1/P2/P3 work (queue `requires_all`), in
+     normal windows, and only once their technical gates pass.
+   - Fresh-uniform (A4), the capacity comparators (A5), the information
+     calibration and all M5-B generation stay **unapproved**.
+2. **Equivalence margin:** ±0.03 accuracy primary, ±0.05 declared sensitivity,
+   frozen in `configs/meeting5/m5a_read.yaml` (protocol §4.3).
+   - Per-comparison TOST claims are Holm-adjusted over the two scientific
+     pairings.
+   - The joint claim is an intersection–union test.
+   - A zero standard error is NOT TESTABLE.
+   - This supersedes the ±0.05-primary proposal of the earlier entry today.
+3. **BBH pin:** commit `9ee07bd481feebf959a6b59d61ea57bdcf30964d`, blob
+   `936cd6d80db71aeacaea857c34f9af87e1c34964`, preparation only. Fetched on
+   the host; the blob was verified, with 250 examples and labels (A)–(E).
+
+**Repairs:** `docs/paper/MEETING5_REVIEW_6b40900_ACCEPTANCE.md`.
+- *M5-A reader:* goes through the shared validation boundary.
+- *Runtime smoke gates:* validate the measurements, and recompute traces and
+  input hashes from the frozen bank.
+- *Production identity:* M5 rows carry identity and input hashes through
+  `scripts/run_grid_m5.py`, with resume refusal.
+- *Input manifest:* `configs/meeting5/input_manifest_m5.json` covers all 100
+  discovery problems. The Meeting-3 manifest covered 25.
+- *Scheduler:* GPU jobs now honour `requires_all`.
+- *Information channel:* the reader takes a production contract and a paired
+  contrast; the runner core has clone controls.
+- *Grading:* BBH and GSM8K conflicting final answers are incorrect.
+- *Read-time scoring:* dataset-aware, for GSM8K and BBH.
+
+**Protocol corrections:** cache subset (instantaneous crop only), the scope of
+the lower bound, and the earlier-information → later-answer bridge (§6.9).
+
+**Re-reads:** the five stored B=256 reads were re-run over unchanged rows,
+because `gates.py` is in their analysis fingerprint. No value changed.

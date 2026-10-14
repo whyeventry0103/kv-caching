@@ -1,12 +1,15 @@
 name: grid_math500_rkvpp256_m5
 stage: grid
-# Meeting 5 M5-A (PREPARED 2026-10-14, HELD): free-running grid under
+# Meeting 5 M5-A (prepared and approved 2026-10-14): free-running grid under
 # prompt-protected R-KV at budget 256, matched to the S.1 and WP5 protected
 # cells (same 100 problems, seeds, cap, interval, total-budget rule). Runs
-# through scripts/run_grid_rkv_pp.py, which refuses real execution while `held`
-# is set or without a current rkv-pp-smoke-PASS.json. NOT in the queue.
+# through scripts/run_grid_m5.py, which refuses real execution while `held`
+# is set or without a validated rkv-pp-smoke-PASS.json. Queued (campaign M5A-RKVPP).
 rkv_prompt_protected: true
-held: true
+# APPROVED by the owner 2026-10-14 (Meeting 5 essential pair, cap 28 GPU-h,
+# campaign M5A-RKVPP); runs only after its technical prerequisites pass, in
+# normal windows, after the approved P1/P2/P3 work (queue requires_all).
+held: false
 smoke_config: configs/experiments/rkvpp_smoke_m5.yaml
 models: [r1_distill_qwen_7b]
 benchmarks: [math500]
@@ -19,6 +22,10 @@ max_new_tokens:
   math500: 16384
 compression_interval: 64
 estimated_generation_count: 400
-scale_authorized: false
+scale_authorized: true
 remote_only: true
 store_token_ids: true
+# Frozen prompt/trace hashes for all 100 discovery problems (built 2026-10-14
+# with scripts/build_input_manifest.py --pids grid100; agrees with the
+# Meeting-3 manifest on its 25 problems).
+input_manifest: configs/meeting5/input_manifest_m5.json

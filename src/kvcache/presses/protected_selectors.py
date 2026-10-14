@@ -170,42 +170,62 @@ def smoke_identity(smoke_cfg: dict[str, Any], *, root: Any = None) -> dict[str, 
     )
 
 
+def smoke_design() -> Any:
+    """This family's PASS-marker contract for ``kvcache.smoke_validation``."""
+    from kvcache import smoke_validation as sv
+
+    return sv.SmokeDesign(
+        marker=SMOKE_MARKER,
+        kinds=("replay", "generation"),
+        identity_kind="identity",
+        schemas={
+            "replay": sv.REPLAY_SCHEMA,
+            "generation": sv.GENERATION_SCHEMA,
+            "identity": {
+                "identity_prunes": sv.INT,
+                "identity_mismatched_heads": sv.INT,
+            },
+        },
+        failures=smoke_failures,
+    )
+
+
 def smoke_record_ok(
     runs_root: Any, smoke_cfg: dict[str, Any], *, root: Any = None
 ) -> tuple[bool, str]:
     """Is the marker under ``runs_root`` a valid PASS for ``smoke_cfg``?
 
-    It must parse to a mapping saying ``passed: true`` and ``status: "PASS"``,
-    list no failures, and carry an identity equal to ``smoke_identity`` computed
-    now, so a generation-code, model, smoke-config or input change makes it
-    stale. Shared by the run adapters (``verify_smoke``) and the scheduler's
-    typed gate (``kvcache.gates`` kind ``protsel_smoke``).
+    Review of 6b409001 (R2): the PASS declaration, identity and record names
+    are not enough -- a marker without measurements, or with a raised control,
+    used to verify. Acceptance now re-derives everything from the records
+    (``kvcache.smoke_validation``): the three traces and their input hashes
+    recomputed from the frozen reference bank, exact 21-record coverage,
+    typed finite measurements, and this family's ``smoke_failures``. Shared by
+    the run adapters (``verify_smoke``) and the scheduler gate
+    (``kvcache.gates`` kind ``protsel_smoke``).
     """
     import json
     from pathlib import Path
 
-    from kvcache.provenance import same_identity
+    from kvcache import smoke_validation as sv
+    from kvcache.provenance import PROJECT_ROOT
 
-    marker = Path(runs_root) / SMOKE_MARKER
-    try:
-        d = json.loads(marker.read_text(encoding="utf-8"))
-    except (OSError, ValueError):
-        return False, f"{SMOKE_MARKER} absent, empty or unreadable"
-    if not isinstance(d, dict):
-        return False, f"{SMOKE_MARKER} is not a record"
-    if d.get("passed") is not True or d.get("status") != "PASS":
-        return False, f"{SMOKE_MARKER} does not record a PASS"
-    if d.get("failures"):
-        return False, f"{SMOKE_MARKER} lists failures"
-    if not same_identity(d.get("identity"), smoke_identity(smoke_cfg, root=root)):
-        return False, f"{SMOKE_MARKER} is stale: its identity differs from now"
-    if set(d.get("families_tested") or []) != {
-        str(p).lower() for p in smoke_cfg["presses"]
-    }:
+    base = Path(root) if root is not None else PROJECT_ROOT
+    families = sorted(str(p).lower() for p in smoke_cfg["presses"])
+    ok, why = sv.gate(
+        runs_root,
+        smoke_cfg,
+        design=smoke_design(),
+        want_identity=smoke_identity(smoke_cfg, root=base),
+        presses=families,
+        identity_press=str(smoke_cfg["identity_family"]).lower(),
+        root=base,
+    )
+    if not ok:
+        return ok, why
+    d = json.loads((Path(runs_root) / SMOKE_MARKER).read_text(encoding="utf-8"))
+    if sorted(d.get("families_tested") or []) != families:
         return False, f"{SMOKE_MARKER} does not list the configured families"
-    missing = smoke_coverage_problems(d, smoke_cfg)
-    if missing:
-        return False, f"{SMOKE_MARKER} does not cover the design: {missing[:3]}"
     return True, "verified"
 
 

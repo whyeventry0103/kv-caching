@@ -13,27 +13,32 @@ trace; the in-row ``correct`` field of a GSM8K row is not the GSM8K primary.
 
 GSM8K rule (frozen): a truncated generation is incorrect. The answer region is
 the text after the last ``</think>`` (the whole text if there is none). The
-candidate is the last ``\\boxed{...}`` in that region, else the last number
-in it (the prompt is the raw question, with no instruction to box). The
-candidate is normalized -- ``\\text{}``/``\\$``/``$``/``%``/``\\%``,
+final candidates are EVERY ``\\boxed{...}`` in that region plus every
+"answer is <number>" phrase; if they name different numbers the answer is
+incorrect (``conflicting_final_answers``) -- a last box never overrides a
+conflicting final statement (review of 6b409001, R4). With no box and no such
+phrase, the candidate is the last number in the region (the prompt is the raw
+question, with no instruction to box). The candidate is normalized --
+``\\text{}``/``\\$``/``$``/``%``/``\\%``,
 thousands commas and trailing unit words removed, ``\\frac{a}{b}`` and
 ``a/b`` read as fractions -- and compared to the gold number by EXACT
 rational equality. Anything unparsable is incorrect with a recorded reason.
 The boxed-only variant is a declared sensitivity, never a rescue.
 
-BBH logical_deduction_five_objects rule (frozen): options are ``(A)``-``(E)``.
-The candidate is the last ``\\boxed{...}`` in the answer region, else the text
-after the last "answer is"; it must name EXACTLY one option letter (as
-``(C)``, ``C`` or ``\\text{(C)}``). Zero or several distinct letters is
-incorrect, reason recorded. There is no LLM judge.
+BBH logical_deduction_five_objects rule (frozen; tightened 2026-10-14 after the
+review of 6b409001, R4, before any BBH generation): options are ``(A)``-``(E)``.
+The final candidates are EVERY ``\\boxed{...}`` in the answer region and every
+"answer is ..." statement in it. A box naming several options is incorrect
+(``several_options``); candidates naming different options are incorrect
+(``conflicting_final_answers``) -- e.g. ``\\boxed{(A)} or \\boxed{(C)}`` and
+``\\boxed{(C)}. Actually, the answer is (D).``; no candidate is incorrect
+(``no_answer``). There is no correction rule and no LLM judge.
 """
 
 from __future__ import annotations
 
 import re
 from fractions import Fraction
-
-from kvcache.canonicalize import _last_boxed
 
 _THINK_CLOSE = "</think>"
 _NUM = re.compile(r"-?\d[\d,]*(?:\.\d+)?|-?\.\d+")
@@ -67,6 +72,31 @@ def parse_number(text: str) -> Fraction | None:
     return None
 
 
+GRADER_VERSIONS = {"gsm8k": "gsm8k-numeric-v2", "bbh": "bbh-option-v2"}
+_ANSWER_IS = re.compile(r"answer\s+is\s*:?\s*", re.IGNORECASE)
+
+
+def all_boxed(text: str) -> list[str]:
+    """Contents of every ``\\boxed{...}`` in order (balanced braces)."""
+    out, start = [], 0
+    while True:
+        at = text.find(r"\boxed{", start)
+        if at < 0:
+            return out
+        i, depth = at + len(r"\boxed{"), 1
+        while i < len(text) and depth:
+            depth += {"{": 1, "}": -1}.get(text[i], 0)
+            i += 1
+        if depth:
+            return out  # unterminated box: ignored, as the MATH extractor does
+        out.append(text[at + len(r"\boxed{") : i - 1].strip())
+        start = i
+
+
+def _answer_is_windows(region: str) -> list[str]:
+    return [region[m.end() : m.end() + 40] for m in _ANSWER_IS.finditer(region)]
+
+
 def gsm8k_grade(
     trace: str, gold: str, *, truncated: bool, boxed_only: bool = False
 ) -> tuple[bool, str]:
@@ -75,12 +105,23 @@ def gsm8k_grade(
         return False, "truncated"
     want = Fraction(gold)
     region = answer_region(trace)
-    boxed = _last_boxed(region)
-    if boxed is not None:
-        got = parse_number(boxed)
-        if got is None:
+    boxes = all_boxed(region)
+    stated = [] if boxed_only else _answer_is_windows(region)
+    values = []
+    for b in boxes:
+        v = parse_number(b)
+        if v is None:
             return False, "boxed_unparsable"
-        return got == want, "boxed"
+        values.append(v)
+    for w in stated:
+        nums = _NUM.findall(w)
+        v = parse_number(nums[0]) if nums else None
+        if v is not None:
+            values.append(v)
+    if values:
+        if len(set(values)) > 1:
+            return False, "conflicting_final_answers"
+        return values[0] == want, "boxed" if boxes else "answer_is"
     if boxed_only:
         return False, "no_boxed"
     nums = _NUM.findall(region)
@@ -108,15 +149,19 @@ def bbh_grade(trace: str, gold: str, *, truncated: bool) -> tuple[bool, str]:
     if truncated:
         return False, "truncated"
     region = answer_region(trace)
-    boxed = _last_boxed(region)
-    if boxed is not None:
-        cand, rule = boxed, "boxed"
-    else:
-        at = region.lower().rfind("answer is")
-        if at < 0:
-            return False, "no_answer"
-        cand, rule = region[at + len("answer is") :][:40], "answer_is"
-    letter, why = bbh_option(cand)
-    if letter is None:
-        return False, f"{rule}:{why}"
-    return letter == gold_letter, rule
+    letters = []
+    for b in all_boxed(region):
+        letter, why = bbh_option(b)
+        if why == "several_options":
+            return False, "boxed:several_options"
+        if letter:
+            letters.append(letter)
+    for w in _answer_is_windows(region):
+        m = _OPTION.search(_TEXT.sub(r"\1", w))
+        if m:
+            letters.append(m.group(1) or m.group(2))
+    if not letters:
+        return False, "no_answer"
+    if len(set(letters)) > 1:
+        return False, "conflicting_final_answers"
+    return letters[0] == gold_letter, "final_answer"

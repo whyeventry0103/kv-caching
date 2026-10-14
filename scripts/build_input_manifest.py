@@ -28,12 +28,15 @@ from kvcache.provenance import inputs_sha256
 SEEDS = (11, 23, 47, 89)
 
 
-def build(runs_root: Path, reference_run: str, model: str) -> dict:
+DEFAULT_PIDS = "configs/meeting3/q2_subset_pids.json"
+
+
+def build(
+    runs_root: Path, reference_run: str, model: str, pids_file: str = DEFAULT_PIDS
+) -> dict:
     from run_replay import _load_jsonl, _load_token_records, _reference_key
 
-    pids = json.loads(
-        (PROJECT_ROOT / "configs/meeting3/q2_subset_pids.json").read_text()
-    )["pids"]
+    pids = json.loads((PROJECT_ROOT / pids_file).read_text())["pids"]
     ref = runs_root / reference_run
     rows = [r for r in _load_jsonl(ref) if r["model"] == model]
     tokens = _load_token_records(ref)
@@ -64,12 +67,15 @@ def main() -> int:
     ap.add_argument("--reference-run", required=True)
     ap.add_argument("--model", required=True)
     ap.add_argument("--out", type=Path, required=True)
+    # Meeting 5 (2026-10-14): the 100-problem discovery cohort needs prompt
+    # hashes for all 100 problems; the default list is unchanged.
+    ap.add_argument("--pids", default=DEFAULT_PIDS, help="frozen pid-list JSON")
     ap.add_argument("--dry-run", action="store_true")
     a = ap.parse_args()
     if a.dry_run:
         print(json.dumps({"command": "input-manifest", "out": str(a.out)}))
         return 0
-    m = build(a.runs_root, a.reference_run, a.model)
+    m = build(a.runs_root, a.reference_run, a.model, a.pids)
     # no trailing newline: byte-identical to the committed Qwen manifest
     a.out.write_text(json.dumps(m, indent=1, sort_keys=True), encoding="utf-8")
     print(

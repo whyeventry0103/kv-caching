@@ -1,0 +1,126 @@
+{
+  "bbh_correction_after_box": [
+    true,
+    "boxed"
+  ],
+  "bbh_two_conflicting_final_boxes": [
+    true,
+    "boxed"
+  ],
+  "info_failed_controls": {
+    "rc": 0,
+    "status": "FINAL"
+  },
+  "info_fractional_keys": {
+    "rc": 0,
+    "status": "FINAL"
+  },
+  "info_impossible_greedy": {
+    "rc": 0,
+    "status": "FINAL"
+  },
+  "info_partial_exit": {
+    "rc": 0,
+    "status": "PARTIAL"
+  },
+  "info_torn_json_stale": {
+    "old_report_status": "FINAL",
+    "rc": 1
+  },
+  "info_valid_reference": {
+    "rc": 0,
+    "status": "FINAL"
+  },
+  "m5a_duplicate": {
+    "h2o_protected_coverage": {
+      "n_covered": 388,
+      "n_duplicates": 1,
+      "n_expected": 388,
+      "n_foreign": 0,
+      "n_rows": 389
+    },
+    "random_protected_accuracy": null,
+    "rc": 0,
+    "status": "PARTIAL"
+  },
+  "m5a_foreign_seed": {
+    "h2o_protected_coverage": {
+      "n_covered": 388,
+      "n_duplicates": 0,
+      "n_expected": 388,
+      "n_foreign": 1,
+      "n_rows": 389
+    },
+    "random_protected_accuracy": 0.0,
+    "rc": 0,
+    "status": "FINAL"
+  },
+  "m5a_nan": {
+    "h2o_protected_coverage": {
+      "n_covered": 388,
+      "n_duplicates": 0,
+      "n_expected": 388,
+      "n_foreign": 0,
+      "n_rows": 388
+    },
+    "random_protected_accuracy": 0.002577319587628866,
+    "rc": 0,
+    "status": "FINAL"
+  },
+  "m5a_string_False": {
+    "h2o_protected_coverage": {
+      "n_covered": 388,
+      "n_duplicates": 0,
+      "n_expected": 388,
+      "n_foreign": 0,
+      "n_rows": 388
+    },
+    "random_protected_accuracy": 1.0,
+    "rc": 0,
+    "status": "FINAL"
+  },
+  "m5a_torn_json_stale": {
+    "old_report_status": "FINAL",
+    "rc": 1
+  },
+  "m5a_valid_minimal_no_provenance": {
+    "h2o_protected_coverage": {
+      "n_covered": 388,
+      "n_duplicates": 0,
+      "n_expected": 388,
+      "n_foreign": 0,
+      "n_rows": 388
+    },
+    "random_protected_accuracy": 0.0,
+    "rc": 0,
+    "status": "FINAL"
+  },
+  "m5a_wrong_model_and_identity": {
+    "h2o_protected_coverage": {
+      "n_covered": 388,
+      "n_duplicates": 0,
+      "n_expected": 388,
+      "n_foreign": 0,
+      "n_rows": 388
+    },
+    "random_protected_accuracy": 0.0,
+    "rc": 0,
+    "status": "FINAL"
+  },
+  "rkv_gate_failed_record": [
+    true,
+    "verified"
+  ],
+  "rkv_gate_no_measurements": [
+    true,
+    "verified"
+  ],
+  "selector_gate_failed_record": [
+    true,
+    "verified"
+  ],
+  "selector_gate_no_measurements": [
+    true,
+    "verified"
+  ]
+}

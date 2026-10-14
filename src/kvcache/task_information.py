@@ -232,7 +232,8 @@ def reference_channel(
                 hot = o
             elif kind == "uniform":
                 lp = tuple([_log(1.0 / K)] * K)
-                out.append(Readout(s, n, lp, None))
+                # all mass on tied symbols: native argmax picks the first
+                out.append(Readout(s, n, lp, 0))
                 continue
             elif kind == "always_other":
                 out.append(Readout(s, n, tuple([-math.inf] * K), None))
@@ -262,6 +263,23 @@ def reference_table() -> list[Mapping[str, float | str]]:
 # --- the reader: rows -> FINAL / PARTIAL / INVALID read ------------------------
 
 ROW_FIELDS = ("policy", "query", "context_id", "eviction_seed", "s", "n")
+INT_FIELDS = ("eviction_seed", "s", "n")
+ROW_SCHEMA = "info-readout-v1"
+REFERENCE, PRODUCTION = "reference", "production"
+# Production rows must carry every control the runner computes, each passed
+# (review of 6b409001, R3): two independent full-cache arms agree exactly; two
+# independent clones of the checkpoint cache read out identically; and the
+# readout itself evicted nothing.
+REQUIRED_CONTROLS = ("full_full_identity", "clone_agreement", "no_readout_eviction")
+PROVENANCE_FIELDS = (
+    "implementation_id",
+    "model_revision",
+    "tokenizer_revision",
+    "answer_alphabet_sha256",
+    "task_layout_sha256",
+    "design_sha256",
+)
+GREEDY_TOL = 1e-9  # log-space tolerance for "this symbol is the argmax"
 METRICS = (
     "mi_bits",
     "mi_other_variable_bits",
@@ -273,21 +291,83 @@ METRICS = (
 )
 
 
-def readout_from_row(row: Mapping[str, Any]) -> Readout:
-    """Parse one stored readout row (raises ValueError when malformed)."""
+def _strict_int(v: Any, name: str) -> int:
+    if isinstance(v, bool) or not isinstance(v, int):
+        raise ValueError(f"{name} is not an integer: {v!r}")
+    return v
+
+
+def greedy_problem(r: Readout, top1_logprob: float | None) -> str | None:
+    """Is the declared native greedy symbol consistent with the stored row?
+
+    A declared symbol must be the argmax among the answer symbols (and, when
+    the native top-1 log-probability is stored, equal it). A declared non-symbol
+    top-1 (None) needs OTHER mass at least the largest symbol probability --
+    a single non-symbol token cannot beat a symbol it is smaller than.
+    """
+    row, _ = channel_row(r.logprobs)
+    best = max(row[:K])
+    if r.greedy is not None:
+        if row[r.greedy] < best - GREEDY_TOL or row[r.greedy] == -math.inf:
+            return f"greedy symbol {r.greedy} is not the argmax of the stored row"
+        if top1_logprob is not None and abs(top1_logprob - row[r.greedy]) > 1e-6:
+            return "greedy symbol's log-probability differs from the stored top-1"
+        return None
+    if best > row[OTHER] + GREEDY_TOL:
+        return "non-symbol greedy token although a symbol outweighs all OTHER mass"
+    if top1_logprob is not None and not (best - GREEDY_TOL <= top1_logprob):
+        return "stored top-1 is below the best symbol although greedy is OTHER"
+    return None
+
+
+def readout_from_row(
+    row: Mapping[str, Any],
+    *,
+    mode: str,
+    expected_provenance: Mapping[str, Any] | None = None,
+) -> Readout:
+    """Parse and validate one stored readout row (ValueError when malformed)."""
     for f in (*ROW_FIELDS, "symbol_logprobs", "greedy"):
         if f not in row:
             raise ValueError(f"row lacks {f!r}")
+    for f in INT_FIELDS:
+        _strict_int(row[f], f)
     lp = row["symbol_logprobs"]
-    if not isinstance(lp, list | tuple):
-        raise ValueError("symbol_logprobs is not a list")
+    if not isinstance(lp, list) or not all(
+        isinstance(x, int | float) and not isinstance(x, bool) for x in lp
+    ):
+        raise ValueError("symbol_logprobs is not a list of numbers")
     g = row["greedy"]
-    return Readout(
-        int(row["s"]),
-        int(row["n"]),
-        tuple(float(x) for x in lp),
-        None if g is None else int(g),
-    )
+    if g is not None:
+        _strict_int(g, "greedy")
+    r = Readout(row["s"], row["n"], tuple(float(x) for x in lp), g)
+    channel_row(r.logprobs)  # validates the distribution itself
+    top1 = row.get("top1_logprob")
+    if mode == PRODUCTION:
+        if row.get("schema") != ROW_SCHEMA:
+            raise ValueError(f"schema {row.get('schema')!r} is not {ROW_SCHEMA}")
+        prov = row.get("provenance")
+        if not isinstance(prov, dict):
+            raise ValueError("production row without provenance")
+        for f in PROVENANCE_FIELDS:
+            if prov.get(f) != (expected_provenance or {}).get(f):
+                raise ValueError(f"provenance {f} differs from the design's")
+        controls = row.get("controls")
+        if not isinstance(controls, dict):
+            raise ValueError("production row without controls")
+        for c in REQUIRED_CONTROLS:
+            if controls.get(c) is not True:
+                raise ValueError(f"control {c} did not pass: {controls.get(c)!r}")
+        if not (isinstance(top1, float | int) and math.isfinite(top1) and top1 <= 0):
+            raise ValueError(f"top1_logprob missing or invalid: {top1!r}")
+    elif mode != REFERENCE:
+        raise ValueError(f"unknown design mode {mode!r}")
+    elif "provenance" in row or "controls" in row:
+        raise ValueError("reference-mode fixtures carry no provenance or controls")
+    why = greedy_problem(r, float(top1) if top1 is not None else None)
+    if why:
+        raise ValueError(why)
+    return r
 
 
 def read_information_probe(
@@ -299,24 +379,36 @@ def read_information_probe(
 ) -> dict[str, Any]:
     """Validate every row against the frozen design and, only if FINAL, label.
 
-    ``design``: ``policies``, ``reference_policy``, ``contexts`` (ids),
-    ``eviction_seeds`` and ``queries`` -- derived from the frozen manifest,
+    ``design``: ``mode`` (``reference`` for analytic fixtures, ``production``
+    for model readouts, which must carry the versioned schema, the
+    ``expected_provenance`` and passed controls), ``policies``,
+    ``reference_policy``, ``contexts``, ``eviction_seeds``, ``queries`` and
+    optional ``paired_contrasts`` ([[a, b], ...]) -- from the frozen manifest,
     never from the rows. Every (policy, query, context, eviction seed) cell must
     be a complete 16-variant grid. Per policy and query, metrics are averaged
-    over eviction seeds within a context, then over contexts (contexts are the
-    sampling unit; seeds are not independent evidence). Paired contrasts
-    against ``reference_policy`` resample contexts (2000 resamples, seed 0).
-    A PARTIAL read reports coverage only; INVALID fails closed.
+    over eviction seeds within a context, then over contexts. Contrasts are
+    computed from PAIRED context-level values and resample contexts (2000,
+    seed 0); intervals are never subtracted. PARTIAL reports coverage only;
+    INVALID fails closed.
     """
     from kvcache.stats import cluster_bootstrap_mean
 
+    mode = str(design.get("mode", ""))
+    expected_prov = design.get("expected_provenance")
+    if mode not in (REFERENCE, PRODUCTION):
+        raise ValueError(f"design mode must be {REFERENCE!r} or {PRODUCTION!r}")
+    if mode == PRODUCTION and not isinstance(expected_prov, dict):
+        raise ValueError("a production design must declare expected_provenance")
     policies = [str(p) for p in design["policies"]]
     contexts = [str(c) for c in design["contexts"]]
-    seeds = [int(s) for s in design["eviction_seeds"]]
+    seeds = [_strict_int(s, "design eviction seed") for s in design["eviction_seeds"]]
     queries = [str(q) for q in design["queries"]]
     ref = str(design["reference_policy"])
+    pairs = [(str(a), str(b)) for a, b in design.get("paired_contrasts", [])]
     if ref not in policies or not set(queries) <= {"s", "n"}:
         raise ValueError("design: reference policy or queries malformed")
+    if any(a not in policies or b not in policies for a, b in pairs):
+        raise ValueError("design: a paired contrast names an unknown policy")
     expected = {
         (p, q, c, e) for p in policies for q in queries for c in contexts for e in seeds
     }
@@ -325,13 +417,15 @@ def read_information_probe(
     status = FINAL
     for i, row in enumerate(rows):
         try:
+            if not isinstance(row, Mapping):
+                raise ValueError("row is not an object")
             key = (
                 str(row["policy"]),
                 str(row["query"]),
                 str(row["context_id"]),
-                int(row["eviction_seed"]),
+                _strict_int(row["eviction_seed"], "eviction_seed"),
             )
-            r = readout_from_row(row)
+            r = readout_from_row(row, mode=mode, expected_provenance=expected_prov)
         except (KeyError, TypeError, ValueError) as exc:
             problems.append(f"row {i}: {exc}")
             status = INVALID
@@ -358,6 +452,7 @@ def read_information_probe(
         status = PARTIAL
     report: dict[str, Any] = {
         "status": status,
+        "mode": mode,
         "endpoint": ENDPOINT_LABEL,
         "not": NOT_LABEL,
         "n_expected_cells": len(expected),
@@ -373,6 +468,15 @@ def read_information_probe(
             c: sum(summaries[(p, q, c, e)][m] for e in seeds) / len(seeds)
             for c in contexts
         }
+
+    def paired(a: str, b: str, q: str) -> dict[str, Any]:
+        va, vb = by_context(a, q, "mi_bits"), by_context(b, q, "mi_bits")
+        bs = cluster_bootstrap_mean(
+            {c: [va[c] - vb[c]] for c in contexts},
+            n_resamples=n_resamples,
+            seed=seed,
+        )
+        return {"mean": bs["mean"], "ci95": bs["ci95"], "n_contexts": len(contexts)}
 
     table: dict[str, dict[str, dict[str, Any]]] = {}
     for p in policies:
@@ -390,16 +494,14 @@ def read_information_probe(
                 else:
                     entry[m] = {"mean": None, "ci95": None, "non_finite": True}
             if p != ref:
-                a, b = by_context(p, q, "mi_bits"), by_context(ref, q, "mi_bits")
-                bs = cluster_bootstrap_mean(
-                    {c: [a[c] - b[c]] for c in contexts},
-                    n_resamples=n_resamples,
-                    seed=seed,
-                )
-                entry[f"mi_bits_minus_{ref}"] = {"mean": bs["mean"], "ci95": bs["ci95"]}
+                entry[f"mi_bits_minus_{ref}"] = paired(p, ref, q)
             table.setdefault(p, {})["query_" + q] = entry
     report.update(
         policies=table,
+        paired_contrasts={
+            f"{a}-{b}": {f"query_{q}": paired(a, b, q) for q in queries}
+            for a, b in pairs
+        },
         n_contexts=len(contexts),
         eviction_seeds=seeds,
         bootstrap={"unit": "context", "n_resamples": n_resamples, "seed": seed},

@@ -1,5 +1,5 @@
 """BIG-Bench Hard ``logical_deduction_five_objects`` loader (Meeting 5, M5-B;
-prepared 2026-10-14; NOT pinned, NOT downloaded).
+prepared 2026-10-14; revision PINNED by the owner 2026-10-14).
 
 Scientific rationale. The review recommends one non-math task with finite
 answer labels as the third task family. The data are a single JSON file in the
@@ -7,8 +7,8 @@ official repository, not a Hugging Face dataset, so the guard here is a git
 blob hash: the file a person places must be byte-identical to the pinned blob.
 The revision is a human decision (the repo's TODO(human) rule); the reviewer
 inspected commit ``9ee07bd...`` and parsed 250 examples with five answer
-labels, which is recorded as a PROPOSAL only. Until ``PINNED_COMMIT`` is set
-by a person, ``load_bbh`` refuses.
+labels; the owner pinned exactly that commit and blob on 2026-10-14
+(preparation only). ``load_bbh`` refuses any file whose blob differs.
 
 Prompt (frozen with the rest of M5-B): the example's ``input`` verbatim as the
 single user turn -- the same raw-question convention as MATH-500 and GSM8K.
@@ -29,8 +29,11 @@ REPO = "suzgunmirac/BIG-Bench-Hard"
 FILE = "bbh/logical_deduction_five_objects.json"
 PROPOSED_COMMIT = "9ee07bd481feebf959a6b59d61ea57bdcf30964d"
 PROPOSED_BLOB = "936cd6d80db71aeacaea857c34f9af87e1c34964"
-PINNED_COMMIT = "TODO(human)"  # a person replaces this with the approved commit
-PINNED_BLOB = "TODO(human)"
+# Pinned by the OWNER's in-session decision, 2026-10-14 (TODO(human) rule):
+# the reviewer-inspected commit and blob. Dataset preparation only; no BBH
+# generation campaign is authorized by this pin.
+PINNED_COMMIT = PROPOSED_COMMIT
+PINNED_BLOB = PROPOSED_BLOB
 EXPECTED_N = 250
 NAME = "bbh_lde5"
 _TARGET = re.compile(r"\([A-E]\)")
@@ -78,3 +81,12 @@ def load_bbh(path: Path) -> list[Problem]:
     if len(problems) != EXPECTED_N:
         raise ValueError(f"{len(problems)} examples, expected {EXPECTED_N}")
     return problems
+
+
+def data_path(data_root: Path) -> Path:
+    """Where the pinned file lives under the data root (one path per commit)."""
+    return Path(data_root) / "bbh" / PINNED_COMMIT / Path(FILE).name
+
+
+def raw_url() -> str:
+    return f"https://raw.githubusercontent.com/{REPO}/{PINNED_COMMIT}/{FILE}"

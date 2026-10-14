@@ -1,5 +1,6 @@
 """Protection-by-policy accuracy read for Meeting 5 M5-A (prepared 2026-10-14,
-before any protected H2O-style or R-KV row exists).
+before any protected H2O-style or R-KV row exists; validation rebuilt after the
+review of 6b409001, R1).
 
 Scientific rationale. The review's primary M5-A endpoint is the paired
 free-running accuracy contrast between Random and each scored policy j, with
@@ -8,17 +9,31 @@ and without prompt protection, and its interaction
     I_j = (A_{R,+P} - A_{j,+P}) - (A_{R,-P} - A_{j,-P}),
 
 computed per (problem, seed) on matched keys, averaged over seeds within a
-problem and then over problems. The registered inference is the B=1024 one
-(``protocol_audit.problem_level_t_tests``): a two-sided problem-level t test,
-Holm over the scientific pairings. A protected contrast "vanishes" only when
-both one-sided tests reject inside the frozen margin (TOST, protocol 4.3);
-otherwise it is "inconclusive" or "outside the margin" -- a non-significant
-difference is never called equivalence.
+problem and then over problems. Inference is the registered B=1024 one
+(``protocol_audit.problem_level_t_tests``: problem-level t test, Holm over the
+two scientific pairings).
 
-Coverage. Expected keys come from the frozen cohort and seeds (never from
-rows). Every arm must hold every expected key exactly once; otherwise the read
-is PARTIAL and carries no number. Truncated generations are already scored
-incorrect in the rows and stay in every denominator.
+Validation goes through the shared boundary (``read_checks.validate_rows``:
+exact coverage, required fields, EXACT booleans checked before any
+conversion -- "False" and NaN are not booleans). Each SOURCE run is validated
+in full against its own config's design before the cohort is selected, so a
+foreign seed or a duplicate is INVALID even when it lies outside the cohort;
+missing expected keys are PARTIAL. On top of the shared checks (the same
+"malformed" channel): model and benchmark must be the declared ones, a
+truncated row may not be scored correct, a LEGACY source row may not carry an
+identity block it never had (and none is fabricated), and an M5 source row
+must carry the expected identity and frozen prompt hash
+(``kvcache.m5_runs.row_identity_problems``).
+
+Equivalence (protocol 4.3; owner decision 2026-10-14, frozen in the read spec):
+a protected contrast is "within margin" only if both one-sided tests reject at
+alpha (TOST) with the PRIMARY margin; the sensitivity margin is reported
+beside it. Per-comparison equivalence claims are Holm-adjusted over the
+scientific pairings; the joint claim "every scientific contrast is within
+margin" is an intersection-union test (largest TOST p <= alpha). A degenerate
+sampling estimate (zero standard error) is NOT TESTABLE -- its observed
+difference is still reported descriptively. A non-significant difference is
+never called equivalence.
 """
 
 from __future__ import annotations
@@ -28,73 +43,147 @@ import statistics
 from collections.abc import Mapping, Sequence
 from typing import Any
 
-from kvcache.metrics.protocol_audit import Key, problem_level_t_tests
+from kvcache.metrics.protocol_audit import NOT_TESTABLE, Key, problem_level_t_tests
 
-MARGIN = 0.05  # protocol 4.3, frozen 2026-10-14
-TOST_ALPHA = 0.05
 FINAL, PARTIAL, INVALID = "FINAL", "PARTIAL", "INVALID"
+GRID_REQUIRED = ("pid", "press", "budget", "decoding.seed", "trace", "model", "bench")
+GRID_BOOLS = ("correct", "truncated")
 
 Arm = tuple[str, bool]  # (policy, protected)
 
 
-def arm_coverage(
-    rows: Sequence[Mapping[str, Any]], expected: set[Key]
-) -> tuple[dict[Key, float] | None, dict[str, int]]:
-    """Per-key correctness of one arm, or None unless coverage is exact."""
-    vals: dict[Key, float] = {}
-    dup = foreign = 0
-    for r in rows:
-        k = (str(r["pid"]), int(r["decoding"]["seed"]))
-        if k not in expected:
-            foreign += 1
-            continue
-        if k in vals:
-            dup += 1
-            continue
-        vals[k] = float(bool(r["correct"]))
-    info = {
-        "n_rows": len(rows),
-        "n_covered": len(vals),
-        "n_expected": len(expected),
-        "n_duplicates": dup,
-        "n_foreign": foreign,
-    }
-    ok = len(vals) == len(expected) and dup == 0
-    return (vals if ok else None), info
+def grid_key(r: Mapping[str, Any]) -> tuple:
+    return (
+        str(r["press"]),
+        str(r["budget"]),
+        str(r["pid"]),
+        int(r["decoding"]["seed"]),
+    )
 
 
-def tost(problem_values: Sequence[float], margin: float = MARGIN) -> dict[str, Any]:
+def row_value_problems(
+    row: Mapping[str, Any],
+    *,
+    model: str,
+    bench: str,
+    provenance: str,
+    identity_check: Any = None,
+) -> list[str]:
+    """M5-A checks beyond the shared boundary (empty list = well formed)."""
+    out = []
+    if row.get("model") != model:
+        out.append(f"model {row.get('model')!r} is not {model!r}")
+    if row.get("bench") != bench:
+        out.append(f"bench {row.get('bench')!r} is not {bench!r}")
+    if row.get("truncated") is True and row.get("correct") is not False:
+        out.append("truncated row is not scored incorrect")
+    if provenance == "legacy":
+        if "provenance" in row:
+            out.append("legacy-source row carries an identity block it never had")
+    elif provenance == "m5":
+        out += identity_check(row) if identity_check else ["no identity check"]
+    else:
+        out.append(f"unknown provenance contract {provenance!r}")
+    return out
+
+
+def validate_source(
+    rows: Sequence[Mapping[str, Any]],
+    *,
+    expected: set[tuple],
+    model: str,
+    bench: str,
+    provenance: str,
+    identity_check: Any = None,
+) -> dict[str, Any]:
+    """The shared validation block for one source run, plus M5-A value checks."""
+    from kvcache.read_checks import validate_rows
+
+    block = validate_rows(
+        rows,
+        key=grid_key,
+        expected=expected,
+        required=GRID_REQUIRED,
+        bool_fields=GRID_BOOLS,
+    )
+    for i, r in enumerate(rows):
+        probs = row_value_problems(
+            r,
+            model=model,
+            bench=bench,
+            provenance=provenance,
+            identity_check=identity_check,
+        )
+        if probs:
+            try:
+                k = repr(grid_key(r))
+            except (KeyError, TypeError, ValueError):
+                k = f"<row {i}>"
+            block["malformed"][k] = block["malformed"].get(k, []) + probs
+            block["status"] = INVALID
+    return block
+
+
+def tost(
+    problem_values: Sequence[float], *, margin: float, alpha: float
+) -> dict[str, Any]:
     """Two one-sided t tests of |mean| < margin over problem-level values."""
     from scipy import stats
 
     n = len(problem_values)
     if n < 2:
-        return {"label": "NOT_TESTABLE", "n_problems": n}
+        return {"label": NOT_TESTABLE, "n_problems": n, "margin": margin}
     mean = statistics.fmean(problem_values)
     se = statistics.stdev(problem_values) / math.sqrt(n)
-    if se == 0.0:
-        inside = abs(mean) < margin
+    if se == 0.0 or not math.isfinite(se):
         return {
-            "label": "within margin" if inside else "outside margin",
-            "mean": mean,
-            "se": 0.0,
+            "label": NOT_TESTABLE,
+            "reason": "degenerate sampling estimate (zero standard error)",
+            "observed_mean": mean,
             "n_problems": n,
+            "margin": margin,
         }
-    t_crit = float(stats.t.ppf(1 - TOST_ALPHA, df=n - 1))
-    lo, hi = mean - t_crit * se, mean + t_crit * se
-    if -margin < lo and hi < margin:
-        label = "within margin"
-    elif hi <= -margin or lo >= margin:
-        label = "outside margin"
-    else:
-        label = "inconclusive"
+    df = n - 1
+    p_lower = float(stats.t.sf((mean + margin) / se, df))  # H0: mean <= -margin
+    p_upper = float(stats.t.cdf((mean - margin) / se, df))  # H0: mean >= +margin
+    p = max(p_lower, p_upper)
+    t_crit = float(stats.t.ppf(1 - alpha, df))
     return {
-        "label": label,
+        "label": "within margin" if p <= alpha else "not shown within margin",
         "mean": mean,
         "se": se,
-        "ci90": [lo, hi],
+        "df": df,
+        "ci_1_minus_2alpha": [mean - t_crit * se, mean + t_crit * se],
+        "p_lower": p_lower,
+        "p_upper": p_upper,
+        "p_tost": p,
         "margin": margin,
         "n_problems": n,
+    }
+
+
+def equivalence_family(
+    members: Mapping[str, Sequence[float]], *, margin: float, alpha: float
+) -> dict[str, Any]:
+    """Per-comparison TOST with Holm over the family, and the joint IUT claim."""
+    rows = {k: tost(v, margin=margin, alpha=alpha) for k, v in members.items()}
+    m = len(rows)
+    tested = sorted((r["p_tost"], k) for k, r in rows.items() if "p_tost" in r)
+    running = 0.0
+    for rank, (p, k) in enumerate(tested):
+        running = max(running, min(1.0, (m - rank) * p))
+        rows[k]["p_tost_holm"] = running
+        rows[k]["equivalent_per_comparison"] = bool(running <= alpha)
+    joint = (
+        bool(len(tested) == m and max(p for p, _ in tested) <= alpha) if m else False
+    )
+    return {
+        "margin": margin,
+        "alpha": alpha,
+        "members": rows,
+        "per_comparison_rule": "TOST, Holm over the scientific pairings",
+        "joint_rule": "intersection-union: every member's TOST p <= alpha",
+        "joint_within_margin": joint,
     }
 
 
@@ -106,42 +195,22 @@ def _problem_means(values: Mapping[Key, float]) -> dict[str, float]:
 
 
 def replication_read(
-    arms: Mapping[Arm, Sequence[Mapping[str, Any]] | None],
+    values: Mapping[Arm, Mapping[Key, float]],
     *,
     expected: set[Key],
     reference: str,
     pairings: Sequence[str],
     descriptive: Sequence[str] = (),
+    equivalence: Mapping[str, Any],
     n_resamples: int = 2000,
     seed: int = 0,
 ) -> dict[str, Any]:
-    """The M5-A read over one cohort; ``None`` for an arm means no rows yet."""
+    """Estimates from VALIDATED arm values (every arm covers ``expected``)."""
     from kvcache.stats import cluster_bootstrap_mean
 
-    coverage: dict[str, Any] = {}
-    values: dict[Arm, dict[Key, float]] = {}
-    for arm, rows in arms.items():
-        tag = f"{arm[0]}{'+P' if arm[1] else '-P'}"
-        if rows is None:
-            coverage[tag] = {"status": "absent"}
-            continue
-        vals, info = arm_coverage(rows, expected)
-        coverage[tag] = info
-        if vals is not None:
-            values[arm] = vals
-    needed = {
-        (p, prot)
-        for p in (reference, *pairings, *descriptive)
-        for prot in (False, True)
-    }
-    missing = sorted(f"{p}{'+P' if b else '-P'}" for p, b in needed - set(values))
-    report: dict[str, Any] = {
-        "coverage": coverage,
-        "n_expected_keys": len(expected),
-        "margin": MARGIN,
-    }
-    if missing:
-        return {**report, "status": PARTIAL, "missing_arms": missing}
+    for arm, v in values.items():
+        if set(v) != expected:
+            raise ValueError(f"arm {arm} does not cover the cohort exactly")
 
     def contrast(j: str, protected: bool) -> dict[Key, float]:
         a, b = values[(reference, protected)], values[(j, protected)]
@@ -155,29 +224,38 @@ def replication_read(
         return {"mean": bs["mean"], "ci95": bs["ci95"], "n_problems": len(pm)}
 
     family: dict[str, dict[Key, float]] = {}
+    protected_pm: dict[str, list[float]] = {}
     out: dict[str, Any] = {}
     for j in (*pairings, *descriptive):
         prot, unprot = contrast(j, True), contrast(j, False)
         inter = {k: prot[k] - unprot[k] for k in expected}
+        name = f"{reference}-{j}"
         if j in pairings:
-            family[f"{reference}-{j}"] = inter
-        out[f"{reference}-{j}"] = {
+            family[name] = inter
+            protected_pm[name] = list(_problem_means(prot).values())
+        out[name] = {
             "role": "scientific" if j in pairings else "descriptive",
-            "protected": {
-                **ci(prot),
-                "tost": tost(list(_problem_means(prot).values())),
-            },
+            "protected": ci(prot),
             "unprotected": ci(unprot),
             "interaction": ci(inter),
         }
+    alpha = float(equivalence["alpha"])
+    eq = {
+        "primary": equivalence_family(
+            protected_pm, margin=float(equivalence["primary_margin"]), alpha=alpha
+        ),
+        "sensitivity": equivalence_family(
+            protected_pm, margin=float(equivalence["sensitivity_margin"]), alpha=alpha
+        ),
+        "declared": dict(equivalence),
+    }
     accuracy = {
         f"{p}{'+P' if b else '-P'}": ci(v) for (p, b), v in sorted(values.items())
     }
     return {
-        **report,
-        "status": FINAL,
         "accuracy": accuracy,
         "contrasts": out,
         "registered_inference": problem_level_t_tests(family),
+        "equivalence_protected_contrasts": eq,
         "bootstrap": {"unit": "problem", "n_resamples": n_resamples, "seed": seed},
     }

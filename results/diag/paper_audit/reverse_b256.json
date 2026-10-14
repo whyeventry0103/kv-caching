@@ -104,7 +104,7 @@
     "groups": {
       "analysis_code": {
         "n_files": 11,
-        "sha256": "eb5ac99b273b3d32f585c3e09af06b704c45b639ea2e847cd40d342f65a2b1d9"
+        "sha256": "9e04f10829023c3f72e804587661905adbca722d2e94d32884e1f1cec67cf43c"
       },
       "protection_inputs": {
         "n_files": 40,
@@ -119,7 +119,7 @@
         "sha256": "cd68be70229183cdcb51c6b7189fb859e39a7e9b0a048eeeefed8d707247b7b8"
       }
     },
-    "sha256": "43a6953af647d73534c906273ac011e20a44d9a2d52fd1515d4e0ca20185b4bd"
+    "sha256": "25b6a3a3deb4f22c5970538d37074cd7fb4bfb877e5816552d5087d90ab9f404"
   },
   "inputs": {
     "grid_base": "grid-diss256-tok",
@@ -3261,6 +3261,42 @@
     }
   },
   "read": "protocol audit: operational 2 x 2 (forward and reverse readout)",
+  "registered_inference": {
+    "alpha": 0.05,
+    "estimand": "protected forward/reverse interaction on the declared common support; missing-readout bounds are reported separately",
+    "family_size": 2,
+    "members": {
+      "random_pp": {
+        "df": 99,
+        "mean": 0.13,
+        "n_conditions": 376,
+        "n_problems": 100,
+        "p": 8.857793165273114e-06,
+        "p_holm": 1.7715586330546227e-05,
+        "reject_at_alpha": true,
+        "sd": 0.27735321089086074,
+        "se": 0.027735321089086072,
+        "status": "TESTED",
+        "t": 4.687164052741231
+      },
+      "streamingllm_pp": {
+        "df": 97,
+        "mean": 0.12670068027210885,
+        "n_conditions": 355,
+        "n_problems": 98,
+        "p": 0.00023604958958942476,
+        "p_holm": 0.00023604958958942476,
+        "reject_at_alpha": true,
+        "sd": 0.3284063692898473,
+        "se": 0.033174052958529224,
+        "status": "TESTED",
+        "t": 3.8192704530404216
+      }
+    },
+    "note": "bootstrap CIs elsewhere in this read are DESCRIPTIVE; this block is the registered family-level test",
+    "procedure": "two-sided one-sample t test of problem-level contrasts (seeds averaged within problem), Holm over the family",
+    "status": "EXPLORATORY (procedure frozen 2026-10-14, after this budget's data were read)"
+  },
   "registration": "NEW ANALYSIS 2026-10-05 (execution plan WP1); not an Amendment S read and relabels nothing",
   "reproduce": "python scripts/report_protocol_audit.py --runs-root /home/sk10741/kvcache-storage/runs reverse --budget 256",
   "retired_previous_output": null,

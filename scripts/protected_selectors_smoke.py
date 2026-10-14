@@ -58,7 +58,7 @@ from kvcache.presses.protected_selectors import (
     smoke_failures,
     smoke_identity,
 )
-from kvcache.provenance import write_gate
+from kvcache.provenance import inputs_sha256, write_gate
 from kvcache.runmeta import capture_runmeta
 
 FAIL_MARKER = SMOKE_MARKER.replace("-PASS.json", "-FAIL.json")
@@ -201,6 +201,7 @@ def main() -> int:
                 "press": name,
                 "prompt_len": len(prompt_ids),
                 "n_replayed": len(trace_ids),
+                "inputs_sha256": inputs_sha256(prompt_ids, trace_ids),
                 "n_layers": len(model.model.layers),
             }
             t0 = time.monotonic()
@@ -292,8 +293,17 @@ def main() -> int:
         "failures": fails,
         "identity": smoke_identity(cfg),
         "families_tested": sorted(str(p).lower() for p in cfg["presses"]),
+        # Review of 6b409001 (R2): the input hash of each replayed trace, so the
+        # runtime gate can check the smoke used the frozen reference inputs.
         "selected": [
-            {k: c[k] for k in ("pid", "prompt_len", "trace_len")} for c in chosen
+            {
+                **{k: c[k] for k in ("pid", "prompt_len", "trace_len")},
+                "inputs_sha256": inputs_sha256(
+                    tokens[c["key"]]["prompt_token_ids"],
+                    tokens[c["key"]]["trace_token_ids"][: int(cfg["replay_tokens"])],
+                ),
+            }
+            for c in chosen
         ],
         "records": records,
         "runmeta": {

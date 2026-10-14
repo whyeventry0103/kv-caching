@@ -1,77 +1,243 @@
-"""M5-A protection-by-policy read: exact coverage or PARTIAL, hand-computed
-contrasts and interaction, TOST labels, registered Holm family."""
+"""M5-A protection-by-policy read (review of 6b409001, R1): the REAL CLI on
+schema-complete fixture runs. A positive control reads FINAL with hand-known
+estimates; every injected defect from the review is INVALID (exit 2) or, for a
+missing condition, PARTIAL (exit 3); a failed read never leaves an old FINAL
+standing. Plus the TOST / equivalence-family rules."""
 
 from __future__ import annotations
 
+import copy
+import json
+import math
+import subprocess
+import sys
+from pathlib import Path
+
 import pytest
+import yaml
 
 from kvcache.metrics import policy_replication as pr
 from kvcache.metrics.protocol_audit import NOT_TESTABLE
 
-PIDS = [f"p{i}" for i in range(10)]
-SEEDS = [1, 2]
-EXPECTED = {(p, s) for p in PIDS for s in SEEDS}
+ROOT = Path(__file__).resolve().parents[1]
+SCRIPT = ROOT / "scripts/report_policy_replication.py"
+SPEC = yaml.safe_load((ROOT / "configs/meeting5/m5a_read.yaml").read_text())
+MODEL = SPEC["model"]
+GRID100 = json.loads((ROOT / "configs/meeting3/grid100_pids.json").read_text())["pids"]
+STRICT = json.loads((ROOT / SPEC["cohort_source"]).read_text())["pids"]
+MANIFEST = json.loads((ROOT / "configs/meeting5/input_manifest_m5.json").read_text())
+# accuracy pattern per press: correct iff the problem index is below the cut
+CUT = {
+    "random": 60,
+    "random_pp": 80,
+    "streamingllm": 50,
+    "streamingllm_pp": 80,
+    "h2o": 20,
+    "h2o_style_pp_v1": 70,
+    "rkv": 40,
+    "rkv_pp_v1": 75,
+}
 
 
-def _rows(rate_by_pid):
-    """Rows where problem i is correct on both seeds iff rate_by_pid(i)."""
-    return [
-        {"pid": p, "decoding": {"seed": s}, "correct": bool(rate_by_pid(i))}
-        for i, p in enumerate(PIDS)
-        for s in SEEDS
-    ]
+def _source_rows(run: str) -> list[dict]:
+    from kvcache.m5_runs import expected_identity
+
+    src = SPEC["sources"][run]
+    cfg = yaml.safe_load((ROOT / src["config"]).read_text())
+    ident = expected_identity(cfg) if src["provenance"] == "m5" else None
+    rows = []
+    for press in cfg["presses"]:
+        for seed in cfg["seeds"]:
+            for i, pid in enumerate(GRID100):
+                r = {
+                    "pid": pid,
+                    "press": press,
+                    "budget": 256,
+                    "model": MODEL,
+                    "bench": "math500",
+                    "decoding": {"seed": seed},
+                    "trace": "t",
+                    "correct": i < CUT[press],
+                    "truncated": False,
+                    "runmeta": {"commit": "abc", "source_tree_hash": "x"},
+                    "versions": {},
+                }
+                if ident:
+                    r["provenance"] = {
+                        **ident,
+                        "inputs_sha256": MANIFEST["prompts"][pid],
+                    }
+                rows.append(r)
+    return rows
 
 
-def _arms(over=None):
-    base = {
-        ("random", False): _rows(lambda i: i < 6),  # 0.6
-        ("random", True): _rows(lambda i: i < 8),  # 0.8
-        ("h2o", False): _rows(lambda i: i < 2),  # 0.2
-        ("h2o", True): _rows(lambda i: i < 7),  # 0.7
-        ("streamingllm", False): _rows(lambda i: i < 6),  # 0.6
-        ("streamingllm", True): _rows(lambda i: i < 8),  # 0.8
-    }
-    base.update(over or {})
-    return base
+ALL = {run: _source_rows(run) for run in SPEC["sources"]}
 
 
-def _read(arms):
-    return pr.replication_read(
-        arms, expected=EXPECTED, reference="random", pairings=["h2o", "streamingllm"]
+def _write(runs: Path, data: dict[str, list[dict]], torn: str | None = None) -> None:
+    for run, rows in data.items():
+        d = runs / run / "math500" / MODEL
+        d.mkdir(parents=True, exist_ok=True)
+        text = "\n".join(json.dumps(r) for r in rows) + "\n"
+        if run == torn:
+            text += '{"torn":'
+        (d / "rows.jsonl").write_text(text)
+
+
+def _cli(tmp_path, data, *, cohort="strict", torn=None, fresh=True):
+    runs, out = tmp_path / "runs", tmp_path / "out"
+    if fresh and runs.exists():
+        import shutil
+
+        shutil.rmtree(runs)
+    _write(runs, data, torn)
+    p = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT),
+            "--cohort",
+            cohort,
+            "--runs-root",
+            str(runs),
+            "--out-dir",
+            str(out),
+        ],
+        capture_output=True,
+        text=True,
+        cwd=ROOT,
     )
+    d = json.loads((out / f"m5a_read_{cohort}.json").read_text())
+    return p.returncode, d
 
 
-def test_final_read_hand_computed():
-    d = _read(_arms())
+def test_positive_control_is_final_with_hand_known_estimates(tmp_path):
+    rc, d = _cli(tmp_path, ALL)
+    assert (rc, d["status"]) == (0, "FINAL"), d.get("sources")
+    est = d["estimates"]
+    # strict cohort = GRID100 minus 3 relaxed problems; the cut is by GRID100
+    # index, so recompute the expected accuracy over the cohort itself
+    idx = {p: i for i, p in enumerate(GRID100)}
+
+    def acc(press):
+        return sum(idx[p] < CUT[press] for p in STRICT) / len(STRICT)
+
+    assert est["accuracy"]["h2o+P"]["mean"] == pytest.approx(acc("h2o_style_pp_v1"))
+    h = est["contrasts"]["random-h2o"]
+    want = (acc("random_pp") - acc("h2o_style_pp_v1")) - (acc("random") - acc("h2o"))
+    assert h["interaction"]["mean"] == pytest.approx(want)
+    assert est["registered_inference"]["family_size"] == 2
+    eq = est["equivalence_protected_contrasts"]
+    assert eq["primary"]["margin"] == 0.03 and eq["sensitivity"]["margin"] == 0.05
+    # identical protected Random and StreamingLLM arms: zero SE -> NOT TESTABLE
+    s = eq["primary"]["members"]["random-streamingllm"]
+    assert s["label"] == NOT_TESTABLE and s["observed_mean"] == 0.0
+    assert d["dependencies"]["sha256"] and d["capacity_matched"] is True
+
+
+def _mut(run, fn):
+    data = copy.deepcopy(ALL)
+    fn(data[run])
+    return data
+
+
+CASES = {
+    "string_False": (
+        _mut("grid-pp256", lambda rs: [r.update(correct="False") for r in rs]),
+        "INVALID",
+    ),
+    "nan": (_mut("grid-pp256", lambda rs: rs[0].update(correct=math.nan)), "INVALID"),
+    "foreign_seed": (
+        _mut(
+            "grid-h2opp256-m5",
+            lambda rs: rs.append({**copy.deepcopy(rs[0]), "decoding": {"seed": 999}}),
+        ),
+        "INVALID",
+    ),
+    "duplicate": (
+        _mut("grid-h2opp256-m5", lambda rs: rs.append(copy.deepcopy(rs[0]))),
+        "INVALID",
+    ),
+    "wrong_model": (
+        _mut("grid-diss256-h2o", lambda rs: rs[0].update(model="wrong_model")),
+        "INVALID",
+    ),
+    "identity_on_legacy_row": (
+        _mut(
+            "grid-diss256-h2o",
+            lambda rs: rs[0].update(provenance={"implementation_id": "wrong"}),
+        ),
+        "INVALID",
+    ),
+    "wrong_m5_identity": (
+        _mut(
+            "grid-rkvpp256-m5",
+            lambda rs: rs[0]["provenance"].update(implementation_id="0" * 64),
+        ),
+        "INVALID",
+    ),
+    "wrong_prompt_hash": (
+        _mut(
+            "grid-rkvpp256-m5",
+            lambda rs: rs[0]["provenance"].update(inputs_sha256="0" * 64),
+        ),
+        "INVALID",
+    ),
+    "truncated_scored_correct": (
+        _mut("grid-pp256", lambda rs: rs[0].update(truncated=True, correct=True)),
+        "INVALID",
+    ),
+    "foreign_outside_cohort": (
+        # a relaxed problem is outside the strict cohort but inside the source
+        # design: its duplicate is still INVALID (validated before selection)
+        _mut(
+            "grid-diss256-tok",
+            lambda rs: rs.append(
+                copy.deepcopy(next(r for r in rs if r["pid"] not in STRICT))
+            ),
+        ),
+        "INVALID",
+    ),
+    "missing_row": (_mut("grid-pp256", lambda rs: rs.pop()), "PARTIAL"),
+}
+
+
+@pytest.mark.parametrize("name", sorted(CASES))
+def test_review_defects_are_refused_through_the_real_cli(tmp_path, name):
+    data, want = CASES[name]
+    rc, d = _cli(tmp_path, data)
+    assert d["status"] == want, (name, d.get("sources"))
+    assert rc == {"INVALID": 2, "PARTIAL": 3}[want]
+    assert "estimates" not in d
+
+
+def test_absent_source_is_partial_and_whole_cohort_needs_capmatch(tmp_path):
+    data = {k: v for k, v in ALL.items() if k != "grid-rkvpp256-m5"}
+    rc, d = _cli(tmp_path, data)
+    assert (rc, d["status"]) == (3, "PARTIAL")
+    assert d["sources"]["grid-rkvpp256-m5"] == {"status": "PARTIAL", "absent": True}
+    rc, d = _cli(tmp_path, ALL, cohort="whole")
+    assert (rc, d["status"]) == (3, "PARTIAL") and d["capacity_matched"] is False
+
+
+def test_torn_json_retires_the_old_final_and_writes_invalid(tmp_path):
+    rc, d = _cli(tmp_path, ALL)
     assert d["status"] == "FINAL"
-    h = d["contrasts"]["random-h2o"]
-    assert h["protected"]["mean"] == pytest.approx(0.1)  # 0.8 - 0.7
-    assert h["unprotected"]["mean"] == pytest.approx(0.4)  # 0.6 - 0.2
-    assert h["interaction"]["mean"] == pytest.approx(-0.3)
-    s = d["contrasts"]["random-streamingllm"]
-    assert s["protected"]["mean"] == 0.0 and s["interaction"]["mean"] == 0.0
-    assert s["protected"]["tost"]["label"] == "within margin"  # identical arms
-    fam = d["registered_inference"]
-    assert fam["family_size"] == 2
-    assert fam["members"]["random-streamingllm"]["status"] == NOT_TESTABLE
-    assert fam["members"]["random-h2o"]["status"] == "TESTED"
-    assert d["accuracy"]["h2o+P"]["mean"] == pytest.approx(0.7)
+    rc, d = _cli(tmp_path, ALL, torn="grid-diss256-h2o")
+    assert (rc, d["status"]) == (2, "INVALID") and "malformed JSON" in d["error"]
+    assert d["retired_previous_output"].startswith("m5a_read_strict.json.superseded")
+    retired = list((tmp_path / "out").glob("*.superseded-*"))
+    assert len(retired) == 1  # the old FINAL is no longer the current output
 
 
-def test_missing_duplicate_or_absent_arm_is_partial_without_numbers():
-    rows = _rows(lambda i: True)
-    for arms in (
-        _arms({("h2o", True): None}),
-        _arms({("h2o", True): rows[1:]}),
-        _arms({("h2o", True): rows + rows[:1]}),
-    ):
-        d = _read(arms)
-        assert d["status"] == "PARTIAL" and "contrasts" not in d
-        assert d["missing_arms"] == ["h2o+P"]
-
-
-def test_tost_labels():
-    assert pr.tost([0.01, -0.01, 0.0, 0.02, -0.02] * 20)["label"] == "within margin"
-    assert pr.tost([0.3, 0.2, 0.25, 0.35] * 10)["label"] == "outside margin"
-    assert pr.tost([1.0, -1.0, 0.5, -0.5])["label"] == "inconclusive"
-    assert pr.tost([0.1])["label"] == "NOT_TESTABLE"
+def test_tost_rules():
+    within = pr.tost([0.01, -0.01, 0.0, 0.005, -0.005] * 40, margin=0.03, alpha=0.05)
+    assert within["label"] == "within margin" and within["p_tost"] < 0.05
+    wide = pr.tost([1.0, -1.0, 0.5, -0.5] * 5, margin=0.03, alpha=0.05)
+    assert wide["label"] == "not shown within margin"
+    flat = pr.tost([0.2] * 10, margin=0.03, alpha=0.05)
+    assert flat["label"] == NOT_TESTABLE and flat["observed_mean"] == pytest.approx(0.2)
+    fam = pr.equivalence_family(
+        {"a": [0.0, 0.01, -0.01] * 50, "b": [1.0, -1.0] * 5}, margin=0.03, alpha=0.05
+    )
+    assert fam["members"]["a"]["equivalent_per_comparison"] is True
+    assert fam["joint_within_margin"] is False  # IUT: b is not within margin

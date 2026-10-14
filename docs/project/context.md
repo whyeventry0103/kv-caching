@@ -24,6 +24,26 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-10-14 ~13:30 Dubai — review of 6b409001 repaired; owner approved the M5 essential pair.**
+  - **Owner decisions.**
+    - A1–A3 approved: R-KV-pp smoke cap 1, H2O-pp cap 28, R-KV-pp cap 28 GPU-h. They are queued after P1/P2/P3 via `requires_all` (the scheduler now honours it for GPU jobs).
+    - Margin ±0.03, with ±0.05 as sensitivity.
+    - BBH pinned and fetched on the host (blob verified; 250 examples).
+  - **Repairs.** R1–R4 per `docs/paper/MEETING5_REVIEW_6b40900_ACCEPTANCE.md`; before/after evidence in `results/diag/meeting5/review_6b40900/`.
+  - **New production path.** M5 rows go through `scripts/run_grid_m5.py` (identity, input hashes, resume refusal) with `configs/meeting5/input_manifest_m5.json`, which covers all 100 problems; the old manifest covered 25.
+  - **Re-reads.** The five stored B=256 reads were re-run because `gates.py` changed: 0 value changes.
+  - **Tonight's server state.**
+    - grid-pp1024 800/800.
+    - readout-pp1024 345/800 (queued first).
+    - P1 reverse 0/800; P2 smoke not yet rerun (the first marker judged by the stricter gate).
+    - The stale remote `scripts/run_grid_rkv_pp.py` was moved to `~/kv-caching-retired/2026-10-14/`.
+  - **Next.**
+    1. The approved jobs run in normal windows.
+    2. When B=1024 is FINAL, re-run `report_s protection --budget 1024`, then `consequence`, then `report_protocol_audit decision/reverse --budget 1024`.
+    3. Lift the Qwen hold.
+    4. After the essential pair, run `report_policy_replication.py --cohort strict`.
+  - **Not built.** CAPMATCH adapter; protected capture; the information-calibration GPU invocation (held).
+
   **★★★★★ 2026-10-14 ~01:00 Dubai — Meeting 5 CPU bundle complete; one approval request awaits the owner.**
   - **No GPU used, and nothing new queued.** The approved P1/P2/P3 run in normal windows under the ledger. Ledger now: P1 20.0 h left, P2 1.7416, P3 6.0. grid-pp1024 is at 796/800; readout-pp1024 and reverse-readout-pp1024 are at 0/800.
   - **Protected R-KV `rkv_pp_v1`.**

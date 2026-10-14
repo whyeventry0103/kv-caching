@@ -332,6 +332,13 @@ def load_queue(path: Path) -> tuple[bool, list[Job]]:
         )
         for j in data["jobs"]
     ]
+    names = {j.name for j in jobs}
+    dangling = sorted(
+        {d for j in jobs for d in j.requires_all if d not in names}
+        | {j.requires for j in jobs if j.requires and j.requires not in names}
+    )
+    if dangling:
+        raise SystemExit(f"REFUSED: queue dependencies name unknown jobs {dangling}")
     caps = load_campaign_caps()
     unknown = sorted(
         {j.campaign for j in jobs if j.campaign and j.campaign not in caps}
@@ -620,11 +627,14 @@ def launch_candidates(
         if job.blocked:
             notes.append(f"BLOCKED {job.name}: {job.blocked} -> skip")
             continue
-        if job.requires is not None:
-            req = by_name.get(job.requires)
-            if req is None or count_progress(runs_root, req) < req.total:
-                notes.append(f"{job.name}: dependency incomplete -> skip")
-                continue
+        # 2026-10-14 (review of 6b409001, R2 launch wiring): GPU jobs honour
+        # requires_all exactly as CPU stages do. Before this, requires_all was
+        # read for CPU stages only, so a GPU job ordered after several others
+        # was silently eligible at once.
+        pending = _deps_complete(runs_root, job, by_name)
+        if pending:
+            notes.append(f"{job.name}: dependency incomplete {pending} -> skip")
+            continue
         per_seed = count_per_seed(runs_root, job)
         seed_total = max(1, job.total // len(job.seeds))
         incomplete = [s for s in job.seeds if per_seed.get(s, 0) < seed_total]
@@ -678,12 +688,10 @@ def select_job(
             continue
         if job.name in skip or job.cpu_only:
             continue  # stuck (repeated no-progress) or a CPU stage
-        if job.requires is not None:
-            req = by_name.get(job.requires)
-            if req is None:
-                return None, f"{job.name} requires unknown job {job.requires}"
-            if count_progress(runs_root, req) < req.total:
-                continue  # dependency not complete; skip tonight
+        if job.requires is not None and job.requires not in by_name:
+            return None, f"{job.name} requires unknown job {job.requires}"
+        if _deps_complete(runs_root, job, by_name):
+            continue  # a dependency (requires or requires_all) is not complete
         return job, "selected"
     if all(count_progress(runs_root, j) >= j.total for j in jobs if j.name not in skip):
         return None, "all jobs complete"

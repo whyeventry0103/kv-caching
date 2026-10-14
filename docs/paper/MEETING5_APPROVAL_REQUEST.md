@@ -1,5 +1,11 @@
 # Meeting 5 — one itemized approval request for new GPU work
 
+**Decision recorded 2026-10-14 (owner, in-session): A1–A3 APPROVED at caps
+1 / 28 / 28 GPU-h. A4 (fresh-uniform) and A5 (capacity comparators) are NOT
+approved and stay held. The BBH revision is pinned for preparation only. The
+equivalence margin is ±0.03, with ±0.05 as sensitivity.** The original request follows
+unchanged.
+
 **Prepared 2026-10-14. Nothing in this document is approved, and every config
 it names is `held: true`.** It answers review §13 and §15 step 3: one concrete
 budget request, with exact counts, prerequisites, worst-case allocated time and

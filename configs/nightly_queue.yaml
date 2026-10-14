@@ -1220,6 +1220,56 @@ jobs:
     est_output_gb: 0.01
     requires: protsel-pilot-grid
 
+  # Meeting 5 essential pair + smoke, APPROVED by the owner 2026-10-14
+  # (caps 1 / 28 / 28 GPU-h, configs/campaigns.yaml). Ordered AFTER the
+  # approved P1/P2/P3 work (requires_all), normal windows only. Rows go through
+  # scripts/run_grid_m5.py: production identity + input hashes in every row,
+  # resume refused into foreign rows, and the family gate re-validates the
+  # smoke's MEASUREMENTS (kvcache.smoke_validation) before any row.
+  - name: rkvpp-smoke
+    campaign: M5A-RKVPP-SMOKE
+    command: rkvppsmoke
+    config: configs/experiments/rkvpp_smoke_m5.yaml
+    run_name: rkvpp-smoke
+    total: 1
+    seeds: [11]
+    min_free_gb: 28
+    progress_kind: marker
+    marker: rkv-pp-smoke-PASS.json
+    est_output_gb: 0.01
+    gate: rkvpp_smoke
+    requires: null
+    requires_all: [reverse-readout-pp1024, protsel-smoke, protsel-pilot-grid,
+                   protsel-pilot-readout, protsel-pilot-reverse]
+
+  - name: grid-h2opp256-m5
+    campaign: M5A-H2OPP
+    command: grid_m5
+    config: configs/experiments/grid_math500_h2opp256_m5.yaml
+    run_name: grid-h2opp256-m5
+    total: 400
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 28
+    progress_kind: grid
+    est_output_gb: 0.05
+    requires: null
+    requires_all: [reverse-readout-pp1024, protsel-smoke, protsel-pilot-grid,
+                   protsel-pilot-readout, protsel-pilot-reverse]
+
+  - name: grid-rkvpp256-m5
+    campaign: M5A-RKVPP
+    command: grid_m5
+    config: configs/experiments/grid_math500_rkvpp256_m5.yaml
+    run_name: grid-rkvpp256-m5
+    total: 400
+    seeds: [11, 23, 47, 89]
+    min_free_gb: 28
+    progress_kind: grid
+    est_output_gb: 0.05
+    requires: rkvpp-smoke
+    requires_all: [reverse-readout-pp1024, protsel-smoke, protsel-pilot-grid,
+                   protsel-pilot-readout, protsel-pilot-reverse]
+
   # Amendment S.2: restoration by origin. Same traces, policies, budget and
   # trigger as restore-v2; arms frozen / prompt / trace / full, eviction off in
   # every arm. 25 problems x 4 seeds x 2 policies = 200 rows. Last in order, so

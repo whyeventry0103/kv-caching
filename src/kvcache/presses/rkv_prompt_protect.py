@@ -62,7 +62,8 @@ SOURCES = (
     "src/kvcache/bank.py",
     "scripts/run_grid.py",
     "scripts/run_replay.py",
-    "scripts/run_grid_rkv_pp.py",
+    "scripts/run_grid_m5.py",
+    "src/kvcache/m5_runs.py",
     "scripts/run_replay_rkv_pp.py",
     "scripts/rkv_pp_smoke.py",
 )
@@ -280,6 +281,8 @@ def smoke_failures(records: list[dict[str, Any]]) -> list[str]:
         if r["kind"] == "identity":
             if r["n_prunes_base"] < 1:
                 fails.append(f"{tag}: identity control compared no prune")
+            if r["n_prunes_protected_off"] != r["n_prunes_base"]:
+                fails.append(f"{tag}: protection-off arm pruned a different count")
             if r["first_kv_mismatch"] is not None:
                 fails.append(f"{tag}: K/V differ from base at {r['first_kv_mismatch']}")
             if not r["tv_identical"]:
@@ -334,43 +337,53 @@ def smoke_identity(smoke_cfg: dict[str, Any], *, root: Any = None) -> dict[str, 
     )
 
 
-def smoke_coverage_problems(record: dict[str, Any]) -> list[str]:
-    """The registered design: identity, replay and generation on each of the
-    three selected traces (9 records)."""
-    have = {(r.get("kind"), str(r.get("pid"))) for r in record.get("records") or []}
-    pids = [str(t["pid"]) for t in record.get("selected") or []]
-    if len(pids) != 3:
-        return [f"{len(pids)} selected traces, expected 3"]
-    need = [(k, p) for p in pids for k in ("identity", "replay", "generation")]
-    return [f"missing {k}" for k in need if k not in have]
+def smoke_design() -> Any:
+    """This family's PASS-marker contract for ``kvcache.smoke_validation``."""
+    from kvcache import smoke_validation as sv
+
+    return sv.SmokeDesign(
+        marker=SMOKE_MARKER,
+        kinds=("replay", "generation"),
+        identity_kind="identity",
+        schemas={
+            "replay": sv.REPLAY_SCHEMA,
+            "generation": sv.GENERATION_SCHEMA,
+            "identity": {
+                "n_prunes_base": sv.INT,
+                "n_prunes_protected_off": sv.INT,
+                "first_kv_mismatch": sv.OPT_INT,
+                "tv_identical": sv.BOOL,
+            },
+        },
+        failures=smoke_failures,
+    )
 
 
 def smoke_record_ok(
     runs_root: Any, smoke_cfg: dict[str, Any], *, root: Any = None
 ) -> tuple[bool, str]:
-    """Is the marker under ``runs_root`` a valid, current PASS for this config?"""
-    import json
+    """Is the marker under ``runs_root`` a valid, current PASS for this config?
+
+    Review of 6b409001 (R2): accepted only if the measurements pass -- traces
+    and input hashes recomputed from the frozen reference bank, exact 9-record
+    coverage, typed finite fields and ``smoke_failures`` re-applied
+    (``kvcache.smoke_validation``). A self-declared PASS is never enough.
+    """
     from pathlib import Path
 
-    from kvcache.provenance import same_identity
+    from kvcache import smoke_validation as sv
+    from kvcache.provenance import PROJECT_ROOT
 
-    marker = Path(runs_root) / SMOKE_MARKER
-    try:
-        d = json.loads(marker.read_text(encoding="utf-8"))
-    except (OSError, ValueError):
-        return False, f"{SMOKE_MARKER} absent, empty or unreadable"
-    if not isinstance(d, dict):
-        return False, f"{SMOKE_MARKER} is not a record"
-    if d.get("passed") is not True or d.get("status") != "PASS":
-        return False, f"{SMOKE_MARKER} does not record a PASS"
-    if d.get("failures"):
-        return False, f"{SMOKE_MARKER} lists failures"
-    if not same_identity(d.get("identity"), smoke_identity(smoke_cfg, root=root)):
-        return False, f"{SMOKE_MARKER} is stale: its identity differs from now"
-    missing = smoke_coverage_problems(d)
-    if missing:
-        return False, f"{SMOKE_MARKER} does not cover the design: {missing[:3]}"
-    return True, "verified"
+    base = Path(root) if root is not None else PROJECT_ROOT
+    return sv.gate(
+        runs_root,
+        smoke_cfg,
+        design=smoke_design(),
+        want_identity=smoke_identity(smoke_cfg, root=base),
+        presses=[FAMILY],
+        identity_press=FAMILY,
+        root=base,
+    )
 
 
 def verify_smoke(

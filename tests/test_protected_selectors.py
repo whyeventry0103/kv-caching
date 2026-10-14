@@ -203,7 +203,7 @@ def test_gate_refuses_non_protected_configs(over, match):
 
 
 # ---------------------------------------- review of 8e1e81a: eager + smoke gate
-import json  # noqa: E402
+import json  # noqa: E402,F401
 import os  # noqa: E402
 import subprocess  # noqa: E402
 import sys  # noqa: E402
@@ -260,34 +260,20 @@ def _run_cfg(**over):
     return cfg
 
 
-def _full_records(smoke):
-    pids = ["p/a", "p/b", "p/c"]
-    recs = [
-        {"kind": k, "pid": p, "press": f}
-        for k in ("replay", "generation")
-        for p in pids
-        for f in smoke["presses"]
-    ]
-    recs += [
-        {"kind": "identity", "pid": p, "press": smoke["identity_family"]} for p in pids
-    ]
-    return [{"pid": p} for p in pids], recs
+sys.path.insert(0, str(ROOT / "tests"))
+import smoke_fixtures as sfx  # noqa: E402
 
 
 def _valid_marker(tmp_path, **over):
+    """A fully measured PASS on a fixture reference bank (review of 6b409001,
+    R2: a marker without measurements is no longer a valid positive control)."""
     smoke = yaml.safe_load((ROOT / SMOKE_CFG).read_text())
-    selected, records = _full_records(smoke)
-    rec = {
-        "passed": True,
-        "status": "PASS",
-        "failures": [],
-        "identity": ps.smoke_identity(smoke),
-        "families_tested": sorted(smoke["presses"]),
-        "selected": selected,
-        "records": records,
-    }
+    if not (tmp_path / smoke["reference_run_name"]).exists():
+        sfx.reference_bank(tmp_path, smoke)
+    rec = sfx.measured_marker(tmp_path, smoke, "protsel")
     rec.update(over)
-    (tmp_path / ps.SMOKE_MARKER).write_text(json.dumps(rec))
+    sfx.write(tmp_path, ps.SMOKE_MARKER, rec)
+    return rec
 
 
 def test_verify_smoke_accepts_a_valid_pass(tmp_path):
@@ -379,11 +365,13 @@ def test_gate_requires_the_full_21_record_design(tmp_path):
     """2026-10-14 (Meeting 5 review G0.1): a PASS that ran free generation on
     the median trace only (the first, 15-record execution) does not cover the
     registered design."""
-    smoke = yaml.safe_load((ROOT / SMOKE_CFG).read_text())
-    selected, records = _full_records(smoke)
-    assert len(records) == 21
+    rec = _valid_marker(tmp_path)
+    assert len(rec["records"]) == 21
+    median = rec["selected"][1]["pid"]
     partial = [
-        r for r in records if not (r["kind"] == "generation" and r["pid"] != "p/b")
+        r
+        for r in rec["records"]
+        if not (r["kind"] == "generation" and r["pid"] != median)
     ]
     assert len(partial) == 15
     _valid_marker(tmp_path, records=partial)
@@ -391,3 +379,58 @@ def test_gate_requires_the_full_21_record_design(tmp_path):
     assert not ok and "does not cover the design" in why
     _valid_marker(tmp_path)
     assert ps.verify_smoke(tmp_path, _run_cfg()) == (True, "verified")
+
+
+def _corrupt(tmp_path, fn):
+    rec = _valid_marker(tmp_path)
+    fn(rec)
+    sfx.write(tmp_path, ps.SMOKE_MARKER, rec)
+    return ps.verify_smoke(tmp_path, _run_cfg())
+
+
+@pytest.mark.parametrize(
+    "mutate, why",
+    [
+        # review of 6b409001 R2: names-only records (no measurements)
+        (
+            lambda r: r.update(
+                records=[
+                    {k: x[k] for k in ("kind", "pid", "press")} for x in r["records"]
+                ]
+            ),
+            "lacks measurement",
+        ),
+        # review of 6b409001 R2: an injected control failure
+        (lambda r: r["records"][0].update(raised="injected"), "raised"),
+        (
+            lambda r: r["records"][0].update(pre_eviction_max_tv=0.01),
+            "measurements fail",
+        ),
+        (lambda r: r["records"][0].update(mean_tv=float("nan")), "not a valid num"),
+        (lambda r: r["records"][0].update(n_layers=True), "not a valid int"),
+        (lambda r: r["records"].append(dict(r["records"][0])), "duplicated"),
+        (lambda r: r["records"][0].update(inputs_sha256="0" * 64), "other inputs"),
+        (lambda r: r["selected"][0].update(inputs_sha256="0" * 64), "input hashes"),
+        (lambda r: r["selected"].reverse(), "frozen reference bank"),
+        (lambda r: r.update(failures=None), "failures"),
+        (
+            lambda r: next(x for x in r["records"] if x["kind"] == "identity").update(
+                identity_mismatched_heads=3
+            ),
+            "measurements fail",
+        ),
+    ],
+)
+def test_runtime_gate_validates_the_measurements_not_the_claim(tmp_path, mutate, why):
+    ok, msg = _corrupt(tmp_path, mutate)
+    assert not ok and why in msg, msg
+
+
+def test_runtime_gate_refuses_without_the_frozen_reference(tmp_path):
+    _valid_marker(tmp_path)
+    smoke = yaml.safe_load((ROOT / SMOKE_CFG).read_text())
+    import shutil
+
+    shutil.rmtree(tmp_path / smoke["reference_run_name"])
+    ok, why = ps.verify_smoke(tmp_path, _run_cfg())
+    assert not ok and "frozen inputs" in why

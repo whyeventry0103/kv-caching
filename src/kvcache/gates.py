@@ -157,6 +157,12 @@ def gate_status(
         from kvcache.presses.protected_selectors import smoke_record_ok
 
         return smoke_record_ok(runs_root, cfg, root=root)
+    elif kind == "rkvpp_smoke":
+        # Meeting 5 M5-A: protected R-KV, validated from its measurements
+        # (kvcache.smoke_validation), exactly as the run adapters do.
+        from kvcache.presses.rkv_prompt_protect import smoke_record_ok as rkv_ok
+
+        return rkv_ok(runs_root, cfg, root=root)
     else:
         raise ValueError(f"unknown gate kind {kind!r}")
     d = _read(marker)

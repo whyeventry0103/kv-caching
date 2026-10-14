@@ -68,10 +68,13 @@ def test_bbh_options():
     assert bbh_option("\\text{(B)}") == ("B", "one_option")
     assert bbh_option("(A) or (B)") == (None, "several_options")
     assert bbh_option("none") == (None, "no_option")
-    assert bbh_grade("</think> \\boxed{(C)}", "(C)", truncated=False) == (True, "boxed")
+    assert bbh_grade("</think> \\boxed{(C)}", "(C)", truncated=False) == (
+        True,
+        "final_answer",
+    )
     assert bbh_grade("So the answer is (D).", "(C)", truncated=False) == (
         False,
-        "answer_is",
+        "final_answer",
     )
     assert bbh_grade("\\boxed{(A) (B)}", "(A)", truncated=False) == (
         False,
@@ -80,3 +83,40 @@ def test_bbh_options():
     assert bbh_grade("I think so", "(A)", truncated=False) == (False, "no_answer")
     with pytest.raises(ValueError):
         bbh_grade("x", "C or D", truncated=False)
+
+
+@pytest.mark.parametrize(
+    "trace",
+    [
+        # review of 6b409001, R4: both used to grade CORRECT against (C)
+        r"</think> \boxed{(A)} or \boxed{(C)}",
+        r"</think> \boxed{(C)}. Actually, the answer is (D).",
+        r"</think> The answer is (C). Wait, the answer is (B).",
+    ],
+)
+def test_bbh_conflicting_final_answers_are_incorrect(trace):
+    assert bbh_grade(trace, "(C)", truncated=False) == (
+        False,
+        "conflicting_final_answers",
+    )
+
+
+def test_bbh_consistent_repeats_and_reasoning_boxes():
+    t = r"<think>maybe \boxed{(A)}</think> \boxed{(C)} so the answer is (C)."
+    assert bbh_grade(t, "(C)", truncated=False) == (True, "final_answer")
+
+
+def test_gsm8k_conflicting_final_answers_are_incorrect():
+    assert gsm8k_grade(
+        r"</think> \boxed{6}, so the answer is 7", "6", truncated=False
+    ) == (
+        False,
+        "conflicting_final_answers",
+    )
+    assert gsm8k_grade(r"\boxed{5} \boxed{6}", "6", truncated=False)[1] == (
+        "conflicting_final_answers"
+    )
+    assert gsm8k_grade("the answer is 1,250 clips", "1250", truncated=False) == (
+        True,
+        "answer_is",
+    )

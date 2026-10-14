@@ -1,0 +1,161 @@
+"""Independent CPU-only review reproductions at 6b409001. No model or server work.
+
+Run from the repository root: PYTHONPATH=src python review_meeting5_repros.py
+All fabricated rows and reports live under TemporaryDirectory.
+"""
+from __future__ import annotations
+
+import copy
+import json
+import os
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+import yaml
+
+ROOT = Path("/Users/apple/dev/kv-caching")
+sys.path.insert(0, str(ROOT / "src"))
+from kvcache import task_information as ti
+from kvcache.presses import rkv_prompt_protect as rpp
+from kvcache.presses import protected_selectors as ps
+from kvcache.task_graders import bbh_grade
+
+observed = {}
+
+
+def cli(script, args, env=None):
+    return subprocess.run(
+        [sys.executable, str(ROOT / "scripts" / script), *map(str, args)],
+        cwd=ROOT, env={**os.environ, **(env or {})}, capture_output=True, text=True,
+    )
+
+
+with tempfile.TemporaryDirectory(prefix="m5-review-") as td:
+    tmp = Path(td)
+    spec = yaml.safe_load((ROOT / "configs/meeting5/m5a_read.yaml").read_text())
+    sf = json.loads((ROOT / spec["cohort_source"]).read_text())
+    runs = tmp / "runs"
+    by_run = {}
+    for policy, sides in spec["arms"].items():
+        for side, (run, press, budget) in sides.items():
+            by_run.setdefault(run, []).extend(
+                {"pid": pid, "press": press, "budget": budget,
+                 "model": "r1_distill_qwen_7b", "bench": "math500",
+                 "decoding": {"seed": seed}, "correct": False}
+                for pid in sf["pids"] for seed in spec["seeds"]
+            )
+    rp_run, rp_press, _ = spec["arms"]["random"]["protected"]
+    hp_run, hp_press, _ = spec["arms"]["h2o"]["protected"]
+    out = tmp / "m5a.json"
+
+    def run_m5a(rows):
+        for run, rs in rows.items():
+            p = runs / run / "rows.jsonl"
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text("\n".join(json.dumps(r) for r in rs) + "\n")
+        p = cli("report_policy_replication.py", ["--cohort", "strict", "--out", out],
+                {"KVCACHE_BASE_RUNS_ROOT": str(runs)})
+        d = json.loads(out.read_text())
+        return {"rc": p.returncode, "status": d["status"],
+                "random_protected_accuracy": d.get("accuracy", {}).get("random+P", {}).get("mean"),
+                "h2o_protected_coverage": d["coverage"].get("h2o+P")}
+
+    observed["m5a_valid_minimal_no_provenance"] = run_m5a(by_run)
+    bad = copy.deepcopy(by_run)
+    for r in bad[rp_run]:
+        if r["press"] == rp_press:
+            r["correct"] = "False"
+    observed["m5a_string_False"] = run_m5a(bad)
+    bad = copy.deepcopy(by_run)
+    next(r for r in bad[rp_run] if r["press"] == rp_press)["correct"] = float("nan")
+    observed["m5a_nan"] = run_m5a(bad)
+    bad = copy.deepcopy(by_run)
+    bad[hp_run].append({**bad[hp_run][0], "decoding": {"seed": 999}})
+    observed["m5a_foreign_seed"] = run_m5a(bad)
+    bad = copy.deepcopy(by_run)
+    bad[hp_run].append(copy.deepcopy(bad[hp_run][0]))
+    observed["m5a_duplicate"] = run_m5a(bad)
+    bad = copy.deepcopy(by_run)
+    bad[hp_run][0]["model"] = "wrong_model"
+    bad[hp_run][0]["provenance"] = {"implementation_id": "wrong"}
+    observed["m5a_wrong_model_and_identity"] = run_m5a(bad)
+    run_m5a(by_run)
+    with (runs / hp_run / "rows.jsonl").open("a") as f:
+        f.write('{"torn":')
+    p = cli("report_policy_replication.py", ["--cohort", "strict", "--out", out],
+            {"KVCACHE_BASE_RUNS_ROOT": str(runs)})
+    observed["m5a_torn_json_stale"] = {"rc": p.returncode, "old_report_status": json.loads(out.read_text())["status"]}
+
+    design = {"policies": ["full", "random"], "reference_policy": "full",
+              "contexts": ["c0", "c1", "c2"], "eviction_seeds": [0], "queries": ["s"]}
+    rows = [
+        {"policy": pol, "query": "s", "context_id": c, "eviction_seed": 0,
+         "s": r.s, "n": r.n, "symbol_logprobs": list(r.logprobs), "greedy": r.greedy}
+        for pol in design["policies"] for c in design["contexts"]
+        for r in ti.reference_channel("identity" if pol == "full" else "uniform")
+    ]
+    ip_rows, ip_design, ip_out = tmp / "info.jsonl", tmp / "design.json", tmp / "info-read.json"
+    ip_design.write_text(json.dumps(design))
+    args = ["--rows", ip_rows, "--design", ip_design, "--out", ip_out]
+
+    def run_info(rs):
+        ip_rows.write_text("\n".join(json.dumps(r) for r in rs) + "\n")
+        p = cli("report_information_probe.py", args)
+        d = json.loads(ip_out.read_text())
+        return {"rc": p.returncode, "status": d["status"]}
+
+    observed["info_valid_reference"] = run_info(rows)
+    bad = copy.deepcopy(rows)
+    bad[0]["s"], bad[0]["eviction_seed"] = 0.7, 0.9
+    observed["info_fractional_keys"] = run_info(bad)
+    bad = copy.deepcopy(rows)
+    bad[0]["greedy"] = 1  # q(1)=0 while q(0)=1: impossible native argmax
+    observed["info_impossible_greedy"] = run_info(bad)
+    bad = copy.deepcopy(rows)
+    bad[0]["provenance"] = {"implementation_id": "wrong"}
+    bad[0]["controls"] = {"passed": False}
+    observed["info_failed_controls"] = run_info(bad)
+    observed["info_partial_exit"] = run_info(rows[1:])
+    run_info(rows)
+    with ip_rows.open("a") as f:
+        f.write('{"torn":')
+    p = cli("report_information_probe.py", args)
+    observed["info_torn_json_stale"] = {"rc": p.returncode, "old_report_status": json.loads(ip_out.read_text())["status"]}
+
+    smoke_cfg = yaml.safe_load((ROOT / "configs/experiments/rkvpp_smoke_m5.yaml").read_text())
+    run_cfg = yaml.safe_load((ROOT / "configs/experiments/grid_math500_rkvpp256_m5.yaml").read_text())
+    pids = ["p/a", "p/b", "p/c"]
+    marker = {"passed": True, "status": "PASS", "failures": [],
+              "identity": rpp.smoke_identity(smoke_cfg),
+              "selected": [{"pid": p} for p in pids],
+              "records": [{"kind": k, "pid": p} for p in pids
+                          for k in ("identity", "replay", "generation")]}
+    (tmp / rpp.SMOKE_MARKER).write_text(json.dumps(marker))
+    observed["rkv_gate_no_measurements"] = rpp.verify_smoke(tmp, run_cfg)
+    marker["records"][0]["raised"] = "injected control failure"
+    (tmp / rpp.SMOKE_MARKER).write_text(json.dumps(marker))
+    observed["rkv_gate_failed_record"] = rpp.verify_smoke(tmp, run_cfg)
+
+    sc = yaml.safe_load((ROOT / "configs/experiments/protsel_smoke_wp4.yaml").read_text())
+    pc = yaml.safe_load((ROOT / "configs/experiments/grid_math500_h2opp256_m5.yaml").read_text())
+    recs = [{"kind": k, "pid": p, "press": f} for p in pids
+            for f in sc["presses"] for k in ("replay", "generation")]
+    recs += [{"kind": "identity", "pid": p, "press": sc["identity_family"]} for p in pids]
+    marker = {"passed": True, "status": "PASS", "failures": [],
+              "identity": ps.smoke_identity(sc), "families_tested": sc["presses"],
+              "selected": [{"pid": p} for p in pids], "records": recs}
+    (tmp / ps.SMOKE_MARKER).write_text(json.dumps(marker))
+    observed["selector_gate_no_measurements"] = ps.verify_smoke(tmp, pc)
+    marker["records"][0]["raised"] = "injected control failure"
+    (tmp / ps.SMOKE_MARKER).write_text(json.dumps(marker))
+    observed["selector_gate_failed_record"] = ps.verify_smoke(tmp, pc)
+
+observed["bbh_two_conflicting_final_boxes"] = bbh_grade(
+    r"</think> \boxed{(A)} or \boxed{(C)}", "(C)", truncated=False)
+observed["bbh_correction_after_box"] = bbh_grade(
+    r"</think> \boxed{(C)}. Actually, the answer is (D).", "(C)", truncated=False)
+
+print(json.dumps(observed, indent=2, sort_keys=True))
+

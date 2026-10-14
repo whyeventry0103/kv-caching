@@ -1,0 +1,151 @@
+{
+ "bbh_correction_after_box": [
+  false,
+  "conflicting_final_answers"
+ ],
+ "bbh_two_conflicting_final_boxes": [
+  false,
+  "conflicting_final_answers"
+ ],
+ "info_bool_key": {
+  "rc": 2,
+  "status": "INVALID"
+ },
+ "info_duplicate": {
+  "rc": 2,
+  "status": "INVALID"
+ },
+ "info_failed_controls": {
+  "rc": 2,
+  "status": "INVALID"
+ },
+ "info_fixture_with_provenance": {
+  "rc": 2,
+  "status": "INVALID"
+ },
+ "info_foreign_cell": {
+  "rc": 2,
+  "status": "INVALID"
+ },
+ "info_fractional_keys": {
+  "rc": 2,
+  "status": "INVALID"
+ },
+ "info_impossible_greedy": {
+  "rc": 2,
+  "status": "INVALID"
+ },
+ "info_invalid_probability": {
+  "rc": 2,
+  "status": "INVALID"
+ },
+ "info_no_schema": {
+  "rc": 2,
+  "status": "INVALID"
+ },
+ "info_partial_exit": {
+  "rc": 3,
+  "status": "PARTIAL"
+ },
+ "info_top1_mismatch": {
+  "rc": 2,
+  "status": "INVALID"
+ },
+ "info_valid_production": {
+  "rc": 0,
+  "status": "FINAL"
+ },
+ "info_valid_reference": {
+  "rc": 0,
+  "status": "FINAL"
+ },
+ "info_wrong_provenance": {
+  "rc": 2,
+  "status": "INVALID"
+ },
+ "m5a_duplicate": {
+  "rc": 2,
+  "status": "INVALID"
+ },
+ "m5a_foreign_outside_cohort": {
+  "rc": 2,
+  "status": "INVALID"
+ },
+ "m5a_foreign_seed": {
+  "rc": 2,
+  "status": "INVALID"
+ },
+ "m5a_identity_on_legacy_row": {
+  "rc": 2,
+  "status": "INVALID"
+ },
+ "m5a_missing_row": {
+  "rc": 3,
+  "status": "PARTIAL"
+ },
+ "m5a_nan": {
+  "rc": 2,
+  "status": "INVALID"
+ },
+ "m5a_review_minimal_rows_now": {
+  "rc": 2,
+  "status": "INVALID"
+ },
+ "m5a_string_False": {
+  "rc": 2,
+  "status": "INVALID"
+ },
+ "m5a_torn_json": {
+  "old_final_retired": true,
+  "rc": 2,
+  "status": "INVALID"
+ },
+ "m5a_truncated_scored_correct": {
+  "rc": 2,
+  "status": "INVALID"
+ },
+ "m5a_valid_schema_complete_control": {
+  "rc": 0,
+  "status": "FINAL"
+ },
+ "m5a_wrong_m5_identity": {
+  "rc": 2,
+  "status": "INVALID"
+ },
+ "m5a_wrong_model": {
+  "rc": 2,
+  "status": "INVALID"
+ },
+ "m5a_wrong_model_and_identity": {
+  "rc": 2,
+  "status": "INVALID"
+ },
+ "m5a_wrong_prompt_hash": {
+  "rc": 2,
+  "status": "INVALID"
+ },
+ "protsel_gate_failed_record": [
+  false,
+  "protected-selectors-smoke-PASS.json: replay test/prealgebra/1622.json h2o_style_pp_v1 raised: injected control failure"
+ ],
+ "protsel_gate_measured_control": [
+  true,
+  "verified"
+ ],
+ "protsel_gate_no_measurements": [
+  false,
+  "protected-selectors-smoke-PASS.json: replay test/prealgebra/1622.json h2o_style_pp_v1 lacks measurement 'prompt_len'"
+ ],
+ "rkvpp_gate_failed_record": [
+  false,
+  "rkv-pp-smoke-PASS.json: replay test/prealgebra/1622.json rkv_pp_v1 raised: injected control failure"
+ ],
+ "rkvpp_gate_measured_control": [
+  true,
+  "verified"
+ ],
+ "rkvpp_gate_no_measurements": [
+  false,
+  "rkv-pp-smoke-PASS.json: replay test/prealgebra/1622.json rkv_pp_v1 lacks measurement 'prompt_len'"
+ ]
+}

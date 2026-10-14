@@ -68,6 +68,8 @@ case "$COMMAND" in
   grid_protsel) PY_SCRIPT="scripts/run_grid_protected.py" ;;
   replay_protsel) PY_SCRIPT="scripts/run_replay_protected.py" ;;
   protselsmoke) PY_SCRIPT="scripts/protected_selectors_smoke.py" ;;
+  rkvppsmoke) PY_SCRIPT="scripts/rkv_pp_smoke.py" ;;
+  grid_m5) PY_SCRIPT="scripts/run_grid_m5.py" ;;
   forkcontrol) PY_SCRIPT="scripts/run_fork_control.py" ;;
   forkprecision) PY_SCRIPT="scripts/run_fork_precision.py" ;;
   metrics) PY_SCRIPT="scripts/run_metrics.py" ;;

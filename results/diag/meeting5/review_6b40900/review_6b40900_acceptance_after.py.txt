@@ -1,0 +1,75 @@
+"""After-repair acceptance for the review of 6b409001: every reproduced case
+through the real CLIs / runtime gates, plus valid positive controls."""
+from __future__ import annotations
+import copy, json, math, os, subprocess, sys, tempfile
+from pathlib import Path
+import yaml
+ROOT = Path("/Users/apple/dev/kv-caching")
+sys.path[:0] = [str(ROOT / "src"), str(ROOT / "tests")]
+import smoke_fixtures as sfx
+import test_policy_replication as tpr
+import test_report_information_probe as tri
+from kvcache.presses import protected_selectors as ps, rkv_prompt_protect as rpp
+from kvcache.task_graders import bbh_grade
+
+obs = {}
+def cli(script, args):
+    p = subprocess.run([sys.executable, str(ROOT / "scripts" / script), *map(str, args)],
+                       cwd=ROOT, capture_output=True, text=True)
+    return p.returncode
+
+with tempfile.TemporaryDirectory() as td:
+    tmp = Path(td)
+    # ---- M5-A reader (R1)
+    def m5a(data, torn=None, cohort="strict"):
+        runs, out = tmp / "runs", tmp / "out"
+        import shutil
+        if runs.exists(): shutil.rmtree(runs)
+        tpr._write(runs, data, torn)
+        rc = cli("report_policy_replication.py", ["--cohort", cohort, "--runs-root", runs, "--out-dir", out])
+        d = json.loads((out / f"m5a_read_{cohort}.json").read_text())
+        return {"rc": rc, "status": d["status"]}
+    obs["m5a_valid_schema_complete_control"] = m5a(tpr.ALL)
+    for name, (data, _) in tpr.CASES.items():
+        obs[f"m5a_{name}"] = m5a(data)
+    bad = tpr._mut("grid-diss256-h2o", lambda rs: rs[0].update(model="wrong_model", provenance={"implementation_id": "wrong"}))
+    obs["m5a_wrong_model_and_identity"] = m5a(bad)
+    m5a(tpr.ALL)
+    r = m5a(tpr.ALL, torn="grid-diss256-h2o")
+    r["old_final_retired"] = bool(list((tmp / "out").glob("*.superseded-*")))
+    obs["m5a_torn_json"] = r
+    # the review's minimal positive-control rows (no trace/truncated/runmeta)
+    minimal = copy.deepcopy(tpr.ALL)
+    for rows in minimal.values():
+        for x in rows:
+            for k in ("trace", "truncated", "runmeta", "versions", "provenance"):
+                x.pop(k, None)
+    obs["m5a_review_minimal_rows_now"] = m5a(minimal)
+    # ---- information reader (R3)
+    def info(rows, design):
+        (tmp / "i").mkdir(exist_ok=True)
+        rc, d = tri._run(tmp / "i", rows, design)
+        return {"rc": rc, "status": d["status"]}
+    obs["info_valid_reference"] = info(tri._rows(), tri._design())
+    obs["info_valid_production"] = info(tri._rows("production"), tri._design("production"))
+    for name, (mode, fn) in tri.INVALID_CASES.items():
+        obs[f"info_{name}"] = info(tri._mut(mode, fn), tri._design(mode))
+    obs["info_partial_exit"] = info(tri._rows()[1:], tri._design())
+    # ---- runtime smoke gates (R2)
+    for fam, mod, cfgp, runp in (("rkvpp", rpp, "configs/experiments/rkvpp_smoke_m5.yaml", "configs/experiments/grid_math500_rkvpp256_m5.yaml"),
+                                  ("protsel", ps, "configs/experiments/protsel_smoke_wp4.yaml", "configs/experiments/grid_math500_h2opp256_m5.yaml")):
+        g = tmp / fam; g.mkdir()
+        sc, rc_ = yaml.safe_load((ROOT / cfgp).read_text()), yaml.safe_load((ROOT / runp).read_text())
+        sfx.reference_bank(g, sc)
+        good = sfx.measured_marker(g, sc, "protsel" if fam == "protsel" else "rkvpp")
+        obs[f"{fam}_gate_measured_control"] = list(mod.verify_smoke(g, rc_))
+        names = {**good, "records": [{k: x[k] for k in ("kind", "pid", "press")} for x in good["records"]]}
+        sfx.write(g, mod.SMOKE_MARKER, names)
+        obs[f"{fam}_gate_no_measurements"] = list(mod.verify_smoke(g, rc_))
+        failed = copy.deepcopy(good); failed["records"][0]["raised"] = "injected control failure"
+        sfx.write(g, mod.SMOKE_MARKER, failed)
+        obs[f"{fam}_gate_failed_record"] = list(mod.verify_smoke(g, rc_))
+# ---- BBH (R4)
+obs["bbh_two_conflicting_final_boxes"] = list(bbh_grade(r"</think> \boxed{(A)} or \boxed{(C)}", "(C)", truncated=False))
+obs["bbh_correction_after_box"] = list(bbh_grade(r"</think> \boxed{(C)}. Actually, the answer is (D).", "(C)", truncated=False))
+print(json.dumps(obs, indent=1, sort_keys=True))

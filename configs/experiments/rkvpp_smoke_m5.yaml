@@ -1,6 +1,6 @@
 name: rkvpp_smoke_m5
 stage: rkvppsmoke
-# Meeting 5 M5-A gate (PREPARED 2026-10-14, HELD; not approved, no cap yet):
+# Meeting 5 M5-A gate (prepared 2026-10-14; APPROVED 2026-10-14, cap 1 GPU-h):
 # real-model smoke of prompt-protected R-KV (rkv_pp_v1) before any M5-A row.
 # Writes rkv-pp-smoke-PASS.json only if every check in
 # kvcache.presses.rkv_prompt_protect.smoke_failures holds; the run adapters
@@ -8,7 +8,10 @@ stage: rkvppsmoke
 # the inputs at launch time (verify_smoke). Same reference bank, traces rule,
 # budget and interval as the protected-selector smoke (protsel_smoke_wp4).
 rkv_prompt_protected: true
-held: true
+# APPROVED by the owner 2026-10-14 (Meeting 5 essential pair, cap 1 GPU-h,
+# campaign M5A-RKVPP-SMOKE); runs only after its technical prerequisites pass, in
+# normal windows, after the approved P1/P2/P3 work (queue requires_all).
+held: false
 reference_run_name: math500-fc-powered-merged
 models: [r1_distill_qwen_7b]
 benchmarks: [math500]
@@ -22,5 +25,9 @@ min_trace_tokens: 1024
 replay_tokens: 1536
 generation_cap: 700
 estimated_generation_count: 3
-scale_authorized: false
+scale_authorized: true
 remote_only: true
+# Frozen prompt/trace hashes for all 100 discovery problems (built 2026-10-14
+# with scripts/build_input_manifest.py --pids grid100; agrees with the
+# Meeting-3 manifest on its 25 problems).
+input_manifest: configs/meeting5/input_manifest_m5.json

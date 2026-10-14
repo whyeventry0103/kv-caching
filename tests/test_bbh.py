@@ -38,8 +38,15 @@ def test_parse_checks_blob_and_targets():
         bbh.parse_bbh(bad, expected_blob=bbh.git_blob_sha1(bad))
 
 
-def test_load_refuses_while_unpinned(tmp_path):
-    assert bbh.PINNED_COMMIT == "TODO(human)"  # a person pins it, never a guess
+def test_owner_pin_is_the_reviewed_revision():
+    # pinned by the owner 2026-10-14: exactly the reviewer-inspected commit/blob
+    assert bbh.PINNED_COMMIT == "9ee07bd481feebf959a6b59d61ea57bdcf30964d"
+    assert bbh.PINNED_BLOB == "936cd6d80db71aeacaea857c34f9af87e1c34964"
+    assert bbh.PINNED_COMMIT in bbh.raw_url()
+
+
+def test_load_refuses_while_unpinned(tmp_path, monkeypatch):
+    monkeypatch.setattr(bbh, "PINNED_COMMIT", "TODO(human)")
     path = tmp_path / "f.json"
     path.write_bytes(_file(["(A)"]))
     with pytest.raises(RuntimeError, match="not pinned"):
@@ -53,4 +60,11 @@ def test_load_after_pin_checks_count(tmp_path, monkeypatch):
     monkeypatch.setattr(bbh, "PINNED_COMMIT", "a" * 40)
     monkeypatch.setattr(bbh, "PINNED_BLOB", bbh.git_blob_sha1(data))
     with pytest.raises(ValueError, match="expected 250"):
+        bbh.load_bbh(path)
+
+
+def test_load_refuses_a_file_with_another_blob(tmp_path):
+    path = tmp_path / "f.json"
+    path.write_bytes(_file(["(A)"]))
+    with pytest.raises(ValueError, match="not the pinned"):
         bbh.load_bbh(path)

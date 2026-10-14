@@ -26,3 +26,7 @@ estimated_generation_count: 400
 scale_authorized: false
 remote_only: true
 store_token_ids: true
+# Frozen prompt/trace hashes for all 100 discovery problems (built 2026-10-14
+# with scripts/build_input_manifest.py --pids grid100; agrees with the
+# Meeting-3 manifest on its 25 problems).
+input_manifest: configs/meeting5/input_manifest_m5.json
