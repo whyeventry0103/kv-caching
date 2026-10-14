@@ -1,0 +1,147 @@
+diff --git a/src/kvcache/m5_publish.py b/src/kvcache/m5_publish.py
+--- a/src/kvcache/m5_publish.py
++++ b/src/kvcache/m5_publish.py
+@@ -170,6 +170,32 @@
+     return out
+ 
+ 
++def _quarantine_torn_lines(runs_root: Path, owned: set[int]) -> int:
++    """Clean owned live files before a journal is published into them.
++
++    A stop can tear either append while leaving its complete journal intact.
++    Publishing first would parse the torn line and fail before recovery could
++    reach its cleanup. Preserve each fragment before atomically removing it;
++    leave complete records in place for publication's conflict checks.
++    """
++    quarantined = 0
++    for sub in (BENCH, "token_ids"):
++        for path in _owned_files(runs_root, sub, owned):
++            lines = _read_lines(path)
++            keep = []
++            for line in lines:
++                try:
++                    row_key(json.loads(line))
++                except (json.JSONDecodeError, KeyError, TypeError, ValueError):
++                    _quarantine(runs_root, path, line, "torn or unreadable line")
++                    quarantined += 1
++                    continue
++                keep.append(line)
++            if len(keep) != len(lines):
++                _atomic_write(path, "".join(line + "\n" for line in keep))
++    return quarantined
++
++
+ def recover(
+     runs_root: Path,
+     *,
+@@ -183,7 +209,10 @@
+     """
+     runs_root = Path(runs_root)
+     owned = {int(s) for s in seeds}
+-    stats = {"published": 0, "quarantined": 0}
++    stats = {
++        "published": 0,
++        "quarantined": _quarantine_torn_lines(runs_root, owned),
++    }
+     jdir = runs_root / JOURNAL
+     if jdir.exists():
+         for env_path in sorted(jdir.rglob("*.json")):
+@@ -205,19 +234,9 @@
+     sides: dict[Key, tuple[Path, str]] = {}
+     for sub, into in ((BENCH, rows), ("token_ids", sides)):
+         for path in _owned_files(runs_root, sub, owned):
+-            keep = []
+             for line in _read_lines(path):
+-                try:
+-                    rec = json.loads(line)
+-                    k = row_key(rec)
+-                except (json.JSONDecodeError, KeyError, TypeError, ValueError):
+-                    _quarantine(runs_root, path, line, "torn or unreadable line")
+-                    stats["quarantined"] += 1
+-                    continue
++                k = row_key(json.loads(line))
+                 into[k] = (path, line)
+-                keep.append(line)
+-            if len(keep) != len(_read_lines(path)):
+-                _atomic_write(path, "".join(x + "\n" for x in keep))
+     for k in sorted(set(rows) ^ set(sides)):
+         path, line = rows[k] if k in rows else sides[k]
+         reason = "row without sidecar" if k in rows else "sidecar without row"
+diff --git a/tests/test_m5_torn_publication.py b/tests/test_m5_torn_publication.py
+new file mode 100644
+--- /dev/null
++++ b/tests/test_m5_torn_publication.py
+@@ -0,0 +1,73 @@
++"""A stop DURING a live append must recover from the intact pair journal."""
++
++from __future__ import annotations
++
++import json
++import sys
++from pathlib import Path
++
++import pytest
++
++ROOT = Path(__file__).resolve().parents[1]
++sys.path.insert(0, str(ROOT / "scripts"))
++sys.path.insert(0, str(ROOT / "tests"))
++
++import test_m5_publish as tp  # noqa: E402
++import test_run_grid_m5 as tm  # noqa: E402
++
++from kvcache import m5_publish as mp  # noqa: E402
++
++
++@pytest.mark.parametrize("target", ["row", "sidecar"])
++def test_torn_live_append_recovers_journal_without_regeneration(
++    tmp_path, monkeypatch, target
++):
++    cfg, out, _ = tm._setup(tmp_path, monkeypatch)
++    generated = tp._counted(monkeypatch)
++    original = mp._publish_one
++    injected = {}
++
++    def torn_append(path, record):
++        if ("token_ids" in path.parts) == (target == "sidecar"):
++            path.parent.mkdir(parents=True, exist_ok=True)
++            text = json.dumps(record, sort_keys=True)
++            injected["line"] = text[: len(text) // 2]
++            with path.open("a", encoding="utf-8") as stream:
++                stream.write(injected["line"])
++            raise OSError("injected interruption during live JSONL append")
++        return original(path, record)
++
++    monkeypatch.setattr(mp, "_publish_one", torn_append)
++    with pytest.raises(OSError, match="during live JSONL append"):
++        tm._run(monkeypatch, cfg)
++    assert generated["generations"] == 1
++    pending = [
++        path
++        for path in (out / mp.JOURNAL).rglob("*.json")
++        if not path.name.endswith(".published.json")
++    ]
++    assert len(pending) == 1
++    saved_row = json.loads(pending[0].read_text())["row"]
++
++    monkeypatch.setattr(mp, "_publish_one", original)
++    assert tm._run(monkeypatch, cfg, "--resume") == 0
++    rows = tp._pairs_ok(out, 100)
++    assert generated["generations"] == 100
++    assert next(row for row in rows if row["pid"] == saved_row["pid"]) == saved_row
++    quarantined = [
++        json.loads(line)
++        for path in (out / mp.QUARANTINE).rglob("*.jsonl")
++        for line in path.read_text().splitlines()
++    ]
++    assert len(quarantined) == 1
++    assert quarantined[0]["line"] == injected["line"]
++    assert quarantined[0]["reason"] == "torn or unreadable line"
++
++    # A second resume neither regenerates nor duplicates quarantine evidence.
++    assert tm._run(monkeypatch, cfg, "--resume") == 0
++    assert generated["generations"] == 100
++    tp._pairs_ok(out, 100)
++    assert sum(
++        len(path.read_text().splitlines())
++        for path in (out / mp.QUARANTINE).rglob("*.jsonl")
++    ) == 1

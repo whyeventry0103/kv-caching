@@ -114,3 +114,28 @@ unchanged.
 ## Gates
 
 See the commit message for this pass.
+
+## Addendum: torn-write recovery (review of 73d9031, 2026-10-14)
+
+**Remaining case found.** The reviewer found one case left: a stop **during**
+a JSONL append. In it, recovery published the intact journal before cleaning
+the torn fragment, and crashed with `JSONDecodeError`. This happened for both
+the result file and the sidecar file.
+
+**Fix (the reviewer's patch, filed as
+`docs/paper/M5_TORN_WRITE_RECOVERY_73d9031.patch`).** Applied as given; black
+then reformatted it, with no logic change.
+- Owned live files are cleaned **first**: each torn fragment is preserved in
+  `m5_quarantine/` before it is atomically removed.
+- Pending journals are published after that.
+- Conflict checks and seed ownership are unchanged.
+
+**Verification:**
+- On `73d9031`, the patch's two new tests (`tests/test_m5_torn_publication.py`)
+  fail with `JSONDecodeError`, reproducing both cases.
+- With the patch, they pass. The interrupted condition is not regenerated, the
+  journal row is published unchanged, exactly one quarantine record holds the
+  fragment, and a second resume is a no-op.
+- Local gates (each run separately, exit code shown): lint 0; test 0 (925
+  passed, 81 skipped); dryrun 0; audit 0; `paper_numbers.json` unchanged.
+- Server CPU suites: 253 passed, exit 0.

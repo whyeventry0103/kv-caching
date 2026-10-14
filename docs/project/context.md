@@ -24,6 +24,11 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-10-14 ~23:00 Dubai — torn-write recovery patch applied (review of 73d9031).**
+  - **Fix.** A stop mid-append no longer breaks M5 resume: torn fragments are quarantined before pending journals are published.
+  - **Verification.** Reproduced first (2 failing tests on 73d9031). Gates: lint 0, test 0 (925 passed), dryrun 0, audit 0. Server CPU suites: 253 passed.
+  - **Next.** The approved queue continues unchanged (caps 1/28/28 after P1/P2/P3). No new scientific results yet.
+
   **★★★★★ 2026-10-14 ~14:30 Dubai — review of 946c76a: the two remaining execution issues are repaired (CPU only).**
   - **Smoke gates.** They now check nested values (counts are exact integers) and derive the target, layers, replay length and generation length independently. Layers come from the frozen `configs/meeting5/model_metadata.json`. The real 10-13 smoke passes the new checks.
   - **M5 runner.** It publishes row + sidecar pairs through an atomic journal (`kvcache.m5_publish`), with recovery limited to owned shards, quarantine of orphans and torn lines, and refusal of conflicts. M5 grid jobs count `grid_pairs`.

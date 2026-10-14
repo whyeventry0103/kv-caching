@@ -170,6 +170,32 @@ def _owned_files(runs_root: Path, sub: str, seeds: set[int]) -> list[Path]:
     return out
 
 
+def _quarantine_torn_lines(runs_root: Path, owned: set[int]) -> int:
+    """Clean owned live files before a journal is published into them.
+
+    A stop can tear either append while leaving its complete journal intact.
+    Publishing first would parse the torn line and fail before recovery could
+    reach its cleanup. Preserve each fragment before atomically removing it;
+    leave complete records in place for publication's conflict checks.
+    """
+    quarantined = 0
+    for sub in (BENCH, "token_ids"):
+        for path in _owned_files(runs_root, sub, owned):
+            lines = _read_lines(path)
+            keep = []
+            for line in lines:
+                try:
+                    row_key(json.loads(line))
+                except (json.JSONDecodeError, KeyError, TypeError, ValueError):
+                    _quarantine(runs_root, path, line, "torn or unreadable line")
+                    quarantined += 1
+                    continue
+                keep.append(line)
+            if len(keep) != len(lines):
+                _atomic_write(path, "".join(line + "\n" for line in keep))
+    return quarantined
+
+
 def recover(
     runs_root: Path,
     *,
@@ -183,7 +209,10 @@ def recover(
     """
     runs_root = Path(runs_root)
     owned = {int(s) for s in seeds}
-    stats = {"published": 0, "quarantined": 0}
+    stats = {
+        "published": 0,
+        "quarantined": _quarantine_torn_lines(runs_root, owned),
+    }
     jdir = runs_root / JOURNAL
     if jdir.exists():
         for env_path in sorted(jdir.rglob("*.json")):
@@ -205,19 +234,9 @@ def recover(
     sides: dict[Key, tuple[Path, str]] = {}
     for sub, into in ((BENCH, rows), ("token_ids", sides)):
         for path in _owned_files(runs_root, sub, owned):
-            keep = []
             for line in _read_lines(path):
-                try:
-                    rec = json.loads(line)
-                    k = row_key(rec)
-                except (json.JSONDecodeError, KeyError, TypeError, ValueError):
-                    _quarantine(runs_root, path, line, "torn or unreadable line")
-                    stats["quarantined"] += 1
-                    continue
+                k = row_key(json.loads(line))
                 into[k] = (path, line)
-                keep.append(line)
-            if len(keep) != len(_read_lines(path)):
-                _atomic_write(path, "".join(x + "\n" for x in keep))
     for k in sorted(set(rows) ^ set(sides)):
         path, line = rows[k] if k in rows else sides[k]
         reason = "row without sidecar" if k in rows else "sidecar without row"
