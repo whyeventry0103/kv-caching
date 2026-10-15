@@ -24,6 +24,20 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-10-15 ~11:30 Dubai — run status after the 14→15 Oct window.**
+  - **readout-pp1024 (S.1) is COMPLETE: 800/800.** The B=1024 forward and grid arms are both done.
+  - **reverse-readout-pp1024 (P1): 461/800.** Seed 11 at 161, seed 23 at 200, seed 47 at 100, seed 89 at 0.
+    - Ledger: 8.032 of 20 GPU-h used (shards 4.580 h and 3.452 h).
+    - Measured rate is 57.4 rows/GPU-h, so the remaining 339 rows need about 5.9 h (projected total about 13.9, within the cap).
+  - **P2 smoke, P3 pilots and the M5 jobs: not started.** They are queued behind P1.
+  - **Ledger-label bug fixed today.** launch.sh recorded rc=0 for every launch, because the run block is piped into tee. The 06:10 shard's true exit was 124 (timer stop, per its log); its ledger entry still reads rc=0 and is left as recorded. Charged hours were never affected.
+  - **Disk:** 40 GB free shared; our footprint is 50 GB.
+  - **Next.**
+    1. P1 should finish in about one window.
+    2. Then run the B=1024 reads: `report_s protection --budget 1024`, `consequence`, `report_protocol_audit decision/reverse --budget 1024`.
+    3. Lift the Qwen hold.
+    4. Then P2, P3 and the M5 jobs, in queue order.
+
   **★★★★★ 2026-10-14 ~23:00 Dubai — torn-write recovery patch applied (review of 73d9031).**
   - **Fix.** A stop mid-append no longer breaks M5 resume: torn fragments are quarantined before pending journals are published.
   - **Verification.** Reproduced first (2 failing tests on 73d9031). Gates: lint 0, test 0 (925 passed), dryrun 0, audit 0. Server CPU suites: 253 passed.

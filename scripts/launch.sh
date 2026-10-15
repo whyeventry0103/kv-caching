@@ -15,6 +15,13 @@ if [[ -n "${KVCACHE_LAUNCH_ID:-}" ]]; then
     "$LAUNCH_START" > "$LAUNCH_REC_DIR/$KVCACHE_LAUNCH_ID.json"
   _kvcache_write_end() {
     local rc=$?
+    # 2026-10-15: the run block below is piped into tee, so its exit code is set
+    # in a subshell and $? here is tee's (always 0). The block records the
+    # RUNNER's true exit code next to the launch record; prefer it.
+    if [[ -f "$LAUNCH_REC_DIR/$KVCACHE_LAUNCH_ID.rc" ]]; then
+      rc="$(cat "$LAUNCH_REC_DIR/$KVCACHE_LAUNCH_ID.rc")"
+      rm -f "$LAUNCH_REC_DIR/$KVCACHE_LAUNCH_ID.rc"
+    fi
     printf '{"launch_id": "%s", "start_epoch": %s, "end_epoch": %s, "rc": %d}\n' \
       "$KVCACHE_LAUNCH_ID" "$LAUNCH_START" "$(date +%s)" "$rc" \
       > "$LAUNCH_REC_DIR/$KVCACHE_LAUNCH_ID.json.tmp"
@@ -138,6 +145,9 @@ fi
   "${RUN_CMD[@]}"
   RC=$?
   set -e
+  if [[ -n "${KVCACHE_LAUNCH_ID:-}" ]]; then
+    printf '%d\n' "$RC" > "$LAUNCH_REC_DIR/$KVCACHE_LAUNCH_ID.rc"
+  fi
   if [[ $RC -eq 124 || $RC -eq 137 || $RC -eq 143 ]]; then
     echo "STOPPED by timer (rc=$RC): $RUN_NAME"
     echo "Progress saved. Rerun the SAME command (keep --resume + KVCACHE_RUN_NAME) to continue."
