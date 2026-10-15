@@ -6,19 +6,21 @@ Specifications:
 
 Claims: `docs/paper/CLAIM_LEDGER.md`. Approvals and caps: `docs/paper/PROPOSALS_FOR_APPROVAL.md` and `configs/campaigns.yaml`.
 
-## Current state (2026-10-14)
+## Current state (2026-10-16)
 
 | Item | State | Evidence / next |
 |---|---|---|
 | Meeting 5 G0 closeout | **In progress (CPU parts done)** | Smoke bundle + validator (VALID from a fresh clone). Smoke design reconciled to 21 records; the rerun is pending under P2. Cumulative caps enforced before launch. B=1024 interaction inference frozen (t test + Holm). Qwen ordering explicit. Latent-basis wording corrected |
-| WP1 protected B=1024 | **Forward FINAL (consequence A); reverse running** | 2026-10-15: protection_b1024, consequence and decision_b1024 are FINAL (PAPER_FINDINGS §5o). P1 reverse-readout-pp1024 461/800 at the 11:31 owner early start, under its 20 GPU-h cap |
-| P2 smoke | **First run VALID but superseded** | 15-record run on 2026-10-13 (0.2584 GPU-h, bundled). The full 21-record smoke reruns within the remaining 1.7416 GPU-h |
-| P3 timing pilot | **Queued behind the new smoke** | Cap 6 GPU-h, shared by all three stages |
-| Qwen3 | **Held behind B=1024** | Gate FAIL 0.845 kept. Disposition (a), exploratory. The 42-row human scoring review is still unassigned (owner/supervisor) |
+| WP1 protected B=1024 | **Forward and reverse FINAL** | Forward (2026-10-15): protection_b1024, consequence (A), decision_b1024 (PAPER_FINDINGS §5o). Reverse (2026-10-16): reverse_b1024 FINAL, P1 800/800 in 12.91 of 20 GPU-h; the registered interaction t test + Holm does not reject for either policy (Holm p 0.64); the trajectory contrast excludes 0 under both readouts (§5p). Paper-text edits pending |
+| P2 smoke | **PASS (2026-10-15 13:19)** | 21 records, 0 failures, 0.549 of 2 GPU-h; the 2026-10-13 15-record run stays bundled as history |
+| P3 timing pilot | **Complete** | Grid, readout, reverse 16/16 each, 1.39 of 6 GPU-h; rows excluded from every claim |
+| Qwen3 | **Released 2026-10-16 (behind both M5 grids)** | The registered release condition is met (B=1024 grid, forward and reverse complete; all four B=1024 reads FINAL). Gate FAIL 0.845 kept. Disposition (a), exploratory. The 42-row human scoring review is still unassigned (owner/supervisor) |
 | Fork-precision gate | **FAIL (scoped)** | Constrains next-token TV claims only, not accuracy (ledger §D) |
 | Meeting 5 CPU preparation | **Bundle ready for review (2026-10-14)** | Protected R-KV `rkv_pp_v1`: own provenance, gate, smoke and held adapters; real-model CPU parity PASS (`results/diag/meeting5/rkv_pp_cpu_parity/`). Finite-channel instrument (`task_information.py`, `information_tasks.py`) and reader CLI. Protocol draft v0.1 (`docs/protocol/MEETING5_INFORMATION_PROTOCOL.md`). Related work rechecked from primary sources; Garcia 2026 precedents the protection × policy cross. Inventory, strict-fit cohort (97), AIME inventory, frozen GSM8K/BBH graders and manifests. M5-A reader (PARTIAL today). Not yet written: information-probe GPU runner, pid-filter adapter for CAPMATCH, protected capture adapter |
 | Meeting 5 approval request | **Decided 2026-10-14** | A1–A3 approved (caps 1/28/28), queued after P1/P2/P3 with the M5 production runner (`run_grid_m5.py`). A4/A5 held. Margin ±0.03 (±0.05 sensitivity). BBH pinned (preparation only). Review of 6b409001 repaired: `docs/paper/MEETING5_REVIEW_6b40900_ACCEPTANCE.md` |
 | Review of 946c76a | **Two execution issues repaired (CPU)** | Smoke gates derive the target, layers and lengths independently; the M5 runner uses atomic pair publication and recovery. `docs/paper/MEETING5_REVIEW_946c76a_ACCEPTANCE.md` |
+| M5 grids | **R-KV running; H2O-style next** | grid-rkvpp256-m5 358/400 pairs at 00:17 on 2026-10-16 (cap 28); grid-h2opp256-m5 follows in queue order (its gate bug fixed in 4f50d28). Strict-cohort replication read after both arms |
+| Review of 5616630 | **R1–R4 repaired (CPU); calibration still HELD** | Calibration measurements validated against a frozen schedule; actual inputs bound by an input manifest; C6 floor rule (pre-data); compression read bound to FINAL S.1 evidence and relabelled as nominal-budget ratios. Feasibility without weights passed (83/40 reserve passages; all 64 variants render). `docs/paper/MEETING5_REVIEW_5616630_ACCEPTANCE.md` |
 | Old WP5/WP6 | **Superseded** | Replaced by Meeting 5 manifests. The old manifests are kept as history |
 
 ## History (dated; superseded statements are kept as they were)

@@ -1767,16 +1767,32 @@ Full-cache accuracy on the cell is 0.885.
   effect sits in the free run (Δfree excludes 0; Δreadout's lower bound is
   0.000). For Random, neither channel excludes 0 on its own.
 
-**Realized compression (mandatory with every absolute budget;
-`results/diag/amendment-s/realized_compression.json`).** In the protected
-grid, the realized ratio B / (prompt + generated tokens) has:
-- mean 0.482 / 0.509 and median 0.434 / 0.487 (Random / StreamingLLM);
-- 31 of 400 conditions never compressed (share 0.0775): the trace stayed
-  under 1024.
+**Nominal-budget compression (mandatory with every absolute budget;
+`results/diag/amendment-s/realized_compression.json`).**
 
-B = 1024 is therefore about **2× realized compression, not 4×**. B = 256 is
-about 10× (median 0.097 / 0.098). The unprotected 1024 cells are matched
-(medians 0.463 / 0.493).
+*Corrected 2026-10-16 (review dated 2026-10-15 of the S.1 b1024 commits, R4).* The numbers are unchanged;
+the labels and evidence binding are corrected. The stored ratio is
+min(1, B / (prompt + generated tokens)): a budget-to-sequence-length ratio,
+not live occupancy, K/V bytes or an eviction count. "31 of 400 never
+compressed" overstated it. The defensible statement is that 31 of 400 have
+ratio 1: those sequences never exceeded B, so nothing could be pruned. With
+periodic pruning and no per-row prune record, 31 is a lower bound on the
+never-compressed count. The read is now published only from rows that the
+FINAL S.1 reads validated, with matching dependency fingerprints; it is
+FINAL, and every stored ratio was cross-checked against its recorded prompt
+length + n_tokens.
+
+In the protected grid, the nominal ratio has:
+- mean 0.482 / 0.509 and median 0.434 / 0.487 (Random / StreamingLLM);
+- 31 of 400 conditions at ratio 1 (share 0.0775).
+
+B = 1024 is therefore about **a 2× budget ratio, not 4×**. This is not a
+measured hardware memory saving. B = 256 is about 10× (median
+0.097 / 0.098); there, 12 of 400 protected conditions per policy (3 problems ×
+4 seeds) have the budget relaxed by the S.1 rule. Their effective-budget mean
+is 0.127 / 0.139 against nominal 0.127 / 0.139 (differences in the fourth
+decimal), and the medians are unchanged. The unprotected 1024 cells are
+matched (medians 0.463 / 0.493).
 
 **Registered consequence (Amendment S, decided 2026-09-30).**
 `consequence.json` → **A: PERSISTS at both budgets for both presses; the
@@ -1796,12 +1812,85 @@ control.
 proposed after B = 256 was seen. It is not primary evidence. For protected
 Random, F_loss is 0.050 [0.018, 0.093] and R_loss is 0.003 [−0.005, 0.013].
 
-**Still pending.**
-- The reverse direction at 1024 (P1, still running under its 20 GPU-h cap).
-- The registered two-policy problem-level interaction test (t test + Holm,
-  frozen 2026-10-14), which needs reverse coverage.
-- Paper-text edits wait for the combined read.
-- The Qwen hold stays until the reverse reads are FINAL.
+**Still pending (updated 2026-10-16).** The reverse direction and the
+registered interaction test are now read (§5p). The Qwen hold is released per
+its registered condition. Paper-text edits remain pending.
+
+### 5p. P1 at budget 1024 (REVERSE) and the combined forward/reverse read: no interaction detected; the trajectory contrast persists under either readout (2026-10-16)
+
+**Status.** `report_protocol_audit.py reverse --budget 1024` is FINAL on the
+host. Coverage:
+- grid, forward readout and reverse readout: 800/800 each, with 0 missing,
+  duplicate, foreign or malformed rows;
+- full-cache bank: 400/400;
+- every provenance control passed.
+
+There is no protected-vs-unprotected comparison: no unprotected reverse arm is
+registered at 1024, and the read reports NOT AVAILABLE. Archived:
+`results/diag/paper_audit/reverse_b1024.json` (+ `.conditions.tsv`;
+dependency fingerprint `4a33889e…`).
+
+**Registered inference (frozen 2026-10-14, before these data existed).** For
+each protected policy, the 2×2 interaction I = A_CC − A_FC − A_CF + A_FF on
+the common support. Seeds are averaged within problem; the test is a
+two-sided one-sample t test, with Holm over the two policies at α = 0.05.
+
+| | Random (protected) | StreamingLLM (protected) |
+|---|---|---|
+| Common support | 382 conditions, 98 problems | 383 conditions, 97 problems |
+| Interaction mean | +0.003 | −0.005 |
+| t (df) | 0.68 (97) | −1.00 (96) |
+| p / Holm p | 0.50 / 0.64 | 0.32 / 0.64 |
+| Rejects at 0.05 | no | no |
+
+**Descriptive 2×2.** Common support, equal-problem estimates, problem-cluster
+bootstrap 95% CI, 2,000 resamples, seed 0:
+
+| | Random (protected) | StreamingLLM (protected) |
+|---|---|---|
+| Trajectory contrast, compressed readout (forward residual) | −0.037 [−0.076, −0.004] | −0.039 [−0.073, −0.011] |
+| Trajectory contrast, full-cache readout | −0.040 [−0.080, −0.006] | −0.034 [−0.067, −0.006] |
+| Readout change on the compressed trace | +0.000 [+0.000, +0.000] | −0.005 [−0.013, +0.000] |
+| Readout change on the reference trace | −0.003 [−0.013, +0.005] | +0.000 [−0.008, +0.008] |
+| Interaction | +0.003 [−0.005, +0.013] | −0.005 [−0.015, +0.005] |
+
+On each direction's own support, the reverse trajectory contrast is:
+- Random: −0.037 [−0.075, −0.007] (384 conditions, 99 problems);
+- StreamingLLM: −0.030 [−0.057, −0.006] (388 conditions, 99 problems).
+
+The forward residual on its own support is unchanged from §5o.
+
+Worst-case completion bounds on the interaction over the full population are
+an identification range, not a sampling interval:
+- Random [−0.057, +0.003];
+- StreamingLLM [−0.055, −0.005].
+
+**Combined interpretation.**
+- At protected B = 1024 (about a 2× budget ratio), the accuracy discrepancy
+  that on-reference readout does not explain is about −0.03 to −0.05. It
+  appears under **either** readout direction, and each interval excludes 0.
+- The readout-change contrasts are about 0 in both directions, and the
+  registered interaction test detects no dependence on readout direction for
+  either policy.
+- So at this budget the residual is not an artifact of which side's readout
+  defines it. This differs from B = 256, where the forward and reverse
+  estimands disagreed and the method split stayed bracketed (§4c).
+
+**Limits, stated once.**
+- Non-rejection is not equivalence. No equivalence test was registered for
+  the interaction, so "no interaction detected" is the claim, never "no
+  interaction". Both sampling intervals stay within about 2 points of 0.
+- These are operational replay comparisons, not a causal trajectory share.
+- The common support excludes undefined readouts. The selection is not
+  repaired, and the StreamingLLM worst-case bound lies entirely below 0.
+- Exploratory scope: one model, one benchmark, one budget.
+
+**Downstream.**
+- The Qwen hold's registered release condition is met: the grid, forward
+  readout and reverse readout are complete, and protection_b1024,
+  consequence, decision_b1024 and reverse_b1024 are FINAL. The three Qwen3
+  jobs are released behind both M5 grids in queue order.
+- Paper-text edits for the B=1024 forward/reverse result are pending.
 
 ## 5. Framing discipline (non-negotiable — apply throughout)
 - **Divergence ≠ damage.** ADD / TV / residual are "behavioral-fidelity loss," never "damage."

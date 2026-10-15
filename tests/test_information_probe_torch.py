@@ -103,6 +103,9 @@ def test_real_rows_pass_the_production_reader(model):
             "policies": ["full", "random_pp"],
             "reference_policy": "full",
             "contexts": ["b0"],
+            "measurement_schedule": ip.measurement_schedule(
+                {"b0": variants}, ["s", "n"]
+            ),
             "eviction_seeds": [0],
             "queries": ["s", "n"],
         },

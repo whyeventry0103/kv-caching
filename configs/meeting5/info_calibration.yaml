@@ -50,3 +50,11 @@ calibration_criteria:
   # C6 dynamic range: target-query MI differs across arms, not floor/ceiling
   min_mi_range_bits: 0.25
   ceiling_mi_bits: 1.9
+  # C6 floor, added 2026-10-16 BEFORE any calibration data (review of 5616630,
+  # R3; protocol 6.8 / section 9): at least one compressed arm must carry
+  # >= 0.1 bits about the target. 0.1 bits is 5% of the 2-bit channel maximum
+  # (and below the 0.25-bit range requirement): an arm under it is close to
+  # uninformative, and if EVERY compressed arm is under it the task shows only
+  # catastrophic loss and cannot compare compressed policies at this operating
+  # point. No policy ordering is required.
+  floor_mi_bits: 0.1

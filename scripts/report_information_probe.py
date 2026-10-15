@@ -11,13 +11,22 @@ clone agreement, no readout eviction); ``mode: reference`` is reserved for
 analytic fixtures. Integer keys must be integers; a declared greedy symbol must
 be consistent with the stored distribution.
 
+Review of 5616630: a production read also validates every calibration
+measurement against the design's frozen schedule (R1), verifies the input
+manifest stored beside the design against its hash (R2), and evaluates the
+calibration criteria FROZEN IN THE DESIGN; ``--calibration-criteria`` may only
+name the same criteria (a different file makes the read INVALID).
+
 Output contract as every reader since R.14: the previous output is retired
 BEFORE parsing; the new one is written atomically (INVALID evidence on any
 failure, including a torn file); exit 0 FINAL, 3 PARTIAL (0 with --partial),
-2 INVALID. All logic is ``kvcache.task_information.read_information_probe``.
+2 INVALID. Validity is not acceptance: a FINAL read whose calibration FAILS
+still exits 0 unless ``--require-calibration-pass`` (then exit 4); downstream
+gates use ``kvcache.information_calibration.accepted``. All logic is in
+``kvcache.task_information`` / ``kvcache.information_calibration``.
 
     python scripts/report_information_probe.py --rows <dir|file.jsonl> \\
-        --design <design.json> --out read.json
+        --design <design.json> --out read.json [--require-calibration-pass]
     python scripts/report_information_probe.py --self-check
 """
 
@@ -33,7 +42,15 @@ sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
 from kvcache.provenance import write_json_atomic
 from kvcache.read_validation import exit_code, files_sha256, retire_stale
-from kvcache.task_information import INVALID, read_information_probe, reference_table
+from kvcache.task_information import (
+    INVALID,
+    PRODUCTION,
+    design_bindings,
+    read_information_probe,
+    reference_table,
+)
+
+NOT_ACCEPTED = 4  # FINAL read, calibration not PASS, --require-calibration-pass
 
 
 def _files(path: Path) -> list[Path]:
@@ -61,8 +78,13 @@ def main() -> int:
     p.add_argument(
         "--calibration-criteria",
         type=Path,
-        help="config whose frozen calibration_criteria are evaluated on a FINAL "
-        "read (kvcache.information_calibration)",
+        help="config whose calibration_criteria must EQUAL the ones frozen in "
+        "the design (checked; the design's criteria are what is evaluated)",
+    )
+    p.add_argument(
+        "--require-calibration-pass",
+        action="store_true",
+        help=f"exit {NOT_ACCEPTED} unless the read is FINAL and calibration PASS",
     )
     p.add_argument(
         "--self-check",
@@ -80,17 +102,35 @@ def main() -> int:
         design = json.loads(args.design.read_text(encoding="utf-8"))
         files = _files(args.rows)
         rows = _rows(files)
-        report = read_information_probe(rows, design)
-        report["inputs_sha256"] = files_sha256([*files, args.design])
-        if args.calibration_criteria is not None:
-            import yaml
+        consumed = [*files, args.design]
+        deps = None
+        if design.get("mode") == PRODUCTION:
+            mpath = args.design.parent / str(design.get("input_manifest", ""))
+            override = None
+            if args.calibration_criteria is not None:
+                import yaml
 
+                override = yaml.safe_load(args.calibration_criteria.read_text())[
+                    "calibration_criteria"
+                ]
+                consumed.append(args.calibration_criteria)
+            deps = design_bindings(
+                design, json.loads(mpath.read_text(encoding="utf-8")), override
+            )
+            consumed.append(mpath)
+        report = read_information_probe(rows, design)
+        report["inputs_sha256"] = files_sha256(consumed)
+        if deps is not None:
             from kvcache.information_calibration import evaluate
 
-            crit = yaml.safe_load(args.calibration_criteria.read_text())[
-                "calibration_criteria"
-            ]
-            report["calibration"] = evaluate(report, rows, crit)
+            report["dependencies"] = deps
+            report["calibration"] = evaluate(
+                report,
+                rows,
+                design["calibration_criteria"],
+                full=str(design["reference_policy"]),
+                e2e_query=design["measurement_schedule"]["e2e_query"],
+            )
     except (OSError, ValueError, KeyError, TypeError) as exc:
         report = {"status": INVALID, "error": str(exc)}
         print(f"INVALID: {exc}", file=sys.stderr)
@@ -98,6 +138,11 @@ def main() -> int:
     args.out.parent.mkdir(parents=True, exist_ok=True)
     write_json_atomic(args.out, report)
     code = exit_code(report["status"], partial_ok=args.partial)
+    if code == 0 and args.require_calibration_pass:
+        from kvcache.information_calibration import accepted
+
+        if not accepted(report):
+            code = NOT_ACCEPTED
     print(f"wrote {args.out} [{report['status']}] exit {code}")
     return code
 

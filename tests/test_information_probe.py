@@ -153,6 +153,7 @@ PROV = {
     "answer_alphabet_sha256": ip.sha256_json(VALUES),
     "task_layout_sha256": "t" * 64,
     "design_sha256": "d" * 64,
+    "input_manifest_sha256": "m" * 64,
 }
 
 
@@ -180,8 +181,10 @@ def _rows(backend, honor=True, n_blocks=2):
 
 
 def _design(blocks):
+    variants = dict(zip([b.block_id for b in blocks], _variants(blocks), strict=True))
     return {
         "mode": "production",
+        "measurement_schedule": ip.measurement_schedule(variants, ["s", "n"]),
         "expected_provenance": PROV,
         "policies": ["full", "recency"],
         "reference_policy": "full",

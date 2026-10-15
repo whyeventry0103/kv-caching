@@ -256,7 +256,19 @@ def test_the_real_catalogue_has_no_two_entries_sharing_an_exact_value_and_rule()
     # (11) on the k/400 and k/392 accuracy lattices or small counts: -0.0025,
     # -0.005, 0.0125, 0.0175, 0.0375, 0.04, 0.05, 0.1075, 0.16, 0.2, 0.8875 (and
     # 31 / 0.0775 gained unrelated members). No new key is cited in the .tex.
-    assert len(collisions) <= 164, (
+    #
+    # 164 -> 172 on 2026-10-16 (P1 reverse read at b1024 and the evidence-bound
+    # nominal-compression read), examined: 8 new groups. Identities by
+    # construction (4): Holm over two members gives both the same adjusted p
+    # (0.6396 = 2 x the smaller p); StreamingLLM's interaction equals its
+    # readout change on the compressed trace because its reference-trace
+    # readout change is exactly 0; the b256 effective-budget medians equal the
+    # nominal ones (the 12 relaxed conditions per policy are not at the
+    # median). Small-count coincidences (4): 97 (Random df = StreamingLLM
+    # problems), 382 (Random common support = p4.tvjsd_shared_support), 96
+    # (StreamingLLM df = p2v2.rotation_n_traces), 99 (both reverse supports).
+    # 0.0 / 31 / 0.0775 gained members. No new key is cited in the .tex.
+    assert len(collisions) <= 172, (
         f"{len(collisions)} exact-value collisions in the catalogue; if this "
         "grew, a new derived quantity is duplicating an existing one"
     )

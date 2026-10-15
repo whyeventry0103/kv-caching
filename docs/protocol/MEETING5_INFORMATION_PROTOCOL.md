@@ -218,6 +218,38 @@ Model readouts are read in `production` mode only. Each row must carry:
 - the native top-1 log-probability, against which the declared greedy symbol is
   checked.
 
+**Added 2026-10-16, before any calibration data (review of 5616630, R1/R2):**
+- *Measurements are validity, checked before aggregation.* The design freezes
+  a `measurement_schedule`: the end-to-end control is measured on the LAST
+  query of every (context, policy, seed, variant), and each context's fact
+  spans are fixed. Every row of that query must carry a finite, non-negative
+  end-to-end difference; every other row must carry none. Compressed rows
+  must carry both spans' retained fractions in [0, 1]; full-cache rows carry
+  none. `n_prunes` is a non-negative integer (0 for full cache), and
+  `fact_spans` must equal the schedule. Any violation makes the read INVALID
+  (exit 2). A missing value cannot drop out of a mean, and a NaN cannot vanish
+  inside a maximum.
+- *The design binds the actual inputs.* Before any weights load, the runner
+  materializes an input manifest:
+  - every filler passage (source, length, token-id hash);
+  - every block (aliases, order, filler segments, skipped sources);
+  - token-id hashes of every rendered instruction, body and query.
+
+  The manifest is stored beside the design. Its hash enters the design and
+  every row's provenance (`input_manifest_sha256`). A resume refuses before
+  any model load or row write when the selected inputs changed, when a stored
+  block is incomplete, or when rows lack their design or manifest. The reader
+  verifies the stored manifest against the hash.
+- *The criteria are bound.* The design embeds the calibration criteria and
+  their fingerprint. The reader evaluates those criteria, and
+  `--calibration-criteria` may name only the same criteria; a different file
+  makes the read INVALID.
+- *Validity is not acceptance.* A complete, valid read that misses a criterion
+  stays FINAL with calibration FAIL. Gate G2 (and anything downstream)
+  requires `information_calibration.accepted(read)`, i.e. FINAL **and**
+  calibration PASS (`report_information_probe.py --require-calibration-pass`
+  exits 4 otherwise). An exit code of 0 is not acceptance.
+
 Integer keys must be integers. The analytic fixtures are a separate
 `reference` mode. The encodings were checked on the pinned tokenizer on
 2026-10-14:
@@ -294,10 +326,26 @@ read. PASS requires all of:
 | C3 | The read is FINAL: every row passed full/full identity, clone agreement and no readout eviction |
 | C4 | End-to-end readout (the query fed into the original cache) agrees with the cloned readout within 0.001 nats per symbol log-probability |
 | C5 | In the evicting arms, the mean retained fraction of the early fact span is ≤ 0.90 |
-| C6 | Target-query MI ranges by ≥ 0.25 bits across arms, and not every evicting arm is at ≥ 1.9 bits |
+| C6 | Target-query MI ranges by ≥ 0.25 bits across arms, not every evicting arm is at ≥ 1.9 bits, and **at least one compressed arm is at ≥ 0.1 bits** (floor rule added 2026-10-16, see below) |
 
 On FAIL, one redesign on calibration data is allowed. If that also fails, the
 instrument is abandoned (gate G2).
+
+**C6 correction, 2026-10-16, before any calibration data (review of 5616630,
+R3).** The range in C6 is taken over the full-cache arm plus the compressed
+arms. A perfect full arm with every compressed arm at about 0 bits therefore
+had a 2-bit range and PASSED. That task shows catastrophic loss against full
+cache, but it cannot tell compressed policies apart at that operating point.
+- *Rule added:* at least one compressed arm must carry ≥ `floor_mi_bits` =
+  0.1 bits about the target. That is 5% of the 2-bit channel maximum, and
+  below the 0.25-bit range requirement. The ceiling check is unchanged.
+- *Reported separately:* the full-to-compressed range and the compressed-only
+  range.
+- *No policy order is required.* Random need not beat H2O-style or
+  StreamingLLM: equal, informative compressed arms are a valid null outcome.
+  Calibration is never tuned toward a desired ranking.
+- *One-redesign rule:* it applies to real instrument failures on calibration
+  data, not to inconvenient policy results.
 
 **Runner.** `scripts/run_information_probe.py` (execution path written
 2026-10-15):
@@ -375,3 +423,15 @@ predeclared body spans, and it is not built until the M5-C calibration passes
 - 2026-10-15: §6.8 numerical calibration criteria (C1–C6) frozen before any
   calibration data; the end-to-end control was added to the runner core. No
   calibration outcome exists.
+- 2026-10-16 (review of 5616630; still no calibration data, still HELD):
+  - §6.6a measurement validation against a frozen schedule;
+  - input manifest bound into the design and every row;
+  - calibration criteria bound to the design;
+  - validity separated from acceptance (G2 requires calibration PASS);
+  - §6.8 C6 floor rule (`floor_mi_bits` 0.1) with separately reported ranges.
+
+  Feasibility was checked on the host without weights:
+  - 83 eligible reserve passages against the 40 needed;
+  - the pinned tokenizer renders all 4 blocks / 64 variants with 1,024-token
+    bodies and 0 leak-screen skips;
+  - input-manifest hash `1f527da6…`.

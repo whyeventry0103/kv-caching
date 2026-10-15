@@ -4514,6 +4514,9 @@ both presses).
 **Realized compression at B = 1024:** median 0.434 / 0.487, i.e. about 2×, with
 31 of 400 conditions never compressed
 (`results/diag/amendment-s/realized_compression.json`).
+*[Corrected 2026-10-16, see the entry below: these are nominal-budget ratios,
+and "31 never compressed" is 31 at ratio 1, a lower bound on never-compressed
+conditions. The numbers are unchanged.]*
 
 The reverse 2×2 at 1024 (P1) and its frozen problem-level t test + Holm are
 pending. Numbers and the framing are in PAPER_FINDINGS §5o.
@@ -4528,3 +4531,62 @@ pending. Numbers and the framing are in PAPER_FINDINGS §5o.
   and 47 on GPU 1. Each shard is bounded at 5.93 h; the ledger reserved
   2 × 5.984 GPU-h of P1's remaining 11.968.
 - This is a one-time bypass, not a change to the nightly policy.
+
+## P1 result at budget 1024, REVERSE (2026-10-16): registered interaction test does not reject for either policy; Qwen hold released; review of 5616630 repaired (information calibration still HELD)
+
+**P1 read.** `report_protocol_audit.py reverse --budget 1024` is FINAL on the
+host over complete inputs: grid, forward and reverse readout 800/800 each,
+bank 400/400, every provenance control passed. Archived as
+`results/diag/paper_audit/reverse_b1024.json` (+ `.conditions.tsv`).
+
+**Registered inference (frozen 2026-10-14, before these data):** the
+problem-level two-sided t test of the protected 2×2 interaction on the common
+support, with Holm over the two policies.
+
+| Policy | Problems | Mean | t (df) | p | Holm p | Verdict |
+|---|---|---|---|---|---|---|
+| Random | 98 | +0.003 | 0.68 (97) | 0.50 | 0.64 | does not reject |
+| StreamingLLM | 97 | −0.005 | −1.00 (96) | 0.32 | 0.64 | does not reject |
+
+Descriptively, the trajectory contrast excludes 0 under both the compressed
+readout (the forward residual) and the full-cache readout:
+- Random: −0.037 / −0.040;
+- StreamingLLM: −0.039 / −0.034.
+
+The readout-change contrasts are about 0. No equivalence test was registered,
+so the outcome is "no interaction detected", not "no interaction".
+Interpretation and limits: PAPER_FINDINGS §5p.
+
+**Qwen hold released (2026-10-16).** Its registered condition (2026-10-14,
+item 4) is met:
+- grid-pp1024, readout-pp1024 and reverse-readout-pp1024 are complete;
+- protection_b1024, consequence (A), decision_b1024 and reverse_b1024 are
+  FINAL.
+
+The three `blocked:` lines were removed from `configs/nightly_queue.yaml`, as
+that text instructed. Queue order keeps grid-h2opp256-m5 and grid-rkvpp256-m5
+ahead of the Qwen jobs. Disposition (a) is unchanged: Qwen3 cells are
+EXPLORATORY.
+
+**Review of 5616630 (2026-10-15).** The forward B=1024 estimates were
+independently reproduced by the reviewer and are kept. The repairs, with
+before/after evidence in `results/diag/meeting5/review_5616630/`, are
+documented in `docs/paper/MEETING5_REVIEW_5616630_ACCEPTANCE.md`:
+- *R1:* calibration measurements are validated against a frozen schedule
+  before aggregation (malformed → INVALID), and the criteria are bound to the
+  design.
+- *R2:* the actual filler/block/token inputs are bound by an input manifest
+  into the design and every row; a changed-input resume refuses before any
+  model load.
+- *R3:* the C6 floor rule (`floor_mi_bits` 0.1) was added before any
+  calibration data, as a pre-data correction in the information protocol
+  §6.8/§9.
+- *R4:* realized compression is published only from FINAL, current S.1
+  evidence and is relabelled as nominal-budget ratios, with ratio-1 counts as
+  lower bounds on never-compressed and effective-budget ratios where the S.1
+  rule relaxed a budget. The numbers are unchanged.
+
+The information calibration stays HELD pending its separate ≤ 4 GPU-h
+approval. Its feasibility checks passed on the host without weights: 83
+eligible reserve passages against 40 needed, and the pinned tokenizer renders
+all 64 variants.

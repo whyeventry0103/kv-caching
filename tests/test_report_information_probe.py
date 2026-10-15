@@ -16,6 +16,7 @@ import sys
 from pathlib import Path
 
 import pytest
+import yaml
 
 from kvcache import task_information as ti
 
@@ -30,6 +31,15 @@ PROV = {
     "task_layout_sha256": "t" * 64,
     "design_sha256": "d" * 64,
 }
+# review of 5616630: a production design binds its input manifest (R2), its
+# measurement schedule and its calibration criteria (R1); the fixture is a
+# complete, valid production artifact so each INVALID case tests one defect
+MANIFEST = {"schema": "info-input-manifest-v1", "fixture": "analytic channels"}
+PROV["input_manifest_sha256"] = ti._sha256_json(MANIFEST)
+CRITERIA = yaml.safe_load(
+    (ROOT / "configs/meeting5/info_calibration.yaml").read_text()
+)["calibration_criteria"]
+SPANS = {"s": [10, 15], "n": [90, 95]}
 
 
 def _design(mode="reference"):
@@ -44,6 +54,13 @@ def _design(mode="reference"):
     }
     if mode == "production":
         d["expected_provenance"] = PROV
+        d["input_manifest"] = "input_manifest.json"
+        d["measurement_schedule"] = {
+            "e2e_query": "n",
+            "fact_spans": {c: SPANS for c in d["contexts"]},
+        }
+        d["calibration_criteria"] = CRITERIA
+        d["calibration_criteria_sha256"] = ti._sha256_json(CRITERIA)
     return d
 
 
@@ -73,6 +90,14 @@ def _rows(mode="reference"):
                                 top1_logprob=max(
                                     x for x in r.logprobs if x != -math.inf
                                 ),
+                                n_prunes=0 if pol == "full" else 3,
+                                fact_spans=SPANS,
+                                retained_fraction=(
+                                    {"s": None, "n": None}
+                                    if pol == "full"
+                                    else {"s": 0.5, "n": 1.0}
+                                ),
+                                e2e_max_abs_diff=0.0 if q == "n" else None,
                             )
                         out.append(row)
     return out
@@ -81,6 +106,7 @@ def _rows(mode="reference"):
 def _run(tmp_path, rows, design, extra=()):
     (tmp_path / "rows.jsonl").write_text("\n".join(json.dumps(r) for r in rows))
     (tmp_path / "design.json").write_text(json.dumps(design))
+    (tmp_path / "input_manifest.json").write_text(json.dumps(MANIFEST))
     p = subprocess.run(
         [
             sys.executable,

@@ -52,11 +52,27 @@ def spec_of(cfg: dict[str, Any]) -> it.TaskSpec:
     return it.TaskSpec(**cfg["spec"])
 
 
-def design(cfg: dict[str, Any], block_ids: list[str]) -> dict[str, Any]:
-    """The frozen design the reader enforces, with its expected provenance."""
+MANIFEST_NAME = "input_manifest.json"
+
+
+def design(
+    cfg: dict[str, Any],
+    block_ids: list[str],
+    *,
+    manifest_sha256: str | None,
+    schedule: dict[str, Any] | None,
+) -> dict[str, Any]:
+    """The frozen design the reader enforces, with its expected provenance.
+
+    Review of 5616630: it binds the ACTUAL selected inputs (the input
+    manifest's hash, R2), the measurement schedule the calibration fields are
+    validated against (R1) and the calibration criteria with their fingerprint
+    (R1.4), so a reader cannot substitute another criteria file. ``None``
+    values appear only in the dry-run preview (no tokenizer, no filler)."""
     models = _yaml(PROJECT_ROOT / "configs/models.yaml")["models"]
     rev = str(models[cfg["models"][0]]["revision"])
     layout = {"spec": asdict(spec_of(cfg)), "aliases": cfg["aliases"]}
+    crit = cfg["calibration_criteria"]
     return {
         "mode": "production",
         "policies": list(cfg["policies"]),
@@ -65,6 +81,10 @@ def design(cfg: dict[str, Any], block_ids: list[str]) -> dict[str, Any]:
         "eviction_seeds": list(cfg["eviction_seeds"]),
         "queries": list(cfg["queries"]),
         "paired_contrasts": cfg.get("paired_contrasts", []),
+        "measurement_schedule": schedule,
+        "input_manifest": MANIFEST_NAME,
+        "calibration_criteria": crit,
+        "calibration_criteria_sha256": ip.sha256_json(crit),
         "expected_provenance": {
             "implementation_id": implementation_id(ip.INFO_KIND),
             "model_revision": rev,
@@ -72,6 +92,7 @@ def design(cfg: dict[str, Any], block_ids: list[str]) -> dict[str, Any]:
             "answer_alphabet_sha256": ip.sha256_json(cfg["values"]),
             "task_layout_sha256": ip.sha256_json(layout),
             "design_sha256": ip.sha256_json(cfg),
+            "input_manifest_sha256": manifest_sha256,
         },
     }
 
@@ -104,6 +125,15 @@ def load_passages(cfg: dict[str, Any], base_runs: Path) -> list[it.Passage]:
     """Filler from full-cache reasoning traces of the MATH-500 RESERVE problems
     (outside the discovery cohort and the confirmation set), seed per config;
     each passage keeps the hash of the exact token ids it was cut from."""
+    out = eligible_passages(cfg, base_runs)
+    n = int(cfg["filler"]["n_passages"])
+    if len(out) < n:
+        raise SystemExit(f"REFUSED: only {len(out)} filler passages, need {n}")
+    return out[:n]
+
+
+def eligible_passages(cfg: dict[str, Any], base_runs: Path) -> list[it.Passage]:
+    """Every reserve trace long enough to cut one passage from, sorted."""
     from kvcache.provenance import inputs_sha256
 
     f = cfg["filler"]
@@ -112,7 +142,7 @@ def load_passages(cfg: dict[str, Any], base_runs: Path) -> list[it.Passage]:
     for k in f["pids_key"]:
         node = node[k]
     reserve = set(node)
-    seed, n, length = int(f["seed"]), int(f["n_passages"]), int(f["passage_tokens"])
+    seed, length = int(f["seed"]), int(f["passage_tokens"])
     out = []
     side = base_runs / f["reference_run"] / "token_ids"
     for path in sorted(side.rglob("*.jsonl")):
@@ -123,9 +153,7 @@ def load_passages(cfg: dict[str, Any], base_runs: Path) -> list[it.Passage]:
                 if len(ids) == length:
                     out.append(it.Passage(inputs_sha256(ids), ids))
     out.sort(key=lambda p: p.source)
-    if len(out) < n:
-        raise SystemExit(f"REFUSED: only {len(out)} filler passages, need {n}")
-    return out[:n]
+    return out
 
 
 def make_backend(model: Any) -> Any:
@@ -190,6 +218,84 @@ def _rows_in(out_dir: Path) -> list[dict[str, Any]]:
     ]
 
 
+def prepare_inputs(cfg: dict[str, Any], base_runs: Path, encode: Any) -> dict[str, Any]:
+    """Everything a run consumes, materialized WITHOUT model weights: filler
+    passages, blocks, every rendered variant, the input manifest and its hash,
+    the measurement schedule and the frozen design (review of 5616630, R2)."""
+    spec = spec_of(cfg)
+    passages = load_passages(cfg, base_runs)
+    blocks = it.make_blocks(
+        int(cfg["n_blocks"]),
+        design_seed=int(cfg["design_seed"]),
+        aliases=cfg["aliases"],
+        passages=passages,
+        encode=encode,
+        values=cfg["values"],
+        spec=spec,
+    )
+    variants = {
+        b.block_id: it.all_variants(
+            b, passages=passages, encode=encode, values=cfg["values"], spec=spec
+        )
+        for b in blocks
+    }
+    symbol_ids = [encode(" " + v)[0] for v in cfg["values"]]
+    manifest = it.input_manifest(
+        blocks, variants, passages=passages, symbol_ids=symbol_ids
+    )
+    schedule = ip.measurement_schedule(variants, cfg["queries"])
+    d = design(
+        cfg,
+        [b.block_id for b in blocks],
+        manifest_sha256=ip.sha256_json(manifest),
+        schedule=schedule,
+    )
+    return {
+        "passages": passages,
+        "blocks": blocks,
+        "variants": variants,
+        "symbol_ids": symbol_ids,
+        "manifest": manifest,
+        "design": d,
+    }
+
+
+def resume_refusals(
+    out_dir: Path, d: dict[str, Any], manifest: dict[str, Any]
+) -> tuple[set[str], list[str]]:
+    """(finished blocks, reasons to refuse) for a run directory, checked
+    BEFORE any model load or row write: the stored design and input manifest
+    must equal the ones just materialized from the actual inputs, every stored
+    row must carry the same identity, and every stored block must be
+    complete."""
+    reasons = []
+    dpath, mpath = out_dir / "design.json", out_dir / MANIFEST_NAME
+    if dpath.exists() and json.loads(dpath.read_text()) != d:
+        reasons.append(
+            "an existing design.json differs (config or ACTUAL selected inputs "
+            "changed); use a new namespace"
+        )
+    if mpath.exists() and ip.sha256_json(json.loads(mpath.read_text())) != (
+        ip.sha256_json(manifest)
+    ):
+        reasons.append("an existing input manifest differs from the selected inputs")
+    existing = _rows_in(out_dir)
+    if existing and not (dpath.exists() and mpath.exists()):
+        reasons.append("stored rows without their design.json and input manifest")
+    reasons += [
+        f"resume into other provenance: {b}"
+        for b in ip.resume_problems(existing, d["expected_provenance"])[:3]
+    ]
+    done, incomplete = ip.finished_blocks(
+        existing,
+        contexts=d["contexts"],
+        policies=d["policies"],
+        eviction_seeds=d["eviction_seeds"],
+        queries=d["queries"],
+    )
+    return done, reasons + incomplete
+
+
 def execute(cfg: dict[str, Any], *, out_dir: Path, base_runs: Path) -> dict:
     """Run the calibration (or resume it); every block is written atomically."""
     from kvcache.models import load_model_and_tokenizer, load_tokenizer
@@ -209,38 +315,23 @@ def execute(cfg: dict[str, Any], *, out_dir: Path, base_runs: Path) -> dict:
     problems = it.check_encodings(encode, cfg["values"], cfg["aliases"], spec)
     if problems:
         raise SystemExit(f"REFUSED: pinned-tokenizer encoding check: {problems}")
-    passages = load_passages(cfg, base_runs)
-    blocks = it.make_blocks(
-        int(cfg["n_blocks"]),
-        design_seed=int(cfg["design_seed"]),
-        aliases=cfg["aliases"],
-        passages=passages,
-        encode=encode,
-        values=cfg["values"],
-        spec=spec,
-    )
-    d = design(cfg, [b.block_id for b in blocks])
-    dpath = out_dir / "design.json"
-    if dpath.exists() and json.loads(dpath.read_text()) != d:
-        raise SystemExit("REFUSED: an existing design.json differs; new namespace")
-    write_json_atomic(dpath, d)
+    inputs = prepare_inputs(cfg, base_runs, encode)
+    d, manifest = inputs["design"], inputs["manifest"]
+    done, refusals = resume_refusals(out_dir, d, manifest)
+    if refusals:
+        raise SystemExit(f"REFUSED: {refusals[0]}")
+    write_json_atomic(out_dir / MANIFEST_NAME, manifest)
+    write_json_atomic(out_dir / "design.json", d)
     prov = d["expected_provenance"]
-    existing = _rows_in(out_dir)
-    bad = ip.resume_problems(existing, prov)
-    if bad:
-        raise SystemExit(f"REFUSED: resume into other provenance: {bad[0]}")
-    done = {r["context_id"] for r in existing}
     model, _ = load_model_and_tokenizer(model_cfg, attn_implementation="eager")
     backend = make_backend(model)
     factories = policy_factories(model, cfg)
-    symbol_ids = [encode(" " + v)[0] for v in cfg["values"]]
+    symbol_ids = inputs["symbol_ids"]
     written = 0
-    for block in blocks:
+    for block in inputs["blocks"]:
         if block.block_id in done:
             continue
-        variants = it.all_variants(
-            block, passages=passages, encode=encode, values=cfg["values"], spec=spec
-        )
+        variants = inputs["variants"][block.block_id]
         rows = ip.run_context(
             backend,
             variants,
@@ -259,7 +350,50 @@ def execute(cfg: dict[str, Any], *, out_dir: Path, base_runs: Path) -> dict:
         os.replace(tmp, path)  # a block is all-or-nothing
         written += len(rows)
         print(f"wrote {path.name}: {len(rows)} rows", flush=True)
-    return {"rows_written": written, "blocks": len(blocks), "skipped": len(done)}
+    return {
+        "rows_written": written,
+        "blocks": len(inputs["blocks"]),
+        "skipped": len(done),
+    }
+
+
+def check_inputs(cfg: dict[str, Any], base_runs: Path) -> dict[str, Any]:
+    """Feasibility WITHOUT model weights (review of 5616630, item 5): the real
+    reserve filler exists in sufficient quantity, and the pinned tokenizer
+    renders the frozen task (encodings, blocks, every variant, manifest)."""
+    from kvcache.models import load_tokenizer
+
+    models = _yaml(PROJECT_ROOT / "configs/models.yaml")["models"]
+    tok = load_tokenizer(models[cfg["models"][0]])
+
+    def encode(t: str) -> list[int]:
+        return list(tok.encode(t, add_special_tokens=False))
+
+    report: dict[str, Any] = {
+        "eligible_passages": len(eligible_passages(cfg, base_runs)),
+        "needed_passages": int(cfg["filler"]["n_passages"]),
+        "tokenizer_problems": it.check_encodings(
+            encode, cfg["values"], cfg["aliases"], spec_of(cfg)
+        ),
+    }
+    if report["tokenizer_problems"] or (
+        report["eligible_passages"] < report["needed_passages"]
+    ):
+        return report
+    inputs = prepare_inputs(cfg, base_runs, encode)
+    m = inputs["manifest"]
+    report.update(
+        blocks=len(m["blocks"]),
+        variants=sum(len(v) for v in m["variants"].values()),
+        skipped_sources=sum(len(b["skipped_sources"]) for b in m["blocks"]),
+        body_tokens={len(v.body_ids) for vs in inputs["variants"].values() for v in vs}
+        == {spec_of(cfg).body_tokens},
+        fact_spans=inputs["design"]["measurement_schedule"]["fact_spans"],
+        input_manifest_sha256=inputs["design"]["expected_provenance"][
+            "input_manifest_sha256"
+        ],
+    )
+    return report
 
 
 def main() -> int:
@@ -267,6 +401,11 @@ def main() -> int:
     ap.add_argument("--config", default=CONFIG)
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--check-tokenizer", action="store_true")
+    ap.add_argument(
+        "--check-inputs",
+        action="store_true",
+        help="reserve filler + pinned tokenizer render the frozen task; no weights",
+    )
     ap.add_argument("--i-understand", action="store_true")
     # accepted so the nightly launcher can run this like any other stage
     ap.add_argument("--resume", action="store_true")
@@ -276,11 +415,17 @@ def main() -> int:
     print(json.dumps({"config": a.config, "held": cfg.get("held"), **counts(cfg)}))
     if a.dry_run:
         d = design(
-            cfg, [f"b{cfg['design_seed']}-{i:04d}" for i in range(cfg["n_blocks"])]
+            cfg,
+            [f"b{cfg['design_seed']}-{i:04d}" for i in range(cfg["n_blocks"])],
+            manifest_sha256=None,
+            schedule=None,
         )
         print(json.dumps(d, indent=1, sort_keys=True))
-        print(json.dumps({"calibration_criteria": cfg["calibration_criteria"]}))
-        print("DRY RUN: design, counts and criteria only; no tokenizer, model or GPU")
+        print(
+            "DRY RUN: design, counts and criteria only; the input manifest and "
+            "measurement schedule (null above) are materialized at execution "
+            "from the pinned tokenizer and the actual filler; no model or GPU"
+        )
         return 0
     if os.environ.get("KVCACHE_REMOTE") != "1":
         raise SystemExit("REFUSED: tokenizer and model work is remote-only")
@@ -288,6 +433,15 @@ def main() -> int:
         problems = check_tokenizer(cfg)
         print(json.dumps({"tokenizer_problems": problems}))
         return 2 if problems else 0
+    if a.check_inputs:
+        rep = check_inputs(cfg, Path(os.environ["KVCACHE_BASE_RUNS_ROOT"]))
+        print(json.dumps(rep, indent=1, sort_keys=True))
+        ok = (
+            not rep["tokenizer_problems"]
+            and rep["eligible_passages"] >= rep["needed_passages"]
+            and rep.get("body_tokens") is True
+        )
+        return 0 if ok else 2
     if cfg.get("held", True):
         raise SystemExit(
             "REFUSED: the information calibration is HELD (separate approval, "

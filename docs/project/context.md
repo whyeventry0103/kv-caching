@@ -24,6 +24,25 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-10-16 ~01:45 PKT — Review of 5616630 repaired (R1–R4, CPU); P1 reverse read FINAL (no interaction detected); Qwen hold released; calibration still HELD.**
+  - **P1 reverse at B=1024: FINAL** (`results/diag/paper_audit/reverse_b1024.json`).
+    - Registered t test + Holm on the protected interaction: Random +0.003 (t 0.68, Holm p 0.64), StreamingLLM −0.005 (t −1.00, Holm p 0.64). Neither rejects.
+    - The trajectory contrast excludes 0 under both the compressed readout (−0.037 / −0.039) and the full-cache readout (−0.040 / −0.034). Readout changes are about 0.
+    - The claim is "no interaction detected" (no equivalence test was registered). PAPER_FINDINGS §5p.
+  - **Qwen hold released** per its registered condition. The three `blocked:` lines were removed. Queue order keeps both M5 grids first.
+  - **Review repairs** (`docs/paper/MEETING5_REVIEW_5616630_ACCEPTANCE.md`; evidence `results/diag/meeting5/review_5616630/`):
+    - R1: calibration fields validated against a frozen schedule (malformed → INVALID); criteria bound to the design; `accepted()` and `--require-calibration-pass` (exit 4).
+    - R2: input manifest (actual passages/blocks/token hashes) bound into the design and rows; a changed-input or incomplete-block resume refuses before any model load.
+    - R3: C6 floor rule `floor_mi_bits` 0.1, pre-data (protocol §6.8/§9).
+    - R4: compression read bound to FINAL S.1 evidence (re-read FINAL, values unchanged); relabelled as nominal-budget ratios, ratio-1 counts as lower bounds, plus effective-budget ratios for the 12 relaxed conditions per policy at B=256.
+  - **Calibration feasibility (host, tokenizer only):** 83 eligible reserve passages against 40 needed; all 64 variants render with 1,024-token bodies; manifest `1f527da6…`. The calibration stays HELD (separate ≤4 GPU-h approval).
+  - **Runs:** grid-rkvpp256-m5 358/400 pairs at 00:17; grid-h2opp256-m5 next.
+  - **Next.**
+    1. H2O grid.
+    2. Strict-cohort replication read (`report_policy_replication.py --cohort strict`, ±0.03) after both arms.
+    3. Paper-text edits for the B=1024 forward/reverse result.
+    4. Calibration approval request (owner).
+
   **★★★★★ 2026-10-15 ~16:00 Dubai — P1, P2, P3 and the R-KV-pp smoke all COMPLETE; M5 R-KV-protected grid RUNNING; H2O grid gate bug fixed.**
   - **Completed** (during the owner early start):
     - reverse-readout-pp1024 (P1) 800/800, 12.91 of 20 GPU-h;
@@ -50,7 +69,7 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
   **★★★★★ 2026-10-15 ~12:00 Dubai — S.1 at B=1024 FORWARD read FINAL: consequence A; owner early start running.**
   - **B=1024 forward reads.** Protected residual: Random −0.047 [−0.086, −0.015], StreamingLLM −0.040 [−0.070, −0.013]. Both are RESIDUAL PERSISTS, SHRINKS (Random's Δresidual lower bound is +0.001).
   - **Registered consequence: A** (the headline stands, at protected size).
-  - **Realized compression at B=1024:** median about 0.43–0.49, i.e. about 2× not 4×; 7.7% of conditions never compressed. Details in PAPER_FINDINGS §5o.
+  - **Realized compression at B=1024:** median about 0.43–0.49, i.e. about 2× not 4×; 7.7% of conditions never compressed. Details in PAPER_FINDINGS §5o. *[Corrected 2026-10-16: these are nominal-budget ratios; 7.7% have ratio 1, a lower bound on never-compressed.]*
   - **Early start (owner, 11:31).** `~/manual_ticks_1015.sh` in tmux `manual-ticks` until 01:40, then cron. P1 reverse-readout-pp1024 running on both GPUs (461/800 at launch; shard bounds 5.93 h; P1 remaining 11.968 h). Recorded in PREREGISTRATION R.16.6.
   - **Next.**
     1. P1 FINAL → `report_protocol_audit.py reverse --budget 1024` (registered t test + Holm).

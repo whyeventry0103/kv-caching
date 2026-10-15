@@ -1,0 +1,121 @@
+import csv
+import hashlib
+import json
+import random
+import shutil
+import statistics
+import subprocess
+import sys
+import tempfile
+from collections import defaultdict
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent
+sys.path[:0] = [str(ROOT / 'src'), str(ROOT / 'scripts'), str(ROOT / 'tests')]
+import pytest
+import test_information_runner as tr
+import test_information_probe as tip
+from kvcache import information_tasks as it
+
+
+def bootstrap(values):
+    groups = defaultdict(list)
+    for pid, value in values:
+        groups[pid].append(value)
+    means = [statistics.fmean(groups[p]) for p in sorted(groups)]
+    rng = random.Random(0)
+    draws = sorted(statistics.fmean(means[rng.randrange(len(means))] for _ in means) for _ in range(2000))
+    return statistics.fmean(means), [draws[49], draws[1949]]
+
+
+def forward_check():
+    path = ROOT / 'results/diag/amendment-s/protection_b1024.conditions.tsv'
+    rows = list(csv.DictReader(path.open(), delimiter='\t'))
+    report = json.loads(path.with_name('protection_b1024.json').read_text())
+    assert hashlib.sha256(path.read_bytes()).hexdigest() == report['sufficient_statistics_sha256']
+    assert len(rows) == len({(r['press'], r['pid'], r['seed']) for r in rows}) == 800
+    for press in sorted({r['press'] for r in rows}):
+        sub = [r for r in rows if r['press'] == press and r['readout_pp'] in ('True','False')]
+        residual = [(r['pid'], int(r['free_pp']=='True')-int(r['readout_pp']=='True')) for r in sub]
+        delta = [(r['pid'], int(r['free_pp']=='True')-int(r['readout_pp']=='True')-int(r['free_base']=='True')+int(r['readout_base']=='True')) for r in sub]
+        for name, values in [('residual_pp',residual), ('delta_residual',delta)]:
+            mean, ci = bootstrap(values)
+            stored = report['per_press'][press]['primary'][name]
+            assert abs(mean-stored['mean']) < 1e-14 and all(abs(a-b)<1e-14 for a,b in zip(ci,stored['ci95']))
+            print(json.dumps({'forward':press, 'endpoint':name, 'n':len(values), 'mean':mean, 'ci95':ci, 'matches':True}))
+
+
+def case(name, mutate=None, budget=40):
+    with tempfile.TemporaryDirectory() as td, pytest.MonkeyPatch.context() as mp:
+        root = Path(td)
+        cfg, config = tr._cfg(root, budget=budget)
+        tr._stubs(mp, budget=budget)
+        if name == 'all_compressed_at_floor':
+            cfg['policies'] = ['full', 'recency_a', 'recency_b', 'recency_c', 'recency_d']
+            config.write_text(tr.yaml.safe_dump(cfg))
+            base_factory = tr.rip.policy_factories
+            def four_policies(model, cfg):
+                base = base_factory(model, cfg)
+                return {'full':base['full'], **{p:base['recency'] for p in cfg['policies'] if p != 'full'}}
+            mp.setattr(tr.rip, 'policy_factories', four_policies)
+        out = root/'run'
+        tr.rip.execute(cfg, out_dir=out, base_runs=root)
+        files = sorted((out/'readout').glob('*.jsonl'))
+        allrows = [json.loads(line) for p in files for line in p.read_text().splitlines()]
+        if mutate:
+            mutate(allrows)
+            for p in files:
+                p.unlink()
+            (out/'readout'/'all.jsonl').write_text(''.join(json.dumps(r)+'\n' for r in allrows))
+        rc, read = tr._read(root, out, config)
+        print(json.dumps({'case':name, 'exit':rc, 'status':read['status'], 'calibration':read.get('calibration')}))
+        if name == 'valid':
+            original_design = (out/'design.json').read_bytes()
+            changed = [it.Passage('changed-'+p.source, tuple(reversed(p.token_ids))) for p in tip.PASSAGES]
+            mp.setattr(tr.rip, 'load_passages', lambda cfg, base: changed)
+            resumed = tr.rip.execute(cfg, out_dir=out, base_runs=root)
+            print(json.dumps({'case':'changed_filler_resume', 'result':resumed, 'design_unchanged':original_design==(out/'design.json').read_bytes()}))
+
+
+def missing_e2e(rows):
+    present = [r for r in rows if r['e2e_max_abs_diff'] is not None]
+    for r in present[1:]:
+        r['e2e_max_abs_diff'] = None
+
+
+def nan_e2e(rows):
+    [r for r in rows if r['e2e_max_abs_diff'] is not None][-1]['e2e_max_abs_diff'] = float('nan')
+
+
+def negative_retention(rows):
+    for r in rows:
+        if r['policy'] != 'full':
+            r['retained_fraction'] = {'s':-1.0,'n':-1.0}
+
+
+def incomplete_compression_read():
+    with tempfile.TemporaryDirectory() as td:
+        root=Path(td)
+        (root/'scripts').mkdir()
+        shutil.copytree(ROOT/'src',root/'src',ignore=shutil.ignore_patterns('__pycache__'))
+        script=root/'scripts/report_realized_compression.py'
+        shutil.copy2(ROOT/'scripts/report_realized_compression.py',script)
+        runs=root/'runs'
+        for run, presses in [('grid-pp256',['random_pp','streamingllm_pp']),('grid-diss256-tok',['random','streamingllm']),('grid-pp1024',['random_pp','streamingllm_pp']),('grid-diss1024',['random','streamingllm'])]:
+            path=runs/run/'math500'/'one.jsonl'
+            path.parent.mkdir(parents=True,exist_ok=True)
+            path.write_text(''.join(json.dumps({'press':p,'compression_ratio':1.0})+'\n' for p in presses))
+        proc=subprocess.run([sys.executable,str(script),'--runs-root',str(runs)],capture_output=True,text=True)
+        output=root/'results/diag/amendment-s/realized_compression.json'
+        d=json.loads(output.read_text()) if output.exists() else {}
+        print(json.dumps({'case':'compression_one_row_per_cell_no_prior_validation','exit':proc.returncode,'output_written':output.exists(),'counts':[v['n_rows'] for b in d.get('cells',{}).values() for v in b.values()]}))
+
+
+if __name__ == '__main__':
+    forward_check()
+    case('valid')
+    case('missing_63_of_64_e2e', missing_e2e)
+    case('nan_e2e', nan_e2e)
+    case('negative_retention', negative_retention)
+    case('all_compressed_at_floor', budget=5)
+    incomplete_compression_read()

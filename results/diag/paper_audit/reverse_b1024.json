@@ -1,0 +1,1354 @@
+{
+  "budget": 1024,
+  "controls": {
+    "provenance_grid_pp": {
+      "commits": [
+        "1123ad0f1f5f8b14f2db85da5da11085056cf272",
+        "6b4090018007eac7a592cf141f65c6856b14733b",
+        "dbdf8311ab2f92df8b59101f805255701a43b7fd"
+      ],
+      "limitation": "no per-row input-manifest hash; reference inputs are matched to the full-cache bank by (problem, seed) key only",
+      "n_rows": 800,
+      "n_without_runmeta": 0,
+      "passed": true,
+      "schema": "legacy (runmeta + versions; no provenance-v1 identity)",
+      "source_tree_hashes": [
+        "09a0e459f19cb5fee51cf1487d457448261da02bd9f52d5f6d10f6db1013fa53",
+        "71cce05c020b85ead6be8cf76e426b345a9aeef8e3c5b2357437f6a9acde463c",
+        "ed21b939282d7e5fdbc2ebccf21c06cba3ef10e6a2a492ae9813f30bf5f371c1"
+      ],
+      "version_sets": 1
+    },
+    "provenance_readout_pp": {
+      "commits": [
+        "4411eefec6e899c30bf461ad29654bd0cf518594",
+        "6b4090018007eac7a592cf141f65c6856b14733b"
+      ],
+      "limitation": "no per-row input-manifest hash; reference inputs are matched to the full-cache bank by (problem, seed) key only",
+      "n_rows": 800,
+      "n_without_runmeta": 0,
+      "passed": true,
+      "schema": "legacy (runmeta + versions; no provenance-v1 identity)",
+      "source_tree_hashes": [
+        "09a0e459f19cb5fee51cf1487d457448261da02bd9f52d5f6d10f6db1013fa53",
+        "a6a65097f72fba0e7b64eb8b044aec09276db76b1b6254ee2bc0cbe06818b4ba"
+      ],
+      "version_sets": 1
+    },
+    "provenance_reverse_pp": {
+      "commits": [
+        "4411eefec6e899c30bf461ad29654bd0cf518594",
+        "5616630b49d888bb35a589032021993df72d73d7",
+        "d50aa40d2dc5755a7792bdb12748476db4e7d01f",
+        "e8fa7ea9d7b66bdb8a20075d5e77908ff4019d4a"
+      ],
+      "limitation": "no per-row input-manifest hash; reference inputs are matched to the full-cache bank by (problem, seed) key only",
+      "n_rows": 800,
+      "n_without_runmeta": 0,
+      "passed": true,
+      "schema": "legacy (runmeta + versions; no provenance-v1 identity)",
+      "source_tree_hashes": [
+        "32c76af7d9e16a083eaf0fd5ff5478744dfe0efcb0e3ba9ebd7b973237134205",
+        "7211172959178c141b2fcb003b3252d9635fa2badfaa429fc013405eec11388d",
+        "8011a978fb519436c4ff4a8dd24936ca84ebdca0678cab163fd9c3242d469f11",
+        "95add3751ef8f6a586c86558d8e8ad99399839225fc679764bb6738f6d0a3ec0",
+        "a6a65097f72fba0e7b64eb8b044aec09276db76b1b6254ee2bc0cbe06818b4ba"
+      ],
+      "version_sets": 1
+    },
+    "reference_covers_design": {
+      "n_missing": 0,
+      "passed": true
+    }
+  },
+  "dependencies": {
+    "groups": {
+      "analysis_code": {
+        "n_files": 11,
+        "sha256": "9e04f10829023c3f72e804587661905adbca722d2e94d32884e1f1cec67cf43c"
+      },
+      "protection_inputs": {
+        "n_files": 40,
+        "sha256": "91b8df1864c2ef3a1e5ae1929dce2190af3963b1d61df60f71fcdf873daaccbf"
+      },
+      "reverse_rows": {
+        "n_files": 4,
+        "sha256": "2f8ac829e7a6663432764c52ca462e31cec78f6950a9233848f46183ead801cc"
+      },
+      "specs": {
+        "n_files": 7,
+        "sha256": "a74e754b533ee50667d9d006c97ac0227362580ab821d700ec8a3056bd33e592"
+      }
+    },
+    "sha256": "4a33889e42e955e49227249cae46c1cd0007419eb14e29fd9882b30e133990c4"
+  },
+  "inputs": {
+    "grid_base": "grid-diss1024",
+    "grid_base_config": "configs/experiments/grid_math500_diss1024.yaml",
+    "grid_pp": "grid-pp1024",
+    "grid_pp_config": "configs/experiments/grid_math500_pp1024_s1.yaml",
+    "readout_base": [
+      "readout-diss1024"
+    ],
+    "readout_pp": [
+      "readout-pp1024"
+    ],
+    "reverse_base": null,
+    "reverse_pp": "reverse-readout-pp1024"
+  },
+  "per_policy": {
+    "random_pp": {
+      "bounds_full_population": {
+        "D_total": [
+          -0.04749999999999999,
+          -0.04749999999999999
+        ],
+        "interaction": [
+          -0.057499999999999885,
+          0.0025000000000000577
+        ],
+        "readout_on_compressed_trace": [
+          -0.039999999999999925,
+          0.0
+        ],
+        "readout_on_reference_trace": [
+          -0.0025000000000000577,
+          0.01749999999999996
+        ],
+        "residual_forward": [
+          -0.06499999999999995,
+          -0.04499999999999993
+        ],
+        "trajectory_under_full_readout": [
+          -0.04749999999999999,
+          -0.007500000000000062
+        ]
+      },
+      "common_support": {
+        "D_total": {
+          "ci90": [
+            -0.07227891156462585,
+            -0.010204081632653073
+          ],
+          "ci95": [
+            -0.07993197278911568,
+            -0.005952380952381042
+          ],
+          "estimator": "equal-problem, joint problem-cluster bootstrap",
+          "excludes_zero": true,
+          "mean": -0.03996598639455795,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "accuracy": {
+          "cc": {
+            "ci90": [
+              0.8078231292517007,
+              0.9209183673469388
+            ],
+            "ci95": [
+              0.7959183673469388,
+              0.9285714285714286
+            ],
+            "estimator": "equal-problem, joint problem-cluster bootstrap",
+            "excludes_zero": true,
+            "mean": 0.8656462585034013,
+            "n_resamples": 2000,
+            "seed": 0
+          },
+          "cf": {
+            "ci90": [
+              0.8078231292517007,
+              0.9209183673469388
+            ],
+            "ci95": [
+              0.7959183673469388,
+              0.9285714285714286
+            ],
+            "estimator": "equal-problem, joint problem-cluster bootstrap",
+            "excludes_zero": true,
+            "mean": 0.8656462585034013,
+            "n_resamples": 2000,
+            "seed": 0
+          },
+          "fc": {
+            "ci90": [
+              0.8545918367346939,
+              0.9455782312925171
+            ],
+            "ci95": [
+              0.8443877551020408,
+              0.951530612244898
+            ],
+            "estimator": "equal-problem, joint problem-cluster bootstrap",
+            "excludes_zero": true,
+            "mean": 0.9022108843537415,
+            "n_resamples": 2000,
+            "seed": 0
+          },
+          "ff": {
+            "ci90": [
+              0.8562925170068028,
+              0.9481292517006803
+            ],
+            "ci95": [
+              0.8469387755102041,
+              0.9557823129251701
+            ],
+            "estimator": "equal-problem, joint problem-cluster bootstrap",
+            "excludes_zero": true,
+            "mean": 0.9056122448979592,
+            "n_resamples": 2000,
+            "seed": 0
+          }
+        },
+        "interaction": {
+          "ci90": [
+            -0.005102040816326481,
+            0.011904761904761973
+          ],
+          "ci95": [
+            -0.005102040816326592,
+            0.012755102040816313
+          ],
+          "estimator": "equal-problem, joint problem-cluster bootstrap",
+          "excludes_zero": false,
+          "mean": 0.003401360544217691,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "n_conditions": 382,
+        "n_problems": 98,
+        "readout_on_compressed_trace": {
+          "ci90": [
+            0.0,
+            0.0
+          ],
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "estimator": "equal-problem, joint problem-cluster bootstrap",
+          "excludes_zero": false,
+          "mean": 0.0,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "readout_on_reference_trace": {
+          "ci90": [
+            -0.011904761904761973,
+            0.005102040816326481
+          ],
+          "ci95": [
+            -0.012755102040816424,
+            0.005102040816326592
+          ],
+          "estimator": "equal-problem, joint problem-cluster bootstrap",
+          "excludes_zero": false,
+          "mean": -0.003401360544217691,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "residual_forward": {
+          "ci90": [
+            -0.0680272108843537,
+            -0.007653061224489832
+          ],
+          "ci95": [
+            -0.07568027210884354,
+            -0.004251700680272141
+          ],
+          "estimator": "equal-problem, joint problem-cluster bootstrap",
+          "excludes_zero": true,
+          "mean": -0.03656462585034026,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "trajectory_under_full_readout": {
+          "ci90": [
+            -0.07227891156462585,
+            -0.010204081632653073
+          ],
+          "ci95": [
+            -0.07993197278911568,
+            -0.005952380952381042
+          ],
+          "estimator": "equal-problem, joint problem-cluster bootstrap",
+          "excludes_zero": true,
+          "mean": -0.03996598639455795,
+          "n_resamples": 2000,
+          "seed": 0
+        }
+      },
+      "endpoints_cross": false,
+      "forward_support": {
+        "D_total": {
+          "ci90": [
+            -0.08499999999999996,
+            -0.022499999999999964
+          ],
+          "ci95": [
+            -0.09250000000000003,
+            -0.01749999999999996
+          ],
+          "estimator": "equal-problem, joint problem-cluster bootstrap",
+          "excludes_zero": true,
+          "mean": -0.04999999999999993,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "accuracy": {
+          "cc": {
+            "ci90": [
+              0.78,
+              0.89
+            ],
+            "ci95": [
+              0.7675,
+              0.9
+            ],
+            "estimator": "equal-problem, joint problem-cluster bootstrap",
+            "excludes_zero": true,
+            "mean": 0.8375,
+            "n_resamples": 2000,
+            "seed": 0
+          },
+          "fc": {
+            "ci90": [
+              0.835,
+              0.93
+            ],
+            "ci95": [
+              0.825,
+              0.9375
+            ],
+            "estimator": "equal-problem, joint problem-cluster bootstrap",
+            "excludes_zero": true,
+            "mean": 0.8841666666666668,
+            "n_resamples": 2000,
+            "seed": 0
+          },
+          "ff": {
+            "ci90": [
+              0.8375,
+              0.935
+            ],
+            "ci95": [
+              0.8275,
+              0.9425
+            ],
+            "estimator": "equal-problem, joint problem-cluster bootstrap",
+            "excludes_zero": true,
+            "mean": 0.8875,
+            "n_resamples": 2000,
+            "seed": 0
+          }
+        },
+        "n_conditions": 392,
+        "n_problems": 100,
+        "readout_on_reference_trace": {
+          "ci90": [
+            -0.011666666666666714,
+            0.0050000000000000044
+          ],
+          "ci95": [
+            -0.013333333333333308,
+            0.0050000000000000044
+          ],
+          "estimator": "equal-problem, joint problem-cluster bootstrap",
+          "excludes_zero": false,
+          "mean": -0.0033333333333331883,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "residual_forward": {
+          "ci90": [
+            -0.07833333333333337,
+            -0.019166666666666665
+          ],
+          "ci95": [
+            -0.0858333333333332,
+            -0.015000000000000013
+          ],
+          "estimator": "equal-problem, joint problem-cluster bootstrap",
+          "excludes_zero": true,
+          "mean": -0.046666666666666745,
+          "n_resamples": 2000,
+          "seed": 0
+        }
+      },
+      "free_run_full_population": {
+        "D_total": {
+          "ci90": [
+            -0.07999999999999996,
+            -0.020000000000000018
+          ],
+          "ci95": [
+            -0.08749999999999991,
+            -0.015000000000000013
+          ],
+          "estimator": "equal-problem, joint problem-cluster bootstrap",
+          "excludes_zero": true,
+          "mean": -0.04749999999999999,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "accuracy": {
+          "cc": {
+            "ci90": [
+              0.78,
+              0.89
+            ],
+            "ci95": [
+              0.7675,
+              0.9
+            ],
+            "estimator": "equal-problem, joint problem-cluster bootstrap",
+            "excludes_zero": true,
+            "mean": 0.8375,
+            "n_resamples": 2000,
+            "seed": 0
+          },
+          "ff": {
+            "ci90": [
+              0.835,
+              0.9325
+            ],
+            "ci95": [
+              0.825,
+              0.94
+            ],
+            "estimator": "equal-problem, joint problem-cluster bootstrap",
+            "excludes_zero": true,
+            "mean": 0.885,
+            "n_resamples": 2000,
+            "seed": 0
+          }
+        },
+        "n_conditions": 400,
+        "n_problems": 100
+      },
+      "interpretation": "operational replay comparisons: residual_forward is the trajectory contrast under compressed readout, trajectory_under_full_readout the same contrast under full-cache readout; interaction is their difference. Neither is a bound on a causal trajectory share without further assumptions",
+      "population": {
+        "forward_only": [
+          [
+            "test/algebra/892.json",
+            47
+          ],
+          [
+            "test/algebra/892.json",
+            89
+          ],
+          [
+            "test/geometry/434.json",
+            23
+          ],
+          [
+            "test/intermediate_algebra/1454.json",
+            89
+          ],
+          [
+            "test/intermediate_algebra/1849.json",
+            23
+          ],
+          [
+            "test/intermediate_algebra/607.json",
+            89
+          ],
+          [
+            "test/intermediate_algebra/662.json",
+            47
+          ],
+          [
+            "test/intermediate_algebra/662.json",
+            89
+          ],
+          [
+            "test/prealgebra/1139.json",
+            47
+          ],
+          [
+            "test/prealgebra/1646.json",
+            23
+          ]
+        ],
+        "n_common_support": 382,
+        "n_conditions": 400,
+        "n_forward_defined": 392,
+        "n_reverse_defined": 384,
+        "neither": [
+          [
+            "test/intermediate_algebra/1454.json",
+            11
+          ],
+          [
+            "test/intermediate_algebra/1454.json",
+            23
+          ],
+          [
+            "test/intermediate_algebra/1454.json",
+            47
+          ],
+          [
+            "test/intermediate_algebra/662.json",
+            23
+          ],
+          [
+            "test/prealgebra/1139.json",
+            23
+          ],
+          [
+            "test/prealgebra/1139.json",
+            89
+          ]
+        ],
+        "reverse_only": [
+          [
+            "test/intermediate_algebra/1197.json",
+            23
+          ],
+          [
+            "test/prealgebra/1139.json",
+            11
+          ]
+        ]
+      },
+      "practical": {
+        "F_loss": {
+          "ci90": [
+            0.0225,
+            0.085
+          ],
+          "ci95": [
+            0.0175,
+            0.0925
+          ],
+          "estimator": "equal-problem, joint problem-cluster bootstrap",
+          "excludes_zero": true,
+          "mean": 0.05,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "R_loss": {
+          "ci90": [
+            -0.005,
+            0.011666666666666665
+          ],
+          "ci95": [
+            -0.005,
+            0.013333333333333332
+          ],
+          "estimator": "equal-problem, joint problem-cluster bootstrap",
+          "excludes_zero": false,
+          "mean": 0.003333333333333333,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "margin_status": "SENSITIVITY: margins proposed 2026-10-05 after the B=256 result was seen; 0.03 is the declared primary for NEW designs only",
+        "margins": {
+          "0.01": {
+            "false_reassurance": false,
+            "free_run_loss_exceeds_margin": true,
+            "readout_already_lossy": false,
+            "residual_equivalent_within_margin": false
+          },
+          "0.03": {
+            "false_reassurance": false,
+            "free_run_loss_exceeds_margin": false,
+            "readout_already_lossy": false,
+            "residual_equivalent_within_margin": false
+          },
+          "0.05": {
+            "false_reassurance": false,
+            "free_run_loss_exceeds_margin": false,
+            "readout_already_lossy": false,
+            "residual_equivalent_within_margin": false
+          }
+        },
+        "n_conditions": 392,
+        "n_problems": 100,
+        "residual": {
+          "ci90": [
+            -0.07833333333333332,
+            -0.019166666666666665
+          ],
+          "ci95": [
+            -0.08583333333333334,
+            -0.015
+          ],
+          "estimator": "equal-problem, joint problem-cluster bootstrap",
+          "excludes_zero": true,
+          "mean": -0.04666666666666667,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "support": "forward-readout defined"
+      },
+      "reverse_support": {
+        "D_total": {
+          "ci90": [
+            -0.06818181818181812,
+            -0.010101010101010166
+          ],
+          "ci95": [
+            -0.07491582491582494,
+            -0.006734006734006703
+          ],
+          "estimator": "equal-problem, joint problem-cluster bootstrap",
+          "excludes_zero": true,
+          "mean": -0.03703703703703709,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "accuracy": {
+          "cc": {
+            "ci90": [
+              0.7996632996632997,
+              0.9116161616161617
+            ],
+            "ci95": [
+              0.7904040404040404,
+              0.92003367003367
+            ],
+            "estimator": "equal-problem, joint problem-cluster bootstrap",
+            "excludes_zero": true,
+            "mean": 0.8569023569023568,
+            "n_resamples": 2000,
+            "seed": 0
+          },
+          "cf": {
+            "ci90": [
+              0.7996632996632997,
+              0.9116161616161617
+            ],
+            "ci95": [
+              0.7904040404040404,
+              0.92003367003367
+            ],
+            "estimator": "equal-problem, joint problem-cluster bootstrap",
+            "excludes_zero": true,
+            "mean": 0.8569023569023568,
+            "n_resamples": 2000,
+            "seed": 0
+          },
+          "ff": {
+            "ci90": [
+              0.8459595959595959,
+              0.9393939393939394
+            ],
+            "ci95": [
+              0.8367003367003366,
+              0.9486531986531987
+            ],
+            "estimator": "equal-problem, joint problem-cluster bootstrap",
+            "excludes_zero": true,
+            "mean": 0.8939393939393939,
+            "n_resamples": 2000,
+            "seed": 0
+          }
+        },
+        "n_conditions": 384,
+        "n_problems": 99,
+        "readout_on_compressed_trace": {
+          "ci90": [
+            0.0,
+            0.0
+          ],
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "estimator": "equal-problem, joint problem-cluster bootstrap",
+          "excludes_zero": false,
+          "mean": 0.0,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "trajectory_under_full_readout": {
+          "ci90": [
+            -0.06818181818181812,
+            -0.010101010101010166
+          ],
+          "ci95": [
+            -0.07491582491582494,
+            -0.006734006734006703
+          ],
+          "estimator": "equal-problem, joint problem-cluster bootstrap",
+          "excludes_zero": true,
+          "mean": -0.03703703703703709,
+          "n_resamples": 2000,
+          "seed": 0
+        }
+      }
+    },
+    "streamingllm_pp": {
+      "bounds_full_population": {
+        "D_total": [
+          -0.03749999999999998,
+          -0.03749999999999998
+        ],
+        "interaction": [
+          -0.05499999999999994,
+          -0.0050000000000000044
+        ],
+        "readout_on_compressed_trace": [
+          -0.03499999999999992,
+          -0.0050000000000000044
+        ],
+        "readout_on_reference_trace": [
+          0.0,
+          0.020000000000000018
+        ],
+        "residual_forward": [
+          -0.057499999999999996,
+          -0.03749999999999998
+        ],
+        "trajectory_under_full_readout": [
+          -0.03249999999999997,
+          -0.0025000000000000577
+        ]
+      },
+      "common_support": {
+        "D_total": {
+          "ci90": [
+            -0.06615120274914088,
+            -0.014604810996563633
+          ],
+          "ci95": [
+            -0.07302405498281783,
+            -0.010309278350515427
+          ],
+          "estimator": "equal-problem, joint problem-cluster bootstrap",
+          "excludes_zero": true,
+          "mean": -0.03865979381443296,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "accuracy": {
+          "cc": {
+            "ci90": [
+              0.8230240549828178,
+              0.9226804123711341
+            ],
+            "ci95": [
+              0.8144329896907216,
+              0.9286941580756013
+            ],
+            "estimator": "equal-problem, joint problem-cluster bootstrap",
+            "excludes_zero": true,
+            "mean": 0.8762886597938144,
+            "n_resamples": 2000,
+            "seed": 0
+          },
+          "cf": {
+            "ci90": [
+              0.8290378006872853,
+              0.9278350515463918
+            ],
+            "ci95": [
+              0.8187285223367698,
+              0.9347079037800687
+            ],
+            "estimator": "equal-problem, joint problem-cluster bootstrap",
+            "excludes_zero": true,
+            "mean": 0.8814432989690721,
+            "n_resamples": 2000,
+            "seed": 0
+          },
+          "fc": {
+            "ci90": [
+              0.8702749140893471,
+              0.95446735395189
+            ],
+            "ci95": [
+              0.8616838487972508,
+              0.9596219931271477
+            ],
+            "estimator": "equal-problem, joint problem-cluster bootstrap",
+            "excludes_zero": true,
+            "mean": 0.9149484536082474,
+            "n_resamples": 2000,
+            "seed": 0
+          },
+          "ff": {
+            "ci90": [
+              0.8685567010309279,
+              0.9553264604810997
+            ],
+            "ci95": [
+              0.8599656357388317,
+              0.961340206185567
+            ],
+            "estimator": "equal-problem, joint problem-cluster bootstrap",
+            "excludes_zero": true,
+            "mean": 0.9149484536082474,
+            "n_resamples": 2000,
+            "seed": 0
+          }
+        },
+        "interaction": {
+          "ci90": [
+            -0.012886597938144395,
+            0.002577319587628857
+          ],
+          "ci95": [
+            -0.015463917525773252,
+            0.005154639175257714
+          ],
+          "estimator": "equal-problem, joint problem-cluster bootstrap",
+          "excludes_zero": false,
+          "mean": -0.005154639175257714,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "n_conditions": 383,
+        "n_problems": 97,
+        "readout_on_compressed_trace": {
+          "ci90": [
+            -0.012886597938144284,
+            0.0
+          ],
+          "ci95": [
+            -0.012886597938144395,
+            0.0
+          ],
+          "estimator": "equal-problem, joint problem-cluster bootstrap",
+          "excludes_zero": false,
+          "mean": -0.005154639175257714,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "readout_on_reference_trace": {
+          "ci90": [
+            -0.005154639175257825,
+            0.005154639175257825
+          ],
+          "ci95": [
+            -0.0077319587628865705,
+            0.0077319587628865705
+          ],
+          "estimator": "equal-problem, joint problem-cluster bootstrap",
+          "excludes_zero": false,
+          "mean": 0.0,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "residual_forward": {
+          "ci90": [
+            -0.06529209621993126,
+            -0.014604810996563522
+          ],
+          "ci95": [
+            -0.07302405498281783,
+            -0.011168384879725046
+          ],
+          "estimator": "equal-problem, joint problem-cluster bootstrap",
+          "excludes_zero": true,
+          "mean": -0.03865979381443296,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "trajectory_under_full_readout": {
+          "ci90": [
+            -0.060996563573883056,
+            -0.010309278350515427
+          ],
+          "ci95": [
+            -0.06701030927835061,
+            -0.006013745704467333
+          ],
+          "estimator": "equal-problem, joint problem-cluster bootstrap",
+          "excludes_zero": true,
+          "mean": -0.03350515463917525,
+          "n_resamples": 2000,
+          "seed": 0
+        }
+      },
+      "endpoints_cross": false,
+      "forward_support": {
+        "D_total": {
+          "ci90": [
+            -0.06500000000000006,
+            -0.01749999999999996
+          ],
+          "ci95": [
+            -0.07000000000000006,
+            -0.015000000000000013
+          ],
+          "estimator": "equal-problem, joint problem-cluster bootstrap",
+          "excludes_zero": true,
+          "mean": -0.039999999999999925,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "accuracy": {
+          "cc": {
+            "ci90": [
+              0.795,
+              0.8975
+            ],
+            "ci95": [
+              0.78,
+              0.905
+            ],
+            "estimator": "equal-problem, joint problem-cluster bootstrap",
+            "excludes_zero": true,
+            "mean": 0.8475,
+            "n_resamples": 2000,
+            "seed": 0
+          },
+          "fc": {
+            "ci90": [
+              0.84,
+              0.9325
+            ],
+            "ci95": [
+              0.83,
+              0.94
+            ],
+            "estimator": "equal-problem, joint problem-cluster bootstrap",
+            "excludes_zero": true,
+            "mean": 0.8875,
+            "n_resamples": 2000,
+            "seed": 0
+          },
+          "ff": {
+            "ci90": [
+              0.8375,
+              0.935
+            ],
+            "ci95": [
+              0.8275,
+              0.9425
+            ],
+            "estimator": "equal-problem, joint problem-cluster bootstrap",
+            "excludes_zero": true,
+            "mean": 0.8875,
+            "n_resamples": 2000,
+            "seed": 0
+          }
+        },
+        "n_conditions": 392,
+        "n_problems": 100,
+        "readout_on_reference_trace": {
+          "ci90": [
+            -0.0050000000000000044,
+            0.0050000000000000044
+          ],
+          "ci95": [
+            -0.007500000000000062,
+            0.007499999999999951
+          ],
+          "estimator": "equal-problem, joint problem-cluster bootstrap",
+          "excludes_zero": false,
+          "mean": 0.0,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "residual_forward": {
+          "ci90": [
+            -0.06500000000000006,
+            -0.01749999999999996
+          ],
+          "ci95": [
+            -0.06999999999999995,
+            -0.012500000000000067
+          ],
+          "estimator": "equal-problem, joint problem-cluster bootstrap",
+          "excludes_zero": true,
+          "mean": -0.039999999999999925,
+          "n_resamples": 2000,
+          "seed": 0
+        }
+      },
+      "free_run_full_population": {
+        "D_total": {
+          "ci90": [
+            -0.06000000000000005,
+            -0.01749999999999996
+          ],
+          "ci95": [
+            -0.06499999999999995,
+            -0.014999999999999902
+          ],
+          "estimator": "equal-problem, joint problem-cluster bootstrap",
+          "excludes_zero": true,
+          "mean": -0.03749999999999998,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "accuracy": {
+          "cc": {
+            "ci90": [
+              0.795,
+              0.8975
+            ],
+            "ci95": [
+              0.78,
+              0.905
+            ],
+            "estimator": "equal-problem, joint problem-cluster bootstrap",
+            "excludes_zero": true,
+            "mean": 0.8475,
+            "n_resamples": 2000,
+            "seed": 0
+          },
+          "ff": {
+            "ci90": [
+              0.835,
+              0.9325
+            ],
+            "ci95": [
+              0.825,
+              0.94
+            ],
+            "estimator": "equal-problem, joint problem-cluster bootstrap",
+            "excludes_zero": true,
+            "mean": 0.885,
+            "n_resamples": 2000,
+            "seed": 0
+          }
+        },
+        "n_conditions": 400,
+        "n_problems": 100
+      },
+      "interpretation": "operational replay comparisons: residual_forward is the trajectory contrast under compressed readout, trajectory_under_full_readout the same contrast under full-cache readout; interaction is their difference. Neither is a bound on a causal trajectory share without further assumptions",
+      "population": {
+        "forward_only": [
+          [
+            "test/geometry/434.json",
+            23
+          ],
+          [
+            "test/intermediate_algebra/1197.json",
+            11
+          ],
+          [
+            "test/intermediate_algebra/1454.json",
+            89
+          ],
+          [
+            "test/intermediate_algebra/607.json",
+            89
+          ],
+          [
+            "test/intermediate_algebra/662.json",
+            11
+          ],
+          [
+            "test/intermediate_algebra/662.json",
+            47
+          ],
+          [
+            "test/intermediate_algebra/662.json",
+            89
+          ],
+          [
+            "test/prealgebra/1139.json",
+            47
+          ],
+          [
+            "test/prealgebra/1646.json",
+            47
+          ]
+        ],
+        "n_common_support": 383,
+        "n_conditions": 400,
+        "n_forward_defined": 392,
+        "n_reverse_defined": 388,
+        "neither": [
+          [
+            "test/intermediate_algebra/662.json",
+            23
+          ],
+          [
+            "test/prealgebra/1139.json",
+            11
+          ],
+          [
+            "test/prealgebra/1139.json",
+            89
+          ]
+        ],
+        "reverse_only": [
+          [
+            "test/intermediate_algebra/1197.json",
+            23
+          ],
+          [
+            "test/intermediate_algebra/1454.json",
+            11
+          ],
+          [
+            "test/intermediate_algebra/1454.json",
+            23
+          ],
+          [
+            "test/intermediate_algebra/1454.json",
+            47
+          ],
+          [
+            "test/prealgebra/1139.json",
+            23
+          ]
+        ]
+      },
+      "practical": {
+        "F_loss": {
+          "ci90": [
+            0.0175,
+            0.065
+          ],
+          "ci95": [
+            0.015,
+            0.07
+          ],
+          "estimator": "equal-problem, joint problem-cluster bootstrap",
+          "excludes_zero": true,
+          "mean": 0.04,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "R_loss": {
+          "ci90": [
+            -0.005,
+            0.005
+          ],
+          "ci95": [
+            -0.0075,
+            0.0075
+          ],
+          "estimator": "equal-problem, joint problem-cluster bootstrap",
+          "excludes_zero": false,
+          "mean": 0.0,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "margin_status": "SENSITIVITY: margins proposed 2026-10-05 after the B=256 result was seen; 0.03 is the declared primary for NEW designs only",
+        "margins": {
+          "0.01": {
+            "false_reassurance": true,
+            "free_run_loss_exceeds_margin": true,
+            "readout_already_lossy": false,
+            "residual_equivalent_within_margin": false
+          },
+          "0.03": {
+            "false_reassurance": false,
+            "free_run_loss_exceeds_margin": false,
+            "readout_already_lossy": false,
+            "residual_equivalent_within_margin": false
+          },
+          "0.05": {
+            "false_reassurance": false,
+            "free_run_loss_exceeds_margin": false,
+            "readout_already_lossy": false,
+            "residual_equivalent_within_margin": false
+          }
+        },
+        "n_conditions": 392,
+        "n_problems": 100,
+        "residual": {
+          "ci90": [
+            -0.065,
+            -0.0175
+          ],
+          "ci95": [
+            -0.07,
+            -0.0125
+          ],
+          "estimator": "equal-problem, joint problem-cluster bootstrap",
+          "excludes_zero": true,
+          "mean": -0.04,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "support": "forward-readout defined"
+      },
+      "reverse_support": {
+        "D_total": {
+          "ci90": [
+            -0.05723905723905731,
+            -0.014309764309764383
+          ],
+          "ci95": [
+            -0.06228956228956217,
+            -0.010942760942761032
+          ],
+          "estimator": "equal-problem, joint problem-cluster bootstrap",
+          "excludes_zero": true,
+          "mean": -0.034511784511784604,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "accuracy": {
+          "cc": {
+            "ci90": [
+              0.8047138047138047,
+              0.9107744107744108
+            ],
+            "ci95": [
+              0.7954545454545454,
+              0.9183501683501684
+            ],
+            "estimator": "equal-problem, joint problem-cluster bootstrap",
+            "excludes_zero": true,
+            "mean": 0.8585858585858586,
+            "n_resamples": 2000,
+            "seed": 0
+          },
+          "cf": {
+            "ci90": [
+              0.8106060606060606,
+              0.9158249158249159
+            ],
+            "ci95": [
+              0.8005050505050505,
+              0.9242424242424242
+            ],
+            "estimator": "equal-problem, joint problem-cluster bootstrap",
+            "excludes_zero": true,
+            "mean": 0.8636363636363636,
+            "n_resamples": 2000,
+            "seed": 0
+          },
+          "ff": {
+            "ci90": [
+              0.8442760942760942,
+              0.9393939393939394
+            ],
+            "ci95": [
+              0.8333333333333334,
+              0.9478114478114478
+            ],
+            "estimator": "equal-problem, joint problem-cluster bootstrap",
+            "excludes_zero": true,
+            "mean": 0.8930976430976432,
+            "n_resamples": 2000,
+            "seed": 0
+          }
+        },
+        "n_conditions": 388,
+        "n_problems": 99,
+        "readout_on_compressed_trace": {
+          "ci90": [
+            -0.012626262626262541,
+            0.0
+          ],
+          "ci95": [
+            -0.012626262626262652,
+            0.0
+          ],
+          "estimator": "equal-problem, joint problem-cluster bootstrap",
+          "excludes_zero": false,
+          "mean": -0.005050505050505083,
+          "n_resamples": 2000,
+          "seed": 0
+        },
+        "trajectory_under_full_readout": {
+          "ci90": [
+            -0.051346801346801474,
+            -0.0092592592592593
+          ],
+          "ci95": [
+            -0.05723905723905709,
+            -0.005892255892255949
+          ],
+          "estimator": "equal-problem, joint problem-cluster bootstrap",
+          "excludes_zero": true,
+          "mean": -0.02946127946127952,
+          "n_resamples": 2000,
+          "seed": 0
+        }
+      }
+    }
+  },
+  "population": {
+    "full_cache": {
+      "duplicated": [],
+      "malformed": {},
+      "missing": [],
+      "n_expected": 400,
+      "n_rows": 400,
+      "n_unique_expected_present": 400,
+      "status": "COMPLETE",
+      "unexpected": []
+    },
+    "grid_pp": {
+      "duplicated": [],
+      "malformed": {},
+      "missing": [],
+      "n_expected": 800,
+      "n_rows": 800,
+      "n_unique_expected_present": 800,
+      "status": "COMPLETE",
+      "unexpected": []
+    },
+    "readout_pp": {
+      "duplicated": [],
+      "malformed": {},
+      "missing": [],
+      "n_expected": 800,
+      "n_rows": 800,
+      "n_unique_expected_present": 800,
+      "status": "COMPLETE",
+      "unexpected": []
+    },
+    "reverse_pp": {
+      "duplicated": [],
+      "malformed": {},
+      "missing": [],
+      "n_expected": 800,
+      "n_rows": 800,
+      "n_unique_expected_present": 800,
+      "status": "COMPLETE",
+      "unexpected": []
+    }
+  },
+  "protection_by_direction": {
+    "random_pp": "NOT AVAILABLE: no unprotected reverse arm at this budget (not registered); the protected 2 x 2 is reported alone",
+    "streamingllm_pp": "NOT AVAILABLE: no unprotected reverse arm at this budget (not registered); the protected 2 x 2 is reported alone"
+  },
+  "read": "protocol audit: operational 2 x 2 (forward and reverse readout)",
+  "registered_inference": {
+    "alpha": 0.05,
+    "estimand": "protected forward/reverse interaction on the declared common support; missing-readout bounds are reported separately",
+    "family_size": 2,
+    "members": {
+      "random_pp": {
+        "df": 97,
+        "mean": 0.003401360544217687,
+        "n_conditions": 382,
+        "n_problems": 98,
+        "p": 0.49552433097824033,
+        "p_holm": 0.6396489220055733,
+        "reject_at_alpha": false,
+        "sd": 0.04921835675728107,
+        "se": 0.0049718048317045965,
+        "status": "TESTED",
+        "t": 0.6841299406057983
+      },
+      "streamingllm_pp": {
+        "df": 96,
+        "mean": -0.005154639175257732,
+        "n_conditions": 383,
+        "n_problems": 97,
+        "p": 0.31982446100278666,
+        "p_holm": 0.6396489220055733,
+        "reject_at_alpha": false,
+        "sd": 0.05076730825668095,
+        "se": 0.005154639175257732,
+        "status": "TESTED",
+        "t": -1.0
+      }
+    },
+    "note": "bootstrap CIs elsewhere in this read are DESCRIPTIVE; this block is the registered family-level test",
+    "procedure": "two-sided one-sample t test of problem-level contrasts (seeds averaged within problem), Holm over the family",
+    "status": "REGISTERED (procedure frozen 2026-10-14 before these data existed)"
+  },
+  "registration": "NEW ANALYSIS 2026-10-05 (execution plan WP1); not an Amendment S read and relabels nothing",
+  "reproduce": "python scripts/report_protocol_audit.py --runs-root /home/sk10741/kvcache-storage/runs reverse --budget 1024",
+  "retired_previous_output": null,
+  "status": "FINAL",
+  "sufficient_statistics_sha256": "b2babaa8b1794fb8032ad40aaec542d1757cb56852bbd6d25c857072f53e43e7",
+  "sufficient_statistics_tsv": "reverse_b1024.conditions.tsv"
+}

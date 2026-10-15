@@ -2,80 +2,112 @@
   "cells": {
     "b1024": {
       "random": {
-        "definition": "B / (prompt + generated tokens), capped at 1, per row",
         "mean": 0.4928978729341884,
         "median": 0.4632455298396124,
-        "n_never_compressed": 31,
+        "n_budget_relaxed": 0,
+        "n_ratio_one": 31,
         "n_rows": 400,
-        "never_compressed_share": 0.0775,
+        "ratio_one_share": 0.0775,
         "run": "grid-diss1024"
       },
       "random_pp": {
-        "definition": "B / (prompt + generated tokens), capped at 1, per row",
         "mean": 0.48243954358708663,
         "median": 0.43353214932780404,
-        "n_never_compressed": 31,
+        "n_budget_relaxed": 0,
+        "n_ratio_one": 31,
         "n_rows": 400,
-        "never_compressed_share": 0.0775,
+        "ratio_one_share": 0.0775,
         "run": "grid-pp1024"
       },
       "streamingllm": {
-        "definition": "B / (prompt + generated tokens), capped at 1, per row",
         "mean": 0.49237879547323943,
         "median": 0.4931388919811496,
-        "n_never_compressed": 31,
+        "n_budget_relaxed": 0,
+        "n_ratio_one": 31,
         "n_rows": 400,
-        "never_compressed_share": 0.0775,
+        "ratio_one_share": 0.0775,
         "run": "grid-diss1024"
       },
       "streamingllm_pp": {
-        "definition": "B / (prompt + generated tokens), capped at 1, per row",
         "mean": 0.5092492592060145,
         "median": 0.4872716864992745,
-        "n_never_compressed": 31,
+        "n_budget_relaxed": 0,
+        "n_ratio_one": 31,
         "n_rows": 400,
-        "never_compressed_share": 0.0775,
+        "ratio_one_share": 0.0775,
         "run": "grid-pp1024"
       }
     },
     "b256": {
       "random": {
-        "definition": "B / (prompt + generated tokens), capped at 1, per row",
         "mean": 0.11865436344794178,
         "median": 0.06935293229226829,
-        "n_never_compressed": 0,
+        "n_budget_relaxed": 0,
+        "n_ratio_one": 0,
         "n_rows": 400,
-        "never_compressed_share": 0.0,
+        "ratio_one_share": 0.0,
         "run": "grid-diss256-tok"
       },
       "random_pp": {
-        "definition": "B / (prompt + generated tokens), capped at 1, per row",
+        "effective": {
+          "mean": 0.1271051024012088,
+          "median": 0.09746820176455853,
+          "n_ratio_one": 0,
+          "n_rows": 400,
+          "ratio_one_share": 0.0
+        },
         "mean": 0.12687844405638016,
         "median": 0.09746820176455853,
-        "n_never_compressed": 0,
+        "n_budget_relaxed": 12,
+        "n_ratio_one": 0,
         "n_rows": 400,
-        "never_compressed_share": 0.0,
+        "ratio_one_share": 0.0,
         "run": "grid-pp256"
       },
       "streamingllm": {
-        "definition": "B / (prompt + generated tokens), capped at 1, per row",
         "mean": 0.13317102557789393,
         "median": 0.09278849637728723,
-        "n_never_compressed": 0,
+        "n_budget_relaxed": 0,
+        "n_ratio_one": 0,
         "n_rows": 400,
-        "never_compressed_share": 0.0,
+        "ratio_one_share": 0.0,
         "run": "grid-diss256-tok"
       },
       "streamingllm_pp": {
-        "definition": "B / (prompt + generated tokens), capped at 1, per row",
+        "effective": {
+          "mean": 0.13886741215463266,
+          "median": 0.0978971074259308,
+          "n_ratio_one": 0,
+          "n_rows": 400,
+          "ratio_one_share": 0.0
+        },
         "mean": 0.138660108161324,
         "median": 0.0978971074259308,
-        "n_never_compressed": 0,
+        "n_budget_relaxed": 12,
+        "n_ratio_one": 0,
         "n_rows": 400,
-        "never_compressed_share": 0.0,
+        "ratio_one_share": 0.0,
         "run": "grid-pp256"
       }
     }
   },
-  "read": "realized compression of the S.1 grid cells"
+  "definition": "nominal-budget ratio min(1, B / (prompt + generated tokens)) per row: a budget-to-sequence-length ratio, not live occupancy, K/V bytes or an eviction count",
+  "evidence": {
+    "b1024": {
+      "problems": [],
+      "s1_dependencies_sha256": "900f0bd9c7066e5dbdb63f0368c06a0cde1434d4719157cb25b94f849f1eaa37",
+      "s1_read": "protection_b1024.json",
+      "status": "FINAL"
+    },
+    "b256": {
+      "problems": [],
+      "s1_dependencies_sha256": "e20b98d0829eabbef59c10e3ffc03f67a7f4ab60286ce5616b7797d2fe888224",
+      "s1_read": "protection_b256.json",
+      "status": "FINAL"
+    }
+  },
+  "ratio_one": "ratio 1 = the sequence never exceeded the budget (nothing pruned, by construction); ratio < 1 does not prove a prune (periodic pruning, no per-row prune record), so n_ratio_one is a LOWER bound on never-compressed",
+  "read": "nominal-budget compression of the S.1 grid cells",
+  "retired_previous_output": "realized_compression.json.superseded-1792097063",
+  "status": "FINAL"
 }

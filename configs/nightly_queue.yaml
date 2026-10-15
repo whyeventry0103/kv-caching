@@ -1320,8 +1320,11 @@ jobs:
     requires: null
     extra_args: ["--allow-model-download"]  # ~8 GB, first fetch of the pinned revision
 
+  # Hold released 2026-10-16 per its own registered condition (PREREGISTRATION
+  # 2026-10-14 item 4): grid-pp1024, readout-pp1024 and reverse-readout-pp1024
+  # complete; protection_b1024, consequence, decision_b1024 and reverse_b1024
+  # FINAL. Queue order keeps both M5 grids ahead of these jobs.
   - name: grid-diss256-qwen3-4b
-    blocked: "Owner decision 2026-10-06, ordering made explicit 2026-10-14 (Meeting 5 review): held until grid-pp1024, readout-pp1024 AND reverse-readout-pp1024 are complete and the B=1024 reads (report_s protection --budget 1024, consequence, report_protocol_audit decision/reverse --budget 1024) are FINAL. Then remove this line; the approved exploratory Qwen work resumes."
     command: grid
     config: configs/experiments/grid_math500_diss256_qwen3_4b.yaml
     run_name: grid-diss256-qwen3-4b
@@ -1333,7 +1336,6 @@ jobs:
     requires: fc-qwen3-4b
 
   - name: readout-diss256-qwen3-4b
-    blocked: "Owner decision 2026-10-06, ordering made explicit 2026-10-14 (Meeting 5 review): held until grid-pp1024, readout-pp1024 AND reverse-readout-pp1024 are complete and the B=1024 reads (report_s protection --budget 1024, consequence, report_protocol_audit decision/reverse --budget 1024) are FINAL. Then remove this line; the approved exploratory Qwen work resumes."
     command: replay
     config: configs/experiments/readout_math500_diss256_qwen3_4b.yaml
     run_name: readout-diss256-qwen3-4b
@@ -1345,7 +1347,6 @@ jobs:
     requires: fc-qwen3-4b
 
   - name: reverse-readout-diss256-qwen3-4b
-    blocked: "Owner decision 2026-10-06, ordering made explicit 2026-10-14 (Meeting 5 review): held until grid-pp1024, readout-pp1024 AND reverse-readout-pp1024 are complete and the B=1024 reads (report_s protection --budget 1024, consequence, report_protocol_audit decision/reverse --budget 1024) are FINAL. Then remove this line; the approved exploratory Qwen work resumes."
     command: replay
     config: configs/experiments/reverse_readout_diss256_qwen3_4b.yaml
     run_name: reverse-readout-diss256-qwen3-4b

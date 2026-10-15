@@ -137,6 +137,14 @@ def _run_attached(
         k: retained_fraction(retained, (base + a, base + b))
         for k, (a, b) in variant.fact_spans.items()
     }
+    if (
+        not isinstance(press, NoPress)
+        and retained is None
+        and prunes_at_checkpoint == 0
+    ):
+        # an evicting arm that never pruned keeps no position maps; zero prunes
+        # IS the evidence that every span position is still held
+        spans = {k: 1.0 for k in spans}
     out = {}
     with press.enabled(False):
         for q in queries:
@@ -232,6 +240,77 @@ def run_context(
                         }
                     )
     return rows
+
+
+def measurement_schedule(
+    variants_by_context: Mapping[str, Sequence[Variant]], queries: Sequence[str]
+) -> dict[str, Any]:
+    """The schedule ``run_variant`` measures, frozen into the design: the
+    end-to-end control on the LAST query, and each context's fact spans (one
+    layout per context -- every variant must agree)."""
+    spans: dict[str, dict[str, list[int]]] = {}
+    for ctx, variants in variants_by_context.items():
+        layouts = {
+            json.dumps({k: list(s) for k, s in v.fact_spans.items()}, sort_keys=True)
+            for v in variants
+        }
+        if len(layouts) != 1:
+            raise ValueError(f"context {ctx}: variants disagree on fact spans")
+        spans[ctx] = json.loads(layouts.pop())
+    return {"e2e_query": list(queries)[-1], "fact_spans": spans}
+
+
+def finished_blocks(
+    existing: Sequence[Mapping[str, Any]],
+    *,
+    contexts: Sequence[str],
+    policies: Sequence[str],
+    eviction_seeds: Sequence[int],
+    queries: Sequence[str],
+) -> tuple[set[str], list[str]]:
+    """(contexts whose stored rows are exactly complete, problems).
+
+    A block counts as finished only when it holds every (policy, query,
+    eviction seed, S, N) row exactly once. Blocks are written atomically, so an
+    incomplete or foreign block is evidence of damage: it is a problem (the
+    resume refuses), never silently skipped or silently topped up.
+    """
+    from kvcache.information_tasks import K
+
+    want = {
+        (p, q, int(e), s, n)
+        for p in policies
+        for q in queries
+        for e in eviction_seeds
+        for s in range(K)
+        for n in range(K)
+    }
+    got: dict[str, list[tuple]] = {}
+    problems: list[str] = []
+    for r in existing:
+        ctx = str(r.get("context_id"))
+        if ctx not in contexts:
+            problems.append(f"stored rows of context {ctx} are not in the design")
+            continue
+        got.setdefault(ctx, []).append(
+            (
+                r.get("policy"),
+                r.get("query"),
+                r.get("eviction_seed"),
+                r.get("s"),
+                r.get("n"),
+            )
+        )
+    done = set()
+    for ctx, keys in sorted(got.items()):
+        if len(keys) == len(set(keys)) and set(keys) == want:
+            done.add(ctx)
+        else:
+            problems.append(
+                f"stored block {ctx} is incomplete or duplicated "
+                f"({len(keys)} rows, {len(want)} expected)"
+            )
+    return done, problems
 
 
 def resume_problems(

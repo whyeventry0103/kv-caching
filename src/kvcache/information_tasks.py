@@ -32,7 +32,8 @@ Nothing here touches a model; a runner feeds ``Variant`` token ids.
 from __future__ import annotations
 
 import hashlib
-from collections.abc import Callable, Sequence
+import json
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -239,6 +240,64 @@ def render(
 
 def all_variants(block: Block, **kw: Any) -> list[Variant]:
     return [render(block, s, n, **kw) for s in range(K) for n in range(K)]
+
+
+def ids_sha256(ids: Sequence[int]) -> str:
+    return hashlib.sha256(json.dumps([int(t) for t in ids]).encode()).hexdigest()
+
+
+def input_manifest(
+    blocks: Sequence[Block],
+    variants: Mapping[str, Sequence[Variant]],
+    *,
+    passages: Sequence[Passage],
+    symbol_ids: Sequence[int],
+) -> dict[str, Any]:
+    """The ACTUAL selected inputs of a run (review of 5616630, R2): every
+    filler passage (source, length, token-id hash), every block definition
+    (aliases, order, filler segments, skipped sources) and the token-id hashes
+    of every rendered variant's instruction, body and queries. Hashing this --
+    not the config, the block ids or the code -- is what binds a run to its
+    inputs: changed filler with the same config changes the manifest."""
+    return {
+        "schema": "info-input-manifest-v1",
+        "symbol_ids": [int(t) for t in symbol_ids],
+        "passages": [
+            {
+                "source": p.source,
+                "n_tokens": len(p.token_ids),
+                "token_ids_sha256": ids_sha256(p.token_ids),
+            }
+            for p in passages
+        ],
+        "blocks": [
+            {
+                "block_id": b.block_id,
+                "s_alias": b.s_alias,
+                "n_alias": b.n_alias,
+                "s_first": b.s_first,
+                "filler": [list(seg) for seg in b.filler],
+                "skipped_sources": list(b.skipped_sources),
+            }
+            for b in blocks
+        ],
+        "variants": {
+            b.block_id: [
+                {
+                    "s": v.s,
+                    "n": v.n,
+                    "prompt_sha256": ids_sha256(v.prompt_ids),
+                    "body_sha256": ids_sha256(v.body_ids),
+                    "query_sha256": {
+                        q: ids_sha256(ids) for q, ids in sorted(v.query_ids.items())
+                    },
+                    "fact_spans": {k: list(s) for k, s in sorted(v.fact_spans.items())},
+                }
+                for v in variants[b.block_id]
+            ]
+            for b in blocks
+        },
+    }
 
 
 def split_blocks(

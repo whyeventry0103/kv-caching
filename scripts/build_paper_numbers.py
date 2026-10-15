@@ -1953,22 +1953,28 @@ def build_catalogue() -> list[Entry]:
                         f"S.1 b1024 {_q} flip mass ({_arm}), {_pp}",
                     )
     _rc = DIAG / "amendment-s" / "realized_compression.json"
-    if _rc.exists():
+    # nominal-budget ratios (review of 5616630, R4): ratio-1 counts are a lower
+    # bound on never-compressed conditions; only a FINAL, evidence-bound read
+    if _rc.exists() and _load(_rc).get("status") == "FINAL":
         _rcd, _rcr = _load(_rc), _rc.relative_to(PROJECT_ROOT)
         for _bud, _rcells in _rcd["cells"].items():
             for _pp, _c in _rcells.items():
-                for _f in (
-                    "mean",
-                    "median",
-                    "n_never_compressed",
-                    "never_compressed_share",
-                ):
+                for _f in ("mean", "median", "n_ratio_one", "ratio_one_share"):
                     add(
                         f"s1.realized.{_bud}.{_pp}.{_f}",
                         _c[_f],
                         f"{_rcr} :: cells.{_bud}.{_pp}.{_f}",
-                        f"realized compression {_f}, {_bud} {_pp}",
+                        f"nominal-budget ratio {_f}, {_bud} {_pp}",
                     )
+                if "effective" in _c:
+                    for _f in ("mean", "median"):
+                        add(
+                            f"s1.realized.{_bud}.{_pp}.effective.{_f}",
+                            _c["effective"][_f],
+                            f"{_rcr} :: cells.{_bud}.{_pp}.effective.{_f}",
+                            f"effective-budget ratio {_f} (S.1 relaxation), "
+                            f"{_bud} {_pp}",
+                        )
     _dc4 = DIAG / "paper_audit" / "decision_b1024.json"
     if _dc4.exists():
         _dc4d, _dc4p = _load(_dc4), _dc4.relative_to(PROJECT_ROOT)
@@ -2067,6 +2073,80 @@ def build_catalogue() -> list[Entry]:
                         f"{_rvp} :: per_policy.{_pp}.common_support.{_c}.ci95[{_i}]",
                         f"2x2 {_c} CI bound, {_pp}",
                     )
+    # P1: the protected B=1024 reverse read (2026-10-16), its REGISTERED
+    # problem-level t test + Holm, and the 2x2 on the common support
+    _rv4 = DIAG / "paper_audit" / "reverse_b1024.json"
+    if _rv4.exists():
+        _rv4d, _rv4p = _load(_rv4), _rv4.relative_to(PROJECT_ROOT)
+        for _pp, _m in _rv4d["registered_inference"]["members"].items():
+            for _f in ("mean", "t", "df", "p", "p_holm", "n_problems", "n_conditions"):
+                add(
+                    f"audit.b1024.{_pp}.registered.{_f}",
+                    _m[_f],
+                    f"{_rv4p} :: registered_inference.members.{_pp}.{_f}",
+                    f"registered B=1024 interaction t test {_f}, {_pp}",
+                )
+        for _pp, _blk in _rv4d["per_policy"].items():
+            _cs = _blk["common_support"]
+            for _c in (
+                "residual_forward",
+                "trajectory_under_full_readout",
+                "readout_on_compressed_trace",
+                "readout_on_reference_trace",
+                "interaction",
+            ):
+                add(
+                    f"audit.b1024.{_pp}.common.{_c}.mean",
+                    _cs[_c]["mean"],
+                    f"{_rv4p} :: per_policy.{_pp}.common_support.{_c}.mean",
+                    f"B=1024 2x2 {_c} on the common support, {_pp}",
+                )
+                for _i, _b in enumerate(_cs[_c]["ci95"]):
+                    add(
+                        f"audit.b1024.{_pp}.common.{_c}.ci{'lo' if _i == 0 else 'hi'}",
+                        _b,
+                        f"{_rv4p} :: per_policy.{_pp}.common_support.{_c}.ci95[{_i}]",
+                        f"B=1024 2x2 {_c} CI bound, {_pp}",
+                    )
+            for _i, _b in enumerate(_blk["bounds_full_population"]["interaction"]):
+                _end = "lo" if _i == 0 else "hi"
+                add(
+                    f"audit.b1024.{_pp}.bounds.interaction.{_end}",
+                    _b,
+                    f"{_rv4p} :: per_policy.{_pp}.bounds_full_population"
+                    f".interaction[{_i}]",
+                    f"B=1024 worst-case interaction bound (identification), {_pp}",
+                )
+            _rs = _blk["reverse_support"]
+            _t = _rs["trajectory_under_full_readout"]
+            add(
+                f"audit.b1024.{_pp}.reverse.trajectory.mean",
+                _t["mean"],
+                f"{_rv4p} :: per_policy.{_pp}.reverse_support"
+                ".trajectory_under_full_readout.mean",
+                f"B=1024 trajectory contrast under full readout (own support), {_pp}",
+            )
+            for _i, _b in enumerate(_t["ci95"]):
+                _end = "lo" if _i == 0 else "hi"
+                add(
+                    f"audit.b1024.{_pp}.reverse.trajectory.ci{_end}",
+                    _b,
+                    f"{_rv4p} :: per_policy.{_pp}.reverse_support"
+                    f".trajectory_under_full_readout.ci95[{_i}]",
+                    f"B=1024 reverse trajectory contrast CI bound, {_pp}",
+                )
+            add(
+                f"audit.b1024.{_pp}.reverse.n_problems",
+                _rs["n_problems"],
+                f"{_rv4p} :: per_policy.{_pp}.reverse_support.n_problems",
+                f"B=1024 reverse-readout support problems, {_pp}",
+            )
+            add(
+                f"audit.b1024.{_pp}.reverse.n",
+                _rs["n_conditions"],
+                f"{_rv4p} :: per_policy.{_pp}.reverse_support.n_conditions",
+                f"B=1024 reverse-readout support, {_pp}",
+            )
     _dc = DIAG / "paper_audit" / "decision_b256.json"
     if _dc.exists():
         _dcd, _dcp = _load(_dc), _dc.relative_to(PROJECT_ROOT)

@@ -278,7 +278,11 @@ PROVENANCE_FIELDS = (
     "answer_alphabet_sha256",
     "task_layout_sha256",
     "design_sha256",
+    # the actual selected inputs (filler passages, blocks, rendered token ids;
+    # review of 5616630, R2), not only the config that chose them
+    "input_manifest_sha256",
 )
+FACTS = ("s", "n")
 GREEDY_TOL = 1e-9  # log-space tolerance for "this symbol is the argmax"
 METRICS = (
     "mi_bits",
@@ -370,6 +374,115 @@ def readout_from_row(
     return r
 
 
+def _finite_number(v: Any) -> bool:
+    return isinstance(v, int | float) and not isinstance(v, bool) and math.isfinite(v)
+
+
+def measurement_schedule(
+    design: Mapping[str, Any], contexts: Sequence[str], queries: Sequence[str]
+) -> dict[str, Any]:
+    """The frozen schedule of the calibration measurements (review of 5616630,
+    R1): which query carries the end-to-end control, and each context's fact
+    spans. A production design must declare it; ValueError when malformed."""
+    sched = design.get("measurement_schedule")
+    if not isinstance(sched, Mapping):
+        raise ValueError("a production design must declare measurement_schedule")
+    e2e = sched.get("e2e_query")
+    if e2e not in queries:
+        raise ValueError(f"measurement_schedule e2e_query {e2e!r} is not a query")
+    spans = sched.get("fact_spans")
+    if not isinstance(spans, Mapping) or set(spans) != set(contexts):
+        raise ValueError("measurement_schedule fact_spans must cover every context")
+    for c, sp in spans.items():
+        if not isinstance(sp, Mapping) or set(sp) != set(FACTS):
+            raise ValueError(f"fact_spans of {c} must name exactly {FACTS}")
+        for f, ab in sp.items():
+            if not (
+                isinstance(ab, list)
+                and len(ab) == 2
+                and all(isinstance(x, int) and not isinstance(x, bool) for x in ab)
+                and 0 <= ab[0] < ab[1]
+            ):
+                raise ValueError(f"fact_spans {c}.{f} malformed: {ab!r}")
+    return {"e2e_query": e2e, "fact_spans": spans}
+
+
+def measurement_problem(
+    row: Mapping[str, Any], schedule: Mapping[str, Any], reference_policy: str
+) -> str | None:
+    """Why a production row's calibration measurements are unusable, or None.
+
+    Validity, not acceptance: every measurement the calibration consumes must
+    be present exactly where the frozen schedule says it is measured, typed and
+    in range, BEFORE any aggregation (a missing value must not drop out of a
+    mean, a NaN must not vanish inside max(), a negative fraction must not
+    satisfy an upper bound). Review of 5616630, R1.
+    """
+    ref = str(row["policy"]) == reference_policy
+    prunes = row.get("n_prunes")
+    if isinstance(prunes, bool) or not isinstance(prunes, int) or prunes < 0:
+        return f"n_prunes is not a non-negative integer: {prunes!r}"
+    if ref and prunes != 0:
+        return "the reference (full-cache) arm recorded prunes"
+    if row.get("fact_spans") != schedule["fact_spans"][str(row["context_id"])]:
+        return "fact_spans differ from the frozen schedule"
+    kept = row.get("retained_fraction")
+    if not isinstance(kept, Mapping) or set(kept) != set(FACTS):
+        return f"retained_fraction must name exactly {FACTS}"
+    for f in FACTS:
+        v = kept[f]
+        if ref:
+            if v is not None:
+                return "the reference arm carries a retained fraction"
+        elif not (_finite_number(v) and 0.0 <= v <= 1.0):
+            return f"retained_fraction.{f} missing or outside [0, 1]: {v!r}"
+    e2e = row.get("e2e_max_abs_diff")
+    if str(row["query"]) == schedule["e2e_query"]:
+        if not (_finite_number(e2e) and e2e >= 0.0):
+            return f"end-to-end control missing or invalid: {e2e!r}"
+    elif e2e is not None:
+        return "end-to-end value on a query the schedule does not measure"
+    return None
+
+
+def _sha256_json(obj: Any) -> str:
+    import hashlib
+    import json
+
+    return hashlib.sha256(json.dumps(obj, sort_keys=True).encode()).hexdigest()
+
+
+def design_bindings(
+    design: Mapping[str, Any],
+    manifest: Any,
+    criteria_override: Mapping[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Verify what a production design binds; return the dependency record.
+
+    Review of 5616630: the stored input manifest must hash to the design's
+    ``input_manifest_sha256`` (R2), and the calibration criteria are the
+    design's own, matching their fingerprint; a criteria file named on the
+    command line must be the SAME criteria, never a substitute (R1.4).
+    ValueError on any mismatch (the read is then INVALID)."""
+    prov = design.get("expected_provenance") or {}
+    want = prov.get("input_manifest_sha256")
+    if not isinstance(want, str) or _sha256_json(manifest) != want:
+        raise ValueError("input manifest does not match the design's hash")
+    crit = design.get("calibration_criteria")
+    crit_sha = design.get("calibration_criteria_sha256")
+    if not isinstance(crit, Mapping) or _sha256_json(crit) != crit_sha:
+        raise ValueError("design calibration criteria do not match their fingerprint")
+    if criteria_override is not None and _sha256_json(criteria_override) != crit_sha:
+        raise ValueError(
+            "--calibration-criteria differs from the criteria frozen in the design"
+        )
+    return {
+        "input_manifest_sha256": want,
+        "calibration_criteria_sha256": crit_sha,
+        "criteria_source": "design (file matched)" if criteria_override else "design",
+    }
+
+
 def read_information_probe(
     rows: Iterable[Mapping[str, Any]],
     design: Mapping[str, Any],
@@ -384,9 +497,12 @@ def read_information_probe(
     ``expected_provenance`` and passed controls), ``policies``,
     ``reference_policy``, ``contexts``, ``eviction_seeds``, ``queries`` and
     optional ``paired_contrasts`` ([[a, b], ...]) -- from the frozen manifest,
-    never from the rows. Every (policy, query, context, eviction seed) cell must
-    be a complete 16-variant grid. Per policy and query, metrics are averaged
-    over eviction seeds within a context, then over contexts. Contrasts are
+    never from the rows. A production design also declares the
+    ``measurement_schedule`` its calibration measurements are validated
+    against (``measurement_problem``). Every (policy, query, context, eviction
+    seed) cell must be a complete 16-variant grid. Per policy and query,
+    metrics are averaged over eviction seeds within a context, then over
+    contexts. Contrasts are
     computed from PAIRED context-level values and resample contexts (2000,
     seed 0); intervals are never subtracted. PARTIAL reports coverage only;
     INVALID fails closed.
@@ -412,6 +528,9 @@ def read_information_probe(
     expected = {
         (p, q, c, e) for p in policies for q in queries for c in contexts for e in seeds
     }
+    schedule = (
+        measurement_schedule(design, contexts, queries) if mode == PRODUCTION else None
+    )
     cells: dict[tuple[str, str, str, int], list[Readout]] = {}
     problems: list[str] = []
     status = FINAL
@@ -432,6 +551,11 @@ def read_information_probe(
             continue
         if key not in expected:
             problems.append(f"row {i}: cell {key} is not in the design")
+            status = INVALID
+            continue
+        why = measurement_problem(row, schedule, ref) if schedule else None
+        if why:
+            problems.append(f"row {i}: {why}")
             status = INVALID
             continue
         cells.setdefault(key, []).append(r)
