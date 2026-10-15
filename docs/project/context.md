@@ -24,6 +24,22 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-10-15 ~16:00 Dubai — P1, P2, P3 and the R-KV-pp smoke all COMPLETE; M5 R-KV-protected grid RUNNING; H2O grid gate bug fixed.**
+  - **Completed** (during the owner early start):
+    - reverse-readout-pp1024 (P1) 800/800, 12.91 of 20 GPU-h;
+    - P2 selector smoke rerun PASS at 13:19 (21 records, 0 failures, accepted by the stricter gate), 0.549 of 2 GPU-h;
+    - P3 pilots: grid, readout and reverse 16/16 each, 1.39 of 6 GPU-h;
+    - rkv-pp smoke PASS at 15:14 (9 records, 0 failures), 0.187 of 1 GPU-h.
+  - **Bug (mine), fixed.** grid-h2opp256-m5 failed every launch (rc 1, 0 h) from 15:13. The cause: the scheduler exported KVCACHE_INPUT_MANIFEST (the M5 100-problem manifest) into the job, and the protected-selector smoke identity, whose config names no manifest, then took its manifest hash from the environment, so the VALID 13:19 PASS read as stale.
+    - Fix: nightly_autorun does not export the override for runners that read their config's manifest themselves (grid_m5, rkvppsmoke, infoprobe), with a regression test.
+    - No smoke rerun was needed.
+    - The H2O stuck counter was reset to 0 (backup `logs/nightly_state.json.bak-20261015-1549`).
+  - **Running.** grid-rkvpp256-m5 (M5A-RKVPP, cap 28) since 15:43 on both GPUs. Complete row+sidecar pairs are being published through the journal; recovery was clean.
+  - **Next.**
+    1. The H2O grid runs once GPUs free.
+    2. Run `report_protocol_audit.py reverse --budget 1024` (P1 is complete) for the registered t test + Holm.
+    3. Lift the Qwen hold once the B=1024 reads are FINAL.
+
   **★★★★★ 2026-10-15 ~12:30 Dubai — information-calibration preparation finished (still HELD).**
   - **Runner.** The GPU execution path in `scripts/run_information_probe.py` validates smokes, the pinned tokenizer, reserve-trace filler, a frozen design.json and resume identity, and writes blocks atomically.
   - **Controls.** An end-to-end readout control was added to `kvcache.information_probe`.

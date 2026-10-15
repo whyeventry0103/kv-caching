@@ -723,6 +723,14 @@ def _config_input_manifest(config: str) -> str | None:
     )
 
 
+# 2026-10-15: runners that read their config's input_manifest EXPLICITLY must
+# not get the KVCACHE_INPUT_MANIFEST override. The override is process-wide:
+# inside grid-h2opp256-m5 it also changed the input-manifest hash of the
+# protected-selector SMOKE identity (whose config names no manifest), so a
+# valid PASS (2026-10-15 13:19) read as stale and every launch failed rc 1.
+MANIFEST_AWARE_COMMANDS = frozenset({"grid_m5", "rkvppsmoke", "infoprobe"})
+
+
 def build_launch_specs(
     job: Job, assignment: dict[int, list[int]], max_hours: float
 ) -> list[LaunchSpec]:
@@ -735,7 +743,7 @@ def build_launch_specs(
         env["KVCACHE_MAX_HOURS"] = str(max_hours)
         env["KVCACHE_ALLOW_EXISTING_RUN"] = "1"
         manifest = _config_input_manifest(job.config)
-        if manifest:
+        if manifest and job.command not in MANIFEST_AWARE_COMMANDS:
             # R.17.3: a config that names its own frozen input manifest (a
             # second model) gets it here; runners read it via the existing
             # KVCACHE_INPUT_MANIFEST override, so no generation file changes.

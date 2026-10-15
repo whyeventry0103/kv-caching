@@ -933,3 +933,22 @@ def test_gpu_jobs_honour_requires_all(tmp_path):
     cands, notes = M.launch_candidates(tmp_path, jobs, live={}, skip={"a", "b"})
     assert [c[0].name for c in cands] == []
     assert any("m5: dependency incomplete ['b']" in n for n in notes)
+
+
+def test_manifest_aware_runners_do_not_get_the_manifest_override():
+    """2026-10-15: KVCACHE_INPUT_MANIFEST leaked into grid-h2opp256-m5 and made
+    the valid protected-selector smoke PASS read as stale (its identity's
+    manifest hash then came from the environment). Runners that read their
+    config's manifest explicitly get no override; legacy runners still do."""
+    import dataclasses
+
+    m5 = dataclasses.replace(
+        _gen("grid-h2opp256-m5"),
+        command="grid_m5",
+        config="configs/experiments/grid_math500_h2opp256_m5.yaml",
+    )
+    (spec,) = M.build_launch_specs(m5, {0: [11]}, 1.0)
+    assert "KVCACHE_INPUT_MANIFEST" not in spec.env
+    legacy = dataclasses.replace(m5, command="grid")
+    (spec,) = M.build_launch_specs(legacy, {0: [11]}, 1.0)
+    assert spec.env["KVCACHE_INPUT_MANIFEST"].endswith("input_manifest_m5.json")
