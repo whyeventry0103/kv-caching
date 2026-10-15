@@ -1270,6 +1270,24 @@ jobs:
     requires_all: [reverse-readout-pp1024, protsel-smoke, protsel-pilot-grid,
                    protsel-pilot-readout, protsel-pilot-reverse]
 
+  # Meeting 5 M5-C information-channel CALIBRATION (prepared 2026-10-15): NOT
+  # approved -- a separate request (proposed cap 4 GPU-h) must add its campaign
+  # and remove `blocked`. 4 blocks x 16 variants x 5 arms x 2 queries = 640 rows.
+  # The runner also refuses while its config is held and without VALID protsel
+  # and rkv-pp smoke PASS records; acceptance = frozen calibration_criteria.
+  - name: info-calibration-m5c
+    command: infoprobe
+    config: configs/meeting5/info_calibration.yaml
+    run_name: info-calibration-m5c
+    total: 640
+    seeds: [0]
+    min_free_gb: 28
+    progress_kind: readout
+    est_output_gb: 0.01
+    requires: null
+    requires_all: [rkvpp-smoke, protsel-smoke]
+    blocked: "Not approved: the information calibration needs its own approval and campaign cap (proposed <= 4 GPU-h); prepared and dry-run only (2026-10-15)."
+
   # Amendment S.2: restoration by origin. Same traces, policies, budget and
   # trigger as restore-v2; arms frozen / prompt / trace / full, eviction off in
   # every arm. 25 problems x 4 seeds x 2 policies = 200 rows. Last in order, so

@@ -32,3 +32,21 @@ filler:
   n_passages: 40
   passage_tokens: 900
 proposed_cap_gpu_hours: 4
+# Numerical calibration acceptance, FROZEN 2026-10-15 before any calibration
+# data exist (review of d50aa40, item 4; protocol 6.8). Evaluated by
+# kvcache.information_calibration over a FINAL production read. PASS needs every
+# criterion; on FAIL the protocol allows ONE redesign on calibration data, then
+# the instrument is abandoned (gate G2). Calibration rows are never confirmatory.
+calibration_criteria:
+  # C1 the full cache reads out both facts through the declared channel
+  full_min_mi_bits: 1.5
+  full_min_correct_prob: 0.80
+  # C2 the answer format works (OTHER mass is not dominating)
+  full_max_other_prob: 0.20
+  # C4 end-to-end (no clone) readout agrees with the cloned readout
+  max_e2e_abs_logprob_diff: 0.001
+  # C5 eviction actually touches the facts in the evicting arms
+  max_mean_early_span_retained: 0.90
+  # C6 dynamic range: target-query MI differs across arms, not floor/ceiling
+  min_mi_range_bits: 0.25
+  ceiling_mi_bits: 1.9

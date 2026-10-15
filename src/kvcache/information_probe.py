@@ -152,7 +152,23 @@ def _run_attached(
                 "no_readout_eviction": press.n_prunes() == prunes_at_checkpoint,
                 "n_prunes": prunes_at_checkpoint,
                 "retained_fraction": spans,
+                "e2e_max_abs_diff": None,
             }
+        # End-to-end control (calibration criterion C4): the LAST query is also
+        # fed straight into the original cache -- no clone -- and must agree
+        # with its cloned readout. The original is discarded afterwards.
+        last = queries[-1]
+        e2e = _readout(backend, cache, variant.query_ids[last], symbol_ids)
+        out[last]["e2e_max_abs_diff"] = max(
+            0.0 if x == y else abs(x - y)  # equal (incl. -inf) is no difference
+            for x, y in zip(
+                e2e["symbol_logprobs"], out[last]["symbol_logprobs"], strict=True
+            )
+        )
+        out[last]["no_readout_eviction"] = (
+            out[last]["no_readout_eviction"]
+            and press.n_prunes() == prunes_at_checkpoint
+        )
     return out
 
 
@@ -210,6 +226,7 @@ def run_context(
                                 "no_readout_eviction": r["no_readout_eviction"],
                             },
                             "n_prunes": r["n_prunes"],
+                            "e2e_max_abs_diff": r["e2e_max_abs_diff"],
                             "retained_fraction": r["retained_fraction"],
                             "fact_spans": {k: list(s) for k, s in v.fact_spans.items()},
                         }

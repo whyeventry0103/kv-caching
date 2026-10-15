@@ -59,6 +59,12 @@ def main() -> int:
     p.add_argument("--out", type=Path)
     p.add_argument("--partial", action="store_true", help="exit 0 on PARTIAL")
     p.add_argument(
+        "--calibration-criteria",
+        type=Path,
+        help="config whose frozen calibration_criteria are evaluated on a FINAL "
+        "read (kvcache.information_calibration)",
+    )
+    p.add_argument(
         "--self-check",
         action="store_true",
         help="print the analytic reference table (review section 10.3) and exit",
@@ -73,8 +79,18 @@ def main() -> int:
     try:
         design = json.loads(args.design.read_text(encoding="utf-8"))
         files = _files(args.rows)
-        report = read_information_probe(_rows(files), design)
+        rows = _rows(files)
+        report = read_information_probe(rows, design)
         report["inputs_sha256"] = files_sha256([*files, args.design])
+        if args.calibration_criteria is not None:
+            import yaml
+
+            from kvcache.information_calibration import evaluate
+
+            crit = yaml.safe_load(args.calibration_criteria.read_text())[
+                "calibration_criteria"
+            ]
+            report["calibration"] = evaluate(report, rows, crit)
     except (OSError, ValueError, KeyError, TypeError) as exc:
         report = {"status": INVALID, "error": str(exc)}
         print(f"INVALID: {exc}", file=sys.stderr)

@@ -24,6 +24,13 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-10-15 ~12:30 Dubai — information-calibration preparation finished (still HELD).**
+  - **Runner.** The GPU execution path in `scripts/run_information_probe.py` validates smokes, the pinned tokenizer, reserve-trace filler, a frozen design.json and resume identity, and writes blocks atomically.
+  - **Controls.** An end-to-end readout control was added to `kvcache.information_probe`.
+  - **Criteria.** C1–C6 frozen in `configs/meeting5/info_calibration.yaml` and protocol §6.8; evaluator `kvcache.information_calibration`; the reader takes `--calibration-criteria`.
+  - **Launch wiring.** `launch.sh` alias `infoprobe`; queue job `info-calibration-m5c` is BLOCKED (separate approval, proposed ≤4 GPU-h).
+  - **CPU acceptance.** `tests/test_information_runner.py`: a working channel is FINAL + PASS; a no-eviction channel FAILs C5/C6.
+
   **★★★★★ 2026-10-15 ~12:00 Dubai — S.1 at B=1024 FORWARD read FINAL: consequence A; owner early start running.**
   - **B=1024 forward reads.** Protected residual: Random −0.047 [−0.086, −0.015], StreamingLLM −0.040 [−0.070, −0.013]. Both are RESIDUAL PERSISTS, SHRINKS (Random's Δresidual lower bound is +0.001).
   - **Registered consequence: A** (the headline stands, at protected size).

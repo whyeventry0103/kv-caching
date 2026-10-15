@@ -282,6 +282,35 @@ The calibration passes only if:
 - eviction actually removes fact spans in some arms;
 - OTHER is understood.
 
+**Numerical criteria, frozen 2026-10-15 before any calibration data.** They
+are recorded in `configs/meeting5/info_calibration.yaml` (`calibration_criteria`)
+and evaluated by `kvcache.information_calibration` over a FINAL production
+read. PASS requires all of:
+
+| Criterion | Requirement |
+|---|---|
+| C1 | Full cache, each query: MI ≥ 1.5 bits and expected correct probability ≥ 0.80 |
+| C2 | Full-cache OTHER mass ≤ 0.20 |
+| C3 | The read is FINAL: every row passed full/full identity, clone agreement and no readout eviction |
+| C4 | End-to-end readout (the query fed into the original cache) agrees with the cloned readout within 0.001 nats per symbol log-probability |
+| C5 | In the evicting arms, the mean retained fraction of the early fact span is ≤ 0.90 |
+| C6 | Target-query MI ranges by ≥ 0.25 bits across arms, and not every evicting arm is at ≥ 1.9 bits |
+
+On FAIL, one redesign on calibration data is allowed. If that also fails, the
+instrument is abandoned (gate G2).
+
+**Runner.** `scripts/run_information_probe.py` (execution path written
+2026-10-15):
+- validates the selector and R-KV smoke PASS records;
+- re-checks the encodings on the pinned tokenizer;
+- builds filler only from MATH-500 reserve traces;
+- freezes `design.json`;
+- refuses a resume of another identity;
+- writes each block atomically.
+
+It stays HELD, and its queue job stays `blocked`, until a separate approval
+names a campaign cap.
+
 ## 7. M5-D equal-budget interventions (review §11.1)
 
 ### 7.1 Arms
@@ -343,3 +372,6 @@ predeclared body spans, and it is not built until the M5-C calibration passes
   - §6.6a production-row contract and pinned-tokenizer check;
   - §6.7 paired contrast;
   - §6.9 bridge specified.
+- 2026-10-15: §6.8 numerical calibration criteria (C1–C6) frozen before any
+  calibration data; the end-to-end control was added to the runner core. No
+  calibration outcome exists.
