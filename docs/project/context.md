@@ -24,6 +24,18 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-10-15 ~12:00 Dubai — S.1 at B=1024 FORWARD read FINAL: consequence A; owner early start running.**
+  - **B=1024 forward reads.** Protected residual: Random −0.047 [−0.086, −0.015], StreamingLLM −0.040 [−0.070, −0.013]. Both are RESIDUAL PERSISTS, SHRINKS (Random's Δresidual lower bound is +0.001).
+  - **Registered consequence: A** (the headline stands, at protected size).
+  - **Realized compression at B=1024:** median about 0.43–0.49, i.e. about 2× not 4×; 7.7% of conditions never compressed. Details in PAPER_FINDINGS §5o.
+  - **Early start (owner, 11:31).** `~/manual_ticks_1015.sh` in tmux `manual-ticks` until 01:40, then cron. P1 reverse-readout-pp1024 running on both GPUs (461/800 at launch; shard bounds 5.93 h; P1 remaining 11.968 h). Recorded in PREREGISTRATION R.16.6.
+  - **Next.**
+    1. P1 FINAL → `report_protocol_audit.py reverse --budget 1024` (registered t test + Holm).
+    2. Combined interpretation.
+    3. Lift the Qwen hold.
+    4. P2 → P3 → M5.
+    5. Information-calibration GPU path prep (held).
+
   **★★★★★ 2026-10-15 ~11:30 Dubai — run status after the 14→15 Oct window.**
   - **readout-pp1024 (S.1) is COMPLETE: 800/800.** The B=1024 forward and grid arms are both done.
   - **reverse-readout-pp1024 (P1): 461/800.** Seed 11 at 161, seed 23 at 200, seed 47 at 100, seed 89 at 0.

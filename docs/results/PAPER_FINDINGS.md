@@ -1721,6 +1721,88 @@ After the repairs every affected read was re-run on the host. There were **0 num
 
 The significant post-protection interaction (§5l) is a separate statement and stands. "Protection works mainly in the forward direction" is retired.
 
+### 5o. S.1 at budget 1024 (FORWARD): the protected residual PERSISTS and SHRINKS for both presses; registered consequence A (2026-10-15)
+
+**Status.** All three reads are FINAL, run on the host over complete inputs:
+- `report_s.py protection --budget 1024`, `consequence`, and
+  `report_protocol_audit.py decision --budget 1024`;
+- grid and forward readout for each arm: 800/800, with 0 missing, 0 duplicate,
+  0 foreign and 0 malformed rows;
+- full-cache bank: 400/400;
+- every provenance and prompt-metadata control passed.
+
+These are **forward** analyses only. The reverse direction (P1,
+`reverse-readout-pp1024`) is still running, and **no reverse or combined
+forward/reverse claim is made here**. Archived:
+- `results/diag/amendment-s/protection_b1024.json` (+ `.conditions.tsv`);
+- `results/diag/amendment-s/consequence.json`;
+- `results/diag/paper_audit/decision_b1024.json`.
+
+**Results.** Equal-problem estimates, problem-cluster bootstrap 95% CI, 2,000
+resamples, seed 0. There are 100 problems × 4 seeds; 392 of 400 conditions
+have a defined readout.
+
+| | Random (protected) | StreamingLLM (protected) |
+|---|---|---|
+| Free-run accuracy, unprotected → protected | 0.800 → 0.838 | 0.688 → 0.848 |
+| Readout accuracy, unprotected → protected | 0.887 → 0.884 | 0.882 → 0.887 |
+| Residual, unprotected | −0.087 [−0.133, −0.048] | −0.195 [−0.263, −0.135] |
+| **Residual, protected** | **−0.047 [−0.086, −0.015]** | **−0.040 [−0.070, −0.013]** |
+| Δfree (protected − unprotected) | +0.037 [−0.003, +0.075] | +0.160 [+0.107, +0.223] |
+| Δreadout | −0.003 [−0.013, +0.005] | +0.005 [+0.000, +0.013] |
+| Δresidual | +0.041 [+0.001, +0.081] | +0.155 [+0.102, +0.217] |
+| Registered labels | RESIDUAL PERSISTS, SHRINKS | RESIDUAL PERSISTS, SHRINKS |
+| Harmful / beneficial flip mass, unprotected → protected | 0.0875 / 0.0025 → 0.0525 / 0.0050 | 0.205 / 0.0075 → 0.040 / 0.0025 |
+| Truncated protected rows | 16 / 400 | 12 / 400 |
+
+Full-cache accuracy on the cell is 0.885.
+
+**Reading the table:**
+- Both cells are INFORMATIVE.
+- At 1024 no problem is budget-relaxed, so the sensitivity read equals the
+  primary.
+- Random's "SHRINKS" rests on a lower bound of +0.001. It is established at
+  this n, but only barely. Its Δfree CI includes 0.
+- Channel attribution, which is descriptive: for StreamingLLM the protection
+  effect sits in the free run (Δfree excludes 0; Δreadout's lower bound is
+  0.000). For Random, neither channel excludes 0 on its own.
+
+**Realized compression (mandatory with every absolute budget;
+`results/diag/amendment-s/realized_compression.json`).** In the protected
+grid, the realized ratio B / (prompt + generated tokens) has:
+- mean 0.482 / 0.509 and median 0.434 / 0.487 (Random / StreamingLLM);
+- 31 of 400 conditions never compressed (share 0.0775): the trace stayed
+  under 1024.
+
+B = 1024 is therefore about **2× realized compression, not 4×**. B = 256 is
+about 10× (median 0.097 / 0.098). The unprotected 1024 cells are matched
+(medians 0.463 / 0.493).
+
+**Registered consequence (Amendment S, decided 2026-09-30).**
+`consequence.json` → **A: PERSISTS at both budgets for both presses; the
+headline stands.** The protected cells enter the paper as its robustness
+control.
+
+**Framing:**
+- What stands is the *protected* residual: a readout-invisible accuracy change
+  of about −0.04 to −0.05 at about 2× compression and about −0.06 to −0.08 at
+  B = 256, not the unprotected sizes.
+- It remains "accuracy change unexplained by on-reference readout", never a
+  measured causal effect.
+- Exploratory at this scope: one model, one benchmark.
+
+**The decision read's practical-threshold block** (F_loss, R_loss, margins
+0.01 / 0.03 / 0.05) is labelled SENSITIVITY, because those margins were
+proposed after B = 256 was seen. It is not primary evidence. For protected
+Random, F_loss is 0.050 [0.018, 0.093] and R_loss is 0.003 [−0.005, 0.013].
+
+**Still pending.**
+- The reverse direction at 1024 (P1, still running under its 20 GPU-h cap).
+- The registered two-policy problem-level interaction test (t test + Holm,
+  frozen 2026-10-14), which needs reverse coverage.
+- Paper-text edits wait for the combined read.
+- The Qwen hold stays until the reverse reads are FINAL.
+
 ## 5. Framing discipline (non-negotiable — apply throughout)
 - **Divergence ≠ damage.** ADD / TV / residual are "behavioral-fidelity loss," never "damage."
   Correctness is the only quality arbiter. Carry the **signed flip-mass** (gained vs lost correct

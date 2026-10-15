@@ -1,0 +1,28 @@
+{
+  "amendment": "S",
+  "consequence": "A: PERSISTS at both budgets; the headline stands",
+  "inputs": {
+    "1024": {
+      "dependencies_sha256": "900f0bd9c7066e5dbdb63f0368c06a0cde1434d4719157cb25b94f849f1eaa37",
+      "status": "FINAL"
+    },
+    "256": {
+      "dependencies_sha256": "e20b98d0829eabbef59c10e3ffc03f67a7f4ab60286ce5616b7797d2fe888224",
+      "status": "FINAL"
+    }
+  },
+  "read": "S.1 consequence for the paper",
+  "reproduce": "python scripts/report_s.py --runs-root /home/sk10741/kvcache-storage/runs consequence",
+  "residual_labels": {
+    "random_pp": {
+      "256": "RESIDUAL PERSISTS",
+      "1024": "RESIDUAL PERSISTS"
+    },
+    "streamingllm_pp": {
+      "256": "RESIDUAL PERSISTS",
+      "1024": "RESIDUAL PERSISTS"
+    }
+  },
+  "retired_previous_output": null,
+  "status": "FINAL"
+}

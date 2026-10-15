@@ -4494,3 +4494,37 @@ the lower bound, and the earlier-information → later-answer bridge (§6.9).
 
 **Re-reads:** the five stored B=256 reads were re-run over unchanged rows,
 because `gates.py` is in their analysis fingerprint. No value changed.
+
+
+## Amendment S.1, result at budget 1024, FORWARD (2026-10-15): RESIDUAL PERSISTS and SHRINKS, both presses; consequence A
+
+The read is FINAL over complete inputs (grid and readout 800/800 per arm, bank
+400/400, every control passed), and it is the forward direction only.
+
+**Protected residual:**
+- Random: −0.047 [−0.086, −0.015], Δresidual +0.041 [+0.001, +0.081];
+- StreamingLLM: −0.040 [−0.070, −0.013], Δresidual +0.155 [+0.102, +0.217].
+
+Both registered labels are RESIDUAL PERSISTS, SHRINKS, and both cells are
+INFORMATIVE.
+
+**Registered paper-level consequence:** **A** (PERSISTS at both budgets for
+both presses).
+
+**Realized compression at B = 1024:** median 0.434 / 0.487, i.e. about 2×, with
+31 of 400 conditions never compressed
+(`results/diag/amendment-s/realized_compression.json`).
+
+The reverse 2×2 at 1024 (P1) and its frozen problem-level t test + Holm are
+pending. Numbers and the framing are in PAPER_FINDINGS §5o.
+
+**R.16.6, sixth owner-requested early start (2026-10-15 11:31 Dubai).**
+- **Request:** "you can start the runs right now".
+- **Mechanism (same as before):** tmux `manual-ticks` runs
+  `~/manual_ticks_1015.sh` (sha256 `6f0b5d23…af5f15`) until 2026-10-16 01:40,
+  then cron takes over. Every job stops at 2026-10-16 10:43.
+- **Unchanged:** campaign caps, VRAM thresholds and the disk floor.
+- **First launch, 11:31:** reverse-readout-pp1024 (P1), seeds 11 + 89 on GPU 0
+  and 47 on GPU 1. Each shard is bounded at 5.93 h; the ledger reserved
+  2 × 5.984 GPU-h of P1's remaining 11.968.
+- This is a one-time bypass, not a change to the nightly policy.

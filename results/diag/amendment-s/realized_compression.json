@@ -1,0 +1,81 @@
+{
+  "cells": {
+    "b1024": {
+      "random": {
+        "definition": "B / (prompt + generated tokens), capped at 1, per row",
+        "mean": 0.4928978729341884,
+        "median": 0.4632455298396124,
+        "n_never_compressed": 31,
+        "n_rows": 400,
+        "never_compressed_share": 0.0775,
+        "run": "grid-diss1024"
+      },
+      "random_pp": {
+        "definition": "B / (prompt + generated tokens), capped at 1, per row",
+        "mean": 0.48243954358708663,
+        "median": 0.43353214932780404,
+        "n_never_compressed": 31,
+        "n_rows": 400,
+        "never_compressed_share": 0.0775,
+        "run": "grid-pp1024"
+      },
+      "streamingllm": {
+        "definition": "B / (prompt + generated tokens), capped at 1, per row",
+        "mean": 0.49237879547323943,
+        "median": 0.4931388919811496,
+        "n_never_compressed": 31,
+        "n_rows": 400,
+        "never_compressed_share": 0.0775,
+        "run": "grid-diss1024"
+      },
+      "streamingllm_pp": {
+        "definition": "B / (prompt + generated tokens), capped at 1, per row",
+        "mean": 0.5092492592060145,
+        "median": 0.4872716864992745,
+        "n_never_compressed": 31,
+        "n_rows": 400,
+        "never_compressed_share": 0.0775,
+        "run": "grid-pp1024"
+      }
+    },
+    "b256": {
+      "random": {
+        "definition": "B / (prompt + generated tokens), capped at 1, per row",
+        "mean": 0.11865436344794178,
+        "median": 0.06935293229226829,
+        "n_never_compressed": 0,
+        "n_rows": 400,
+        "never_compressed_share": 0.0,
+        "run": "grid-diss256-tok"
+      },
+      "random_pp": {
+        "definition": "B / (prompt + generated tokens), capped at 1, per row",
+        "mean": 0.12687844405638016,
+        "median": 0.09746820176455853,
+        "n_never_compressed": 0,
+        "n_rows": 400,
+        "never_compressed_share": 0.0,
+        "run": "grid-pp256"
+      },
+      "streamingllm": {
+        "definition": "B / (prompt + generated tokens), capped at 1, per row",
+        "mean": 0.13317102557789393,
+        "median": 0.09278849637728723,
+        "n_never_compressed": 0,
+        "n_rows": 400,
+        "never_compressed_share": 0.0,
+        "run": "grid-diss256-tok"
+      },
+      "streamingllm_pp": {
+        "definition": "B / (prompt + generated tokens), capped at 1, per row",
+        "mean": 0.138660108161324,
+        "median": 0.0978971074259308,
+        "n_never_compressed": 0,
+        "n_rows": 400,
+        "never_compressed_share": 0.0,
+        "run": "grid-pp256"
+      }
+    }
+  },
+  "read": "realized compression of the S.1 grid cells"
+}

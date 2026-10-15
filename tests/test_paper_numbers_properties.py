@@ -244,7 +244,19 @@ def test_the_real_catalogue_has_no_two_entries_sharing_an_exact_value_and_rule()
     # k/400 accuracy lattices (0.19, 0.31, 0.14, 0.22, 0.315, 0.4675, -0.0783);
     # the abstract's 0.078 is pinned to its S.1 key by a claim. (-0.125, -0.27,
     # 0.0 and 0.898 gained members; those groups are not new.)
-    assert len(collisions) <= 139, (
+    #
+    # 139 -> 164 on 2026-10-15 (S.1 budget-1024 forward reads, its decision read
+    # and the realized-compression artifact), examined: 25 new groups.
+    # Identities by construction (14): the decision read reproduces S.1's
+    # residual mean/CI exactly (as at b256); the unprotected arm equals the
+    # earlier b1024 cell reads (b1024.*.residual_ci*, free_ci0: same rows and
+    # estimand); and the never-compressed share/count is equal across the four
+    # b1024 cells because a trace that stays under 1024 tokens is never evicted,
+    # so its generation is the full-cache one under every policy. Coincidences
+    # (11) on the k/400 and k/392 accuracy lattices or small counts: -0.0025,
+    # -0.005, 0.0125, 0.0175, 0.0375, 0.04, 0.05, 0.1075, 0.16, 0.2, 0.8875 (and
+    # 31 / 0.0775 gained unrelated members). No new key is cited in the .tex.
+    assert len(collisions) <= 164, (
         f"{len(collisions)} exact-value collisions in the catalogue; if this "
         "grew, a new derived quantity is duplicating an existing one"
     )

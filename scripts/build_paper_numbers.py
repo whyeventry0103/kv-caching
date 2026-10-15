@@ -1907,6 +1907,88 @@ def build_catalogue() -> list[Entry]:
                         f"{_s1r} :: per_press.{_pp}.primary.{_f}.ci95[{_i}]",
                         f"S.1 b256 {_f} CI bound, {_pp}",
                     )
+    # 2026-10-15: S.1 at budget 1024 (forward) and the realized compression of
+    # every S.1 grid cell. Separate keys; the b256 entries above are unchanged.
+    _s14 = DIAG / "amendment-s" / "protection_b1024.json"
+    if _s14.exists():
+        _s14d, _s14r = _load(_s14), _s14.relative_to(PROJECT_ROOT)
+        for _pp, _blk in _s14d["per_press"].items():
+            _pr = _blk["primary"]
+            for _f in (
+                "residual_pp",
+                "residual_base",
+                "delta_residual",
+                "delta_free",
+                "delta_readout",
+                "free_accuracy_pp",
+                "free_accuracy_base",
+                "readout_accuracy_pp",
+                "readout_accuracy_base",
+            ):
+                add(
+                    f"s1.b1024.{_pp}.{_f}.mean",
+                    _pr[_f]["mean"],
+                    f"{_s14r} :: per_press.{_pp}.primary.{_f}.mean",
+                    f"S.1 b1024 {_f} for {_pp} (equal-problem)",
+                )
+                for _i, _b in enumerate(_pr[_f]["ci95"]):
+                    add(
+                        f"s1.b1024.{_pp}.{_f}.ci{'lo' if _i == 0 else 'hi'}",
+                        _b,
+                        f"{_s14r} :: per_press.{_pp}.primary.{_f}.ci95[{_i}]",
+                        f"S.1 b1024 {_f} CI bound, {_pp}",
+                    )
+            add(
+                f"s1.b1024.{_pp}.fc_accuracy_on_cell",
+                _pr["fc_accuracy_on_cell"],
+                f"{_s14r} :: per_press.{_pp}.primary.fc_accuracy_on_cell",
+                f"S.1 b1024 full-cache accuracy on the cell, {_pp}",
+            )
+            for _arm in ("flip_mass_base", "flip_mass_pp"):
+                for _q in ("harmful", "beneficial"):
+                    add(
+                        f"s1.b1024.{_pp}.{_arm}.{_q}",
+                        _blk[_arm][_q],
+                        f"{_s14r} :: per_press.{_pp}.{_arm}.{_q}",
+                        f"S.1 b1024 {_q} flip mass ({_arm}), {_pp}",
+                    )
+    _rc = DIAG / "amendment-s" / "realized_compression.json"
+    if _rc.exists():
+        _rcd, _rcr = _load(_rc), _rc.relative_to(PROJECT_ROOT)
+        for _bud, _rcells in _rcd["cells"].items():
+            for _pp, _c in _rcells.items():
+                for _f in (
+                    "mean",
+                    "median",
+                    "n_never_compressed",
+                    "never_compressed_share",
+                ):
+                    add(
+                        f"s1.realized.{_bud}.{_pp}.{_f}",
+                        _c[_f],
+                        f"{_rcr} :: cells.{_bud}.{_pp}.{_f}",
+                        f"realized compression {_f}, {_bud} {_pp}",
+                    )
+    _dc4 = DIAG / "paper_audit" / "decision_b1024.json"
+    if _dc4.exists():
+        _dc4d, _dc4p = _load(_dc4), _dc4.relative_to(PROJECT_ROOT)
+        for _pp, _blk in _dc4d["per_press"].items():
+            for _arm in ("practical_protected", "practical_unprotected"):
+                for _q in ("R_loss", "F_loss", "residual"):
+                    add(
+                        f"audit.decision.b1024.{_pp}.{_arm}.{_q}",
+                        _blk[_arm][_q]["mean"],
+                        f"{_dc4p} :: per_press.{_pp}.{_arm}.{_q}.mean",
+                        f"{_q} ({_arm}), {_pp}, b1024 (SENSITIVITY margins)",
+                    )
+                    for _i, _b in enumerate(_blk[_arm][_q]["ci95"]):
+                        add(
+                            f"audit.decision.b1024.{_pp}.{_arm}.{_q}"
+                            f".ci{'lo' if _i == 0 else 'hi'}",
+                            _b,
+                            f"{_dc4p} :: per_press.{_pp}.{_arm}.{_q}.ci95[{_i}]",
+                            f"{_q} CI bound ({_arm}), {_pp}, b1024",
+                        )
     _rv = DIAG / "paper_audit" / "reverse_b256.json"
     if _rv.exists():
         _rvd, _rvp = _load(_rv), _rv.relative_to(PROJECT_ROOT)

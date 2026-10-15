@@ -11,7 +11,7 @@ Claims: `docs/paper/CLAIM_LEDGER.md`. Approvals and caps: `docs/paper/PROPOSALS_
 | Item | State | Evidence / next |
 |---|---|---|
 | Meeting 5 G0 closeout | **In progress (CPU parts done)** | Smoke bundle + validator (VALID from a fresh clone). Smoke design reconciled to 21 records; the rerun is pending under P2. Cumulative caps enforced before launch. B=1024 interaction inference frozen (t test + Holm). Qwen ordering explicit. Latent-basis wording corrected |
-| WP1 protected B=1024 | **Running in normal windows** | grid-pp1024 796/800 → readout-pp1024 (S.1, registered) → reverse-readout-pp1024 (P1, cap 20 GPU-h). Reads when FINAL: `report_s.py protection --budget 1024`, `consequence`, `report_protocol_audit.py decision/reverse --budget 1024` |
+| WP1 protected B=1024 | **Forward FINAL (consequence A); reverse running** | 2026-10-15: protection_b1024, consequence and decision_b1024 are FINAL (PAPER_FINDINGS §5o). P1 reverse-readout-pp1024 461/800 at the 11:31 owner early start, under its 20 GPU-h cap |
 | P2 smoke | **First run VALID but superseded** | 15-record run on 2026-10-13 (0.2584 GPU-h, bundled). The full 21-record smoke reruns within the remaining 1.7416 GPU-h |
 | P3 timing pilot | **Queued behind the new smoke** | Cap 6 GPU-h, shared by all three stages |
 | Qwen3 | **Held behind B=1024** | Gate FAIL 0.845 kept. Disposition (a), exploratory. The 42-row human scoring review is still unassigned (owner/supervisor) |
