@@ -4675,3 +4675,22 @@ ledger). No number changed.
 - *Generator:* `scripts/plan_meeting5_cost.py` emits the same metadata. The
   2026-10-14 table above ("the revision stays TODO(human)") is kept as
   written and superseded by this entry.
+
+## M5-C calibration approved (2026-10-17, owner, in-session)
+
+The owner approved `docs/paper/MEETING5_CALIBRATION_APPROVAL_REQUEST.md`
+("Approve ≤4 GPU-h"). Three changes landed together, so that the cap is
+enforced from the first launch:
+- campaign `M5C-CAL`, `cap_gpu_hours: 4`, approved 2026-10-17;
+- the queue job `info-calibration-m5c` gets `campaign: M5C-CAL`, and its
+  `blocked:` line is removed;
+- `configs/meeting5/info_calibration.yaml` is set to `held: false`. This
+  changes the design hash; no calibration row exists.
+
+Runs happen in normal windows only. The read is
+`report_information_probe.py --require-calibration-pass`. The outcome
+responses were fixed before data (request §6): INVALID is a defect and does
+not use the redesign; FAIL allows one pre-registered redesign under a
+separate approval; PASS freezes the confirmation N. The confirmation run and
+the reasoning bridge are not approved. The held guard keeps its test, now on
+a held copy of the config.

@@ -1,9 +1,9 @@
 name: info_calibration_m5c
-# Meeting 5 M5-C information-channel CALIBRATION (prepared 2026-10-14; HELD --
-# not approved; proposed separate cap 4 GPU-h). Calibration records are never
-# confirmatory. Runs through scripts/run_information_probe.py, which refuses
-# while held. Design: protocol section 6 (docs/protocol/MEETING5_INFORMATION_PROTOCOL.md).
-held: true
+# Meeting 5 M5-C information-channel CALIBRATION (prepared 2026-10-14; APPROVED
+# by the owner in-session 2026-10-17, campaign M5C-CAL, cap 4 GPU-h). Calibration
+# records are never confirmatory. Runs through scripts/run_information_probe.py.
+# Design: protocol section 6 (docs/protocol/MEETING5_INFORMATION_PROTOCOL.md).
+held: false
 models: [r1_distill_qwen_7b]
 design_seed: 20261014
 n_blocks: 4

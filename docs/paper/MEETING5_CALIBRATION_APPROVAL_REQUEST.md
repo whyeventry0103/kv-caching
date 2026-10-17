@@ -1,9 +1,14 @@
 # Approval request: M5-C information-channel calibration (2026-10-17)
 
-**Status: REQUESTED. Not approved, not launched.** The queue job
-`info-calibration-m5c` stays `blocked:` and the config stays `held: true`
-until the owner approves this request in a conversation. This document grants
-nothing.
+**Status: APPROVED by the owner in-session, 2026-10-17** (option "Approve
+≤4 GPU-h").
+- *Changes landed together:* campaign `M5C-CAL` with cap 4 GPU-h in
+  `configs/campaigns.yaml`; `campaign: M5C-CAL` on the queue job, with
+  `blocked:` removed; `held: false` in the config.
+- *Not yet launched:* the first eligible window is 2026-10-18 01:45 Dubai.
+- *Still separate decisions:* the confirmation run and the reasoning bridge.
+
+The text below is the request as approved.
 
 ## 1. What would run
 

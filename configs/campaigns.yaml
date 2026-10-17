@@ -31,3 +31,11 @@ campaigns:
     cap_gpu_hours: 28
     approved: 2026-10-14
     scope: R-KV protected free runs, B=256, 100 problems x 4 seeds (400 rows)
+  # Meeting 5 M5-C information-channel calibration, APPROVED by the owner
+  # in-session 2026-10-17 (docs/paper/MEETING5_CALIBRATION_APPROVAL_REQUEST.md).
+  # Calibration only: the confirmation run and the reasoning bridge are
+  # separate decisions with no campaign.
+  M5C-CAL:
+    cap_gpu_hours: 4
+    approved: 2026-10-17
+    scope: information-channel calibration (info-calibration-m5c, 640 rows; never confirmatory)

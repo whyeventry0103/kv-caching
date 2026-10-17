@@ -1276,6 +1276,7 @@ jobs:
   # The runner also refuses while its config is held and without VALID protsel
   # and rkv-pp smoke PASS records; acceptance = frozen calibration_criteria.
   - name: info-calibration-m5c
+    campaign: M5C-CAL   # cap 4 GPU-h, approved by the owner 2026-10-17
     command: infoprobe
     config: configs/meeting5/info_calibration.yaml
     run_name: info-calibration-m5c
@@ -1286,7 +1287,6 @@ jobs:
     est_output_gb: 0.01
     requires: null
     requires_all: [rkvpp-smoke, protsel-smoke]
-    blocked: "Not approved: the information calibration needs its own approval and campaign cap (proposed <= 4 GPU-h); prepared and dry-run only (2026-10-15)."
 
   # Amendment S.2: restoration by origin. Same traces, policies, budget and
   # trigger as restore-v2; arms frozen / prompt / trace / full, eviction off in

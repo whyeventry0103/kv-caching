@@ -34,8 +34,9 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
   - **Claim ledger.** A11–A16 added; A2, B1 and C3 updated; §F1 closed, §F3 narrowed; two wordings retired.
   - **BBH manifest metadata amended** (revision is the owner's pin, plus the blob). The selection sha `146d2369…` is unchanged and asserted by a test.
   - **SSH restored**; the sync to 94720ff completed.
-  - **Next (owner decision pending).**
-    1. Calibration approval (≤4 GPU-h; config changes ready).
+  - **Calibration APPROVED by the owner (2026-10-17).** Campaign M5C-CAL, cap 4 GPU-h. The job is unblocked, the config is no longer held, and the first window is 2026-10-18 01:45.
+  - **Next.**
+    1. Read the calibration (`report_information_probe.py --require-calibration-pass`) when it completes.
     2. Protected-capture adapter on CPU plus a smoke/timing proposal.
     3. GSM8K full-cache calibration pricing.
     4. Qwen3 continues in the windows.

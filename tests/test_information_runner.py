@@ -145,10 +145,16 @@ def test_resume_skips_finished_blocks_and_refuses_a_changed_design(
 
 
 def test_real_execution_refuses_while_held_or_without_smokes(tmp_path, monkeypatch):
+    # The real config was released by the owner's approval (2026-10-17), so the
+    # held guard is exercised on a held copy of it: the guard itself is kept.
+    held = tmp_path / "held.yaml"
+    held.write_text(yaml.safe_dump({**REAL, "held": True}))
     p = subprocess.run(
         [
             sys.executable,
             str(ROOT / "scripts/run_information_probe.py"),
+            "--config",
+            str(held),
             "--i-understand",
         ],
         capture_output=True,
@@ -157,6 +163,15 @@ def test_real_execution_refuses_while_held_or_without_smokes(tmp_path, monkeypat
         env={"KVCACHE_REMOTE": "1", "PATH": "/usr/bin:/bin"},
     )
     assert p.returncode != 0 and "HELD" in p.stderr
+    # without --i-understand the released config still refuses costly execution
+    p = subprocess.run(
+        [sys.executable, str(ROOT / "scripts/run_information_probe.py")],
+        capture_output=True,
+        text=True,
+        cwd=ROOT,
+        env={"KVCACHE_REMOTE": "1", "PATH": "/usr/bin:/bin"},
+    )
+    assert p.returncode != 0 and "--i-understand" in p.stderr
     cfg, _ = _cfg(tmp_path)
     monkeypatch.setattr(rip, "smoke_gates", lambda cfg, base: ["no PASS marker"])
     with pytest.raises(SystemExit, match="smoke gate"):

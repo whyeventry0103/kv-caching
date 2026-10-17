@@ -435,3 +435,6 @@ predeclared body spans, and it is not built until the M5-C calibration passes
   - the pinned tokenizer renders all 4 blocks / 64 variants with 1,024-token
     bodies and 0 leak-screen skips;
   - input-manifest hash `1f527da6…`.
+- 2026-10-17: the §6.8 calibration was approved by the owner: campaign
+  `M5C-CAL`, cap 4 GPU-h, normal windows. The confirmation run and the §6.9
+  bridge remain separate decisions. Still no calibration data.
