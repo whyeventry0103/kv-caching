@@ -1,0 +1,470 @@
+{
+ "calibration_prereqs": {
+  "counts": {
+   "full_full_controls": 8,
+   "prefix_executions": 320,
+   "readouts": 1280,
+   "variants": 64
+  },
+  "held": true,
+  "smoke_gate_problems": []
+ },
+ "decode_throughput": {
+  "grid-h2opp256-m5": {
+   "hours": 15.48,
+   "s_per_token": 0.0265,
+   "tokens": 2102812
+  },
+  "grid-pp256": {
+   "hours": 32.44,
+   "s_per_token": 0.0232,
+   "tokens": 5027921
+  },
+  "grid-rkvpp256-m5": {
+   "hours": 19.23,
+   "s_per_token": 0.0237,
+   "tokens": 2918877
+  }
+ },
+ "launches": [
+  {
+   "campaign": "M5A-H2OPP",
+   "ended_at": "2026-10-15T15:13:33",
+   "gpu": 1,
+   "job": "grid-h2opp256-m5",
+   "rc": 1,
+   "settled_hours": 0.0,
+   "started_at": "2026-10-15T15:13:33",
+   "status": "settled"
+  },
+  {
+   "campaign": "M5A-H2OPP",
+   "ended_at": "2026-10-15T15:23:40",
+   "gpu": 1,
+   "job": "grid-h2opp256-m5",
+   "rc": 1,
+   "settled_hours": 0.000278,
+   "started_at": "2026-10-15T15:23:39",
+   "status": "settled"
+  },
+  {
+   "campaign": "M5A-H2OPP",
+   "ended_at": "2026-10-15T15:23:40",
+   "gpu": 0,
+   "job": "grid-h2opp256-m5",
+   "rc": 1,
+   "settled_hours": 0.000278,
+   "started_at": "2026-10-15T15:23:39",
+   "status": "settled"
+  },
+  {
+   "campaign": "M5A-H2OPP",
+   "ended_at": "2026-10-15T15:33:46",
+   "gpu": 0,
+   "job": "grid-h2opp256-m5",
+   "rc": 1,
+   "settled_hours": 0.0,
+   "started_at": "2026-10-15T15:33:46",
+   "status": "settled"
+  },
+  {
+   "campaign": "M5A-H2OPP",
+   "ended_at": "2026-10-15T15:33:46",
+   "gpu": 1,
+   "job": "grid-h2opp256-m5",
+   "rc": 1,
+   "settled_hours": 0.0,
+   "started_at": "2026-10-15T15:33:46",
+   "status": "settled"
+  },
+  {
+   "campaign": "M5A-H2OPP",
+   "ended_at": "2026-10-16T09:12:53",
+   "gpu": 1,
+   "job": "grid-h2opp256-m5",
+   "rc": 0,
+   "settled_hours": 7.746111,
+   "started_at": "2026-10-16T01:28:07",
+   "status": "settled"
+  },
+  {
+   "campaign": "M5A-H2OPP",
+   "ended_at": "2026-10-16T09:12:40",
+   "gpu": 0,
+   "job": "grid-h2opp256-m5",
+   "rc": 0,
+   "settled_hours": 7.7425,
+   "started_at": "2026-10-16T01:28:07",
+   "status": "settled"
+  },
+  {
+   "campaign": "M5A-RKVPP",
+   "ended_at": "2026-10-16T01:21:12",
+   "gpu": 0,
+   "job": "grid-rkvpp256-m5",
+   "rc": 0,
+   "settled_hours": 9.621667,
+   "started_at": "2026-10-15T15:43:54",
+   "status": "settled"
+  },
+  {
+   "campaign": "M5A-RKVPP",
+   "ended_at": "2026-10-16T01:21:00",
+   "gpu": 1,
+   "job": "grid-rkvpp256-m5",
+   "rc": 0,
+   "settled_hours": 9.618333,
+   "started_at": "2026-10-15T15:43:54",
+   "status": "settled"
+  },
+  {
+   "campaign": "M5A-RKVPP-SMOKE",
+   "ended_at": "2026-10-15T15:14:40",
+   "gpu": 0,
+   "job": "rkvpp-smoke",
+   "rc": 0,
+   "settled_hours": 0.187222,
+   "started_at": "2026-10-15T15:03:26",
+   "status": "settled"
+  },
+  {
+   "campaign": "P1",
+   "ended_at": "2026-10-15T10:44:57",
+   "gpu": 1,
+   "job": "reverse-readout-pp1024",
+   "rc": 0,
+   "settled_hours": 4.58,
+   "started_at": "2026-10-15T06:10:09",
+   "status": "settled"
+  },
+  {
+   "campaign": "P1",
+   "ended_at": "2026-10-15T10:27:17",
+   "gpu": 0,
+   "job": "reverse-readout-pp1024",
+   "rc": 0,
+   "settled_hours": 3.452222,
+   "started_at": "2026-10-15T07:00:09",
+   "status": "settled"
+  },
+  {
+   "campaign": "P1",
+   "ended_at": "2026-10-15T15:01:03",
+   "gpu": 0,
+   "job": "reverse-readout-pp1024",
+   "rc": 0,
+   "settled_hours": 3.491111,
+   "started_at": "2026-10-15T11:31:35",
+   "status": "settled"
+  },
+  {
+   "campaign": "P1",
+   "ended_at": "2026-10-15T12:54:43",
+   "gpu": 1,
+   "job": "reverse-readout-pp1024",
+   "rc": 0,
+   "settled_hours": 1.385556,
+   "started_at": "2026-10-15T11:31:35",
+   "status": "settled"
+  },
+  {
+   "campaign": "P2",
+   "ended_at": "2026-10-13T09:45:35.635000",
+   "gpu": 0,
+   "job": "protsel-smoke",
+   "rc": 0,
+   "settled_hours": 0.258416,
+   "started_at": "2026-10-13T09:30:05.338000",
+   "status": "settled"
+  },
+  {
+   "campaign": "P2",
+   "ended_at": "2026-10-15T13:19:52",
+   "gpu": 1,
+   "job": "protsel-smoke",
+   "rc": 0,
+   "settled_hours": 0.290556,
+   "started_at": "2026-10-15T13:02:26",
+   "status": "settled"
+  },
+  {
+   "campaign": "P3",
+   "ended_at": "2026-10-15T14:02:46",
+   "gpu": 1,
+   "job": "protsel-pilot-grid",
+   "rc": 0,
+   "settled_hours": 0.668889,
+   "started_at": "2026-10-15T13:22:38",
+   "status": "settled"
+  },
+  {
+   "campaign": "P3",
+   "ended_at": "2026-10-15T14:19:48",
+   "gpu": 1,
+   "job": "protsel-pilot-readout",
+   "rc": 0,
+   "settled_hours": 0.280278,
+   "started_at": "2026-10-15T14:02:59",
+   "status": "settled"
+  },
+  {
+   "campaign": "P3",
+   "ended_at": "2026-10-15T14:49:29",
+   "gpu": 1,
+   "job": "protsel-pilot-reverse",
+   "rc": 0,
+   "settled_hours": 0.438611,
+   "started_at": "2026-10-15T14:23:10",
+   "status": "settled"
+  }
+ ],
+ "ledger_summary": {
+  "M5A-H2OPP": {
+   "cap": 28.0,
+   "charged": 15.4892,
+   "remaining": 12.5108
+  },
+  "M5A-RKVPP": {
+   "cap": 28.0,
+   "charged": 19.24,
+   "remaining": 8.76
+  },
+  "M5A-RKVPP-SMOKE": {
+   "cap": 1.0,
+   "charged": 0.1872,
+   "remaining": 0.8128
+  },
+  "P1": {
+   "cap": 20.0,
+   "charged": 12.9089,
+   "remaining": 7.0911
+  },
+  "P2": {
+   "cap": 2.0,
+   "charged": 0.549,
+   "remaining": 1.451
+  },
+  "P3": {
+   "cap": 6.0,
+   "charged": 1.3878,
+   "remaining": 4.6122
+  }
+ },
+ "m5a_strict_arm_counts": {
+  "h2o/protected": {
+   "correct": 267,
+   "n": 388,
+   "press": "h2o_style_pp_v1",
+   "run": "grid-h2opp256-m5",
+   "truncated": 17,
+   "truncated_and_correct": 0
+  },
+  "h2o/unprotected": {
+   "correct": 99,
+   "n": 388,
+   "press": "h2o",
+   "run": "grid-diss256-h2o",
+   "truncated": 40,
+   "truncated_and_correct": 0
+  },
+  "random/protected": {
+   "correct": 265,
+   "n": 388,
+   "press": "random_pp",
+   "run": "grid-pp256",
+   "truncated": 12,
+   "truncated_and_correct": 0
+  },
+  "random/unprotected": {
+   "correct": 169,
+   "n": 388,
+   "press": "random",
+   "run": "grid-diss256-tok",
+   "truncated": 87,
+   "truncated_and_correct": 0
+  },
+  "rkv/protected": {
+   "correct": 250,
+   "n": 388,
+   "press": "rkv_pp_v1",
+   "run": "grid-rkvpp256-m5",
+   "truncated": 46,
+   "truncated_and_correct": 0
+  },
+  "rkv/unprotected": {
+   "correct": 208,
+   "n": 388,
+   "press": "rkv",
+   "run": "grid-diss256-rkv",
+   "truncated": 48,
+   "truncated_and_correct": 0
+  },
+  "streamingllm/protected": {
+   "correct": 244,
+   "n": 388,
+   "press": "streamingllm_pp",
+   "run": "grid-pp256",
+   "truncated": 32,
+   "truncated_and_correct": 0
+  },
+  "streamingllm/unprotected": {
+   "correct": 95,
+   "n": 388,
+   "press": "streamingllm",
+   "run": "grid-diss256-tok",
+   "truncated": 24,
+   "truncated_and_correct": 0
+  }
+ },
+ "qwen3_coverage": {
+  "fc-qwen3-4b": {
+   "duplicated_keys": 0,
+   "expected": 200,
+   "file_lines": 200,
+   "per_policy_seed": {
+    "fullcache/s11": 50,
+    "fullcache/s23": 50,
+    "fullcache/s47": 50,
+    "fullcache/s89": 50
+   },
+   "row_wallclock_hours": 7.42,
+   "torn_lines": 0,
+   "unexpected_keys": 0,
+   "unique_expected_present": 200
+  },
+  "grid-diss256-qwen3-4b": {
+   "duplicated_keys": 0,
+   "expected": 400,
+   "file_lines": 381,
+   "per_policy_seed": {
+    "random/s11": 50,
+    "random/s23": 50,
+    "random/s47": 50,
+    "random/s89": 31,
+    "streamingllm/s11": 50,
+    "streamingllm/s23": 50,
+    "streamingllm/s47": 50,
+    "streamingllm/s89": 50
+   },
+   "row_wallclock_hours": 42.5,
+   "torn_lines": 0,
+   "unexpected_keys": 0,
+   "unique_expected_present": 381
+  },
+  "readout-diss256-qwen3-4b": {
+   "duplicated_keys": 0,
+   "expected": 400,
+   "file_lines": 169,
+   "per_policy_seed": {
+    "random/s11": 50,
+    "random/s23": 0,
+    "random/s47": 34,
+    "random/s89": 0,
+    "streamingllm/s11": 50,
+    "streamingllm/s23": 0,
+    "streamingllm/s47": 35,
+    "streamingllm/s89": 0
+   },
+   "row_wallclock_hours": 0.0,
+   "torn_lines": 0,
+   "unexpected_keys": 0,
+   "unique_expected_present": 169
+  },
+  "reverse-readout-diss256-qwen3-4b": {
+   "absent": true,
+   "expected": 400,
+   "unique_expected_present": 0
+  }
+ },
+ "scheduler_fail_counters": {
+  "bank-hottcap": 0,
+  "capture-b2048": 0,
+  "capture-b256": 0,
+  "capture-llama8b-b256": 0,
+  "capture-llama8b-smoke": 0,
+  "capture-smoke": 0,
+  "capture2-smoke": 0,
+  "dacc-gate-smoke": 0,
+  "dacc-t0": 0,
+  "dacc-t2048": 0,
+  "dacc-t512": 0,
+  "exact-lag-r5": 0,
+  "fc-aime24": 0,
+  "fc-aime24-llama8b": 0,
+  "fc-aime24-llama8b-cap32768": 0,
+  "fc-llama50": 1,
+  "fc-q14b": 0,
+  "fc-q15b": 0,
+  "fc-qwen3-4b": 0,
+  "fork-control-random": 0,
+  "fork-control-slm": 0,
+  "fork-precision": 0,
+  "grid-aime24-2048": 0,
+  "grid-aime24-rkv-published-cap32768": 0,
+  "grid-diss1024": 0,
+  "grid-diss2048-h2o": 0,
+  "grid-diss2048-tok": 0,
+  "grid-diss256-h2o": 0,
+  "grid-diss256-llama": 0,
+  "grid-diss256-q14b": 0,
+  "grid-diss256-q15b": 0,
+  "grid-diss256-qwen3-4b": 0,
+  "grid-diss256-rkv": 0,
+  "grid-diss512": 0,
+  "grid-h2opp256-m5": 1,
+  "grid-hottcap": 0,
+  "grid-pp1024": 0,
+  "grid-pp256": 0,
+  "grid-rkvpp256-m5": 0,
+  "onset-surface-q2": 0,
+  "pp-smoke": 0,
+  "protsel-pilot-grid": 0,
+  "protsel-pilot-readout": 0,
+  "protsel-pilot-reverse": 0,
+  "protsel-smoke": 1,
+  "q6-basis-fit": 0,
+  "q6-basis-fit-k256": 0,
+  "q6-basis-fit-llama8b": 0,
+  "readout-aime24-2048": 0,
+  "readout-diss1024": 0,
+  "readout-diss2048": 0,
+  "readout-diss2048-h2o": 0,
+  "readout-diss256-h2o": 0,
+  "readout-diss256-llama": 0,
+  "readout-diss256-q14b": 0,
+  "readout-diss256-q15b": 0,
+  "readout-diss256-qwen3-4b": 0,
+  "readout-diss256-rkv": 0,
+  "readout-diss512": 1,
+  "readout-fc-control": 1,
+  "readout-pp1024": 0,
+  "readout-pp256": 0,
+  "replay-diss256": 0,
+  "replay-diss256-h2o": 0,
+  "replay-onset-t0": 0,
+  "replay-onset-t2048": 0,
+  "replay-onset-t512": 0,
+  "replay-ratio-matched-m3-v2": 0,
+  "replay-sawtooth-i16": 0,
+  "replay-sawtooth-i256": 0,
+  "replay-sawtooth-i64": 0,
+  "restoration-diss256-v2": 0,
+  "restore-v2": 0,
+  "restore-v3": 0,
+  "reverse-readout-diss256-h2o": 0,
+  "reverse-readout-diss256-llama": 0,
+  "reverse-readout-diss256-q14b": 0,
+  "reverse-readout-diss256-q15b": 0,
+  "reverse-readout-diss256-rkv": 0,
+  "reverse-readout-pp1024": 0,
+  "reverse-readout-pp256": 0,
+  "rkvpp-smoke": 0,
+  "shape-p2v2-restricted": 3,
+  "shape-sawtooth-i16": 0,
+  "shape-sawtooth-i256": 0,
+  "shape-sawtooth-i64": 0,
+  "t1-tv1024": 0,
+  "t1-tv512": 0
+ },
+ "taken_at": "2026-10-17T17:06:14+04:00"
+}

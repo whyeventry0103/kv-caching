@@ -2147,6 +2147,77 @@ def build_catalogue() -> list[Entry]:
                 f"{_rv4p} :: per_policy.{_pp}.reverse_support.n_conditions",
                 f"B=1024 reverse-readout support, {_pp}",
             )
+    # M5-A strict-cohort protection-by-policy read (2026-10-17): FINAL only
+    _m5a = DIAG / "meeting5" / "m5a" / "m5a_read_strict.json"
+    if _m5a.exists() and _load(_m5a).get("status") == "FINAL":
+        _m5d, _m5p = _load(_m5a), _m5a.relative_to(PROJECT_ROOT)
+        _est = _m5d["estimates"]
+        for _arm, _b in _est["accuracy"].items():
+            _tag = _arm.replace("+P", "_pp").replace("-P", "_unprot")
+            add(
+                f"m5a.strict.acc.{_tag}.mean",
+                _b["mean"],
+                f"{_m5p} :: estimates.accuracy[{_arm!r}].mean",
+                f"M5-A strict free-run accuracy, {_arm}",
+            )
+            for _i, _x in enumerate(_b["ci95"]):
+                add(
+                    f"m5a.strict.acc.{_tag}.ci{'lo' if _i == 0 else 'hi'}",
+                    _x,
+                    f"{_m5p} :: estimates.accuracy[{_arm!r}].ci95[{_i}]",
+                    f"M5-A strict accuracy CI bound, {_arm}",
+                )
+        for _pair, _blk in _est["contrasts"].items():
+            _tag = _pair.replace("-", "_minus_")
+            for _c in ("protected", "unprotected", "interaction"):
+                add(
+                    f"m5a.strict.{_tag}.{_c}.mean",
+                    _blk[_c]["mean"],
+                    f"{_m5p} :: estimates.contrasts[{_pair!r}].{_c}.mean",
+                    f"M5-A strict {_c} contrast, {_pair}",
+                )
+                for _i, _x in enumerate(_blk[_c]["ci95"]):
+                    add(
+                        f"m5a.strict.{_tag}.{_c}.ci{'lo' if _i == 0 else 'hi'}",
+                        _x,
+                        f"{_m5p} :: estimates.contrasts[{_pair!r}].{_c}.ci95[{_i}]",
+                        f"M5-A strict {_c} contrast CI bound, {_pair}",
+                    )
+        for _pair, _m in _est["registered_inference"]["members"].items():
+            _tag = _pair.replace("-", "_minus_")
+            for _f in ("t", "df", "p", "p_holm", "n_problems", "n_conditions"):
+                add(
+                    f"m5a.strict.{_tag}.registered.{_f}",
+                    _m[_f],
+                    f"{_m5p} :: estimates.registered_inference.members"
+                    f"[{_pair!r}].{_f}",
+                    f"M5-A registered interaction t test {_f}, {_pair}",
+                )
+        for _which in ("primary", "sensitivity"):
+            _eq = _est["equivalence_protected_contrasts"][_which]
+            for _pair, _m in _eq["members"].items():
+                _tag = _pair.replace("-", "_minus_")
+                for _f in ("p_tost", "p_tost_holm"):
+                    add(
+                        f"m5a.strict.{_tag}.tost_{_which}.{_f}",
+                        _m[_f],
+                        f"{_m5p} :: estimates.equivalence_protected_contrasts."
+                        f"{_which}.members[{_pair!r}].{_f}",
+                        f"M5-A TOST ({_which}) {_f}, {_pair}",
+                    )
+        # the TOST interval does not depend on the margin: registered once
+        for _pair, _m in _est["equivalence_protected_contrasts"]["primary"][
+            "members"
+        ].items():
+            _tag = _pair.replace("-", "_minus_")
+            for _i, _x in enumerate(_m["ci_1_minus_2alpha"]):
+                add(
+                    f"m5a.strict.{_tag}.tost.ci90{'lo' if _i == 0 else 'hi'}",
+                    _x,
+                    f"{_m5p} :: estimates.equivalence_protected_contrasts."
+                    f"primary.members[{_pair!r}].ci_1_minus_2alpha[{_i}]",
+                    f"M5-A TOST (1 - 2 alpha) interval bound, {_pair}",
+                )
     _dc = DIAG / "paper_audit" / "decision_b256.json"
     if _dc.exists():
         _dcd, _dcp = _load(_dc), _dc.relative_to(PROJECT_ROOT)

@@ -1,0 +1,490 @@
+{
+  "capacity_matched": true,
+  "cohort": {
+    "n_problems": 97,
+    "name": "strict",
+    "seeds": [
+      11,
+      23,
+      47,
+      89
+    ]
+  },
+  "controls": {
+    "provenance_grid-diss256-h2o": {
+      "commits": [
+        "3245cf8582d48ea1b5045603f4522c777d095851",
+        "32768a9fbca4369d080ef2c9bbe739102d36b76f"
+      ],
+      "limitation": "no per-row input-manifest hash; reference inputs are matched to the full-cache bank by (problem, seed) key only",
+      "n_rows": 400,
+      "n_without_runmeta": 0,
+      "passed": true,
+      "schema": "legacy (runmeta + versions; no provenance-v1 identity)",
+      "source_tree_hashes": [
+        "6567073ba31b1cc2518b53865d6cf465601cdf4481a8606a208c7a1266536d63",
+        "ada58a40b49d558f53129926c2e5531fa44f0c7810d8ab39ae3416d3460e8bb8"
+      ],
+      "version_sets": 1
+    },
+    "provenance_grid-diss256-rkv": {
+      "commits": [
+        "a358b4c1136c6e3c995363c3b4eaef66422ab2a0"
+      ],
+      "limitation": "no per-row input-manifest hash; reference inputs are matched to the full-cache bank by (problem, seed) key only",
+      "n_rows": 400,
+      "n_without_runmeta": 0,
+      "passed": true,
+      "schema": "legacy (runmeta + versions; no provenance-v1 identity)",
+      "source_tree_hashes": [
+        "f237673f64eed709d1e50ae8aea25c3576a484138fa28f287d3d69f91ad5a46c"
+      ],
+      "version_sets": 1
+    },
+    "provenance_grid-diss256-tok": {
+      "commits": [
+        "3245cf8582d48ea1b5045603f4522c777d095851"
+      ],
+      "limitation": "no per-row input-manifest hash; reference inputs are matched to the full-cache bank by (problem, seed) key only",
+      "n_rows": 800,
+      "n_without_runmeta": 0,
+      "passed": true,
+      "schema": "legacy (runmeta + versions; no provenance-v1 identity)",
+      "source_tree_hashes": [
+        "6429d0b343a88e6f8490de5ac2cfe822dd3293af321269e09cf2a7e128b58123",
+        "90dc7b1c45d983ff780b5e430a6643dfe00d7bd02af59e97a71b452083414992",
+        "fb2529411a9238dd9b07fa75b00ed9b7e98dbb69a6cb148f783c763faad9b20a"
+      ],
+      "version_sets": 1
+    },
+    "provenance_grid-pp256": {
+      "commits": [
+        "15778e33182324c4acaee76ae75873046160e0a9",
+        "b254a61bc08b97063bc80eee700ffd8c41dd17a0"
+      ],
+      "limitation": "no per-row input-manifest hash; reference inputs are matched to the full-cache bank by (problem, seed) key only",
+      "n_rows": 800,
+      "n_without_runmeta": 0,
+      "passed": true,
+      "schema": "legacy (runmeta + versions; no provenance-v1 identity)",
+      "source_tree_hashes": [
+        "371ff1d5247156bcccb4c4158777c5e399f2faeee58f79c976e50624516810f7",
+        "9db886090f76c9dd78919cb1dfca2e4802d523a4bb2f364c4f86b26320af7019"
+      ],
+      "version_sets": 1
+    }
+  },
+  "dependencies": {
+    "groups": {
+      "analysis_code": {
+        "n_files": 8,
+        "sha256": "b2b8ccb8a9230b1e4d566c0457752790d77d74f39f05fb4e91c96bc3a8c5d2c8"
+      },
+      "rows_grid-diss256-h2o": {
+        "n_files": 4,
+        "sha256": "0f43375c050553bf5508639e6224c5d13bfed20ca05b3d820afef2362e5c6965"
+      },
+      "rows_grid-diss256-rkv": {
+        "n_files": 4,
+        "sha256": "4d6f3bd4eda0db86386446e6d7c5b3907ad42a2551e7e9b95a445f9ca66884f1"
+      },
+      "rows_grid-diss256-tok": {
+        "n_files": 8,
+        "sha256": "e80887d4008581d8e5bcbbb754c54512572dba73fbbaa42d27988b8829c7536f"
+      },
+      "rows_grid-h2opp256-m5": {
+        "n_files": 4,
+        "sha256": "c8a5b88b579bb8f7c08801653acf8478dd712c8f45a28109628d17e9cf30df7c"
+      },
+      "rows_grid-pp256": {
+        "n_files": 8,
+        "sha256": "23b5fed9fa1cda45f122353d22c44ce54e625e65e6f999c4c13b3241497745a8"
+      },
+      "rows_grid-rkvpp256-m5": {
+        "n_files": 4,
+        "sha256": "16a809b9dfaf9aa1373d853dd354b19cb0ffb69e299c2c2ba995f824623d1217"
+      },
+      "specs": {
+        "n_files": 8,
+        "sha256": "11a85f865a273b167e23dc89b13fb905d8f0ac2929d7770219f4bf6359bf4423"
+      }
+    },
+    "sha256": "9ae3127307b96c91d1d2c01264b58296793dcb2297916126cb47c5385c72b43f"
+  },
+  "estimates": {
+    "accuracy": {
+      "h2o+P": {
+        "ci95": [
+          0.6108247422680413,
+          0.7654639175257731
+        ],
+        "mean": 0.6881443298969072,
+        "n_problems": 97
+      },
+      "h2o-P": {
+        "ci95": [
+          0.18814432989690721,
+          0.3247422680412371
+        ],
+        "mean": 0.2551546391752577,
+        "n_problems": 97
+      },
+      "random+P": {
+        "ci95": [
+          0.5979381443298969,
+          0.770618556701031
+        ],
+        "mean": 0.6829896907216495,
+        "n_problems": 97
+      },
+      "random-P": {
+        "ci95": [
+          0.3556701030927835,
+          0.5128865979381443
+        ],
+        "mean": 0.43556701030927836,
+        "n_problems": 97
+      },
+      "rkv+P": {
+        "ci95": [
+          0.5592783505154639,
+          0.729381443298969
+        ],
+        "mean": 0.6443298969072165,
+        "n_problems": 97
+      },
+      "rkv-P": {
+        "ci95": [
+          0.45103092783505155,
+          0.6237113402061856
+        ],
+        "mean": 0.5360824742268041,
+        "n_problems": 97
+      },
+      "streamingllm+P": {
+        "ci95": [
+          0.5412371134020618,
+          0.7139175257731959
+        ],
+        "mean": 0.6288659793814433,
+        "n_problems": 97
+      },
+      "streamingllm-P": {
+        "ci95": [
+          0.18298969072164947,
+          0.31443298969072164
+        ],
+        "mean": 0.24484536082474226,
+        "n_problems": 97
+      }
+    },
+    "bootstrap": {
+      "n_resamples": 2000,
+      "seed": 0,
+      "unit": "problem"
+    },
+    "contrasts": {
+      "random-h2o": {
+        "interaction": {
+          "ci95": [
+            -0.25,
+            -0.1134020618556701
+          ],
+          "mean": -0.18556701030927836,
+          "n_problems": 97
+        },
+        "protected": {
+          "ci95": [
+            -0.03608247422680412,
+            0.030927835051546393
+          ],
+          "mean": -0.005154639175257732,
+          "n_problems": 97
+        },
+        "role": "scientific",
+        "unprotected": {
+          "ci95": [
+            0.1211340206185567,
+            0.23969072164948454
+          ],
+          "mean": 0.18041237113402062,
+          "n_problems": 97
+        }
+      },
+      "random-rkv": {
+        "interaction": {
+          "ci95": [
+            0.07216494845360824,
+            0.20876288659793815
+          ],
+          "mean": 0.13917525773195877,
+          "n_problems": 97
+        },
+        "protected": {
+          "ci95": [
+            -0.002577319587628866,
+            0.08247422680412371
+          ],
+          "mean": 0.03865979381443299,
+          "n_problems": 97
+        },
+        "role": "descriptive",
+        "unprotected": {
+          "ci95": [
+            -0.15721649484536082,
+            -0.04639175257731959
+          ],
+          "mean": -0.10051546391752578,
+          "n_problems": 97
+        }
+      },
+      "random-streamingllm": {
+        "interaction": {
+          "ci95": [
+            -0.20103092783505155,
+            -0.06958762886597938
+          ],
+          "mean": -0.13659793814432988,
+          "n_problems": 97
+        },
+        "protected": {
+          "ci95": [
+            0.023195876288659795,
+            0.09020618556701031
+          ],
+          "mean": 0.05412371134020619,
+          "n_problems": 97
+        },
+        "role": "scientific",
+        "unprotected": {
+          "ci95": [
+            0.13402061855670103,
+            0.24742268041237114
+          ],
+          "mean": 0.19072164948453607,
+          "n_problems": 97
+        }
+      }
+    },
+    "equivalence_protected_contrasts": {
+      "declared": {
+        "alpha": 0.05,
+        "degenerate_se": "NOT TESTABLE; the observed difference is reported descriptively",
+        "joint": "intersection-union over the scientific pairings (every TOST p <= alpha)",
+        "per_comparison": "TOST on the protected contrast, Holm over the scientific pairings",
+        "primary_margin": 0.03,
+        "sensitivity_margin": 0.05
+      },
+      "primary": {
+        "alpha": 0.05,
+        "joint_rule": "intersection-union: every member's TOST p <= alpha",
+        "joint_within_margin": false,
+        "margin": 0.03,
+        "members": {
+          "random-h2o": {
+            "ci_1_minus_2alpha": [
+              -0.03368320161044033,
+              0.02337392325992487
+            ],
+            "df": 96,
+            "equivalent_per_comparison": false,
+            "label": "not shown within margin",
+            "margin": 0.03,
+            "mean": -0.005154639175257732,
+            "n_problems": 97,
+            "p_lower": 0.07565381373181229,
+            "p_tost": 0.07565381373181229,
+            "p_tost_holm": 0.15130762746362458,
+            "p_upper": 0.021713485150872062,
+            "se": 0.017176760329151382
+          },
+          "random-streamingllm": {
+            "ci_1_minus_2alpha": [
+              0.026087813997816605,
+              0.08215960868259577
+            ],
+            "df": 96,
+            "equivalent_per_comparison": false,
+            "label": "not shown within margin",
+            "margin": 0.03,
+            "mean": 0.05412371134020619,
+            "n_problems": 97,
+            "p_lower": 1.3804894292668967e-06,
+            "p_tost": 0.9218919579182998,
+            "p_tost_holm": 0.9218919579182998,
+            "p_upper": 0.9218919579182998,
+            "se": 0.01688013163499017
+          }
+        },
+        "per_comparison_rule": "TOST, Holm over the scientific pairings"
+      },
+      "sensitivity": {
+        "alpha": 0.05,
+        "joint_rule": "intersection-union: every member's TOST p <= alpha",
+        "joint_within_margin": false,
+        "margin": 0.05,
+        "members": {
+          "random-h2o": {
+            "ci_1_minus_2alpha": [
+              -0.03368320161044033,
+              0.02337392325992487
+            ],
+            "df": 96,
+            "equivalent_per_comparison": true,
+            "label": "within margin",
+            "margin": 0.05,
+            "mean": -0.005154639175257732,
+            "n_problems": 97,
+            "p_lower": 0.005240578012539526,
+            "p_tost": 0.005240578012539526,
+            "p_tost_holm": 0.010481156025079052,
+            "p_upper": 0.0008999747039141572,
+            "se": 0.017176760329151382
+          },
+          "random-streamingllm": {
+            "ci_1_minus_2alpha": [
+              0.026087813997816605,
+              0.08215960868259577
+            ],
+            "df": 96,
+            "equivalent_per_comparison": false,
+            "label": "not shown within margin",
+            "margin": 0.05,
+            "mean": 0.05412371134020619,
+            "n_problems": 97,
+            "p_lower": 8.163156005053923e-09,
+            "p_tost": 0.5962376736015789,
+            "p_tost_holm": 0.5962376736015789,
+            "p_upper": 0.5962376736015789,
+            "se": 0.01688013163499017
+          }
+        },
+        "per_comparison_rule": "TOST, Holm over the scientific pairings"
+      }
+    },
+    "registered_inference": {
+      "alpha": 0.05,
+      "family_size": 2,
+      "members": {
+        "random-h2o": {
+          "df": 96,
+          "mean": -0.18556701030927836,
+          "n_conditions": 388,
+          "n_problems": 97,
+          "p": 3.845898398609133e-07,
+          "p_holm": 7.691796797218266e-07,
+          "reject_at_alpha": true,
+          "sd": 0.335173988002764,
+          "se": 0.03403176233711481,
+          "status": "TESTED",
+          "t": -5.452759350840325
+        },
+        "random-streamingllm": {
+          "df": 96,
+          "mean": -0.13659793814432988,
+          "n_conditions": 388,
+          "n_problems": 97,
+          "p": 0.00011590220288211854,
+          "p_holm": 0.00011590220288211854,
+          "reject_at_alpha": true,
+          "sd": 0.3346729952441703,
+          "se": 0.03398089422949503,
+          "status": "TESTED",
+          "t": -4.019845305476523
+        }
+      },
+      "note": "bootstrap CIs elsewhere in this read are DESCRIPTIVE; this block is the registered family-level test",
+      "procedure": "two-sided one-sample t test of problem-level contrasts (seeds averaged within problem), Holm over the family"
+    }
+  },
+  "read": "M5-A protection-by-policy accuracy",
+  "reproduce": "python scripts/report_policy_replication.py --runs-root /home/sk10741/kvcache-storage/runs --cohort strict",
+  "retired_previous_output": null,
+  "sources": {
+    "grid-diss256-h2o": {
+      "duplicated": [],
+      "malformed": {},
+      "missing": [],
+      "n_duplicated": 0,
+      "n_expected": 400,
+      "n_malformed": 0,
+      "n_missing": 0,
+      "n_rows": 400,
+      "n_unexpected": 0,
+      "n_unique_expected_present": 400,
+      "status": "COMPLETE",
+      "unexpected": []
+    },
+    "grid-diss256-rkv": {
+      "duplicated": [],
+      "malformed": {},
+      "missing": [],
+      "n_duplicated": 0,
+      "n_expected": 400,
+      "n_malformed": 0,
+      "n_missing": 0,
+      "n_rows": 400,
+      "n_unexpected": 0,
+      "n_unique_expected_present": 400,
+      "status": "COMPLETE",
+      "unexpected": []
+    },
+    "grid-diss256-tok": {
+      "duplicated": [],
+      "malformed": {},
+      "missing": [],
+      "n_duplicated": 0,
+      "n_expected": 800,
+      "n_malformed": 0,
+      "n_missing": 0,
+      "n_rows": 800,
+      "n_unexpected": 0,
+      "n_unique_expected_present": 800,
+      "status": "COMPLETE",
+      "unexpected": []
+    },
+    "grid-h2opp256-m5": {
+      "duplicated": [],
+      "malformed": {},
+      "missing": [],
+      "n_duplicated": 0,
+      "n_expected": 400,
+      "n_malformed": 0,
+      "n_missing": 0,
+      "n_rows": 400,
+      "n_unexpected": 0,
+      "n_unique_expected_present": 400,
+      "status": "COMPLETE",
+      "unexpected": []
+    },
+    "grid-pp256": {
+      "duplicated": [],
+      "malformed": {},
+      "missing": [],
+      "n_duplicated": 0,
+      "n_expected": 800,
+      "n_malformed": 0,
+      "n_missing": 0,
+      "n_rows": 800,
+      "n_unexpected": 0,
+      "n_unique_expected_present": 800,
+      "status": "COMPLETE",
+      "unexpected": []
+    },
+    "grid-rkvpp256-m5": {
+      "duplicated": [],
+      "malformed": {},
+      "missing": [],
+      "n_duplicated": 0,
+      "n_expected": 400,
+      "n_malformed": 0,
+      "n_missing": 0,
+      "n_rows": 400,
+      "n_unexpected": 0,
+      "n_unique_expected_present": 400,
+      "status": "COMPLETE",
+      "unexpected": []
+    }
+  },
+  "status": "FINAL"
+}

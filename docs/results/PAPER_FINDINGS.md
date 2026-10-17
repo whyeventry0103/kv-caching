@@ -1892,6 +1892,89 @@ an identification range, not a sampling interval:
   jobs are released behind both M5 grids in queue order.
 - Paper-text edits for the B=1024 forward/reverse result are pending.
 
+### 5q. M5-A strict cohort (97 problems, B=256): prompt protection removes the Random advantage over H2O-style and shrinks it over StreamingLLM; both interactions are registered-significant (2026-10-17)
+
+**Status.** `report_policy_replication.py --cohort strict` is FINAL on the
+host. Every source run was validated in full against its own design before
+the cohort was selected:
+- grid-diss256-tok and grid-pp256: 800/800 each;
+- grid-diss256-h2o, grid-diss256-rkv, grid-h2opp256-m5 and grid-rkvpp256-m5:
+  400/400 each;
+- 0 missing, duplicate, foreign or malformed rows;
+- legacy provenance controls passed; M5 rows carry the expected identity.
+
+Archived: `results/diag/meeting5/m5a/m5a_read_strict.json` (dependency
+fingerprint `9ae31273…`).
+
+**Denominators.** 97 problems × 4 seeds = 388 conditions per arm, every arm.
+- *Excluded:* the 3 problems whose prompt leaves fewer than 64 trace slots at
+  B=256 (`configs/meeting5/strict_fit_b256.json`, frozen 2026-10-14 before any
+  M5 outcome).
+- *Truncation:* truncated rows stay in every denominator, scored incorrect;
+  none is scored correct.
+- *Whole cohort:* the whole-cohort (100-problem) read stays HELD until its
+  capacity-matched comparators exist (M5A-CAPMATCH: not approved, not
+  generated).
+
+**Free-run accuracy** (equal-problem means, problem-cluster bootstrap 95% CI,
+2,000 resamples, seed 0):
+
+| Policy | Unprotected | Protected |
+|---|---|---|
+| Random (historical fixed-slot) | 0.436 [0.356, 0.513] | 0.683 [0.598, 0.771] |
+| H2O-style / current-attention | 0.255 [0.188, 0.325] | 0.688 [0.611, 0.765] |
+| StreamingLLM | 0.245 [0.183, 0.314] | 0.629 [0.541, 0.714] |
+| R-KV (certified port) | 0.536 [0.451, 0.624] | 0.644 [0.559, 0.729] |
+
+**Paired contrasts** (Random − policy, matched keys):
+
+| Contrast | Unprotected | Protected | Interaction |
+|---|---|---|---|
+| Random − H2O-style (scientific) | +0.180 [+0.121, +0.240] | −0.005 [−0.036, +0.031] | −0.186 [−0.250, −0.113] |
+| Random − StreamingLLM (scientific) | +0.191 [+0.134, +0.247] | +0.054 [+0.023, +0.090] | −0.137 [−0.201, −0.070] |
+| Random − R-KV (descriptive) | −0.101 [−0.157, −0.046] | +0.039 [−0.003, +0.082] | +0.139 [+0.072, +0.209] |
+
+**Registered interaction test** (problem-level two-sided t test, Holm over the
+two scientific pairings, frozen 2026-10-14 before any M5 outcome):
+- Random − H2O-style: t −5.45 (df 96);
+- Random − StreamingLLM: t −4.02 (df 96).
+
+Both reject at α = 0.05 after Holm. Protection changes the Random contrast for
+both scientific pairings.
+
+**Equivalence of the protected contrasts** (TOST, Holm over the two pairings;
+owner margin ±0.03, ±0.05 sensitivity):
+
+| Contrast | TOST interval (1 − 2α) | ±0.03: TOST p (Holm) | ±0.05: TOST p (Holm) |
+|---|---|---|---|
+| Random − H2O-style | [−0.034, +0.023] | 0.076 (0.151): not shown within margin | 0.005 (0.010): within margin |
+| Random − StreamingLLM | [+0.026, +0.082] | 0.922 (0.922): not shown within margin | 0.596 (0.596): not shown within margin |
+
+The joint intersection–union claim (every scientific contrast within margin)
+fails at both margins.
+
+**Reading.**
+- *H2O-style.* The Random advantage over H2O-style (+0.180 unprotected) is
+  **not detected** under protection (−0.005). Equivalence within the primary
+  ±0.03 margin is **not established**: the TOST (1 − 2α) interval reaches −0.034. It
+  is established only at the ±0.05 sensitivity margin. The claim is "no
+  difference detected; within ±0.05", never "equal".
+- *StreamingLLM.* Random's advantage over StreamingLLM **persists** under
+  protection but shrinks from +0.191 to +0.054 (CI excludes 0), so it is
+  not equivalent at either margin.
+- *R-KV (descriptive only).* The unprotected ordering (R-KV ahead) reverses in
+  sign under protection; the protected CI includes 0.
+- *Consequence for the "random beats recency" framing.* It is a property of
+  prompt-evictable policies. Under prompt protection, the ordering against
+  H2O-style is not detected and the gap to StreamingLLM is about a quarter
+  of its unprotected size.
+- *Gate G1 is half met.* The four-policy accuracy read is complete; the
+  protected M/Δ/ω capture read does not exist (adapter not implemented), so
+  no protected mismatch-mechanism claim is made.
+- *Scope.* One model, one benchmark, B=256, 97-problem strict cohort.
+  H2O-style is current-attention, not canonical accumulated-attention H2O.
+  The R-KV numbers are our certified port.
+
 ## 5. Framing discipline (non-negotiable — apply throughout)
 - **Divergence ≠ damage.** ADD / TV / residual are "behavioral-fidelity loss," never "damage."
   Correctness is the only quality arbiter. Carry the **signed flip-mass** (gained vs lost correct

@@ -1,0 +1,95 @@
+# Status INSPECTION for the 2026-10-17 progress update (not an analysis: no
+# estimate here enters a claim). Run on the GPU host from ~/kv-caching:
+#   cp results/diag/meeting5/status_20261017/status_inspection.py.txt /tmp/si.py
+#   KVCACHE_REMOTE=1 .venv/bin/python /tmp/si.py > status_inspection.json
+# Uses the package's own design-key, key-function, ledger and gate code.
+import datetime, json, statistics, sys
+from collections import Counter
+from pathlib import Path
+sys.path[:0] = ["scripts", "src"]
+import yaml
+from kvcache import campaign_budget as cb
+from kvcache.coverage import expected_keys
+from kvcache.metrics.policy_replication import grid_key
+from kvcache.read_validation import frozen_pids, tree_files
+import run_information_probe as rip
+
+RUNS = Path("/home/sk10741/kvcache-storage/runs")
+out = {"taken_at": datetime.datetime.now().astimezone().isoformat(timespec="seconds")}
+
+# 1. campaign ledger: charged/cap and every launch's exit code
+caps = json.load(open("logs/campaign_ledger.json"))["caps"]
+out["ledger_summary"] = cb.summary(Path("logs/campaign_ledger.json"), caps)
+launches = json.load(open("logs/campaign_ledger.json"))["launches"]
+out["launches"] = sorted(
+    ({k: v.get(k) for k in ("campaign", "job", "gpu", "started_at", "ended_at", "rc", "status", "settled_hours")}
+     for v in launches.values()), key=lambda r: (r["campaign"], r["started_at"] or ""))
+st = json.load(open("logs/nightly_state.json")); st = st.get("jobs", st)
+out["scheduler_fail_counters"] = {k: v.get("fails") for k, v in st.items()}
+
+# 2. M5-A strict cohort: per-arm rows / correct / truncated (inspection count)
+spec = yaml.safe_load(open("configs/meeting5/m5a_read.yaml"))
+pids = set(json.load(open(spec["cohort_source"]))["pids"])
+arms = {}
+for pol, sides in spec["arms"].items():
+    for side in ("unprotected", "protected"):
+        run, press = sides[side]
+        rows = [json.loads(l) for f in tree_files(RUNS / run, "math500") for l in f.read_text().splitlines() if l.strip()]
+        sel = [r for r in rows if r["press"] == press and r["pid"] in pids]
+        arms[f"{pol}/{side}"] = {"run": run, "press": press, "n": len(sel),
+            "correct": sum(r["correct"] is True for r in sel), "truncated": sum(r["truncated"] is True for r in sel),
+            "truncated_and_correct": sum(r["truncated"] is True and r["correct"] is True for r in sel)}
+out["m5a_strict_arm_counts"] = arms
+
+# 3. Qwen3: unique expected-key coverage (MATH-500 subset n = first n dataset
+# rows, kvcache.datasets._select_math500_rows; grid100_pids is the first 100)
+P50 = frozen_pids(100, root=Path("."))[:50]
+def exp_of(p):
+    c = yaml.safe_load(open(p)); assert int(c["subset"]["math500"]) == 50
+    return expected_keys(list(c["presses"]), [str(b) for b in c["budgets"]], P50, [int(x) for x in c["seeds"]])
+def ro_key(r):
+    ref = r["reference_key"]; return (str(r["condition"]["press"]), str(r["condition"]["budget"]), str(ref[1]), int(ref[5]))
+def rev_key(r):
+    ref = r["reference_key"]; return (str(ref[3]), str(ref[4]), str(ref[1]), int(ref[5]))
+grid_exp = exp_of("configs/experiments/grid_math500_diss256_qwen3_4b.yaml")
+bank_exp = exp_of("configs/experiments/bank_math500_qwen3_4b.yaml")
+qwen = {}
+for run, sub, key, exp in (("fc-qwen3-4b", "math500", grid_key, bank_exp),
+                           ("grid-diss256-qwen3-4b", "math500", grid_key, grid_exp),
+                           ("readout-diss256-qwen3-4b", "readout", ro_key, grid_exp),
+                           ("reverse-readout-diss256-qwen3-4b", "readout", rev_key, grid_exp)):
+    if not (RUNS / run).is_dir():
+        qwen[run] = {"expected": len(exp), "unique_expected_present": 0, "absent": True}; continue
+    lines, torn, ks, wall = 0, 0, [], 0.0
+    for f in tree_files(RUNS / run, sub):
+        for l in f.read_text().splitlines():
+            if not l.strip(): continue
+            lines += 1
+            try: r = json.loads(l)
+            except json.JSONDecodeError: torn += 1; continue
+            ks.append(key(r))
+            if isinstance(r.get("wallclock_s"), (int, float)): wall += r["wallclock_s"]
+    c = Counter(ks)
+    qwen[run] = {"expected": len(exp), "file_lines": lines, "torn_lines": torn,
+        "unique_expected_present": len(set(ks) & exp), "duplicated_keys": sum(1 for n in c.values() if n > 1),
+        "unexpected_keys": len(set(ks) - exp), "row_wallclock_hours": round(wall / 3600, 2),
+        "per_policy_seed": {f"{p}/s{s}": sum(1 for k in set(ks) & exp if k[0] == p and k[3] == s)
+                            for p in sorted({k[0] for k in exp}) for s in sorted({k[3] for k in exp})}}
+out["qwen3_coverage"] = qwen
+
+# 4. calibration cost basis: measured decode seconds per token, protected grids
+tp = {}
+for run in ("grid-h2opp256-m5", "grid-rkvpp256-m5", "grid-pp256"):
+    w = t = 0
+    for f in tree_files(RUNS / run, "math500"):
+        for l in f.read_text().splitlines():
+            r = json.loads(l)
+            if isinstance(r.get("wallclock_s"), (int, float)) and r.get("n_tokens"):
+                w += r["wallclock_s"]; t += r["n_tokens"]
+    tp[run] = {"tokens": t, "hours": round(w / 3600, 2), "s_per_token": round(w / t, 4)}
+out["decode_throughput"] = tp
+
+# 5. calibration prerequisites the runner itself enforces
+cfg = rip._yaml(rip.PROJECT_ROOT / rip.CONFIG)
+out["calibration_prereqs"] = {"held": cfg["held"], "smoke_gate_problems": rip.smoke_gates(cfg, RUNS), "counts": rip.counts(cfg)}
+print(json.dumps(out, indent=1, sort_keys=True))

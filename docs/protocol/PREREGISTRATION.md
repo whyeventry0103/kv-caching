@@ -4590,3 +4590,44 @@ The information calibration stays HELD pending its separate ≤ 4 GPU-h
 approval. Its feasibility checks passed on the host without weights: 83
 eligible reserve passages against 40 needed, and the pinned tokenizer renders
 all 64 variants.
+
+## M5-A result, strict cohort (2026-10-17): both registered protection-by-policy interactions reject; protected Random − H2O-style not shown within ±0.03 (within ±0.05 sensitivity); Random − StreamingLLM not equivalent
+
+**Read.** `report_policy_replication.py --cohort strict` is FINAL on the host
+(`results/diag/meeting5/m5a/m5a_read_strict.json`).
+- *Source validation first.* Every source run was validated against its own
+  design before the cohort was selected: 800/800 for each two-policy run,
+  400/400 for each single-policy run. There were 0 missing, duplicate, foreign
+  or malformed rows; legacy provenance controls passed and M5 identities
+  matched.
+- *Cohort.* The frozen 97-problem strict-fit cohort (2026-10-14, before any
+  M5 outcome) × 4 seeds = 388 conditions per arm. The 3 relaxed-budget
+  problems are excluded by design; truncated rows are scored incorrect.
+
+**Registered inference** (frozen 2026-10-14: problem-level t test of the
+interaction, Holm over the two scientific pairings):
+
+| Pairing | Interaction | t (df) | Verdict |
+|---|---|---|---|
+| Random − H2O-style | −0.186 | −5.45 (96) | rejects at 0.05 after Holm |
+| Random − StreamingLLM | −0.137 | −4.02 (96) | rejects at 0.05 after Holm |
+
+**Equivalence** of the protected contrasts (owner margin ±0.03, ±0.05
+sensitivity; TOST with Holm, intersection–union for the joint claim):
+
+| Pairing | Protected contrast | At ±0.03 | At ±0.05 |
+|---|---|---|---|
+| Random − H2O-style | −0.005 | not shown within margin (Holm TOST p 0.151) | within margin (Holm TOST p 0.010) |
+| Random − StreamingLLM | +0.054 | not within margin | not within margin |
+
+The joint claim fails at both margins.
+
+Random − R-KV is descriptive only.
+
+The whole-cohort read stays HELD (PARTIAL by construction) until the
+capacity-matched comparators (M5A-CAPMATCH) exist. They are not approved and
+not generated, and the pid-filter adapter they need is not implemented.
+
+Gate G1 is half met: the protected M/Δ/ω capture read
+(M5A-CAPTURE-PP) needs a protected capture adapter that is not implemented.
+Interpretation and scope: PAPER_FINDINGS §5q.

@@ -268,7 +268,17 @@ def test_the_real_catalogue_has_no_two_entries_sharing_an_exact_value_and_rule()
     # problems), 382 (Random common support = p4.tvjsd_shared_support), 96
     # (StreamingLLM df = p2v2.rotation_n_traces), 99 (both reverse supports).
     # 0.0 / 31 / 0.0775 gained members. No new key is cited in the .tex.
-    assert len(collisions) <= 172, (
+    #
+    # 172 -> 178 on 2026-10-17 (M5-A strict-cohort read), examined: 6 new
+    # groups. Identities by construction (3): in a two-member Holm family the
+    # larger p is its own adjusted value whenever it is >= twice the smaller
+    # (registered p, primary and sensitivity TOST p for Random - StreamingLLM).
+    # Coincidences (3) on the k/388 and k/194 lattices or counts: -0.00515
+    # (= -1/194, also the b1024 StreamingLLM registered mean), 388 (the
+    # strict-cohort condition count, also a b1024 reverse support) and -0.25.
+    # The TOST interval is registered once (it does not depend on the margin).
+    # No new key is cited in the .tex.
+    assert len(collisions) <= 178, (
         f"{len(collisions)} exact-value collisions in the catalogue; if this "
         "grew, a new derived quantity is duplicating an existing one"
     )

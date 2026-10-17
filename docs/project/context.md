@@ -24,6 +24,24 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-10-17 17:10 Dubai — M5-A strict read FINAL; reviewer progress update and calibration approval request written; no GPU work started.**
+  - **M5-A strict read: FINAL** (`results/diag/meeting5/m5a/m5a_read_strict.json`; PAPER_FINDINGS §5q). Every source was validated in full first; 97 problems × 4 seeds = 388 per arm.
+    - Protected accuracy: Random 0.683, H2O-style 0.688, StreamingLLM 0.629, R-KV 0.644.
+    - Unprotected accuracy: Random 0.436, H2O-style 0.255, StreamingLLM 0.245, R-KV 0.536.
+    - Registered interaction t test + Holm rejects for both pairings: Random − H2O-style −0.186 (t −5.45); Random − StreamingLLM −0.137 (t −4.02).
+    - Protected Random − H2O-style −0.005: not shown within ±0.03 (Holm TOST p 0.151), within ±0.05 (0.010).
+    - Protected Random − StreamingLLM +0.054 [+0.023, +0.090]: not equivalent.
+    - The whole-cohort read stays held (CAPMATCH absent). G1 is half met (no protected-capture adapter).
+  - **Campaigns:** P1, P2, P3, both smokes and both M5 grids are complete (ledger in `results/diag/meeting5/status_20261017/status_inspection.json`).
+    - Qwen3 unique expected keys: bank 200/200, grid 381/400 (Random seed 89 31/50), readout 169/400, reverse 0/400. It resumes at 01:45.
+  - **Calibration request:** `docs/paper/MEETING5_CALIBRATION_APPROVAL_REQUEST.md`. Cap ≤ 4 GPU-h; estimate about 2.5 GPU-h from measured 0.0265 s/token; prerequisites met. NOT approved and NOT launched.
+    - On approval, add campaign M5C-CAL, set `campaign:` on the job and remove `blocked:`, and set `held: false` — all together.
+  - **Reviewer update:** `docs/paper/PROGRESS_UPDATE_20261017.md`. It also lists the paper-text and claim-ledger edits still needed.
+  - **Next.**
+    1. Owner decision on the calibration.
+    2. Paper-text edits (abstract L71; §4.2–4.4; threats; claim ledger A2/B1/C3).
+    3. The Qwen3 grid → reverse readout.
+
   **★★★★★ 2026-10-16 ~01:45 PKT — Review of 5616630 repaired (R1–R4, CPU); P1 reverse read FINAL (no interaction detected); Qwen hold released; calibration still HELD.**
   - **P1 reverse at B=1024: FINAL** (`results/diag/paper_audit/reverse_b1024.json`).
     - Registered t test + Holm on the protected interaction: Random +0.003 (t 0.68, Holm p 0.64), StreamingLLM −0.005 (t −1.00, Holm p 0.64). Neither rejects.
