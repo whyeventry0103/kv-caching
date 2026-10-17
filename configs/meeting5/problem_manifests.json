@@ -232,7 +232,7 @@
     "n_excluded": 0,
     "n_pool": 250,
     "n_total": 250,
-    "note": "ids are example indices; the count must be re-verified by the loader after a human pins the revision",
+    "note": "ids are example indices; revision pinned by the owner 2026-10-14 (kvcache.bbh.PINNED_COMMIT/PINNED_BLOB); load_bbh verifies the blob and the 250-example count. Metadata amended 2026-10-17 (PREREGISTRATION); the selection is unchanged",
     "reserve": [
       "bbh_lde5/104",
       "bbh_lde5/117",
@@ -260,8 +260,9 @@
       "bbh_lde5/78",
       "bbh_lde5/92"
     ],
-    "revision": "TODO(human): proposed 9ee07bd481feebf959a6b59d61ea57bdcf30964d",
-    "salt": "meeting5-2026-10-14|bbh_lde5"
+    "revision": "9ee07bd481feebf959a6b59d61ea57bdcf30964d",
+    "salt": "meeting5-2026-10-14|bbh_lde5",
+    "blob": "936cd6d80db71aeacaea857c34f9af87e1c34964"
   },
   "frozen": "2026-10-14, before any M5-B outcome; selection by hash only",
   "gsm8k": {

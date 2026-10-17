@@ -259,3 +259,50 @@ def replication_read(
         "equivalence_protected_contrasts": eq,
         "bootstrap": {"unit": "problem", "n_resamples": n_resamples, "seed": seed},
     }
+
+
+# --- the published condition table (review of 94720ff, 2026-10-17) ----------
+# The aggregate read alone cannot be checked: a reviewer could reproduce the t
+# tests from reported means and SEs but not the paired bootstrap intervals or
+# the correctness flags. The read therefore publishes its sufficient
+# statistics -- one row per (problem, seed) with every arm's correctness and
+# truncation flag -- and records the table's sha256, and ``values_from_table``
+# turns the table back into exactly the arm values ``replication_read`` used.
+
+TABLE_SIDES = (("unprotected", False), ("protected", True))
+
+
+def condition_table(
+    outcomes: Mapping[Arm, Mapping[Key, tuple[bool, bool]]],
+    *,
+    expected: set[Key],
+    policies: Sequence[str],
+) -> tuple[list[str], list[list[Any]]]:
+    """(header, rows): pid, seed, then ``<policy>_<side>_correct`` and
+    ``_truncated`` (0/1) for every arm, sorted by (pid, seed)."""
+    header = ["pid", "seed"]
+    arms = [(p, side, prot) for p in policies for side, prot in TABLE_SIDES]
+    for p, side, _ in arms:
+        header += [f"{p}_{side}_correct", f"{p}_{side}_truncated"]
+    rows = []
+    for key in sorted(expected):
+        row: list[Any] = [key[0], key[1]]
+        for p, _, prot in arms:
+            correct, truncated = outcomes[(p, prot)][key]
+            row += [int(correct), int(truncated)]
+        rows.append(row)
+    return header, rows
+
+
+def values_from_table(
+    header: Sequence[str], rows: Sequence[Sequence[str]]
+) -> dict[Arm, dict[Key, float]]:
+    """Arm values (correctness as 0/1 floats) back from a published table."""
+    out: dict[Arm, dict[Key, float]] = {}
+    for col, name in enumerate(header):
+        if not name.endswith("_correct"):
+            continue
+        policy, side = name[: -len("_correct")].rsplit("_", 1)
+        arm = (policy, dict(TABLE_SIDES)[side])
+        out[arm] = {(str(r[0]), int(r[1])): float(int(r[col])) for r in rows}
+    return out

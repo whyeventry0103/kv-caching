@@ -78,7 +78,7 @@
     "groups": {
       "analysis_code": {
         "n_files": 8,
-        "sha256": "b2b8ccb8a9230b1e4d566c0457752790d77d74f39f05fb4e91c96bc3a8c5d2c8"
+        "sha256": "b770992b1d7e8b7e0b0cfc285bdad119e1d06d186ac9655800afd1f3cfa541ce"
       },
       "rows_grid-diss256-h2o": {
         "n_files": 4,
@@ -109,7 +109,7 @@
         "sha256": "11a85f865a273b167e23dc89b13fb905d8f0ac2929d7770219f4bf6359bf4423"
       }
     },
-    "sha256": "9ae3127307b96c91d1d2c01264b58296793dcb2297916126cb47c5385c72b43f"
+    "sha256": "7ebd4c4a530146ab9b18094330218ca94bc9318189380a1546e037debf4fa470"
   },
   "estimates": {
     "accuracy": {
@@ -399,7 +399,7 @@
   },
   "read": "M5-A protection-by-policy accuracy",
   "reproduce": "python scripts/report_policy_replication.py --runs-root /home/sk10741/kvcache-storage/runs --cohort strict",
-  "retired_previous_output": null,
+  "retired_previous_output": "m5a_read_strict.json.superseded-1792244383",
   "sources": {
     "grid-diss256-h2o": {
       "duplicated": [],
@@ -486,5 +486,7 @@
       "unexpected": []
     }
   },
-  "status": "FINAL"
+  "status": "FINAL",
+  "sufficient_statistics_sha256": "da50c268e7601d55c095b2faa895f5e4177a8d3da748362707721264b52ba077",
+  "sufficient_statistics_tsv": "m5a_read_strict.conditions.tsv"
 }

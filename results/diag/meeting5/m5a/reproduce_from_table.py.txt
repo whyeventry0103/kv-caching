@@ -1,0 +1,41 @@
+# Independent stdlib reproduction of the M5-A strict read from its published
+# condition table (no kvcache import). Bootstrap convention as in the review of
+# 5616630: average seeds within problem, resample problems with replacement,
+# 2,000 replicates, random.Random(0), percentile indices 49 / 1949.
+#   python reproduce_from_table.py.txt m5a_read_strict.conditions.tsv m5a_read_strict.json
+import csv, json, math, random, statistics, sys
+from collections import defaultdict
+rows = list(csv.DictReader(open(sys.argv[1]), delimiter="\t"))
+read = json.load(open(sys.argv[2]))["estimates"]
+def pm(f):
+    g = defaultdict(list)
+    for r in rows: g[r["pid"]].append(f(r))
+    return [statistics.fmean(g[p]) for p in sorted(g)]
+def boot(m):
+    rng = random.Random(0)
+    d = sorted(statistics.fmean(m[rng.randrange(len(m))] for _ in m) for _ in range(2000))
+    return statistics.fmean(m), [d[49], d[1949]]
+c = lambda p, s: (lambda r: int(r[f"{p}_{s}_correct"]))
+ok = True
+def check(name, got, want):
+    global ok
+    same = abs(got[0] - want["mean"]) < 1e-12 and all(abs(a - b) < 1e-12 for a, b in zip(got[1], want["ci95"]))
+    ok &= same
+    print(f"{name:42s} {got[0]:+.4f} [{got[1][0]:+.4f}, {got[1][1]:+.4f}]  matches={same}")
+for p in ("random", "streamingllm", "h2o", "rkv"):
+    for s, tag in (("unprotected", "-P"), ("protected", "+P")):
+        check(f"accuracy {p}{tag}", boot(pm(c(p, s))), read["accuracy"][f"{p}{tag}"])
+for j in ("h2o", "streamingllm", "rkv"):
+    prot = lambda r, j=j: c("random", "protected")(r) - c(j, "protected")(r)
+    unp = lambda r, j=j: c("random", "unprotected")(r) - c(j, "unprotected")(r)
+    inter = lambda r, j=j: prot(r) - unp(r)
+    for name, f in (("protected", prot), ("unprotected", unp), ("interaction", inter)):
+        check(f"random-{j} {name}", boot(pm(f)), read["contrasts"][f"random-{j}"][name])
+    if j != "rkv":
+        m = pm(inter); n = len(m); se = statistics.stdev(m) / math.sqrt(n)
+        t = statistics.fmean(m) / se
+        want = read["registered_inference"]["members"][f"random-{j}"]
+        same = abs(t - want["t"]) < 1e-9 and n == want["n_problems"]
+        ok &= same
+        print(f"random-{j} registered t {t:.4f} (df {n-1})  matches={same}")
+print("ALL MATCH" if ok else "MISMATCH")

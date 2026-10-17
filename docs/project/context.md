@@ -24,6 +24,22 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-10-17 ~18:50 PKT — Reviewer follow-up: condition table published, pair-specific paper and ledger, BBH metadata amended; calibration approval asked of the owner.**
+  - **Condition table.** `results/diag/meeting5/m5a/m5a_read_strict.conditions.tsv` (388 rows; correct and truncated flags for 8 arms), with its sha in the read. The host re-read is bit-identical in its estimates. The standard-library reproduction from the table matches everything (`reproduce_from_table.out.txt`).
+  - **Corrections, no number changed.** Protected Random − StreamingLLM +0.054 is DESCRIPTIVE, not a registered superiority claim. The "prompt-evicting policies only" restriction is withdrawn, because the StreamingLLM gap survives protection.
+  - **Paper.**
+    - New §4.5 (`sec:protection`): B=1024 persists, no interaction detected; the four-policy protected table; pair-specific ranking.
+    - Abstract, intro bullet, §4.2 title and sentence, and threats edited.
+    - PDF rebuilt ×2: 0 errors, the single Overfull is pre-existing (0.6 pt at L261–273); pages viewed.
+  - **Claim ledger.** A11–A16 added; A2, B1 and C3 updated; §F1 closed, §F3 narrowed; two wordings retired.
+  - **BBH manifest metadata amended** (revision is the owner's pin, plus the blob). The selection sha `146d2369…` is unchanged and asserted by a test.
+  - **SSH restored**; the sync to 94720ff completed.
+  - **Next (owner decision pending).**
+    1. Calibration approval (≤4 GPU-h; config changes ready).
+    2. Protected-capture adapter on CPU plus a smoke/timing proposal.
+    3. GSM8K full-cache calibration pricing.
+    4. Qwen3 continues in the windows.
+
   **★★★★★ 2026-10-17 17:10 Dubai — M5-A strict read FINAL; reviewer progress update and calibration approval request written; no GPU work started.**
   - **M5-A strict read: FINAL** (`results/diag/meeting5/m5a/m5a_read_strict.json`; PAPER_FINDINGS §5q). Every source was validated in full first; 97 problems × 4 seeds = 388 per arm.
     - Protected accuracy: Random 0.683, H2O-style 0.688, StreamingLLM 0.629, R-KV 0.644.

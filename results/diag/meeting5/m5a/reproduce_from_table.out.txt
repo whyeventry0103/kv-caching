@@ -1,0 +1,20 @@
+accuracy random-P                          +0.4356 [+0.3557, +0.5129]  matches=True
+accuracy random+P                          +0.6830 [+0.5979, +0.7706]  matches=True
+accuracy streamingllm-P                    +0.2448 [+0.1830, +0.3144]  matches=True
+accuracy streamingllm+P                    +0.6289 [+0.5412, +0.7139]  matches=True
+accuracy h2o-P                             +0.2552 [+0.1881, +0.3247]  matches=True
+accuracy h2o+P                             +0.6881 [+0.6108, +0.7655]  matches=True
+accuracy rkv-P                             +0.5361 [+0.4510, +0.6237]  matches=True
+accuracy rkv+P                             +0.6443 [+0.5593, +0.7294]  matches=True
+random-h2o protected                       -0.0052 [-0.0361, +0.0309]  matches=True
+random-h2o unprotected                     +0.1804 [+0.1211, +0.2397]  matches=True
+random-h2o interaction                     -0.1856 [-0.2500, -0.1134]  matches=True
+random-h2o registered t -5.4528 (df 96)  matches=True
+random-streamingllm protected              +0.0541 [+0.0232, +0.0902]  matches=True
+random-streamingllm unprotected            +0.1907 [+0.1340, +0.2474]  matches=True
+random-streamingllm interaction            -0.1366 [-0.2010, -0.0696]  matches=True
+random-streamingllm registered t -4.0198 (df 96)  matches=True
+random-rkv protected                       +0.0387 [-0.0026, +0.0825]  matches=True
+random-rkv unprotected                     -0.1005 [-0.1572, -0.0464]  matches=True
+random-rkv interaction                     +0.1392 [+0.0722, +0.2088]  matches=True
+ALL MATCH

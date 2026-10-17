@@ -225,8 +225,13 @@ def test_torn_json_retires_the_old_final_and_writes_invalid(tmp_path):
     rc, d = _cli(tmp_path, ALL, torn="grid-diss256-h2o")
     assert (rc, d["status"]) == (2, "INVALID") and "malformed JSON" in d["error"]
     assert d["retired_previous_output"].startswith("m5a_read_strict.json.superseded")
-    retired = list((tmp_path / "out").glob("*.superseded-*"))
-    assert len(retired) == 1  # the old FINAL is no longer the current output
+    retired = sorted(p.name for p in (tmp_path / "out").glob("*.superseded-*"))
+    # the old FINAL and its condition table are both no longer current
+    assert [n.split(".superseded-")[0] for n in retired] == [
+        "m5a_read_strict.conditions.tsv",
+        "m5a_read_strict.json",
+    ]
+    assert not (tmp_path / "out" / "m5a_read_strict.conditions.tsv").exists()
 
 
 def test_tost_rules():
@@ -241,3 +246,38 @@ def test_tost_rules():
     )
     assert fam["members"]["a"]["equivalent_per_comparison"] is True
     assert fam["joint_within_margin"] is False  # IUT: b is not within margin
+
+
+def test_final_read_publishes_a_condition_table_that_reproduces_it(tmp_path):
+    """Review of 94720ff: the read publishes its sufficient statistics (one row
+    per (problem, seed): every arm's correctness and truncation flag), bound to
+    the read by sha256, and the table alone reproduces every estimate."""
+    import csv
+    import hashlib
+
+    rc, d = _cli(tmp_path, ALL)
+    assert (rc, d["status"]) == (0, "FINAL")
+    tsv = tmp_path / "out" / d["sufficient_statistics_tsv"]
+    assert hashlib.sha256(tsv.read_bytes()).hexdigest() == (
+        d["sufficient_statistics_sha256"]
+    )
+    with tsv.open() as fh:
+        r = list(csv.reader(fh, delimiter="\t"))
+    header, rows = r[0], r[1:]
+    seeds = SPEC["seeds"]
+    assert len(rows) == len(STRICT) * len(seeds) and header[:2] == ["pid", "seed"]
+    assert len(header) == 2 + 2 * 2 * len(SPEC["arms"])  # 8 arms x (correct, trunc)
+    values = pr.values_from_table(header, rows)
+    again = pr.replication_read(
+        values,
+        expected={(p, s) for p in STRICT for s in seeds},
+        reference=SPEC["reference"],
+        pairings=SPEC["pairings"],
+        descriptive=SPEC["descriptive"],
+        equivalence=SPEC["equivalence"],
+    )
+    assert json.loads(json.dumps(again)) == d["estimates"]
+    # a non-FINAL read publishes no table (and retires an old one)
+    rc, d = _cli(tmp_path, {k: v for k, v in ALL.items() if k != "grid-pp256"})
+    assert d["status"] == "PARTIAL" and "sufficient_statistics_tsv" not in d
+    assert not tsv.exists()

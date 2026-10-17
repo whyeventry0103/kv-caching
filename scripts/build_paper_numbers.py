@@ -2167,6 +2167,20 @@ def build_catalogue() -> list[Entry]:
                     f"{_m5p} :: estimates.accuracy[{_arm!r}].ci95[{_i}]",
                     f"M5-A strict accuracy CI bound, {_arm}",
                 )
+        # protection improvement per policy (protected - unprotected, same keys)
+        for _pol in ("random", "h2o", "streamingllm", "rkv"):
+            add(
+                f"m5a.strict.improvement.{_pol}",
+                _est["accuracy"][f"{_pol}+P"]["mean"]
+                - _est["accuracy"][f"{_pol}-P"]["mean"],
+                f"{_m5p} :: estimates.accuracy['{_pol}+P'].mean - ['{_pol}-P'].mean",
+                f"M5-A strict accuracy gain from protection, {_pol}",
+                kind="derived",
+                inputs=(
+                    f"m5a.strict.acc.{_pol}_pp.mean",
+                    f"m5a.strict.acc.{_pol}_unprot.mean",
+                ),
+            )
         for _pair, _blk in _est["contrasts"].items():
             _tag = _pair.replace("-", "_minus_")
             for _c in ("protected", "unprotected", "interaction"):

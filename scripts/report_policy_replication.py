@@ -37,6 +37,7 @@ from kvcache.metrics.policy_replication import (
     FINAL,
     INVALID,
     PARTIAL,
+    condition_table,
     replication_read,
     validate_source,
 )
@@ -200,18 +201,29 @@ def read(runs: Path, cohort: str) -> tuple[dict[str, Any], str]:
 
     keep = set(pids)
     values: dict[tuple[str, bool], dict[tuple[str, int], float]] = {}
+    outcomes: dict[tuple[str, bool], dict[tuple[str, int], tuple[bool, bool]]] = {}
     for policy, sides in spec["arms"].items():
         for protected in (False, True):
             run, press = sides["protected" if protected else "unprotected"]
-            vals = {
-                (str(r["pid"]), int(r["decoding"]["seed"])): float(r["correct"])
+            sel = [
+                r
                 for r in rows_by_run[run]
                 if str(r["press"]) == press
                 and r["pid"] in keep
                 and (protected or r["pid"] not in use_relaxed)
+            ]
+            key = [(str(r["pid"]), int(r["decoding"]["seed"])) for r in sel]
+            values[(policy, protected)] = {
+                k: float(r["correct"]) for k, r in zip(key, sel, strict=True)
             }
-            values[(policy, protected)] = vals
+            outcomes[(policy, protected)] = {
+                k: (r["correct"] is True, r["truncated"] is True)
+                for k, r in zip(key, sel, strict=True)
+            }
     expected = {(p, s) for p in pids for s in seeds}
+    payload["_conditions"] = condition_table(
+        outcomes, expected=expected, policies=list(spec["arms"])
+    )
     payload["estimates"] = replication_read(
         values,
         expected=expected,
@@ -247,6 +259,25 @@ def main() -> int:
         payload = {"read": "M5-A", "status": INVALID, "error": repr(exc)}
         status = INVALID
         print(f"INVALID: {exc!r}", file=sys.stderr)
+    table = payload.pop("_conditions", None)
+    tsv = a.out_dir / f"m5a_read_{a.cohort}.conditions.tsv"
+    retire_stale(tsv)
+    if table is not None:  # FINAL only: the sufficient statistics of the read
+        import csv
+        import hashlib
+        import io
+
+        buf = io.StringIO()
+        w = csv.writer(buf, delimiter="\t", lineterminator="\n")
+        w.writerow(table[0])
+        w.writerows(table[1])
+        tmp = tsv.with_name(tsv.name + ".tmp")
+        tmp.write_text(buf.getvalue(), encoding="utf-8")
+        os.replace(tmp, tsv)
+        payload["sufficient_statistics_tsv"] = tsv.name
+        payload["sufficient_statistics_sha256"] = hashlib.sha256(
+            tsv.read_bytes()
+        ).hexdigest()
     payload["reproduce"] = "python scripts/report_policy_replication.py " + " ".join(
         sys.argv[1:]
     )

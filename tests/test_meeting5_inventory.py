@@ -3,6 +3,7 @@ expected keys, strict-fit cohort, mean-based rate band, cost arithmetic."""
 
 from __future__ import annotations
 
+import hashlib
 import json
 import subprocess
 import sys
@@ -154,7 +155,28 @@ def test_committed_problem_manifests():
         n_confirmation=200,
     )
     assert {k: bbh[k] for k in again} == again  # reproducible without the data
-    assert bbh["revision"].startswith("TODO(human)")
+    # metadata amendment 2026-10-17: the owner's pin, the selection unchanged
+    from kvcache import bbh as bbh_mod
+
+    assert (bbh["revision"], bbh["blob"]) == (
+        bbh_mod.PINNED_COMMIT,
+        bbh_mod.PINNED_BLOB,
+    )
+    sel = {
+        k: bbh[k]
+        for k in (
+            "calibration",
+            "confirmation",
+            "reserve",
+            "salt",
+            "n_pool",
+            "n_excluded",
+            "n_total",
+        )
+    }
+    assert hashlib.sha256(json.dumps(sel, sort_keys=True).encode()).hexdigest() == (
+        "146d23690072be4cdd5b26461fac965c0a3068e5cf7150236a9e4fbb81e857e2"
+    )  # the selection frozen 2026-10-14
 
 
 def test_readout_inventory_keys_on_the_reference_trace():

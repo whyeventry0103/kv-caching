@@ -1892,7 +1892,7 @@ an identification range, not a sampling interval:
   jobs are released behind both M5 grids in queue order.
 - Paper-text edits for the B=1024 forward/reverse result are pending.
 
-### 5q. M5-A strict cohort (97 problems, B=256): prompt protection removes the Random advantage over H2O-style and shrinks it over StreamingLLM; both interactions are registered-significant (2026-10-17)
+### 5q. M5-A strict cohort (97 problems, B=256): prompt protection changes the policy contrasts (both registered interactions reject); the Random advantage over H2O-style is not detected under protection, a smaller one over StreamingLLM remains descriptively (2026-10-17)
 
 **Status.** `report_policy_replication.py --cohort strict` is FINAL on the
 host. Every source run was validated in full against its own design before
@@ -1959,15 +1959,37 @@ fails at both margins.
   ±0.03 margin is **not established**: the TOST (1 − 2α) interval reaches −0.034. It
   is established only at the ±0.05 sensitivity margin. The claim is "no
   difference detected; within ±0.05", never "equal".
-- *StreamingLLM.* Random's advantage over StreamingLLM **persists** under
-  protection but shrinks from +0.191 to +0.054 (CI excludes 0), so it is
-  not equivalent at either margin.
+- *StreamingLLM.* Random's advantage over StreamingLLM shrinks from +0.191 to
+  +0.054 under protection. Its **descriptive** paired 95% interval
+  [+0.023, +0.090] excludes 0, and it is not shown within either equivalence
+  margin. That interval is not a registered superiority test: the registered,
+  Holm-corrected tests are the two interactions. The protected contrast is
+  therefore reported as a descriptive difference, never as a confirmed
+  superiority claim.
 - *R-KV (descriptive only).* The unprotected ordering (R-KV ahead) reverses in
   sign under protection; the protected CI includes 0.
-- *Consequence for the "random beats recency" framing.* It is a property of
-  prompt-evictable policies. Under prompt protection, the ordering against
-  H2O-style is not detected and the gap to StreamingLLM is about a quarter
-  of its unprotected size.
+- *Consequence for the "random beats recency" framing: pair-specific.*
+  - Prompt handling changes the policy contrasts substantially; that is what
+    the two registered interactions establish.
+  - Under protection, Random's advantage over H2O-style is not detected.
+  - Against StreamingLLM, a smaller positive difference remains,
+    descriptively.
+  - *Corrected 2026-10-17 (reviewer, at the commit of this read).* The earlier sentence
+    here confined the ranking to "prompt-evictable policies". That is
+    inaccurate, because the Random − StreamingLLM gap survives protection.
+    "Positive protected Random − StreamingLLM" is also not a registered
+    claim.
+- *Accuracy improvement with protection* (protected − unprotected, same 388
+  conditions):
+  - Random +0.247;
+  - H2O-style +0.433;
+  - StreamingLLM +0.384;
+  - R-KV +0.108.
+- *Condition table.* `m5a_read_strict.conditions.tsv` has 388 rows: pid,
+  seed, and each arm's correct and truncated flags. Its sha256 is recorded
+  in the read. A standard-library reproduction from the table alone
+  (`reproduce_from_table.py.txt`, output `reproduce_from_table.out.txt`)
+  matches every accuracy, contrast, interval and registered t statistic.
 - *Gate G1 is half met.* The four-policy accuracy read is complete; the
   protected M/Δ/ω capture read does not exist (adapter not implemented), so
   no protected mismatch-mechanism claim is made.

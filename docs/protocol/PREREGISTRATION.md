@@ -4631,3 +4631,47 @@ not generated, and the pid-filter adapter they need is not implemented.
 Gate G1 is half met: the protected M/Δ/ω capture read
 (M5A-CAPTURE-PP) needs a protected capture adapter that is not implemented.
 Interpretation and scope: PAPER_FINDINGS §5q.
+
+## 2026-10-17 (later): M5-A condition table published; two wording corrections; BBH manifest metadata amendment (no outcome affected)
+
+**Condition table.** The reviewer reproduced the registered tests from the
+reported means and standard errors, but could not rebuild the paired
+bootstrap intervals or check the correctness flags from the aggregate JSON.
+- *What was published.* `report_policy_replication.py` now writes the read's
+  sufficient statistics, `m5a_read_strict.conditions.tsv`: 388 rows of pid,
+  seed, and each of the 8 arms' correct and truncated flags. Its sha256 is
+  recorded in the read.
+- *Re-read on the host.* The estimates and source validation are
+  bit-identical to the earlier read; only the analysis-code fingerprint group
+  changed.
+- *Independent reproduction.* A standard-library script that uses only the
+  table (`results/diag/meeting5/m5a/reproduce_from_table.py.txt`) matches
+  every accuracy, contrast, interval and registered t statistic.
+
+**Wording corrections** (PAPER_FINDINGS §5q, the progress update, the claim
+ledger). No number changed.
+1. *Protected Random − StreamingLLM (+0.054).* Its paired interval is
+   DESCRIPTIVE. The registered, Holm-corrected tests are the interactions, so
+   this is not a superiority claim. It had been written "a difference is
+   established".
+2. *The ranking's scope.* The proposed restriction of "random beats recency"
+   to prompt-evicting policies is withdrawn, because the Random −
+   StreamingLLM gap survives protection. The framing is now pair-specific.
+
+**BBH manifest metadata amendment.** This concerns
+`configs/meeting5/problem_manifests.json`, entry
+`bbh_logical_deduction_five_objects`; no BBH outcome exists.
+- *Revision field:* the old value "TODO(human): proposed 9ee07bd…" is
+  replaced by the owner's pin of 2026-10-14,
+  `9ee07bd481feebf959a6b59d61ea57bdcf30964d`.
+- *Fields added and rewritten:* `blob`
+  `936cd6d80db71aeacaea857c34f9af87e1c34964` is added, and the note is
+  rewritten.
+- *Why the selection cannot change:* the calibration (25), confirmation (200)
+  and reserve (25) example indices depend only on the indices and the salt,
+  and are unchanged. The sha256 of the selection fields, `146d2369…`, is the
+  same before and after and is now asserted by
+  `tests/test_meeting5_inventory.py`.
+- *Generator:* `scripts/plan_meeting5_cost.py` emits the same metadata. The
+  2026-10-14 table above ("the revision stays TODO(human)") is kept as
+  written and superseded by this entry.

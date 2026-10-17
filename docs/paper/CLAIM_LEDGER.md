@@ -24,7 +24,7 @@ The two estimators are never mixed under one label.
 | ID | Sentence (exact wording allowed) | Source artifact | Denominator | Estimator, CI | Scope | Status | What would invalidate it |
 |---|---|---|---|---|---|---|---|
 | A1 | "At budget 256, with policies that may evict the prompt, free-running accuracy falls far below held-trace readout accuracy: forward residual −0.332 (Random) and −0.338 (StreamingLLM)." | `results/diag/amendment-s/protection_b256.json` `per_press.*.primary.residual_base` | 392 conditions with a defined forward readout (of 400) | EP; Random [−0.404, −0.262], SLM [−0.405, −0.270] | Qwen-7B (R1-Distill), MATH-500, 100 problems × 4 seeds, B=256 | CONFIRMED-SCOPED (descriptive decomposition, not causal) | A data or grading correction |
-| A2 | "Protecting the prompt at the same total budget shrinks the forward residual to −0.056 (Random) and −0.078 (StreamingLLM); a residual persists." | same, `residual_pp`, `residual_label` = RESIDUAL PERSISTS | 392 | EP; [−0.098, −0.016] / [−0.125, −0.034]; sensitivity without the 3 budget-relaxed problems −0.058 / −0.081, also PERSISTS | same, B=256 only | CONFIRMED-SCOPED (S.1) | B=1024 is separate (PENDING). Not "most of the residual was prompt loss" (RETIRED wording). |
+| A2 | "Protecting the prompt at the same total budget shrinks the forward residual to −0.056 (Random) and −0.078 (StreamingLLM); a residual persists." | same, `residual_pp`, `residual_label` = RESIDUAL PERSISTS | 392 | EP; [−0.098, −0.016] / [−0.125, −0.034]; sensitivity without the 3 budget-relaxed problems −0.058 / −0.081, also PERSISTS | same, B=256 only | CONFIRMED-SCOPED (S.1) | B=1024 is A11–A12. Not "most of the residual was prompt loss" (RETIRED wording). |
 | A3 | "The paired change in the forward residual is +0.276 (Random) and +0.259 (StreamingLLM)." | same, `delta_residual`, label SHRINKS | 392 pairs | EP paired; [+0.204, +0.349] / [+0.182, +0.339] | same | CONFIRMED-SCOPED (S.1) | — |
 | A4 | "Forward residual magnitude shrinks by about 83% (Random) and 77% (StreamingLLM)." | `results/diag/paper_audit/decision_b256.json` `per_press.*.shrinkage` | 392 | Joint EP bootstrap of `1 − abs(R_pp)/abs(R_base)`: 0.832 [0.709, 0.949] / 0.768 [0.624, 0.898]; base near zero in 0% of replicates | same | SENSITIVITY (ratio of point estimates, not a causal share) | Must be paired with A5 wherever it appears |
 | A5 | "On the four-arm support, protection improves the forward residual by +0.239 (Random) and +0.271 (StreamingLLM), and the reverse trajectory contrast by +0.161 and +0.278. The forward improvement is larger for Random (difference +0.078 [+0.007, +0.149]); for StreamingLLM a difference was not detected (−0.007 [−0.081, +0.069]). As ratios of each direction's own unprotected value: 0.82/0.78 forward, 0.51/0.57 reverse." | `results/diag/paper_audit/reverse_b256.json` `protection_by_direction` (incl. `difference_of_improvements`) | 298 conditions / 92 problems (Random), 335 / 98 (SLM): all four arms defined in both cells | Joint EP; ratios Random 0.817 [0.655, 0.968] / 0.507 [0.309, 0.687], SLM 0.778 [0.622, 0.910] / 0.570 [0.447, 0.691] | same | SENSITIVITY (new 2×2 analysis, 2026-10-05; difference added after the review of fbf869f) | Percentages use different denominators: never read "mainly forward" off them. The four-arm support is selected (undefined reverse rows are post-treatment) |
@@ -33,12 +33,18 @@ The two estimators are never mixed under one label.
 | A8 | "Free-running accuracy rises with protection from 0.422 to 0.662 (Random) and from 0.237 to 0.610 (StreamingLLM), still well below the full cache." | `protection_b256.json` `free_accuracy_*`, `delta_free` | 400 | EP; Δfree +0.240 [+0.180, +0.307] / +0.372 [+0.297, +0.450] | same | CONFIRMED-SCOPED | — |
 | A9 | "Protection does not detectably change Random's forward readout (Δ −0.033 [−0.094, +0.024]); it raises StreamingLLM's (+0.116 [+0.063, +0.177])." | `protection_b256.json` `delta_readout` | 392 | EP paired | same | CONFIRMED-SCOPED | Not "Random's readout did not need the prompt" (RETIRED) |
 | A10 | Unprotected four-policy decomposition and reverse envelope at 256 (paper Table 2, §4.4) | `results/diag/amendment-k/m4-*-summary.json` | per cell | M4 | Qwen-7B, B=256 | CONFIRMED-SCOPED as *operational comparisons*; the envelope is not a causal bound | Wording fixed 2026-10-05 (§2.3 of the plan) |
+| A11 | "With the prompt protected at B=1024 (about a 2× nominal budget ratio), the forward residual persists and shrinks: −0.047 (Random) and −0.040 (StreamingLLM)." | `results/diag/amendment-s/protection_b1024.json` `per_press.*.primary.residual_pp`; ratio in `realized_compression.json` | 392 of 400 conditions per policy (readout defined) | EP; [−0.086, −0.015] / [−0.070, −0.013]; Δresidual Random lower bound +0.001 | Qwen-7B, MATH-500, 100 problems × 4 seeds, B=1024 | CONFIRMED-SCOPED (S.1; consequence A) | Random's SHRINKS rests on a +0.001 bound: never "robust shrinkage". The ratio is nominal (budget/sequence length), not hardware memory |
+| A12 | "At protected B=1024 the trajectory contrast is negative under either readout direction (compressed: −0.037 / −0.039; full cache: −0.040 / −0.034), and no forward/reverse interaction was detected (Holm p 0.64 for both policies)." | `results/diag/paper_audit/reverse_b1024.json` `registered_inference`, `per_policy.*.common_support` | common support 382 / 98 problems (Random), 383 / 97 (SLM) | registered problem-level t test + Holm; EP bootstrap CIs descriptive | same, B=1024 | CONFIRMED-SCOPED (registered 2026-10-14, before the data) | "No interaction detected" ≠ "no interaction" (no equivalence test was registered). Operational comparisons, not a causal share. Undefined readouts are excluded; SLM's worst-case bound lies below 0 |
+| A13 | "Prompt protection changes the Random contrast for both scientific pairings: interaction −0.186 (Random − H2O-style) and −0.137 (Random − StreamingLLM), both rejecting after Holm." | `results/diag/meeting5/m5a/m5a_read_strict.json` `registered_inference` (+ `.conditions.tsv`) | 388 conditions / 97 problems per arm (frozen strict cohort) | registered problem-level t test + Holm (t −5.45, −4.02; df 96); EP bootstrap [−0.250, −0.113] / [−0.201, −0.070] | Qwen-7B, MATH-500, B=256, strict cohort | CONFIRMED-SCOPED (registered 2026-10-14, before any M5 outcome) | The whole-cohort read is held (capacity comparators absent) |
+| A14 | "Under protection, a Random − H2O-style accuracy difference was not detected (−0.005); it lies within ±0.05 (sensitivity margin) but was not shown within the ±0.03 primary margin." | same, `contrasts["random-h2o"].protected`, `equivalence_protected_contrasts` | same | EP [−0.036, +0.031]; TOST (1 − 2α) [−0.034, +0.023]; Holm TOST p 0.151 (±0.03), 0.010 (±0.05) | same | CONFIRMED-SCOPED (owner margins frozen 2026-10-14) | Never "equal" or "equivalent" without naming the ±0.05 margin |
+| A15 | "Under protection Random's advantage over StreamingLLM shrinks from +0.191 to +0.054 (descriptive paired 95% interval [+0.023, +0.090]); it is not shown within either equivalence margin." | same, `contrasts["random-streamingllm"]` | same | EP | same | DESCRIPTIVE (the protected contrast is not a registered superiority test; the registered tests are the interactions, A13) | Never "Random beats StreamingLLM under protection" as a confirmed claim |
+| A16 | "Protection raises free-running accuracy by +0.247 (Random), +0.433 (H2O-style), +0.384 (StreamingLLM) and +0.108 (R-KV)." | same, `accuracy` | same | EP means (protected − unprotected) | same | DESCRIPTIVE | R-KV is our certified port; H2O-style is current-attention, not canonical H2O |
 
 ## B. Diagnostics (supporting; scoped)
 
 | ID | Sentence | Source | Denominator | Estimator, CI | Status | Limit |
 |---|---|---|---|---|---|---|
-| B1 | "On the 25 capture problems, Random is more accurate than H2O-style (+0.19) while losing more attention mass M (+0.315): a policy-level mismatch." | `results/diag/paper_audit/matched_b256.json` `contrasts_M["random - h2o"]` | 100 conditions / 25 problems, unprotected B=256 | Joint EP; accuracy +0.190 [+0.070, +0.310], Bonferroni-3 [+0.040, +0.340]; M +0.315 [+0.298, +0.329] | EXPLORATORY (descriptive) | Four policy means cannot establish a per-trace predictor; unprotected policies only; teacher-forced M |
+| B1 | "On the 25 capture problems, Random is more accurate than H2O-style (+0.19) while losing more attention mass M (+0.315): a policy-level mismatch." | `results/diag/paper_audit/matched_b256.json` `contrasts_M["random - h2o"]` | 100 conditions / 25 problems, unprotected B=256 | Joint EP; accuracy +0.190 [+0.070, +0.310], Bonferroni-3 [+0.040, +0.340]; M +0.315 [+0.298, +0.329] | EXPLORATORY (descriptive) | Four policy means cannot establish a per-trace predictor; unprotected policies only; teacher-forced M. **2026-10-17:** under protection the accuracy half is not detected on the strict cohort (A14), and no protected M exists. Never combine protected accuracy with unprotected M to claim that the mismatch persists |
 | B2 | "Random vs StreamingLLM: the accuracy advantage (+0.12) is not established after adjustment across the three pairs." | same, `random - streamingllm` | same | +0.120 [+0.020, +0.220], Bonferroni-3 [0.000, +0.240] → NOT ESTABLISHED | EXPLORATORY | — |
 | B3 | "Random and R-KV have equal accuracy (+0.000) while Random loses more mass (+0.269)." | same, `random - rkv` | same | acc [−0.120, +0.110] | EXPLORATORY | "Equal" is not equivalence: no TOST was run |
 | B4 | "ω(Random) − ω(StreamingLLM) reverses on Llama-8B (−0.355 [−0.453, −0.275])." | `results/diag/meeting3/capture_llama8b_b256.json` | R.17.3 design | registered contrast | CONFIRMED-SCOPED (REVERSED) | Does not isolate architecture as the cause; "ω proves the mechanism" is RETIRED |
@@ -51,7 +57,7 @@ The two estimators are never mixed under one label.
 |---|---|---|---|
 | C1 | "Under the frozen grader the Qwen3-4B full-cache bank scores 169/200 = 0.845, just below the registered band [0.85, 0.99]; the gate FAILS." | `results/diag/qwen_scoring/bank_audit_qwen3_4b.json` `primary` (0 recompute mismatches) | CONFIRMED (gate FAIL stands) |
 | C2 | "A post-inspection, format-aware secondary score (v2) gives 0.905, with an AMBIGUITY RANGE of 0.900–0.960 over 12 ambiguous rows (not a confidence interval); the same scorer moves the Qwen-7B anchor from 0.885 to 0.920 (range 0.920–0.930)." | same, plus `bank_audit_r1_qwen7b.json` | SENSITIVITY (never a gate input) |
-| C3 | Any Qwen3 decomposition result | — | PENDING. Cells incomplete and held behind B=1024. Disposition (a) chosen 2026-10-06: exploratory only, gate FAIL shown beside every result, secondary score unusable until the 42-row human review is done |
+| C3 | Any Qwen3 decomposition result | — | PENDING. Released 2026-10-16 when its registered condition was met. On 2026-10-17, unique expected keys: bank 200/200, grid 381/400, readout 169/400, reverse 0/400. Disposition (a) chosen 2026-10-06: exploratory only, gate FAIL shown beside every result, secondary score unusable until the 42-row human review is done |
 
 ## D. Fork-precision gate: scope of the FAIL (WP0 item 6)
 
@@ -95,13 +101,17 @@ No software gate substitutes for this instrument gate.
 | "The reverse bracket proves a causal trajectory effect" / "forward and reverse bracket the on-policy residual" | "Forward and reverse readout are complementary operational comparisons; a causal bound requires additional assumptions." (paper edited at 13 places, 2026-10-05) |
 | UNCHANGED meaning equal | "UNCHANGED (registered label): the CI includes zero; equivalence was not tested." |
 | "All gates pass." | Name each gate. Software: lint/test/dryrun/audit pass. Provenance: legacy summaries pass. Bank: Qwen3 FAIL. Instrument: fork-precision FAIL. |
+| "Random beats recency" (unscoped), and its proposed replacement "only for prompt-evicting policies" (2026-10-17) | The pair-specific statements A13–A15: protection changes both contrasts; under protection the H2O-style difference is not detected, and a smaller StreamingLLM difference remains descriptively |
+| "Random is equivalent to H2O-style under protection" / "Random beats StreamingLLM under protection" | A14 with its ±0.05 margin named; A15 as DESCRIPTIVE |
 | Title "Near-Lossless Under Readout, Collapse Under Free Generation" | Working title "Auditing KV-Cache Eviction: Prompt Retention, Readout, and Free-Running Reasoning". At B=256 readout loses 0.136–0.315 (A7). |
 
 ## F. Open questions this ledger cannot close yet
 
-1. **B=1024 (protected free run + forward readout).** Does a practically meaningful protected residual persist? This decides the budget scope of A2. Status: PENDING (grid 796/800 on 2026-10-14). The forward/reverse interaction at 1024 has a registered t-test + Holm procedure, frozen 2026-10-14 before the data.
+1. **B=1024 (protected free run + forward readout).** CLOSED 2026-10-16: A11 (a residual persists and shrinks) and A12 (no forward/reverse interaction detected).
 2. **B=1024/2048 near-lossless readout.** Is there a cell where readout is within 3 points of the full cache while free running is not? This is the only form of the "false certification" story the plan allows. Status: not measured under protection.
-3. **H2O-style under protection, and a fresh-uniform random baseline.** Do B1–B3 survive equal prompt protection? This needs WP5, which is held for authorization.
+3. **H2O-style under protection, and a fresh-uniform random baseline.** The accuracy half is answered (A13–A15, 2026-10-17). Still open:
+   - the protected M/Δ/ω captures (the adapter is not implemented), so whether the remaining protected Random − StreamingLLM gap conflicts with protected metrics is unmeasured;
+   - fresh-uniform (A4), which is held.
 4. **Qwen3 gate disposition.** This is the owner's and supervisor's decision; see `docs/protocol/QWEN_SCORING_SENSITIVITY.md`.
 
 ## G. Review of fbf869f (2026-10-05): what changed in this ledger
@@ -114,3 +124,16 @@ No software gate substitutes for this instrument gate.
   0 numeric changes in protection_b256, origin, reverse_b256, matched_b256,
   decision_b256. matched joint labels reworded by the sign-table fix (R4), same
   classification.
+
+## H. 2026-10-17: B=1024 and M5-A entered; pair-specific framing
+
+- A11–A16 added from FINAL reads, and A2's "B=1024 PENDING" replaced.
+- B1 now carries its protected qualification; C3 has the Qwen3 coverage.
+- §F1 is closed and §F3 narrowed.
+- Two wordings retired: the unscoped ranking story, and its blanket
+  "prompt-evicting policies" replacement. The reviewer showed the
+  replacement is inaccurate, because the Random − StreamingLLM gap survives
+  protection.
+- The M5-A read now publishes its condition table. An independent
+  standard-library reproduction matches every estimate
+  (`results/diag/meeting5/m5a/reproduce_from_table.out.txt`).

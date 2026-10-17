@@ -98,9 +98,12 @@ Holm over the pairings; the joint claim is intersection–union.
   Equivalence at the owner's ±0.03 margin is **not established**, because the
   TOST interval reaches −0.034. It holds only at the ±0.05 sensitivity
   margin. This is never written as "equal".
-- *Random − StreamingLLM under protection: a difference is established*
-  (+0.054, CI excludes 0). It is about a quarter of the unprotected +0.191,
-  and it is not equivalent at either margin.
+- *Random − StreamingLLM under protection: +0.054,* with a **descriptive**
+  paired 95% interval of [+0.023, +0.090]. It is about a quarter of the
+  unprotected +0.191, and it is not shown within either equivalence margin.
+  *[Corrected after the reviewer's check: the original text said "a
+  difference is established". The registered, Holm-corrected tests are the
+  interactions; this interval is not a registered superiority test.]*
 - *Both interactions are established.* Protection changes the Random contrast
   for both scientific pairings.
 - *R-KV is descriptive only.* Its ordering against Random reverses sign under
@@ -183,10 +186,16 @@ unassigned.
    with the forward and reverse result and its ≈2× nominal ratio. The abstract
    is also flagged (L72–73) for a full rewrite from the claim ledger at the
    evidence freeze.
-2. *§4.2 "collapse, and random beats recency" (L283 ff.).* Scope "random beats
-   recency" to prompt-evictable policies, and add the protected four-policy
-   result from §1 above: the advantage over H2O-style is not detected; the
-   advantage over StreamingLLM is +0.054; both interactions are established.
+2. *§4.2 "collapse, and random beats recency" (L283 ff.).* Replace the broad
+   "random beats recency" story with the pair-specific result from §1 above:
+   - both interactions are established;
+   - the protected advantage over H2O-style is not detected (within ±0.05,
+     not shown within ±0.03);
+   - a smaller protected difference over StreamingLLM remains, descriptively.
+
+   *[Corrected after the reviewer's check: the original proposal confined the
+   ranking to prompt-evictable policies. That is inaccurate, because the
+   Random − StreamingLLM gap survives protection.]*
 3. *§4.3 forward decomposition (L294 ff.) and §4.4 reverse replay (L334 ff.).*
    Add the protected rows at B=256 and B=1024, including that the B=256
    directions disagree while the B=1024 interaction is not detected.
@@ -268,3 +277,22 @@ brief:
 - `docs/results/PAPER_FINDINGS.md` §5q; `docs/protocol/PREREGISTRATION.md`
   (M5-A result entry); `docs/paper/EXECUTION_STATUS.md`;
   `docs/paper/MEETING5_CALIBRATION_APPROVAL_REQUEST.md`.
+
+## Addendum after the reviewer's check of 94720ff (2026-10-17, later)
+
+- *Condition table published.* `results/diag/meeting5/m5a/m5a_read_strict.conditions.tsv`
+  has 388 rows: pid, seed, and correct and truncated flags for the 8 arms.
+  Its sha256 is in the re-read `m5a_read_strict.json`, whose estimates are
+  bit-identical to the read above.
+- *Independent reproduction.* `reproduce_from_table.py.txt` uses the
+  standard library only (no project code), with the review's bootstrap
+  convention. It reproduces every accuracy, contrast, interval and registered
+  t statistic: `reproduce_from_table.out.txt` reads "ALL MATCH".
+- *Corrections.* The two marked corrections above (§1 Random −
+  StreamingLLM; §3 item 2) are applied in PAPER_FINDINGS §5q, the claim
+  ledger and the paper.
+- *Paper and claim ledger updated.* New §4.5; abstract, introduction, §4.2
+  and threats now pair-specific; ledger A11–A16. The PDF rebuilds cleanly and
+  the edited pages were viewed.
+- *BBH manifest metadata* amended with the selection unchanged
+  (PREREGISTRATION, 2026-10-17 later).

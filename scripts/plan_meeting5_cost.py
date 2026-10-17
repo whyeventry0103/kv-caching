@@ -131,7 +131,10 @@ def aime_inventory(runs_root: Path) -> dict[str, Any]:
 # SHA-256 order, salted per dataset; sizes are the planning N of review 9.2.
 SPLIT_SALT = "meeting5-2026-10-14"
 BBH_N = 250  # review 9.1: the reviewer parsed the file at 9ee07bd (250 examples)
-BBH_PROPOSED_REVISION = "9ee07bd481feebf959a6b59d61ea57bdcf30964d"  # not pinned
+BBH_PROPOSED_REVISION = "9ee07bd481feebf959a6b59d61ea57bdcf30964d"
+# pinned by the owner 2026-10-14; the single source of truth is kvcache.bbh
+from kvcache.bbh import PINNED_BLOB as BBH_PINNED_BLOB  # noqa: E402
+from kvcache.bbh import PINNED_COMMIT as BBH_PINNED_COMMIT  # noqa: E402
 
 
 def problem_manifests() -> dict[str, Any]:
@@ -163,11 +166,17 @@ def problem_manifests() -> dict[str, Any]:
                 gsm, salt=f"{SPLIT_SALT}|gsm8k", n_calibration=24, n_confirmation=200
             ),
         },
+        # metadata amended 2026-10-17 (PREREGISTRATION): the owner pinned the
+        # proposed revision on 2026-10-14 (kvcache.bbh); the selection, which
+        # depends only on the indices and the salt, is unchanged
         "bbh_logical_deduction_five_objects": {
-            "revision": "TODO(human): proposed " + BBH_PROPOSED_REVISION,
+            "revision": BBH_PINNED_COMMIT,
+            "blob": BBH_PINNED_BLOB,
             "n_total": BBH_N,
-            "note": "ids are example indices; the count must be re-verified by the "
-            "loader after a human pins the revision",
+            "note": "ids are example indices; revision pinned by the owner "
+            "2026-10-14 (kvcache.bbh.PINNED_COMMIT/PINNED_BLOB); load_bbh verifies "
+            "the blob and the 250-example count. Metadata amended 2026-10-17 "
+            "(PREREGISTRATION); the selection is unchanged",
             **hashed_split(
                 [f"bbh_lde5/{i}" for i in range(BBH_N)],
                 salt=f"{SPLIT_SALT}|bbh_lde5",

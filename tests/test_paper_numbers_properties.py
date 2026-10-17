@@ -278,7 +278,12 @@ def test_the_real_catalogue_has_no_two_entries_sharing_an_exact_value_and_rule()
     # strict-cohort condition count, also a b1024 reverse support) and -0.25.
     # The TOST interval is registered once (it does not depend on the margin).
     # No new key is cited in the .tex.
-    assert len(collisions) <= 178, (
+    #
+    # 178 -> 179 on 2026-10-17 (protection-improvement derived keys),
+    # examined: 1 coincidence on the k/388 lattice -- Random's gain from
+    # protection (96/388) equals the unprotected Random - StreamingLLM CI's
+    # upper bound; neither is derived from the other.
+    assert len(collisions) <= 179, (
         f"{len(collisions)} exact-value collisions in the catalogue; if this "
         "grew, a new derived quantity is duplicating an existing one"
     )
