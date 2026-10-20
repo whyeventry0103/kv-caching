@@ -1,0 +1,22 @@
+{
+ "cells": {
+  "random": {
+   "mean": 0.01875473869319916,
+   "median": 0.015572723401666768,
+   "n_ratio_one": 0,
+   "n_rows": 200,
+   "ratio_one_share": 0.0
+  },
+  "streamingllm": {
+   "mean": 0.10561998258888337,
+   "median": 0.09651601957837919,
+   "n_ratio_one": 0,
+   "n_rows": 200,
+   "ratio_one_share": 0.0
+  }
+ },
+ "definition": "nominal-budget ratio min(1, B / (prompt + generated tokens)) per row: a budget-to-sequence-length ratio, not live occupancy, K/V bytes or an eviction count",
+ "ratio_one": "ratio 1 = the sequence never exceeded the budget (nothing pruned, by construction); ratio < 1 does not prove a prune (periodic pruning, no per-row prune record), so n_ratio_one is a LOWER bound on never-compressed",
+ "read": "nominal-budget ratio of the Qwen3-4B B=256 grid (Amendment S.4, EXPLORATORY: bank gate FAIL)",
+ "run": "grid-diss256-qwen3-4b"
+}

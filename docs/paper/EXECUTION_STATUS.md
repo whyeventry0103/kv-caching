@@ -6,7 +6,7 @@ Specifications:
 
 Claims: `docs/paper/CLAIM_LEDGER.md`. Approvals and caps: `docs/paper/PROPOSALS_FOR_APPROVAL.md` and `configs/campaigns.yaml`.
 
-## Current state (2026-10-17, 17:06 Dubai)
+## Current state (2026-10-20, 12:30 Dubai)
 
 | Item | State | Evidence / next |
 |---|---|---|
@@ -14,14 +14,14 @@ Claims: `docs/paper/CLAIM_LEDGER.md`. Approvals and caps: `docs/paper/PROPOSALS_
 | WP1 protected B=1024 | **Forward and reverse FINAL** | Forward (2026-10-15): protection_b1024, consequence (A), decision_b1024 (PAPER_FINDINGS §5o). Reverse (2026-10-16): reverse_b1024 FINAL, P1 800/800 in 12.91 of 20 GPU-h; the registered interaction t test + Holm does not reject for either policy (Holm p 0.64); the trajectory contrast excludes 0 under both readouts (§5p). Paper-text edits pending |
 | P2 smoke | **PASS (2026-10-15 13:19)** | 21 records, 0 failures, 0.549 of 2 GPU-h; the 2026-10-13 15-record run stays bundled as history |
 | P3 timing pilot | **Complete** | Grid, readout, reverse 16/16 each, 1.39 of 6 GPU-h; rows excluded from every claim |
-| Qwen3 | **Running in the normal windows (exploratory, no campaign cap)** | Unique expected keys at 17:06 on 2026-10-17: bank 200/200, grid 381/400 (Random seed 89 31/50), readout 169/400, reverse 0/400 (needs the grid). Gate FAIL 0.845 kept; disposition (a). The 42-row human scoring review is still unassigned (owner/supervisor). Evidence `results/diag/meeting5/status_20261017/status_inspection.json` |
+| Qwen3 | **Complete; read 2026-10-20 (EXPLORATORY)** | Unique expected keys: bank 200/200, grid / readout / reverse 400/400 each. StreamingLLM REPLICATES (residual −0.209); Random near floor (free run 0.030, truncation 0.735). Gate FAIL 0.845 kept; disposition (a). The 42-row human scoring review is still unassigned. PAPER_FINDINGS §5r |
 | Fork-precision gate | **FAIL (scoped)** | Constrains next-token TV claims only, not accuracy (ledger §D) |
 | Meeting 5 CPU preparation | **Bundle ready for review (2026-10-14)** | Protected R-KV `rkv_pp_v1`: own provenance, gate, smoke and held adapters; real-model CPU parity PASS (`results/diag/meeting5/rkv_pp_cpu_parity/`). Finite-channel instrument (`task_information.py`, `information_tasks.py`) and reader CLI. Protocol draft v0.1 (`docs/protocol/MEETING5_INFORMATION_PROTOCOL.md`). Related work rechecked from primary sources; Garcia 2026 precedents the protection × policy cross. Inventory, strict-fit cohort (97), AIME inventory, frozen GSM8K/BBH graders and manifests. M5-A reader (PARTIAL today). Not yet written: information-probe GPU runner, pid-filter adapter for CAPMATCH, protected capture adapter |
 | Meeting 5 approval request | **Decided 2026-10-14** | A1–A3 approved (caps 1/28/28), queued after P1/P2/P3 with the M5 production runner (`run_grid_m5.py`). A4/A5 held. Margin ±0.03 (±0.05 sensitivity). BBH pinned (preparation only). Review of 6b409001 repaired: `docs/paper/MEETING5_REVIEW_6b40900_ACCEPTANCE.md` |
 | Review of 946c76a | **Two execution issues repaired (CPU)** | Smoke gates derive the target, layers and lengths independently; the M5 runner uses atomic pair publication and recovery. `docs/paper/MEETING5_REVIEW_946c76a_ACCEPTANCE.md` |
 | M5 grids | **Complete, validated** | grid-rkvpp256-m5 400/400 (19.24 of 28 GPU-h), grid-h2opp256-m5 400/400 (15.49 of 28 GPU-h; 5 launches failed at 0 h on 2026-10-15 from the gate bug fixed in 4f50d28) |
 | M5-A strict read | **FINAL (2026-10-17); condition table published** | Both registered interactions reject after Holm. Protected Random − H2O-style −0.005: not shown within ±0.03, within ±0.05 sensitivity. Protected Random − StreamingLLM +0.054: descriptive only, not equivalent. The 388-row condition table is bound to the read by sha256 and reproduces it independently. Paper (§4.5 added; abstract, intro and §4.2 now pair-specific; threats) and claim ledger (A11–A16) updated. PAPER_FINDINGS §5q; `results/diag/meeting5/m5a/m5a_read_strict.json`. Whole-cohort read held (capacity comparators absent). G1 half met (protected captures not implemented) |
-| Information calibration | **APPROVED 2026-10-17 (owner); queued, not yet launched** | Campaign M5C-CAL, cap 4 GPU-h (estimate about 2.5). First eligible window 2026-10-18 01:45. Read with `--require-calibration-pass`. `docs/paper/MEETING5_CALIBRATION_APPROVAL_REQUEST.md` |
+| Information calibration | **APPROVED 2026-10-17; NOT RUN (sync blocker, now cleared)** | The host was unreachable 2026-10-17 → 2026-10-20 and kept `5327072` (held/blocked). Synced 2026-10-20; first eligible window 2026-10-21 01:45. Campaign M5C-CAL, cap 4 GPU-h. `docs/paper/STATUS_REPORT_20261020.md` |
 | Review of 5616630 | **R1–R4 repaired (CPU); calibration still HELD** | Calibration measurements validated against a frozen schedule; actual inputs bound by an input manifest; C6 floor rule (pre-data); compression read bound to FINAL S.1 evidence and relabelled as nominal-budget ratios. Feasibility without weights passed (83/40 reserve passages; all 64 variants render). `docs/paper/MEETING5_REVIEW_5616630_ACCEPTANCE.md` |
 | Old WP5/WP6 | **Superseded** | Replaced by Meeting 5 manifests. The old manifests are kept as history |
 

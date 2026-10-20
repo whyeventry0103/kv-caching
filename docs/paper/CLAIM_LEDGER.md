@@ -57,7 +57,7 @@ The two estimators are never mixed under one label.
 |---|---|---|---|
 | C1 | "Under the frozen grader the Qwen3-4B full-cache bank scores 169/200 = 0.845, just below the registered band [0.85, 0.99]; the gate FAILS." | `results/diag/qwen_scoring/bank_audit_qwen3_4b.json` `primary` (0 recompute mismatches) | CONFIRMED (gate FAIL stands) |
 | C2 | "A post-inspection, format-aware secondary score (v2) gives 0.905, with an AMBIGUITY RANGE of 0.900–0.960 over 12 ambiguous rows (not a confidence interval); the same scorer moves the Qwen-7B anchor from 0.885 to 0.920 (range 0.920–0.930)." | same, plus `bank_audit_r1_qwen7b.json` | SENSITIVITY (never a gate input) |
-| C3 | Any Qwen3 decomposition result | — | PENDING. Released 2026-10-16 when its registered condition was met. On 2026-10-17, unique expected keys: bank 200/200, grid 381/400, readout 169/400, reverse 0/400. Disposition (a) chosen 2026-10-06: exploratory only, gate FAIL shown beside every result, secondary score unusable until the 42-row human review is done |
+| C3 | "On Qwen3-4B (EXPLORATORY; the full-cache bank fails its gate at 0.845), StreamingLLM's B=256 residual replicates (−0.209 [−0.285, −0.125], bracket excludes zero). Random runs near the floor (free run 0.030, truncation 0.735), so its residual is uninformative. Unprotected Random is far below StreamingLLM on this model." | `results/diag/amendment-k/m4-qwen3-4b-256-summary.json` (+ `-ratios.json`), read 2026-10-20; all cells complete on unique keys | EXPLORATORY (disposition (a), 2026-10-06): gate FAIL shown beside every result; secondary score unusable until the 42-row human review is done; unprotected only |
 
 ## D. Fork-precision gate: scope of the FAIL (WP0 item 6)
 

@@ -37,6 +37,8 @@ UNITS = {
     "llama": K / "m4-llama-256-summary.json",
     "q15b": K / "m4-q15b-256-summary.json",
     "q14b": K / "m4-q14b-256-summary.json",
+    # Amendment S.4 (Qwen3-4B, EXPLORATORY: bank gate FAIL 0.845), read 2026-10-20
+    "qwen3": K / "m4-qwen3-4b-256-summary.json",
 }
 ADD = K / "add"
 CLASSB = K / "classb"
@@ -2146,6 +2148,17 @@ def build_catalogue() -> list[Entry]:
                 _rs["n_conditions"],
                 f"{_rv4p} :: per_policy.{_pp}.reverse_support.n_conditions",
                 f"B=1024 reverse-readout support, {_pp}",
+            )
+    # Qwen3-4B nominal-budget ratio (Amendment S.4, exploratory), 2026-10-20
+    _q3r = DIAG / "amendment-k" / "m4-qwen3-4b-256-ratios.json"
+    if _q3r.exists():
+        _q3d, _q3p = _load(_q3r), _q3r.relative_to(PROJECT_ROOT)
+        for _pp, _c in _q3d["cells"].items():
+            add(
+                f"qwen3.{_pp}.ratio_median",
+                _c["median"],
+                f"{_q3p} :: cells.{_pp}.median",
+                f"Qwen3-4B nominal-budget ratio median, B=256, {_pp}",
             )
     # M5-A strict-cohort protection-by-policy read (2026-10-17): FINAL only
     _m5a = DIAG / "meeting5" / "m5a" / "m5a_read_strict.json"

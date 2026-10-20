@@ -472,6 +472,7 @@ REFERENCE_RELATIVE_ARTIFACTS = (
     "m4-llama-256-summary.json",
     "m4-q15b-256-summary.json",
     "m4-q14b-256-summary.json",
+    "m4-qwen3-4b-256-summary.json",
     "add/add-256-randslm.json",
     "add/add-256-h2o.json",
     "add/add-256-rkv.json",

@@ -1997,6 +1997,49 @@ fails at both margins.
   H2O-style is current-attention, not canonical accumulated-attention H2O.
   The R-KV numbers are our certified port.
 
+### 5r. Amendment S.4, Qwen3-4B at B=256 (EXPLORATORY; bank gate FAIL): StreamingLLM's residual replicates; Random's channels are near the floor (2026-10-20)
+
+**Status.**
+- *Data:* all four cells are complete on unique expected keys: bank 200/200,
+  grid 400/400, forward readout 400/400, reverse readout 400/400, with 0
+  duplicate, foreign or torn rows
+  (the status inspection of 2026-10-20 under `results/diag/meeting5/`).
+- *Read:* `report_m4.py` on the host, with the same argument set as the 14B
+  unit (now harvest unit `m4-qwen3-4b-256`). Archived:
+  `results/diag/amendment-k/m4-qwen3-4b-256-summary.json`; nominal ratios in
+  `m4-qwen3-4b-256-ratios.json`.
+- *Qualification on every number below:* the full-cache bank FAILS its
+  registered gate (0.845, below the registered band of Amendment S.4). Under owner
+  disposition (a), every Qwen3 cell is EXPLORATORY, with the gate FAIL shown
+  beside it. The 42-row human scoring review is still unassigned.
+
+| | Random | StreamingLLM |
+|---|---|---|
+| Free-run accuracy | 0.030 [0.005, 0.055] | 0.215 [0.12, 0.315] |
+| Truncation rate | 0.735 | 0.03 |
+| Forward readout accuracy | 0.061 [0.032, 0.098] | 0.429 [0.315, 0.52] |
+| Residual | −0.031 [−0.072, +0.01] | −0.209 [−0.285, −0.125] |
+| Bracket | [−0.3, −0.031] | [−0.232, −0.209] |
+| Nominal-budget ratio, median | 0.016 | 0.097 |
+
+**Pre-committed read** (Amendment J wording):
+- *StreamingLLM: REPLICATES.* The residual's CI and the bracket both exclude
+  zero.
+- *Random: no branch forced.* Its residual CI includes zero, and both
+  channels sit near the floor (free run 0.030, readout 0.061). Most traces
+  run to the generation cap without terminating. This is the regime the
+  Llama-Random cell showed, so its residual is not evidence of a small
+  trajectory channel.
+- *The ratios differ because the sequences differ.* Random's traces are
+  mostly cap-length, so its 256-token budget is a smaller fraction of each
+  sequence.
+
+**Consequence for the Random − StreamingLLM question.** On this model,
+unprotected, Random is far below StreamingLLM (0.030 against 0.215). The
+unprotected "Random beats recency" ordering therefore fails on a second
+model besides Llama-8B. It is exploratory, as stated above, and was measured
+without prompt protection.
+
 ## 5. Framing discipline (non-negotiable — apply throughout)
 - **Divergence ≠ damage.** ADD / TV / residual are "behavioral-fidelity loss," never "damage."
   Correctness is the only quality arbiter. Carry the **signed flip-mass** (gained vs lost correct

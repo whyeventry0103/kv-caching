@@ -141,6 +141,24 @@ UNITS = [
             "reverse": "reverse-readout-diss256-q14b",
         },
     ),
+    # Amendment S.4 (Qwen3-4B; EXPLORATORY, bank gate FAIL 0.845, disposition
+    # (a)); first read 2026-10-20 with this exact argument set
+    Unit(
+        "m4-qwen3-4b-256",
+        {
+            "fc-qwen3-4b": ("grid", 200),
+            "grid-diss256-qwen3-4b": ("grid", 400),
+            "readout-diss256-qwen3-4b": ("readout", 400),
+            "reverse-readout-diss256-qwen3-4b": ("readout", 400),
+        },
+        "m4_reverse",
+        args={
+            "fullcache": "fc-qwen3-4b",
+            "compression": "grid-diss256-qwen3-4b",
+            "readout": "readout-diss256-qwen3-4b",
+            "reverse": "reverse-readout-diss256-qwen3-4b",
+        },
+    ),
     Unit(
         "fc-readout-control",
         {

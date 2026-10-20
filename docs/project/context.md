@@ -24,6 +24,19 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-10-20 12:30 Dubai — Status report; Qwen3 S.4 read (EXPLORATORY); calibration still NOT RUN (sync blocker cleared today).**
+  - **Server:** unreachable 2026-10-17 → 2026-10-20 and kept `5327072`, so the approved calibration stayed held and blocked there. No launch on 10-19 or 10-20.
+  - **Qwen3:** complete on unique keys (200 / 400 / 400 / 400) and read with `report_m4`.
+    - StreamingLLM REPLICATES (−0.209 [−0.285, −0.125]).
+    - Random is near floor (free run 0.030, truncation 0.735) and is reported verbatim.
+    - Gate FAIL 0.845 stands. PAPER_FINDINGS §5r.
+  - **M5-A strict re-verified** on the host: identical, including the fingerprint and the table. Protected Random − StreamingLLM +0.0541 [+0.0232, +0.0902] is descriptive; the interaction −0.137 is registered and rejects.
+  - **Central question (information explains Random > StreamingLLM?): unknown.** No information data, and no protected M/Δ/ω. The registered M5-C contrast is Random − H2O-style; Random − StreamingLLM would be exploratory unless amended before confirmation.
+  - **Report:** `docs/paper/STATUS_REPORT_20261020.md`.
+  - **Next.**
+    1. Calibration runs from 2026-10-21 01:45 (authorized).
+    2. Proposals: protected capture adapter (about 12–16 GPU-h for four policies, measured basis); register Random − StreamingLLM as a contrast; GSM8K timing (≤ about 2.5 GPU-h).
+
   **★★★★★ 2026-10-17 ~18:50 PKT — Reviewer follow-up: condition table published, pair-specific paper and ledger, BBH metadata amended; calibration approval asked of the owner.**
   - **Condition table.** `results/diag/meeting5/m5a/m5a_read_strict.conditions.tsv` (388 rows; correct and truncated flags for 8 arms), with its sha in the read. The host re-read is bit-identical in its estimates. The standard-library reproduction from the table matches everything (`reproduce_from_table.out.txt`).
   - **Corrections, no number changed.** Protected Random − StreamingLLM +0.054 is DESCRIPTIVE, not a registered superiority claim. The "prompt-evicting policies only" restriction is withdrawn, because the StreamingLLM gap survives protection.

@@ -283,7 +283,18 @@ def test_the_real_catalogue_has_no_two_entries_sharing_an_exact_value_and_rule()
     # examined: 1 coincidence on the k/388 lattice -- Random's gain from
     # protection (96/388) equals the unprotected Random - StreamingLLM CI's
     # upper bound; neither is derived from the other.
-    assert len(collisions) <= 179, (
+    #
+    # 179 -> 192 on 2026-10-20 (Qwen3-4B S.4 read, registered like q15b/q14b),
+    # examined: 13 new groups. Identities by construction (9), the same ones
+    # every M4 unit carries: full-bank = per-cell full-cache accuracy; each
+    # bracket endpoint = the forward residual or the reverse change (Random,
+    # StreamingLLM); flip_net = total_change (both); primary bracket = primary
+    # reverse bounds (Random lo, hi); one readout reference shared by both
+    # presses. Coincidences on the k/50, k/200 and k/400 lattices (4): -0.30
+    # (also AIME Random primary residual bound), 0.12 (also the matched
+    # Random - StreamingLLM accuracy), 0.735 (also a b2048 CI bound), -0.205
+    # (also b512 Random flip_net). No new key is cited in the .tex.
+    assert len(collisions) <= 192, (
         f"{len(collisions)} exact-value collisions in the catalogue; if this "
         "grew, a new derived quantity is duplicating an existing one"
     )

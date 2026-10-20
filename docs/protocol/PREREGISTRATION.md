@@ -4694,3 +4694,29 @@ not use the redesign; FAIL allows one pre-registered redesign under a
 separate approval; PASS freezes the confirmation N. The confirmation run and
 the reasoning bridge are not approved. The held guard keeps its test, now on
 a held copy of the config.
+
+## Amendment S.4 result (2026-10-20): Qwen3-4B at B=256 — StreamingLLM REPLICATES; Random reported verbatim (near-floor channels); EXPLORATORY, bank gate FAIL
+
+**Data.** All cells are complete on unique expected keys (status inspection
+2026-10-20 12:22 +04:00): `fc-qwen3-4b` 200/200,
+`grid-diss256-qwen3-4b` 400/400, forward readout 400/400 and reverse readout
+400/400, with 0 duplicate, foreign or torn rows.
+
+**Read.** `report_m4.py` with the 14B unit's argument set; harvest unit
+`m4-qwen3-4b-256`. Archived as
+`results/diag/amendment-k/m4-qwen3-4b-256-summary.json`, with nominal ratios
+in `…-ratios.json`.
+
+**Status of every number below:** EXPLORATORY. The bank gate FAILS at 0.845
+(disposition (a), 2026-10-06), and the 42-row human scoring review is still
+unassigned.
+
+**Pre-committed read** (Amendment J wording):
+- *StreamingLLM: REPLICATES.* Residual −0.209 [−0.285, −0.125]; bracket
+  [−0.232, −0.209]; nominal ratio median 0.097.
+- *Random: verbatim, no branch forced.* Free run 0.030 (truncation 0.735),
+  readout 0.061, residual −0.031 [−0.072, +0.010] (the CI includes 0),
+  bracket [−0.300, −0.031], nominal ratio median 0.016. Both channels are near
+  the floor, as in Llama-Random.
+
+Unprotected Random is far below StreamingLLM on this model.
