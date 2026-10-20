@@ -110,7 +110,7 @@ No software gate substitutes for this instrument gate.
 1. **B=1024 (protected free run + forward readout).** CLOSED 2026-10-16: A11 (a residual persists and shrinks) and A12 (no forward/reverse interaction detected).
 2. **B=1024/2048 near-lossless readout.** Is there a cell where readout is within 3 points of the full cache while free running is not? This is the only form of the "false certification" story the plan allows. Status: not measured under protection.
 3. **H2O-style under protection, and a fresh-uniform random baseline.** The accuracy half is answered (A13–A15, 2026-10-17). Still open:
-   - the protected M/Δ/ω captures (the adapter is not implemented), so whether the remaining protected Random − StreamingLLM gap conflicts with protected metrics is unmeasured;
+   - the protected M/Δ/ω captures (the adapter was built and tested on CPU 2026-10-20; the smoke and campaign are not approved), so whether the remaining protected Random − StreamingLLM gap conflicts with protected metrics is unmeasured;
    - fresh-uniform (A4), which is held.
 4. **Qwen3 gate disposition.** This is the owner's and supervisor's decision; see `docs/protocol/QWEN_SCORING_SENSITIVITY.md`.
 

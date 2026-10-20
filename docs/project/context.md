@@ -24,6 +24,22 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-10-20 ~16:30 PKT — Reviewer follow-up: protected-capture adapter built and tested; Amendment T; GSM8K proposal. Calibration still queued for 2026-10-21 01:45 (unchanged).**
+  - **Protected capture (CPU).**
+    - `src/kvcache/capture_protected.py` reads each protected prune from the press's own position record and verifies it bitwise. It reuses the unchanged `capture.replay_condition` via a scoped tap swap, because `capture.py` carries six identities.
+    - `scripts/run_capture_pp.py` refuses when held, without `--i-understand`, off the host, on a foreign resume, or without a same-identity smoke PASS.
+    - Two configs (both held) and launch alias `capturepp`. No queue job yet: a new marker job needs a typed gate in `gates.py`, whose change forces S.1 re-reads, so it lands with the approval.
+    - 12 tests pass on the host CPU, including identity controls: random_pp@0 equals random and rkv_pp@0 equals rkv, exactly.
+    - Observation: with interval 4 (shorter than the 8-entry window) the R-KV-protected press's own guard refuses; the registered interval is 64.
+  - **Cohort frozen:** 23 strict-fit capture problems × 4 = 92 traces. Protected Random − StreamingLLM on these keys is +0.043 (descriptive).
+  - **Proposal:** smoke 1 GPU-h; campaign about 13.8 GPU-h (cap 16), or about 8.2 for two policies. `docs/paper/CAPTURE_PP_SMOKE_TIMING_PROPOSAL.md`.
+  - **Amendment T:** Random − StreamingLLM added as a confirmation contrast (Holm over 2, beside Random − H2O-style), before any information data. Calibration comparisons are exploratory. The MI evidence chain is restated.
+  - **GSM8K:** proposal with a cap of 3 GPU-h (24 × 2 full cache; 0.82–2.76 GPU-h). Blocked on a pid-filter adapter (CPU). `docs/paper/GSM8K_TIMING_PROPOSAL.md`.
+  - **Next.**
+    1. Calibration read after 2026-10-21.
+    2. Approvals: capture smoke, then campaign.
+    3. Pid-filter adapter (CPU) for GSM8K and CAPMATCH.
+
   **★★★★★ 2026-10-20 12:30 Dubai — Status report; Qwen3 S.4 read (EXPLORATORY); calibration still NOT RUN (sync blocker cleared today).**
   - **Server:** unreachable 2026-10-17 → 2026-10-20 and kept `5327072`, so the approved calibration stayed held and blocked there. No launch on 10-19 or 10-20.
   - **Qwen3:** complete on unique keys (200 / 400 / 400 / 400) and read with `report_m4`.

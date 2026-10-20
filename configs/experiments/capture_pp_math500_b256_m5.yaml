@@ -1,0 +1,26 @@
+name: capture_pp_math500_b256_m5
+stage: capture_pp
+# Meeting 5 M5A-CAPTURE-PP campaign (prepared 2026-10-20; HELD -- needs the
+# smoke PASS and its own campaign approval). Same replay, basis, interval, tau
+# and trigger as capture-b256 (configs/experiments/capture_math500_b256_r9.yaml),
+# on the PROTECTED presses. Predeclared cohort, frozen before any protected
+# capture exists: the 25 capture problems restricted to the strict-fit cohort
+# = 23 problems (algebra/1349 and precalculus/1199 relax B=256 under
+# protection) x 4 seeds = 92 reference traces x 4 policies = 368 conditions.
+# Protected accuracy is compared on exactly these 92 keys.
+held: true
+presses: [random_pp, streamingllm_pp, h2o_style_pp_v1, rkv_pp_v1]
+budgets: [256]
+seeds: [11, 23, 47, 89]
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+subset:
+  math500: 25
+cohort_source: configs/meeting5/strict_fit_b256.json
+reference_run_name: math500-fc-powered-merged
+compression_interval: 64
+tau: 0.01
+trigger_step: 130
+basis_run: q6-basis-fit
+scale_authorized: true
+remote_only: true

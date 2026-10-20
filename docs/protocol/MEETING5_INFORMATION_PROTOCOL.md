@@ -264,6 +264,11 @@ Integer keys must be integers. The analytic fixtures are a separate
 - The Random − H2O-style contrast of target-query MI. It is computed from
   paired context-level values and resamples contexts; separately bootstrapped
   intervals are never subtracted.
+- **Added 2026-10-20 (PREREGISTRATION Amendment T):** the Random −
+  StreamingLLM contrast, the same estimator, labelled as chosen after the
+  M5-A outcome and before any information data. The confirmation family is
+  {Random − H2O-style, Random − StreamingLLM}, with Holm at α = 0.05. All
+  calibration comparisons remain exploratory.
 - Uncertainty resamples contexts.
 - The confirmation-precision target is a 0.1-bit half-width. The final N is
   frozen after calibration, before any confirmation outcome.
@@ -438,3 +443,8 @@ predeclared body spans, and it is not built until the M5-C calibration passes
 - 2026-10-17: the §6.8 calibration was approved by the owner: campaign
   `M5C-CAL`, cap 4 GPU-h, normal windows. The confirmation run and the §6.9
   bridge remain separate decisions. Still no calibration data.
+- 2026-10-20 (PREREGISTRATION Amendment T; still no information data):
+  Random − StreamingLLM added to the confirmation contrasts beside the
+  preserved Random − H2O-style. The protected-capture cohort (23 × 4 = 92
+  traces) is frozen. The full MI evidence chain (§6.8 → §6.9 → §7 → a
+  natural-task bridge) is restated as required.

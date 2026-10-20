@@ -4720,3 +4720,73 @@ unassigned.
   the floor, as in Llama-Random.
 
 Unprotected Random is far below StreamingLLM on this model.
+
+## Amendment T (2026-10-20): Random − StreamingLLM added as an M5-C confirmation contrast; protected-capture cohort frozen; the MI evidence chain restated
+
+**Timing.** This was written after the M5-A strict read (2026-10-17) and the
+Qwen3 S.4 read (2026-10-20). It was written **before any information data**:
+the M5-C calibration has not run, and no confirmation design exists. It was
+also written before any protected M/Δ/ω capture exists.
+
+**1. The expanded scientific question, and why.** The M5-C protocol (v0.1,
+§6.7) registered one paired information contrast, Random − H2O-style,
+because the original mismatch was Random vs H2O-style. M5-A changed the
+picture:
+- under prompt protection, a Random − H2O-style accuracy difference is not
+  detected (−0.005; within ±0.05, not shown within ±0.03);
+- a smaller Random − StreamingLLM difference remains (+0.054
+  [+0.023, +0.090], descriptive);
+- both protection-by-policy interactions reject.
+
+The question the information instrument can now address is therefore
+whether Random preserves more task-relevant, accessible information than
+StreamingLLM under protection. Random − StreamingLLM is **added**.
+- *The original contrast is preserved.* Random − H2O-style stays.
+- *How the addition must be labelled:* it was chosen after the M5-A outcome,
+  before any information data.
+
+**2. Confirmation contrasts (M5-C confirmation, not calibration).**
+- *Contrasts:* Random − H2O-style (original) and Random − StreamingLLM
+  (added).
+- *Estimator:* the paired per-context contrast of target-query channel MI,
+  resampling contexts, as in §6.7.
+- *Multiplicity:* Holm over the two at α = 0.05.
+- *Sample size:* the confirmation N is still frozen after calibration and
+  before any confirmation outcome; the 0.1-bit half-width target stands.
+- *Reported with every MI contrast:* the correct-symbol probability, log
+  loss and OTHER mass.
+
+**3. Calibration is unchanged.**
+- The approved calibration config and design are not modified; its declared
+  paired contrast stays Random − H2O-style.
+- **Every policy comparison computed from calibration data, including any
+  Random − StreamingLLM value, is EXPLORATORY instrument development.**
+- Calibration blocks are never reused for confirmation.
+
+**4. Protected-capture cohort, frozen** (M5A-CAPTURE-PP; not approved, no
+data).
+- *Cohort:* the 25 capture problems restricted to the strict-fit cohort,
+  i.e. 23 problems (test/algebra/1349 and test/precalculus/1199 excluded,
+  since they relax B=256 under protection) × seeds 11/23/47/89 = 92
+  reference traces.
+- *Accuracy:* protected accuracy is compared on exactly these keys.
+- *Primary pairing:* Random − StreamingLLM. Secondary pairings: Random −
+  H2O-style and Random − R-KV.
+- *Read rule:* the joint-label rule is the `matched_b256` one. The protected
+  matched reader is frozen with the campaign request
+  (`docs/paper/CAPTURE_PP_SMOKE_TIMING_PROPOSAL.md`).
+
+**5. The evidence chain any MI explanation needs (restated; nothing is
+relaxed).** An information account of the Random − StreamingLLM accuracy
+difference needs all of:
+1. an instrument that reads out (a calibration PASS, C1–C6 plus the floor);
+2. earlier information access predicting a **separately generated later
+   answer** on held-out blocks, beyond each fact span's retention and age,
+   occupancy, prune count and the existing proxies (§6.9);
+3. equal-budget target / nuisance / placebo interventions that change the
+   downstream outcome as predicted (§7);
+4. a bridge to natural reasoning problems.
+
+Immediate retrieval MI and the accuracy derived from the same answer
+distribution is never presented as an explanation of later reasoning. A
+synthetic-task finding is never presented as the natural-task mechanism.

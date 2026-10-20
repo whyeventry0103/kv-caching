@@ -1,0 +1,27 @@
+name: capture_pp_smoke_m5
+stage: capture_pp
+# Meeting 5 M5A-CAPTURE-PP SMOKE (prepared 2026-10-20; HELD -- not approved).
+# Protected M / Delta / omega through the validated capture replay with the
+# protected-press selection record (kvcache.capture_protected). Two reference
+# traces of the predeclared cohort; full/full control; identity control
+# (random_pp with prompt length 0 must reproduce unprotected random EXACTLY).
+# Writes capture-pp-smoke-PASS.json only if every control holds.
+held: true
+smoke: true
+fullfull_control: true
+identity_control: true
+reference_limit: 2
+presses: [random_pp, streamingllm_pp, h2o_style_pp_v1, rkv_pp_v1]
+budgets: [256]
+seeds: [11]
+models: [r1_distill_qwen_7b]
+benchmarks: [math500]
+subset:
+  math500: 25
+cohort_source: configs/meeting5/strict_fit_b256.json
+reference_run_name: math500-fc-powered-merged
+compression_interval: 64
+tau: 0.01
+trigger_step: 130
+basis_run: q6-basis-fit
+remote_only: true
