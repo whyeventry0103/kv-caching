@@ -195,3 +195,20 @@ symbols plus OTHER), with the nuisance N marginalized.
   task. It would not explain natural reasoning accuracy without the bridge
   (§6.9) and the interventions (§7). Nothing here guarantees that MI explains
   the gap, or any publication outcome.
+
+## Post-sync verification (2026-10-20 13:24 +04:00)
+
+- *Host checkout:* `5d372e2` (`.sync-state`, synced 09:23:50 UTC). It
+  contains the approval: `held: false`, `campaign: M5C-CAL` on the job, and
+  the campaign defined with cap 4.
+- *Scheduler dry-run at tomorrow's window*
+  (`nightly_autorun.py --dry-run --force --now 2026-10-21T01:50:00`):
+  - it selects `info-calibration-m5c` 0/640 on one GPU (seed shard 0);
+  - preflight `check_remote.sh` PASS;
+  - "campaign M5C-CAL: remaining 4.000 GPU-h -> would reserve 1 x 4.000";
+  - nothing launched.
+- *Note on the bound:* the dry-run prints the window bound (8.91 h). A real
+  launch sets `KVCACHE_MAX_HOURS = min(window, granted reservation)`, so the
+  process is bounded by the 4 GPU-h cap.
+- *If the run outgrows the cap:* the run would read PARTIAL, and finishing it
+  would need a new request (approval request §6).
