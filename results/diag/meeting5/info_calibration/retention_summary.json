@@ -1,0 +1,30 @@
+{
+ "note": "fact spans are body positions 64-69 (early) and 768-773 (late) of a 1,024-token body; B=256; interval 64",
+ "policies": {
+  "h2o_style_pp_v1": {
+   "early_mean": 0.045954241071428585,
+   "late_mean": 0.6396763392857142,
+   "n_prefixes": 64,
+   "n_prunes_mean": 364.0
+  },
+  "random_pp": {
+   "early_mean": 0.10000000000000005,
+   "late_mean": 0.35000000000000003,
+   "n_prefixes": 64,
+   "n_prunes_mean": 364.0
+  },
+  "rkv_pp_v1": {
+   "early_mean": 0.5440011160714284,
+   "late_mean": 0.516127232142857,
+   "n_prefixes": 64,
+   "n_prunes_mean": 364.0
+  },
+  "streamingllm_pp": {
+   "early_mean": 0.0,
+   "late_mean": 0.0,
+   "n_prefixes": 64,
+   "n_prunes_mean": 364.0
+  }
+ },
+ "read": "M5-C calibration: retained fraction of the early and late fact spans per compressed policy (one row per prefix execution)"
+}

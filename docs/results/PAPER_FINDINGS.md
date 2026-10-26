@@ -2040,6 +2040,20 @@ unprotected "Random beats recency" ordering therefore fails on a second
 model besides Llama-8B. It is exploratory, as stated above, and was measured
 without prompt protection.
 
+### 5s. M5-C information calibration (run 2026-10-21, read 2026-10-27): FINAL, calibration FAIL — instrument development, not paper evidence
+
+The information instrument failed its frozen calibration criteria C1 (the
+full cache does not read the facts out), C2 (most answer mass falls outside
+the four symbols) and C6 (every compressed arm is at the information floor).
+It passed C3, C4 and C5.
+- **No information result exists** for any policy or pairing. The central
+  information question remains unmeasured.
+- **The numbers are not recorded here.** They are instrument development and
+  never paper evidence; they are in PREREGISTRATION ("M5-C calibration
+  result") and `results/diag/meeting5/info_calibration/`.
+- **Next step under the protocol:** one pre-registered redesign, which needs
+  a separate approval. A second failure abandons the instrument.
+
 ## 5. Framing discipline (non-negotiable — apply throughout)
 - **Divergence ≠ damage.** ADD / TV / residual are "behavioral-fidelity loss," never "damage."
   Correctness is the only quality arbiter. Carry the **signed flip-mass** (gained vs lost correct

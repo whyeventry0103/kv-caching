@@ -448,3 +448,11 @@ predeclared body spans, and it is not built until the M5-C calibration passes
   preserved Random − H2O-style. The protected-capture cohort (23 × 4 = 92
   traces) is frozen. The full MI evidence chain (§6.8 → §6.9 → §7 → a
   natural-task bridge) is restated as required.
+- 2026-10-27: the §6.8 calibration ran (2026-10-21, 2.165 of 4 GPU-h,
+  640/640 rows). The read is FINAL, and the **calibration FAILS on C1, C2
+  and C6**: full-cache MI 0.235 bits and correct probability 0.203; OTHER
+  mass 0.691; every compressed arm below the 0.1-bit floor. C3, C4 and C5
+  pass. Full record: PREREGISTRATION, "M5-C calibration result". Per §6.8 and
+  G2, one redesign is allowed on calibration data, by dated pre-data
+  amendment and a separate approval; a second failure abandons the
+  instrument.

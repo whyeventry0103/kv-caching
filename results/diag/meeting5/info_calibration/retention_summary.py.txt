@@ -1,0 +1,32 @@
+# Calibration retention summary (instrument development; never confirmatory).
+# Run on the GPU host: python retention_summary.py.txt > retention_summary.json
+import json, statistics
+from pathlib import Path
+R = Path("/home/sk10741/kvcache-storage/runs/info-calibration-m5c/readout")
+agg = {}
+for f in sorted(R.glob("*.jsonl")):
+    for line in f.read_text().splitlines():
+        r = json.loads(line)
+        if r["policy"] == "full" or r["query"] != "n":  # one row per prefix
+            continue
+        sp = r["fact_spans"]
+        early = min(sp, key=lambda k: sp[k][0])
+        late = max(sp, key=lambda k: sp[k][0])
+        a = agg.setdefault(r["policy"], {"early": [], "late": [], "n_prunes": []})
+        a["early"].append(r["retained_fraction"][early])
+        a["late"].append(r["retained_fraction"][late])
+        a["n_prunes"].append(r["n_prunes"])
+out = {
+    "read": "M5-C calibration: retained fraction of the early and late fact spans per compressed policy (one row per prefix execution)",
+    "note": "fact spans are body positions 64-69 (early) and 768-773 (late) of a 1,024-token body; B=256; interval 64",
+    "policies": {
+        p: {
+            "n_prefixes": len(a["early"]),
+            "early_mean": statistics.fmean(a["early"]),
+            "late_mean": statistics.fmean(a["late"]),
+            "n_prunes_mean": statistics.fmean(a["n_prunes"]),
+        }
+        for p, a in sorted(agg.items())
+    },
+}
+print(json.dumps(out, indent=1, sort_keys=True))

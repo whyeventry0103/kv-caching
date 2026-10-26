@@ -4790,3 +4790,73 @@ difference needs all of:
 Immediate retrieval MI and the accuracy derived from the same answer
 distribution is never presented as an explanation of later reasoning. A
 synthetic-task finding is never presented as the natural-task mechanism.
+
+## M5-C calibration result (run 2026-10-21; read 2026-10-27): FINAL, calibration FAIL on C1, C2 and C6 — instrument development, not evidence
+
+**Run.**
+- `info-calibration-m5c`, campaign M5C-CAL; launched 2026-10-21 01:45 Dubai,
+  ended 03:55, rc 0.
+- **2.165 of 4 GPU-h**; no overrun.
+- 640/640 rows (4 blocks × 160).
+- Host commit `3b637fe`; input manifest `1f527da6…`; criteria fingerprint
+  `54f9c22a…` (bound to the design and matched).
+
+**Read.** The frozen reader with `--require-calibration-pass`, archived as
+`results/diag/meeting5/info_calibration/calibration_read.json`. Status
+**FINAL**: 40/40 cells, no validation problem. Exit 4: calibration not
+accepted.
+
+| Criterion | Measured | Threshold | Result |
+|---|---|---|---|
+| C1 full cache reads out | min MI 0.235 bits; min correct prob 0.203 | ≥ 1.5 bits; ≥ 0.80 | **FAIL** |
+| C2 answer format | full-cache OTHER mass 0.691 | ≤ 0.20 | **FAIL** |
+| C3 read FINAL | — | — | PASS |
+| C4 end-to-end vs cloned readout | 0.0 over 320 readouts | ≤ 0.001 | PASS |
+| C5 eviction reaches the facts | mean early-fact retention 0.172 | ≤ 0.90 | PASS |
+| C6 dynamic range | all-arm range 0.497; best compressed arm 0.026 bits; compressed-only range 0.026 | ≥ 0.25; floor ≥ 0.1 | **FAIL** (floor) |
+
+**Channel metrics.**
+- *Full cache:* target-query MI 0.497 bits (S) and 0.235 (N); correct
+  probability 0.308 / 0.203; OTHER mass 0.639 / 0.691; greedy accuracy
+  0.609 / 0.391.
+- *Compressed arms:* every arm is ≤ 0.045 bits on either query, with OTHER
+  mass 0.88–1.00.
+- *Retention* (early / late fact):
+  - Random 0.100 / 0.350;
+  - StreamingLLM 0.000 / 0.000;
+  - H2O-style 0.046 / 0.640;
+  - R-KV 0.544 / 0.516.
+
+  Source: `results/diag/meeting5/info_calibration/retention_summary.json`.
+- *Registered contrast (Random − H2O-style):* ≈ 0 on both queries (4
+  contexts), at the floor and uninformative.
+- *Every other policy comparison is exploratory.* That includes Random −
+  StreamingLLM, which is also ≈ 0.
+
+**Reading.**
+- *Where the instrument failed:* at the reader, not at compression. Even the
+  full cache puts most of its next-token mass outside the four answer
+  symbols, and reads the facts out weakly. With the reader failing, the
+  compressed arms' near-zero information cannot be attributed to eviction.
+- *StreamingLLM's retention:* it kept neither fact. At B=256 with the prompt
+  protected, its recent window does not reach the late fact, 251–256 tokens
+  before the end of the body.
+- *A hypothesis, not tested:* the cause of C1/C2 is the answer format for a
+  reasoning-distilled model given a raw (no chat template) prompt ending in
+  "Answer:". The rows store the native top-1 log-probability but not its
+  token id, so the dominant non-symbol continuation is not identified.
+
+**Response** (pre-registered 2026-10-17, approval request §6). FINAL with
+calibration FAIL means the instrument has no usable range at this operating
+point.
+- **One** redesign is allowed on calibration data, stated as a dated
+  pre-data amendment before it runs.
+  - *C1/C2:* the task or answer format.
+  - *C6 at the floor:* a less harsh operating point.
+- The redesign is chosen on instrument criteria only, never toward a policy
+  ranking.
+- The redesign's run is a **separate approval**; M5C-CAL's remaining 1.835
+  GPU-h does not authorize it.
+- If the redesign also fails, the instrument is abandoned and reported as a
+  retrieval diagnostic, with no MI claim.
+- The confirmation, the bridge and the interventions stay held (gate G2).

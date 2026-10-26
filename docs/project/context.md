@@ -24,6 +24,17 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-10-27 ~00:30 PKT — M5-C calibration ran and FAILED (C1, C2, C6); queue drained; GPUs in use by another project of the same account.**
+  - **Calibration.** Ran 2026-10-21 01:45–03:55 Dubai, rc 0, 2.165 of 4 GPU-h, 640/640 rows. The read is FINAL (40/40 cells).
+    - Failed: C1 (full cache MI 0.235 bits, correct probability 0.203), C2 (OTHER 0.691), C6 (best compressed arm 0.026 bits).
+    - Passed: C3, C4 (end-to-end difference 0.0), C5.
+    - Retention, early/late fact: R-KV 0.54/0.52, H2O-style 0.05/0.64, Random 0.10/0.35, StreamingLLM 0/0.
+    - The reader fails even on the full cache.
+    - Next: one redesign (task/answer format, operating point) by pre-data amendment and a separate approval. No MI result exists.
+  - **Queue:** nothing approved remains; every window since 10-21 had nothing to launch.
+  - **Server GPUs:** at 2026-10-26 23:00 both GPUs were running `train_model.py` (another project, same account) at about 25 GB each. Our scheduler needs ≥ 28 GB free per GPU.
+  - **Local disk** is nearly full again (~0.7 GB free).
+
   **★★★★★ 2026-10-20 ~16:30 PKT — Reviewer follow-up: protected-capture adapter built and tested; Amendment T; GSM8K proposal. Calibration still queued for 2026-10-21 01:45 (unchanged).**
   - **Protected capture (CPU).**
     - `src/kvcache/capture_protected.py` reads each protected prune from the press's own position record and verifies it bitwise. It reuses the unchanged `capture.replay_condition` via a scoped tap swap, because `capture.py` carries six identities.
