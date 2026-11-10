@@ -163,6 +163,7 @@ dryrun:
 	$(PYTHON) scripts/report_realized_compression.py --dry-run
 	$(PYTHON) scripts/report_strict_compression.py --dry-run
 	$(PYTHON) scripts/run_bank_manifest.py --config configs/experiments/bank_gsm8k_timing_m5.yaml --dry-run
+	$(PYTHON) scripts/read_gsm8k_timing.py --dry-run
 	$(PYTHON) scripts/audit_meeting4.py --dry-run retention
 	$(PYTHON) scripts/run_grid_pp.py --config configs/experiments/grid_math500_pp256_s1.yaml --dry-run
 	$(PYTHON) scripts/run_grid_pp.py --config configs/experiments/grid_math500_pp1024_s1.yaml --dry-run

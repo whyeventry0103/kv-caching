@@ -24,6 +24,27 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-11-10 PKT (pilot path) — GSM8K timing pilot: recoverable pair publication + timing reader built and CPU-tested; launch preflight REFUSES on shared disk. HELD; not queued, not launched.**
+  - **Publication.** `scripts/run_bank_manifest.py` now publishes row + token-ID pairs through the M5 recoverable path.
+    - `kvcache.manifest_publish` reuses `kvcache.m5_publish` byte-identical, scoped to `gsm8k`. That module is in the `m5_protsel`/`rkv_pp` identities, so it is not edited.
+    - Recovery runs before the model loads; resume counts complete pairs only.
+    - The bank now requires `store_token_ids: true`.
+  - **Reader.** `scripts/read_gsm8k_timing.py` + `kvcache.gsm8k_timing`.
+    - FINAL only with exactly one matching row and sidecar for all 48 keys. Refuses on any missing, extra or repeated key, a torn line, a pending envelope, or a trace hash or token-count mismatch.
+    - Scores the stored traces with the frozen `gsm8k_grade`; the row `correct` field is reported only as a disagreement count.
+    - Golds come from the pinned dataset and must match `split_resolution.json`.
+    - That record is not source-synced (`results/` is excluded), so it was copied to the host (sha256 `ea59fa84…` on both sides). A host without it gets a clean REFUSED.
+  - **Tests.** 17 in `tests/test_gsm8k_timing_pilot.py`.
+    - Stop after the result write → resume: exactly one pair per key. Envelope kept: 48 generations. Envelope lost: the orphan is quarantined and regenerated once, 49 generations.
+    - Mutation check: with recovery disabled, both interrupt tests fail.
+    - Gates bare: lint; test 1011 passed / 91 skipped; dryrun; audit; catalogue unchanged.
+  - **Host preflight (read-only, 2026-11-10 18:22 host time).** `check_remote.sh` with the scheduler's declared env → `REFUSED: runs filesystem has less than 30 GiB free`.
+    - Shared disk: 19.32 GiB free. Personal footprint: 49.75 GiB of the 72 GiB allowance (22.25 GiB headroom).
+    - Source tree hash MATCH. Run dir `bank-gsm8k-timing-m5` absent. No GSM8K process, tmux session, queue job or campaign. Both GPUs idle.
+    - Host runner `--dry-run` → 48 generations. Generation without approval → `REFUSED: this bank is HELD`, nothing written.
+    - Reader `--dry-run` OK. Dataset golds 24/24 agree with the record.
+  - **Next.** Owner approval, campaign (cap 3 GPU-h), queue job + `launch.sh` alias, `held: false` / `scale_authorized: true`, and shared disk ≥ 30 GiB.
+
   **★★★★★ 2026-11-10 PKT (follow-up) — Wording follow-up on 9f6c676; claim ledger synced. GPU jobs held.**
   - §4.6 opener rescoped: "We next examine when next-token predictions diverge during fixed-trace replay for policies that can evict the prompt." It replaces the causal "34-point loss" question.
   - Figure 3 is scoped to the four prompt-evictable policies at B=256, and "readout-invisible" is replaced by "unexplained by on-reference readout".

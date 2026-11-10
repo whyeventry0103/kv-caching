@@ -59,6 +59,28 @@ ID, so the frozen calibration split needed an additive adapter.
 - *Runner:* `scripts/run_bank_manifest.py`. It is held, and generates full
   cache only by importing `build_bank.py`'s path. `run_grid.py`,
   `build_bank.py` and `datasets.py` are byte-identical.
+- *Publication (2026-11-10):* the Meeting 5 runner's recoverable pair path.
+  - Each row and its token-ID sidecar are journalled together and published
+    idempotently; recovery runs before the model loads; resume counts complete
+    pairs only.
+  - `kvcache.manifest_publish` reuses `kvcache.m5_publish` unchanged, scoped
+    to `gsm8k`. That module is part of the M5 generation identity, so it is
+    not edited.
+  - CPU regression: a stop after the result write resumes to exactly one
+    matching pair for each of the 48 keys, both when the envelope survives
+    (no regeneration) and when it is lost (the orphan row is quarantined and
+    regenerated once).
+- *Reader:* `scripts/read_gsm8k_timing.py` + `kvcache.gsm8k_timing`.
+  - It is FINAL only with exactly one matching row and sidecar for all 48
+    keys. It refuses on any missing, extra or repeated key, a torn line, a
+    pending envelope, or a trace hash or token-count mismatch.
+  - It scores the stored traces with the frozen `gsm8k_grade`; the row's
+    `correct` field is reported only as a disagreement count.
+  - Golds come from the pinned dataset and must match the committed
+    resolution record.
+  - It also reports truncation, the length distribution, s/token, GPU-h, and
+    whether B=256 or B=1024 would bind.
+- *Tests:* 16 in `tests/test_gsm8k_timing_pilot.py`.
 - *Config:* `configs/experiments/bank_gsm8k_timing_m5.yaml` (`held: true`,
   `scale_authorized: false`). It is on `make dryrun`; there is no queue job
   and no campaign.
@@ -70,6 +92,8 @@ ID, so the frozen calibration split needed an additive adapter.
     from the 1,319-row pinned pool, with non-empty gold answers
     (`results/diag/meeting5/gsm8k_timing/split_resolution.json`).
 - *Not yet built:* the compressed-grid counterpart that M5A-CAPMATCH needs.
+- *Launch preflight (2026-11-10, read-only):* see `docs/project/context.md`
+  (2026-11-10 pilot-path bullet).
   It would reuse the same selection module.
 - *To run, after approval:*
   1. a campaign (cap 3 GPU-h);

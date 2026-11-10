@@ -10,6 +10,14 @@ rather than edited (``run_grid.py``/``build_bank.py``/``datasets.py`` stay
 byte-identical, so no existing generation identity or generation-path check
 moves).
 
+Publication reuses the Meeting 5 runner's recoverable pair path
+(``kvcache.manifest_publish`` over the unchanged ``kvcache.m5_publish``): each
+condition's row and token-ID sidecar are validated, journalled together and
+published idempotently. Before the model loads, pending envelopes are finished
+and orphans quarantined in the owned seed shards; ``--resume`` skips complete
+pairs only. A stop between the row and sidecar writes therefore never needs a
+regeneration and can never leave the run unable to complete.
+
 Modes, all refusing on any mismatch with the frozen design:
 
 * ``--dry-run``: validates the config and resolves the split from the
@@ -38,10 +46,21 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
 
-from build_bank import _resume_done_keys
-
+from kvcache.bank import build_result_row
 from kvcache.cli import load_config, plan
+from kvcache.datasets import load_benchmark
+from kvcache.generation import generate_full_cache
+from kvcache.io_schema import validate_row
 from kvcache.manifest_problems import frozen_split_pids, select_frozen_split
+from kvcache.manifest_publish import (
+    complete_pair_keys,
+    pair_identity_problems,
+    publish_pair,
+    recover_pairs,
+)
+from kvcache.models import load_model_and_tokenizer
+from kvcache.runmeta import capture_runmeta
+from kvcache.token_ids import build_token_ids_record
 
 
 def _yaml(path: Path) -> Any:
@@ -68,6 +87,8 @@ def resolve_design(config: dict[str, Any]) -> dict[str, Any]:
         raise ValueError("this runner generates full-cache banks only")
     if len(config["benchmarks"]) != 1:
         raise ValueError("one benchmark per manifest bank")
+    if config.get("store_token_ids") is not True:
+        raise ValueError("manifest banks publish row + token-ID pairs")
     bench = config["benchmarks"][0]
     spec = config.get("manifest") or {}
     if not spec.get("path") or not spec.get("split"):
@@ -93,13 +114,12 @@ def resolve_design(config: dict[str, Any]) -> dict[str, Any]:
         "n_generations": n_gen,
         "max_new_tokens": int(config["max_new_tokens"][bench]),
         "revision": str(bench_cfg["revision"]),
+        "model": str(config["models"][0]),
     }
 
 
 def load_split(design: dict[str, Any]) -> list[Any]:
     """The split's problems from the pinned dataset (offline; no model)."""
-    from kvcache.datasets import load_benchmark
-
     bench_cfg = _yaml(PROJECT_ROOT / "configs/benchmarks.yaml")["benchmarks"][
         design["benchmark"]
     ]
@@ -160,33 +180,47 @@ def main() -> int:
     if not config.get("scale_authorized"):
         raise SystemExit("REFUSED: config must set scale_authorized: true")
 
-    from kvcache.bank import append_result, build_result_row
-    from kvcache.generation import generate_full_cache
-    from kvcache.models import load_model_and_tokenizer
-    from kvcache.runmeta import capture_runmeta
-    from kvcache.token_ids import append_token_ids, build_token_ids_record
-
-    problems = load_split(design)
-    models_cfg = _yaml(PROJECT_ROOT / "configs/models.yaml")["models"]
-    sampling_cfg = _yaml(PROJECT_ROOT / "configs/sampling.yaml")
-    model_name = config["models"][0]
-    model_cfg = models_cfg[model_name]
-    model, tokenizer = load_model_and_tokenizer(model_cfg, allow_download=False)
     runs_root = Path(os.environ["REMOTE_RUNS_ROOT"])
-    store = bool(config.get("store_token_ids"))
-    done = _resume_done_keys(runs_root, store) if args.resume else set()
+    bench, cap, model_name = (
+        design["benchmark"],
+        design["max_new_tokens"],
+        design["model"],
+    )
+    split_tag = {"split": design["split"], "revision": design["revision"]}
     seeds = design["seeds"]
     if args.seeds.strip():
         shard = {int(s) for s in args.seeds.split(",")}
         seeds = [s for s in seeds if s in shard]
         if not seeds:
             raise SystemExit(f"--seeds {args.seeds} disjoint from config seeds")
-    bench, cap = design["benchmark"], design["max_new_tokens"]
+    # Finish interrupted pair publications and quarantine orphans in the owned
+    # seed shards BEFORE the model loads; "done" then means a complete pair.
+    stats = recover_pairs(
+        runs_root,
+        bench,
+        seeds=seeds,
+        validate=lambda rec: pair_identity_problems(
+            rec,
+            bench=bench,
+            model=model_name,
+            pids=design["pids"],
+            seeds=seeds,
+            manifest_split=split_tag,
+        ),
+    )
+    print(f"RECOVERY: {json.dumps(stats, sort_keys=True)}", flush=True)
+
+    problems = load_split(design)
+    models_cfg = _yaml(PROJECT_ROOT / "configs/models.yaml")["models"]
+    sampling_cfg = _yaml(PROJECT_ROOT / "configs/sampling.yaml")
+    model_cfg = models_cfg[model_name]
+    model, tokenizer = load_model_and_tokenizer(model_cfg, allow_download=False)
+    done = complete_pair_keys(runs_root, bench, seeds) if args.resume else set()
     counts = {"rows": 0, "truncated": 0, "skipped_resume": len(done)}
     for seed in seeds:
         runmeta = capture_runmeta(config["name"], args.config, int(seed))
         for problem in problems:
-            if (bench, problem.pid, int(seed)) in done:
+            if ("fullcache", "full", problem.pid, int(seed)) in done:
                 continue
             generation = generate_full_cache(
                 model,
@@ -207,24 +241,20 @@ def main() -> int:
                 generation=generation,
                 runmeta=runmeta,
             )
-            row["manifest_split"] = {
-                "split": design["split"],
-                "revision": design["revision"],
-            }
-            output = append_result(runs_root, row)
-            if store:
-                append_token_ids(
-                    runs_root,
-                    build_token_ids_record(
-                        result_row=row,
-                        prompt_token_ids=generation.prompt_token_ids,
-                        trace_token_ids=generation.trace_token_ids,
-                        prompt_text=generation.prompt,
-                        trace_text=generation.trace,
-                        tokenizer=tokenizer,
-                        tokenizer_revision=str(model_cfg["revision"]),
-                    ),
-                )
+            row["manifest_split"] = dict(split_tag)
+            validate_row(row)
+            side = build_token_ids_record(
+                result_row=row,
+                prompt_token_ids=generation.prompt_token_ids,
+                trace_token_ids=generation.trace_token_ids,
+                prompt_text=generation.prompt,
+                trace_text=generation.trace,
+                tokenizer=tokenizer,
+                tokenizer_revision=str(model_cfg["revision"]),
+            )
+            side["manifest_split"] = dict(split_tag)
+            # both records validated -> one atomic envelope -> publish
+            output = publish_pair(runs_root, bench, row, side)
             counts["rows"] += 1
             counts["truncated"] += int(row["truncated"])
             print(f"wrote {output}: {bench}/{problem.pid}/s{seed}", flush=True)
