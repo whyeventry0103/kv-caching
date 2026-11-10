@@ -99,16 +99,21 @@ def pair_identity_problems(
     pids: Iterable[str],
     seeds: Iterable[int],
     manifest_split: Mapping[str, str],
+    presses: Iterable[str] = ("fullcache",),
+    budgets: Iterable[int | str] = ("full",),
 ) -> list[str]:
-    """Why a row or sidecar does not belong to this manifest bank (empty: it
-    does). Applied to every record recovery would publish."""
+    """Why a row or sidecar does not belong to this manifest run (empty: it
+    does). Applied to every record recovery would publish. The defaults are a
+    full-cache bank; a compressed grid names its presses and budgets."""
     problems = []
     if str(rec.get("bench")) != bench:
         problems.append(f"bench {rec.get('bench')!r} != {bench!r}")
     if str(rec.get("model")) != model:
         problems.append(f"model {rec.get('model')!r} != {model!r}")
-    if str(rec.get("press")) != "fullcache" or str(rec.get("budget")) != "full":
-        problems.append("not a full-cache record")
+    if str(rec.get("press")) not in {str(p) for p in presses}:
+        problems.append(f"press {rec.get('press')!r} is not a design press")
+    if str(rec.get("budget")) not in {str(b) for b in budgets}:
+        problems.append(f"budget {rec.get('budget')!r} is not a design budget")
     try:
         _, _, pid, seed = m5_publish.row_key(rec)
     except (KeyError, TypeError, ValueError):

@@ -104,7 +104,7 @@ No software gate substitutes for this instrument gate.
 | "All gates pass." | Name each gate. Software: lint/test/dryrun/audit pass. Provenance: legacy summaries pass. Bank: Qwen3 FAIL. Instrument: fork-precision FAIL. |
 | "Random beats recency" (unscoped), and its proposed replacement "only for prompt-evicting policies" (2026-10-17) | The pair-specific statements A13–A15: protection changes both contrasts; under protection the H2O-style difference is not detected, and a smaller StreamingLLM difference remains descriptively |
 | "Random is equivalent to H2O-style under protection" / "Random beats StreamingLLM under protection" | A14 with its ±0.05 margin named; A15 as DESCRIPTIVE |
-| "Readout-invisible residual" (Figure 3 caption) | "a large residual unexplained by on-reference readout", scoped to the four prompt-evictable policies at B=256 (2026-11-10). Two §5 occurrences ("the readout-invisible trajectory residual") are not yet replaced: §F5 |
+| "Readout-invisible residual" (Figure 3 caption) | "a large residual unexplained by on-reference readout", scoped to the four prompt-evictable policies at B=256 (2026-11-10). The two §5 occurrences use the same estimand wording: §F5 |
 | "Why does readout-style evaluation miss a 34-point loss?" (§4.6 opener: causal, unscoped) | "We next examine when next-token predictions diverge during fixed-trace replay for policies that can evict the prompt." (2026-11-10) |
 | Title "Near-Lossless Under Readout, Collapse Under Free Generation" | Working title "Auditing KV-Cache Eviction: Prompt Retention, Readout, and Free-Running Reasoning". At B=256 readout loses 0.136–0.315 (A7). |
 
@@ -116,7 +116,7 @@ No software gate substitutes for this instrument gate.
    - the protected M/Δ/ω captures (the adapter was built and tested on CPU 2026-10-20; the smoke and campaign are not approved), so whether the remaining protected Random − StreamingLLM gap conflicts with protected metrics is unmeasured;
    - fresh-uniform (A4), which is held.
 4. **Qwen3 gate disposition.** This is the owner's and supervisor's decision; see `docs/protocol/QWEN_SCORING_SENSITIVITY.md`.
-5. **"Readout-invisible" in §5.** The Threats section still says "the readout-invisible trajectory residual" twice (scale axis, Llama-8B). Both describe unprotected, prompt-evictable cells. Replacing them is an owner wording decision; not done 2026-11-10.
+5. **§5 scope.** The scale-axis and Llama-8B checks describe negative accuracy changes unexplained by on-reference readout for the tested prompt-evictable cells. They do not establish a model-independent mechanism.
 
 ## G. Review of fbf869f (2026-10-05): what changed in this ledger
 

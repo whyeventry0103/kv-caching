@@ -512,6 +512,60 @@ def _marker_ok(path: Path) -> bool:
     return not (isinstance(data, dict) and data.get("passed") is False)
 
 
+def _manifest_pairs_per_seed(runs_root: Path, job: Job) -> dict[int, int]:
+    """Count unique expected readable pairs. The final reader verifies payloads."""
+    run_dir = runs_root / job.run_name
+    if not run_dir.is_dir():
+        return {}
+    from run_bank_manifest import resolve_design
+
+    from kvcache.cli import load_config
+    from kvcache.io_schema import result_path
+    from kvcache.m5_publish import row_key
+    from kvcache.token_ids import token_ids_path
+
+    cfg = load_config(PROJECT_ROOT / job.config)
+    design = resolve_design(cfg)
+    bench, model = design["benchmark"], cfg["models"][0]
+    if (
+        bench != job.bench
+        or set(design["seeds"]) != set(job.seeds)
+        or design["n_generations"] != job.total
+    ):
+        raise ValueError(f"{job.name}: queue does not match the manifest design")
+    pids = set(design["pids"])
+
+    def unique_pids(path: Path, seed: int) -> set[str]:
+        seen, duplicates = set(), set()
+        if not path.is_file():
+            return seen
+        for line in path.read_text(encoding="utf-8").splitlines():
+            try:
+                rec = json.loads(line)
+                press, budget, pid, got_seed = row_key(rec)
+                if (
+                    rec["bench"] != bench
+                    or rec["model"] != model
+                    or (press, budget, got_seed) != ("fullcache", "full", seed)
+                    or pid not in pids
+                ):
+                    continue
+                if pid in seen:
+                    duplicates.add(pid)
+                seen.add(pid)
+            except (ValueError, KeyError, TypeError):
+                continue
+        return seen - duplicates
+
+    per_seed = {}
+    for seed in job.seeds:
+        args = (run_dir, bench, model, "fullcache", "full", seed)
+        rows = unique_pids(result_path(*args), seed)
+        sides = unique_pids(token_ids_path(*args), seed)
+        per_seed[seed] = len(rows & sides)
+    return per_seed
+
+
 def count_progress(runs_root: Path, job: Job) -> int:
     run_dir = runs_root / job.run_name
     if job.progress_kind == "marker":
@@ -524,6 +578,8 @@ def count_progress(runs_root: Path, job: Job) -> int:
 
             return 1 if gate_status(job.gate, runs_root, job.config)[0] else 0
         return 1 if job.marker and _marker_ok(runs_root / job.marker) else 0
+    if job.progress_kind == "manifest_pairs":
+        return sum(_manifest_pairs_per_seed(runs_root, job).values())
     if job.progress_kind == "grid_pairs":
         # Review of 946c76a (issue 2): M5 jobs publish row + sidecar pairs; only
         # a COMPLETE pair counts, so an orphan row never completes a job.
@@ -559,6 +615,8 @@ def count_per_seed(runs_root: Path, job: Job) -> dict[int, int]:
     if job.progress_kind == "marker":
         done = count_progress(runs_root, job)
         return {job.seeds[0]: done} if done else {}
+    if job.progress_kind == "manifest_pairs":
+        return _manifest_pairs_per_seed(runs_root, job)
     if job.progress_kind == "grid_pairs":
         from kvcache.m5_publish import complete_pairs
 

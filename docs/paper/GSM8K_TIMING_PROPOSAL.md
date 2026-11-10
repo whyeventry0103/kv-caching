@@ -102,6 +102,42 @@ ID, so the frozen calibration split needed an additive adapter.
   4. shared-disk headroom above the 30 GiB launch floor (20 GB free on
      2026-11-10).
 
+## Scheduler integration (owner patch, 2026-11-10)
+
+- Queue job `bank-gsm8k-timing-m5`: `blocked`, no campaign. Progress counts
+  unique, expected row + sidecar pairs.
+- `M5B-GSM8K-TIMING` (cap 3 GPU-h) is under `proposed_campaigns`, which the
+  scheduler does not read.
+- The `bank_manifest` launcher alias refuses without that campaign's capped
+  reservation.
+
+## Replication paths (prepared 2026-11-10; design and cost PENDING)
+
+The paths are ready; the design is not. Both runners refuse real execution
+until the config is unheld, authorized and `design_status: final`, and the
+press family's own gate passes.
+- *Compressed free runs:* `scripts/run_grid_manifest.py` uses the frozen
+  confirmation IDs. Presses come from the config's single registered family
+  (`kvcache.manifest_grid`): unprotected, S.1 protected, protected selector,
+  or `rkv_pp_v1`. Each family uses its unchanged builder and gate. Rows are
+  published as pairs through the M5 recoverable path.
+- *Forward readout:* `scripts/run_readout_manifest.py` runs `run_replay.main`
+  unchanged, after swapping in three things: the frozen-ID loader, the
+  family's replay press factory, and a reference loader that reads live
+  result files only. It refuses unless the full-cache reference bank has
+  exactly one pair per expected key.
+- *Reads:* `kvcache.manifest_reads`. Coverage is validated per expected key,
+  and scores come from the registered `task_scoring.rescore`.
+- *Readout convention (proposed; confirm with the design):* an undefined
+  boundary is excluded and counted; an answer span that reaches
+  `max_answer_tokens` counts as truncated, so incorrect.
+- *Templates:* `grid_gsm8k_template_m5b.yaml` and
+  `readout_gsm8k_template_m5b.yaml`, both held and pending, with placeholder
+  presses, budgets and counts. Both are on `make dryrun`.
+- *Tests:* 25 in `tests/test_manifest_replication_paths.py`.
+- *Not built:* the full-cache confirmation bank config (the reference),
+  reverse readout, and the decomposition read. All wait for the design.
+
 ## What comes after (each a separate decision)
 
 1. **Price the matched GSM8K replication.** Use the measured rate and

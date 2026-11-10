@@ -469,7 +469,7 @@ def test_every_queued_progress_kind_is_one_the_orchestrator_implements():
     queue = yaml.safe_load(
         (ROOT / "configs" / "nightly_queue.yaml").read_text(encoding="utf-8")
     )
-    known = {"grid", "grid_pairs", "readout", "marker", "postprocess"}
+    known = {"grid", "grid_pairs", "manifest_pairs", "readout", "marker", "postprocess"}
     bad = {
         j["name"]: j["progress_kind"]
         for j in queue["jobs"]

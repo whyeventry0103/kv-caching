@@ -1,0 +1,26 @@
+name: grid_gsm8k_template_m5b
+stage: grid
+# M5-B replication, compressed free runs on the frozen GSM8K CONFIRMATION
+# split (scripts/run_grid_manifest.py). TEMPLATE, prepared 2026-11-10 to make
+# the frozen-ID path dry-runnable. The design is PENDING the GSM8K timing read:
+# presses, budgets, seeds, cap and the count below are placeholders, not a
+# registration. One press family per config (here the S.1 prompt-protected
+# family). Real execution refuses while held or design_status is pending.
+held: true
+design_status: pending
+prompt_protected: true
+models: [r1_distill_qwen_7b]
+benchmarks: [gsm8k]
+manifest:
+  path: configs/meeting5/problem_manifests.json
+  split: confirmation
+presses: [random_pp, streamingllm_pp]
+budgets: [256]
+seeds: [11, 23]
+max_new_tokens:
+  gsm8k: 8192
+compression_interval: 64
+estimated_generation_count: 800
+scale_authorized: false
+remote_only: true
+store_token_ids: true

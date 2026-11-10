@@ -24,6 +24,28 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-11-10 PKT (held launch + replication paths) — Owner patch applied (scheduler integration, §5 wording); GSM8K replication paths prepared and CPU-tested; disk survey: safe cleanup alone does NOT reach the 30 GiB floor. Pilot HELD; cap inactive; nothing queued to run.**
+  - **Patch.** `GSM8K_Held_Launch_and_Manuscript.patch` (owner; untracked, not committed) applied on `87ef825`: all 6 base blobs matched, `git apply --check` clean.
+    - Queue job `bank-gsm8k-timing-m5` is blocked with no campaign. `M5B-GSM8K-TIMING` sits under `proposed_campaigns`, which the scheduler does not read.
+    - The `bank_manifest` launcher alias refuses without the capped reservation.
+    - §5 now uses the estimand wording: 0 "readout-invisible" left in the tex.
+  - **Two follow-on fixes.**
+    - `tests/test_nightly_autorun.py`: the progress-kind allow-list gains `manifest_pairs`, which is implemented in both `count_progress` and `count_per_seed`.
+    - `tests/test_manifest_timing_schedule.py`: `# noqa: E402` on its post-`sys.path` imports (lint).
+  - **Replication paths (design and cost PENDING the timing read).**
+    - `kvcache.manifest_grid`: design resolution and family builders/gates, reused unchanged.
+    - `scripts/run_grid_manifest.py`: compressed runs, recoverable pairs.
+    - `scripts/run_readout_manifest.py`: `run_replay.main` unchanged, with a frozen-ID loader and family factory, and a validated reference bank.
+    - `kvcache.manifest_reads`: coverage plus registered `rescore`.
+    - The timing reader now scores through `task_scoring.rescore` as well.
+    - Held templates `grid_gsm8k_template_m5b.yaml` and `readout_gsm8k_template_m5b.yaml`. 25 tests; gates bare: lint; test 1039 passed / 91 skipped; dryrun (117); audit clean; catalogue unchanged.
+  - **Disk survey (host, read-only, ~19:00).** The `/` filesystem holds the runs; 15.47 GiB free, falling (pa3 job live).
+    - Safe now (about 8.3 GiB): `~/.cache/pip` 3.96, `~/.cache/uv` 4.31 (once pa3 is idle), and own `/tmp` items 0.08. That reaches about 23.8 GiB: SHORT of 30.
+    - Needs owner OK: `~/.cache/huggingface` coursework sets 7.81 (to about 31.6), the Llama-8B model 14.97 (to about 38.7), Qwen3-4B 7.51, Qwen-1.5B 3.32, `~/genaiPA2/pa2/outputs` 9.58, kagglehub 1.26.
+    - No alternate volume: two unformatted 7 TB disks need root.
+    - Preserve: `kvcache-storage/runs/**`, `data/**`, the Qwen-7B snapshot `916b56a…`, `.venv` and its hardlinked uv cache, `.venv-legacy-tf452`, `~/capstone/**`, and the live pa3 job.
+  - **Next.** Owner chooses the cleanup; then rerun `check_remote.sh` (≥ 30 GiB). Approval moves `M5B-GSM8K-TIMING` into `campaigns` and attaches it to the job.
+
   **★★★★★ 2026-11-10 PKT (pilot path) — GSM8K timing pilot: recoverable pair publication + timing reader built and CPU-tested; launch preflight REFUSES on shared disk. HELD; not queued, not launched.**
   - **Publication.** `scripts/run_bank_manifest.py` now publishes row + token-ID pairs through the M5 recoverable path.
     - `kvcache.manifest_publish` reuses `kvcache.m5_publish` byte-identical, scoped to `gsm8k`. That module is in the `m5_protsel`/`rkv_pp` identities, so it is not edited.

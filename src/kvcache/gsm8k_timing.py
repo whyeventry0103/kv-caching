@@ -13,9 +13,11 @@ scored:
   is still pending. Anything else refuses: a partial pilot is not priced.
 * Scoring. The generation row's ``correct`` field comes from the MATH grader
   inside generation, which ``kvcache.task_graders`` documents as a systematic
-  false negative on GSM8K answers. The GSM8K primary is the frozen
-  ``gsm8k_grade`` applied here to the STORED trace against the pinned gold,
-  with truncation scored incorrect. The row field is reported only as a
+  false negative on GSM8K answers. The GSM8K primary is the registered
+  read-time scorer ``kvcache.task_scoring.rescore`` (the frozen ``gsm8k_grade``
+  dispatched by benchmark and pinned revision, recording the grader source
+  hash and each trace hash), applied to the STORED trace against the pinned
+  gold, with truncation scored incorrect. The row field is reported only as a
   disagreement count, never as a score.
 * Timing. Seconds per generated token pools wall clock over generated tokens
   (the same estimator as the MATH-500 bank's 0.0253 s/token). Whether a
@@ -33,7 +35,7 @@ from pathlib import Path
 from typing import Any
 
 from kvcache.m5_publish import JOURNAL, QUARANTINE, row_key
-from kvcache.task_graders import GRADER_VERSIONS, gsm8k_grade
+from kvcache.task_scoring import FINAL, rescore
 from kvcache.token_ids import text_sha256
 
 BUDGETS = (256, 1024)
@@ -115,10 +117,26 @@ def validate_coverage(
     seeds: Iterable[int],
     manifest_split: Mapping[str, str],
 ) -> list[tuple[dict[str, Any], dict[str, Any]]]:
-    """The design's (row, sidecar) pairs in design order, or ValueError."""
+    """The full-cache design's (row, sidecar) pairs in design order."""
+    keys = [("fullcache", "full", str(p), int(s)) for s in seeds for p in pids]
+    return validate_pairs(
+        runs_root, bench=bench, keys=keys, manifest_split=manifest_split
+    )
+
+
+def validate_pairs(
+    runs_root: Path,
+    *,
+    bench: str,
+    keys: list[Key],
+    manifest_split: Mapping[str, str],
+) -> list[tuple[dict[str, Any], dict[str, Any]]]:
+    """One matching (row, sidecar) pair per expected key, in ``keys`` order,
+    or ValueError naming the problems. Shared by every manifest-bank read."""
     runs_root = Path(runs_root)
-    pids, seeds = [str(p) for p in pids], [int(s) for s in seeds]
-    want = expected_keys(pids, seeds)
+    want = set(keys)
+    if len(want) != len(keys):
+        raise ValueError("the expected key list repeats a key")
     rows, torn_r = _records(runs_root / bench)
     sides, torn_s = _records(runs_root / "token_ids" / bench)
     errors: list[str] = []
@@ -140,15 +158,31 @@ def validate_coverage(
     if errors:
         raise ValueError("; ".join(errors))
     pairs = []
-    for seed in seeds:
-        for pid in pids:
-            key = ("fullcache", "full", pid, seed)
-            row, side = rows[key][0], sides[key][0]
-            probs = pair_problems(row, side, manifest_split)
-            if probs:
-                raise ValueError(f"{pid} seed {seed}: {probs[0]}")
-            pairs.append((row, side))
+    for key in keys:
+        row, side = rows[key][0], sides[key][0]
+        probs = pair_problems(row, side, manifest_split)
+        if probs:
+            raise ValueError(f"{key}: {probs[0]}")
+        pairs.append((row, side))
     return pairs
+
+
+def score_rows(
+    rows: list[Mapping[str, Any]], golds: Mapping[str, str], *, revision: str
+) -> dict[str, Any]:
+    """The registered GSM8K read-time scores (``task_scoring.rescore``), in row
+    order, after checking every needed gold is a number; ValueError otherwise."""
+    for pid in {str(r["pid"]) for r in rows}:
+        if pid not in golds:
+            raise ValueError(f"no gold answer for {pid}")
+        try:
+            Fraction(str(golds[pid]))
+        except (ValueError, ZeroDivisionError) as exc:
+            raise ValueError(f"gold for {pid} is not a number: {golds[pid]!r}") from exc
+    scored = rescore(rows, golds, bench="gsm8k", revision=revision)
+    if scored["status"] != FINAL:
+        raise ValueError(f"GSM8K re-score INVALID: {scored['problems']}")
+    return scored
 
 
 def _quantile(values: list[float], q: float) -> float:
@@ -160,23 +194,16 @@ def _quantile(values: list[float], q: float) -> float:
 
 
 def summarize(
-    pairs: list[tuple[dict[str, Any], dict[str, Any]]], golds: Mapping[str, str]
+    pairs: list[tuple[dict[str, Any], dict[str, Any]]],
+    golds: Mapping[str, str],
+    *,
+    revision: str,
 ) -> dict[str, Any]:
-    """Accuracy under the frozen GSM8K grader, truncation, lengths, timing."""
-    for pid in {r["pid"] for r, _ in pairs}:
-        if pid not in golds:
-            raise ValueError(f"no gold answer for {pid}")
-        try:
-            Fraction(str(golds[pid]))
-        except (ValueError, ZeroDivisionError) as exc:
-            raise ValueError(f"gold for {pid} is not a number: {golds[pid]!r}") from exc
+    """Accuracy under the registered GSM8K scorer, truncation, lengths, timing."""
+    scored = score_rows([r for r, _ in pairs], golds, revision=revision)
     conditions = []
-    for row, side in pairs:
-        correct, rule = gsm8k_grade(
-            str(row["trace"]),
-            str(golds[row["pid"]]),
-            truncated=bool(row["truncated"]),
-        )
+    for (row, side), score in zip(pairs, scored["scores"], strict=True):
+        correct, rule = score["correct"], score["rule"]
         prompt_len = len(side["prompt_token_ids"])
         conditions.append(
             {
@@ -209,7 +236,8 @@ def summarize(
         "accuracy_equal_problem": statistics.fmean(
             statistics.fmean(v) for v in by_pid.values()
         ),
-        "grader": GRADER_VERSIONS["gsm8k"],
+        "grader": scored["grader"],
+        "grader_sha256": scored["grader_sha256"],
         "grader_rules": dict(sorted(rules.items())),
         "row_correct_field_disagreements": sum(
             c["correct"] != c["row_correct_field"] for c in conditions
@@ -257,5 +285,5 @@ def read_timing(
         "validated_pairs": len(pairs),
         "quarantined_records": _quarantined(Path(runs_root)),
         "score_source": "gsm8k_grade on the stored trace; row 'correct' ignored",
-        **summarize(pairs, golds),
+        **summarize(pairs, golds, revision=str(manifest_split["revision"])),
     }

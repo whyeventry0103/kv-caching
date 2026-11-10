@@ -1,0 +1,25 @@
+name: readout_gsm8k_template_m5b
+stage: replay
+mode: readout
+# M5-B replication, forward readout of the full-cache GSM8K CONFIRMATION bank
+# under compression (scripts/run_readout_manifest.py). TEMPLATE, prepared
+# 2026-11-10; the design is PENDING the GSM8K timing read. Presses, budgets,
+# seeds, the answer cap and the reference bank name are placeholders (no
+# confirmation bank exists). Real execution refuses while held or pending.
+held: true
+design_status: pending
+prompt_protected: true
+reference_run_name: bank-gsm8k-confirmation-m5b
+models: [r1_distill_qwen_7b]
+benchmarks: [gsm8k]
+manifest:
+  path: configs/meeting5/problem_manifests.json
+  split: confirmation
+presses: [random_pp, streamingllm_pp]
+budgets: [256]
+seeds: [11, 23]
+compression_interval: 64
+max_answer_tokens: 2048
+estimated_generation_count: 0
+estimated_replay_count: 800
+scale_authorized: false

@@ -39,3 +39,9 @@ campaigns:
     cap_gpu_hours: 4
     approved: 2026-10-17
     scope: information-channel calibration (info-calibration-m5c, 640 rows; never confirmatory)
+
+# Not read by the scheduler. Move into campaigns only after owner approval.
+proposed_campaigns:
+  M5B-GSM8K-TIMING:
+    cap_gpu_hours: 3
+    scope: full-cache GSM8K timing only (24 frozen calibration problems x seeds 11/23)

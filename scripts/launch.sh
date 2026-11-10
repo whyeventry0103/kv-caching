@@ -59,6 +59,15 @@ fi
 
 case "$COMMAND" in
   bank) PY_SCRIPT="scripts/build_bank.py" ;;
+  bank_manifest)
+    if [[ "$CONFIG" != "configs/experiments/bank_gsm8k_timing_m5.yaml" \
+       || "${KVCACHE_LAUNCH_ID:-}" != M5B-GSM8K-TIMING-* \
+       || -z "${KVCACHE_MAX_HOURS:-}" ]]; then
+      echo "REFUSED: GSM8K timing requires its capped scheduler reservation" >&2
+      exit 2
+    fi
+    PY_SCRIPT="scripts/run_bank_manifest.py"
+    ;;
   grid) PY_SCRIPT="scripts/run_grid.py" ;;
   replay) PY_SCRIPT="scripts/run_replay.py" ;;
   rkvsmoke) PY_SCRIPT="scripts/rkv_smoke.py" ;;
