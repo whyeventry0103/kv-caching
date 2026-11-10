@@ -2160,6 +2160,20 @@ def build_catalogue() -> list[Entry]:
                 f"{_q3p} :: cells.{_pp}.median",
                 f"Qwen3-4B nominal-budget ratio median, B=256, {_pp}",
             )
+    # M5-A strict-cohort nominal-budget ratios, eight arms (2026-11-10): a
+    # SEPARATE population from the 100-problem s1.realized.* entries; FINAL only
+    _scr = DIAG / "meeting5" / "m5a" / "strict_realized_compression.json"
+    if _scr.exists() and _load(_scr).get("status") == "FINAL":
+        _scd, _scp = _load(_scr), _scr.relative_to(PROJECT_ROOT)
+        for _arm, _c in _scd["arms"].items():
+            _tag = _arm.replace("+P", "_pp").replace("-P", "_unprot")
+            for _f in ("median", "mean", "n_ratio_one", "n_budget_relaxed"):
+                add(
+                    f"m5a.strict.ratio.{_tag}.{_f}",
+                    _c[_f],
+                    f"{_scp} :: arms.{_arm}.{_f}",
+                    f"strict-cohort nominal-budget ratio {_f}, B=256, {_arm}",
+                )
     # M5-A strict-cohort protection-by-policy read (2026-10-17): FINAL only
     _m5a = DIAG / "meeting5" / "m5a" / "m5a_read_strict.json"
     if _m5a.exists() and _load(_m5a).get("status") == "FINAL":

@@ -1,0 +1,26 @@
+name: bank_gsm8k_timing_m5
+stage: bank
+# Meeting 5 GSM8K full-cache TIMING bank (prepared 2026-11-10; HELD -- not
+# approved). docs/paper/GSM8K_TIMING_PROPOSAL.md: the frozen 24-problem GSM8K
+# CALIBRATION split (configs/meeting5/problem_manifests.json, hash-selected
+# before any outcome, never used for confirmation) x seeds 11, 23 = 48
+# full-cache generations on Qwen-7B (R1-Distill), cap 8192 (plan 9.3; a cap
+# change before the replication is a pre-outcome amendment). Problems are
+# selected by frozen ID (scripts/run_bank_manifest.py), never by count.
+# Proposed campaign cap 3 GPU-h. Runs only after held: false AND
+# scale_authorized: true, with its own campaign and queue job.
+held: true
+models: [r1_distill_qwen_7b]
+benchmarks: [gsm8k]
+manifest:
+  path: configs/meeting5/problem_manifests.json
+  split: calibration
+seeds: [11, 23]
+max_new_tokens:
+  gsm8k: 8192
+presses: [fullcache]
+budgets: [full]
+estimated_generation_count: 48
+store_token_ids: true
+scale_authorized: false
+remote_only: true

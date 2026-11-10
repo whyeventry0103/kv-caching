@@ -1,0 +1,147 @@
+{
+ "config": "configs/experiments/bank_gsm8k_timing_m5.yaml",
+ "design": {
+  "benchmark": "gsm8k",
+  "first_pids": [
+   "gsm8k/test/1127",
+   "gsm8k/test/1178",
+   "gsm8k/test/1193"
+  ],
+  "held": true,
+  "max_new_tokens": 8192,
+  "n_generations": 48,
+  "n_pool": 1319,
+  "n_problems": 24,
+  "revision": "740312add88f781978c0658806c59bc2815b9866",
+  "seeds": [
+   11,
+   23
+  ],
+  "split": "calibration"
+ },
+ "observed": "2026-11-10, host kvcache-gpu, scripts/run_bank_manifest.py --resolve-only",
+ "problems": [
+  {
+   "gold": "750",
+   "pid": "gsm8k/test/1127",
+   "question_sha256": "48705328fbdd61a3820c40b3b488089f341ace66f78cd69797d464fccb66a37e"
+  },
+  {
+   "gold": "17",
+   "pid": "gsm8k/test/1178",
+   "question_sha256": "173e1d62ebee6edae8489a337e8278c273017bc478a2df85b70e488096d1d89a"
+  },
+  {
+   "gold": "9",
+   "pid": "gsm8k/test/1193",
+   "question_sha256": "48e1f4b965acee41e103bda238c02dc29292f3d604e5831e685f26d4b87ab43e"
+  },
+  {
+   "gold": "150",
+   "pid": "gsm8k/test/1212",
+   "question_sha256": "477173f48977592b7627a654454f237f2a473c156166e14bddb1f6b284987848"
+  },
+  {
+   "gold": "31",
+   "pid": "gsm8k/test/1228",
+   "question_sha256": "3931b6363f3a060ca7cb0774662127e64007e9f34ce209edddca77425e20a479"
+  },
+  {
+   "gold": "3360",
+   "pid": "gsm8k/test/1246",
+   "question_sha256": "88c5c9b085326acb934a18e19db08bad1e8120503bf7f6b3e6d0a3cb9c0ac3cd"
+  },
+  {
+   "gold": "34",
+   "pid": "gsm8k/test/1288",
+   "question_sha256": "370f1dabd58264cd58a96e001deb2a3d34f70f365f6ac1013d81c839102b8873"
+  },
+  {
+   "gold": "8",
+   "pid": "gsm8k/test/1307",
+   "question_sha256": "e47612db4c66b2028f10a078db58f9bb91ab3f4d58df21502a7b9efe209aed08"
+  },
+  {
+   "gold": "20",
+   "pid": "gsm8k/test/140",
+   "question_sha256": "09a8532e00e3cd9a41779c00b791730f72848bf57e0ea9e380ad034816e7ec31"
+  },
+  {
+   "gold": "400",
+   "pid": "gsm8k/test/141",
+   "question_sha256": "cdf3f31e007929771fb5edba6a762f04b0e92ca5416c600cf6e12a9eb428ffac"
+  },
+  {
+   "gold": "32",
+   "pid": "gsm8k/test/161",
+   "question_sha256": "b8c462eaeb0b0329edfd68eb6c3cf6b2cb0e3a187873cc33762360965072b073"
+  },
+  {
+   "gold": "70",
+   "pid": "gsm8k/test/251",
+   "question_sha256": "58585cbaa8c1c89597af0ac775c1a89afa12e5610960ea70243fed1968a85dea"
+  },
+  {
+   "gold": "50",
+   "pid": "gsm8k/test/371",
+   "question_sha256": "dc921eb972c6103b1c2a788bbbf16001402266685426be35572d82e79de45e7e"
+  },
+  {
+   "gold": "15",
+   "pid": "gsm8k/test/391",
+   "question_sha256": "c54bbb7f74eb8fc4a61171c6bef2f4c65be1679b17748d3bf16ba3ba3c962ea3"
+  },
+  {
+   "gold": "1",
+   "pid": "gsm8k/test/466",
+   "question_sha256": "a864c1e8618c4219ea3e5e3ec05f1359a6e63c2b61b0bb89b6475418e350155b"
+  },
+  {
+   "gold": "11",
+   "pid": "gsm8k/test/480",
+   "question_sha256": "806079fe17bfbbcea7188a650cd6a818e0e5437fd1864d0560cba0883bbe79bc"
+  },
+  {
+   "gold": "130",
+   "pid": "gsm8k/test/546",
+   "question_sha256": "8619c48853d9610e152a7525a70d157c33e2f3ec1f9bcc8b41f927324527d5f2"
+  },
+  {
+   "gold": "45",
+   "pid": "gsm8k/test/560",
+   "question_sha256": "500ad1d2aea493d6195f5c8e8cbafa5131af2159795cab00d732c5ccdd81e89a"
+  },
+  {
+   "gold": "104",
+   "pid": "gsm8k/test/601",
+   "question_sha256": "ae7b78223d943ffb83542bf8362ffeb2ef02fb40f0ffa2c17d829cc6089a306c"
+  },
+  {
+   "gold": "75",
+   "pid": "gsm8k/test/757",
+   "question_sha256": "722e050a6bdcf5677d18fa1db91b4dff2577d0343289ec898580a2ec34df953e"
+  },
+  {
+   "gold": "6250",
+   "pid": "gsm8k/test/819",
+   "question_sha256": "d9eb85dbea16ec3f3df18c7cf393ed27bd082874bb8f7b04f4f89edb46375faf"
+  },
+  {
+   "gold": "10",
+   "pid": "gsm8k/test/888",
+   "question_sha256": "a0a6fac737a5120adc6d7f75884a4f7ad52bff30cac2f3980f2424e40491764e"
+  },
+  {
+   "gold": "4",
+   "pid": "gsm8k/test/977",
+   "question_sha256": "fdf9b8a2a9c21ef8e52dc03998db76846c4e77de4f814facc3f54dc6bcd80e91"
+  },
+  {
+   "gold": "12",
+   "pid": "gsm8k/test/995",
+   "question_sha256": "35a2af8941708ae6b10badc5eccbf14bc6aa28640165112aad72cf69b7a08987"
+  }
+ ],
+ "read": "GSM8K timing split resolved against the pinned dataset on the GPU host (CPU only, offline, no model)",
+ "resolved": 24
+}

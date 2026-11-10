@@ -2,121 +2,6 @@
   "note": "Intent map for the paper's load-bearing numbers. audit_paper_numbers.py proves each literal matches SOME catalogue entry; this file names WHICH quantity each one asserts, so a literal that happens to equal an unrelated entry cannot pass. `context` must appear exactly once in the .tex and must contain `literal`; `key` must be able to display `literal` under its own rounding rules. Adding a claim is cheap; a number that matters and is not here is unpinned, which the checker reports as coverage.",
   "claims": [
     {
-      "context": "random eviction scores $0.765$ when the full-cache reasoning trace is teacher-forced",
-      "literal": "0.765",
-      "key": "diss256.random.readout"
-    },
-    {
-      "context": "but $0.422$ when the model writes its own trace",
-      "literal": "0.422",
-      "key": "diss256.random.free"
-    },
-    {
-      "context": "(matched full cache $0.885$; StreamingLLM $0.584$ versus $0.237$",
-      "literal": "0.885",
-      "key": "diss256.random.fc_cell"
-    },
-    {
-      "context": "StreamingLLM $0.584$ versus $0.237$;",
-      "literal": "0.584",
-      "key": "diss256.streamingllm.readout"
-    },
-    {
-      "context": "StreamingLLM $0.584$ versus $0.237$;",
-      "literal": "0.237",
-      "key": "diss256.streamingllm.free"
-    },
-    {
-      "context": "an attention-score heavy-hitter press $0.597$ versus $0.247$)",
-      "literal": "0.597",
-      "key": "h2o256.h2o.readout"
-    },
-    {
-      "context": "an attention-score heavy-hitter press $0.597$ versus $0.247$)",
-      "literal": "0.247",
-      "key": "h2o256.h2o.free"
-    },
-    {
-      "context": "a trajectory residual of $-0.337$ / $-0.344$ / $-0.344$ across three mechanistically unrelated eviction policies",
-      "literal": "0.337",
-      "key": "diss256.random.residual"
-    },
-    {
-      "context": "showing the same readout-invisible structure at $-0.268$ while free-running best",
-      "literal": "0.268",
-      "key": "rkv256.rkv.residual"
-    },
-    {
-      "context": "exactly zero before the first eviction, ${\\approx}0.002$ per step immediately after",
-      "literal": "0.002",
-      "key": "tv_diss256.first50"
-    },
-    {
-      "context": "and $0.088$ later in the trajectory",
-      "literal": "0.088",
-      "key": "tv_diss256.later"
-    },
-    {
-      "context": "two-full-cache negative control (noise floor $\\approx 0.07$",
-      "literal": "0.07",
-      "key": "twofc.mean_add"
-    },
-    {
-      "context": "full-cache accuracy $0.885$ collapses to $0.237$ (StreamingLLM) and $0.422$ (Random)",
-      "literal": "0.885",
-      "key": "diss256.random.fc_cell"
-    },
-    {
-      "context": "collapses to $0.237$ (StreamingLLM) and $0.422$ (Random)",
-      "literal": "0.237",
-      "key": "diss256.streamingllm.free"
-    },
-    {
-      "context": "$0.237$ (StreamingLLM) and $0.422$ (Random); random eviction beats the principled recency policy",
-      "literal": "0.422",
-      "key": "diss256.random.free"
-    },
-    {
-      "context": "random eviction beats the principled recency policy by $+0.185$, 95\\% CI $[0.130, 0.240]$",
-      "literal": "0.185",
-      "key": "contrast256.mean"
-    },
-    {
-      "context": "by $+0.185$, 95\\% CI $[0.130, 0.240]$, with per-problem difference",
-      "literal": "0.130",
-      "key": "contrast256.ci0"
-    },
-    {
-      "context": "by $+0.185$, 95\\% CI $[0.130, 0.240]$, with per-problem difference",
-      "literal": "0.240",
-      "key": "contrast256.ci1"
-    },
-    {
-      "context": "residual spread $0.008$, every CI excluding zero; 400 conditions per cell",
-      "literal": "0.008",
-      "key": "residual_spread.256_three_policies"
-    },
-    {
-      "context": "(Random $[-0.337,-0.282]$, StreamingLLM $[-0.470,-0.344]$",
-      "literal": "0.282",
-      "key": "diss256.random.bracket1"
-    },
-    {
-      "context": "StreamingLLM $[-0.470,-0.344]$, H2O-style $[-0.478,-0.344]$",
-      "literal": "0.470",
-      "key": "diss256.streamingllm.bracket0"
-    },
-    {
-      "context": "H2O-style $[-0.478,-0.344]$, R-KV $[-0.268,-0.251]$",
-      "literal": "0.478",
-      "key": "h2o256.h2o.bracket0"
-    },
-    {
-      "context": "R-KV $[-0.268,-0.251]$)",
-      "literal": "0.251",
-      "key": "rkv256.rkv.bracket1"
-    },
-    {
       "context": "From $\\accfc = 0.885$, free-running accuracy at budget 256 falls to $\\mathbf{0.237}$",
       "literal": "0.885",
       "key": "diss256.random.fc_cell"
@@ -398,85 +283,85 @@
       "key": "rkv256.rkv.trunc"
     },
     {
-      "context": "| Random | 0.422 | 0.765 | **\u22120.337** | [\u22120.337, \u22120.282] |",
+      "context": "| Random | 0.422 | 0.765 | **−0.337** | [−0.337, −0.282] |",
       "literal": "0.422",
       "key": "diss256.random.free",
       "document": "README.md"
     },
     {
-      "context": "| Random | 0.422 | 0.765 | **\u22120.337** | [\u22120.337, \u22120.282] |",
+      "context": "| Random | 0.422 | 0.765 | **−0.337** | [−0.337, −0.282] |",
       "literal": "0.765",
       "key": "diss256.random.readout",
       "document": "README.md"
     },
     {
-      "context": "| Random | 0.422 | 0.765 | **\u22120.337** | [\u22120.337, \u22120.282] |",
+      "context": "| Random | 0.422 | 0.765 | **−0.337** | [−0.337, −0.282] |",
       "literal": "0.337",
       "key": "diss256.random.residual",
       "document": "README.md"
     },
     {
-      "context": "| Random | 0.422 | 0.765 | **\u22120.337** | [\u22120.337, \u22120.282] |",
+      "context": "| Random | 0.422 | 0.765 | **−0.337** | [−0.337, −0.282] |",
       "literal": "0.282",
       "key": "diss256.random.bracket1",
       "document": "README.md"
     },
     {
-      "context": "| StreamingLLM | 0.237 | 0.584 | **\u22120.344** | [\u22120.470, \u22120.344] |",
+      "context": "| StreamingLLM | 0.237 | 0.584 | **−0.344** | [−0.470, −0.344] |",
       "literal": "0.237",
       "key": "diss256.streamingllm.free",
       "document": "README.md"
     },
     {
-      "context": "| StreamingLLM | 0.237 | 0.584 | **\u22120.344** | [\u22120.470, \u22120.344] |",
+      "context": "| StreamingLLM | 0.237 | 0.584 | **−0.344** | [−0.470, −0.344] |",
       "literal": "0.584",
       "key": "diss256.streamingllm.readout",
       "document": "README.md"
     },
     {
-      "context": "| StreamingLLM | 0.237 | 0.584 | **\u22120.344** | [\u22120.470, \u22120.344] |",
+      "context": "| StreamingLLM | 0.237 | 0.584 | **−0.344** | [−0.470, −0.344] |",
       "literal": "0.470",
       "key": "diss256.streamingllm.bracket0",
       "document": "README.md"
     },
     {
-      "context": "| H2O-style | 0.247 | 0.597 | **\u22120.344** | [\u22120.478, \u22120.344] |",
+      "context": "| H2O-style | 0.247 | 0.597 | **−0.344** | [−0.478, −0.344] |",
       "literal": "0.247",
       "key": "h2o256.h2o.free",
       "document": "README.md"
     },
     {
-      "context": "| H2O-style | 0.247 | 0.597 | **\u22120.344** | [\u22120.478, \u22120.344] |",
+      "context": "| H2O-style | 0.247 | 0.597 | **−0.344** | [−0.478, −0.344] |",
       "literal": "0.597",
       "key": "h2o256.h2o.readout",
       "document": "README.md"
     },
     {
-      "context": "| H2O-style | 0.247 | 0.597 | **\u22120.344** | [\u22120.478, \u22120.344] |",
+      "context": "| H2O-style | 0.247 | 0.597 | **−0.344** | [−0.478, −0.344] |",
       "literal": "0.478",
       "key": "h2o256.h2o.bracket0",
       "document": "README.md"
     },
     {
-      "context": "| R-KV (certified port) | 0.520 | 0.798 | **\u22120.268** | [\u22120.268, \u22120.251] |",
+      "context": "| R-KV (certified port) | 0.520 | 0.798 | **−0.268** | [−0.268, −0.251] |",
       "literal": "0.520",
       "key": "rkv256.rkv.free",
       "document": "README.md"
     },
     {
-      "context": "| R-KV (certified port) | 0.520 | 0.798 | **\u22120.268** | [\u22120.268, \u22120.251] |",
+      "context": "| R-KV (certified port) | 0.520 | 0.798 | **−0.268** | [−0.268, −0.251] |",
       "literal": "0.798",
       "key": "rkv256.rkv.readout",
       "document": "README.md"
     },
     {
-      "context": "| R-KV (certified port) | 0.520 | 0.798 | **\u22120.268** | [\u22120.268, \u22120.251] |",
+      "context": "| R-KV (certified port) | 0.520 | 0.798 | **−0.268** | [−0.268, −0.251] |",
       "literal": "0.268",
       "key": "rkv256.rkv.residual",
       "document": "README.md"
     },
     {
-      "context": "| R-KV (certified port) | 0.520 | 0.798 | **\u22120.268** | [\u22120.268, \u22120.251] |",
+      "context": "| R-KV (certified port) | 0.520 | 0.798 | **−0.268** | [−0.268, −0.251] |",
       "literal": "0.251",
       "key": "rkv256.rkv.bracket1",
       "document": "README.md"
@@ -1058,34 +943,489 @@
       "key": "m3.llama.h3.cihi"
     },
     {
-      "context": "from $-0.332$ to $-0.056$ (Random)",
-      "literal": "0.056",
-      "key": "s1.b256.random_pp.residual_pp.mean"
+      "context": "Random & $0.436\\;[0.356, 0.513]$ & $0.683\\;[0.598, 0.771]$ \\\\",
+      "literal": "0.436",
+      "key": "m5a.strict.acc.random_unprot.mean"
     },
     {
-      "context": "from $-0.338$ to $-0.078$ (StreamingLLM",
-      "literal": "0.078",
-      "key": "s1.b256.streamingllm_pp.residual_pp.mean"
+      "context": "Random & $0.436\\;[0.356, 0.513]$ & $0.683\\;[0.598, 0.771]$ \\\\",
+      "literal": "0.356",
+      "key": "m5a.strict.acc.random_unprot.cilo"
     },
     {
-      "context": "budget 256 shrinks from $-0.332$ to $-0.056$",
-      "literal": "0.332",
+      "context": "Random & $0.436\\;[0.356, 0.513]$ & $0.683\\;[0.598, 0.771]$ \\\\",
+      "literal": "0.513",
+      "key": "m5a.strict.acc.random_unprot.cihi"
+    },
+    {
+      "context": "Random & $0.436\\;[0.356, 0.513]$ & $0.683\\;[0.598, 0.771]$ \\\\",
+      "literal": "0.683",
+      "key": "m5a.strict.acc.random_pp.mean"
+    },
+    {
+      "context": "Random & $0.436\\;[0.356, 0.513]$ & $0.683\\;[0.598, 0.771]$ \\\\",
+      "literal": "0.598",
+      "key": "m5a.strict.acc.random_pp.cilo"
+    },
+    {
+      "context": "Random & $0.436\\;[0.356, 0.513]$ & $0.683\\;[0.598, 0.771]$ \\\\",
+      "literal": "0.771",
+      "key": "m5a.strict.acc.random_pp.cihi"
+    },
+    {
+      "context": "H2O-style & $0.255\\;[0.188, 0.325]$ & $0.688\\;[0.611, 0.765]$ \\\\",
+      "literal": "0.255",
+      "key": "m5a.strict.acc.h2o_unprot.mean"
+    },
+    {
+      "context": "H2O-style & $0.255\\;[0.188, 0.325]$ & $0.688\\;[0.611, 0.765]$ \\\\",
+      "literal": "0.188",
+      "key": "m5a.strict.acc.h2o_unprot.cilo"
+    },
+    {
+      "context": "H2O-style & $0.255\\;[0.188, 0.325]$ & $0.688\\;[0.611, 0.765]$ \\\\",
+      "literal": "0.325",
+      "key": "m5a.strict.acc.h2o_unprot.cihi"
+    },
+    {
+      "context": "H2O-style & $0.255\\;[0.188, 0.325]$ & $0.688\\;[0.611, 0.765]$ \\\\",
+      "literal": "0.688",
+      "key": "m5a.strict.acc.h2o_pp.mean"
+    },
+    {
+      "context": "H2O-style & $0.255\\;[0.188, 0.325]$ & $0.688\\;[0.611, 0.765]$ \\\\",
+      "literal": "0.611",
+      "key": "m5a.strict.acc.h2o_pp.cilo"
+    },
+    {
+      "context": "H2O-style & $0.255\\;[0.188, 0.325]$ & $0.688\\;[0.611, 0.765]$ \\\\",
+      "literal": "0.765",
+      "key": "m5a.strict.acc.h2o_pp.cihi"
+    },
+    {
+      "context": "StreamingLLM & $0.245\\;[0.183, 0.314]$ & $0.629\\;[0.541, 0.714]$ \\\\",
+      "literal": "0.245",
+      "key": "m5a.strict.acc.streamingllm_unprot.mean"
+    },
+    {
+      "context": "StreamingLLM & $0.245\\;[0.183, 0.314]$ & $0.629\\;[0.541, 0.714]$ \\\\",
+      "literal": "0.183",
+      "key": "m5a.strict.acc.streamingllm_unprot.cilo"
+    },
+    {
+      "context": "StreamingLLM & $0.245\\;[0.183, 0.314]$ & $0.629\\;[0.541, 0.714]$ \\\\",
+      "literal": "0.314",
+      "key": "m5a.strict.acc.streamingllm_unprot.cihi"
+    },
+    {
+      "context": "StreamingLLM & $0.245\\;[0.183, 0.314]$ & $0.629\\;[0.541, 0.714]$ \\\\",
+      "literal": "0.629",
+      "key": "m5a.strict.acc.streamingllm_pp.mean"
+    },
+    {
+      "context": "StreamingLLM & $0.245\\;[0.183, 0.314]$ & $0.629\\;[0.541, 0.714]$ \\\\",
+      "literal": "0.541",
+      "key": "m5a.strict.acc.streamingllm_pp.cilo"
+    },
+    {
+      "context": "StreamingLLM & $0.245\\;[0.183, 0.314]$ & $0.629\\;[0.541, 0.714]$ \\\\",
+      "literal": "0.714",
+      "key": "m5a.strict.acc.streamingllm_pp.cihi"
+    },
+    {
+      "context": "R-KV & $0.536\\;[0.451, 0.624]$ & $0.644\\;[0.559, 0.729]$ \\\\",
+      "literal": "0.536",
+      "key": "m5a.strict.acc.rkv_unprot.mean"
+    },
+    {
+      "context": "R-KV & $0.536\\;[0.451, 0.624]$ & $0.644\\;[0.559, 0.729]$ \\\\",
+      "literal": "0.451",
+      "key": "m5a.strict.acc.rkv_unprot.cilo"
+    },
+    {
+      "context": "R-KV & $0.536\\;[0.451, 0.624]$ & $0.644\\;[0.559, 0.729]$ \\\\",
+      "literal": "0.624",
+      "key": "m5a.strict.acc.rkv_unprot.cihi"
+    },
+    {
+      "context": "R-KV & $0.536\\;[0.451, 0.624]$ & $0.644\\;[0.559, 0.729]$ \\\\",
+      "literal": "0.644",
+      "key": "m5a.strict.acc.rkv_pp.mean"
+    },
+    {
+      "context": "R-KV & $0.536\\;[0.451, 0.624]$ & $0.644\\;[0.559, 0.729]$ \\\\",
+      "literal": "0.559",
+      "key": "m5a.strict.acc.rkv_pp.cilo"
+    },
+    {
+      "context": "R-KV & $0.536\\;[0.451, 0.624]$ & $0.644\\;[0.559, 0.729]$ \\\\",
+      "literal": "0.729",
+      "key": "m5a.strict.acc.rkv_pp.cihi"
+    },
+    {
+      "context": "We audit how KV-cache eviction affects reasoning accuracy when a model writes its own reasoning and when it answers from a supplied reasoning trace. On MATH-500 with DeepSeek-R1-Distill-Qwen-7B, we compare free-running accuracy with answer readout on a fixed full-cache trace, then replay compressed traces under a full cache as a complementary comparison. On 100 problems with four seeds each, protecting the prompt reduces the forward residual---the accuracy change unexplained by on-reference readout---while a negative residual remains for Random and StreamingLLM. With the prompt protected, the two replay directions disagree at the tighter budget. At a budget of 1024 entries (median nominal budget ratios $0.434$ and $0.487$), the protected forward residual is $-0.047$ (95\\% CI $[-0.086,-0.015]$) for Random and $-0.040$ ($[-0.070,-0.013]$) for StreamingLLM; a direction interaction was not detected. On a strict-fit subset of 97 problems, prompt protection changes Random's free-running accuracy contrasts with both StreamingLLM and an H2O-style policy. These comparisons motivate reporting free-running accuracy alongside fixed-trace readout and specifying which prompt entries eviction can remove.",
+      "literal": "-0.047",
+      "key": "s1.b1024.random_pp.residual_pp.mean"
+    },
+    {
+      "context": "We audit how KV-cache eviction affects reasoning accuracy when a model writes its own reasoning and when it answers from a supplied reasoning trace. On MATH-500 with DeepSeek-R1-Distill-Qwen-7B, we compare free-running accuracy with answer readout on a fixed full-cache trace, then replay compressed traces under a full cache as a complementary comparison. On 100 problems with four seeds each, protecting the prompt reduces the forward residual---the accuracy change unexplained by on-reference readout---while a negative residual remains for Random and StreamingLLM. With the prompt protected, the two replay directions disagree at the tighter budget. At a budget of 1024 entries (median nominal budget ratios $0.434$ and $0.487$), the protected forward residual is $-0.047$ (95\\% CI $[-0.086,-0.015]$) for Random and $-0.040$ ($[-0.070,-0.013]$) for StreamingLLM; a direction interaction was not detected. On a strict-fit subset of 97 problems, prompt protection changes Random's free-running accuracy contrasts with both StreamingLLM and an H2O-style policy. These comparisons motivate reporting free-running accuracy alongside fixed-trace readout and specifying which prompt entries eviction can remove.",
+      "literal": "-0.086",
+      "key": "s1.b1024.random_pp.residual_pp.cilo"
+    },
+    {
+      "context": "We audit how KV-cache eviction affects reasoning accuracy when a model writes its own reasoning and when it answers from a supplied reasoning trace. On MATH-500 with DeepSeek-R1-Distill-Qwen-7B, we compare free-running accuracy with answer readout on a fixed full-cache trace, then replay compressed traces under a full cache as a complementary comparison. On 100 problems with four seeds each, protecting the prompt reduces the forward residual---the accuracy change unexplained by on-reference readout---while a negative residual remains for Random and StreamingLLM. With the prompt protected, the two replay directions disagree at the tighter budget. At a budget of 1024 entries (median nominal budget ratios $0.434$ and $0.487$), the protected forward residual is $-0.047$ (95\\% CI $[-0.086,-0.015]$) for Random and $-0.040$ ($[-0.070,-0.013]$) for StreamingLLM; a direction interaction was not detected. On a strict-fit subset of 97 problems, prompt protection changes Random's free-running accuracy contrasts with both StreamingLLM and an H2O-style policy. These comparisons motivate reporting free-running accuracy alongside fixed-trace readout and specifying which prompt entries eviction can remove.",
+      "literal": "-0.015",
+      "key": "s1.b1024.random_pp.residual_pp.cihi"
+    },
+    {
+      "context": "\\textbf{Forward readout.} The Amendment~S estimates weight each problem equally and use the $392$ conditions per policy with defined forward readout, from $100$ problems and four seeds. At budget $256$, the median nominal budget ratios for Random and StreamingLLM are $0.069$ and $0.093$ without protection, and $0.097$ and $0.098$ with protection. These ratios describe budget divided by sequence length, capped at one. The Random residual changes from $-0.332$ (95\\% CI $[-0.404,-0.262]$) to $-0.056$ ($[-0.098,-0.016]$); the StreamingLLM residual changes from $-0.338$ ($[-0.405,-0.270]$) to $-0.078$ ($[-0.125,-0.034]$). The paired changes are $+0.276$ ($[+0.204,+0.349]$) and $+0.259$ ($[+0.182,+0.339]$), respectively. At budget $1024$, with median protected ratios $0.434$ and $0.487$, the residual remains negative: $-0.047$ ($[-0.086,-0.015]$) and $-0.040$ ($[-0.070,-0.013]$).",
+      "literal": "-0.047",
+      "key": "s1.b1024.random_pp.residual_pp.mean"
+    },
+    {
+      "context": "\\textbf{Forward readout.} The Amendment~S estimates weight each problem equally and use the $392$ conditions per policy with defined forward readout, from $100$ problems and four seeds. At budget $256$, the median nominal budget ratios for Random and StreamingLLM are $0.069$ and $0.093$ without protection, and $0.097$ and $0.098$ with protection. These ratios describe budget divided by sequence length, capped at one. The Random residual changes from $-0.332$ (95\\% CI $[-0.404,-0.262]$) to $-0.056$ ($[-0.098,-0.016]$); the StreamingLLM residual changes from $-0.338$ ($[-0.405,-0.270]$) to $-0.078$ ($[-0.125,-0.034]$). The paired changes are $+0.276$ ($[+0.204,+0.349]$) and $+0.259$ ($[+0.182,+0.339]$), respectively. At budget $1024$, with median protected ratios $0.434$ and $0.487$, the residual remains negative: $-0.047$ ($[-0.086,-0.015]$) and $-0.040$ ($[-0.070,-0.013]$).",
+      "literal": "-0.086",
+      "key": "s1.b1024.random_pp.residual_pp.cilo"
+    },
+    {
+      "context": "\\textbf{Forward readout.} The Amendment~S estimates weight each problem equally and use the $392$ conditions per policy with defined forward readout, from $100$ problems and four seeds. At budget $256$, the median nominal budget ratios for Random and StreamingLLM are $0.069$ and $0.093$ without protection, and $0.097$ and $0.098$ with protection. These ratios describe budget divided by sequence length, capped at one. The Random residual changes from $-0.332$ (95\\% CI $[-0.404,-0.262]$) to $-0.056$ ($[-0.098,-0.016]$); the StreamingLLM residual changes from $-0.338$ ($[-0.405,-0.270]$) to $-0.078$ ($[-0.125,-0.034]$). The paired changes are $+0.276$ ($[+0.204,+0.349]$) and $+0.259$ ($[+0.182,+0.339]$), respectively. At budget $1024$, with median protected ratios $0.434$ and $0.487$, the residual remains negative: $-0.047$ ($[-0.086,-0.015]$) and $-0.040$ ($[-0.070,-0.013]$).",
+      "literal": "-0.015",
+      "key": "s1.b1024.random_pp.residual_pp.cihi"
+    },
+    {
+      "context": "\\textbf{Forward readout.} The Amendment~S estimates weight each problem equally and use the $392$ conditions per policy with defined forward readout, from $100$ problems and four seeds. At budget $256$, the median nominal budget ratios for Random and StreamingLLM are $0.069$ and $0.093$ without protection, and $0.097$ and $0.098$ with protection. These ratios describe budget divided by sequence length, capped at one. The Random residual changes from $-0.332$ (95\\% CI $[-0.404,-0.262]$) to $-0.056$ ($[-0.098,-0.016]$); the StreamingLLM residual changes from $-0.338$ ($[-0.405,-0.270]$) to $-0.078$ ($[-0.125,-0.034]$). The paired changes are $+0.276$ ($[+0.204,+0.349]$) and $+0.259$ ($[+0.182,+0.339]$), respectively. At budget $1024$, with median protected ratios $0.434$ and $0.487$, the residual remains negative: $-0.047$ ($[-0.086,-0.015]$) and $-0.040$ ($[-0.070,-0.013]$).",
+      "literal": "-0.332",
       "key": "s1.b256.random_pp.residual_base.mean"
     },
     {
-      "context": "and from $-0.338$ to $-0.078$ (StreamingLLM",
-      "literal": "0.338",
-      "key": "s1.b256.streamingllm_pp.residual_base.mean"
+      "context": "\\textbf{Forward readout.} The Amendment~S estimates weight each problem equally and use the $392$ conditions per policy with defined forward readout, from $100$ problems and four seeds. At budget $256$, the median nominal budget ratios for Random and StreamingLLM are $0.069$ and $0.093$ without protection, and $0.097$ and $0.098$ with protection. These ratios describe budget divided by sequence length, capped at one. The Random residual changes from $-0.332$ (95\\% CI $[-0.404,-0.262]$) to $-0.056$ ($[-0.098,-0.016]$); the StreamingLLM residual changes from $-0.338$ ($[-0.405,-0.270]$) to $-0.078$ ($[-0.125,-0.034]$). The paired changes are $+0.276$ ($[+0.204,+0.349]$) and $+0.259$ ($[+0.182,+0.339]$), respectively. At budget $1024$, with median protected ratios $0.434$ and $0.487$, the residual remains negative: $-0.047$ ($[-0.086,-0.015]$) and $-0.040$ ($[-0.070,-0.013]$).",
+      "literal": "-0.404",
+      "key": "s1.b256.random_pp.residual_base.cilo"
     },
     {
-      "context": "(interaction $+0.130$ for Random",
-      "literal": "0.130",
+      "context": "\\textbf{Forward readout.} The Amendment~S estimates weight each problem equally and use the $392$ conditions per policy with defined forward readout, from $100$ problems and four seeds. At budget $256$, the median nominal budget ratios for Random and StreamingLLM are $0.069$ and $0.093$ without protection, and $0.097$ and $0.098$ with protection. These ratios describe budget divided by sequence length, capped at one. The Random residual changes from $-0.332$ (95\\% CI $[-0.404,-0.262]$) to $-0.056$ ($[-0.098,-0.016]$); the StreamingLLM residual changes from $-0.338$ ($[-0.405,-0.270]$) to $-0.078$ ($[-0.125,-0.034]$). The paired changes are $+0.276$ ($[+0.204,+0.349]$) and $+0.259$ ($[+0.182,+0.339]$), respectively. At budget $1024$, with median protected ratios $0.434$ and $0.487$, the residual remains negative: $-0.047$ ($[-0.086,-0.015]$) and $-0.040$ ($[-0.070,-0.013]$).",
+      "literal": "-0.262",
+      "key": "s1.b256.random_pp.residual_base.cihi"
+    },
+    {
+      "context": "\\textbf{Forward readout.} The Amendment~S estimates weight each problem equally and use the $392$ conditions per policy with defined forward readout, from $100$ problems and four seeds. At budget $256$, the median nominal budget ratios for Random and StreamingLLM are $0.069$ and $0.093$ without protection, and $0.097$ and $0.098$ with protection. These ratios describe budget divided by sequence length, capped at one. The Random residual changes from $-0.332$ (95\\% CI $[-0.404,-0.262]$) to $-0.056$ ($[-0.098,-0.016]$); the StreamingLLM residual changes from $-0.338$ ($[-0.405,-0.270]$) to $-0.078$ ($[-0.125,-0.034]$). The paired changes are $+0.276$ ($[+0.204,+0.349]$) and $+0.259$ ($[+0.182,+0.339]$), respectively. At budget $1024$, with median protected ratios $0.434$ and $0.487$, the residual remains negative: $-0.047$ ($[-0.086,-0.015]$) and $-0.040$ ($[-0.070,-0.013]$).",
+      "literal": "-0.056",
+      "key": "s1.b256.random_pp.residual_pp.mean"
+    },
+    {
+      "context": "\\textbf{Forward readout.} The Amendment~S estimates weight each problem equally and use the $392$ conditions per policy with defined forward readout, from $100$ problems and four seeds. At budget $256$, the median nominal budget ratios for Random and StreamingLLM are $0.069$ and $0.093$ without protection, and $0.097$ and $0.098$ with protection. These ratios describe budget divided by sequence length, capped at one. The Random residual changes from $-0.332$ (95\\% CI $[-0.404,-0.262]$) to $-0.056$ ($[-0.098,-0.016]$); the StreamingLLM residual changes from $-0.338$ ($[-0.405,-0.270]$) to $-0.078$ ($[-0.125,-0.034]$). The paired changes are $+0.276$ ($[+0.204,+0.349]$) and $+0.259$ ($[+0.182,+0.339]$), respectively. At budget $1024$, with median protected ratios $0.434$ and $0.487$, the residual remains negative: $-0.047$ ($[-0.086,-0.015]$) and $-0.040$ ($[-0.070,-0.013]$).",
+      "literal": "-0.098",
+      "key": "s1.b256.random_pp.residual_pp.cilo"
+    },
+    {
+      "context": "\\textbf{Forward readout.} The Amendment~S estimates weight each problem equally and use the $392$ conditions per policy with defined forward readout, from $100$ problems and four seeds. At budget $256$, the median nominal budget ratios for Random and StreamingLLM are $0.069$ and $0.093$ without protection, and $0.097$ and $0.098$ with protection. These ratios describe budget divided by sequence length, capped at one. The Random residual changes from $-0.332$ (95\\% CI $[-0.404,-0.262]$) to $-0.056$ ($[-0.098,-0.016]$); the StreamingLLM residual changes from $-0.338$ ($[-0.405,-0.270]$) to $-0.078$ ($[-0.125,-0.034]$). The paired changes are $+0.276$ ($[+0.204,+0.349]$) and $+0.259$ ($[+0.182,+0.339]$), respectively. At budget $1024$, with median protected ratios $0.434$ and $0.487$, the residual remains negative: $-0.047$ ($[-0.086,-0.015]$) and $-0.040$ ($[-0.070,-0.013]$).",
+      "literal": "-0.016",
+      "key": "s1.b256.random_pp.residual_pp.cihi"
+    },
+    {
+      "context": "\\textbf{Forward readout.} The Amendment~S estimates weight each problem equally and use the $392$ conditions per policy with defined forward readout, from $100$ problems and four seeds. At budget $256$, the median nominal budget ratios for Random and StreamingLLM are $0.069$ and $0.093$ without protection, and $0.097$ and $0.098$ with protection. These ratios describe budget divided by sequence length, capped at one. The Random residual changes from $-0.332$ (95\\% CI $[-0.404,-0.262]$) to $-0.056$ ($[-0.098,-0.016]$); the StreamingLLM residual changes from $-0.338$ ($[-0.405,-0.270]$) to $-0.078$ ($[-0.125,-0.034]$). The paired changes are $+0.276$ ($[+0.204,+0.349]$) and $+0.259$ ($[+0.182,+0.339]$), respectively. At budget $1024$, with median protected ratios $0.434$ and $0.487$, the residual remains negative: $-0.047$ ($[-0.086,-0.015]$) and $-0.040$ ($[-0.070,-0.013]$).",
+      "literal": "+0.276",
+      "key": "s1.b256.random_pp.delta_residual.mean"
+    },
+    {
+      "context": "\\textbf{Forward readout.} The Amendment~S estimates weight each problem equally and use the $392$ conditions per policy with defined forward readout, from $100$ problems and four seeds. At budget $256$, the median nominal budget ratios for Random and StreamingLLM are $0.069$ and $0.093$ without protection, and $0.097$ and $0.098$ with protection. These ratios describe budget divided by sequence length, capped at one. The Random residual changes from $-0.332$ (95\\% CI $[-0.404,-0.262]$) to $-0.056$ ($[-0.098,-0.016]$); the StreamingLLM residual changes from $-0.338$ ($[-0.405,-0.270]$) to $-0.078$ ($[-0.125,-0.034]$). The paired changes are $+0.276$ ($[+0.204,+0.349]$) and $+0.259$ ($[+0.182,+0.339]$), respectively. At budget $1024$, with median protected ratios $0.434$ and $0.487$, the residual remains negative: $-0.047$ ($[-0.086,-0.015]$) and $-0.040$ ($[-0.070,-0.013]$).",
+      "literal": "+0.204",
+      "key": "s1.b256.random_pp.delta_residual.cilo"
+    },
+    {
+      "context": "\\textbf{Forward readout.} The Amendment~S estimates weight each problem equally and use the $392$ conditions per policy with defined forward readout, from $100$ problems and four seeds. At budget $256$, the median nominal budget ratios for Random and StreamingLLM are $0.069$ and $0.093$ without protection, and $0.097$ and $0.098$ with protection. These ratios describe budget divided by sequence length, capped at one. The Random residual changes from $-0.332$ (95\\% CI $[-0.404,-0.262]$) to $-0.056$ ($[-0.098,-0.016]$); the StreamingLLM residual changes from $-0.338$ ($[-0.405,-0.270]$) to $-0.078$ ($[-0.125,-0.034]$). The paired changes are $+0.276$ ($[+0.204,+0.349]$) and $+0.259$ ($[+0.182,+0.339]$), respectively. At budget $1024$, with median protected ratios $0.434$ and $0.487$, the residual remains negative: $-0.047$ ($[-0.086,-0.015]$) and $-0.040$ ($[-0.070,-0.013]$).",
+      "literal": "+0.349",
+      "key": "s1.b256.random_pp.delta_residual.cihi"
+    },
+    {
+      "context": "\\textbf{Forward readout.} The Amendment~S estimates weight each problem equally and use the $392$ conditions per policy with defined forward readout, from $100$ problems and four seeds. At budget $256$, the median nominal budget ratios for Random and StreamingLLM are $0.069$ and $0.093$ without protection, and $0.097$ and $0.098$ with protection. These ratios describe budget divided by sequence length, capped at one. The Random residual changes from $-0.332$ (95\\% CI $[-0.404,-0.262]$) to $-0.056$ ($[-0.098,-0.016]$); the StreamingLLM residual changes from $-0.338$ ($[-0.405,-0.270]$) to $-0.078$ ($[-0.125,-0.034]$). The paired changes are $+0.276$ ($[+0.204,+0.349]$) and $+0.259$ ($[+0.182,+0.339]$), respectively. At budget $1024$, with median protected ratios $0.434$ and $0.487$, the residual remains negative: $-0.047$ ($[-0.086,-0.015]$) and $-0.040$ ($[-0.070,-0.013]$).",
+      "literal": "0.069",
+      "key": "s1.realized.b256.random.median"
+    },
+    {
+      "context": "\\textbf{Forward readout.} The Amendment~S estimates weight each problem equally and use the $392$ conditions per policy with defined forward readout, from $100$ problems and four seeds. At budget $256$, the median nominal budget ratios for Random and StreamingLLM are $0.069$ and $0.093$ without protection, and $0.097$ and $0.098$ with protection. These ratios describe budget divided by sequence length, capped at one. The Random residual changes from $-0.332$ (95\\% CI $[-0.404,-0.262]$) to $-0.056$ ($[-0.098,-0.016]$); the StreamingLLM residual changes from $-0.338$ ($[-0.405,-0.270]$) to $-0.078$ ($[-0.125,-0.034]$). The paired changes are $+0.276$ ($[+0.204,+0.349]$) and $+0.259$ ($[+0.182,+0.339]$), respectively. At budget $1024$, with median protected ratios $0.434$ and $0.487$, the residual remains negative: $-0.047$ ($[-0.086,-0.015]$) and $-0.040$ ($[-0.070,-0.013]$).",
+      "literal": "0.097",
+      "key": "s1.realized.b256.random_pp.median"
+    },
+    {
+      "context": "\\textbf{Forward readout.} The Amendment~S estimates weight each problem equally and use the $392$ conditions per policy with defined forward readout, from $100$ problems and four seeds. At budget $256$, the median nominal budget ratios for Random and StreamingLLM are $0.069$ and $0.093$ without protection, and $0.097$ and $0.098$ with protection. These ratios describe budget divided by sequence length, capped at one. The Random residual changes from $-0.332$ (95\\% CI $[-0.404,-0.262]$) to $-0.056$ ($[-0.098,-0.016]$); the StreamingLLM residual changes from $-0.338$ ($[-0.405,-0.270]$) to $-0.078$ ($[-0.125,-0.034]$). The paired changes are $+0.276$ ($[+0.204,+0.349]$) and $+0.259$ ($[+0.182,+0.339]$), respectively. At budget $1024$, with median protected ratios $0.434$ and $0.487$, the residual remains negative: $-0.047$ ($[-0.086,-0.015]$) and $-0.040$ ($[-0.070,-0.013]$).",
+      "literal": "0.434",
+      "key": "s1.realized.b1024.random_pp.median"
+    },
+    {
+      "context": "We audit how KV-cache eviction affects reasoning accuracy when a model writes its own reasoning and when it answers from a supplied reasoning trace. On MATH-500 with DeepSeek-R1-Distill-Qwen-7B, we compare free-running accuracy with answer readout on a fixed full-cache trace, then replay compressed traces under a full cache as a complementary comparison. On 100 problems with four seeds each, protecting the prompt reduces the forward residual---the accuracy change unexplained by on-reference readout---while a negative residual remains for Random and StreamingLLM. With the prompt protected, the two replay directions disagree at the tighter budget. At a budget of 1024 entries (median nominal budget ratios $0.434$ and $0.487$), the protected forward residual is $-0.047$ (95\\% CI $[-0.086,-0.015]$) for Random and $-0.040$ ($[-0.070,-0.013]$) for StreamingLLM; a direction interaction was not detected. On a strict-fit subset of 97 problems, prompt protection changes Random's free-running accuracy contrasts with both StreamingLLM and an H2O-style policy. These comparisons motivate reporting free-running accuracy alongside fixed-trace readout and specifying which prompt entries eviction can remove.",
+      "literal": "0.434",
+      "key": "s1.realized.b1024.random_pp.median"
+    },
+    {
+      "context": "\\textbf{Comparison across readout directions.} On the common support at the tighter budget ($376$ protected Random conditions and $355$ protected StreamingLLM conditions), the forward-minus-reverse contrast is $+0.130$ ($[+0.078,+0.185]$) and $+0.127$ ($[+0.065,+0.197]$), respectively. At the larger budget, the trajectory contrast is negative in both directions on the common support ($382$ and $383$ conditions). The registered direction-interaction test does not reject for either policy (Holm-adjusted $p=0.64$ for both). That result leaves equality unresolved. The common-support analysis uses a different set of conditions from the forward read above; neither comparison identifies a causal share of the loss.",
+      "literal": "+0.130",
       "key": "audit.b256.random_pp.common.interaction.mean"
     },
     {
-      "context": "and $+0.127$ for StreamingLLM on their common",
-      "literal": "0.127",
+      "context": "\\textbf{Comparison across readout directions.} On the common support at the tighter budget ($376$ protected Random conditions and $355$ protected StreamingLLM conditions), the forward-minus-reverse contrast is $+0.130$ ($[+0.078,+0.185]$) and $+0.127$ ($[+0.065,+0.197]$), respectively. At the larger budget, the trajectory contrast is negative in both directions on the common support ($382$ and $383$ conditions). The registered direction-interaction test does not reject for either policy (Holm-adjusted $p=0.64$ for both). That result leaves equality unresolved. The common-support analysis uses a different set of conditions from the forward read above; neither comparison identifies a causal share of the loss.",
+      "literal": "+0.078",
+      "key": "audit.b256.random_pp.common.interaction.cilo"
+    },
+    {
+      "context": "\\textbf{Comparison across readout directions.} On the common support at the tighter budget ($376$ protected Random conditions and $355$ protected StreamingLLM conditions), the forward-minus-reverse contrast is $+0.130$ ($[+0.078,+0.185]$) and $+0.127$ ($[+0.065,+0.197]$), respectively. At the larger budget, the trajectory contrast is negative in both directions on the common support ($382$ and $383$ conditions). The registered direction-interaction test does not reject for either policy (Holm-adjusted $p=0.64$ for both). That result leaves equality unresolved. The common-support analysis uses a different set of conditions from the forward read above; neither comparison identifies a causal share of the loss.",
+      "literal": "+0.185",
+      "key": "audit.b256.random_pp.common.interaction.cihi"
+    },
+    {
+      "context": "\\emph{Exploratory Qwen3-4B check.} On 50 MATH-500 problems with four seeds, the full-cache bank scored $0.845$, below its pre-registered lower bound of $0.850$. At the tighter budget (median nominal ratios $0.016$ for Random and $0.097$ for StreamingLLM), StreamingLLM's forward residual was $-0.209$ (95\\% CI $[-0.285,-0.125]$). Free-running accuracy was $0.030$ (95\\% CI $[0.005,0.055]$) for Random and $0.215$ ($[0.120,0.315]$) for StreamingLLM. Random's truncation rate was $0.735$; truncated generations count as incorrect. The Random-ahead ordering did not transfer to this model and setup. The failed bank gate and severe truncation limit interpretation.",
+      "literal": "0.030",
+      "key": "qwen3.random.free"
+    },
+    {
+      "context": "\\emph{Exploratory Qwen3-4B check.} On 50 MATH-500 problems with four seeds, the full-cache bank scored $0.845$, below its pre-registered lower bound of $0.850$. At the tighter budget (median nominal ratios $0.016$ for Random and $0.097$ for StreamingLLM), StreamingLLM's forward residual was $-0.209$ (95\\% CI $[-0.285,-0.125]$). Free-running accuracy was $0.030$ (95\\% CI $[0.005,0.055]$) for Random and $0.215$ ($[0.120,0.315]$) for StreamingLLM. Random's truncation rate was $0.735$; truncated generations count as incorrect. The Random-ahead ordering did not transfer to this model and setup. The failed bank gate and severe truncation limit interpretation.",
+      "literal": "0.005",
+      "key": "qwen3.random.free_ci0"
+    },
+    {
+      "context": "\\emph{Exploratory Qwen3-4B check.} On 50 MATH-500 problems with four seeds, the full-cache bank scored $0.845$, below its pre-registered lower bound of $0.850$. At the tighter budget (median nominal ratios $0.016$ for Random and $0.097$ for StreamingLLM), StreamingLLM's forward residual was $-0.209$ (95\\% CI $[-0.285,-0.125]$). Free-running accuracy was $0.030$ (95\\% CI $[0.005,0.055]$) for Random and $0.215$ ($[0.120,0.315]$) for StreamingLLM. Random's truncation rate was $0.735$; truncated generations count as incorrect. The Random-ahead ordering did not transfer to this model and setup. The failed bank gate and severe truncation limit interpretation.",
+      "literal": "0.055",
+      "key": "qwen3.random.free_ci1"
+    },
+    {
+      "context": "\\emph{Exploratory Qwen3-4B check.} On 50 MATH-500 problems with four seeds, the full-cache bank scored $0.845$, below its pre-registered lower bound of $0.850$. At the tighter budget (median nominal ratios $0.016$ for Random and $0.097$ for StreamingLLM), StreamingLLM's forward residual was $-0.209$ (95\\% CI $[-0.285,-0.125]$). Free-running accuracy was $0.030$ (95\\% CI $[0.005,0.055]$) for Random and $0.215$ ($[0.120,0.315]$) for StreamingLLM. Random's truncation rate was $0.735$; truncated generations count as incorrect. The Random-ahead ordering did not transfer to this model and setup. The failed bank gate and severe truncation limit interpretation.",
+      "literal": "0.016",
+      "key": "qwen3.random.ratio_median"
+    },
+    {
+      "context": "We audit how KV-cache eviction affects reasoning accuracy when a model writes its own reasoning and when it answers from a supplied reasoning trace. On MATH-500 with DeepSeek-R1-Distill-Qwen-7B, we compare free-running accuracy with answer readout on a fixed full-cache trace, then replay compressed traces under a full cache as a complementary comparison. On 100 problems with four seeds each, protecting the prompt reduces the forward residual---the accuracy change unexplained by on-reference readout---while a negative residual remains for Random and StreamingLLM. With the prompt protected, the two replay directions disagree at the tighter budget. At a budget of 1024 entries (median nominal budget ratios $0.434$ and $0.487$), the protected forward residual is $-0.047$ (95\\% CI $[-0.086,-0.015]$) for Random and $-0.040$ ($[-0.070,-0.013]$) for StreamingLLM; a direction interaction was not detected. On a strict-fit subset of 97 problems, prompt protection changes Random's free-running accuracy contrasts with both StreamingLLM and an H2O-style policy. These comparisons motivate reporting free-running accuracy alongside fixed-trace readout and specifying which prompt entries eviction can remove.",
+      "literal": "-0.040",
+      "key": "s1.b1024.streamingllm_pp.residual_pp.mean"
+    },
+    {
+      "context": "We audit how KV-cache eviction affects reasoning accuracy when a model writes its own reasoning and when it answers from a supplied reasoning trace. On MATH-500 with DeepSeek-R1-Distill-Qwen-7B, we compare free-running accuracy with answer readout on a fixed full-cache trace, then replay compressed traces under a full cache as a complementary comparison. On 100 problems with four seeds each, protecting the prompt reduces the forward residual---the accuracy change unexplained by on-reference readout---while a negative residual remains for Random and StreamingLLM. With the prompt protected, the two replay directions disagree at the tighter budget. At a budget of 1024 entries (median nominal budget ratios $0.434$ and $0.487$), the protected forward residual is $-0.047$ (95\\% CI $[-0.086,-0.015]$) for Random and $-0.040$ ($[-0.070,-0.013]$) for StreamingLLM; a direction interaction was not detected. On a strict-fit subset of 97 problems, prompt protection changes Random's free-running accuracy contrasts with both StreamingLLM and an H2O-style policy. These comparisons motivate reporting free-running accuracy alongside fixed-trace readout and specifying which prompt entries eviction can remove.",
+      "literal": "-0.070",
+      "key": "s1.b1024.streamingllm_pp.residual_pp.cilo"
+    },
+    {
+      "context": "We audit how KV-cache eviction affects reasoning accuracy when a model writes its own reasoning and when it answers from a supplied reasoning trace. On MATH-500 with DeepSeek-R1-Distill-Qwen-7B, we compare free-running accuracy with answer readout on a fixed full-cache trace, then replay compressed traces under a full cache as a complementary comparison. On 100 problems with four seeds each, protecting the prompt reduces the forward residual---the accuracy change unexplained by on-reference readout---while a negative residual remains for Random and StreamingLLM. With the prompt protected, the two replay directions disagree at the tighter budget. At a budget of 1024 entries (median nominal budget ratios $0.434$ and $0.487$), the protected forward residual is $-0.047$ (95\\% CI $[-0.086,-0.015]$) for Random and $-0.040$ ($[-0.070,-0.013]$) for StreamingLLM; a direction interaction was not detected. On a strict-fit subset of 97 problems, prompt protection changes Random's free-running accuracy contrasts with both StreamingLLM and an H2O-style policy. These comparisons motivate reporting free-running accuracy alongside fixed-trace readout and specifying which prompt entries eviction can remove.",
+      "literal": "-0.013",
+      "key": "s1.b1024.streamingllm_pp.residual_pp.cihi"
+    },
+    {
+      "context": "\\textbf{Forward readout.} The Amendment~S estimates weight each problem equally and use the $392$ conditions per policy with defined forward readout, from $100$ problems and four seeds. At budget $256$, the median nominal budget ratios for Random and StreamingLLM are $0.069$ and $0.093$ without protection, and $0.097$ and $0.098$ with protection. These ratios describe budget divided by sequence length, capped at one. The Random residual changes from $-0.332$ (95\\% CI $[-0.404,-0.262]$) to $-0.056$ ($[-0.098,-0.016]$); the StreamingLLM residual changes from $-0.338$ ($[-0.405,-0.270]$) to $-0.078$ ($[-0.125,-0.034]$). The paired changes are $+0.276$ ($[+0.204,+0.349]$) and $+0.259$ ($[+0.182,+0.339]$), respectively. At budget $1024$, with median protected ratios $0.434$ and $0.487$, the residual remains negative: $-0.047$ ($[-0.086,-0.015]$) and $-0.040$ ($[-0.070,-0.013]$).",
+      "literal": "-0.040",
+      "key": "s1.b1024.streamingllm_pp.residual_pp.mean"
+    },
+    {
+      "context": "\\textbf{Forward readout.} The Amendment~S estimates weight each problem equally and use the $392$ conditions per policy with defined forward readout, from $100$ problems and four seeds. At budget $256$, the median nominal budget ratios for Random and StreamingLLM are $0.069$ and $0.093$ without protection, and $0.097$ and $0.098$ with protection. These ratios describe budget divided by sequence length, capped at one. The Random residual changes from $-0.332$ (95\\% CI $[-0.404,-0.262]$) to $-0.056$ ($[-0.098,-0.016]$); the StreamingLLM residual changes from $-0.338$ ($[-0.405,-0.270]$) to $-0.078$ ($[-0.125,-0.034]$). The paired changes are $+0.276$ ($[+0.204,+0.349]$) and $+0.259$ ($[+0.182,+0.339]$), respectively. At budget $1024$, with median protected ratios $0.434$ and $0.487$, the residual remains negative: $-0.047$ ($[-0.086,-0.015]$) and $-0.040$ ($[-0.070,-0.013]$).",
+      "literal": "-0.070",
+      "key": "s1.b1024.streamingllm_pp.residual_pp.cilo"
+    },
+    {
+      "context": "\\textbf{Forward readout.} The Amendment~S estimates weight each problem equally and use the $392$ conditions per policy with defined forward readout, from $100$ problems and four seeds. At budget $256$, the median nominal budget ratios for Random and StreamingLLM are $0.069$ and $0.093$ without protection, and $0.097$ and $0.098$ with protection. These ratios describe budget divided by sequence length, capped at one. The Random residual changes from $-0.332$ (95\\% CI $[-0.404,-0.262]$) to $-0.056$ ($[-0.098,-0.016]$); the StreamingLLM residual changes from $-0.338$ ($[-0.405,-0.270]$) to $-0.078$ ($[-0.125,-0.034]$). The paired changes are $+0.276$ ($[+0.204,+0.349]$) and $+0.259$ ($[+0.182,+0.339]$), respectively. At budget $1024$, with median protected ratios $0.434$ and $0.487$, the residual remains negative: $-0.047$ ($[-0.086,-0.015]$) and $-0.040$ ($[-0.070,-0.013]$).",
+      "literal": "-0.013",
+      "key": "s1.b1024.streamingllm_pp.residual_pp.cihi"
+    },
+    {
+      "context": "\\textbf{Forward readout.} The Amendment~S estimates weight each problem equally and use the $392$ conditions per policy with defined forward readout, from $100$ problems and four seeds. At budget $256$, the median nominal budget ratios for Random and StreamingLLM are $0.069$ and $0.093$ without protection, and $0.097$ and $0.098$ with protection. These ratios describe budget divided by sequence length, capped at one. The Random residual changes from $-0.332$ (95\\% CI $[-0.404,-0.262]$) to $-0.056$ ($[-0.098,-0.016]$); the StreamingLLM residual changes from $-0.338$ ($[-0.405,-0.270]$) to $-0.078$ ($[-0.125,-0.034]$). The paired changes are $+0.276$ ($[+0.204,+0.349]$) and $+0.259$ ($[+0.182,+0.339]$), respectively. At budget $1024$, with median protected ratios $0.434$ and $0.487$, the residual remains negative: $-0.047$ ($[-0.086,-0.015]$) and $-0.040$ ($[-0.070,-0.013]$).",
+      "literal": "-0.338",
+      "key": "s1.b256.streamingllm_pp.residual_base.mean"
+    },
+    {
+      "context": "\\textbf{Forward readout.} The Amendment~S estimates weight each problem equally and use the $392$ conditions per policy with defined forward readout, from $100$ problems and four seeds. At budget $256$, the median nominal budget ratios for Random and StreamingLLM are $0.069$ and $0.093$ without protection, and $0.097$ and $0.098$ with protection. These ratios describe budget divided by sequence length, capped at one. The Random residual changes from $-0.332$ (95\\% CI $[-0.404,-0.262]$) to $-0.056$ ($[-0.098,-0.016]$); the StreamingLLM residual changes from $-0.338$ ($[-0.405,-0.270]$) to $-0.078$ ($[-0.125,-0.034]$). The paired changes are $+0.276$ ($[+0.204,+0.349]$) and $+0.259$ ($[+0.182,+0.339]$), respectively. At budget $1024$, with median protected ratios $0.434$ and $0.487$, the residual remains negative: $-0.047$ ($[-0.086,-0.015]$) and $-0.040$ ($[-0.070,-0.013]$).",
+      "literal": "-0.405",
+      "key": "s1.b256.streamingllm_pp.residual_base.cilo"
+    },
+    {
+      "context": "\\textbf{Forward readout.} The Amendment~S estimates weight each problem equally and use the $392$ conditions per policy with defined forward readout, from $100$ problems and four seeds. At budget $256$, the median nominal budget ratios for Random and StreamingLLM are $0.069$ and $0.093$ without protection, and $0.097$ and $0.098$ with protection. These ratios describe budget divided by sequence length, capped at one. The Random residual changes from $-0.332$ (95\\% CI $[-0.404,-0.262]$) to $-0.056$ ($[-0.098,-0.016]$); the StreamingLLM residual changes from $-0.338$ ($[-0.405,-0.270]$) to $-0.078$ ($[-0.125,-0.034]$). The paired changes are $+0.276$ ($[+0.204,+0.349]$) and $+0.259$ ($[+0.182,+0.339]$), respectively. At budget $1024$, with median protected ratios $0.434$ and $0.487$, the residual remains negative: $-0.047$ ($[-0.086,-0.015]$) and $-0.040$ ($[-0.070,-0.013]$).",
+      "literal": "-0.270",
+      "key": "s1.b256.streamingllm_pp.residual_base.cihi"
+    },
+    {
+      "context": "\\textbf{Forward readout.} The Amendment~S estimates weight each problem equally and use the $392$ conditions per policy with defined forward readout, from $100$ problems and four seeds. At budget $256$, the median nominal budget ratios for Random and StreamingLLM are $0.069$ and $0.093$ without protection, and $0.097$ and $0.098$ with protection. These ratios describe budget divided by sequence length, capped at one. The Random residual changes from $-0.332$ (95\\% CI $[-0.404,-0.262]$) to $-0.056$ ($[-0.098,-0.016]$); the StreamingLLM residual changes from $-0.338$ ($[-0.405,-0.270]$) to $-0.078$ ($[-0.125,-0.034]$). The paired changes are $+0.276$ ($[+0.204,+0.349]$) and $+0.259$ ($[+0.182,+0.339]$), respectively. At budget $1024$, with median protected ratios $0.434$ and $0.487$, the residual remains negative: $-0.047$ ($[-0.086,-0.015]$) and $-0.040$ ($[-0.070,-0.013]$).",
+      "literal": "-0.078",
+      "key": "s1.b256.streamingllm_pp.residual_pp.mean"
+    },
+    {
+      "context": "\\textbf{Forward readout.} The Amendment~S estimates weight each problem equally and use the $392$ conditions per policy with defined forward readout, from $100$ problems and four seeds. At budget $256$, the median nominal budget ratios for Random and StreamingLLM are $0.069$ and $0.093$ without protection, and $0.097$ and $0.098$ with protection. These ratios describe budget divided by sequence length, capped at one. The Random residual changes from $-0.332$ (95\\% CI $[-0.404,-0.262]$) to $-0.056$ ($[-0.098,-0.016]$); the StreamingLLM residual changes from $-0.338$ ($[-0.405,-0.270]$) to $-0.078$ ($[-0.125,-0.034]$). The paired changes are $+0.276$ ($[+0.204,+0.349]$) and $+0.259$ ($[+0.182,+0.339]$), respectively. At budget $1024$, with median protected ratios $0.434$ and $0.487$, the residual remains negative: $-0.047$ ($[-0.086,-0.015]$) and $-0.040$ ($[-0.070,-0.013]$).",
+      "literal": "-0.125",
+      "key": "s1.b256.streamingllm_pp.residual_pp.cilo"
+    },
+    {
+      "context": "\\textbf{Forward readout.} The Amendment~S estimates weight each problem equally and use the $392$ conditions per policy with defined forward readout, from $100$ problems and four seeds. At budget $256$, the median nominal budget ratios for Random and StreamingLLM are $0.069$ and $0.093$ without protection, and $0.097$ and $0.098$ with protection. These ratios describe budget divided by sequence length, capped at one. The Random residual changes from $-0.332$ (95\\% CI $[-0.404,-0.262]$) to $-0.056$ ($[-0.098,-0.016]$); the StreamingLLM residual changes from $-0.338$ ($[-0.405,-0.270]$) to $-0.078$ ($[-0.125,-0.034]$). The paired changes are $+0.276$ ($[+0.204,+0.349]$) and $+0.259$ ($[+0.182,+0.339]$), respectively. At budget $1024$, with median protected ratios $0.434$ and $0.487$, the residual remains negative: $-0.047$ ($[-0.086,-0.015]$) and $-0.040$ ($[-0.070,-0.013]$).",
+      "literal": "-0.034",
+      "key": "s1.b256.streamingllm_pp.residual_pp.cihi"
+    },
+    {
+      "context": "\\textbf{Forward readout.} The Amendment~S estimates weight each problem equally and use the $392$ conditions per policy with defined forward readout, from $100$ problems and four seeds. At budget $256$, the median nominal budget ratios for Random and StreamingLLM are $0.069$ and $0.093$ without protection, and $0.097$ and $0.098$ with protection. These ratios describe budget divided by sequence length, capped at one. The Random residual changes from $-0.332$ (95\\% CI $[-0.404,-0.262]$) to $-0.056$ ($[-0.098,-0.016]$); the StreamingLLM residual changes from $-0.338$ ($[-0.405,-0.270]$) to $-0.078$ ($[-0.125,-0.034]$). The paired changes are $+0.276$ ($[+0.204,+0.349]$) and $+0.259$ ($[+0.182,+0.339]$), respectively. At budget $1024$, with median protected ratios $0.434$ and $0.487$, the residual remains negative: $-0.047$ ($[-0.086,-0.015]$) and $-0.040$ ($[-0.070,-0.013]$).",
+      "literal": "+0.259",
+      "key": "s1.b256.streamingllm_pp.delta_residual.mean"
+    },
+    {
+      "context": "\\textbf{Forward readout.} The Amendment~S estimates weight each problem equally and use the $392$ conditions per policy with defined forward readout, from $100$ problems and four seeds. At budget $256$, the median nominal budget ratios for Random and StreamingLLM are $0.069$ and $0.093$ without protection, and $0.097$ and $0.098$ with protection. These ratios describe budget divided by sequence length, capped at one. The Random residual changes from $-0.332$ (95\\% CI $[-0.404,-0.262]$) to $-0.056$ ($[-0.098,-0.016]$); the StreamingLLM residual changes from $-0.338$ ($[-0.405,-0.270]$) to $-0.078$ ($[-0.125,-0.034]$). The paired changes are $+0.276$ ($[+0.204,+0.349]$) and $+0.259$ ($[+0.182,+0.339]$), respectively. At budget $1024$, with median protected ratios $0.434$ and $0.487$, the residual remains negative: $-0.047$ ($[-0.086,-0.015]$) and $-0.040$ ($[-0.070,-0.013]$).",
+      "literal": "+0.182",
+      "key": "s1.b256.streamingllm_pp.delta_residual.cilo"
+    },
+    {
+      "context": "\\textbf{Forward readout.} The Amendment~S estimates weight each problem equally and use the $392$ conditions per policy with defined forward readout, from $100$ problems and four seeds. At budget $256$, the median nominal budget ratios for Random and StreamingLLM are $0.069$ and $0.093$ without protection, and $0.097$ and $0.098$ with protection. These ratios describe budget divided by sequence length, capped at one. The Random residual changes from $-0.332$ (95\\% CI $[-0.404,-0.262]$) to $-0.056$ ($[-0.098,-0.016]$); the StreamingLLM residual changes from $-0.338$ ($[-0.405,-0.270]$) to $-0.078$ ($[-0.125,-0.034]$). The paired changes are $+0.276$ ($[+0.204,+0.349]$) and $+0.259$ ($[+0.182,+0.339]$), respectively. At budget $1024$, with median protected ratios $0.434$ and $0.487$, the residual remains negative: $-0.047$ ($[-0.086,-0.015]$) and $-0.040$ ($[-0.070,-0.013]$).",
+      "literal": "+0.339",
+      "key": "s1.b256.streamingllm_pp.delta_residual.cihi"
+    },
+    {
+      "context": "\\textbf{Forward readout.} The Amendment~S estimates weight each problem equally and use the $392$ conditions per policy with defined forward readout, from $100$ problems and four seeds. At budget $256$, the median nominal budget ratios for Random and StreamingLLM are $0.069$ and $0.093$ without protection, and $0.097$ and $0.098$ with protection. These ratios describe budget divided by sequence length, capped at one. The Random residual changes from $-0.332$ (95\\% CI $[-0.404,-0.262]$) to $-0.056$ ($[-0.098,-0.016]$); the StreamingLLM residual changes from $-0.338$ ($[-0.405,-0.270]$) to $-0.078$ ($[-0.125,-0.034]$). The paired changes are $+0.276$ ($[+0.204,+0.349]$) and $+0.259$ ($[+0.182,+0.339]$), respectively. At budget $1024$, with median protected ratios $0.434$ and $0.487$, the residual remains negative: $-0.047$ ($[-0.086,-0.015]$) and $-0.040$ ($[-0.070,-0.013]$).",
+      "literal": "0.093",
+      "key": "s1.realized.b256.streamingllm.median"
+    },
+    {
+      "context": "\\textbf{Forward readout.} The Amendment~S estimates weight each problem equally and use the $392$ conditions per policy with defined forward readout, from $100$ problems and four seeds. At budget $256$, the median nominal budget ratios for Random and StreamingLLM are $0.069$ and $0.093$ without protection, and $0.097$ and $0.098$ with protection. These ratios describe budget divided by sequence length, capped at one. The Random residual changes from $-0.332$ (95\\% CI $[-0.404,-0.262]$) to $-0.056$ ($[-0.098,-0.016]$); the StreamingLLM residual changes from $-0.338$ ($[-0.405,-0.270]$) to $-0.078$ ($[-0.125,-0.034]$). The paired changes are $+0.276$ ($[+0.204,+0.349]$) and $+0.259$ ($[+0.182,+0.339]$), respectively. At budget $1024$, with median protected ratios $0.434$ and $0.487$, the residual remains negative: $-0.047$ ($[-0.086,-0.015]$) and $-0.040$ ($[-0.070,-0.013]$).",
+      "literal": "0.098",
+      "key": "s1.realized.b256.streamingllm_pp.median"
+    },
+    {
+      "context": "\\textbf{Forward readout.} The Amendment~S estimates weight each problem equally and use the $392$ conditions per policy with defined forward readout, from $100$ problems and four seeds. At budget $256$, the median nominal budget ratios for Random and StreamingLLM are $0.069$ and $0.093$ without protection, and $0.097$ and $0.098$ with protection. These ratios describe budget divided by sequence length, capped at one. The Random residual changes from $-0.332$ (95\\% CI $[-0.404,-0.262]$) to $-0.056$ ($[-0.098,-0.016]$); the StreamingLLM residual changes from $-0.338$ ($[-0.405,-0.270]$) to $-0.078$ ($[-0.125,-0.034]$). The paired changes are $+0.276$ ($[+0.204,+0.349]$) and $+0.259$ ($[+0.182,+0.339]$), respectively. At budget $1024$, with median protected ratios $0.434$ and $0.487$, the residual remains negative: $-0.047$ ($[-0.086,-0.015]$) and $-0.040$ ($[-0.070,-0.013]$).",
+      "literal": "0.487",
+      "key": "s1.realized.b1024.streamingllm_pp.median"
+    },
+    {
+      "context": "We audit how KV-cache eviction affects reasoning accuracy when a model writes its own reasoning and when it answers from a supplied reasoning trace. On MATH-500 with DeepSeek-R1-Distill-Qwen-7B, we compare free-running accuracy with answer readout on a fixed full-cache trace, then replay compressed traces under a full cache as a complementary comparison. On 100 problems with four seeds each, protecting the prompt reduces the forward residual---the accuracy change unexplained by on-reference readout---while a negative residual remains for Random and StreamingLLM. With the prompt protected, the two replay directions disagree at the tighter budget. At a budget of 1024 entries (median nominal budget ratios $0.434$ and $0.487$), the protected forward residual is $-0.047$ (95\\% CI $[-0.086,-0.015]$) for Random and $-0.040$ ($[-0.070,-0.013]$) for StreamingLLM; a direction interaction was not detected. On a strict-fit subset of 97 problems, prompt protection changes Random's free-running accuracy contrasts with both StreamingLLM and an H2O-style policy. These comparisons motivate reporting free-running accuracy alongside fixed-trace readout and specifying which prompt entries eviction can remove.",
+      "literal": "0.487",
+      "key": "s1.realized.b1024.streamingllm_pp.median"
+    },
+    {
+      "context": "\\textbf{Comparison across readout directions.} On the common support at the tighter budget ($376$ protected Random conditions and $355$ protected StreamingLLM conditions), the forward-minus-reverse contrast is $+0.130$ ($[+0.078,+0.185]$) and $+0.127$ ($[+0.065,+0.197]$), respectively. At the larger budget, the trajectory contrast is negative in both directions on the common support ($382$ and $383$ conditions). The registered direction-interaction test does not reject for either policy (Holm-adjusted $p=0.64$ for both). That result leaves equality unresolved. The common-support analysis uses a different set of conditions from the forward read above; neither comparison identifies a causal share of the loss.",
+      "literal": "+0.127",
       "key": "audit.b256.streamingllm_pp.common.interaction.mean"
+    },
+    {
+      "context": "\\textbf{Comparison across readout directions.} On the common support at the tighter budget ($376$ protected Random conditions and $355$ protected StreamingLLM conditions), the forward-minus-reverse contrast is $+0.130$ ($[+0.078,+0.185]$) and $+0.127$ ($[+0.065,+0.197]$), respectively. At the larger budget, the trajectory contrast is negative in both directions on the common support ($382$ and $383$ conditions). The registered direction-interaction test does not reject for either policy (Holm-adjusted $p=0.64$ for both). That result leaves equality unresolved. The common-support analysis uses a different set of conditions from the forward read above; neither comparison identifies a causal share of the loss.",
+      "literal": "+0.065",
+      "key": "audit.b256.streamingllm_pp.common.interaction.cilo"
+    },
+    {
+      "context": "\\textbf{Comparison across readout directions.} On the common support at the tighter budget ($376$ protected Random conditions and $355$ protected StreamingLLM conditions), the forward-minus-reverse contrast is $+0.130$ ($[+0.078,+0.185]$) and $+0.127$ ($[+0.065,+0.197]$), respectively. At the larger budget, the trajectory contrast is negative in both directions on the common support ($382$ and $383$ conditions). The registered direction-interaction test does not reject for either policy (Holm-adjusted $p=0.64$ for both). That result leaves equality unresolved. The common-support analysis uses a different set of conditions from the forward read above; neither comparison identifies a causal share of the loss.",
+      "literal": "+0.197",
+      "key": "audit.b256.streamingllm_pp.common.interaction.cihi"
+    },
+    {
+      "context": "\\emph{Exploratory Qwen3-4B check.} On 50 MATH-500 problems with four seeds, the full-cache bank scored $0.845$, below its pre-registered lower bound of $0.850$. At the tighter budget (median nominal ratios $0.016$ for Random and $0.097$ for StreamingLLM), StreamingLLM's forward residual was $-0.209$ (95\\% CI $[-0.285,-0.125]$). Free-running accuracy was $0.030$ (95\\% CI $[0.005,0.055]$) for Random and $0.215$ ($[0.120,0.315]$) for StreamingLLM. Random's truncation rate was $0.735$; truncated generations count as incorrect. The Random-ahead ordering did not transfer to this model and setup. The failed bank gate and severe truncation limit interpretation.",
+      "literal": "0.215",
+      "key": "qwen3.streamingllm.free"
+    },
+    {
+      "context": "\\emph{Exploratory Qwen3-4B check.} On 50 MATH-500 problems with four seeds, the full-cache bank scored $0.845$, below its pre-registered lower bound of $0.850$. At the tighter budget (median nominal ratios $0.016$ for Random and $0.097$ for StreamingLLM), StreamingLLM's forward residual was $-0.209$ (95\\% CI $[-0.285,-0.125]$). Free-running accuracy was $0.030$ (95\\% CI $[0.005,0.055]$) for Random and $0.215$ ($[0.120,0.315]$) for StreamingLLM. Random's truncation rate was $0.735$; truncated generations count as incorrect. The Random-ahead ordering did not transfer to this model and setup. The failed bank gate and severe truncation limit interpretation.",
+      "literal": "0.120",
+      "key": "qwen3.streamingllm.free_ci0"
+    },
+    {
+      "context": "\\emph{Exploratory Qwen3-4B check.} On 50 MATH-500 problems with four seeds, the full-cache bank scored $0.845$, below its pre-registered lower bound of $0.850$. At the tighter budget (median nominal ratios $0.016$ for Random and $0.097$ for StreamingLLM), StreamingLLM's forward residual was $-0.209$ (95\\% CI $[-0.285,-0.125]$). Free-running accuracy was $0.030$ (95\\% CI $[0.005,0.055]$) for Random and $0.215$ ($[0.120,0.315]$) for StreamingLLM. Random's truncation rate was $0.735$; truncated generations count as incorrect. The Random-ahead ordering did not transfer to this model and setup. The failed bank gate and severe truncation limit interpretation.",
+      "literal": "0.315",
+      "key": "qwen3.streamingllm.free_ci1"
+    },
+    {
+      "context": "\\emph{Exploratory Qwen3-4B check.} On 50 MATH-500 problems with four seeds, the full-cache bank scored $0.845$, below its pre-registered lower bound of $0.850$. At the tighter budget (median nominal ratios $0.016$ for Random and $0.097$ for StreamingLLM), StreamingLLM's forward residual was $-0.209$ (95\\% CI $[-0.285,-0.125]$). Free-running accuracy was $0.030$ (95\\% CI $[0.005,0.055]$) for Random and $0.215$ ($[0.120,0.315]$) for StreamingLLM. Random's truncation rate was $0.735$; truncated generations count as incorrect. The Random-ahead ordering did not transfer to this model and setup. The failed bank gate and severe truncation limit interpretation.",
+      "literal": "0.097",
+      "key": "qwen3.streamingllm.ratio_median"
+    },
+    {
+      "context": "\\emph{Exploratory Qwen3-4B check.} On 50 MATH-500 problems with four seeds, the full-cache bank scored $0.845$, below its pre-registered lower bound of $0.850$. At the tighter budget (median nominal ratios $0.016$ for Random and $0.097$ for StreamingLLM), StreamingLLM's forward residual was $-0.209$ (95\\% CI $[-0.285,-0.125]$). Free-running accuracy was $0.030$ (95\\% CI $[0.005,0.055]$) for Random and $0.215$ ($[0.120,0.315]$) for StreamingLLM. Random's truncation rate was $0.735$; truncated generations count as incorrect. The Random-ahead ordering did not transfer to this model and setup. The failed bank gate and severe truncation limit interpretation.",
+      "literal": "0.845",
+      "key": "qwen3.fc_bank"
+    },
+    {
+      "context": "\\emph{Exploratory Qwen3-4B check.} On 50 MATH-500 problems with four seeds, the full-cache bank scored $0.845$, below its pre-registered lower bound of $0.850$. At the tighter budget (median nominal ratios $0.016$ for Random and $0.097$ for StreamingLLM), StreamingLLM's forward residual was $-0.209$ (95\\% CI $[-0.285,-0.125]$). Free-running accuracy was $0.030$ (95\\% CI $[0.005,0.055]$) for Random and $0.215$ ($[0.120,0.315]$) for StreamingLLM. Random's truncation rate was $0.735$; truncated generations count as incorrect. The Random-ahead ordering did not transfer to this model and setup. The failed bank gate and severe truncation limit interpretation.",
+      "literal": "0.735",
+      "key": "qwen3.random.trunc"
+    },
+    {
+      "context": "\\emph{Exploratory Qwen3-4B check.} On 50 MATH-500 problems with four seeds, the full-cache bank scored $0.845$, below its pre-registered lower bound of $0.850$. At the tighter budget (median nominal ratios $0.016$ for Random and $0.097$ for StreamingLLM), StreamingLLM's forward residual was $-0.209$ (95\\% CI $[-0.285,-0.125]$). Free-running accuracy was $0.030$ (95\\% CI $[0.005,0.055]$) for Random and $0.215$ ($[0.120,0.315]$) for StreamingLLM. Random's truncation rate was $0.735$; truncated generations count as incorrect. The Random-ahead ordering did not transfer to this model and setup. The failed bank gate and severe truncation limit interpretation.",
+      "literal": "-0.209",
+      "key": "qwen3.streamingllm.residual"
+    },
+    {
+      "context": "\\emph{Exploratory Qwen3-4B check.} On 50 MATH-500 problems with four seeds, the full-cache bank scored $0.845$, below its pre-registered lower bound of $0.850$. At the tighter budget (median nominal ratios $0.016$ for Random and $0.097$ for StreamingLLM), StreamingLLM's forward residual was $-0.209$ (95\\% CI $[-0.285,-0.125]$). Free-running accuracy was $0.030$ (95\\% CI $[0.005,0.055]$) for Random and $0.215$ ($[0.120,0.315]$) for StreamingLLM. Random's truncation rate was $0.735$; truncated generations count as incorrect. The Random-ahead ordering did not transfer to this model and setup. The failed bank gate and severe truncation limit interpretation.",
+      "literal": "-0.285",
+      "key": "qwen3.streamingllm.residual_ci0"
+    },
+    {
+      "context": "\\emph{Exploratory Qwen3-4B check.} On 50 MATH-500 problems with four seeds, the full-cache bank scored $0.845$, below its pre-registered lower bound of $0.850$. At the tighter budget (median nominal ratios $0.016$ for Random and $0.097$ for StreamingLLM), StreamingLLM's forward residual was $-0.209$ (95\\% CI $[-0.285,-0.125]$). Free-running accuracy was $0.030$ (95\\% CI $[0.005,0.055]$) for Random and $0.215$ ($[0.120,0.315]$) for StreamingLLM. Random's truncation rate was $0.735$; truncated generations count as incorrect. The Random-ahead ordering did not transfer to this model and setup. The failed bank gate and severe truncation limit interpretation.",
+      "literal": "-0.125",
+      "key": "qwen3.streamingllm.residual_ci1"
+    },
+    {
+      "context": "The registered protection-by-policy interaction measures how the free-running accuracy contrast changes with protection. For Random~$-$~H2O-style it is $-0.186$ (95\\% CI $[-0.250,-0.113]$, $t=-5.45$); for Random~$-$~StreamingLLM it is $-0.137$ ($[-0.201,-0.070]$, $t=-4.02$). Both reject after Holm correction.",
+      "literal": "-0.186",
+      "key": "m5a.strict.random_minus_h2o.interaction.mean"
+    },
+    {
+      "context": "The registered protection-by-policy interaction measures how the free-running accuracy contrast changes with protection. For Random~$-$~H2O-style it is $-0.186$ (95\\% CI $[-0.250,-0.113]$, $t=-5.45$); for Random~$-$~StreamingLLM it is $-0.137$ ($[-0.201,-0.070]$, $t=-4.02$). Both reject after Holm correction.",
+      "literal": "-0.250",
+      "key": "m5a.strict.random_minus_h2o.interaction.cilo"
+    },
+    {
+      "context": "The registered protection-by-policy interaction measures how the free-running accuracy contrast changes with protection. For Random~$-$~H2O-style it is $-0.186$ (95\\% CI $[-0.250,-0.113]$, $t=-5.45$); for Random~$-$~StreamingLLM it is $-0.137$ ($[-0.201,-0.070]$, $t=-4.02$). Both reject after Holm correction.",
+      "literal": "-0.113",
+      "key": "m5a.strict.random_minus_h2o.interaction.cihi"
+    },
+    {
+      "context": "The registered protection-by-policy interaction measures how the free-running accuracy contrast changes with protection. For Random~$-$~H2O-style it is $-0.186$ (95\\% CI $[-0.250,-0.113]$, $t=-5.45$); for Random~$-$~StreamingLLM it is $-0.137$ ($[-0.201,-0.070]$, $t=-4.02$). Both reject after Holm correction.",
+      "literal": "-5.45",
+      "key": "m5a.strict.random_minus_h2o.registered.t"
+    },
+    {
+      "context": "The registered protection-by-policy interaction measures how the free-running accuracy contrast changes with protection. For Random~$-$~H2O-style it is $-0.186$ (95\\% CI $[-0.250,-0.113]$, $t=-5.45$); for Random~$-$~StreamingLLM it is $-0.137$ ($[-0.201,-0.070]$, $t=-4.02$). Both reject after Holm correction.",
+      "literal": "-0.137",
+      "key": "m5a.strict.random_minus_streamingllm.interaction.mean"
+    },
+    {
+      "context": "The registered protection-by-policy interaction measures how the free-running accuracy contrast changes with protection. For Random~$-$~H2O-style it is $-0.186$ (95\\% CI $[-0.250,-0.113]$, $t=-5.45$); for Random~$-$~StreamingLLM it is $-0.137$ ($[-0.201,-0.070]$, $t=-4.02$). Both reject after Holm correction.",
+      "literal": "-0.201",
+      "key": "m5a.strict.random_minus_streamingllm.interaction.cilo"
+    },
+    {
+      "context": "The registered protection-by-policy interaction measures how the free-running accuracy contrast changes with protection. For Random~$-$~H2O-style it is $-0.186$ (95\\% CI $[-0.250,-0.113]$, $t=-5.45$); for Random~$-$~StreamingLLM it is $-0.137$ ($[-0.201,-0.070]$, $t=-4.02$). Both reject after Holm correction.",
+      "literal": "-0.070",
+      "key": "m5a.strict.random_minus_streamingllm.interaction.cihi"
+    },
+    {
+      "context": "The registered protection-by-policy interaction measures how the free-running accuracy contrast changes with protection. For Random~$-$~H2O-style it is $-0.186$ (95\\% CI $[-0.250,-0.113]$, $t=-5.45$); for Random~$-$~StreamingLLM it is $-0.137$ ($[-0.201,-0.070]$, $t=-4.02$). Both reject after Holm correction.",
+      "literal": "-4.02",
+      "key": "m5a.strict.random_minus_streamingllm.registered.t"
+    },
+    {
+      "context": "For Random, the median nominal budget ratio is $0.074$ unprotected and $0.103$ protected",
+      "literal": "0.074",
+      "key": "m5a.strict.ratio.random_unprot.median"
+    },
+    {
+      "context": "For Random, the median nominal budget ratio is $0.074$ unprotected and $0.103$ protected",
+      "literal": "0.103",
+      "key": "m5a.strict.ratio.random_pp.median"
+    },
+    {
+      "context": "for H2O-style, $0.068$ and $0.111$",
+      "literal": "0.068",
+      "key": "m5a.strict.ratio.h2o_unprot.median"
+    },
+    {
+      "context": "for H2O-style, $0.068$ and $0.111$",
+      "literal": "0.111",
+      "key": "m5a.strict.ratio.h2o_pp.median"
+    },
+    {
+      "context": "for StreamingLLM, $0.098$ and $0.104$",
+      "literal": "0.098",
+      "key": "m5a.strict.ratio.streamingllm_unprot.median"
+    },
+    {
+      "context": "for StreamingLLM, $0.098$ and $0.104$",
+      "literal": "0.104",
+      "key": "m5a.strict.ratio.streamingllm_pp.median"
+    },
+    {
+      "context": "and for R-KV, $0.045$ and $0.058$",
+      "literal": "0.045",
+      "key": "m5a.strict.ratio.rkv_unprot.median"
+    },
+    {
+      "context": "and for R-KV, $0.045$ and $0.058$",
+      "literal": "0.058",
+      "key": "m5a.strict.ratio.rkv_pp.median"
     }
   ]
 }

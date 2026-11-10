@@ -45,16 +45,38 @@ lengths have not been measured, so:
 
 **Proposed cap: 3 GPU-h,** including model loading. Normal windows only.
 
-## Blocker before it can run (CPU work, no approval needed)
+## Problem-ID adapter (built 2026-11-10; the CPU blocker is cleared)
 
-`scripts/run_grid.py` selects problems by subset **count**, not by ID. The
-frozen calibration split is a hashed ID list, so it needs a pid-filter grid
-adapter. This is the same adapter the whole-cohort capacity comparators
-(M5A-CAPMATCH) need.
-- *Design constraint:* build it as an additive runner path. Changing
-  `run_grid.py` would alter the generation identity of completed cells.
-- *Readiness:* the adapter, its tests and the config come first; the timing
-  request follows.
+The existing loaders select problems by a count or a seeded sample, not by
+ID, so the frozen calibration split needed an additive adapter.
+- *Selection:* `src/kvcache/manifest_problems.py` resolves a split to its
+  frozen IDs and refuses:
+  - a manifest revision that differs from the pin;
+  - a missing, empty or repeated split;
+  - overlap with another split;
+  - a loaded pool of the wrong size;
+  - any absent ID.
+- *Runner:* `scripts/run_bank_manifest.py`. It is held, and generates full
+  cache only by importing `build_bank.py`'s path. `run_grid.py`,
+  `build_bank.py` and `datasets.py` are byte-identical.
+- *Config:* `configs/experiments/bank_gsm8k_timing_m5.yaml` (`held: true`,
+  `scale_authorized: false`). It is on `make dryrun`; there is no queue job
+  and no campaign.
+- *Checks:*
+  - 17 CPU tests (`tests/test_manifest_problems.py`);
+  - a dry-run resolves 24 IDs × 2 seeds = 48 generations at revision
+    `740312a…`;
+  - on the GPU host, CPU only and offline, `--resolve-only` selects all 24
+    from the 1,319-row pinned pool, with non-empty gold answers
+    (`results/diag/meeting5/gsm8k_timing/split_resolution.json`).
+- *Not yet built:* the compressed-grid counterpart that M5A-CAPMATCH needs.
+  It would reuse the same selection module.
+- *To run, after approval:*
+  1. a campaign (cap 3 GPU-h);
+  2. a queue job and a `launch.sh` alias;
+  3. `held: false` and `scale_authorized: true`;
+  4. shared-disk headroom above the 30 GiB launch floor (20 GB free on
+     2026-11-10).
 
 ## What comes after (each a separate decision)
 

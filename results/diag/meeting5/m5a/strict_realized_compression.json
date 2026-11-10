@@ -1,0 +1,178 @@
+{
+  "arms": {
+    "h2o+P": {
+      "mean": 0.134173062283749,
+      "median": 0.1112350865984512,
+      "n_budget_relaxed": 0,
+      "n_ratio_one": 0,
+      "n_rows": 388,
+      "policy": "h2o",
+      "press": "h2o_style_pp_v1",
+      "protected": true,
+      "ratio_one_share": 0.0,
+      "run": "grid-h2opp256-m5"
+    },
+    "h2o-P": {
+      "mean": 0.1119974888603881,
+      "median": 0.06769814664798843,
+      "n_budget_relaxed": 0,
+      "n_ratio_one": 0,
+      "n_rows": 388,
+      "policy": "h2o",
+      "press": "h2o",
+      "protected": false,
+      "ratio_one_share": 0.0,
+      "run": "grid-diss256-h2o"
+    },
+    "random+P": {
+      "mean": 0.13027957865322165,
+      "median": 0.10316461965938968,
+      "n_budget_relaxed": 0,
+      "n_ratio_one": 0,
+      "n_rows": 388,
+      "policy": "random",
+      "press": "random_pp",
+      "protected": true,
+      "ratio_one_share": 0.0,
+      "run": "grid-pp256"
+    },
+    "random-P": {
+      "mean": 0.1214047349888715,
+      "median": 0.0742064896398263,
+      "n_budget_relaxed": 0,
+      "n_ratio_one": 0,
+      "n_rows": 388,
+      "policy": "random",
+      "press": "random",
+      "protected": false,
+      "ratio_one_share": 0.0,
+      "run": "grid-diss256-tok"
+    },
+    "rkv+P": {
+      "mean": 0.10512572569030766,
+      "median": 0.05815635631007035,
+      "n_budget_relaxed": 0,
+      "n_ratio_one": 0,
+      "n_rows": 388,
+      "policy": "rkv",
+      "press": "rkv_pp_v1",
+      "protected": true,
+      "ratio_one_share": 0.0,
+      "run": "grid-rkvpp256-m5"
+    },
+    "rkv-P": {
+      "mean": 0.10395105232723978,
+      "median": 0.0445501944655672,
+      "n_budget_relaxed": 0,
+      "n_ratio_one": 0,
+      "n_rows": 388,
+      "policy": "rkv",
+      "press": "rkv",
+      "protected": false,
+      "ratio_one_share": 0.0,
+      "run": "grid-diss256-rkv"
+    },
+    "streamingllm+P": {
+      "mean": 0.1424467784158101,
+      "median": 0.1044259703160447,
+      "n_budget_relaxed": 0,
+      "n_ratio_one": 0,
+      "n_rows": 388,
+      "policy": "streamingllm",
+      "press": "streamingllm_pp",
+      "protected": true,
+      "ratio_one_share": 0.0,
+      "run": "grid-pp256"
+    },
+    "streamingllm-P": {
+      "mean": 0.13596482155075604,
+      "median": 0.0979529689416987,
+      "n_budget_relaxed": 0,
+      "n_ratio_one": 0,
+      "n_rows": 388,
+      "policy": "streamingllm",
+      "press": "streamingllm",
+      "protected": false,
+      "ratio_one_share": 0.0,
+      "run": "grid-diss256-tok"
+    }
+  },
+  "budget": 256,
+  "definition": "nominal-budget ratio min(1, B / (prompt + generated tokens)) per row: a budget-to-sequence-length ratio, not live occupancy, K/V bytes or an eviction count",
+  "evidence": {
+    "row_files_sha256": {
+      "grid-diss256-h2o": {
+        "math500/r1_distill_qwen_7b/h2o-256-s11.jsonl": "2cd926c93848276dd5d86a42a8e0218b5a99fa253a06b6da059ba26dca522b43",
+        "math500/r1_distill_qwen_7b/h2o-256-s23.jsonl": "b0db9d01036225f8e819830b982ee8a17b43eabba4c8285b53cd893915d26132",
+        "math500/r1_distill_qwen_7b/h2o-256-s47.jsonl": "9c47a2e79b43fc2e5003646fff3a4ca7a72959cc8a87adc13eb12b35f93bda8c",
+        "math500/r1_distill_qwen_7b/h2o-256-s89.jsonl": "ce4d7331bcd8e98eee0b4807ec03ec85a4606aba1b9e09a7832d66183d6a7395"
+      },
+      "grid-diss256-rkv": {
+        "math500/r1_distill_qwen_7b/rkv-256-s11.jsonl": "a7450dadf46868eedb50538e99d5c164b015f9f34d66b0e88083028328815ab3",
+        "math500/r1_distill_qwen_7b/rkv-256-s23.jsonl": "d82a3bbc08f55c8896e96815e2267bd598dae19d33f26b36d777e3788b202ee0",
+        "math500/r1_distill_qwen_7b/rkv-256-s47.jsonl": "48a885df1bd8e43d5a1bbc16c326f6837701adbdc981fe72d275a2bc71ee18e4",
+        "math500/r1_distill_qwen_7b/rkv-256-s89.jsonl": "04cd583559d09a4aa628bce12fe14304d96e0ec3243f5306224061022d6ea64e"
+      },
+      "grid-diss256-tok": {
+        "math500/r1_distill_qwen_7b/random-256-s11.jsonl": "fa4888f7c26d8aad4d4062191d3155a7cef1633a3b6eee0d32d04ae33aaf2d79",
+        "math500/r1_distill_qwen_7b/random-256-s23.jsonl": "cfa3757e8ba09e1761c06cb2f99a6ac35254ee745905ed6998839f06fb3138c0",
+        "math500/r1_distill_qwen_7b/random-256-s47.jsonl": "c893a62de0d00d7d6676c76b1edf623890167daf60c1be04647f476d6ab9db19",
+        "math500/r1_distill_qwen_7b/random-256-s89.jsonl": "6b720ebee55d9e1f960b0fbf1fc6d7e62b77763cd985fb8233ed0f65e4de62ed",
+        "math500/r1_distill_qwen_7b/streamingllm-256-s11.jsonl": "f7713c61c783738fa325b73bf541265a707f96e5dd610253b48537af868664d9",
+        "math500/r1_distill_qwen_7b/streamingllm-256-s23.jsonl": "1e41e6a9188f2cc5768247265ff4455d1955fe2b7c5d2fda0b6907e5320a97f2",
+        "math500/r1_distill_qwen_7b/streamingllm-256-s47.jsonl": "52e003affc8565e9bda045ba6040a9ee5b496dfa8c64a7c6cf4ffee0e0cc0c67",
+        "math500/r1_distill_qwen_7b/streamingllm-256-s89.jsonl": "119a1b8036cf77876017b9a9112ae3867d18ba53f31ecda1ea5415ae0b3c8813"
+      },
+      "grid-h2opp256-m5": {
+        "math500/r1_distill_qwen_7b/h2o_style_pp_v1-256-s11.jsonl": "d6a37ced44e83e9eeb8312f603e716fbae9fdfebcb9b225abd89101e7333cc08",
+        "math500/r1_distill_qwen_7b/h2o_style_pp_v1-256-s23.jsonl": "7540d2deb63a5bc49823c34e4d68d80bd90428fb0d1326aa35ae80560ce88f05",
+        "math500/r1_distill_qwen_7b/h2o_style_pp_v1-256-s47.jsonl": "59aa8f1b7cb05da51d8521a27ca52d89151ea3356f3c88a6c8685d4efaabc062",
+        "math500/r1_distill_qwen_7b/h2o_style_pp_v1-256-s89.jsonl": "11e3235f6e6e97d83fe570c1612ae9002a68ce8b6155a0c67f167c00f0237376"
+      },
+      "grid-pp256": {
+        "math500/r1_distill_qwen_7b/random_pp-256-s11.jsonl": "98f1268ae1a19015bc7c67e87b0c30995fe4329f56d4e89f0163fee91d54aeaa",
+        "math500/r1_distill_qwen_7b/random_pp-256-s23.jsonl": "96a23307cc06ec89cf4e251186d7714667d7fd3128a5eb713b0549e648d1af0a",
+        "math500/r1_distill_qwen_7b/random_pp-256-s47.jsonl": "bd501f64138bb984e62db5060f6d13f6c2075cab5431fcc5c8eb51266ccbaa14",
+        "math500/r1_distill_qwen_7b/random_pp-256-s89.jsonl": "c3afaa223a34af2428397def883c2c5c9b03815587df318ce67d214dced01908",
+        "math500/r1_distill_qwen_7b/streamingllm_pp-256-s11.jsonl": "f3227b67ea90a962de792888b5f84f63f6ed208c842013c5c31b2c598271a887",
+        "math500/r1_distill_qwen_7b/streamingllm_pp-256-s23.jsonl": "6e0a34a4329d53654028c73dc68a6cfa4fc82b544e17f64b69727fbc32c4c5df",
+        "math500/r1_distill_qwen_7b/streamingllm_pp-256-s47.jsonl": "34cb85fb455ebbb781ef50a257d89930a3585dc1bdb8c1ce9a97656418902126",
+        "math500/r1_distill_qwen_7b/streamingllm_pp-256-s89.jsonl": "8b641d25c398f6822443aaf8ba3a32fe22d5758d31136c349d9a58cc71171c65"
+      },
+      "grid-rkvpp256-m5": {
+        "math500/r1_distill_qwen_7b/rkv_pp_v1-256-s11.jsonl": "83f5ab81d608ef176df4d4098d64517aa61fd44d160f95baf9acfbc22cc3f9d3",
+        "math500/r1_distill_qwen_7b/rkv_pp_v1-256-s23.jsonl": "ecad7432e1d44262c5906c344079a597273add8f3347dabcb55fd503cc49e069",
+        "math500/r1_distill_qwen_7b/rkv_pp_v1-256-s47.jsonl": "66a4f1abc0fe70ae364053051265cbee181c9c1ea203b2c66aaa87987858d6b1",
+        "math500/r1_distill_qwen_7b/rkv_pp_v1-256-s89.jsonl": "e6ad0e676c3bd69e2490348482e3a6593c6ab2de8518a239cc98a71959fad126"
+      }
+    },
+    "s1_conditions_sha256": "69d6fe2379f2d106069c82f2144577ebfb20af55001d38866932cc38d92f7864",
+    "s1_prompt_lengths_from": "protection_b256.conditions.tsv",
+    "strict_conditions_sha256": "da50c268e7601d55c095b2faa895f5e4177a8d3da748362707721264b52ba077",
+    "strict_read": "m5a_read_strict.json",
+    "strict_read_status": "FINAL"
+  },
+  "population": "97-problem strict-fit cohort x seeds 11/23/47/89 (the M5-A strict read's own keys); NOT the 100-problem S.1 population",
+  "ratio_one": "ratio 1 = the sequence never exceeded the budget (nothing pruned, by construction); ratio < 1 does not prove a prune (periodic pruning, no per-row prune record), so n_ratio_one is a LOWER bound on never-compressed",
+  "read": "nominal-budget compression of the eight M5-A arms on the strict-fit cohort",
+  "reproduces_s1_artifact": {
+    "random": {
+      "published": 0.06935293229226829,
+      "recomputed": 0.06935293229226829
+    },
+    "random_pp": {
+      "published": 0.09746820176455853,
+      "recomputed": 0.09746820176455853
+    },
+    "streamingllm": {
+      "published": 0.09278849637728723,
+      "recomputed": 0.09278849637728723
+    },
+    "streamingllm_pp": {
+      "published": 0.0978971074259308,
+      "recomputed": 0.0978971074259308
+    }
+  },
+  "retired_previous_output": null,
+  "status": "FINAL"
+}

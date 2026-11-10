@@ -24,6 +24,18 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-11-10 PKT — Manuscript revision patch applied; strict-cohort compression ratios read (FINAL); GSM8K problem-ID adapter built and CPU-tested. GPU jobs held; nothing launched.**
+  - **Patch.** `KVCache_Manuscript_Revision_91d94ef.patch` (owner-supplied, untracked in the repo root, not committed) applied on base `91d94ef`: blob `be2d48e` / `ed67794` matched; `git apply --check` clean. It rewrites the abstract, intro, thesis, contributions, §4.5 and conclusion, and adds the Qwen3-4B threats paragraph and 274-claim `paper_claims.json`. Its new literals were checked against their pinned keys; common-support counts 376/355 and 382/383 against `reverse_b256/b1024.json`.
+  - **Strict-cohort ratios.**
+    - `scripts/report_strict_compression.py` + `kvcache.strict_compression` (additive; `compression_summary`/S.1 untouched). Run on the host from the stored rows → `results/diag/meeting5/m5a/strict_realized_compression.json`, FINAL, 388 per arm.
+    - Medians (unprotected / protected): Random 0.0742 / 0.1032, H2O-style 0.0677 / 0.1112, StreamingLLM 0.0980 / 0.1044, R-KV 0.0446 / 0.0582. 0 relaxed, 0 ratio-one.
+    - Reproduces the S.1 Random/StreamingLLM medians exactly on the S.1 keys.
+    - Added to §4.5 and pinned: `m5a.strict.ratio.*` in `build_paper_numbers.py`, plus 8 claims (282 total).
+  - **PDF.** Rebuilt ×2: 26 pages, 0 `^!`, 1 Overfull (0.607 pt, Table 1), identical at HEAD. Pages 1, 13, 14, 19 rendered on the host with pdftoppm and inspected.
+  - **GSM8K adapter.** `kvcache.manifest_problems` + `scripts/run_bank_manifest.py` (held, full cache only) + `configs/experiments/bank_gsm8k_timing_m5.yaml` (`held: true`, `scale_authorized: false`). 17 CPU tests; `--resolve-only` on the host resolves 24/24 IDs from the 1,319-row pinned pool.
+  - **Not done.** No queue job or campaign for GSM8K. The CAPMATCH compressed-grid counterpart is not built. The claim ledger is not yet synced to the new abstract.
+  - **Host.** Shared disk 20 GB free, below the 30 GiB launch floor.
+
   **★★★★★ 2026-10-27 ~00:30 PKT — M5-C calibration ran and FAILED (C1, C2, C6); queue drained; GPUs in use by another project of the same account.**
   - **Calibration.** Ran 2026-10-21 01:45–03:55 Dubai, rc 0, 2.165 of 4 GPU-h, 640/640 rows. The read is FINAL (40/40 cells).
     - Failed: C1 (full cache MI 0.235 bits, correct probability 0.203), C2 (OTHER 0.691), C6 (best compressed arm 0.026 bits).
