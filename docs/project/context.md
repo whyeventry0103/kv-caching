@@ -24,6 +24,15 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-11-10 PKT (follow-up) — Wording follow-up on 9f6c676; claim ledger synced. GPU jobs held.**
+  - §4.6 opener rescoped: "We next examine when next-token predictions diverge during fixed-trace replay for policies that can evict the prompt." It replaces the causal "34-point loss" question.
+  - Figure 3 is scoped to the four prompt-evictable policies at B=256, and "readout-invisible" is replaced by "unexplained by on-reference readout".
+  - The abstract gives the tighter budget's protected ratios from the 100-problem S.1 artifact: 0.097 (Random) and 0.098 (StreamingLLM), `s1.realized.b256.*_pp.median`. The 97-problem ratios stay in §4.5 only.
+  - `paper_claims.json`: the 8 abstract contexts were resynced and 2 claims added, giving 284. `CLAIM_LEDGER.md`: A6 and A11 updated (A11's "about 2×" gloss replaced by 0.434 / 0.487), A17 added, plus D, E, F5 and a new section I.
+  - Gates bare: lint; test 994 passed / 91 skipped; dryrun; audit (both strict audits clean); catalogue unchanged.
+  - PDF ×2: 26 pages, 0 `^!`, the same single Overfull. Pages 1, 13 and 14 inspected.
+  - Open: §5 still says "readout-invisible" twice (ledger §F5; an owner wording decision).
+
   **★★★★★ 2026-11-10 PKT — Manuscript revision patch applied; strict-cohort compression ratios read (FINAL); GSM8K problem-ID adapter built and CPU-tested. GPU jobs held; nothing launched.**
   - **Patch.** `KVCache_Manuscript_Revision_91d94ef.patch` (owner-supplied, untracked in the repo root, not committed) applied on base `91d94ef`: blob `be2d48e` / `ed67794` matched; `git apply --check` clean. It rewrites the abstract, intro, thesis, contributions, §4.5 and conclusion, and adds the Qwen3-4B threats paragraph and 274-claim `paper_claims.json`. Its new literals were checked against their pinned keys; common-support counts 376/355 and 382/383 against `reverse_b256/b1024.json`.
   - **Strict-cohort ratios.**
@@ -33,7 +42,7 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
     - Added to §4.5 and pinned: `m5a.strict.ratio.*` in `build_paper_numbers.py`, plus 8 claims (282 total).
   - **PDF.** Rebuilt ×2: 26 pages, 0 `^!`, 1 Overfull (0.607 pt, Table 1), identical at HEAD. Pages 1, 13, 14, 19 rendered on the host with pdftoppm and inspected.
   - **GSM8K adapter.** `kvcache.manifest_problems` + `scripts/run_bank_manifest.py` (held, full cache only) + `configs/experiments/bank_gsm8k_timing_m5.yaml` (`held: true`, `scale_authorized: false`). 17 CPU tests; `--resolve-only` on the host resolves 24/24 IDs from the 1,319-row pinned pool.
-  - **Not done.** No queue job or campaign for GSM8K. The CAPMATCH compressed-grid counterpart is not built. The claim ledger is not yet synced to the new abstract.
+  - **Not done.** No queue job or campaign for GSM8K. The CAPMATCH compressed-grid counterpart is not built. The claim ledger is not yet synced to the new abstract (synced in the follow-up above).
   - **Host.** Shared disk 20 GB free, below the 30 GiB launch floor.
 
   **★★★★★ 2026-10-27 ~00:30 PKT — M5-C calibration ran and FAILED (C1, C2, C6); queue drained; GPUs in use by another project of the same account.**
