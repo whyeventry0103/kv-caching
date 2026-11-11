@@ -24,6 +24,21 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-11-11 PKT — CI repaired (red since 2026-10-17); owner-approved disk cleanup; real launch preflight PASSES. GSM8K pilot still HELD (no campaign, not queued to run).**
+  - **CI.** The 19 failures had two causes.
+    - Smoke-bundle validator: `git archive <producing_commit>` failed on the depth-1 checkout. Fixed with `fetch-depth: 0` in `.github/workflows/ci.yml`.
+    - scipy (registered t tests) was absent from the `dev` extras. Fixed with `scipy==1.15.3` in `pyproject.toml`, matching the host's `requirements.txt`.
+  - **Cleanup (owner-approved, 2026-11-11).** Only two paths were removed, both on `/dev/nvme1n1p2` (the runs filesystem):
+    - `~/.cache/pip` (3.97 GiB: http caches, wheels, selfcheck).
+    - `kvcache-storage/cache/huggingface/hub/models--deepseek-ai--DeepSeek-R1-Distill-Llama-8B` (14.97 GiB).
+  - **Pre-delete checks.**
+    - No open files, processes or tmux sessions; no hardlinks; model last read 2026-10-02.
+    - All 8 queue jobs using the model are complete.
+    - The Hub serves the pinned revision `6a6f4aa…`, and all 7 cached files match it by size and sha256. Re-fetch with `--allow-model-download` at that revision.
+  - **Result.** Free space 13.30 → 32.23 GiB. `check_remote.sh` (scheduler-declared env) → `Health check passed` (33G available, tree hash match, GPUs idle).
+  - **Preserved.** runs (3.9G, 228 token-sidecar files), GSM8K data, Qwen-7B `916b56a…`, Qwen3-4B, Qwen-1.5B, `.venv`, coursework.
+  - **Caveat.** Headroom over the floor is only about 2 GiB on a shared disk that other users keep filling: recheck immediately before any approved launch.
+
   **★★★★★ 2026-11-10 PKT (held launch + replication paths) — Owner patch applied (scheduler integration, §5 wording); GSM8K replication paths prepared and CPU-tested; disk survey: safe cleanup alone does NOT reach the 30 GiB floor. Pilot HELD; cap inactive; nothing queued to run.**
   - **Patch.** `GSM8K_Held_Launch_and_Manuscript.patch` (owner; untracked, not committed) applied on `87ef825`: all 6 base blobs matched, `git apply --check` clean.
     - Queue job `bank-gsm8k-timing-m5` is blocked with no campaign. `M5B-GSM8K-TIMING` sits under `proposed_campaigns`, which the scheduler does not read.

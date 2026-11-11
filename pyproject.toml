@@ -26,6 +26,10 @@ dev = [
   # make_paper_figures.py imports matplotlib at module level, and the figure
   # runner is part of `make dryrun`, so the dev gate needs it.
   "matplotlib>=3.8",
+  # The registered problem-level t tests (kvcache.metrics.policy_replication,
+  # protocol_audit) import scipy.stats; pinned to the host's requirements.txt
+  # version, which produced the committed reads.
+  "scipy==1.15.3",
 ]
 
 [tool.setuptools.packages.find]

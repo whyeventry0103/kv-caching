@@ -15,6 +15,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Full history: scripts/validate_smoke_bundle.py rebuilds the smoke
+          # identity from `git archive <producing_commit>`, which a depth-1
+          # checkout does not contain (7 test_smoke_bundle failures since
+          # 2026-10-17).
+          fetch-depth: 0
 
       - uses: actions/setup-python@v5
         with:
