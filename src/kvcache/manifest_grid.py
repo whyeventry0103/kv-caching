@@ -32,7 +32,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from kvcache.manifest_problems import frozen_split_pids
+from kvcache.manifest_problems import frozen_split_pids, manifest_key
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DESIGN_STATUSES = ("pending", "final")
@@ -197,7 +197,8 @@ def resolve_grid_design(
     manifest = json.loads((base / spec["path"]).read_text(encoding="utf-8"))
     bench_cfg = _yaml(base / "configs/benchmarks.yaml")["benchmarks"][bench]
     revision = str(bench_cfg["revision"])
-    pids = frozen_split_pids(manifest, bench, spec["split"], pinned_revision=revision)
+    mkey = manifest_key(bench, bench_cfg)
+    pids = frozen_split_pids(manifest, mkey, spec["split"], pinned_revision=revision)
     seeds = [int(s) for s in config["seeds"]]
     if len(set(seeds)) != len(seeds):
         raise ValueError("seeds repeat")
@@ -218,7 +219,7 @@ def resolve_grid_design(
         "benchmark": bench,
         "split": str(spec["split"]),
         "pids": pids,
-        "n_pool": int(manifest[bench]["n_pool"]),
+        "n_pool": int(manifest[mkey]["n_pool"]),
         "revision": revision,
         "seeds": seeds,
         "presses": presses,

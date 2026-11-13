@@ -51,7 +51,7 @@ from kvcache.manifest_grid import (
     resolve_grid_design,
     run_gate,
 )
-from kvcache.manifest_problems import select_frozen_split
+from kvcache.manifest_problems import load_frozen_pool, select_frozen_split
 
 
 def replay_factory(family: Family) -> Any:
@@ -77,9 +77,7 @@ def frozen_loader(design: dict[str, Any]) -> Any:
     def load(bench: str, bench_cfg: Any, **kwargs: Any) -> list[Any]:
         if bench != design["benchmark"]:
             raise SystemExit(f"REFUSED: readout asked for {bench!r}")
-        pool = datasets.load_benchmark(
-            bench, bench_cfg, subset=None, allow_download=False
-        )
+        pool = load_frozen_pool(bench, bench_cfg, hf_loader=datasets.load_benchmark)
         return select_frozen_split(pool, design["pids"], n_pool=design["n_pool"])
 
     return load

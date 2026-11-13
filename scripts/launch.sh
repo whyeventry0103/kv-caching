@@ -68,6 +68,15 @@ case "$COMMAND" in
     fi
     PY_SCRIPT="scripts/run_bank_manifest.py"
     ;;
+  bank_manifest_bbh)
+    if [[ "$CONFIG" != "configs/experiments/bank_bbh_timing_m5.yaml" \
+       || "${KVCACHE_LAUNCH_ID:-}" != M5B-BBH-TIMING-* \
+       || -z "${KVCACHE_MAX_HOURS:-}" ]]; then
+      echo "REFUSED: BBH timing requires its capped scheduler reservation" >&2
+      exit 2
+    fi
+    PY_SCRIPT="scripts/run_bank_manifest.py"
+    ;;
   grid) PY_SCRIPT="scripts/run_grid.py" ;;
   replay) PY_SCRIPT="scripts/run_replay.py" ;;
   rkvsmoke) PY_SCRIPT="scripts/rkv_smoke.py" ;;

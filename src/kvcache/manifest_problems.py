@@ -25,7 +25,9 @@ stable.py``), so adding it changes no existing generation path.
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+import os
+from collections.abc import Callable, Mapping, Sequence
+from pathlib import Path
 from typing import Any
 
 SPLITS = ("calibration", "confirmation", "reserve")
@@ -87,3 +89,40 @@ def select_frozen_split(
             f"(e.g. {missing[0]!r})"
         )
     return [by_pid[pid] for pid in pids]
+
+
+def manifest_key(bench: str, bench_cfg: Mapping[str, Any]) -> str:
+    """The manifest entry a benchmark's frozen splits live under.
+
+    BBH's rows, paths and grader registry use the short name ``bbh_lde5``;
+    its manifest entry was frozen under the long subtask name (2026-10-14), so
+    ``configs/benchmarks.yaml`` maps one to the other explicitly.
+    """
+    return str(bench_cfg.get("manifest_key", bench))
+
+
+def load_frozen_pool(
+    bench: str,
+    bench_cfg: Mapping[str, Any],
+    *,
+    hf_loader: Callable[..., Sequence[Any]],
+    data_root: str | Path | None = None,
+) -> Sequence[Any]:
+    """The pinned pool, offline: BBH from its blob-verified file under the data
+    root (``kvcache.bbh.load_bbh``), every other benchmark through the
+    caller's ``kvcache.datasets.load_benchmark`` (passed in, unchanged)."""
+    if bench_cfg.get("loader") == "bbh_file":
+        from kvcache import bbh
+
+        if str(bench_cfg.get("revision")) != bbh.PINNED_COMMIT:
+            raise ValueError(
+                f"{bench}: configured revision {bench_cfg.get('revision')!r} is "
+                f"not the pinned BBH commit {bbh.PINNED_COMMIT!r}"
+            )
+        root = (
+            data_root if data_root is not None else os.environ.get("REMOTE_DATA_ROOT")
+        )
+        if not root:
+            raise ValueError("BBH needs REMOTE_DATA_ROOT (the pinned file's root)")
+        return bbh.load_bbh(bbh.data_path(Path(root)))
+    return hf_loader(bench, dict(bench_cfg), subset=None, allow_download=False)

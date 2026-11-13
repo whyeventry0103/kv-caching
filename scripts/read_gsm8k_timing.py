@@ -15,6 +15,14 @@ order, same golds, same question hashes) or the read refuses.
 
     python scripts/read_gsm8k_timing.py --dry-run
     python scripts/read_gsm8k_timing.py --runs-root "$REMOTE_RUNS_ROOT/<run>"
+
+The BBH logical-deduction timing bank (2026-11-13) uses the same reader with
+its own config and record; ``bbh_grade`` is dispatched by the benchmark:
+
+    python scripts/read_gsm8k_timing.py \
+        --config configs/experiments/bank_bbh_timing_m5.yaml \
+        --resolution results/diag/meeting5/bbh_lde5_timing/bbh_split_resolution.json \
+        --out results/diag/meeting5/bbh_lde5_timing/bbh_timing_read.json --dry-run
 """
 
 from __future__ import annotations
@@ -59,7 +67,7 @@ def resolution_golds(design: dict[str, Any], resolution: Path) -> dict[str, dict
         # record must be copied next to the code before a read.
         raise ValueError(
             f"resolution record {resolution} is missing; copy the committed "
-            "results/diag/meeting5/gsm8k_timing/split_resolution.json here"
+            "results/diag/meeting5/<bench>_timing/split_resolution.json here"
         )
     rec = json.loads(resolution.read_text(encoding="utf-8"))
     got = [p["pid"] for p in rec["problems"]]

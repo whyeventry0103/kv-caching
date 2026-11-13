@@ -49,4 +49,7 @@ campaigns:
     scope: full-cache GSM8K timing only (24 frozen calibration problems x seeds 11/23, 48 rows)
 
 # Not read by the scheduler. Move into campaigns only after owner approval.
-proposed_campaigns: {}
+proposed_campaigns:
+  M5B-BBH-TIMING:
+    cap_gpu_hours: 2
+    scope: full-cache BBH logical-deduction timing only (25 frozen calibration problems x seeds 11/23, 50 rows)

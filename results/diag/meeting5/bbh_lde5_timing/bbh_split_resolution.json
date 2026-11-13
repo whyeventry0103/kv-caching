@@ -1,0 +1,152 @@
+{
+ "config": "configs/experiments/bank_bbh_timing_m5.yaml",
+ "design": {
+  "benchmark": "bbh_lde5",
+  "first_pids": [
+   "bbh_lde5/100",
+   "bbh_lde5/111",
+   "bbh_lde5/119"
+  ],
+  "held": true,
+  "max_new_tokens": 4096,
+  "n_generations": 50,
+  "n_pool": 250,
+  "n_problems": 25,
+  "revision": "9ee07bd481feebf959a6b59d61ea57bdcf30964d",
+  "seeds": [
+   11,
+   23
+  ],
+  "split": "calibration"
+ },
+ "observed": "2026-11-13, host kvcache-gpu, scripts/run_bank_manifest.py --resolve-only",
+ "problems": [
+  {
+   "gold": "(A)",
+   "pid": "bbh_lde5/100",
+   "question_sha256": "68b592802fadd7b4d957f61b2c83106ec913c931cc410f778786d5693588aafe"
+  },
+  {
+   "gold": "(C)",
+   "pid": "bbh_lde5/111",
+   "question_sha256": "841edde066e018ba813750dc2e14d7e1f583bd5c83b8995881d8da5335f4f1e0"
+  },
+  {
+   "gold": "(D)",
+   "pid": "bbh_lde5/119",
+   "question_sha256": "493fdd7695807c3a6f70a3c60647d13fb2bd64a33a75fce1eb49cbb372e96a02"
+  },
+  {
+   "gold": "(D)",
+   "pid": "bbh_lde5/123",
+   "question_sha256": "7b5b527186ed97fb3c1530aad460ebd4664c6922413c3baad3dd34185eb704ae"
+  },
+  {
+   "gold": "(A)",
+   "pid": "bbh_lde5/129",
+   "question_sha256": "6875f345c00e33712e1b4968bda19f25e9ce6f31a32aa49d7c459ba5423bdf31"
+  },
+  {
+   "gold": "(C)",
+   "pid": "bbh_lde5/151",
+   "question_sha256": "752ea2762a41ab6bccde7dea316ae8e9256a9937f40a017a7752e775737cd6f3"
+  },
+  {
+   "gold": "(D)",
+   "pid": "bbh_lde5/162",
+   "question_sha256": "0641843ef4c6ab0c23b88cab2f2a21860efef3a40fbe974dbb8e188826d1323c"
+  },
+  {
+   "gold": "(D)",
+   "pid": "bbh_lde5/166",
+   "question_sha256": "e6fc7339649bd625c197b8a675dbf5ee7457d58396d35118671dabb30701cfd6"
+  },
+  {
+   "gold": "(B)",
+   "pid": "bbh_lde5/169",
+   "question_sha256": "dd06f3e66b58f2227b258799d387ed5ac2a415e0f4196d4c8f5876b56ccbc8b6"
+  },
+  {
+   "gold": "(B)",
+   "pid": "bbh_lde5/188",
+   "question_sha256": "7989022984391e6f66c2cb6ec0b98bbb72a7d3582a71f27682f5326b89e89197"
+  },
+  {
+   "gold": "(A)",
+   "pid": "bbh_lde5/189",
+   "question_sha256": "c73b7eae29a9307853d44c9f876f883171c3f497a7ec4d1e01ec92116355cbbb"
+  },
+  {
+   "gold": "(E)",
+   "pid": "bbh_lde5/210",
+   "question_sha256": "414f536dac70ca1e0258bd254eede22b495aedbd2d7396323eb43037bff61690"
+  },
+  {
+   "gold": "(B)",
+   "pid": "bbh_lde5/211",
+   "question_sha256": "ed2a4377161b45cb2f0ab58609e9867484604e39e592dd3b25761d9b7555cfe0"
+  },
+  {
+   "gold": "(B)",
+   "pid": "bbh_lde5/22",
+   "question_sha256": "8fd880622dfd319df6c4114d141423f5fe2f104739050ce4f3653911ca6ed20d"
+  },
+  {
+   "gold": "(C)",
+   "pid": "bbh_lde5/227",
+   "question_sha256": "bc26ee1b8e32a062f4a0c6d765b853cbba496cd8cbef5609ee889338841cf9b8"
+  },
+  {
+   "gold": "(E)",
+   "pid": "bbh_lde5/229",
+   "question_sha256": "6b45705dde33b95a124ceb4c44082d5b12040932bce5ea8ed8fa82178974be14"
+  },
+  {
+   "gold": "(B)",
+   "pid": "bbh_lde5/232",
+   "question_sha256": "30ac1594819b9fa2ce9a1f438a624df7dce462a9270b1ed07b0424a522406f43"
+  },
+  {
+   "gold": "(D)",
+   "pid": "bbh_lde5/234",
+   "question_sha256": "89b923a21f8d386b8f049b54435975d66606de55c951f46b47d9a5c902dd007a"
+  },
+  {
+   "gold": "(B)",
+   "pid": "bbh_lde5/25",
+   "question_sha256": "5e8698dd1573f6d3e3b2f0c55a1228f7af43cf7e4fa0f4a5ae8993fbaa66ef70"
+  },
+  {
+   "gold": "(E)",
+   "pid": "bbh_lde5/46",
+   "question_sha256": "7f209ee05b0a57939c195e279fde9a38a69bbcae0e12f76111b3d5eb18441289"
+  },
+  {
+   "gold": "(C)",
+   "pid": "bbh_lde5/47",
+   "question_sha256": "d12cf231f584f36f3ce32239462a2114902343d2b3ddeb1eff30faec5bbb1709"
+  },
+  {
+   "gold": "(A)",
+   "pid": "bbh_lde5/60",
+   "question_sha256": "e7a60392dbc2b8a523ff83273c32fe86bf4bcb46343fcf8ce4e2ed1b387c7266"
+  },
+  {
+   "gold": "(E)",
+   "pid": "bbh_lde5/73",
+   "question_sha256": "9f9d57ef1a473084f6dd1b436593773c6a4b6f3bc46132181d9c7a15e08dca7c"
+  },
+  {
+   "gold": "(C)",
+   "pid": "bbh_lde5/94",
+   "question_sha256": "96ffb02f2f55bcc50f737c8aeca5cbb0bd1576062df8d8d5b840a50e670f9685"
+  },
+  {
+   "gold": "(A)",
+   "pid": "bbh_lde5/97",
+   "question_sha256": "ab174556a759d2bd86383c7c2a14701d29a63688a2224a4456f4c1295450b2c0"
+  }
+ ],
+ "read": "BBH logical-deduction timing split resolved against the blob-verified pinned file on the GPU host (CPU only, offline, no model)",
+ "resolved": 25
+}

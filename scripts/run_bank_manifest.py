@@ -51,7 +51,12 @@ from kvcache.cli import load_config, plan
 from kvcache.datasets import load_benchmark
 from kvcache.generation import generate_full_cache
 from kvcache.io_schema import validate_row
-from kvcache.manifest_problems import frozen_split_pids, select_frozen_split
+from kvcache.manifest_problems import (
+    frozen_split_pids,
+    load_frozen_pool,
+    manifest_key,
+    select_frozen_split,
+)
 from kvcache.manifest_publish import (
     complete_pair_keys,
     pair_identity_problems,
@@ -95,8 +100,9 @@ def resolve_design(config: dict[str, Any]) -> dict[str, Any]:
         raise ValueError("config.manifest needs path and split")
     manifest = json.loads((PROJECT_ROOT / spec["path"]).read_text(encoding="utf-8"))
     bench_cfg = _yaml(PROJECT_ROOT / "configs/benchmarks.yaml")["benchmarks"][bench]
+    mkey = manifest_key(bench, bench_cfg)
     pids = frozen_split_pids(
-        manifest, bench, spec["split"], pinned_revision=str(bench_cfg["revision"])
+        manifest, mkey, spec["split"], pinned_revision=str(bench_cfg["revision"])
     )
     seeds = [int(s) for s in config["seeds"]]
     n_gen = len(pids) * len(seeds)
@@ -109,7 +115,7 @@ def resolve_design(config: dict[str, Any]) -> dict[str, Any]:
         "benchmark": bench,
         "split": spec["split"],
         "pids": pids,
-        "n_pool": int(manifest[bench]["n_pool"]),
+        "n_pool": int(manifest[mkey]["n_pool"]),
         "seeds": seeds,
         "n_generations": n_gen,
         "max_new_tokens": int(config["max_new_tokens"][bench]),
@@ -123,9 +129,7 @@ def load_split(design: dict[str, Any]) -> list[Any]:
     bench_cfg = _yaml(PROJECT_ROOT / "configs/benchmarks.yaml")["benchmarks"][
         design["benchmark"]
     ]
-    pool = load_benchmark(
-        design["benchmark"], bench_cfg, subset=None, allow_download=False
-    )
+    pool = load_frozen_pool(design["benchmark"], bench_cfg, hf_loader=load_benchmark)
     return select_frozen_split(pool, design["pids"], n_pool=design["n_pool"])
 
 

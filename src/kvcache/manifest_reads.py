@@ -62,7 +62,12 @@ def score_grid(
         keys=design_keys(design),
         manifest_split=split,
     )
-    scored = score_rows([r for r, _ in pairs], golds, revision=design["revision"])
+    scored = score_rows(
+        [r for r, _ in pairs],
+        golds,
+        revision=design["revision"],
+        bench=design["benchmark"],
+    )
     cells: dict[str, list[Mapping[str, Any]]] = {}
     for s in scored["scores"]:
         cells.setdefault(f"{s['press']}-{s['budget']}", []).append(s)
@@ -160,6 +165,7 @@ def score_readouts(
         readout_rows(defined, max_answer_tokens=int(design["max_answer_tokens"])),
         golds,
         revision=design["revision"],
+        bench=design["benchmark"],
     )
     cells: dict[str, list[Mapping[str, Any]]] = {}
     for s in scored["scores"]:

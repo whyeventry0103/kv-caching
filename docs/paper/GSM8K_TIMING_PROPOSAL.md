@@ -138,6 +138,31 @@ press family's own gate passes.
 - *Not built:* the full-cache confirmation bank config (the reference),
   reverse readout, and the decomposition read. All wait for the design.
 
+## Approval and the BBH path (2026-11-13)
+
+- *GSM8K pilot APPROVED* by the owner in-session (cap 3 GPU-h, normal window,
+  after the real preflight): campaign `M5B-GSM8K-TIMING` active, job unblocked,
+  config released together (PREREGISTRATION, same date). Calibration and
+  costing only; never policy evidence.
+- *Prompt fit (pre-outcome, CPU, tokenizer only):*
+  `scripts/probe_manifest_prompts.py` →
+  `results/diag/meeting5/replication/prompt_fit.json`. At B=256 every frozen
+  calibration and confirmation problem of both datasets fits `P+64 <= B`
+  (GSM8K 224/224, BBH 225/225), so `B_eff = B` everywhere and the protected and
+  unprotected arms have exactly equal capacity with no relaxed budgets. Median
+  prompt: GSM8K 62 tokens (confirmation), BBH 152; median trace slots at
+  B=256: 194 and 104.
+- *BBH calibration path (HELD):* `configs/experiments/bank_bbh_timing_m5.yaml`
+  (25 frozen calibration problems × seeds 11/23 = 50, cap 4,096), queue job
+  `bank-bbh-timing-m5` (`blocked`), its own capped launch alias
+  `bank_manifest_bbh`, and the proposed campaign `M5B-BBH-TIMING` (2 GPU-h,
+  under `proposed_campaigns`). The manifest runners load BBH from the
+  blob-verified pinned file (`kvcache.manifest_problems.load_frozen_pool`);
+  the timing reader and replication reads dispatch `bbh_grade` by benchmark.
+  Resolution record (host, offline):
+  `results/diag/meeting5/bbh_lde5_timing/bbh_split_resolution.json`.
+  Tests: `tests/test_bbh_replication_path.py`.
+
 ## What comes after (each a separate decision)
 
 1. **Price the matched GSM8K replication.** Use the measured rate and

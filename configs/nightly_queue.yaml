@@ -1372,6 +1372,23 @@ jobs:
     est_output_gb: 0.25
     requires: null
 
+  # M5-B BBH logical-deduction timing pilot (prepared 2026-11-13; HELD, not
+  # approved): 25 frozen calibration problems x seeds 11/23, full cache, cap
+  # 4096. Proposed campaign M5B-BBH-TIMING (configs/campaigns.yaml
+  # proposed_campaigns, not read by the scheduler).
+  - name: bank-bbh-timing-m5
+    command: bank_manifest_bbh
+    config: configs/experiments/bank_bbh_timing_m5.yaml
+    run_name: bank-bbh-timing-m5
+    total: 50
+    seeds: [11, 23]
+    bench: bbh_lde5
+    min_free_gb: 28
+    progress_kind: manifest_pairs
+    est_output_gb: 0.15
+    requires: null
+    blocked: "BBH timing held: requires owner approval and passing shared-filesystem preflight"
+
   # ======================================================================
   # R.14 postprocessing: CPU stages run inline by every orchestrator tick
   # (never given a GPU; also at the 10:50 tick). Each runs its registered

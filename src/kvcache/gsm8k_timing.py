@@ -28,6 +28,7 @@ scored:
 from __future__ import annotations
 
 import json
+import re
 import statistics
 from collections.abc import Iterable, Mapping
 from fractions import Fraction
@@ -39,6 +40,7 @@ from kvcache.task_scoring import FINAL, rescore
 from kvcache.token_ids import text_sha256
 
 BUDGETS = (256, 1024)
+BBH = "bbh_lde5"  # kvcache.bbh.NAME, the registered BBH scorer key
 SCHEMA = "gsm8k-timing-read-v1"
 
 Key = tuple[str, str, str, int]
@@ -167,21 +169,39 @@ def validate_pairs(
     return pairs
 
 
+def _gold_problem(bench: str, gold: str) -> str | None:
+    """Why a gold cannot be scored by the benchmark's frozen grader, or None."""
+    if bench == "gsm8k":
+        try:
+            Fraction(gold)
+        except (ValueError, ZeroDivisionError):
+            return "is not a number"
+        return None
+    if bench == BBH:
+        # the pinned file's target form, which kvcache.bbh.parse_bbh enforces
+        return None if re.fullmatch(r"\([A-E]\)", gold) else "is not one option"
+    return f"has no registered gold check for {bench!r}"
+
+
 def score_rows(
-    rows: list[Mapping[str, Any]], golds: Mapping[str, str], *, revision: str
+    rows: list[Mapping[str, Any]],
+    golds: Mapping[str, str],
+    *,
+    revision: str,
+    bench: str = "gsm8k",
 ) -> dict[str, Any]:
-    """The registered GSM8K read-time scores (``task_scoring.rescore``), in row
-    order, after checking every needed gold is a number; ValueError otherwise."""
+    """The registered read-time scores (``task_scoring.rescore``: ``gsm8k_grade``
+    or ``bbh_grade`` by benchmark), in row order, after checking every needed
+    gold is well-formed for that grader; ValueError otherwise."""
     for pid in {str(r["pid"]) for r in rows}:
         if pid not in golds:
             raise ValueError(f"no gold answer for {pid}")
-        try:
-            Fraction(str(golds[pid]))
-        except (ValueError, ZeroDivisionError) as exc:
-            raise ValueError(f"gold for {pid} is not a number: {golds[pid]!r}") from exc
-    scored = rescore(rows, golds, bench="gsm8k", revision=revision)
+        why = _gold_problem(bench, str(golds[pid]))
+        if why:
+            raise ValueError(f"gold for {pid} {why}: {golds[pid]!r}")
+    scored = rescore(rows, golds, bench=bench, revision=revision)
     if scored["status"] != FINAL:
-        raise ValueError(f"GSM8K re-score INVALID: {scored['problems']}")
+        raise ValueError(f"{bench} re-score INVALID: {scored['problems']}")
     return scored
 
 
@@ -198,9 +218,10 @@ def summarize(
     golds: Mapping[str, str],
     *,
     revision: str,
+    bench: str = "gsm8k",
 ) -> dict[str, Any]:
-    """Accuracy under the registered GSM8K scorer, truncation, lengths, timing."""
-    scored = score_rows([r for r, _ in pairs], golds, revision=revision)
+    """Accuracy under the registered scorer, truncation, lengths, timing."""
+    scored = score_rows([r for r, _ in pairs], golds, revision=revision, bench=bench)
     conditions = []
     for (row, side), score in zip(pairs, scored["scores"], strict=True):
         correct, rule = score["correct"], score["rule"]
@@ -284,6 +305,11 @@ def read_timing(
         "expected_keys": len(expected_keys(pids, seeds)),
         "validated_pairs": len(pairs),
         "quarantined_records": _quarantined(Path(runs_root)),
-        "score_source": "gsm8k_grade on the stored trace; row 'correct' ignored",
-        **summarize(pairs, golds, revision=str(manifest_split["revision"])),
+        "score_source": (
+            f"{'bbh_grade' if bench == BBH else 'gsm8k_grade'} on the stored "
+            "trace; row 'correct' ignored"
+        ),
+        **summarize(
+            pairs, golds, revision=str(manifest_split["revision"]), bench=bench
+        ),
     }

@@ -26,6 +26,19 @@ benchmarks:
     config: main
     split: test
     extraction: hash_numeric
+  bbh_lde5:
+    # BIG-Bench Hard logical_deduction_five_objects (Meeting 5 M5-B non-math
+    # task). Pinned by the OWNER 2026-10-14 (kvcache.bbh.PINNED_COMMIT /
+    # PINNED_BLOB). A git file, not an HF dataset: kvcache.bbh.load_bbh verifies
+    # the blob and the 250 examples; kvcache.manifest_problems.load_frozen_pool
+    # reads it from $REMOTE_DATA_ROOT/bbh/<commit>/. Frozen splits live under
+    # the manifest's long subtask name.
+    handle: suzgunmirac/BIG-Bench-Hard
+    revision: 9ee07bd481feebf959a6b59d61ea57bdcf30964d
+    loader: bbh_file
+    manifest_key: bbh_logical_deduction_five_objects
+    split: test
+    extraction: option
   folio:
     handle: yale-lily/folio
     split: validation
