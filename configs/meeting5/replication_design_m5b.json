@@ -1,0 +1,93 @@
+{
+ "schema": "m5b-replication-design-v1",
+ "status": "PROPOSED 2026-11-13 -- not frozen; freezes (per dataset) only after its full-cache calibration read and before any confirmation outcome",
+ "plan": "docs/paper/MEETING5_REVIEW_AND_PLAN.md 8.2, 8.4, 9.2-9.4; docs/paper/M5B_REPLICATION_APPROVAL_REQUEST.md",
+ "model": "r1_distill_qwen_7b",
+ "split": "confirmation (configs/meeting5/problem_manifests.json; frozen 2026-10-14)",
+ "seeds": [11, 23],
+ "budget": 256,
+ "capacity_rule": "B_eff = max(B, P + 64), identical for every policy and both protection arms; at B=256 every confirmation problem of both datasets fits (B_eff = B), results/diag/meeting5/replication/prompt_fit.json",
+ "policies": {
+  "random": {"protected": "random_pp (pp family)", "unprotected": "random"},
+  "streamingllm": {"protected": "streamingllm_pp (pp family)", "unprotected": "streamingllm"},
+  "h2o_style": {"protected": "h2o_style_pp_v1 (protsel family)", "unprotected": "h2o (ObservedAttentionPress, no recency reservation; eager)"},
+  "rkv": {"protected": "rkv_pp_v1 (rkv_pp family; certified)", "unprotected": "rkv (certified port)"}
+ },
+ "stages": [
+  {
+   "id": "G1",
+   "benchmark": "gsm8k",
+   "answers": "Under prompt protection: Random - StreamingLLM and Random - H2O-style (scientific, Holm over 2), Random - R-KV (descriptive), accuracy loss vs full cache, and the forward-readout decomposition. Cannot estimate the effect of protection.",
+   "n_problems": 200, "n_seeds": 2, "max_new_tokens": 8192, "max_answer_tokens": 2048,
+   "cells": [
+    {"name": "bank-gsm8k-confirmation-m5b", "kind": "bank", "family": "fullcache"},
+    {"name": "grid-gsm8k-pp256-m5b", "kind": "grid", "family": "pp", "presses": ["random_pp", "streamingllm_pp"]},
+    {"name": "grid-gsm8k-h2opp256-m5b", "kind": "grid", "family": "protsel", "presses": ["h2o_style_pp_v1"]},
+    {"name": "grid-gsm8k-rkvpp256-m5b", "kind": "grid", "family": "rkv_pp", "presses": ["rkv_pp_v1"]},
+    {"name": "readout-gsm8k-protected256-m5b", "kind": "readout", "family": "pp/protsel/rkv_pp", "presses": ["random_pp", "streamingllm_pp", "h2o_style_pp_v1", "rkv_pp_v1"]}
+   ]
+  },
+  {
+   "id": "G2",
+   "benchmark": "gsm8k",
+   "answers": "Unprotected Random - StreamingLLM / Random - H2O-style (the historical comparison) and the protection-by-policy interaction I_j (registered: problem-level t, Holm over the two scientific pairings).",
+   "n_problems": 200, "n_seeds": 2, "max_new_tokens": 8192, "max_answer_tokens": 2048,
+   "cells": [
+    {"name": "grid-gsm8k-base256-m5b", "kind": "grid", "family": "base", "presses": ["random", "streamingllm", "rkv"]},
+    {"name": "grid-gsm8k-h2o256-m5b", "kind": "grid", "family": "base (eager)", "presses": ["h2o"]},
+    {"name": "readout-gsm8k-unprotected256-m5b", "kind": "readout", "family": "base", "presses": ["random", "streamingllm", "rkv", "h2o"]}
+   ]
+  },
+  {
+   "id": "GR",
+   "benchmark": "gsm8k",
+   "answers": "Reverse readout (separately priced; brackets the residual). Not needed for the supervisor question.",
+   "n_problems": 200, "n_seeds": 2, "max_new_tokens": 8192, "max_answer_tokens": 2048,
+   "cells": [
+    {"name": "reverse-readout-gsm8k-256-m5b", "kind": "reverse", "family": "all", "presses": ["random_pp", "streamingllm_pp", "h2o_style_pp_v1", "rkv_pp_v1", "random", "streamingllm", "rkv", "h2o"]}
+   ]
+  },
+  {
+   "id": "BP",
+   "benchmark": "bbh_lde5",
+   "answers": "BBH full-cache timing/calibration (25 frozen calibration problems x 2 seeds): accuracy, truncation at 4096, lengths, eviction exposure. Never policy evidence.",
+   "n_problems": 25, "n_seeds": 2, "max_new_tokens": 4096, "max_answer_tokens": 2048,
+   "cells": [
+    {"name": "bank-bbh-timing-m5", "kind": "bank", "family": "fullcache"}
+   ]
+  },
+  {
+   "id": "B1",
+   "benchmark": "bbh_lde5",
+   "answers": "As G1, on BBH logical deduction (five objects): the non-math check.",
+   "n_problems": 200, "n_seeds": 2, "max_new_tokens": 4096, "max_answer_tokens": 2048,
+   "cells": [
+    {"name": "bank-bbh-confirmation-m5b", "kind": "bank", "family": "fullcache"},
+    {"name": "grid-bbh-pp256-m5b", "kind": "grid", "family": "pp", "presses": ["random_pp", "streamingllm_pp"]},
+    {"name": "grid-bbh-h2opp256-m5b", "kind": "grid", "family": "protsel", "presses": ["h2o_style_pp_v1"]},
+    {"name": "grid-bbh-rkvpp256-m5b", "kind": "grid", "family": "rkv_pp", "presses": ["rkv_pp_v1"]},
+    {"name": "readout-bbh-protected256-m5b", "kind": "readout", "family": "pp/protsel/rkv_pp", "presses": ["random_pp", "streamingllm_pp", "h2o_style_pp_v1", "rkv_pp_v1"]}
+   ]
+  },
+  {
+   "id": "B2",
+   "benchmark": "bbh_lde5",
+   "answers": "As G2, on BBH.",
+   "n_problems": 200, "n_seeds": 2, "max_new_tokens": 4096, "max_answer_tokens": 2048,
+   "cells": [
+    {"name": "grid-bbh-base256-m5b", "kind": "grid", "family": "base", "presses": ["random", "streamingllm", "rkv"]},
+    {"name": "grid-bbh-h2o256-m5b", "kind": "grid", "family": "base (eager)", "presses": ["h2o"]},
+    {"name": "readout-bbh-unprotected256-m5b", "kind": "readout", "family": "base", "presses": ["random", "streamingllm", "rkv", "h2o"]}
+   ]
+  },
+  {
+   "id": "BR",
+   "benchmark": "bbh_lde5",
+   "answers": "Reverse readout on BBH (separately priced).",
+   "n_problems": 200, "n_seeds": 2, "max_new_tokens": 4096, "max_answer_tokens": 2048,
+   "cells": [
+    {"name": "reverse-readout-bbh-256-m5b", "kind": "reverse", "family": "all", "presses": ["random_pp", "streamingllm_pp", "h2o_style_pp_v1", "rkv_pp_v1", "random", "streamingllm", "rkv", "h2o"]}
+   ]
+  }
+ ]
+}

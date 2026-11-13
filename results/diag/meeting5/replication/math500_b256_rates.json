@@ -1,0 +1,95 @@
+{
+ "fc_bank": {
+  "mean_tokens": 3743.9475,
+  "n": 2000,
+  "run": "math500-fc-powered-merged"
+ },
+ "presses": {
+  "h2o": {
+   "inflation": 1.2708135624352206,
+   "mean_tokens": 4358.7825,
+   "n": 400.0,
+   "n_matched": 400.0,
+   "s_per_token": 0.03215991762863056,
+   "truncation_rate": 0.105
+  },
+  "h2o_style_pp_v1": {
+   "inflation": 1.5326997899364854,
+   "mean_tokens": 5257.03,
+   "n": 400.0,
+   "n_matched": 400.0,
+   "s_per_token": 0.026501606628331852,
+   "truncation_rate": 0.055
+  },
+  "random": {
+   "inflation": 2.34516234367324,
+   "mean_tokens": 8043.7075,
+   "n": 400.0,
+   "n_matched": 400.0,
+   "s_per_token": 0.02689758560719755,
+   "truncation_rate": 0.2325
+  },
+  "random_pp": {
+   "inflation": 1.7322936574229975,
+   "mean_tokens": 5941.62,
+   "n": 400.0,
+   "n_matched": 400.0,
+   "s_per_token": 0.023194935473201866,
+   "truncation_rate": 0.045
+  },
+  "rkv": {
+   "inflation": 2.3419071609646305,
+   "mean_tokens": 8032.5425,
+   "n": 400.0,
+   "n_matched": 400.0,
+   "s_per_token": 0.02462750839573297,
+   "truncation_rate": 0.135
+  },
+  "rkv_pp_v1": {
+   "inflation": 2.127514092914839,
+   "mean_tokens": 7297.1925,
+   "n": 400.0,
+   "n_matched": 400.0,
+   "s_per_token": 0.023717122872367095,
+   "truncation_rate": 0.13
+  },
+  "streamingllm": {
+   "inflation": 1.5375716307838532,
+   "mean_tokens": 5273.74,
+   "n": 400.0,
+   "n_matched": 400.0,
+   "s_per_token": 0.024748487098991145,
+   "truncation_rate": 0.07
+  },
+  "streamingllm_pp": {
+   "inflation": 1.9324626120472372,
+   "mean_tokens": 6628.1825,
+   "n": 400.0,
+   "n_matched": 400.0,
+   "s_per_token": 0.023259518623850544,
+   "truncation_rate": 0.0975
+  }
+ },
+ "readout": {
+  "forward": {
+   "job": "protsel-pilot-readout",
+   "mean_answer_tokens": 551.875,
+   "mean_replayed_tokens": 2368.625,
+   "n_launches": 1,
+   "n_records": 16,
+   "s_per_token": 0.017740986132511558,
+   "settled_gpu_hours": 0.280278
+  },
+  "reverse": {
+   "job": "protsel-pilot-reverse",
+   "mean_answer_tokens": 431.0625,
+   "mean_replayed_tokens": 5679.5625,
+   "n_launches": 1,
+   "n_records": 16,
+   "s_per_token": 0.014309088677508438,
+   "settled_gpu_hours": 0.438611
+  }
+ },
+ "schema": "m5b-replication-rates-v1",
+ "source": "MATH-500, Qwen-7B (R1-Distill), B=256 complete cells; P3 pilot readouts"
+}
