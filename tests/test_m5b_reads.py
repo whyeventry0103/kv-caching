@@ -96,15 +96,17 @@ def test_readout_uses_only_keys_defined_for_every_compared_arm():
     assert got["undefined_by_arm"] == {"random": 1, "streamingllm": 0}
     rnd = got["arms"]["random"]
     # keys a11, a23, b11: free 1,1,1; readout 1,1,0 -> residual (free - ro)
-    # per key 0,0,1; problem means a=0, b=1 -> 0.5
-    assert rnd["residual"]["mean"] == pytest.approx(0.5)
-    # readout change vs FC (all correct): 0,0,-1 -> a=0, b=-1 -> -0.5
-    assert rnd["readout_change"]["mean"] == pytest.approx(-0.5)
+    # per key 0,0,1; conditions POOLED (Amendment K) -> 1/3, not the
+    # equal-problem 0.5
+    assert rnd["residual"]["mean"] == pytest.approx(1 / 3)
+    assert rnd["residual"]["weighting"].startswith("conditions pooled")
+    # readout change vs FC (all correct): 0,0,-1 -> -1/3
+    assert rnd["readout_change"]["mean"] == pytest.approx(-1 / 3)
     gap = got["contrasts"]["random-streamingllm"]
-    # free gap: random 1,1,1 vs slm 1,1,0 -> 0,0,1 -> 0.5; readout gap 0
-    assert gap["free"]["mean"] == pytest.approx(0.5)
+    # free gap: random 1,1,1 vs slm 1,1,0 -> 0,0,1 -> 1/3; readout gap 0
+    assert gap["free"]["mean"] == pytest.approx(1 / 3)
     assert gap["readout"]["mean"] == pytest.approx(0.0)
-    assert gap["residual"]["mean"] == pytest.approx(0.5)
+    assert gap["residual"]["mean"] == pytest.approx(1 / 3)
 
 
 def test_exposure_by_hand():

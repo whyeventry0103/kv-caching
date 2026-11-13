@@ -21,7 +21,13 @@ one dataset at a time and never pooled across datasets (plan 9.4):
   only when its boundary is defined for every arm compared; undefined keys are
   counted per arm and never scored. On those keys the residual is the
   accuracy change unexplained by on-reference readout,
-  ``(free - FC) - (readout - FC)`` -- never a measured causal effect;
+  ``(free - FC) - (readout - FC)`` -- never a measured causal effect. Readout
+  quantities pool the defined CONDITIONS (the paper's Amendment K
+  complete-case estimator), with problem-cluster bootstrap CIs; problems
+  contribute unequal numbers of defined keys, so this is not the equal-problem
+  weighting of the free-running contrasts (fixed 2026-11-13, before any
+  GSM8K/BBH outcome, after the AIME re-read showed the two weightings differ:
+  Random residual -0.118 pooled vs -0.185 equal-problem);
 * exposure: the realized budget ratio each row records, the prune count where
   the row carries a protection report (recorded), and the overflow
   ``P + T - B_eff`` from the row's own prompt and trace lengths (derived; the
@@ -58,6 +64,23 @@ def _ci(values: Mapping[Key, float], *, n_resamples: int, seed: int) -> dict:
         "ci95": bs["ci95"],
         "n_problems": len(pm),
         "n_conditions": len(values),
+    }
+
+
+def _ci_pooled(values: Mapping[Key, float], *, n_resamples: int, seed: int) -> dict:
+    """Condition-pooled mean, problem-cluster bootstrap: the paper's readout
+    decomposition estimator (Amendment K complete-case), used on matched
+    defined keys, where problems contribute unequal numbers of conditions."""
+    by: dict[str, list[float]] = {}
+    for (pid, _), v in values.items():
+        by.setdefault(pid, []).append(float(v))
+    bs = cluster_bootstrap_mean(by, n_resamples=n_resamples, seed=seed)
+    return {
+        "mean": bs["mean"],
+        "ci95": bs["ci95"],
+        "n_problems": len(by),
+        "n_conditions": len(values),
+        "weighting": "conditions pooled (Amendment K), problem-cluster bootstrap",
     }
 
 
@@ -141,13 +164,13 @@ def readout_block(
         ro = vals(lambda k, a=a: readouts[a][k]["correct"])
         ref = vals(lambda k: fc[k]["correct"])
         out["arms"][a[0]] = {
-            "free": _ci(free, n_resamples=n_resamples, seed=seed),
-            "readout": _ci(ro, n_resamples=n_resamples, seed=seed),
-            "fc_same_keys": _ci(ref, n_resamples=n_resamples, seed=seed),
-            "readout_change": _ci(
+            "free": _ci_pooled(free, n_resamples=n_resamples, seed=seed),
+            "readout": _ci_pooled(ro, n_resamples=n_resamples, seed=seed),
+            "fc_same_keys": _ci_pooled(ref, n_resamples=n_resamples, seed=seed),
+            "readout_change": _ci_pooled(
                 {k: ro[k] - ref[k] for k in keys}, n_resamples=n_resamples, seed=seed
             ),
-            "residual": _ci(
+            "residual": _ci_pooled(
                 {k: free[k] - ro[k] for k in keys}, n_resamples=n_resamples, seed=seed
             ),
         }
@@ -158,7 +181,7 @@ def readout_block(
         a = (j, protected)
         gap = {}
         for what, src in (("free", arms), ("readout", readouts)):
-            gap[what] = _ci(
+            gap[what] = _ci_pooled(
                 {
                     k: float(src[r][k]["correct"]) - float(src[a][k]["correct"])
                     for k in keys
@@ -166,7 +189,7 @@ def readout_block(
                 n_resamples=n_resamples,
                 seed=seed,
             )
-        gap["residual"] = _ci(
+        gap["residual"] = _ci_pooled(
             {
                 k: (float(arms[r][k]["correct"]) - float(readouts[r][k]["correct"]))
                 - (float(arms[a][k]["correct"]) - float(readouts[a][k]["correct"]))

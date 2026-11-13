@@ -1,0 +1,427 @@
+{
+ "cells": {
+  "random": "FINAL",
+  "rkv": "FINAL",
+  "streamingllm": "FINAL"
+ },
+ "label": "PRIOR EVIDENCE, differently configured: AIME-24, Qwen-7B, 30 problems x 4 seeds, B=2048, prompt evictable only, Random / StreamingLLM / R-KV (no H2O-style). Not the new four-policy replication; no protection arm, so no protection effect is estimable.",
+ "read": {
+  "arms": {
+   "random-P": {
+    "accuracy": {
+     "ci95": [
+      0.15,
+      0.425
+     ],
+     "mean": 0.2833333333333333,
+     "n_conditions": 120,
+     "n_problems": 30
+    },
+    "exposure": {
+     "exposure_source": "ratio recorded; prunes recorded where a protection report exists; overflow derived from recorded prompt and trace lengths",
+     "n_prunes_recorded": null,
+     "n_with_prune_record": 0,
+     "overflow_reached_rate": 0.9916666666666667,
+     "overflow_tokens_when_reached": {
+      "median": 9012.0,
+      "p10": 1627.0,
+      "p90": 14488.0
+     },
+     "realized_ratio": {
+      "median": 0.187708979186282,
+      "p10": 0.12385099177552007,
+      "p90": 0.5572789115646258
+     }
+    },
+    "loss_vs_full_cache": {
+     "ci95": [
+      -0.15833333333333333,
+      0.0
+     ],
+     "mean": -0.075,
+     "n_conditions": 120,
+     "n_problems": 30
+    },
+    "truncation_rate": 0.30833333333333335
+   },
+   "rkv-P": {
+    "accuracy": {
+     "ci95": [
+      0.1,
+      0.35833333333333334
+     ],
+     "mean": 0.21666666666666667,
+     "n_conditions": 120,
+     "n_problems": 30
+    },
+    "exposure": {
+     "exposure_source": "ratio recorded; prunes recorded where a protection report exists; overflow derived from recorded prompt and trace lengths",
+     "n_prunes_recorded": null,
+     "n_with_prune_record": 0,
+     "overflow_reached_rate": 0.9916666666666667,
+     "overflow_tokens_when_reached": {
+      "median": 14393.0,
+      "p10": 1916.0,
+      "p90": 14492.0
+     },
+     "realized_ratio": {
+      "median": 0.12457799915146003,
+      "p10": 0.12382103990326482,
+      "p90": 0.5166498486377397
+     }
+    },
+    "loss_vs_full_cache": {
+     "ci95": [
+      -0.23333333333333334,
+      -0.058333333333333334
+     ],
+     "mean": -0.14166666666666666,
+     "n_conditions": 120,
+     "n_problems": 30
+    },
+    "truncation_rate": 0.45
+   },
+   "streamingllm-P": {
+    "accuracy": {
+     "ci95": [
+      0.041666666666666664,
+      0.25833333333333336
+     ],
+     "mean": 0.14166666666666666,
+     "n_conditions": 120,
+     "n_problems": 30
+    },
+    "exposure": {
+     "exposure_source": "ratio recorded; prunes recorded where a protection report exists; overflow derived from recorded prompt and trace lengths",
+     "n_prunes_recorded": null,
+     "n_with_prune_record": 0,
+     "overflow_reached_rate": 0.9916666666666667,
+     "overflow_tokens_when_reached": {
+      "median": 8396.0,
+      "p10": 1419.0,
+      "p90": 14447.0
+     },
+     "realized_ratio": {
+      "median": 0.19936264505221174,
+      "p10": 0.1241588360109124,
+      "p90": 0.5907124314969714
+     }
+    },
+    "loss_vs_full_cache": {
+     "ci95": [
+      -0.3333333333333333,
+      -0.10833333333333334
+     ],
+     "mean": -0.21666666666666667,
+     "n_conditions": 120,
+     "n_problems": 30
+    },
+    "truncation_rate": 0.23333333333333334
+   }
+  },
+  "full_cache": {
+   "accuracy": {
+    "ci95": [
+     0.21666666666666667,
+     0.49166666666666664
+    ],
+    "mean": 0.35833333333333334,
+    "n_conditions": 120,
+    "n_problems": 30
+   },
+   "truncation_rate": 0.225
+  },
+  "n_conditions": 120,
+  "n_problems": 30,
+  "protection_interaction": {
+   "status": "NOT ESTIMABLE",
+   "why": "both protection arms are needed for every policy; a protected-only stage compares policies under protection but cannot estimate the effect of protection"
+  },
+  "sides": {
+   "protected": {
+    "status": "NOT RUN"
+   },
+   "unprotected": {
+    "contrasts": {
+     "random-rkv": {
+      "ci95": [
+       0.008333333333333333,
+       0.14166666666666666
+      ],
+      "mean": 0.06666666666666667,
+      "n_conditions": 120,
+      "n_problems": 30,
+      "role": "descriptive"
+     },
+     "random-streamingllm": {
+      "ci95": [
+       0.041666666666666664,
+       0.25
+      ],
+      "mean": 0.14166666666666666,
+      "n_conditions": 120,
+      "n_problems": 30,
+      "role": "scientific"
+     }
+    },
+    "readout": {
+     "arms": {
+      "random": {
+       "fc_same_keys": {
+        "ci95": [
+         0.2903225806451613,
+         0.651685393258427
+        ],
+        "mean": 0.46236559139784944,
+        "n_conditions": 93,
+        "n_problems": 28,
+        "weighting": "conditions pooled (Amendment K), problem-cluster bootstrap"
+       },
+       "free": {
+        "ci95": [
+         0.19318181818181818,
+         0.5113636363636364
+        ],
+        "mean": 0.34408602150537637,
+        "n_conditions": 93,
+        "n_problems": 28,
+        "weighting": "conditions pooled (Amendment K), problem-cluster bootstrap"
+       },
+       "readout": {
+        "ci95": [
+         0.2903225806451613,
+         0.651685393258427
+        ],
+        "mean": 0.46236559139784944,
+        "n_conditions": 93,
+        "n_problems": 28,
+        "weighting": "conditions pooled (Amendment K), problem-cluster bootstrap"
+       },
+       "readout_change": {
+        "ci95": [
+         0.0,
+         0.0
+        ],
+        "mean": 0.0,
+        "n_conditions": 93,
+        "n_problems": 28,
+        "weighting": "conditions pooled (Amendment K), problem-cluster bootstrap"
+       },
+       "residual": {
+        "ci95": [
+         -0.2413793103448276,
+         -0.019417475728155338
+        ],
+        "mean": -0.11827956989247312,
+        "n_conditions": 93,
+        "n_problems": 28,
+        "weighting": "conditions pooled (Amendment K), problem-cluster bootstrap"
+       }
+      },
+      "rkv": {
+       "fc_same_keys": {
+        "ci95": [
+         0.2903225806451613,
+         0.651685393258427
+        ],
+        "mean": 0.46236559139784944,
+        "n_conditions": 93,
+        "n_problems": 28,
+        "weighting": "conditions pooled (Amendment K), problem-cluster bootstrap"
+       },
+       "free": {
+        "ci95": [
+         0.12631578947368421,
+         0.43333333333333335
+        ],
+        "mean": 0.26881720430107525,
+        "n_conditions": 93,
+        "n_problems": 28,
+        "weighting": "conditions pooled (Amendment K), problem-cluster bootstrap"
+       },
+       "readout": {
+        "ci95": [
+         0.2903225806451613,
+         0.651685393258427
+        ],
+        "mean": 0.46236559139784944,
+        "n_conditions": 93,
+        "n_problems": 28,
+        "weighting": "conditions pooled (Amendment K), problem-cluster bootstrap"
+       },
+       "readout_change": {
+        "ci95": [
+         0.0,
+         0.0
+        ],
+        "mean": 0.0,
+        "n_conditions": 93,
+        "n_problems": 28,
+        "weighting": "conditions pooled (Amendment K), problem-cluster bootstrap"
+       },
+       "residual": {
+        "ci95": [
+         -0.32967032967032966,
+         -0.08333333333333333
+        ],
+        "mean": -0.1935483870967742,
+        "n_conditions": 93,
+        "n_problems": 28,
+        "weighting": "conditions pooled (Amendment K), problem-cluster bootstrap"
+       }
+      },
+      "streamingllm": {
+       "fc_same_keys": {
+        "ci95": [
+         0.2903225806451613,
+         0.651685393258427
+        ],
+        "mean": 0.46236559139784944,
+        "n_conditions": 93,
+        "n_problems": 28,
+        "weighting": "conditions pooled (Amendment K), problem-cluster bootstrap"
+       },
+       "free": {
+        "ci95": [
+         0.056818181818181816,
+         0.33
+        ],
+        "mean": 0.1827956989247312,
+        "n_conditions": 93,
+        "n_problems": 28,
+        "weighting": "conditions pooled (Amendment K), problem-cluster bootstrap"
+       },
+       "readout": {
+        "ci95": [
+         0.2903225806451613,
+         0.651685393258427
+        ],
+        "mean": 0.46236559139784944,
+        "n_conditions": 93,
+        "n_problems": 28,
+        "weighting": "conditions pooled (Amendment K), problem-cluster bootstrap"
+       },
+       "readout_change": {
+        "ci95": [
+         0.0,
+         0.0
+        ],
+        "mean": 0.0,
+        "n_conditions": 93,
+        "n_problems": 28,
+        "weighting": "conditions pooled (Amendment K), problem-cluster bootstrap"
+       },
+       "residual": {
+        "ci95": [
+         -0.4418604651162791,
+         -0.14423076923076922
+        ],
+        "mean": -0.27956989247311825,
+        "n_conditions": 93,
+        "n_problems": 28,
+        "weighting": "conditions pooled (Amendment K), problem-cluster bootstrap"
+       }
+      }
+     },
+     "contrasts": {
+      "random-rkv": {
+       "free": {
+        "ci95": [
+         0.0,
+         0.16853932584269662
+        ],
+        "mean": 0.07526881720430108,
+        "n_conditions": 93,
+        "n_problems": 28,
+        "weighting": "conditions pooled (Amendment K), problem-cluster bootstrap"
+       },
+       "readout": {
+        "ci95": [
+         0.0,
+         0.0
+        ],
+        "mean": 0.0,
+        "n_conditions": 93,
+        "n_problems": 28,
+        "weighting": "conditions pooled (Amendment K), problem-cluster bootstrap"
+       },
+       "residual": {
+        "ci95": [
+         0.0,
+         0.16853932584269662
+        ],
+        "mean": 0.07526881720430108,
+        "n_conditions": 93,
+        "n_problems": 28,
+        "weighting": "conditions pooled (Amendment K), problem-cluster bootstrap"
+       }
+      },
+      "random-streamingllm": {
+       "free": {
+        "ci95": [
+         0.043478260869565216,
+         0.29
+        ],
+        "mean": 0.16129032258064516,
+        "n_conditions": 93,
+        "n_problems": 28,
+        "weighting": "conditions pooled (Amendment K), problem-cluster bootstrap"
+       },
+       "readout": {
+        "ci95": [
+         0.0,
+         0.0
+        ],
+        "mean": 0.0,
+        "n_conditions": 93,
+        "n_problems": 28,
+        "weighting": "conditions pooled (Amendment K), problem-cluster bootstrap"
+       },
+       "residual": {
+        "ci95": [
+         0.043478260869565216,
+         0.29
+        ],
+        "mean": 0.16129032258064516,
+        "n_conditions": 93,
+        "n_problems": 28,
+        "weighting": "conditions pooled (Amendment K), problem-cluster bootstrap"
+       }
+      }
+     },
+     "matched_defined_keys": 93,
+     "status": "FINAL",
+     "undefined_by_arm": {
+      "random": 27,
+      "rkv": 27,
+      "streamingllm": 27
+     }
+    },
+    "registered_inference": {
+     "alpha": 0.05,
+     "family_size": 1,
+     "members": {
+      "random-streamingllm": {
+       "df": 29,
+       "mean": 0.14166666666666666,
+       "n_conditions": 120,
+       "n_problems": 30,
+       "p": 0.012478173238653406,
+       "p_holm": 0.012478173238653406,
+       "reject_at_alpha": true,
+       "sd": 0.29127642201693654,
+       "se": 0.053179555602690186,
+       "status": "TESTED",
+       "t": 2.6639309986919146
+      }
+     },
+     "note": "bootstrap CIs elsewhere in this read are DESCRIPTIVE; this block is the registered family-level test",
+     "procedure": "two-sided one-sample t test of problem-level contrasts (seeds averaged within problem), Holm over the family"
+    },
+    "status": "FINAL"
+   }
+  },
+  "status": "FINAL"
+ },
+ "schema": "m5b-aime-audit-v1"
+}

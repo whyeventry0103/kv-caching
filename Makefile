@@ -168,6 +168,7 @@ dryrun:
 	$(PYTHON) scripts/plan_replication_cost.py --dry-run
 	$(PYTHON) scripts/report_m5b_replication.py --bench gsm8k --dry-run
 	$(PYTHON) scripts/report_m5b_replication.py --bench bbh --dry-run
+	$(PYTHON) scripts/audit_aime_m5b.py --dry-run
 	$(PYTHON) scripts/run_bank_manifest.py --config configs/experiments/bank_gsm8k_confirmation_m5b.yaml --dry-run
 	$(PYTHON) scripts/run_grid_manifest.py --config configs/experiments/grid_gsm8k_pp256_m5b.yaml --dry-run
 	$(PYTHON) scripts/run_readout_manifest.py --config configs/experiments/readout_gsm8k_pp256_m5b.yaml --dry-run
