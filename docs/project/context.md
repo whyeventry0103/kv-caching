@@ -24,6 +24,12 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-11-13 PKT — GSM8K timing pilot APPROVED (owner, in-session): campaign `M5B-GSM8K-TIMING` active (cap 3 GPU-h), job `bank-gsm8k-timing-m5` unblocked, config released — all in one commit. First eligible tick 2026-11-14 01:45 Dubai.**
+  - **Scope.** 24 frozen GSM8K calibration problems × seeds 11/23, full cache, R1-Distill-Qwen-7B, cap 8192 → 48 result/token pairs. Calibration and costing only; never policy evidence.
+  - **Record.** PREREGISTRATION "M5-B GSM8K timing pilot approved (2026-11-13)". Held guard still tested on a held copy; released runner still refuses without `--i-understand`; a test pins the reservation at ≤ 3 GPU-h.
+  - **Read.** `scripts/read_gsm8k_timing.py` (FINAL only with all 48 pairs; frozen `gsm8k_grade`; truncated = incorrect).
+  - **Not approved.** GSM8K replication cells, BBH pilot, reverse readout — a consolidated approval request follows the pilot read.
+
   **★★★★★ 2026-11-11 PKT — CI repaired (red since 2026-10-17); owner-approved disk cleanup; real launch preflight PASSES. GSM8K pilot still HELD (no campaign, not queued to run).**
   - **CI.** The 19 failures had two causes.
     - Smoke-bundle validator: `git archive <producing_commit>` failed on the depth-1 checkout. Fixed with `fetch-depth: 0` in `.github/workflows/ci.yml`.

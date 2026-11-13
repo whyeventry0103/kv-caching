@@ -39,9 +39,14 @@ campaigns:
     cap_gpu_hours: 4
     approved: 2026-10-17
     scope: information-channel calibration (info-calibration-m5c, 640 rows; never confirmatory)
-
-# Not read by the scheduler. Move into campaigns only after owner approval.
-proposed_campaigns:
+  # Meeting 5 GSM8K full-cache timing pilot, APPROVED by the owner in-session
+  # 2026-11-13 ("this pilot only, up to 3 total GPU-hours", normal window, after
+  # the real launch preflight passes). Calibration and costing only; never
+  # policy evidence. The replication and the BBH pilot have no campaign.
   M5B-GSM8K-TIMING:
     cap_gpu_hours: 3
-    scope: full-cache GSM8K timing only (24 frozen calibration problems x seeds 11/23)
+    approved: 2026-11-13
+    scope: full-cache GSM8K timing only (24 frozen calibration problems x seeds 11/23, 48 rows)
+
+# Not read by the scheduler. Move into campaigns only after owner approval.
+proposed_campaigns: {}

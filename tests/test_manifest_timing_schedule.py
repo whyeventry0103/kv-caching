@@ -1,11 +1,14 @@
-"""CPU acceptance for the held GSM8K scheduler integration."""
+"""CPU acceptance for the GSM8K timing scheduler integration (approved by the
+owner 2026-11-13: campaign M5B-GSM8K-TIMING, cap 3 GPU-h)."""
 
 from __future__ import annotations
 
+import dataclasses
 import json
 import os
 import subprocess
 import sys
+from datetime import datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -23,17 +26,45 @@ def _job():
     return next(j for j in jobs if j.name == "bank-gsm8k-timing-m5")
 
 
-def test_pilot_is_held_and_no_cap_is_active(tmp_path):
+def test_pilot_is_released_only_under_its_capped_campaign(tmp_path):
     job = _job()
     cfg = load_config(ROOT / job.config)
-    assert cfg["held"] is True and cfg["scale_authorized"] is False
-    assert job.blocked and job.campaign is None
-    assert "M5B-GSM8K-TIMING" not in scheduler.load_campaign_caps()
+    assert cfg["held"] is False and cfg["scale_authorized"] is True
+    assert job.blocked is None and job.campaign == "M5B-GSM8K-TIMING"
+    assert scheduler.load_campaign_caps()["M5B-GSM8K-TIMING"] == 3.0
+    eligible, _ = scheduler.launch_candidates(
+        tmp_path, [job], skip=set(), live={}, state={}
+    )
+    assert [j.name for j, _ in eligible] == ["bank-gsm8k-timing-m5"]
+
+
+def test_held_copy_of_the_pilot_is_still_blocked(tmp_path):
+    job = dataclasses.replace(_job(), blocked="held", campaign=None)
     eligible, notes = scheduler.launch_candidates(
         tmp_path, [job], skip=set(), live={}, state={}
     )
     assert eligible == []
     assert any("BLOCKED bank-gsm8k-timing-m5" in s for s in notes)
+
+
+def test_campaign_reservation_never_exceeds_the_3h_cap(tmp_path):
+    from kvcache import campaign_budget as cb
+
+    caps = scheduler.load_campaign_caps()
+    ledger = tmp_path / "ledger.json"
+    granted, why = cb.reserve(
+        ledger,
+        caps,
+        campaign="M5B-GSM8K-TIMING",
+        job="bank-gsm8k-timing-m5",
+        shards=[cb.Shard("s11", 0), cb.Shard("s23", 1)],
+        window_hours=8.0,
+        now=datetime(2026, 11, 14, 1, 45),
+    )
+    assert granted is not None, why
+    assert all(lid.startswith("M5B-GSM8K-TIMING-") for lid in granted)
+    assert sum(granted.values()) <= 3.0 + 1e-9
+    assert cb.summary(ledger, caps)["M5B-GSM8K-TIMING"]["remaining"] <= 1e-9
 
 
 def test_scheduler_counts_only_unique_expected_pairs(tmp_path):

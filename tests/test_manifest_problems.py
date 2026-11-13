@@ -108,7 +108,8 @@ def _config():
 
 def test_gsm8k_timing_config_resolves_to_the_frozen_calibration_split():
     cfg = _config()
-    assert cfg["held"] is True and cfg["scale_authorized"] is False
+    # Released 2026-11-13 under campaign M5B-GSM8K-TIMING (owner approval).
+    assert cfg["held"] is False and cfg["scale_authorized"] is True
     d = _runner().resolve_design(cfg)
     m = json.loads(MANIFEST.read_text())["gsm8k"]
     assert d["pids"] == m["calibration"] and len(d["pids"]) == 24
@@ -133,17 +134,31 @@ def test_runner_refuses_a_config_that_departs_from_the_design(over, match):
         _runner().resolve_design({**_config(), **over})
 
 
-def test_runner_refuses_to_generate_while_held():
-    r = subprocess.run(
+def _run(config: Path) -> subprocess.CompletedProcess:
+    return subprocess.run(
         [
             sys.executable,
             str(ROOT / "scripts/run_bank_manifest.py"),
             "--config",
-            str(CONFIG),
+            str(config),
         ],
         capture_output=True,
         text=True,
         cwd=ROOT,
     )
+
+
+def test_runner_refuses_to_generate_while_held(tmp_path):
+    import yaml
+
+    held = tmp_path / "held.yaml"
+    held.write_text(yaml.safe_dump({**_config(), "held": True}))
+    r = _run(held)
     assert r.returncode != 0
     assert "HELD" in (r.stderr + r.stdout)
+
+
+def test_released_runner_still_refuses_without_i_understand():
+    r = _run(CONFIG)
+    assert r.returncode != 0
+    assert "--i-understand" in (r.stderr + r.stdout)

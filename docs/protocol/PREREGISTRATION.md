@@ -4860,3 +4860,26 @@ point.
 - If the redesign also fails, the instrument is abandoned and reported as a
   retrieval diagnostic, with no MI claim.
 - The confirmation, the bridge and the interventions stay held (gate G2).
+
+## M5-B GSM8K timing pilot approved (2026-11-13, owner, in-session)
+
+The owner approved the held GSM8K timing pilot in-session ("I authorize this
+pilot only, up to 3 total GPU-hours, in the existing normal run window, once
+the real launch preflight passes"). Three changes landed together, so that the
+cap is enforced from the first launch:
+- campaign `M5B-GSM8K-TIMING`, `cap_gpu_hours: 3`, approved 2026-11-13, moved
+  from `proposed_campaigns` into `campaigns`;
+- the queue job `bank-gsm8k-timing-m5` gets `campaign: M5B-GSM8K-TIMING`, and
+  its `blocked:` line is removed;
+- `configs/experiments/bank_gsm8k_timing_m5.yaml` is set to `held: false`,
+  `scale_authorized: true`. This changes the design hash; no GSM8K row exists.
+
+Scope, unchanged from `docs/paper/GSM8K_TIMING_PROPOSAL.md`: the frozen 24
+GSM8K calibration problems × seeds 11 and 23, full cache, pinned
+DeepSeek-R1-Distill-Qwen-7B, cap 8,192 new tokens, 48 result/token pairs.
+The read is `scripts/read_gsm8k_timing.py` (FINAL only with all 48 pairs;
+frozen `gsm8k_grade` on the stored traces; truncated = incorrect). The pilot
+is **calibration and costing only and is never policy evidence**. The
+replication cells, the BBH pilot and any reverse readout are not approved and
+have no campaign. The held guard keeps its test, now on a held copy of the
+config.

@@ -7,9 +7,10 @@ stage: bank
 # full-cache generations on Qwen-7B (R1-Distill), cap 8192 (plan 9.3; a cap
 # change before the replication is a pre-outcome amendment). Problems are
 # selected by frozen ID (scripts/run_bank_manifest.py), never by count.
-# Proposed campaign cap 3 GPU-h. Runs only after held: false AND
-# scale_authorized: true, with its own campaign and queue job.
-held: true
+# APPROVED by the owner 2026-11-13: campaign M5B-GSM8K-TIMING (cap 3 GPU-h),
+# queue job bank-gsm8k-timing-m5; released together with the queue hold.
+# Calibration and costing only -- never policy evidence.
+held: false
 models: [r1_distill_qwen_7b]
 benchmarks: [gsm8k]
 manifest:
@@ -22,5 +23,5 @@ presses: [fullcache]
 budgets: [full]
 estimated_generation_count: 48
 store_token_ids: true
-scale_authorized: false
+scale_authorized: true
 remote_only: true

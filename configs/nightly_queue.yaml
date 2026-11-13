@@ -1360,6 +1360,7 @@ jobs:
   # Preparation only. Attach M5B-GSM8K-TIMING after approval; the launcher
   # refuses this alias without the capped scheduler reservation.
   - name: bank-gsm8k-timing-m5
+    campaign: M5B-GSM8K-TIMING   # cap 3 GPU-h, approved by the owner 2026-11-13
     command: bank_manifest
     config: configs/experiments/bank_gsm8k_timing_m5.yaml
     run_name: bank-gsm8k-timing-m5
@@ -1370,7 +1371,6 @@ jobs:
     progress_kind: manifest_pairs
     est_output_gb: 0.25
     requires: null
-    blocked: "GSM8K timing held: requires owner approval and passing shared-filesystem preflight"
 
   # ======================================================================
   # R.14 postprocessing: CPU stages run inline by every orchestrator tick
