@@ -4973,3 +4973,81 @@ priced from the GSM8K calibration bank):
   applies the same branches. Their caps are then set at the re-priced upper
   bound, in a dated note here, before any BBH confirmation outcome.
 - The reverse readouts (GR and BR) are not built and are not released.
+
+## M5-B BBH calibration read; BBH grader v3 and cap 8,192 (pre-outcome); BBH design FROZEN and released (2026-11-14)
+
+**BBH timing pilot: launched 00:56 Dubai under `M5B-BBH-TIMING`, FINAL.**
+- 50/50 pairs validated; 0.41 GPU-h of generation.
+- Read under v2: `results/diag/meeting5/bbh_lde5_timing/bbh_timing_read.json`.
+- Trace length: mean 1,537, median 889, max 4,096 tokens.
+- 0.0193 s/token.
+- Calibration only, never policy evidence.
+
+**Branch 4 STOPPED the design: an instrument bug, now fixed.**
+- **Finding.** Under the frozen `bbh-option-v2` rule, 17 of 50 traces were
+  `no_answer` without truncation, and full-cache accuracy was 0.46. Inspection
+  showed the model ending with an "Answer:" label: `**Answer:** (D) Rob
+  finished last.` or `**Answer: (E) The quail is the second from the left.**`.
+  v2 accepts only `\boxed{}` and "answer is", so this is a systematic
+  extraction failure.
+- **The fix, `bbh-option-v3`.** An "Answer:" label (any case, optional
+  markdown bold) is a final statement read exactly like "answer is". It goes
+  through the same single-option and conflicting-answer rules.
+  - BBH only; the GSM8K rule is untouched, and a regression test pins that.
+  - Tests cover each new format, conflicts, and a label with no option.
+- **Re-scoring the same 50 stored traces** (`kvcache.task_graders` at this
+  commit):
+  - 16 of 17 `no_answer` rows now resolve: 14 correct, 2 incorrect.
+  - Both incorrect rows were checked by hand: the model named (A) against gold
+    (B), and (C) against gold (A).
+  - The remaining `no_answer` (`bbh_lde5/111` s11) names no option ("the
+    **hatchback**") and stays incorrect.
+  - No row v2 had scored changed.
+  - Full-cache accuracy is 0.74 under v3.
+- **Why this is pre-outcome.** The rule was chosen on answer FORMAT from the
+  calibration split only, before any BBH confirmation row exists. It moves no
+  existing row's score, and no policy outcome exists on BBH. The v2 read stays
+  archived beside the v3 read.
+
+**Branch 1: truncation 3/50 = 6% > 5%, so the cap rises to 8,192 for EVERY BBH
+arm and the reference together** (plan 9.3; never one arm alone).
+- 8/50 traces hit the 4,096 cap; 5 of them still carried a final answer.
+- 8,192 equals the GSM8K cap.
+- The six BBH generation configs (bank + five grids) and the design file's
+  B1, B2 and BR entries now read 8,192.
+- The pilot itself stays at 4,096: it is calibration, not part of the
+  replication.
+
+**Branch 2.** P + T > 256 in 50/50 traces, so B=256 is the primary budget.
+- Median P + T is 1,030, and the median prompt is 145 tokens.
+- The kept share 256/(P + T) is median 0.25 (p10 0.06, p90 0.34): a regime
+  much closer to MATH-500 than GSM8K is.
+- The prompt takes about 57% of the budget under protection.
+
+**Branch 3.** No branch: accuracy is 0.74 under v3.
+
+**Branch 5.** N stays 200 × 2.
+
+**BBH design FROZEN** (B1, B2), before any BBH confirmation outcome. It
+matches GSM8K in every respect except the dataset, with a cap of 8,192 and
+grader `bbh-option-v3`. All 11 BBH configs are set to `held: false`,
+`design_status: final`, `scale_authorized: true`.
+
+**Campaigns.** Each cap is the upper bound priced from the BBH calibration
+bank (`cost_plan.json`):
+
+| Campaign | Cap (GPU-h) | Central (GPU-h) | Rows |
+|---|---|---|---|
+| `M5B-BBH-S1` | 148 | ≈ 55 | 3,600 |
+| `M5B-BBH-S2` | 141 | ≈ 55 | 3,200 |
+
+The central estimates are low-biased: the bank was capped at 4,096.
+
+**Provenance note.** The host was synced to this commit while GSM8K stage-1
+shards launched on 878eb64 may be running. Between the two commits:
+- generation code is unchanged (the diff touches `task_graders.py`, which is
+  read-time scoring only; the BBH configs; the queue; campaigns; tests; and
+  docs);
+- no GSM8K config changes, so GSM8K design hashes are identical;
+- GSM8K rows may still carry two source commits. This is recorded here, not
+  hidden.

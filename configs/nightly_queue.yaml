@@ -1392,7 +1392,8 @@ jobs:
   # M5-B multi-dataset replication (prepared 2026-11-13). GSM8K RELEASED by the
   # owner 2026-11-14 ("start all runs right now"), design FROZEN after the
   # GSM8K calibration read: stage 1 under M5B-GSM8K-S1, stage 2 under
-  # M5B-GSM8K-S2. BBH stays HELD until its own calibration read freezes it.
+  # M5B-GSM8K-S2. BBH released the same night after its calibration read
+  # (grader v3, cap raised to 8192 for every arm): M5B-BBH-S1 / M5B-BBH-S2.
   # configs/meeting5/replication_design_m5b.json. Per dataset, stage 1 = full
   # cache + the four PROTECTED policies + forward readout (compares policies
   # under protection; cannot estimate the effect of protection); stage 2 = the
@@ -1542,6 +1543,7 @@ jobs:
     requires: bank-gsm8k-confirmation-m5b
 
   - name: bank-bbh-confirmation-m5b
+    campaign: M5B-BBH-S1
     command: bank_manifest_m5b
     config: configs/experiments/bank_bbh_confirmation_m5b.yaml
     run_name: bank-bbh-confirmation-m5b
@@ -1552,9 +1554,9 @@ jobs:
     progress_kind: manifest_pairs
     est_output_gb: 0.1
     requires: null
-    blocked: "M5-B replication held: requires the owner-approved campaign, a frozen design (design_status: final) and passing preflight"
 
   - name: grid-bbh-pp256-m5b
+    campaign: M5B-BBH-S1
     command: grid_manifest
     config: configs/experiments/grid_bbh_pp256_m5b.yaml
     run_name: grid-bbh-pp256-m5b
@@ -1565,9 +1567,9 @@ jobs:
     progress_kind: manifest_grid_pairs
     est_output_gb: 0.1
     requires: null
-    blocked: "M5-B replication held: requires the owner-approved campaign, a frozen design (design_status: final) and passing preflight"
 
   - name: grid-bbh-h2opp256-m5b
+    campaign: M5B-BBH-S1
     command: grid_manifest
     config: configs/experiments/grid_bbh_h2opp256_m5b.yaml
     run_name: grid-bbh-h2opp256-m5b
@@ -1578,9 +1580,9 @@ jobs:
     progress_kind: manifest_grid_pairs
     est_output_gb: 0.1
     requires: null
-    blocked: "M5-B replication held: requires the owner-approved campaign, a frozen design (design_status: final) and passing preflight"
 
   - name: grid-bbh-rkvpp256-m5b
+    campaign: M5B-BBH-S1
     command: grid_manifest
     config: configs/experiments/grid_bbh_rkvpp256_m5b.yaml
     run_name: grid-bbh-rkvpp256-m5b
@@ -1591,9 +1593,9 @@ jobs:
     progress_kind: manifest_grid_pairs
     est_output_gb: 0.1
     requires: null
-    blocked: "M5-B replication held: requires the owner-approved campaign, a frozen design (design_status: final) and passing preflight"
 
   - name: readout-bbh-pp256-m5b
+    campaign: M5B-BBH-S1
     command: readout_manifest
     config: configs/experiments/readout_bbh_pp256_m5b.yaml
     run_name: readout-bbh-pp256-m5b
@@ -1604,9 +1606,9 @@ jobs:
     progress_kind: readout
     est_output_gb: 0.02
     requires: bank-bbh-confirmation-m5b
-    blocked: "M5-B replication held: requires the owner-approved campaign, a frozen design (design_status: final) and passing preflight"
 
   - name: readout-bbh-h2opp256-m5b
+    campaign: M5B-BBH-S1
     command: readout_manifest
     config: configs/experiments/readout_bbh_h2opp256_m5b.yaml
     run_name: readout-bbh-h2opp256-m5b
@@ -1617,9 +1619,9 @@ jobs:
     progress_kind: readout
     est_output_gb: 0.02
     requires: bank-bbh-confirmation-m5b
-    blocked: "M5-B replication held: requires the owner-approved campaign, a frozen design (design_status: final) and passing preflight"
 
   - name: readout-bbh-rkvpp256-m5b
+    campaign: M5B-BBH-S1
     command: readout_manifest
     config: configs/experiments/readout_bbh_rkvpp256_m5b.yaml
     run_name: readout-bbh-rkvpp256-m5b
@@ -1630,9 +1632,9 @@ jobs:
     progress_kind: readout
     est_output_gb: 0.02
     requires: bank-bbh-confirmation-m5b
-    blocked: "M5-B replication held: requires the owner-approved campaign, a frozen design (design_status: final) and passing preflight"
 
   - name: grid-bbh-base256-m5b
+    campaign: M5B-BBH-S2
     command: grid_manifest
     config: configs/experiments/grid_bbh_base256_m5b.yaml
     run_name: grid-bbh-base256-m5b
@@ -1643,9 +1645,9 @@ jobs:
     progress_kind: manifest_grid_pairs
     est_output_gb: 0.1
     requires: null
-    blocked: "M5-B replication held: requires the owner-approved campaign, a frozen design (design_status: final) and passing preflight"
 
   - name: grid-bbh-h2o256-m5b
+    campaign: M5B-BBH-S2
     command: grid_manifest
     config: configs/experiments/grid_bbh_h2o256_m5b.yaml
     run_name: grid-bbh-h2o256-m5b
@@ -1656,9 +1658,9 @@ jobs:
     progress_kind: manifest_grid_pairs
     est_output_gb: 0.1
     requires: null
-    blocked: "M5-B replication held: requires the owner-approved campaign, a frozen design (design_status: final) and passing preflight"
 
   - name: readout-bbh-base256-m5b
+    campaign: M5B-BBH-S2
     command: readout_manifest
     config: configs/experiments/readout_bbh_base256_m5b.yaml
     run_name: readout-bbh-base256-m5b
@@ -1669,9 +1671,9 @@ jobs:
     progress_kind: readout
     est_output_gb: 0.02
     requires: bank-bbh-confirmation-m5b
-    blocked: "M5-B replication held: requires the owner-approved campaign, a frozen design (design_status: final) and passing preflight"
 
   - name: readout-bbh-h2o256-m5b
+    campaign: M5B-BBH-S2
     command: readout_manifest
     config: configs/experiments/readout_bbh_h2o256_m5b.yaml
     run_name: readout-bbh-h2o256-m5b
@@ -1682,7 +1684,6 @@ jobs:
     progress_kind: readout
     est_output_gb: 0.02
     requires: bank-bbh-confirmation-m5b
-    blocked: "M5-B replication held: requires the owner-approved campaign, a frozen design (design_status: final) and passing preflight"
 
   # ======================================================================
   # R.14 postprocessing: CPU stages run inline by every orchestrator tick

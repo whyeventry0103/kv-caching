@@ -53,8 +53,8 @@ campaigns:
   # the priced UPPER bound (every trace at its token cap, plus retries and
   # loads; results/diag/meeting5/replication/cost_plan.json), so the cap can
   # only stop a run that exceeds the physical worst case. Reverse readouts
-  # (GR/BR) are not built and have no campaign. BBH stages get their caps after
-  # the BBH calibration read.
+  # (GR/BR) are not built and have no campaign. BBH stages were capped after
+  # the BBH calibration read (grader v3 and cap 8192, both pre-outcome).
   M5B-BBH-TIMING:
     cap_gpu_hours: 2
     approved: 2026-11-14
@@ -67,6 +67,14 @@ campaigns:
     cap_gpu_hours: 132
     approved: 2026-11-14
     scope: GSM8K stage 2 -- unprotected random/streamingllm/rkv/h2o free runs + forward readouts (3200 rows; central ~25 GPU-h)
+  M5B-BBH-S1:
+    cap_gpu_hours: 148
+    approved: 2026-11-14
+    scope: BBH logical-deduction stage 1 -- full-cache confirmation bank + protected free runs + forward readouts (200 problems x seeds 11/23, B=256, cap 8192; 3600 rows; central ~55 GPU-h)
+  M5B-BBH-S2:
+    cap_gpu_hours: 141
+    approved: 2026-11-14
+    scope: BBH logical-deduction stage 2 -- unprotected free runs + forward readouts (3200 rows; central ~55 GPU-h)
 
 # Not read by the scheduler. Move into campaigns only after owner approval.
 proposed_campaigns: {}

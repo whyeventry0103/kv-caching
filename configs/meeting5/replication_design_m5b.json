@@ -1,6 +1,6 @@
 {
  "schema": "m5b-replication-design-v1",
- "status": "GSM8K (G1, G2) FROZEN 2026-11-14 after its calibration read (timing_read.json: truncation 0/48, every trace exceeds B=256) and before any confirmation outcome; BBH (B1, B2) PROPOSED until its own calibration read; GR/BR (reverse) not built, not released",
+ "status": "GSM8K (G1, G2) FROZEN 2026-11-14 after its calibration read (timing_read.json: truncation 0/48, every trace exceeds B=256) and before any confirmation outcome; BBH (B1, B2) FROZEN 2026-11-14 after its calibration read (bbh_timing_read.json: truncation 3/50 > 5% -> cap 8192 for every arm; grader bbh-option-v3) and before any confirmation outcome; GR/BR (reverse) not built, not released",
  "plan": "docs/paper/MEETING5_REVIEW_AND_PLAN.md 8.2, 8.4, 9.2-9.4; docs/paper/M5B_REPLICATION_APPROVAL_REQUEST.md",
  "model": "r1_distill_qwen_7b",
  "split": "confirmation (configs/meeting5/problem_manifests.json; frozen 2026-10-14)",
@@ -60,7 +60,7 @@
    "id": "B1",
    "benchmark": "bbh_lde5",
    "answers": "As G1, on BBH logical deduction (five objects): the non-math check.",
-   "n_problems": 200, "n_seeds": 2, "max_new_tokens": 4096, "max_answer_tokens": 2048,
+   "n_problems": 200, "n_seeds": 2, "max_new_tokens": 8192, "max_answer_tokens": 2048,
    "cells": [
     {"name": "bank-bbh-confirmation-m5b", "kind": "bank", "family": "fullcache"},
     {"name": "grid-bbh-pp256-m5b", "kind": "grid", "family": "pp", "presses": ["random_pp", "streamingllm_pp"]},
@@ -73,7 +73,7 @@
    "id": "B2",
    "benchmark": "bbh_lde5",
    "answers": "As G2, on BBH.",
-   "n_problems": 200, "n_seeds": 2, "max_new_tokens": 4096, "max_answer_tokens": 2048,
+   "n_problems": 200, "n_seeds": 2, "max_new_tokens": 8192, "max_answer_tokens": 2048,
    "cells": [
     {"name": "grid-bbh-base256-m5b", "kind": "grid", "family": "base", "presses": ["random", "streamingllm", "rkv"]},
     {"name": "grid-bbh-h2o256-m5b", "kind": "grid", "family": "base (eager)", "presses": ["h2o"]},
@@ -84,7 +84,7 @@
    "id": "BR",
    "benchmark": "bbh_lde5",
    "answers": "Reverse readout on BBH (separately priced).",
-   "n_problems": 200, "n_seeds": 2, "max_new_tokens": 4096, "max_answer_tokens": 2048,
+   "n_problems": 200, "n_seeds": 2, "max_new_tokens": 8192, "max_answer_tokens": 2048,
    "cells": [
     {"name": "reverse-readout-bbh-256-m5b", "kind": "reverse", "family": "all", "presses": ["random_pp", "streamingllm_pp", "h2o_style_pp_v1", "rkv_pp_v1", "random", "streamingllm", "rkv", "h2o"]}
    ]

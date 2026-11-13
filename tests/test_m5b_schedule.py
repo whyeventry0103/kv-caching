@@ -1,8 +1,7 @@
-"""M5-B replication scheduler integration (prepared 2026-11-13; GSM8K released
-2026-11-14): GSM8K cells run only under their stage campaigns, BBH cells stay
-blocked with no campaign, grid progress counts only complete pairs of the
-design's own keys on the new benchmarks, and the launch aliases refuse without
-a capped M5-B reservation."""
+"""M5-B replication scheduler integration (prepared 2026-11-13; released
+2026-11-14): every cell runs only under its stage campaign, grid progress
+counts only complete pairs of the design's own keys on the new benchmarks, and
+the launch aliases refuse without a capped M5-B reservation."""
 
 from __future__ import annotations
 
@@ -29,32 +28,33 @@ def _jobs():
     return {j.name: j for j in jobs if j.name.endswith("-m5b")}
 
 
-# Released 2026-11-14 by the owner: GSM8K under its two stage campaigns with a
-# frozen design; BBH stays held, blocked and uncapped until its own read.
-STAGE_CAMPAIGNS = {"M5B-GSM8K-S1": 140, "M5B-GSM8K-S2": 132}
+# Released 2026-11-14 by the owner: every cell under its dataset's stage
+# campaign with a frozen design (BBH after its calibration read: cap 8192).
+STAGE_CAMPAIGNS = {
+    "M5B-GSM8K-S1": 140,
+    "M5B-GSM8K-S2": 132,
+    "M5B-BBH-S1": 148,
+    "M5B-BBH-S2": 141,
+}
 
 
-def test_gsm8k_cells_are_released_under_their_stage_caps_and_bbh_stays_held():
+def test_every_cell_is_released_under_its_stage_cap_with_a_frozen_design():
     jobs = _jobs()
     assert len(jobs) == 22
     caps = scheduler.load_campaign_caps()
     for name, cap in STAGE_CAMPAIGNS.items():
         assert caps[name] == cap
-    assert not [c for c in caps if c.startswith("M5B-BBH-S")]
     for job in jobs.values():
         cfg = load_config(ROOT / job.config)
-        if "-gsm8k-" in job.name:
-            s2 = "-base256-" in job.name or "-h2o256-" in job.name
-            stage = "S2" if s2 else "S1"
-            assert not job.blocked and job.campaign == f"M5B-GSM8K-{stage}", job.name
-            assert cfg["held"] is False and cfg["scale_authorized"] is True
-            want = "final"
-        else:
-            assert job.blocked and job.campaign is None, job.name
-            assert cfg["held"] is True and cfg["scale_authorized"] is False
-            want = "pending"
+        ds = "GSM8K" if "-gsm8k-" in job.name else "BBH"
+        s2 = "-base256-" in job.name or "-h2o256-" in job.name
+        want = f"M5B-{ds}-{'S2' if s2 else 'S1'}"
+        assert not job.blocked and job.campaign == want, job.name
+        assert cfg["held"] is False and cfg["scale_authorized"] is True
         if job.command != "bank_manifest_m5b":
-            assert cfg["design_status"] == want
+            assert cfg["design_status"] == "final"
+        else:
+            assert list(cfg["max_new_tokens"].values()) == [8192]
         if job.command == "readout_manifest":
             assert job.requires == cfg["reference_run_name"]
 

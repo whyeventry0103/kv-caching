@@ -101,6 +101,36 @@ def test_bbh_conflicting_final_answers_are_incorrect(trace):
     )
 
 
+@pytest.mark.parametrize(
+    "trace, want",
+    [
+        # BBH v3 (2026-11-14): formats from the calibration bank that v2 missed
+        ("</think> **Answer:** (D) Rob finished last.", (True, "final_answer")),
+        (
+            "</think> **Answer: (D) The hummingbird is the rightmost**",
+            (True, "final_answer"),
+        ),
+        ("</think> Final answer: (B)", (False, "final_answer")),
+        (
+            "</think> **Answer:** (D). Wait, the answer is (B).",
+            (False, "conflicting_final_answers"),
+        ),
+        # no option named after the label stays no_answer
+        ("</think> **Answer:** the hatchback", (False, "no_answer")),
+    ],
+)
+def test_bbh_v3_answer_label(trace, want):
+    assert bbh_grade(trace, "(D)", truncated=False) == want
+
+
+def test_bbh_v3_leaves_the_gsm8k_rule_alone():
+    # "Answer:" is not a GSM8K final statement: the last number still decides
+    assert gsm8k_grade("</think> Answer: 5 apples, then 7", "7", truncated=False) == (
+        True,
+        "last_number",
+    )
+
+
 def test_bbh_consistent_repeats_and_reasoning_boxes():
     t = r"<think>maybe \boxed{(A)}</think> \boxed{(C)} so the answer is (C)."
     assert bbh_grade(t, "(C)", truncated=False) == (True, "final_answer")

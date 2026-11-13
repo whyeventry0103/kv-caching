@@ -33,6 +33,15 @@ The final candidates are EVERY ``\\boxed{...}`` in the answer region and every
 (``conflicting_final_answers``) -- e.g. ``\\boxed{(A)} or \\boxed{(C)}`` and
 ``\\boxed{(C)}. Actually, the answer is (D).``; no candidate is incorrect
 (``no_answer``). There is no correction rule and no LLM judge.
+
+BBH v3 (2026-11-14, before any BBH confirmation generation): an "Answer:"
+label (any case, optional markdown bold, e.g. ``**Answer:** (D)`` or
+``**Answer: (E) The quail ...**``) is also a final statement, read like
+"answer is". The BBH calibration bank showed v2 missing this label
+systematically (17 of 50 traces ``no_answer`` without truncation; at least 4
+of the 5 inspected state an option after it), an extraction failure, not a
+model failure. The change is format-only and BBH-only; the GSM8K rule is
+untouched.
 """
 
 from __future__ import annotations
@@ -72,8 +81,9 @@ def parse_number(text: str) -> Fraction | None:
     return None
 
 
-GRADER_VERSIONS = {"gsm8k": "gsm8k-numeric-v2", "bbh": "bbh-option-v2"}
+GRADER_VERSIONS = {"gsm8k": "gsm8k-numeric-v2", "bbh": "bbh-option-v3"}
 _ANSWER_IS = re.compile(r"answer\s+is\s*:?\s*", re.IGNORECASE)
+_ANSWER_LABEL = re.compile(r"\banswer\**\s*:\**\s*", re.IGNORECASE)  # BBH v3
 
 
 def all_boxed(text: str) -> list[str]:
@@ -93,8 +103,8 @@ def all_boxed(text: str) -> list[str]:
         start = i
 
 
-def _answer_is_windows(region: str) -> list[str]:
-    return [region[m.end() : m.end() + 40] for m in _ANSWER_IS.finditer(region)]
+def _answer_is_windows(region: str, pattern: re.Pattern = _ANSWER_IS) -> list[str]:
+    return [region[m.end() : m.end() + 40] for m in pattern.finditer(region)]
 
 
 def gsm8k_grade(
@@ -156,7 +166,8 @@ def bbh_grade(trace: str, gold: str, *, truncated: bool) -> tuple[bool, str]:
             return False, "boxed:several_options"
         if letter:
             letters.append(letter)
-    for w in _answer_is_windows(region):
+    stated = _answer_is_windows(region) + _answer_is_windows(region, _ANSWER_LABEL)
+    for w in stated:
         m = _OPTION.search(_TEXT.sub(r"\1", w))
         if m:
             letters.append(m.group(1) or m.group(2))

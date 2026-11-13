@@ -190,9 +190,9 @@
     {
      "family": "fullcache",
      "gpu_hours": {
-      "central": 1.31,
-      "mean_tokens_central": 4096.0,
-      "upper": 1.31
+      "central": 0.56,
+      "mean_tokens_central": 1537.0,
+      "upper": 1.32
      },
      "kind": "bank",
      "name": "bank-bbh-timing-m5",
@@ -200,12 +200,12 @@
      "storage_gb": 0.008
     }
    ],
-   "gpu_hours_central": 1.31,
-   "gpu_hours_upper": 1.31,
+   "gpu_hours_central": 0.56,
+   "gpu_hours_upper": 1.32,
    "id": "BP",
-   "nights_central": 0.1,
+   "nights_central": 0.0,
    "nights_upper": 0.1,
-   "priced_from": "cap bound (no calibration bank)",
+   "priced_from": "own calibration bank",
    "rows": 50,
    "storage_gb": 0.008
   },
@@ -216,9 +216,9 @@
     {
      "family": "fullcache",
      "gpu_hours": {
-      "central": 9.72,
-      "mean_tokens_central": 4096.0,
-      "upper": 9.72
+      "central": 3.74,
+      "mean_tokens_central": 1537.0,
+      "upper": 19.44
      },
      "kind": "bank",
      "name": "bank-bbh-confirmation-m5b",
@@ -228,8 +228,8 @@
     {
      "family": "pp",
      "gpu_hours": {
-      "central": 23.47,
-      "upper": 23.47
+      "central": 16.1,
+      "upper": 46.62
      },
      "kind": "grid",
      "name": "grid-bbh-pp256-m5b",
@@ -243,8 +243,8 @@
     {
      "family": "protsel",
      "gpu_hours": {
-      "central": 13.38,
-      "upper": 13.38
+      "central": 7.74,
+      "upper": 26.64
      },
      "kind": "grid",
      "name": "grid-bbh-h2opp256-m5b",
@@ -257,8 +257,8 @@
     {
      "family": "rkv_pp",
      "gpu_hours": {
-      "central": 11.98,
-      "upper": 11.98
+      "central": 9.35,
+      "upper": 23.86
      },
      "kind": "grid",
      "name": "grid-bbh-rkvpp256-m5b",
@@ -271,8 +271,8 @@
     {
      "family": "pp/protsel/rkv_pp",
      "gpu_hours": {
-      "central": 40.64,
-      "upper": 53.62
+      "central": 18.34,
+      "upper": 31.31
      },
      "kind": "readout",
      "name": "readout-bbh-protected256-m5b",
@@ -286,12 +286,12 @@
      "storage_gb": 0.013
     }
    ],
-   "gpu_hours_central": 99.19,
-   "gpu_hours_upper": 112.17,
+   "gpu_hours_central": 55.27,
+   "gpu_hours_upper": 147.87,
    "id": "B1",
-   "nights_central": 5.5,
-   "nights_upper": 6.3,
-   "priced_from": "cap bound (no calibration bank)",
+   "nights_central": 3.1,
+   "nights_upper": 8.2,
+   "priced_from": "own calibration bank",
    "rows": 3600,
    "storage_gb": 0.221
   },
@@ -302,8 +302,8 @@
     {
      "family": "base",
      "gpu_hours": {
-      "central": 38.52,
-      "upper": 38.52
+      "central": 28.61,
+      "upper": 76.59
      },
      "kind": "grid",
      "name": "grid-bbh-base256-m5b",
@@ -318,8 +318,8 @@
     {
      "family": "base (eager)",
      "gpu_hours": {
-      "central": 16.21,
-      "upper": 16.21
+      "central": 7.79,
+      "upper": 32.31
      },
      "kind": "grid",
      "name": "grid-bbh-h2o256-m5b",
@@ -332,8 +332,8 @@
     {
      "family": "base",
      "gpu_hours": {
-      "central": 40.64,
-      "upper": 53.62
+      "central": 18.34,
+      "upper": 31.31
      },
      "kind": "readout",
      "name": "readout-bbh-unprotected256-m5b",
@@ -347,12 +347,12 @@
      "storage_gb": 0.013
     }
    ],
-   "gpu_hours_central": 95.37,
-   "gpu_hours_upper": 108.35,
+   "gpu_hours_central": 54.74,
+   "gpu_hours_upper": 140.21,
    "id": "B2",
-   "nights_central": 5.3,
-   "nights_upper": 6.0,
-   "priced_from": "cap bound (no calibration bank)",
+   "nights_central": 3.1,
+   "nights_upper": 7.8,
+   "priced_from": "own calibration bank",
    "rows": 3200,
    "storage_gb": 0.157
   },
@@ -363,8 +363,8 @@
     {
      "family": "all",
      "gpu_hours": {
-      "central": 81.18,
-      "upper": 107.13
+      "central": 68.53,
+      "upper": 94.48
      },
      "kind": "reverse",
      "name": "reverse-readout-bbh-256-m5b",
@@ -382,12 +382,12 @@
      "storage_gb": 0.026
     }
    ],
-   "gpu_hours_central": 81.18,
-   "gpu_hours_upper": 107.13,
+   "gpu_hours_central": 68.53,
+   "gpu_hours_upper": 94.48,
    "id": "BR",
-   "nights_central": 4.5,
-   "nights_upper": 6.0,
-   "priced_from": "cap bound (no calibration bank)",
+   "nights_central": 3.8,
+   "nights_upper": 5.3,
+   "priced_from": "own calibration bank",
    "rows": 3200,
    "storage_gb": 0.026
   }
