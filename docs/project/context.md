@@ -24,6 +24,14 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-11-13 PKT (later) — M5-B multi-dataset replication PREPARED (CPU; all held/blocked, nothing approved beyond the GSM8K pilot). Pilot launches at the 2026-11-14 01:45 Dubai tick on 328fd58; host NOT re-synced until its bank is complete.**
+  - **Prompt fit** (`results/diag/meeting5/replication/prompt_fit.json`): at B=256 every calibration+confirmation problem of GSM8K (224) and BBH (225) fits P+64 <= B → B_eff = B, protected/unprotected capacity exactly equal. Median prompt 62 (GSM8K) / 152 (BBH).
+  - **BBH path** (7dd81fd): `bank_bbh_timing_m5.yaml` (25×2, cap 4096, held), job `bank-bbh-timing-m5` blocked, proposed campaign `M5B-BBH-TIMING` 2 GPU-h.
+  - **Cost model** (7d959fd): `kvcache.replication_cost`; MATH-500 B=256 rates `math500_b256_rates.json`. Design `configs/meeting5/replication_design_m5b.json` (PROPOSED).
+  - **Cells + read** (59b2568, 625b0b5, cb6a9aa): 22 held `*_m5b.yaml` cells, 22 blocked jobs, capped aliases, `manifest_grid_pairs` progress (fixes zero-count on non-MATH grids); frozen read `kvcache.m5b_reads` + `scripts/report_m5b_replication.py`; confirmation resolution records for both datasets. Readout block pools defined conditions (Amendment K) — fixed pre-outcome after the AIME re-read.
+  - **AIME audit** (`aime24_audit.json`): prior, differently configured (B=2048, unprotected, no H2O-style, 30×4). Random−SLM +0.142 [0.042, 0.250], Random−R-KV +0.067 [0.008, 0.142]; residuals −0.118/−0.194/−0.280 reproduce Amendment K.
+  - **Next:** read the pilot (`read_gsm8k_timing.py`), sync host, price with `plan_replication_cost.py --plan`, write `docs/paper/M5B_REPLICATION_APPROVAL_REQUEST.md`.
+
   **★★★★★ 2026-11-13 PKT — GSM8K timing pilot APPROVED (owner, in-session): campaign `M5B-GSM8K-TIMING` active (cap 3 GPU-h), job `bank-gsm8k-timing-m5` unblocked, config released — all in one commit. First eligible tick 2026-11-14 01:45 Dubai.**
   - **Scope.** 24 frozen GSM8K calibration problems × seeds 11/23, full cache, R1-Distill-Qwen-7B, cap 8192 → 48 result/token pairs. Calibration and costing only; never policy evidence.
   - **Record.** PREREGISTRATION "M5-B GSM8K timing pilot approved (2026-11-13)". Held guard still tested on a held copy; released runner still refuses without `--i-understand`; a test pins the reservation at ≤ 3 GPU-h.
