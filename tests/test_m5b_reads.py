@@ -128,3 +128,82 @@ def test_incomplete_arm_is_refused():
     arms = {("random", True): {("a", 11): _rows(ALL)[("a", 11)]}}
     with pytest.raises(ValueError, match="does not cover"):
         _read(arms)
+
+
+def test_cell_status_classification():
+    from kvcache.m5b_reads import cell_status
+
+    assert cell_status(None, exists=False) == "ABSENT"
+    assert cell_status(None, exists=True) == "FINAL"
+    missing = ValueError(
+        "3 expected keys lack result rows: x; 3 expected keys lack sidecars: x"
+    )
+    assert cell_status(missing, exists=True) == "PARTIAL"
+    mixed = ValueError(
+        "3 expected keys lack result rows: x; 1 result rows outside the design: y"
+    )
+    assert cell_status(mixed, exists=True) == "INVALID"
+    assert (
+        cell_status(ValueError("torn or unreadable lines: z"), exists=True) == "INVALID"
+    )
+
+
+def test_grid_and_readout_assembly_map_presses_to_arms(monkeypatch):
+    import kvcache.gsm8k_timing as gt
+    import kvcache.manifest_reads as mr
+    from kvcache.m5b_reads import grid_arms, readout_arms
+
+    design = {
+        "benchmark": "gsm8k",
+        "split": "confirmation",
+        "revision": "r",
+        "pids": ["a"],
+        "seeds": [11],
+        "presses": ["random_pp", "h2o"],
+        "budgets": [256],
+    }
+    pairs = [
+        (
+            {
+                "press": p,
+                "pid": "a",
+                "decoding": {"seed": 11},
+                "compression_ratio": 0.5,
+                "n_tokens": 400,
+                **({"protection": {"n_prunes": 3}} if p == "random_pp" else {}),
+            },
+            {"prompt_token_ids": [0] * 60},
+        )
+        for p in ("random_pp", "h2o")
+    ]
+    monkeypatch.setattr(gt, "validate_pairs", lambda *a, **k: pairs)
+    monkeypatch.setattr(
+        gt,
+        "score_rows",
+        lambda rows, *a, **k: {
+            "scores": [
+                {"correct": True, "truncated": False},
+                {"correct": False, "truncated": True},
+            ]
+        },
+    )
+    got = grid_arms("root", design, {"a": "1"})
+    assert got[("random", True)][("a", 11)]["n_prunes"] == 3
+    assert got[("h2o", False)][("a", 11)] == {
+        "correct": False,
+        "truncated": True,
+        "compression_ratio": 0.5,
+        "prompt_tokens": 60,
+        "n_tokens": 400,
+        "n_prunes": None,
+    }
+    monkeypatch.setattr(
+        mr,
+        "score_readouts",
+        lambda *a, **k: {
+            "scores": [{"press": "random_pp", "pid": "a", "seed": 11, "correct": True}]
+        },
+    )
+    ro = readout_arms("root", design, {"a": "1"})
+    assert ro[("random", True)][("a", 11)] == {"defined": True, "correct": True}
+    assert ro[("h2o", False)][("a", 11)] == {"defined": False, "correct": None}

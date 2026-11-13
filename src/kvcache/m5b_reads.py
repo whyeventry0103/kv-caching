@@ -283,3 +283,128 @@ def read_dataset(
             "estimate the effect of protection",
         }
     return out
+
+
+# --- assembly from validated cells (frozen with the read, 2026-11-13) --------
+
+ARM_OF_PRESS: dict[str, Arm] = {
+    "random_pp": ("random", True),
+    "streamingllm_pp": ("streamingllm", True),
+    "h2o_style_pp_v1": ("h2o", True),
+    "rkv_pp_v1": ("rkv", True),
+    "random": ("random", False),
+    "streamingllm": ("streamingllm", False),
+    "h2o": ("h2o", False),
+    "rkv": ("rkv", False),
+}
+
+
+def cell_status(exc: Exception | None, *, exists: bool) -> str:
+    """ABSENT (no run dir), PARTIAL (only expected keys missing), INVALID
+    (anything else: extra, repeated, torn, pending, mismatched), or FINAL."""
+    if not exists:
+        return "ABSENT"
+    if exc is None:
+        return "FINAL"
+    parts = [p.strip() for p in str(exc).split(";") if p.strip()]
+    only_missing = all(
+        "expected keys lack" in p or "expected readouts missing" in p for p in parts
+    )
+    return "PARTIAL" if only_missing else "INVALID"
+
+
+def grid_arms(
+    runs_root: Any,
+    design: Mapping[str, Any],
+    golds: Mapping[str, str],
+) -> dict[Arm, dict[Key, dict[str, Any]]]:
+    """Every expected pair of one compressed-run cell, validated and scored with
+    the benchmark's registered grader, as per-arm rows; ValueError otherwise."""
+    from kvcache.gsm8k_timing import score_rows, validate_pairs
+    from kvcache.manifest_grid import design_keys
+
+    split = {"split": design["split"], "revision": design["revision"]}
+    pairs = validate_pairs(
+        runs_root,
+        bench=design["benchmark"],
+        keys=design_keys(design),
+        manifest_split=split,
+    )
+    scored = score_rows(
+        [r for r, _ in pairs],
+        golds,
+        revision=design["revision"],
+        bench=design["benchmark"],
+    )
+    out: dict[Arm, dict[Key, dict[str, Any]]] = {}
+    for (row, side), s in zip(pairs, scored["scores"], strict=True):
+        arm = ARM_OF_PRESS[str(row["press"])]
+        protection = row.get("protection") or {}
+        out.setdefault(arm, {})[(str(row["pid"]), int(row["decoding"]["seed"]))] = {
+            "correct": bool(s["correct"]),
+            "truncated": bool(s["truncated"]),
+            "compression_ratio": float(row["compression_ratio"]),
+            "prompt_tokens": len(side["prompt_token_ids"]),
+            "n_tokens": int(row["n_tokens"]),
+            "n_prunes": protection.get("n_prunes"),
+        }
+    return out
+
+
+def fc_bank(
+    runs_root: Any,
+    design: Mapping[str, Any],
+    golds: Mapping[str, str],
+) -> dict[Key, dict[str, Any]]:
+    """The full-cache reference bank, validated and scored."""
+    from kvcache.gsm8k_timing import score_rows, validate_coverage
+
+    split = {"split": design["split"], "revision": design["revision"]}
+    pairs = validate_coverage(
+        runs_root,
+        bench=design["benchmark"],
+        pids=design["pids"],
+        seeds=design["seeds"],
+        manifest_split=split,
+    )
+    scored = score_rows(
+        [r for r, _ in pairs],
+        golds,
+        revision=design["revision"],
+        bench=design["benchmark"],
+    )
+    return {
+        (str(r["pid"]), int(r["decoding"]["seed"])): {
+            "correct": bool(s["correct"]),
+            "truncated": bool(s["truncated"]),
+            "n_tokens": int(r["n_tokens"]),
+            "prompt_tokens": len(side["prompt_token_ids"]),
+        }
+        for (r, side), s in zip(pairs, scored["scores"], strict=True)
+    }
+
+
+def readout_arms(
+    runs_root: Any,
+    design: Mapping[str, Any],
+    golds: Mapping[str, str],
+) -> dict[Arm, dict[Key, dict[str, Any]]]:
+    """Every expected readout record of one cell (``manifest_reads``: exactly
+    one per key), with its definedness and, if defined, its registered score."""
+    from kvcache.manifest_reads import score_readouts
+
+    read = score_readouts(runs_root, design, golds)
+    scored = {
+        (str(s["press"]), str(s["pid"]), int(s["seed"])): s for s in read["scores"]
+    }
+    out: dict[Arm, dict[Key, dict[str, Any]]] = {}
+    for press in design["presses"]:
+        arm = ARM_OF_PRESS[str(press)]
+        for seed in design["seeds"]:
+            for pid in design["pids"]:
+                s = scored.get((str(press), str(pid), int(seed)))
+                out.setdefault(arm, {})[(str(pid), int(seed))] = {
+                    "defined": s is not None,
+                    "correct": bool(s["correct"]) if s is not None else None,
+                }
+    return out
