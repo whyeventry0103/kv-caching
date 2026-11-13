@@ -163,6 +163,49 @@ press family's own gate passes.
   `results/diag/meeting5/bbh_lde5_timing/bbh_split_resolution.json`.
   Tests: `tests/test_bbh_replication_path.py`.
 
+## Pre-reasoned calibration branches (written 2026-11-13, before the pilot ran)
+
+The pilot is calibration only. Its read (`timing_read.json`) selects the
+design response below; no branch looks at any compressed outcome, and no
+budget or dataset is chosen by which policy wins. The same rules apply to the
+BBH pilot (cap 4,096).
+
+1. **Truncation at the cap** (full cache, in-denominator).
+   - ≤ 5% of the 48 traces: keep the cap (GSM8K 8,192) for every arm.
+   - > 5%: a dated pre-outcome amendment raises the cap for **every** arm and
+     the reference together (plan 9.3; never one arm alone), priced before
+     approval.
+2. **Is B=256 informative?** Use the share of full-cache traces with
+   `P + T > B_eff` (`manifest_capacity.predicted_exposure`; every problem has
+   `B_eff = B`).
+   - ≥ 80%: B=256 is the primary budget, as planned.
+   - 50–80%: keep B=256, and report the unexposed share as a low-exposure
+     stratum in every table.
+   - < 50%: B=256 is a low-exposure regime for this dataset. Report that
+     plainly; do not move to a smaller budget without a separate,
+     pre-outcome amendment.
+   - B=1024 is secondary, and only where its share is ≥ 50%.
+3. **Full-cache accuracy.** No branch. A near-ceiling reference (≥ 0.95)
+   leaves little room for loss, which is reported as such; it is not a
+   reason to drop the dataset.
+4. **Grader sanity (instrument check, not a branch).** Any trace the frozen
+   grader marks `no_answer` while its row is not truncated is inspected
+   before the read is used. A systematic extraction failure is an instrument
+   bug and stops the design (CLAUDE.md §2.8).
+5. **Sample size.** Planning N stays 200 × 2 seeds; the pilot cannot measure
+   a policy contrast's SD. Planning source: the M5-A MATH-500 strict cohort,
+   restricted to seeds 11/23.
+   - Problem-level SDs: protected 0.17–0.22, unprotected 0.31–0.40,
+     interaction 0.36–0.43.
+   - 95% half-widths at N=200: 0.024–0.030 protected, 0.043–0.055
+     unprotected, 0.050–0.060 interaction.
+   - 80%-power detectable effects (Holm over 2): about 0.04–0.05 protected,
+     0.07–0.09 unprotected, 0.08–0.09 interaction.
+   - The MATH-500 effects (unprotected gaps 0.18–0.19, interactions −0.14 to
+     −0.19) are above these; the protected gaps there (−0.005 to +0.054) are
+     at or below them, so a protected null is not evidence of equivalence
+     unless TOST says so.
+
 ## What comes after (each a separate decision)
 
 1. **Price the matched GSM8K replication.** Use the measured rate and
