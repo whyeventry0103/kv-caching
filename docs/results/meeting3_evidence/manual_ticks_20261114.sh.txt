@@ -1,0 +1,21 @@
+#!/bin/bash
+# Owner-requested ONE-TIME exception (2026-11-14 ~00:40 Dubai): "start all runs
+# right now, consider there is no window, keep them on 24/7 till they are done."
+# The unchanged orchestrator ticks every 10 min around the clock with
+# --max-hours-override 12 (shards run up to 12 h, then resume on the next tick).
+# While the cron window is live (01:40-11:00 Dubai) this loop defers to cron so
+# two schedulers never tick at once. Campaign caps and reservations, VRAM
+# thresholds, the shared-disk floor and the preflight are enforced unchanged.
+# Stop: touch ~/manual_ticks_1114.stop (running shards finish their reservation).
+cd ~/kv-caching || exit 1
+while [ ! -e ~/manual_ticks_1114.stop ]; do
+  hm=$((10#$(TZ=Asia/Dubai date +%H%M)))
+  if [ "$hm" -ge 140 ] && [ "$hm" -lt 1100 ]; then
+    sleep 300
+    continue
+  fi
+  echo "[24/7 tick $(TZ=Asia/Dubai date +%H:%M)] max-hours 12" >> logs/nightly_autorun.log
+  .venv/bin/python scripts/nightly_autorun.py --max-hours-override 12 >> logs/nightly_autorun.log 2>&1
+  sleep 600
+done
+echo "[24/7 ticks stopped $(TZ=Asia/Dubai date +%H:%M)] cron only" >> logs/nightly_autorun.log

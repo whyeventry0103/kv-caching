@@ -1,7 +1,8 @@
 name: bank_bbh_timing_m5
 stage: bank
 # Meeting 5 BBH logical-deduction (five objects) full-cache TIMING bank
-# (prepared 2026-11-13; HELD -- not approved). The frozen 25-problem BBH
+# (prepared 2026-11-13; RELEASED 2026-11-14 by the owner, campaign
+# M5B-BBH-TIMING, cap 2 GPU-h). The frozen 25-problem BBH
 # CALIBRATION split (configs/meeting5/problem_manifests.json, hash-selected
 # 2026-10-14 before any outcome, never used for confirmation) x seeds 11, 23 =
 # 50 full-cache generations on Qwen-7B (R1-Distill), cap 4096 (plan 9.3; a cap
@@ -9,8 +10,8 @@ stage: bank
 # kvcache.bbh (commit 9ee07bd, blob 936cd6d); scored by the frozen bbh_grade.
 # Calibration and costing only -- never policy evidence. Runs only after
 # held: false AND scale_authorized: true, with its own campaign
-# (proposed M5B-BBH-TIMING) and queue job (bank-bbh-timing-m5, blocked).
-held: true
+# (M5B-BBH-TIMING) and queue job (bank-bbh-timing-m5).
+held: false
 models: [r1_distill_qwen_7b]
 benchmarks: [bbh_lde5]
 manifest:
@@ -23,5 +24,5 @@ presses: [fullcache]
 budgets: [full]
 estimated_generation_count: 50
 store_token_ids: true
-scale_authorized: false
+scale_authorized: true
 remote_only: true

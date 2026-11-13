@@ -51,9 +51,9 @@ def test_bbh_benchmark_entry_maps_to_its_frozen_manifest_and_pin():
     assert cfg["revision"] == bbh.PINNED_COMMIT == LDE["revision"]
 
 
-def test_bbh_timing_config_is_held_and_resolves_the_frozen_calibration_split():
-    cfg = _config()
-    assert cfg["held"] is True and cfg["scale_authorized"] is False
+def test_bbh_timing_config_is_released_and_resolves_the_frozen_calibration_split():
+    cfg = _config()  # released by the owner 2026-11-14 (campaign M5B-BBH-TIMING)
+    assert cfg["held"] is False and cfg["scale_authorized"] is True
     d = rbm.resolve_design(cfg)
     assert d["benchmark"] == "bbh_lde5" and d["pids"] == PIDS and len(PIDS) == 25
     assert d["n_pool"] == 250 and d["n_generations"] == 50
@@ -200,16 +200,16 @@ def test_bbh_timing_bank_end_to_end_reads_final_with_the_bbh_grader(
     assert read["budget_would_bind"] == {"256": 1.0, "1024": 0.0}
 
 
-def test_bbh_pilot_is_blocked_and_its_cap_is_only_proposed(tmp_path):
+def test_bbh_pilot_runs_only_under_its_own_cap(tmp_path):
+    # released by the owner 2026-11-14 with its 2 GPU-h campaign
     _, jobs = scheduler.load_queue(scheduler.QUEUE_DEFAULT)
     job = next(j for j in jobs if j.name == "bank-bbh-timing-m5")
-    assert job.blocked and job.campaign is None and job.total == 50
-    assert "M5B-BBH-TIMING" not in scheduler.load_campaign_caps()
-    eligible, notes = scheduler.launch_candidates(
+    assert not job.blocked and job.campaign == "M5B-BBH-TIMING" and job.total == 50
+    assert scheduler.load_campaign_caps()["M5B-BBH-TIMING"] == 2
+    eligible, _ = scheduler.launch_candidates(
         tmp_path, [job], skip=set(), live={}, state={}
     )
-    assert eligible == []
-    assert any("BLOCKED bank-bbh-timing-m5" in s for s in notes)
+    assert [j.name for j, _ in eligible] == ["bank-bbh-timing-m5"]
 
 
 @pytest.mark.parametrize(

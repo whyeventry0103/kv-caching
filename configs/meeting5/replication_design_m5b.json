@@ -1,6 +1,6 @@
 {
  "schema": "m5b-replication-design-v1",
- "status": "PROPOSED 2026-11-13 -- not frozen; freezes (per dataset) only after its full-cache calibration read and before any confirmation outcome",
+ "status": "GSM8K (G1, G2) FROZEN 2026-11-14 after its calibration read (timing_read.json: truncation 0/48, every trace exceeds B=256) and before any confirmation outcome; BBH (B1, B2) PROPOSED until its own calibration read; GR/BR (reverse) not built, not released",
  "plan": "docs/paper/MEETING5_REVIEW_AND_PLAN.md 8.2, 8.4, 9.2-9.4; docs/paper/M5B_REPLICATION_APPROVAL_REQUEST.md",
  "model": "r1_distill_qwen_7b",
  "split": "confirmation (configs/meeting5/problem_manifests.json; frozen 2026-10-14)",

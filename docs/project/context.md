@@ -24,6 +24,18 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-11-14 Dubai — owner: "start all runs right now … 24/7 till they are done" (one-time exception). GSM8K pilot FINAL; GSM8K design FROZEN; GSM8K S1+S2 and the BBH pilot RELEASED under caps; BBH S1/S2 held until the BBH calibration read.**
+  - **24/7 ticks:** tmux `manual-ticks` on the host runs `~/manual_ticks_1114.sh` (sha `fe5578d8…`), which calls `nightly_autorun.py --max-hours-override 12` every 10 min and defers to cron during 01:40–11:00. Stop it with `touch ~/manual_ticks_1114.stop`. Recorded in PREREGISTRATION (R.16.6, sixth start).
+  - **Pilot** (`results/diag/meeting5/gsm8k_timing/timing_read.json`):
+    - 48/48 pairs; FC accuracy 0.854; truncation 0; trace mean 604 / median 432 / max 3,385 tokens; 0.0192 s/token; 0.154 GPU-h.
+    - Every trace exceeds B=256, but mildly: kept share median 0.53.
+    - One grader false negative (`test/1288` s23, a dual-unit box); the grader stays frozen.
+  - **Caps:** `M5B-GSM8K-S1` 140 and `M5B-GSM8K-S2` 132 GPU-h (the upper bounds; central ≈25 each); `M5B-BBH-TIMING` 2. Costs are in `results/diag/meeting5/replication/cost_plan.json`.
+  - **Next:**
+    - BBH pilot read: `scripts/read_gsm8k_timing.py --resolution results/diag/meeting5/bbh_lde5_timing/bbh_split_resolution.json`, with REMOTE_DATA_ROOT set.
+    - Apply the branches, freeze BBH, then release B1/B2 with `release_m5b`-style edits and the re-priced upper caps.
+    - When each dataset finishes, run `scripts/report_m5b_replication.py --bench {gsm8k,bbh}`, then draft the supervisor report. Do not send it.
+
   **★★★★★ 2026-11-13 PKT (later) — M5-B multi-dataset replication PREPARED (CPU; all held/blocked, nothing approved beyond the GSM8K pilot). Pilot launches at the 2026-11-14 01:45 Dubai tick on 328fd58; host NOT re-synced until its bank is complete.**
   - **Prompt fit** (`results/diag/meeting5/replication/prompt_fit.json`): at B=256 every calibration+confirmation problem of GSM8K (224) and BBH (225) fits P+64 <= B → B_eff = B, protected/unprotected capacity exactly equal. Median prompt 62 (GSM8K) / 152 (BBH).
   - **BBH path** (7dd81fd): `bank_bbh_timing_m5.yaml` (25×2, cap 4096, held), job `bank-bbh-timing-m5` blocked, proposed campaign `M5B-BBH-TIMING` 2 GPU-h.

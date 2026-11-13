@@ -4883,3 +4883,93 @@ is **calibration and costing only and is never policy evidence**. The
 replication cells, the BBH pilot and any reverse readout are not approved and
 have no campaign. The held guard keeps its test, now on a held copy of the
 config.
+
+## M5-B GSM8K calibration read; GSM8K design FROZEN; release of all prepared runs (2026-11-14, owner, in-session)
+
+**Owner instruction (2026-11-14 00:33 Dubai):** "start all runs right now,
+consider there is no window, keep them on 24/7 till they are done. This is a
+one time exception, keep them on till all of them finish."
+
+**R.16.6, sixth owner-requested start, and the first with no window.** tmux
+`manual-ticks` runs `~/manual_ticks_1114.sh` (sha256 `fe5578d8…ffd27`, copied
+to `docs/results/meeting3_evidence/manual_ticks_20261114.sh.txt`). It ticks the
+unchanged orchestrator every 10 min with `--max-hours-override 12` around the
+clock. While the cron window is live (01:40–11:00 Dubai) it defers to cron, so
+two schedulers never tick at once. Unlike R.16.6's earlier starts, jobs do
+**not** stop at 10:43: a shard runs up to its reservation (≤ 12 h) and resumes
+on the next tick. It stops when `~/manual_ticks_1114.stop` exists. Campaign
+caps and reservations, VRAM thresholds, the 30 GiB shared-disk floor, the
+72 GiB personal allocation and the preflight are enforced unchanged. This is a
+one-time exception for the runs released here, not a change to the nightly
+policy.
+
+**GSM8K timing pilot: launched 00:36, FINAL.** `M5B-GSM8K-TIMING` reserved
+2 × 1.5 GPU-h before launch (bound 1.45 h per shard); generation used 0.154
+GPU-h. Read `results/diag/meeting5/gsm8k_timing/timing_read.json`:
+- 48/48 result/token pairs validated; 0 quarantined.
+- Full-cache accuracy 0.854 (41/48) by the frozen `gsm8k_grade`.
+- Truncation 0/48; nothing hit the 8,192 cap.
+- Trace length: mean 604, median 432, p90 685, max 3,385 tokens.
+- 0.0192 s/token.
+
+These are calibration and costing numbers only, never policy evidence.
+
+**Pre-reasoned branches (GSM8K_TIMING_PROPOSAL, written before the run):**
+1. **Truncation** 0% ≤ 5%: the cap stays 8,192 for every arm.
+2. **Exposure**: P + T > B_eff = 256 in 48/48 traces (100% ≥ 80%), so B=256 is
+   the primary budget, as planned. The overflow is modest: median P + T = 484,
+   so the overflow is 228 tokens (min 4). The implied kept share 256/(P + T) is
+   median 0.53 (p10 0.33, p90 0.78), far milder than MATH-500 at the same B.
+   That share is reported beside every GSM8K number, with the realized ratios.
+3. **FC accuracy**: no branch.
+4. **Grader sanity**: two rows are `boxed_unparsable` without truncation, both
+   on `gsm8k/test/1288` (gold 34).
+   - Seed 11 boxes "1,320 minutes or 22 hours", which is wrong anyway.
+   - Seed 23 boxes "2040 minutes or 34 hours", which contains the gold. This
+     is a grader false negative on a dual-unit answer.
+   - It is one format on one problem, not a systematic failure. The grader
+     stays frozen (precedent S.4), and the same rule scores every arm. FC
+     accuracy would be 0.875 if that box were credited.
+   - The four disagreements with the in-row MATH grader are that grader's
+     errors: `3,\!360` read as 360, `\$6,\!250` read as 250, and `\$9.00` vs
+     gold 9. The frozen GSM8K grader scores them correctly.
+5. **Planning N**: stays 200 × 2.
+
+**GSM8K design FROZEN before any confirmation outcome.** It is exactly
+`configs/meeting5/replication_design_m5b.json` G1 and G2:
+- **Data:** the 200 frozen confirmation problems × seeds 11 and 23, B = 256
+  (B_eff = B for every problem), cap 8,192, readout answer cap 2,048,
+  compression interval 64.
+- **Policies:** four policies × protected and unprotected, against the
+  full-cache reference.
+- **Read:** frozen per-dataset read `kvcache.m5b_reads`, using the
+  `configs/meeting5/m5a_read.yaml` spec:
+  - inference by problem-level t, Holm over Random − StreamingLLM and
+    Random − H2O-style; R-KV descriptive;
+  - equal-problem cluster bootstrap (2,000 resamples, seed 0);
+  - readout pooled over the defined conditions, on matched defined keys;
+  - truncation counts as incorrect;
+  - TOST margins 0.03 primary, 0.05 sensitivity.
+- **Configs:** all 11 GSM8K configs are set to `held: false`,
+  `design_status: final`, `scale_authorized: true`.
+
+**Campaigns.** Each cap is the priced upper bound (every trace at its token cap,
+plus retries and loads; `results/diag/meeting5/replication/cost_plan.json`
+priced from the GSM8K calibration bank):
+
+| Campaign | Cap (GPU-h) | Central (GPU-h) | Rows |
+|---|---|---|---|
+| `M5B-GSM8K-S1` | 140 | ≈ 25.0 | 3,600 |
+| `M5B-GSM8K-S2` | 132 | ≈ 25.1 | 3,200 |
+| `M5B-BBH-TIMING` | 2 | 1.31 upper | 50 |
+
+- `M5B-GSM8K-S1` covers the full-cache bank, the protected free runs and the
+  forward readouts.
+- `M5B-GSM8K-S2` covers the unprotected free runs and the forward readouts.
+- `M5B-BBH-TIMING` was moved from `proposed_campaigns`.
+- Stage 1 is labelled as unable to estimate the protection effect. The
+  interaction is read only once both stages are FINAL.
+- BBH B1 and B2 stay held, blocked and uncapped until the BBH calibration read
+  applies the same branches. Their caps are then set at the re-priced upper
+  bound, in a dated note here, before any BBH confirmation outcome.
+- The reverse readouts (GR and BR) are not built and are not released.

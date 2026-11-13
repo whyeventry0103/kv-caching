@@ -1,14 +1,14 @@
 name: grid_gsm8k_h2o256_m5b
 stage: grid
-# M5-B gsm8k replication cell (prepared 2026-11-13; HELD, design PENDING).
+# M5-B gsm8k replication cell (prepared 2026-11-13; RELEASED 2026-11-14, design FROZEN).
 # configs/meeting5/replication_design_m5b.json stage 2; frozen 200-problem
 # CONFIRMATION split x seeds 11/23, B=256 (every problem fits P+64 <= B,
 # results/diag/meeting5/replication/prompt_fit.json). Real execution refuses
 # until held: false, design_status: final, scale_authorized: true and the
 # family gate passes -- set together only with an approved campaign.
 # Free runs: unprotected H2O-style, ObservedAttentionPress, no recency reservation (eager).
-held: true
-design_status: pending
+held: false
+design_status: final
 models: [r1_distill_qwen_7b]
 benchmarks: [gsm8k]
 manifest:
@@ -21,6 +21,6 @@ compression_interval: 64
 max_new_tokens:
   gsm8k: 8192
 estimated_generation_count: 400
-scale_authorized: false
+scale_authorized: true
 remote_only: true
 store_token_ids: true

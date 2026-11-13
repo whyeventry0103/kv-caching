@@ -47,9 +47,26 @@ campaigns:
     cap_gpu_hours: 3
     approved: 2026-11-13
     scope: full-cache GSM8K timing only (24 frozen calibration problems x seeds 11/23, 48 rows)
-
-# Not read by the scheduler. Move into campaigns only after owner approval.
-proposed_campaigns:
+  # Meeting 5 M5-B multi-dataset replication, RELEASED by the owner in-session
+  # 2026-11-14 ("start all runs right now, consider there is no window, keep
+  # them on 24/7 till they are done"; one-time exception). Each stage cap is
+  # the priced UPPER bound (every trace at its token cap, plus retries and
+  # loads; results/diag/meeting5/replication/cost_plan.json), so the cap can
+  # only stop a run that exceeds the physical worst case. Reverse readouts
+  # (GR/BR) are not built and have no campaign. BBH stages get their caps after
+  # the BBH calibration read.
   M5B-BBH-TIMING:
     cap_gpu_hours: 2
+    approved: 2026-11-14
     scope: full-cache BBH logical-deduction timing only (25 frozen calibration problems x seeds 11/23, 50 rows)
+  M5B-GSM8K-S1:
+    cap_gpu_hours: 140
+    approved: 2026-11-14
+    scope: GSM8K stage 1 -- full-cache confirmation bank + protected random/streamingllm/h2o-style/rkv free runs + forward readouts (200 problems x seeds 11/23, B=256; 3600 rows; central ~25 GPU-h)
+  M5B-GSM8K-S2:
+    cap_gpu_hours: 132
+    approved: 2026-11-14
+    scope: GSM8K stage 2 -- unprotected random/streamingllm/rkv/h2o free runs + forward readouts (3200 rows; central ~25 GPU-h)
+
+# Not read by the scheduler. Move into campaigns only after owner approval.
+proposed_campaigns: {}

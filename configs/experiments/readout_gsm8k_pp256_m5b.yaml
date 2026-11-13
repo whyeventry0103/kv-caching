@@ -1,7 +1,7 @@
 name: readout_gsm8k_pp256_m5b
 stage: replay
 mode: readout
-# M5-B gsm8k replication cell (prepared 2026-11-13; HELD, design PENDING).
+# M5-B gsm8k replication cell (prepared 2026-11-13; RELEASED 2026-11-14, design FROZEN).
 # configs/meeting5/replication_design_m5b.json stage 1; frozen 200-problem
 # CONFIRMATION split x seeds 11/23, B=256 (every problem fits P+64 <= B,
 # results/diag/meeting5/replication/prompt_fit.json). Real execution refuses
@@ -9,8 +9,8 @@ mode: readout
 # family gate passes -- set together only with an approved campaign.
 # Forward readout of the full-cache confirmation bank under: protected (S.1 pp family).
 reference_run_name: bank-gsm8k-confirmation-m5b
-held: true
-design_status: pending
+held: false
+design_status: final
 prompt_protected: true
 models: [r1_distill_qwen_7b]
 benchmarks: [gsm8k]
@@ -24,5 +24,5 @@ compression_interval: 64
 max_answer_tokens: 2048
 estimated_generation_count: 0
 estimated_replay_count: 800
-scale_authorized: false
+scale_authorized: true
 remote_only: true

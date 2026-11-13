@@ -1,0 +1,395 @@
+{
+ "rates_source": "MATH-500, Qwen-7B (R1-Distill), B=256 complete cells; P3 pilot readouts",
+ "stages": [
+  {
+   "answers": "Under prompt protection: Random - StreamingLLM and Random - H2O-style (scientific, Holm over 2), Random - R-KV (descriptive), accuracy loss vs full cache, and the forward-readout decomposition. Cannot estimate the effect of protection.",
+   "benchmark": "gsm8k",
+   "cells": [
+    {
+     "family": "fullcache",
+     "gpu_hours": {
+      "central": 1.53,
+      "mean_tokens_central": 604.1875,
+      "upper": 19.31
+     },
+     "kind": "bank",
+     "name": "bank-gsm8k-confirmation-m5b",
+     "rows": 400,
+     "storage_gb": 0.064
+    },
+    {
+     "family": "pp",
+     "gpu_hours": {
+      "central": 6.4,
+      "upper": 46.62
+     },
+     "kind": "grid",
+     "name": "grid-gsm8k-pp256-m5b",
+     "presses": [
+      "random_pp",
+      "streamingllm_pp"
+     ],
+     "rows": 800,
+     "storage_gb": 0.072
+    },
+    {
+     "family": "protsel",
+     "gpu_hours": {
+      "central": 3.11,
+      "upper": 26.64
+     },
+     "kind": "grid",
+     "name": "grid-gsm8k-h2opp256-m5b",
+     "presses": [
+      "h2o_style_pp_v1"
+     ],
+     "rows": 400,
+     "storage_gb": 0.036
+    },
+    {
+     "family": "rkv_pp",
+     "gpu_hours": {
+      "central": 3.84,
+      "upper": 23.86
+     },
+     "kind": "grid",
+     "name": "grid-gsm8k-rkvpp256-m5b",
+     "presses": [
+      "rkv_pp_v1"
+     ],
+     "rows": 400,
+     "storage_gb": 0.036
+    },
+    {
+     "family": "pp/protsel/rkv_pp",
+     "gpu_hours": {
+      "central": 10.14,
+      "upper": 23.11
+     },
+     "kind": "readout",
+     "name": "readout-gsm8k-protected256-m5b",
+     "presses": [
+      "random_pp",
+      "streamingllm_pp",
+      "h2o_style_pp_v1",
+      "rkv_pp_v1"
+     ],
+     "rows": 1600,
+     "storage_gb": 0.013
+    }
+   ],
+   "gpu_hours_central": 25.02,
+   "gpu_hours_upper": 139.54,
+   "id": "G1",
+   "nights_central": 1.4,
+   "nights_upper": 7.8,
+   "priced_from": "own calibration bank",
+   "rows": 3600,
+   "storage_gb": 0.221
+  },
+  {
+   "answers": "Unprotected Random - StreamingLLM / Random - H2O-style (the historical comparison) and the protection-by-policy interaction I_j (registered: problem-level t, Holm over the two scientific pairings).",
+   "benchmark": "gsm8k",
+   "cells": [
+    {
+     "family": "base",
+     "gpu_hours": {
+      "central": 11.84,
+      "upper": 76.48
+     },
+     "kind": "grid",
+     "name": "grid-gsm8k-base256-m5b",
+     "presses": [
+      "random",
+      "streamingllm",
+      "rkv"
+     ],
+     "rows": 1200,
+     "storage_gb": 0.108
+    },
+    {
+     "family": "base (eager)",
+     "gpu_hours": {
+      "central": 3.13,
+      "upper": 32.31
+     },
+     "kind": "grid",
+     "name": "grid-gsm8k-h2o256-m5b",
+     "presses": [
+      "h2o"
+     ],
+     "rows": 400,
+     "storage_gb": 0.036
+    },
+    {
+     "family": "base",
+     "gpu_hours": {
+      "central": 10.14,
+      "upper": 23.11
+     },
+     "kind": "readout",
+     "name": "readout-gsm8k-unprotected256-m5b",
+     "presses": [
+      "random",
+      "streamingllm",
+      "rkv",
+      "h2o"
+     ],
+     "rows": 1600,
+     "storage_gb": 0.013
+    }
+   ],
+   "gpu_hours_central": 25.11,
+   "gpu_hours_upper": 131.9,
+   "id": "G2",
+   "nights_central": 1.4,
+   "nights_upper": 7.4,
+   "priced_from": "own calibration bank",
+   "rows": 3200,
+   "storage_gb": 0.157
+  },
+  {
+   "answers": "Reverse readout (separately priced; brackets the residual). Not needed for the supervisor question.",
+   "benchmark": "gsm8k",
+   "cells": [
+    {
+     "family": "all",
+     "gpu_hours": {
+      "central": 34.36,
+      "upper": 60.32
+     },
+     "kind": "reverse",
+     "name": "reverse-readout-gsm8k-256-m5b",
+     "presses": [
+      "random_pp",
+      "streamingllm_pp",
+      "h2o_style_pp_v1",
+      "rkv_pp_v1",
+      "random",
+      "streamingllm",
+      "rkv",
+      "h2o"
+     ],
+     "rows": 3200,
+     "storage_gb": 0.026
+    }
+   ],
+   "gpu_hours_central": 34.36,
+   "gpu_hours_upper": 60.32,
+   "id": "GR",
+   "nights_central": 1.9,
+   "nights_upper": 3.4,
+   "priced_from": "own calibration bank",
+   "rows": 3200,
+   "storage_gb": 0.026
+  },
+  {
+   "answers": "BBH full-cache timing/calibration (25 frozen calibration problems x 2 seeds): accuracy, truncation at 4096, lengths, eviction exposure. Never policy evidence.",
+   "benchmark": "bbh_lde5",
+   "cells": [
+    {
+     "family": "fullcache",
+     "gpu_hours": {
+      "central": 1.31,
+      "mean_tokens_central": 4096.0,
+      "upper": 1.31
+     },
+     "kind": "bank",
+     "name": "bank-bbh-timing-m5",
+     "rows": 50,
+     "storage_gb": 0.008
+    }
+   ],
+   "gpu_hours_central": 1.31,
+   "gpu_hours_upper": 1.31,
+   "id": "BP",
+   "nights_central": 0.1,
+   "nights_upper": 0.1,
+   "priced_from": "cap bound (no calibration bank)",
+   "rows": 50,
+   "storage_gb": 0.008
+  },
+  {
+   "answers": "As G1, on BBH logical deduction (five objects): the non-math check.",
+   "benchmark": "bbh_lde5",
+   "cells": [
+    {
+     "family": "fullcache",
+     "gpu_hours": {
+      "central": 9.72,
+      "mean_tokens_central": 4096.0,
+      "upper": 9.72
+     },
+     "kind": "bank",
+     "name": "bank-bbh-confirmation-m5b",
+     "rows": 400,
+     "storage_gb": 0.064
+    },
+    {
+     "family": "pp",
+     "gpu_hours": {
+      "central": 23.47,
+      "upper": 23.47
+     },
+     "kind": "grid",
+     "name": "grid-bbh-pp256-m5b",
+     "presses": [
+      "random_pp",
+      "streamingllm_pp"
+     ],
+     "rows": 800,
+     "storage_gb": 0.072
+    },
+    {
+     "family": "protsel",
+     "gpu_hours": {
+      "central": 13.38,
+      "upper": 13.38
+     },
+     "kind": "grid",
+     "name": "grid-bbh-h2opp256-m5b",
+     "presses": [
+      "h2o_style_pp_v1"
+     ],
+     "rows": 400,
+     "storage_gb": 0.036
+    },
+    {
+     "family": "rkv_pp",
+     "gpu_hours": {
+      "central": 11.98,
+      "upper": 11.98
+     },
+     "kind": "grid",
+     "name": "grid-bbh-rkvpp256-m5b",
+     "presses": [
+      "rkv_pp_v1"
+     ],
+     "rows": 400,
+     "storage_gb": 0.036
+    },
+    {
+     "family": "pp/protsel/rkv_pp",
+     "gpu_hours": {
+      "central": 40.64,
+      "upper": 53.62
+     },
+     "kind": "readout",
+     "name": "readout-bbh-protected256-m5b",
+     "presses": [
+      "random_pp",
+      "streamingllm_pp",
+      "h2o_style_pp_v1",
+      "rkv_pp_v1"
+     ],
+     "rows": 1600,
+     "storage_gb": 0.013
+    }
+   ],
+   "gpu_hours_central": 99.19,
+   "gpu_hours_upper": 112.17,
+   "id": "B1",
+   "nights_central": 5.5,
+   "nights_upper": 6.3,
+   "priced_from": "cap bound (no calibration bank)",
+   "rows": 3600,
+   "storage_gb": 0.221
+  },
+  {
+   "answers": "As G2, on BBH.",
+   "benchmark": "bbh_lde5",
+   "cells": [
+    {
+     "family": "base",
+     "gpu_hours": {
+      "central": 38.52,
+      "upper": 38.52
+     },
+     "kind": "grid",
+     "name": "grid-bbh-base256-m5b",
+     "presses": [
+      "random",
+      "streamingllm",
+      "rkv"
+     ],
+     "rows": 1200,
+     "storage_gb": 0.108
+    },
+    {
+     "family": "base (eager)",
+     "gpu_hours": {
+      "central": 16.21,
+      "upper": 16.21
+     },
+     "kind": "grid",
+     "name": "grid-bbh-h2o256-m5b",
+     "presses": [
+      "h2o"
+     ],
+     "rows": 400,
+     "storage_gb": 0.036
+    },
+    {
+     "family": "base",
+     "gpu_hours": {
+      "central": 40.64,
+      "upper": 53.62
+     },
+     "kind": "readout",
+     "name": "readout-bbh-unprotected256-m5b",
+     "presses": [
+      "random",
+      "streamingllm",
+      "rkv",
+      "h2o"
+     ],
+     "rows": 1600,
+     "storage_gb": 0.013
+    }
+   ],
+   "gpu_hours_central": 95.37,
+   "gpu_hours_upper": 108.35,
+   "id": "B2",
+   "nights_central": 5.3,
+   "nights_upper": 6.0,
+   "priced_from": "cap bound (no calibration bank)",
+   "rows": 3200,
+   "storage_gb": 0.157
+  },
+  {
+   "answers": "Reverse readout on BBH (separately priced).",
+   "benchmark": "bbh_lde5",
+   "cells": [
+    {
+     "family": "all",
+     "gpu_hours": {
+      "central": 81.18,
+      "upper": 107.13
+     },
+     "kind": "reverse",
+     "name": "reverse-readout-bbh-256-m5b",
+     "presses": [
+      "random_pp",
+      "streamingllm_pp",
+      "h2o_style_pp_v1",
+      "rkv_pp_v1",
+      "random",
+      "streamingllm",
+      "rkv",
+      "h2o"
+     ],
+     "rows": 3200,
+     "storage_gb": 0.026
+    }
+   ],
+   "gpu_hours_central": 81.18,
+   "gpu_hours_upper": 107.13,
+   "id": "BR",
+   "nights_central": 4.5,
+   "nights_upper": 6.0,
+   "priced_from": "cap bound (no calibration bank)",
+   "rows": 3200,
+   "storage_gb": 0.026
+  }
+ ]
+}
