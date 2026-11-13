@@ -1,0 +1,25 @@
+name: bank_gsm8k_confirmation_m5b
+stage: bank
+# M5-B gsm8k replication cell (prepared 2026-11-13; HELD, design PENDING).
+# configs/meeting5/replication_design_m5b.json stage 1; frozen 200-problem
+# CONFIRMATION split x seeds 11/23, B=256 (every problem fits P+64 <= B,
+# results/diag/meeting5/replication/prompt_fit.json). Real execution refuses
+# until held: false, design_status: final, scale_authorized: true and the
+# family gate passes -- set together only with an approved campaign.
+# Full-cache REFERENCE bank (scripts/run_bank_manifest.py) for every arm
+# and every forward readout of this dataset.
+held: true
+models: [r1_distill_qwen_7b]
+benchmarks: [gsm8k]
+manifest:
+  path: configs/meeting5/problem_manifests.json
+  split: confirmation
+seeds: [11, 23]
+max_new_tokens:
+  gsm8k: 8192
+presses: [fullcache]
+budgets: [full]
+estimated_generation_count: 400
+store_token_ids: true
+scale_authorized: false
+remote_only: true

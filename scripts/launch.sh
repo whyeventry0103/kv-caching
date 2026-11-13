@@ -77,6 +77,22 @@ case "$COMMAND" in
     fi
     PY_SCRIPT="scripts/run_bank_manifest.py"
     ;;
+  bank_manifest_m5b|grid_manifest|readout_manifest)
+    # M5-B replication cells (2026-11-13): only *_m5b configs, only under a
+    # capped M5-B campaign reservation made by the scheduler.
+    if [[ "$CONFIG" != configs/experiments/*_m5b.yaml \
+       || "$CONFIG" == *template* \
+       || "${KVCACHE_LAUNCH_ID:-}" != M5B-*-S[12]-* \
+       || -z "${KVCACHE_MAX_HOURS:-}" ]]; then
+      echo "REFUSED: M5-B replication requires its capped scheduler reservation" >&2
+      exit 2
+    fi
+    case "$COMMAND" in
+      bank_manifest_m5b) PY_SCRIPT="scripts/run_bank_manifest.py" ;;
+      grid_manifest) PY_SCRIPT="scripts/run_grid_manifest.py" ;;
+      readout_manifest) PY_SCRIPT="scripts/run_readout_manifest.py" ;;
+    esac
+    ;;
   grid) PY_SCRIPT="scripts/run_grid.py" ;;
   replay) PY_SCRIPT="scripts/run_replay.py" ;;
   rkvsmoke) PY_SCRIPT="scripts/rkv_smoke.py" ;;

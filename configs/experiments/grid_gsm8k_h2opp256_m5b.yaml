@@ -1,0 +1,28 @@
+name: grid_gsm8k_h2opp256_m5b
+stage: grid
+# M5-B gsm8k replication cell (prepared 2026-11-13; HELD, design PENDING).
+# configs/meeting5/replication_design_m5b.json stage 1; frozen 200-problem
+# CONFIRMATION split x seeds 11/23, B=256 (every problem fits P+64 <= B,
+# results/diag/meeting5/replication/prompt_fit.json). Real execution refuses
+# until held: false, design_status: final, scale_authorized: true and the
+# family gate passes -- set together only with an approved campaign.
+# Free runs: protected H2O-style (protsel family; eager).
+held: true
+design_status: pending
+protected_selector: true
+smoke_config: configs/experiments/protsel_smoke_wp4.yaml
+models: [r1_distill_qwen_7b]
+benchmarks: [gsm8k]
+manifest:
+  path: configs/meeting5/problem_manifests.json
+  split: confirmation
+presses: [h2o_style_pp_v1]
+budgets: [256]
+seeds: [11, 23]
+compression_interval: 64
+max_new_tokens:
+  gsm8k: 8192
+estimated_generation_count: 400
+scale_authorized: false
+remote_only: true
+store_token_ids: true

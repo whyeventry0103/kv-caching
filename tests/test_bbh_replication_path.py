@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import json
 import os
-import subprocess
 import sys
 from pathlib import Path
 from types import SimpleNamespace
@@ -221,25 +220,16 @@ def test_bbh_pilot_is_blocked_and_its_cap_is_only_proposed(tmp_path):
         ("bank_manifest", "M5B-BBH-TIMING-x"),
     ],
 )
-def test_launch_aliases_refuse_the_bbh_config_without_its_own_cap(alias, launch_id):
+def test_launch_aliases_refuse_the_bbh_config_without_its_own_cap(
+    tmp_path, alias, launch_id
+):
+    from test_m5b_schedule import _launch
+
     env = dict(os.environ, KVCACHE_REMOTE="1", KVCACHE_MAX_HOURS="1")
     env.pop("KVCACHE_LAUNCH_ID", None)
     if launch_id:
         env["KVCACHE_LAUNCH_ID"] = launch_id
-    p = subprocess.run(
-        [
-            "bash",
-            "scripts/launch.sh",
-            "--i-understand",
-            alias,
-            "configs/experiments/bank_bbh_timing_m5.yaml",
-        ],
-        env=env,
-        cwd=ROOT,
-        capture_output=True,
-        text=True,
-        check=False,
-    )
+    p = _launch(tmp_path, alias, "configs/experiments/bank_bbh_timing_m5.yaml", env)
     assert p.returncode == 2
     assert "requires its capped scheduler reservation" in p.stderr
 

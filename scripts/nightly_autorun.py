@@ -566,6 +566,36 @@ def _manifest_pairs_per_seed(runs_root: Path, job: Job) -> dict[int, int]:
     return per_seed
 
 
+def _manifest_grid_pairs_per_seed(runs_root: Path, job: Job) -> dict[int, int]:
+    """M5-B frozen-ID compressed runs: complete pairs of the design's own keys.
+
+    ``grid_pairs`` reads ``m5_publish.BENCH`` (MATH-500 only), so a GSM8K or
+    BBH grid would count zero forever and be marked stuck; this counts through
+    ``manifest_publish.complete_pair_keys`` (the runner's own ``--resume`` set)
+    restricted to ``manifest_grid.design_keys``, so a foreign key never counts.
+    """
+    run_dir = runs_root / job.run_name
+    if not run_dir.is_dir():
+        return {}
+    from kvcache.cli import load_config
+    from kvcache.manifest_grid import design_keys, resolve_grid_design
+    from kvcache.manifest_publish import complete_pair_keys
+
+    design = resolve_grid_design(load_config(PROJECT_ROOT / job.config), kind="grid")
+    if (
+        design["benchmark"] != job.bench
+        or set(design["seeds"]) != set(job.seeds)
+        or design["n_conditions"] != job.total
+    ):
+        raise ValueError(f"{job.name}: queue does not match the manifest design")
+    want = set(design_keys(design))
+    per: dict[int, int] = {}
+    for key in complete_pair_keys(run_dir, design["benchmark"], design["seeds"]):
+        if key in want:
+            per[key[3]] = per.get(key[3], 0) + 1
+    return per
+
+
 def count_progress(runs_root: Path, job: Job) -> int:
     run_dir = runs_root / job.run_name
     if job.progress_kind == "marker":
@@ -580,6 +610,8 @@ def count_progress(runs_root: Path, job: Job) -> int:
         return 1 if job.marker and _marker_ok(runs_root / job.marker) else 0
     if job.progress_kind == "manifest_pairs":
         return sum(_manifest_pairs_per_seed(runs_root, job).values())
+    if job.progress_kind == "manifest_grid_pairs":
+        return sum(_manifest_grid_pairs_per_seed(runs_root, job).values())
     if job.progress_kind == "grid_pairs":
         # Review of 946c76a (issue 2): M5 jobs publish row + sidecar pairs; only
         # a COMPLETE pair counts, so an orphan row never completes a job.
@@ -617,6 +649,8 @@ def count_per_seed(runs_root: Path, job: Job) -> dict[int, int]:
         return {job.seeds[0]: done} if done else {}
     if job.progress_kind == "manifest_pairs":
         return _manifest_pairs_per_seed(runs_root, job)
+    if job.progress_kind == "manifest_grid_pairs":
+        return _manifest_grid_pairs_per_seed(runs_root, job)
     if job.progress_kind == "grid_pairs":
         from kvcache.m5_publish import complete_pairs
 

@@ -166,6 +166,28 @@ dryrun:
 	$(PYTHON) scripts/run_bank_manifest.py --config configs/experiments/bank_bbh_timing_m5.yaml --dry-run
 	$(PYTHON) scripts/probe_manifest_prompts.py --dry-run
 	$(PYTHON) scripts/plan_replication_cost.py --dry-run
+	$(PYTHON) scripts/run_bank_manifest.py --config configs/experiments/bank_gsm8k_confirmation_m5b.yaml --dry-run
+	$(PYTHON) scripts/run_grid_manifest.py --config configs/experiments/grid_gsm8k_pp256_m5b.yaml --dry-run
+	$(PYTHON) scripts/run_readout_manifest.py --config configs/experiments/readout_gsm8k_pp256_m5b.yaml --dry-run
+	$(PYTHON) scripts/run_grid_manifest.py --config configs/experiments/grid_gsm8k_h2opp256_m5b.yaml --dry-run
+	$(PYTHON) scripts/run_readout_manifest.py --config configs/experiments/readout_gsm8k_h2opp256_m5b.yaml --dry-run
+	$(PYTHON) scripts/run_grid_manifest.py --config configs/experiments/grid_gsm8k_rkvpp256_m5b.yaml --dry-run
+	$(PYTHON) scripts/run_readout_manifest.py --config configs/experiments/readout_gsm8k_rkvpp256_m5b.yaml --dry-run
+	$(PYTHON) scripts/run_grid_manifest.py --config configs/experiments/grid_gsm8k_base256_m5b.yaml --dry-run
+	$(PYTHON) scripts/run_readout_manifest.py --config configs/experiments/readout_gsm8k_base256_m5b.yaml --dry-run
+	$(PYTHON) scripts/run_grid_manifest.py --config configs/experiments/grid_gsm8k_h2o256_m5b.yaml --dry-run
+	$(PYTHON) scripts/run_readout_manifest.py --config configs/experiments/readout_gsm8k_h2o256_m5b.yaml --dry-run
+	$(PYTHON) scripts/run_bank_manifest.py --config configs/experiments/bank_bbh_confirmation_m5b.yaml --dry-run
+	$(PYTHON) scripts/run_grid_manifest.py --config configs/experiments/grid_bbh_pp256_m5b.yaml --dry-run
+	$(PYTHON) scripts/run_readout_manifest.py --config configs/experiments/readout_bbh_pp256_m5b.yaml --dry-run
+	$(PYTHON) scripts/run_grid_manifest.py --config configs/experiments/grid_bbh_h2opp256_m5b.yaml --dry-run
+	$(PYTHON) scripts/run_readout_manifest.py --config configs/experiments/readout_bbh_h2opp256_m5b.yaml --dry-run
+	$(PYTHON) scripts/run_grid_manifest.py --config configs/experiments/grid_bbh_rkvpp256_m5b.yaml --dry-run
+	$(PYTHON) scripts/run_readout_manifest.py --config configs/experiments/readout_bbh_rkvpp256_m5b.yaml --dry-run
+	$(PYTHON) scripts/run_grid_manifest.py --config configs/experiments/grid_bbh_base256_m5b.yaml --dry-run
+	$(PYTHON) scripts/run_readout_manifest.py --config configs/experiments/readout_bbh_base256_m5b.yaml --dry-run
+	$(PYTHON) scripts/run_grid_manifest.py --config configs/experiments/grid_bbh_h2o256_m5b.yaml --dry-run
+	$(PYTHON) scripts/run_readout_manifest.py --config configs/experiments/readout_bbh_h2o256_m5b.yaml --dry-run
 	$(PYTHON) scripts/read_gsm8k_timing.py --dry-run
 	$(PYTHON) scripts/read_gsm8k_timing.py --config configs/experiments/bank_bbh_timing_m5.yaml --resolution results/diag/meeting5/bbh_lde5_timing/bbh_split_resolution.json --out results/diag/meeting5/bbh_lde5_timing/bbh_timing_read.json --dry-run
 	$(PYTHON) scripts/run_grid_manifest.py --config configs/experiments/grid_gsm8k_template_m5b.yaml --dry-run
