@@ -2054,6 +2054,76 @@ It passed C3, C4 and C5.
 - **Next step under the protocol:** one pre-registered redesign, which needs
   a separate approval. A second failure abandons the instrument.
 
+### 5t. M5-B GSM8K replication (B=256, 200 confirmation problems × 2 seeds): without prompt protection Random beats both registered comparators; with protection neither registered contrast is detected; both registered interactions reject (2026-11-15)
+
+**Status.** `report_m5b_replication.py --bench gsm8k` is FINAL on the host:
+all 11 cells (full-cache confirmation bank, 5 grids, 5 forward readouts)
+validated in full against their frozen designs. Golds matched the committed
+resolution record. Archived:
+`results/diag/meeting5/replication/gsm8k_replication_read.json`.
+
+**Denominators.** 200 problems × seeds 11, 23 = 400 conditions in every arm.
+Truncated generations stay in every denominator, scored incorrect. Every
+GSM8K prompt fits at B=256 (B_eff = B), so no problem is excluded.
+Full cache: 0.868 [0.825, 0.907], truncation 0.
+
+**Free-run accuracy and loss vs full cache** (conditions pooled,
+problem-cluster bootstrap 95% CI, 2,000 resamples, seed 0):
+
+| Policy | Unprotected acc | loss vs FC | Protected acc | loss vs FC |
+|---|---|---|---|---|
+| Random | 0.800 [0.755, 0.848] | -0.068 [-0.102, -0.035] | 0.848 [0.802, 0.892] | -0.020 [-0.048, +0.007] |
+| H2O-style (no recency reservation) | 0.675 [0.623, 0.733] | -0.193 [-0.237, -0.147] | 0.810 [0.765, 0.858] | -0.058 [-0.095, -0.022] |
+| StreamingLLM | 0.690 [0.632, 0.750] | -0.177 [-0.225, -0.133] | 0.873 [0.833, 0.912] | +0.005 [-0.020, +0.030] |
+| R-KV (certified port) | 0.812 [0.767, 0.863] | -0.055 [-0.087, -0.025] | 0.843 [0.800, 0.887] | -0.025 [-0.052, +0.000] |
+
+**Paired contrasts** (Random − policy). Registered inference: two-sided t on
+problem-level contrasts, Holm over the two scientific pairings. CIs are the
+descriptive bootstrap.
+
+| Contrast | Unprotected | Holm p | Protected | Holm p | Interaction | Holm p |
+|---|---|---|---|---|---|---|
+| Random − H2O-style (scientific) | +0.125 [+0.083, +0.168] | <0.001 | +0.037 [-0.003, +0.072] | 0.11 | -0.087 [-0.138, -0.037] | 0.0006 |
+| Random − StreamingLLM (scientific) | +0.110 [+0.070, +0.152] | <0.001 | -0.025 [-0.055, +0.005] | 0.11 | -0.135 [-0.185, -0.085] | <0.001 |
+| Random − R-KV (descriptive) | -0.013 [-0.045, +0.020] | — | +0.005 [-0.028, +0.037] | — | +0.018 [-0.030, +0.068] | — |
+
+- **Protected contrasts are a null, not an equivalence.** TOST does not
+  show either protected contrast within the 0.03 primary margin or the 0.05
+  sensitivity margin (Holm TOST p, H2O-style/StreamingLLM: 0.75/0.75 at
+  0.03, 0.26/0.11 at 0.05).
+- **Reversal shown, not claimed.** Under protection the Random − StreamingLLM
+  point estimate changes sign (-0.025). It is not detected (Holm p 0.11).
+  On MATH-500 (§5q) it stayed positive (+0.054).
+
+**Matched forward readout** (400/400 keys defined in every arm on both
+sides; conditions pooled, Amendment K):
+
+| Side | Contrast | Free | Readout | Residual |
+|---|---|---|---|---|
+| unprotected | Random − H2O-style | +0.125 [+0.083, +0.168] | +0.138 [+0.092, +0.185] | -0.013 [-0.068, +0.043] |
+| unprotected | Random − StreamingLLM | +0.110 [+0.070, +0.152] | +0.075 [+0.040, +0.113] | +0.035 [-0.010, +0.080] |
+| unprotected | Random − R-KV | -0.013 [-0.045, +0.020] | -0.010 [-0.037, +0.018] | -0.003 [-0.040, +0.035] |
+| protected | Random − H2O-style | +0.037 [-0.003, +0.072] | +0.043 [+0.003, +0.083] | -0.005 [-0.062, +0.048] |
+| protected | Random − StreamingLLM | -0.025 [-0.055, +0.005] | +0.015 [-0.015, +0.048] | -0.040 [-0.085, +0.003] |
+| protected | Random − R-KV | +0.005 [-0.028, +0.037] | +0.000 [-0.030, +0.030] | +0.005 [-0.043, +0.050] |
+
+The unprotected Random advantage is almost entirely on-reference readout
+for H2O-style (readout +0.138, residual -0.013). For StreamingLLM it is
+mostly readout (+0.075), with a residual whose CI includes 0. Forward readout
+only; the reverse readout was not run (priced separately, not approved).
+
+**Budget realization and exposure.** Realized compression-ratio median
+0.455–0.510 across the eight arms (p10 0.142–0.222, p90 0.766–0.773).
+Overflow reached in a fraction 0.9875–0.9925 of conditions. Compressed-arm truncation
+0.0025–0.030 (highest: Random unprotected 0.030).
+
+**Reading.** This is the same qualitative pattern as MATH-500 (§5q) at a
+lighter compression: GSM8K full-cache traces are several times shorter than
+MATH-500's (GSM8K pilot timing read vs `math500_b256_rates.json`).
+Without protection, Random beats both comparators. Protection removes most
+of the gap, and both interactions reject. One model (R1-Distill-Qwen-7B),
+one budget. No mechanism is inferred from these contrasts.
+
 ## 5. Framing discipline (non-negotiable — apply throughout)
 - **Divergence ≠ damage.** ADD / TV / residual are "behavioral-fidelity loss," never "damage."
   Correctness is the only quality arbiter. Carry the **signed flip-mass** (gained vs lost correct

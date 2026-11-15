@@ -2259,6 +2259,122 @@ def build_catalogue() -> list[Entry]:
                     f"primary.members[{_pair!r}].ci_1_minus_2alpha[{_i}]",
                     f"M5-A TOST (1 - 2 alpha) interval bound, {_pair}",
                 )
+    # M5-B multi-dataset replication reads (2026-11-15): FINAL only, per bench
+    for _bench in ("gsm8k", "bbh"):
+        _rp = DIAG / "meeting5" / "replication" / f"{_bench}_replication_read.json"
+        if not _rp.exists() or _load(_rp).get("status") != "FINAL":
+            continue
+        _rd, _rpp = _load(_rp)["read"], _rp.relative_to(PROJECT_ROOT)
+
+        def _band(key: str, blk: dict, loc: str, desc: str, src: Path = _rpp) -> None:
+            add(f"{key}.mean", blk["mean"], f"{src} :: {loc}.mean", desc)
+            for _i, _x in enumerate(blk["ci95"]):
+                add(
+                    f"{key}.ci{'lo' if _i == 0 else 'hi'}",
+                    _x,
+                    f"{src} :: {loc}.ci95[{_i}]",
+                    f"{desc} (CI bound)",
+                )
+
+        _k = f"m5b.{_bench}"
+        _band(
+            f"{_k}.fc.acc",
+            _rd["full_cache"]["accuracy"],
+            "full_cache.accuracy",
+            f"M5-B {_bench} full-cache accuracy",
+        )
+        for _arm, _v in _rd["arms"].items():
+            _tag = _arm.replace("+P", "_pp").replace("-P", "_unprot")
+            for _f in ("accuracy", "loss_vs_full_cache"):
+                _band(
+                    f"{_k}.{_tag}.{_f}",
+                    _v[_f],
+                    f"arms[{_arm!r}].{_f}",
+                    f"M5-B {_bench} {_f}, {_arm}",
+                )
+            add(
+                f"{_k}.{_tag}.truncation_rate",
+                _v["truncation_rate"],
+                f"{_rpp} :: arms[{_arm!r}].truncation_rate",
+                f"M5-B {_bench} truncation rate, {_arm}",
+            )
+            _e = _v["exposure"]
+            add(
+                f"{_k}.{_tag}.overflow_reached_rate",
+                _e["overflow_reached_rate"],
+                f"{_rpp} :: arms[{_arm!r}].exposure.overflow_reached_rate",
+                f"M5-B {_bench} overflow-reached rate, {_arm}",
+            )
+            for _q in ("median", "p10", "p90"):
+                add(
+                    f"{_k}.{_tag}.ratio.{_q}",
+                    _e["realized_ratio"][_q],
+                    f"{_rpp} :: arms[{_arm!r}].exposure.realized_ratio.{_q}",
+                    f"M5-B {_bench} realized ratio {_q}, {_arm}",
+                )
+        for _side, _s in _rd["sides"].items():
+            if "contrasts" not in _s:
+                continue
+            for _pair, _c in _s["contrasts"].items():
+                _band(
+                    f"{_k}.{_side}.{_pair.replace('-', '_minus_')}",
+                    _c,
+                    f"sides.{_side}.contrasts[{_pair!r}]",
+                    f"M5-B {_bench} {_side} contrast, {_pair}",
+                )
+            for _pair, _m in _s["registered_inference"]["members"].items():
+                add(
+                    f"{_k}.{_side}.{_pair.replace('-', '_minus_')}.p_holm",
+                    _m["p_holm"],
+                    f"{_rpp} :: sides.{_side}.registered_inference.members"
+                    f"[{_pair!r}].p_holm",
+                    f"M5-B {_bench} registered {_side} test Holm p, {_pair}",
+                )
+            _ro = _s.get("readout") or {}
+            for _pair, _c in _ro.get("contrasts", {}).items():
+                for _f in ("readout", "residual"):  # free == side contrast
+                    _band(
+                        f"{_k}.{_side}.ro.{_pair.replace('-', '_minus_')}.{_f}",
+                        _c[_f],
+                        f"sides.{_side}.readout.contrasts[{_pair!r}].{_f}",
+                        f"M5-B {_bench} {_side} readout-side {_f} gap, {_pair}",
+                    )
+            for _pol, _a in _ro.get("arms", {}).items():
+                for _f in ("readout_change", "residual"):
+                    _band(
+                        f"{_k}.{_side}.ro.{_pol}.{_f}",
+                        _a[_f],
+                        f"sides.{_side}.readout.arms[{_pol!r}].{_f}",
+                        f"M5-B {_bench} {_side} {_f}, {_pol}",
+                    )
+        _int = _rd["protection_interaction"]
+        if "contrasts" in _int:
+            for _pair, _c in _int["contrasts"].items():
+                _band(
+                    f"{_k}.interaction.{_pair.replace('-', '_minus_')}",
+                    _c["interaction"],
+                    f"protection_interaction.contrasts[{_pair!r}].interaction",
+                    f"M5-B {_bench} protection interaction, {_pair}",
+                )
+            for _pair, _m in _int["registered_inference"]["members"].items():
+                add(
+                    f"{_k}.interaction.{_pair.replace('-', '_minus_')}.p_holm",
+                    _m["p_holm"],
+                    f"{_rpp} :: protection_interaction.registered_inference"
+                    f".members[{_pair!r}].p_holm",
+                    f"M5-B {_bench} registered interaction Holm p, {_pair}",
+                )
+            for _which in ("primary", "sensitivity"):
+                _eq = _int["equivalence_protected_contrasts"][_which]
+                for _pair, _m in _eq["members"].items():
+                    add(
+                        f"{_k}.tost_{_which}.{_pair.replace('-', '_minus_')}",
+                        _m["p_tost_holm"],
+                        f"{_rpp} :: protection_interaction."
+                        f"equivalence_protected_contrasts.{_which}"
+                        f".members[{_pair!r}].p_tost_holm",
+                        f"M5-B {_bench} TOST ({_which}) Holm p, {_pair}",
+                    )
     _dc = DIAG / "paper_audit" / "decision_b256.json"
     if _dc.exists():
         _dcd, _dcp = _load(_dc), _dc.relative_to(PROJECT_ROOT)

@@ -294,7 +294,23 @@ def test_the_real_catalogue_has_no_two_entries_sharing_an_exact_value_and_rule()
     # (also AIME Random primary residual bound), 0.12 (also the matched
     # Random - StreamingLLM accuracy), 0.735 (also a b2048 CI bound), -0.205
     # (also b512 Random flip_net). No new key is cited in the .tex.
-    assert len(collisions) <= 192, (
+    #
+    # 192 -> 235 on 2026-11-15 (M5-B GSM8K replication read, 400 conditions
+    # per arm), examined: 43 new groups. The readout-side "free" gap equals
+    # the side contrast by construction, so it is NOT registered. Of the
+    # rest:
+    # - Identities by construction (6): Holm over two members gives both
+    #   primary TOST p the same adjusted value (0.7513). The sensitivity
+    #   margin 0.05 is twice |Random - StreamingLLM| = 0.025, so that TOST p
+    #   equals the registered two-sided p (0.1141). Overflow-reached rates
+    #   and realized-ratio p90 coincide across arms that share the same
+    #   problems, prompts and budget (0.9875, 0.9925, 0.7665, 0.7711).
+    # - Coincidences on the k/400 lattice (37): 10 within the read (e.g.
+    #   H2O-style's protected readout change equals its loss because its
+    #   residual is exactly 0) and 27 with older keys (e.g. 0.8675, 0.11,
+    #   0.125). 32 existing groups also gained M5-B members.
+    # No new key is cited in the .tex.
+    assert len(collisions) <= 235, (
         f"{len(collisions)} exact-value collisions in the catalogue; if this "
         "grew, a new derived quantity is duplicating an existing one"
     )

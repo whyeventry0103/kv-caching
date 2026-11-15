@@ -24,6 +24,14 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-11-15 Dubai — M5-B GSM8K replication FINAL (11/11 cells); BBH S1 in flight.** Full record: PAPER_FINDINGS §5t; archive `results/diag/meeting5/replication/gsm8k_replication_read.json`.
+  - **Scale:** 200 problems × 2 seeds = 400 conditions per arm. Full cache 0.868 [0.825, 0.907].
+  - **Unprotected, Random − policy:** H2O-style +0.125 [+0.083, +0.168], Holm p <0.001. StreamingLLM +0.110 [+0.070, +0.152], Holm p <0.001.
+  - **Protected, Random − policy:** neither is detected and neither is shown equivalent (TOST at 0.03 and 0.05). H2O-style +0.037 [−0.003, +0.072], Holm p 0.11. StreamingLLM −0.025 [−0.055, +0.005], Holm p 0.11; the sign reverses but the reversal is not detected.
+  - **Interactions:** both registered interactions reject, H2O-style −0.087 (Holm p 0.0006) and StreamingLLM −0.135 (Holm p <0.001). This is the MATH-500 pattern (§5q).
+  - **In flight at 11:21:** BBH bank, grid-bbh-pp256 and grid-bbh-h2opp256 FINAL-sized; grid-bbh-rkvpp256 271/400. All BBH readouts and both S2 grids are still pending.
+  - **Next:** when BBH completes, scp `bbh_confirmation_resolution.json` (already on the host since 11-15), run `report_m5b_replication.py --bench bbh` with the host read env, write §5u, then draft the supervisor report. Do not send it. Then `touch ~/manual_ticks_1114.stop`.
+
   **★★★★★ 2026-11-14 Dubai — owner: "start all runs right now … 24/7 till they are done" (one-time exception). GSM8K pilot FINAL; GSM8K design FROZEN; GSM8K S1+S2, the BBH pilot, then BBH S1+S2 RELEASED under caps (all 22 cells).**
   - **24/7 ticks:** tmux `manual-ticks` on the host runs `~/manual_ticks_1114.sh` (sha `fe5578d8…`), which calls `nightly_autorun.py --max-hours-override 12` every 10 min and defers to cron during 01:40–11:00. Stop it with `touch ~/manual_ticks_1114.stop`. Recorded in PREREGISTRATION (R.16.6, sixth start).
   - **Pilot** (`results/diag/meeting5/gsm8k_timing/timing_read.json`):
