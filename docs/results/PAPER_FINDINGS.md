@@ -2124,6 +2124,113 @@ Without protection, Random beats both comparators. Protection removes most
 of the gap, and both interactions reject. One model (R1-Distill-Qwen-7B),
 one budget. No mechanism is inferred from these contrasts.
 
+### 5u. M5-B BBH logical deduction (five objects) replication (B=256, 200 confirmation problems × 2 seeds): without prompt protection Random beats both registered comparators; with protection neither registered contrast is detected; both registered interactions reject (2026-11-21)
+
+**Status.** `report_m5b_replication.py --bench bbh` is FINAL on the host:
+all 11 cells (full-cache confirmation bank, 5 grids, 5 forward readouts)
+validated in full against their frozen designs (design frozen 2026-11-14,
+grader `bbh-option-v3`, cap 8,192 for the bank and every grid). Golds matched
+the committed resolution record. Archived:
+`results/diag/meeting5/replication/bbh_replication_read.json`.
+
+**Denominators.** 200 problems × seeds 11, 23 = 400 conditions in every arm.
+Truncated generations stay in every denominator, scored incorrect.
+Full cache: 0.873 [0.835, 0.907], truncation 0.005.
+
+**Free-run accuracy and loss vs full cache** (conditions pooled,
+problem-cluster bootstrap 95% CI, 2,000 resamples, seed 0):
+
+| Policy | Unprotected acc | loss vs FC | Protected acc | loss vs FC |
+|---|---|---|---|---|
+| Random | 0.160 [0.122, 0.200] | -0.713 [-0.762, -0.660] | 0.665 [0.613, 0.715] | -0.207 [-0.263, -0.155] |
+| H2O-style (no recency reservation) | 0.030 [0.013, 0.050] | -0.843 [-0.885, -0.800] | 0.670 [0.620, 0.718] | -0.203 [-0.253, -0.152] |
+| StreamingLLM | 0.020 [0.007, 0.035] | -0.853 [-0.890, -0.815] | 0.655 [0.605, 0.708] | -0.217 [-0.270, -0.163] |
+| R-KV (certified port) | 0.450 [0.400, 0.502] | -0.422 [-0.477, -0.365] | 0.680 [0.627, 0.728] | -0.193 [-0.242, -0.145] |
+
+Every compressed arm loses heavily against full cache on BBH, protected or
+not; unprotected Random, H2O-style and StreamingLLM are near the floor.
+
+**Paired contrasts** (Random − policy). Registered inference: two-sided t on
+problem-level contrasts, Holm over the two scientific pairings. CIs are the
+descriptive bootstrap.
+
+| Contrast | Unprotected | Holm p | Protected | Holm p | Interaction | Holm p |
+|---|---|---|---|---|---|---|
+| Random − H2O-style (scientific) | +0.130 [+0.087, +0.172] | <0.001 | -0.005 [-0.058, +0.050] | 1.00 | -0.135 [-0.198, -0.070] | 0.0002 |
+| Random − StreamingLLM (scientific) | +0.140 [+0.100, +0.180] | <0.001 | +0.010 [-0.045, +0.068] | 1.00 | -0.130 [-0.200, -0.062] | 0.0003 |
+| Random − R-KV (descriptive) | -0.290 [-0.350, -0.233] | — | -0.015 [-0.070, +0.040] | — | +0.275 [+0.198, +0.352] | — |
+
+- **Protected contrasts are a null, not an equivalence.** TOST does not
+  show either protected contrast within the 0.03 primary margin or the 0.05
+  sensitivity margin (Holm TOST p, H2O-style/StreamingLLM: 0.371/0.371 at
+  0.03, 0.108/0.108 at 0.05).
+- **Reversal shown, not claimed.** Under protection the Random − H2O-style
+  point estimate is negative (-0.005), not detected. Unprotected, R-KV beats
+  Random by a wide margin (descriptive pairing, untested).
+
+**Matched forward readout** (398/400 keys defined in every arm on both
+sides, 2 undefined in each arm; the full-cache bank has 2 truncated
+reference traces. Conditions pooled, Amendment K; the free column is on the
+398 matched keys, so it differs slightly from the 400-condition contrast
+above):
+
+| Side | Contrast | Free | Readout | Residual |
+|---|---|---|---|---|
+| unprotected | Random − H2O-style | +0.128 [+0.088, +0.169] | +0.264 [+0.207, +0.322] | -0.136 [-0.199, -0.075] |
+| unprotected | Random − StreamingLLM | +0.138 [+0.098, +0.178] | +0.010 [-0.033, +0.056] | +0.128 [+0.065, +0.190] |
+| unprotected | Random − R-KV | -0.294 [-0.353, -0.238] | -0.010 [-0.052, +0.035] | -0.284 [-0.353, -0.219] |
+| protected | Random − H2O-style | -0.003 [-0.055, +0.053] | +0.005 [-0.038, +0.048] | -0.008 [-0.071, +0.058] |
+| protected | Random − StreamingLLM | +0.008 [-0.048, +0.063] | +0.156 [+0.101, +0.210] | -0.148 [-0.226, -0.070] |
+| protected | Random − R-KV | -0.015 [-0.070, +0.040] | -0.015 [-0.061, +0.028] | +0.000 [-0.068, +0.068] |
+
+- **Unprotected, the readout split differs by comparator.** Against
+  H2O-style the on-reference readout gap (+0.264) exceeds the free gap; the
+  residual is negative. Against StreamingLLM the readout gap is not detected
+  (+0.010) and the free gap sits in the residual (+0.128). On GSM8K (§5t) the
+  StreamingLLM gap was mostly readout.
+- **Per-policy residuals are large.** Unprotected residuals are -0.606
+  [-0.659, -0.549] Random, -0.470 [-0.524, -0.419] H2O-style, -0.734
+  [-0.777, -0.687] StreamingLLM, -0.322 [-0.382, -0.261] R-KV; readout
+  changes are -0.113 to -0.377. Most of the unprotected loss is accuracy
+  change unexplained by on-reference readout.
+- **Protected StreamingLLM.** Its readout change is -0.276 [-0.329, -0.225],
+  about twice the others' (-0.106 to -0.126), but its free run matches theirs;
+  its residual is +0.058 [+0.000, +0.121]. That makes the protected
+  Random − StreamingLLM readout gap positive and the residual gap negative
+  with a near-zero free gap.
+- Forward readout only; the reverse readout was not run (priced separately,
+  not approved).
+
+**Budget realization and exposure.** Overflow reached in every condition
+of every arm (rate 1.0). Realized compression-ratio medians are far below
+GSM8K's and differ between arms at the same nominal budget:
+
+| Arm | Ratio median [p10, p90] | Truncation |
+|---|---|---|
+| Random unprotected | 0.031 [0.031, 0.302] | 0.3575 |
+| H2O-style unprotected | 0.086 [0.031, 0.270] | 0.0775 |
+| StreamingLLM unprotected | 0.093 [0.031, 0.299] | 0.125 |
+| R-KV unprotected | 0.154 [0.031, 0.318] | 0.025 |
+| Random protected | 0.147 [0.031, 0.288] | 0.0325 |
+| H2O-style protected | 0.204 [0.064, 0.312] | 0.0175 |
+| StreamingLLM protected | 0.126 [0.031, 0.309] | 0.030 |
+| R-KV protected | 0.154 [0.031, 0.309] | 0.085 |
+
+The ratio floor 0.031 is a generation that ran to the 8,192 cap. Unprotected
+Random's median sits on it: most of its generations run to the cap, and
+over a third end without an answer and are scored incorrect. The arms are
+equal in nominal budget, not in realized ratio.
+
+**Reading.** The registered pattern replicates on a non-arithmetic task:
+without protection Random beats both registered comparators, protection
+removes the gap, and both interactions reject. The setting is far harsher
+than GSM8K: BBH traces run longer, every arm loses 0.19–0.85 against full
+cache, and unprotected Random wins mostly by failing less often near the
+floor (0.160 vs 0.030 and 0.020). The readout split of the unprotected gap
+differs by comparator and from GSM8K, so no single readout-vs-trajectory
+account covers both datasets. One model (R1-Distill-Qwen-7B), one budget. No
+mechanism is inferred from these contrasts.
+
 ## 5. Framing discipline (non-negotiable — apply throughout)
 - **Divergence ≠ damage.** ADD / TV / residual are "behavioral-fidelity loss," never "damage."
   Correctness is the only quality arbiter. Carry the **signed flip-mass** (gained vs lost correct

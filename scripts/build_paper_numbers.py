@@ -2331,8 +2331,21 @@ def build_catalogue() -> list[Entry]:
                     f"M5-B {_bench} registered {_side} test Holm p, {_pair}",
                 )
             _ro = _s.get("readout") or {}
+            # free == side contrast unless some keys are undefined (BBH: 398/400)
+            _fs = ("readout", "residual")
+            if (
+                _ro.get("matched_defined_keys", _rd["n_conditions"])
+                < _rd["n_conditions"]
+            ):
+                _fs = ("free", *_fs)
+                add(
+                    f"{_k}.{_side}.ro.matched_defined_keys",
+                    _ro["matched_defined_keys"],
+                    f"{_rpp} :: sides.{_side}.readout.matched_defined_keys",
+                    f"M5-B {_bench} {_side} matched defined readout keys",
+                )
             for _pair, _c in _ro.get("contrasts", {}).items():
-                for _f in ("readout", "residual"):  # free == side contrast
+                for _f in _fs:
                     _band(
                         f"{_k}.{_side}.ro.{_pair.replace('-', '_minus_')}.{_f}",
                         _c[_f],

@@ -24,6 +24,16 @@ lag). `docs/protocol/PREREGISTRATION.md` is authoritative for scientific protoco
 
 ## 0. TL;DR — where we are right now
 
+  **★★★★★ 2026-11-21 Dubai — M5-B BBH replication FINAL (11/11 cells); M5-B complete on both datasets.** Full record: PAPER_FINDINGS §5u; archive `results/diag/meeting5/replication/bbh_replication_read.json`.
+  - **Scale:** 200 problems × 2 seeds = 400 conditions per arm. Full cache 0.873 [0.835, 0.907], truncation 0.005.
+  - **Unprotected, Random − policy:** H2O-style +0.130 [+0.087, +0.172], StreamingLLM +0.140 [+0.100, +0.180], both Holm p <0.001. Near the floor: Random 0.160, H2O-style 0.030, StreamingLLM 0.020. R-KV 0.450 beats Random (descriptive).
+  - **Protected, Random − policy:** H2O-style −0.005, StreamingLLM +0.010, both Holm p 1.00. Neither is detected and neither is shown equivalent (TOST at 0.03 and 0.05).
+  - **Interactions:** both reject, H2O-style −0.135 (Holm p 0.0002) and StreamingLLM −0.130 (Holm p 0.0003). The same direction as MATH-500 (§5q) and GSM8K (§5t).
+  - **Readout** (398/400 matched keys): unprotected, Random − H2O-style is readout +0.264 with residual −0.136; Random − StreamingLLM is readout +0.010 with residual +0.128. This differs from GSM8K. Forward readout only.
+  - **Exposure:** every arm overflows. Realized ratio medians are 0.031–0.204 and differ by arm; unprotected Random sits on the cap floor (0.031) with truncation 0.3575.
+  - **Runs:** finished 2026-11-21 01:29 Dubai. Ledger: BBH S1 53.05 and S2 56.76 GPU-h (caps 148/141). Lost about 4 days (11-16 → 11-20) to the 30 GiB disk floor until the owner approved deletions.
+  - **Next:** draft the supervisor report (do not send). Stop the 24/7 ticks with `ssh kvcache-gpu 'touch ~/manual_ticks_1114.stop'`. `make sync-apply` after this commit.
+
   **★★★★★ 2026-11-15 Dubai — M5-B GSM8K replication FINAL (11/11 cells); BBH S1 in flight.** Full record: PAPER_FINDINGS §5t; archive `results/diag/meeting5/replication/gsm8k_replication_read.json`.
   - **Scale:** 200 problems × 2 seeds = 400 conditions per arm. Full cache 0.868 [0.825, 0.907].
   - **Unprotected, Random − policy:** H2O-style +0.125 [+0.083, +0.168], Holm p <0.001. StreamingLLM +0.110 [+0.070, +0.152], Holm p <0.001.

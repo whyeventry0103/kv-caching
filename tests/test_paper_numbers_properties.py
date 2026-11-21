@@ -310,7 +310,22 @@ def test_the_real_catalogue_has_no_two_entries_sharing_an_exact_value_and_rule()
     #   residual is exactly 0) and 27 with older keys (e.g. 0.8675, 0.11,
     #   0.125). 32 existing groups also gained M5-B members.
     # No new key is cited in the .tex.
-    assert len(collisions) <= 235, (
+    #
+    # 235 -> 258 on 2026-11-21 (M5-B BBH replication read), examined: 23 new
+    # groups. 398/400 readout keys are defined, so the readout-side "free" gap
+    # differs from the side contrast and IS registered for BBH (plus the
+    # matched-key count).
+    # - Identities by construction (4): both primary and both sensitivity
+    #   TOST p share one Holm-adjusted value (0.3714, 0.1084); the matched-key
+    #   count is 398 on both sides (same full-cache reference); and protected
+    #   Random - R-KV free == readout because that residual gap is exactly 0.
+    # - Coincidences (19): 5 within the read on the k/398 lattice (e.g. the
+    #   unprotected Random - H2O-style free gap equals the Random -
+    #   StreamingLLM residual gap, 51/398) and 14 with older keys on the k/400
+    #   lattice (e.g. 0.8725 BBH full cache = GSM8K protected StreamingLLM;
+    #   0.45, 0.68, 0.18). 40 existing groups also gained BBH members.
+    # No new key is cited in the .tex.
+    assert len(collisions) <= 258, (
         f"{len(collisions)} exact-value collisions in the catalogue; if this "
         "grew, a new derived quantity is duplicating an existing one"
     )
